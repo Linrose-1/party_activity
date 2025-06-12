@@ -1,0 +1,342 @@
+
+/* 全局/基础样式 */
+/* * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+} */
+
+/* 页面根容器样式，模拟 body 的布局和最大宽度 */
+.business-opportunity-app.data-v-07e72d3c {
+    background-color: #f9f9f9;
+    color: #333;
+    max-width: 1000rpx; /* 限制内容最大宽度 */
+    margin: 0 auto; /* 居中显示 */
+    padding-bottom: 160rpx; /* 为底部导航栏留出空间 */
+    min-height: 100vh; /* 确保内容不足时也能占满高度 */
+    display: flex;
+    flex-direction: column;
+}
+
+/* 顶部区域样式 */
+.header.data-v-07e72d3c {
+    background: linear-gradient(135deg, #FF6A00, #FF8C37);
+    color: white;
+    padding: 40rpx 40rpx 60rpx;
+    border-radius: 0 0 40rpx 40rpx;
+    box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+.header.data-v-07e72d3c::before {
+    content: "";
+    position: absolute;
+    top: -60rpx;
+    right: -60rpx;
+    width: 240rpx;
+    height: 240rpx;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+}
+.app-title.data-v-07e72d3c {
+    font-size: 56rpx;
+    font-weight: 700;
+    margin-bottom: 16rpx;
+    text-shadow: 0 4rpx 8rpx rgba(0, 0, 0, 0.2);
+}
+.app-subtitle.data-v-07e72d3c {
+    font-size: 32rpx;
+    margin-bottom: 10rpx;
+    opacity: 0.95;
+}
+.app-description.data-v-07e72d3c {
+    font-size: 28rpx;
+    margin-bottom: 40rpx;
+    opacity: 0.9;
+}
+.search-container.data-v-07e72d3c {
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 60rpx;
+    padding: 20rpx 40rpx;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.1);
+}
+.search-container i.data-v-07e72d3c {
+    color: #FF6A00;
+    margin-right: 20rpx;
+}
+.search-container input.data-v-07e72d3c {
+    border: none;
+    outline: none;
+    width: 100%;
+    font-size: 28rpx;
+    color: #555;
+    background: transparent;
+}
+
+/* 商机发现标题 */
+.section-title.data-v-07e72d3c {
+    font-size: 40rpx;
+    font-weight: 700;
+    padding: 40rpx 40rpx 30rpx;
+    color: #FF6A00;
+    display: flex;
+    align-items: center;
+}
+.section-title.data-v-07e72d3c::before {
+    content: "";
+    display: inline-block;
+    width: 8rpx;
+    height: 40rpx;
+    background: #FF6A00;
+    border-radius: 4rpx;
+    margin-right: 20rpx;
+}
+
+/* 导航标签栏 */
+.tabs.data-v-07e72d3c {
+    display: flex;
+    background: white;
+    padding: 20rpx 40rpx;
+    border-bottom: 2rpx solid #eee;
+    position: -webkit-sticky;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+.tab.data-v-07e72d3c {
+    flex: 1;
+    text-align: center;
+    padding: 16rpx 0;
+    font-size: 32rpx;
+    color: #666;
+    position: relative;
+    /* cursor: pointer; */ /* 在小程序中不适用 */
+    transition: all 0.3s;
+}
+.tab.active.data-v-07e72d3c {
+    color: #FF6A00;
+    font-weight: 600;
+}
+.tab.active.data-v-07e72d3c::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 48rpx;
+    height: 6rpx;
+    background: #FF6A00;
+    border-radius: 6rpx;
+}
+.post-button.data-v-07e72d3c {
+    background: linear-gradient(to right, #FF6A00, #FF8C37);
+    color: white;
+    border: none;
+    border-radius: 40rpx;
+    padding: 16rpx 32rpx;
+    font-size: 28rpx;
+    font-weight: 600;
+    /* cursor: pointer; */
+    box-shadow: 0 4rpx 12rpx rgba(255, 106, 0, 0.3);
+    display: flex;
+    align-items: center;
+    margin-left: 30rpx;
+    /* 移除小程序按钮默认边框和背景 */
+    -webkit-appearance: none;
+    background-color: transparent;
+}
+/* 小程序按钮点击态 */
+.post-button.data-v-07e72d3c::after {
+    border: none;
+}
+.post-button i.data-v-07e72d3c {
+    margin-right: 10rpx;
+}
+
+/* 帖子列表样式 */
+.post-list.data-v-07e72d3c {
+    padding: 0 30rpx;
+    flex: 1; /* 让列表占据剩余空间 */
+    overflow-y: auto; /* 允许列表内容滚动 */
+}
+.post-card.data-v-07e72d3c {
+    background: white;
+    border-radius: 30rpx;
+    padding: 40rpx;
+    margin-bottom: 30rpx;
+    box-shadow: 0 6rpx 20rpx rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+.post-card.data-v-07e72d3c:active { /* 小程序使用 :active 模拟 :hover */
+    transform: translateY(-6rpx);
+    box-shadow: 0 10rpx 30rpx rgba(0, 0, 0, 0.1);
+}
+.post-header.data-v-07e72d3c {
+    display: flex;
+    align-items: center;
+    margin-bottom: 30rpx;
+}
+.avatar.data-v-07e72d3c {
+    width: 90rpx;
+    height: 90rpx;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #FF6A00, #FF8C37);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 36rpx;
+    margin-right: 24rpx;
+}
+.user-info.data-v-07e72d3c {
+    flex: 1;
+}
+.user-name.data-v-07e72d3c {
+    font-weight: 600;
+    font-size: 32rpx;
+    margin-bottom: 6rpx;
+}
+.post-time.data-v-07e72d3c {
+    font-size: 26rpx;
+    color: #888;
+}
+.post-content.data-v-07e72d3c {
+    font-size: 30rpx;
+    line-height: 1.5;
+    margin-bottom: 30rpx;
+    color: #444;
+}
+.tags.data-v-07e72d3c {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16rpx;
+    margin-bottom: 30rpx;
+}
+.tag.data-v-07e72d3c {
+    background: #fff0e6;
+    color: #FF6A00;
+    padding: 10rpx 24rpx;
+    border-radius: 40rpx;
+    font-size: 26rpx;
+}
+.post-actions.data-v-07e72d3c {
+    display: flex;
+    justify-content: space-between;
+    border-top: 2rpx solid #f0f0f0;
+    padding-top: 30rpx;
+}
+.action-group.data-v-07e72d3c {
+    display: flex;
+    gap: 40rpx;
+}
+.action.data-v-07e72d3c {
+    display: flex;
+    align-items: center;
+    color: #666;
+    /* cursor: pointer; */
+    transition: all 0.2s;
+}
+.action i.data-v-07e72d3c {
+    margin-right: 12rpx;
+    font-size: 32rpx;
+}
+.action.data-v-07e72d3c:active { /* 小程序使用 :active 模拟 :hover */
+    color: #FF6A00;
+}
+.action.like.active.data-v-07e72d3c {
+    color: #e74c3c;
+}
+.action.dislike.active.data-v-07e72d3c {
+    color: #3498db;
+}
+.action.share.data-v-07e72d3c:active { /* 小程序使用 :active 模拟 :hover */
+    color: #2ecc71;
+}
+
+/* 底部导航 */
+.bottom-nav.data-v-07e72d3c {
+    position: fixed;
+    bottom: 0;
+    /* left: 0; */
+    /* right: 0; */
+    left: 50%; /* 居中显示 */
+    transform: translateX(-50%); /* 居中显示 */
+    max-width: 1000rpx; /* 限制最大宽度与主内容区一致 */
+    width: 100%; /* 确保占据100%宽度，以便max-width生效 */
+    margin: 0 auto; /* 对 fixed 元素可能不生效，通过 left/transform 实现 */
+    background: white;
+    display: flex;
+    justify-content: space-around;
+    padding: 24rpx 0;
+    /* 适配底部安全区域 */
+    padding-bottom: calc(24rpx + env(safe-area-inset-bottom));
+    box-shadow: 0 -4rpx 20rpx rgba(0, 0, 0, 0.08);
+    border-top: 2rpx solid #f0f0f0;
+    z-index: 100;
+}
+.nav-item.data-v-07e72d3c {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #888;
+    font-size: 24rpx;
+    /* cursor: pointer; */
+    transition: all 0.3s;
+}
+.nav-item i.data-v-07e72d3c {
+    font-size: 40rpx;
+    margin-bottom: 6rpx;
+}
+.nav-item.active.data-v-07e72d3c {
+    color: #FF6A00;
+}
+.nav-item.data-v-07e72d3c:active { /* 小程序使用 :active 模拟 :hover */
+    color: #FF6A00;
+}
+
+/* 微信小程序样式调整 */
+.wechat-style.data-v-07e72d3c {
+    position: relative;
+}
+.wechat-style.data-v-07e72d3c::after {
+    content: "微信小程序";
+    position: absolute;
+    top: 20rpx;
+    right: 20rpx;
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    font-size: 24rpx;
+    padding: 6rpx 16rpx;
+    border-radius: 20rpx;
+}
+
+/* 赞踩统计 */
+.feedback-stats.data-v-07e72d3c {
+    display: flex;
+    align-items: center;
+    background: #f8f8f8;
+    border-radius: 30rpx;
+    padding: 16rpx 30rpx;
+    font-size: 28rpx;
+    color: #666;
+    margin-bottom: 30rpx; /* 在操作区上方添加间距 */
+}
+.feedback-stats .like-count.data-v-07e72d3c {
+    display: flex;
+    align-items: center;
+    margin-right: 30rpx;
+    color: #e74c3c;
+}
+.feedback-stats .dislike-count.data-v-07e72d3c {
+    display: flex;
+    align-items: center;
+    color: #3498db;
+}
+.feedback-stats i.data-v-07e72d3c {
+    margin-right: 10rpx;
+    font-size: 28rpx;
+}

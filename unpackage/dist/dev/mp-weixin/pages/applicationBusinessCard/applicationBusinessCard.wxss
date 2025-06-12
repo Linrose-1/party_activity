@@ -1,0 +1,499 @@
+
+
+
+/* 页面根容器样式，模拟 body 的布局和最大宽度 */
+.business-card-apply-page.data-v-f0843d79 {
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    color: #333;
+    line-height: 1.6;
+    max-width: 750rpx; /* uni-app 推荐使用 rpx */
+    margin: 0 auto; /* 页面内容居中 */
+    position: relative;
+    min-height: 100vh; /* 确保页面至少占满视口高度 */
+    display: flex; /* 使用 flex 布局，使顶部导航和内容可以分开管理 */
+    flex-direction: column;
+}
+.container.data-v-f0843d79 {
+    padding: 40rpx; /* 转换为 rpx */
+    padding-bottom: 160rpx; /* 为底部导航栏留出空间，转换为 rpx */
+    flex: 1; /* 容器占据剩余垂直空间 */
+    overflow-y: auto; /* 允许内容垂直滚动 */
+    -webkit-overflow-scrolling: touch; /* 提升 iOS 滚动流畅度 */
+}
+
+/* 顶部导航 */
+.header.data-v-f0843d79 {
+    background: linear-gradient(135deg, #FF6A00, #FF8C00);
+    color: white;
+    padding: 36rpx 40rpx; /* 转换为 rpx */
+    position: -webkit-sticky;
+    position: sticky; /* 吸顶效果 */
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 6rpx 24rpx rgba(255, 106, 0, 0.3); /* 转换为 rpx */
+    display: flex;
+    align-items: center;
+    border-bottom-left-radius: 30rpx; /* 转换为 rpx */
+    border-bottom-right-radius: 30rpx; /* 转换为 rpx */
+}
+.header .back-btn.data-v-f0843d79 {
+    font-size: 44rpx; /* 转换为 rpx */
+    margin-right: 30rpx; /* 转换为 rpx */
+    /* cursor: pointer; 在小程序中不适用 */
+    width: 72rpx; /* 转换为 rpx */
+    height: 72rpx; /* 转换为 rpx */
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.3s;
+}
+.header .back-btn.data-v-f0843d79:active { /* 在小程序中使用 :active 模拟 :hover */
+    background: rgba(255, 255, 255, 0.2);
+}
+.header h1.data-v-f0843d79 {
+    font-size: 40rpx; /* 转换为 rpx */
+    font-weight: 600;
+    flex-grow: 1;
+    text-shadow: 0 2rpx 4rpx rgba(0,0,0,0.2); /* 转换为 rpx */
+}
+
+/* 申请卡片 */
+.application-card.data-v-f0843d79 {
+    background: white;
+    border-radius: 40rpx; /* 转换为 rpx */
+    margin: 50rpx 0; /* 转换为 rpx */
+    padding: 60rpx; /* 转换为 rpx */
+    box-shadow: 0 20rpx 60rpx rgba(0,0,0,0.1); /* 转换为 rpx */
+    border: 2rpx solid #eee; /* 转换为 rpx */
+    position: relative;
+    overflow: hidden;
+    text-align: center;
+}
+.application-card.data-v-f0843d79::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 10rpx; /* 转换为 rpx */
+    background: linear-gradient(to right, #FF6A00, #FF8C00);
+}
+.target-user.data-v-f0843d79 {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 60rpx; /* 转换为 rpx */
+}
+.target-avatar.data-v-f0843d79 {
+    width: 180rpx; /* 转换为 rpx */
+    height: 180rpx; /* 转换为 rpx */
+    border-radius: 50%;
+    background: linear-gradient(135deg, #FF6A00, #FF8C00);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 72rpx; /* 转换为 rpx */
+    margin-bottom: 30rpx; /* 转换为 rpx */
+    border: 6rpx solid white; /* 转换为 rpx */
+    box-shadow: 0 10rpx 30rpx rgba(0,0,0,0.2); /* 转换为 rpx */
+}
+.target-name.data-v-f0843d79 {
+    font-size: 48rpx; /* 转换为 rpx */
+    font-weight: 700;
+    color: #333;
+}
+.target-title.data-v-f0843d79 {
+    font-size: 32rpx; /* 转换为 rpx */
+    color: #666;
+    margin-top: 10rpx; /* 转换为 rpx */
+}
+.description.data-v-f0843d79 {
+    font-size: 32rpx; /* 转换为 rpx */
+    color: #555;
+    margin: 40rpx 0; /* 转换为 rpx */
+    line-height: 1.7;
+    padding: 0 20rpx; /* 转换为 rpx */
+}
+.highlight.data-v-f0843d79 {
+    color: #FF6A00;
+    font-weight: bold;
+}
+.cost-section.data-v-f0843d79 {
+    background: #fff8f3;
+    border-radius: 30rpx; /* 转换为 rpx */
+    padding: 40rpx; /* 转换为 rpx */
+    margin: 50rpx 0; /* 转换为 rpx */
+    border: 2rpx solid #ffe8d9; /* 转换为 rpx */
+}
+.cost-title.data-v-f0843d79 {
+    font-size: 36rpx; /* 转换为 rpx */
+    font-weight: 600;
+    color: #FF6A00;
+    margin-bottom: 40rpx; /* 转换为 rpx */
+    text-align: center;
+}
+.cost-options.data-v-f0843d79 {
+    display: flex;
+    justify-content: center;
+    gap: 40rpx; /* 转换为 rpx */
+    margin-bottom: 20rpx; /* 转换为 rpx */
+}
+.cost-option.data-v-f0843d79 {
+    flex: 1;
+    max-width: 300rpx; /* 转换为 rpx */
+    border: 4rpx solid #e0e0e0; /* 转换为 rpx */
+    border-radius: 30rpx; /* 转换为 rpx */
+    padding: 30rpx; /* 转换为 rpx */
+    text-align: center;
+    /* cursor: pointer; */
+    transition: all 0.3s;
+    position: relative;
+    background: white;
+}
+.cost-option.selected.data-v-f0843d79 {
+    border-color: #FF6A00;
+    background: #fff8f3;
+    box-shadow: 0 10rpx 30rpx rgba(255, 106, 0, 0.15); /* 转换为 rpx */
+}
+.cost-option.selected.data-v-f0843d79::after {
+    content: '✓';
+    position: absolute;
+    top: -20rpx; /* 转换为 rpx */
+    right: -20rpx; /* 转换为 rpx */
+    width: 50rpx; /* 转换为 rpx */
+    height: 50rpx; /* 转换为 rpx */
+    background: #FF6A00;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 32rpx; /* 转换为 rpx */
+}
+.currency-icon.data-v-f0843d79 {
+    font-size: 56rpx; /* 转换为 rpx */
+    color: #FF8C00;
+    margin-bottom: 20rpx; /* 转换为 rpx */
+}
+.cost-amount.data-v-f0843d79 {
+    font-size: 40rpx; /* 转换为 rpx */
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 10rpx; /* 转换为 rpx */
+}
+.cost-label.data-v-f0843d79 {
+    font-size: 28rpx; /* 转换为 rpx */
+    color: #777;
+}
+.user-balance.data-v-f0843d79 {
+    display: flex;
+    justify-content: center;
+    gap: 60rpx; /* 转换为 rpx */
+    margin: 40rpx 0; /* 转换为 rpx */
+    padding: 30rpx; /* 转换为 rpx */
+    background: #f8f9fa;
+    border-radius: 24rpx; /* 转换为 rpx */
+    font-size: 30rpx; /* 转换为 rpx */
+}
+.balance-item.data-v-f0843d79 {
+    text-align: center;
+}
+.balance-value.data-v-f0843d79 {
+    font-weight: 700;
+    font-size: 36rpx; /* 转换为 rpx */
+    color: #FF6A00;
+    margin-top: 10rpx; /* 转换为 rpx */
+}
+.insufficient-value.data-v-f0843d79 {
+    color: #e53935;
+}
+.action-buttons.data-v-f0843d79 {
+    display: flex;
+    flex-direction: column;
+    gap: 30rpx; /* 转换为 rpx */
+    margin-top: 40rpx; /* 转换为 rpx */
+}
+.btn.data-v-f0843d79 {
+    padding: 32rpx; /* 转换为 rpx */
+    border-radius: 24rpx; /* 转换为 rpx */
+    font-size: 34rpx; /* 转换为 rpx */
+    font-weight: 600;
+    /* cursor: pointer; */
+    transition: all 0.3s;
+    text-align: center;
+    border: none;
+    /* 针对 uni-app 按钮默认样式进行重置 */
+    -webkit-appearance: none;
+    background-color: transparent;
+    line-height: 1; /* 消除默认 button 的行高影响 */
+}
+/* 移除小程序按钮的默认边框 */
+.btn.data-v-f0843d79::after {
+    border: none;
+}
+.btn-primary.data-v-f0843d79 {
+    background: linear-gradient(135deg, #FF6A00, #FF8C00);
+    color: white;
+    box-shadow: 0 10rpx 30rpx rgba(255, 106, 0, 0.3); /* 转换为 rpx */
+}
+.btn-primary.data-v-f0843d79:active { /* 在小程序中使用 :active 模拟 :hover */
+    background: linear-gradient(135deg, #e05a00, #e07a00);
+    transform: translateY(-4rpx); /* 转换为 rpx */
+    box-shadow: 0 14rpx 36rpx rgba(255, 106, 0, 0.4); /* 转换为 rpx */
+}
+.btn-secondary.data-v-f0843d79 {
+    background: #f0f0f0;
+    color: #666;
+}
+.btn-secondary.data-v-f0843d79:active { /* 在小程序中使用 :active 模拟 :hover */
+    background: #e0e0e0;
+}
+.insufficient.data-v-f0843d79 {
+    color: #e53935;
+    font-size: 28rpx; /* 转换为 rpx */
+    margin-top: 20rpx; /* 转换为 rpx */
+    text-align: center;
+    display: flex; /* 使用 flex 布局图标和文字 */
+    align-items: center;
+    justify-content: center;
+    gap: 10rpx; /* 转换为 rpx */
+}
+.success-message.data-v-f0843d79 {
+    background: #4caf50;
+    color: white;
+    padding: 30rpx; /* 转换为 rpx */
+    border-radius: 24rpx; /* 转换为 rpx */
+    margin-top: 40rpx; /* 转换为 rpx */
+    text-align: center;
+    animation: fadeIn-f0843d79 0.5s;
+    display: flex; /* 使用 flex 布局图标和文字 */
+    align-items: center;
+    justify-content: center;
+    gap: 10rpx; /* 转换为 rpx */
+    font-size: 32rpx; /* 转换为 rpx */
+}
+@keyframes fadeIn-f0843d79 {
+from { opacity: 0; transform: translateY(20rpx);
+} /* 转换为 rpx */
+to { opacity: 1; transform: translateY(0);
+}
+}
+
+/* 联系方式弹窗 */
+.contact-modal.data-v-f0843d79 {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    opacity: 0;
+    pointer-events: none; /* 默认不响应事件 */
+    transition: opacity 0.3s;
+}
+.contact-modal.active.data-v-f0843d79 {
+    opacity: 1;
+    pointer-events: all; /* 激活时响应事件 */
+}
+.contact-card.data-v-f0843d79 {
+    background: white;
+    border-radius: 40rpx; /* 转换为 rpx */
+    width: 85%;
+    max-width: 640rpx; /* 转换为 rpx */
+    padding: 60rpx; /* 转换为 rpx */
+    text-align: center;
+    transform: translateY(60rpx); /* 转换为 rpx */
+    transition: transform 0.4s;
+    box-shadow: 0 30rpx 80rpx rgba(0,0,0,0.3); /* 转换为 rpx */
+    position: relative;
+    overflow: hidden;
+}
+.contact-modal.active .contact-card.data-v-f0843d79 {
+    transform: translateY(0);
+}
+.contact-card.data-v-f0843d79::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 10rpx; /* 转换为 rpx */
+    background: linear-gradient(to right, #4CAF50, #2E7D32);
+}
+.contact-avatar.data-v-f0843d79 {
+    width: 180rpx; /* 转换为 rpx */
+    height: 180rpx; /* 转换为 rpx */
+    border-radius: 50%;
+    background: linear-gradient(135deg, #4CAF50, #2E7D32);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 72rpx; /* 转换为 rpx */
+    margin: 0 auto 40rpx; /* 转换为 rpx */
+    border: 6rpx solid white; /* 转换为 rpx */
+    box-shadow: 0 10rpx 30rpx rgba(0,0,0,0.2); /* 转换为 rpx */
+}
+.contact-name.data-v-f0843d79 {
+    font-size: 44rpx; /* 转换为 rpx */
+    font-weight: 700;
+    margin-bottom: 50rpx; /* 转换为 rpx */
+    color: #333;
+}
+.contact-info.data-v-f0843d79 {
+    background: #f1f8e9;
+    border-radius: 30rpx; /* 转换为 rpx */
+    padding: 40rpx; /* 转换为 rpx */
+    margin: 40rpx 0; /* 转换为 rpx */
+    text-align: left;
+    border: 2rpx solid #dcedc8; /* 转换为 rpx */
+}
+.contact-info p.data-v-f0843d79 {
+    margin: 28rpx 0; /* 转换为 rpx */
+    display: flex;
+    align-items: center;
+    font-size: 30rpx; /* 转换为 rpx */
+}
+.contact-info i.data-v-f0843d79 {
+    margin-right: 24rpx; /* 转换为 rpx */
+    color: #4CAF50;
+    width: 48rpx; /* 转换为 rpx */
+    font-size: 36rpx; /* 转换为 rpx */
+    text-align: center;
+}
+.close-btn.data-v-f0843d79 {
+    background: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 50rpx; /* 转换为 rpx */
+    padding: 28rpx 50rpx; /* 转换为 rpx */
+    width: 100%;
+    font-weight: 600;
+    /* cursor: pointer; */
+    margin-top: 20rpx; /* 转换为 rpx */
+    font-size: 32rpx; /* 转换为 rpx */
+    box-shadow: 0 8rpx 24rpx rgba(76, 175, 80, 0.4); /* 转换为 rpx */
+    transition: background 0.3s;
+
+    /* 针对 uni-app 按钮默认样式进行重置 */
+    -webkit-appearance: none;
+    background-color: transparent;
+    line-height: 1; /* 消除默认 button 的行高影响 */
+}
+/* 移除小程序按钮的默认边框 */
+.close-btn.data-v-f0843d79::after {
+    border: none;
+}
+.close-btn.data-v-f0843d79:active { /* 在小程序中使用 :active 模拟 :hover */
+    background: #388E3C;
+}
+
+/* 底部导航 */
+.bottom-nav.data-v-f0843d79 {
+    position: fixed;
+    bottom: 0;
+    left: 50%; /* 居中显示 */
+    transform: translateX(-50%); /* 居中显示 */
+    width: 100%; /* 确保占据100%宽度，以便 max-width 生效 */
+    background: white;
+    display: flex;
+    justify-content: space-around;
+    padding: 24rpx 0; /* 转换为 rpx */
+    /* 适配底部安全区域 (例如 iPhone 刘海屏) */
+    padding-bottom: calc(24rpx + env(safe-area-inset-bottom));
+    border-top: 2rpx solid #e0e0e0; /* 转换为 rpx */
+    box-shadow: 0 -10rpx 30rpx rgba(0,0,0,0.05); /* 转换为 rpx */
+    max-width: 750rpx; /* 与页面内容最大宽度保持一致 */
+    z-index: 100;
+    border-top-left-radius: 40rpx; /* 转换为 rpx */
+    border-top-right-radius: 40rpx; /* 转换为 rpx */
+}
+.nav-item.data-v-f0843d79 {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 24rpx; /* 转换为 rpx */
+    color: #888;
+    /* cursor: pointer; */
+    padding: 10rpx 30rpx; /* 转换为 rpx */
+    border-radius: 30rpx; /* 转换为 rpx */
+    transition: all 0.3s;
+}
+.nav-item.active.data-v-f0843d79 {
+    color: #FF6A00;
+    background: rgba(255, 106, 0, 0.08);
+}
+.nav-item i.data-v-f0843d79 {
+    font-size: 44rpx; /* 转换为 rpx */
+    margin-bottom: 10rpx; /* 转换为 rpx */
+}
+.nav-item span.data-v-f0843d79 {
+    font-weight: 500;
+}
+
+/* 提示卡片 */
+.info-card.data-v-f0843d79 {
+    background: white;
+    border-radius: 36rpx; /* 转换为 rpx */
+    padding: 40rpx; /* 转换为 rpx */
+    margin-top: 40rpx; /* 转换为 rpx */
+    box-shadow: 0 10rpx 40rpx rgba(0,0,0,0.05); /* 转换为 rpx */
+    border: 2rpx solid #eee; /* 转换为 rpx */
+}
+.info-card h3.data-v-f0843d79 {
+    font-size: 36rpx; /* 转换为 rpx */
+    font-weight: 700;
+    color: #FF6A00;
+    margin-bottom: 30rpx; /* 转换为 rpx */
+    display: flex;
+    align-items: center;
+}
+.info-card h3 i.data-v-f0843d79 {
+    margin-right: 20rpx; /* 转换为 rpx */
+    font-size: 40rpx; /* 转换为 rpx */
+}
+.info-card p.data-v-f0843d79 {
+    font-size: 28rpx; /* 转换为 rpx */
+    color: #555;
+    margin-bottom: 20rpx; /* 转换为 rpx */
+    line-height: 1.6;
+}
+.info-card ul.data-v-f0843d79 {
+    padding-left: 40rpx; /* 转换为 rpx */
+    margin-top: 20rpx; /* 转换为 rpx */
+}
+.info-card li.data-v-f0843d79 {
+    font-size: 28rpx; /* 转换为 rpx */
+    color: #555;
+    margin-bottom: 16rpx; /* 转换为 rpx */
+    line-height: 1.5;
+}
+
+/* 响应式调整 */
+/* uni-app 的 rpx 本身就是响应式的，但如果需要针对特定屏幕宽度进行调整，可以使用 @media */
+@media (max-width: 750rpx) { /* 模拟手机竖屏 */
+.application-card.data-v-f0843d79 {
+        padding: 40rpx; /* 转换为 rpx */
+}
+.cost-options.data-v-f0843d79 {
+        flex-direction: column; /* 小屏幕下选项垂直堆叠 */
+        align-items: center;
+}
+.cost-option.data-v-f0843d79 {
+        max-width: 100%; /* 占据全部可用宽度 */
+        width: 100%;
+}
+.user-balance.data-v-f0843d79 {
+        flex-direction: column; /* 小屏幕下余额信息垂直堆叠 */
+        gap: 30rpx; /* 转换为 rpx */
+}
+}

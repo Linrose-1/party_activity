@@ -1,0 +1,126 @@
+/* 水平间距 */
+/* 水平间距 */
+.activity-card.data-v-f73ae0ce {
+  background: white;
+  border-radius: 24rpx;
+  box-shadow: 0 4rpx 24rpx rgba(0, 0, 0, 0.05);
+  padding: 32rpx;
+  margin: 32rpx auto;
+  position: relative;
+  overflow: hidden;
+}
+.activity-image.data-v-f73ae0ce {
+  width: 100%;
+  height: 320rpx;
+  border-radius: 16rpx;
+  margin-bottom: 30rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.1);
+}
+.activity-title.data-v-f73ae0ce {
+  font-size: 36rpx;
+  font-weight: 600;
+  margin-bottom: 24rpx;
+  color: #1c1e21;
+  display: block;
+}
+.activity-info.data-v-f73ae0ce {
+  display: flex;
+  align-items: center;
+  margin-bottom: 24rpx;
+  color: #606770;
+  font-size: 28rpx;
+}
+.activity-info text.data-v-f73ae0ce {
+  margin-left: 16rpx;
+}
+.activity-stats.data-v-f73ae0ce {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 30rpx;
+  font-size: 26rpx;
+  color: #65676b;
+}
+.participants.data-v-f73ae0ce {
+  background: #f0f2f5;
+  padding: 6rpx 20rpx;
+  border-radius: 20rpx;
+}
+.activity-tags.data-v-f73ae0ce {
+  display: flex;
+  gap: 16rpx;
+  margin-bottom: 30rpx;
+  flex-wrap: wrap;
+}
+.tag.data-v-f73ae0ce {
+  background: #fff0e5;
+  color: #FF6B00;
+  padding: 8rpx 20rpx;
+  border-radius: 8rpx;
+  font-size: 24rpx;
+  border: 2rpx solid #ffdcc7;
+}
+
+/* 底部区域样式 */
+.activity-footer.data-v-f73ae0ce {
+  display: flex;
+  justify-content: space-between;
+  /* 左右两端对齐 */
+  align-items: center;
+  /* 垂直居中 */
+  margin-top: 30rpx;
+  padding-top: 24rpx;
+  border-top: 2rpx solid #f0f2f5;
+  /* 添加分割线 */
+}
+.organizer.data-v-f73ae0ce {
+  display: flex;
+  align-items: center;
+  font-size: 28rpx;
+  color: #606770;
+}
+.organizer text.data-v-f73ae0ce {
+  margin-left: 10rpx;
+}
+
+/* 按钮区域样式 */
+.action-buttons.data-v-f73ae0ce {
+  display: flex;
+  gap: 24rpx;
+  /* 恢复按钮间距 */
+}
+
+/* 基础按钮样式 */
+.btn.data-v-f73ae0ce {
+  padding: 8rpx 36rpx;
+  border-radius: 12rpx;
+  font-weight: 500;
+  font-size: 28rpx;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: all 0.3s;
+}
+.btn text.data-v-f73ae0ce {
+  margin-left: 10rpx;
+}
+
+/* 主要按钮样式 (报名按钮) */
+.btn-primary.data-v-f73ae0ce {
+  background: linear-gradient(135deg, #FF6B00 0%, #FF8C00 100%);
+  color: white;
+}
+.btn-primary.data-v-f73ae0ce:active {
+  opacity: 0.9;
+  transform: translateY(-4rpx);
+}
+
+/* 收藏按钮样式 */
+.btn-favorite.data-v-f73ae0ce {
+  background: #ffe7d8;
+  color: #FF6B00;
+}
+.btn-favorite.data-v-f73ae0ce:active {
+  opacity: 0.9;
+  transform: translateY(-4rpx);
+}

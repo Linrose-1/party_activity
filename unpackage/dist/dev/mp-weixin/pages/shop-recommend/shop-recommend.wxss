@@ -1,0 +1,57 @@
+/* 水平间距 */
+/* 水平间距 */
+/* 使用 SCSS 变量 */
+.container {
+  background-color: #f8f8f8;
+  min-height: 100vh;
+  padding-bottom: 40px;
+}
+.form-container {
+  padding: 20px;
+  background: white;
+  margin: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+.form-group {
+  margin-bottom: 20px;
+}
+.form-group .uni-easyinput {
+  border: 1px solid #eee;
+  border-radius: 8px;
+  padding: 10px;
+}
+.form-group .uni-easyinput.is-input-border {
+  border: 1px solid #eee;
+}
+.submit-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  background: #FF6B00;
+  color: white;
+  padding: 8px;
+  font-size: 16px;
+  border: none;
+  border-radius: 8px;
+  transition: background 0.3s;
+}
+.submit-btn:active {
+  background: #FF8A33;
+}
+.footer {
+  text-align: center;
+  color: #666;
+  font-size: 13px;
+  margin-top: 40px;
+  padding: 0 20px;
+}
+ .uni-nav-bar .uni-nav-bar--fixed {
+  background-color: white;
+  border-bottom: 1px solid #eee;
+}
+ .uni-nav-bar .uni-nav-bar-text {
+  font-weight: bold;
+  font-size: 18px;
+}

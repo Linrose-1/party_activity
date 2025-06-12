@@ -1,0 +1,63 @@
+/* 水平间距 */
+/* 水平间距 */
+/* 单位转换：1px = 2rpx */
+.container.data-v-30894501 {
+  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+  color: #333;
+  line-height: 1.6;
+  padding: 40rpx 30rpx;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.card-header.data-v-30894501 {
+  text-align: center;
+  margin-bottom: 60rpx;
+}
+.card-header .header-title.data-v-30894501 {
+  font-size: 56rpx;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 20rpx;
+}
+.card-header .header-subtitle.data-v-30894501 {
+  color: #777;
+  font-size: 32rpx;
+}
+
+/* 操作按钮 */
+.action-buttons.data-v-30894501 {
+  display: flex;
+  gap: 30rpx;
+  margin-top: 60rpx;
+  width: 100%;
+  max-width: 1000rpx;
+}
+.action-btn.data-v-30894501 {
+  flex: 1;
+  padding: 22rpx;
+  border-radius: 30rpx;
+  font-size: 32rpx;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  color: white;
+}
+.action-btn text.data-v-30894501 {
+  margin-left: 16rpx;
+}
+.share-btn.data-v-30894501 {
+  background: linear-gradient(to right, #3a7bd5, #00d2ff);
+  box-shadow: 0 10rpx 30rpx rgba(58, 123, 213, 0.3);
+}
+.action-btn.data-v-30894501:active {
+  transform: translateY(-6rpx);
+  box-shadow: 0 16rpx 40rpx rgba(0, 0, 0, 0.2);
+}

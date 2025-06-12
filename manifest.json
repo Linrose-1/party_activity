@@ -1,0 +1,73 @@
+{
+	"name": "party_activity",
+	"appid": "",
+	"description": "",
+	"versionName": "1.0.0",
+	"versionCode": "100",
+	"transformPx": false,
+	"app-plus": {
+		/* 5+App特有相关 */
+		"usingComponents": true,
+		"nvueCompiler": "uni-app",
+		"nvueStyleCompiler": "uni-app",
+		"splashscreen": {
+			"alwaysShowBeforeRender": true,
+			"waiting": true,
+			"autoclose": true,
+			"delay": 0
+		},
+		"modules": {},
+		/* 模块配置 */
+		"distribute": {
+			/* 应用发布信息 */
+			"android": {
+				/* android打包配置 */
+				"permissions": [
+					"<uses-permission android:name=\"android.permission.CHANGE_NETWORK_STATE\"/>",
+					"<uses-permission android:name=\"android.permission.MOUNT_UNMOUNT_FILESYSTEMS\"/>",
+					"<uses-permission android:name=\"android.permission.VIBRATE\"/>",
+					"<uses-permission android:name=\"android.permission.READ_LOGS\"/>",
+					"<uses-permission android:name=\"android.permission.ACCESS_WIFI_STATE\"/>",
+					"<uses-feature android:name=\"android.hardware.camera.autofocus\"/>",
+					"<uses-permission android:name=\"android.permission.ACCESS_NETWORK_STATE\"/>",
+					"<uses-permission android:name=\"android.permission.CAMERA\"/>",
+					"<uses-permission android:name=\"android.permission.GET_ACCOUNTS\"/>",
+					"<uses-permission android:name=\"android.permission.READ_PHONE_STATE\"/>",
+					"<uses-permission android:name=\"android.permission.CHANGE_WIFI_STATE\"/>",
+					"<uses-permission android:name=\"android.permission.WAKE_LOCK\"/>",
+					"<uses-permission android:name=\"android.permission.FLASHLIGHT\"/>",
+					"<uses-feature android:name=\"android.hardware.camera\"/>",
+					"<uses-permission android:name=\"android.permission.WRITE_SETTINGS\"/>"
+				]
+			},
+			"ios": {},
+			/* ios打包配置 */
+			"sdkConfigs": {}
+		}
+	},
+	/* SDK配置 */
+	"quickapp": {},
+	/* 快应用特有相关 */
+	"mp-weixin": {
+		/* 小程序特有相关 */
+		"appid": "wx5710552f6a4d9a21",
+		"permission": {
+			"scope.userLocation": {
+				// !!! 这里必须填写清晰、具体的使用目的描述 !!!
+				"desc": "您的位置信息将用于在地图上选择地点"
+			}
+			// 如果还用了其他权限，比如 getUserInfo，也需要在这里声明
+		},
+
+		"requiredPrivateInfos": [
+			"chooseLocation", // <--- 添加这一行
+			"getLocation" // <--- 如果你还用了 uni.getLocation，也要加上
+			// 如果还用了其他需要声明的隐私接口，也需要添加到这个数组里
+		],
+		"setting": {
+			"urlCheck": false
+		},
+		"usingComponents": true
+	},
+	"vueVersion": "3"
+}

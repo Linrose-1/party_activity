@@ -1,0 +1,71 @@
+{
+  "pages": [
+    "pages/home/home",
+    "pages/index/index",
+    "pages/active/active",
+    "pages/shop/shop",
+    "pages/my/my",
+    "pages/active-detail/active-detail",
+    "pages/active-publish/active-publish",
+    "pages/active-enroll/active-enroll",
+    "pages/my-edit/my-edit",
+    "pages/my-account/my-account",
+    "pages/my-businessCard/my-businessCard",
+    "pages/shop-detail/shop-detail",
+    "pages/home-commercialDetail/home-commercialDetail",
+    "pages/applicationBusinessCard/applicationBusinessCard",
+    "pages/shop-recommend/shop-recommend",
+    "pages/home-opportunitiesPublish/home-opportunitiesPublish",
+    "pages/my-active/my-active",
+    "pages/my-opportunity/my-opportunity",
+    "pages/my-collection/my-collection",
+    "pages/user-agreement/user-agreement"
+  ],
+  "window": {
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "uni-app",
+    "navigationBarBackgroundColor": "#F8F8F8",
+    "backgroundColor": "#F8F8F8"
+  },
+  "tabBar": {
+    "color": "#999",
+    "selectedColor": "#ff770f",
+    "backgroundColor": "#fff",
+    "list": [
+      {
+        "pagePath": "pages/home/home",
+        "text": "首页",
+        "iconPath": "static/tabbar/home.png",
+        "selectedIconPath": "static/tabbar/home-active.png"
+      },
+      {
+        "pagePath": "pages/active/active",
+        "text": "活动",
+        "iconPath": "/static/tabbar/active.png",
+        "selectedIconPath": "/static/tabbar/active-active.png"
+      },
+      {
+        "pagePath": "pages/shop/shop",
+        "text": "聚店",
+        "iconPath": "/static/tabbar/shop.png",
+        "selectedIconPath": "/static/tabbar/shop-active.png"
+      },
+      {
+        "pagePath": "pages/my/my",
+        "text": "我的",
+        "iconPath": "static/tabbar/me.png",
+        "selectedIconPath": "static/tabbar/me-active.png"
+      }
+    ]
+  },
+  "permission": {
+    "scope.userLocation": {
+      "desc": "您的位置信息将用于在地图上选择地点"
+    }
+  },
+  "requiredPrivateInfos": [
+    "chooseLocation",
+    "getLocation"
+  ],
+  "usingComponents": {}
+}

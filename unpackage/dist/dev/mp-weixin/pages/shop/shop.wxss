@@ -1,0 +1,211 @@
+/* 水平间距 */
+/* 水平间距 */
+/*
+  Uniapp 支持 Sass/Scss。如果你喜欢纯 CSS，请删除 `lang="scss"`
+  并确保你的 CSS 有效。
+*/
+:root {
+  --primary: #FF6B00;
+  --primary-light: #FF8A33;
+  --light-bg: #f8f8f8;
+  --dark-text: #333;
+  --gray-text: #666;
+  --light-text: #999;
+  --border: #eee;
+  --weui-BG-0: #ededed;
+  --weui-BG-1: #f7f7f7;
+}
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background-color: var(--weui-BG-0);
+  color: var(--dark-text);
+  font-size: 16px;
+}
+
+/* 顶部标题栏 - 微信小程序风格 */
+.navbar {
+  background: white;
+  padding: 0 15px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 1px solid #e5e5e5;
+  position: relative;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.05);
+  z-index: 100;
+}
+.navbar-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--dark-text);
+}
+
+/* 搜索区域 */
+.search-container {
+  background: white;
+  padding: 15px;
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0;
+  z-index: 90;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 10rpx;
+}
+.search-box {
+  display: flex;
+  align-items: center;
+  background: var(--weui-BG-1);
+  border-radius: 20px;
+  padding: 10px 15px;
+  border: 1px solid #ffe8d9;
+}
+.search-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-size: 15px;
+  outline: none;
+  color: var(--dark-text);
+  margin-left: 10rpx;
+  /* 适应 uni-icons */
+}
+.filters-scroll {
+  white-space: nowrap;
+  width: 100%;
+  padding-top: 15px;
+}
+.filters {
+  display: flex;
+  gap: 10px;
+  padding: 0 15px;
+  /* 为筛选器添加内边距以便滚动 */
+}
+.filter-btn {
+  background: #f1f1f1;
+  color: var(--gray-text);
+  border: none;
+  padding: 8px 15px;
+  border-radius: 16px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+  flex-shrink: 0;
+  line-height: 1;
+  /* 调整按钮行高 */
+  margin: 0;
+  /* 重置按钮默认边距 */
+}
+.filter-btn::after {
+  border: none;
+  /* 移除 uni-app 按钮默认边框 */
+}
+.filter-btn.active {
+  background: var(--primary);
+  color: #FF6B00;
+  font-weight: 500;
+}
+
+/* 商店列表 */
+.store-list {
+  flex: 1;
+  padding: 0 15px;
+  padding-bottom: 20px;
+  /* `scroll-behavior: smooth` 不直接作为 CSS 在 uni-app 的 scroll-view 中支持。
+     通常通过 JS 中的 `scroll-into-view` 或 `scroll-top` 动画来处理。 */
+}
+.section-title {
+  font-size: 17px;
+  font-weight: 600;
+  padding: 20px 0 15px;
+  color: var(--dark-text);
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.section-title::before {
+  content: "";
+  display: block;
+  width: 4px;
+  height: 16px;
+  background: var(--primary);
+  border-radius: 2px;
+  margin-right: 8px;
+}
+
+/* 空状态 */
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--light-text);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+.empty-state .uni-icons {
+  font-size: 60px;
+  /* 使用 uni-icons 的 size 属性 */
+  margin-bottom: 20px;
+  color: #ffd8c1;
+}
+.empty-state text {
+  font-size: 15px;
+  margin-top: 10px;
+  line-height: 1.5;
+}
+
+/* 加载更多 */
+.load-more {
+  text-align: center;
+  padding: 15px;
+  color: var(--light-text);
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.load-more .uni-icons {
+  margin-right: 5px;
+}
+
+/* 底部操作栏 */
+.action-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: white;
+  display: flex;
+  padding: 10px;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+  z-index: 100;
+}
+.action-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  line-height: 1;
+  /* 调整按钮行高 */
+}
+.action-btn .uni-icons {
+  margin-right: 5px;
+}
+.share-btn {
+  background: #f0f0f0;
+  color: #333;
+  margin-right: 10px;
+}
+.register-btn {
+  background: linear-gradient(to right, #FF8C00, #FF6B00);
+  color: white;
+}
