@@ -48,39 +48,35 @@ const _sfc_main = {
         icon: "success"
       });
     }
-    function onClose() {
-      common_vendor.index.navigateBack();
-    }
     return (_ctx, _cache) => {
       return {
-        a: common_vendor.o(onClose),
-        b: title.value,
-        c: common_vendor.o(($event) => title.value = $event.detail.value),
-        d: content.value,
-        e: common_vendor.o(($event) => content.value = $event.detail.value),
-        f: common_vendor.f(tags.value, (tag, index, i0) => {
+        a: title.value,
+        b: common_vendor.o(($event) => title.value = $event.detail.value),
+        c: content.value,
+        d: common_vendor.o(($event) => content.value = $event.detail.value),
+        e: common_vendor.f(tags.value, (tag, index, i0) => {
           return {
             a: common_vendor.t(tag),
             b: common_vendor.o(($event) => removeTag(index), index),
             c: index
           };
         }),
-        g: tagInput.value,
-        h: common_vendor.o(($event) => tagInput.value = $event.detail.value),
-        i: common_vendor.o(addTag),
-        j: common_vendor.f(images.value, (img, i, i0) => {
+        f: tagInput.value,
+        g: common_vendor.o(($event) => tagInput.value = $event.detail.value),
+        h: common_vendor.o(addTag),
+        i: common_vendor.f(images.value, (img, i, i0) => {
           return {
             a: i,
             b: img
           };
         }),
-        k: common_vendor.o(handleChooseImage),
-        l: images.value.length >= 6,
-        m: showProfile.value,
-        n: common_vendor.o((e) => showProfile.value = e.detail.value),
-        o: allowComments.value,
-        p: common_vendor.o((e) => allowComments.value = e.detail.value),
-        q: common_vendor.o(submitPost)
+        j: common_vendor.o(handleChooseImage),
+        k: images.value.length >= 6,
+        l: showProfile.value,
+        m: common_vendor.o((e) => showProfile.value = e.detail.value),
+        n: allowComments.value,
+        o: common_vendor.o((e) => allowComments.value = e.detail.value),
+        p: common_vendor.o(submitPost)
       };
     };
   }

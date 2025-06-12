@@ -1,12 +1,5 @@
 <template>
   <view class="page-container">
-    <!-- 自定义导航栏 -->
-    <uni-nav-bar 
-      left-icon="arrowleft" 
-      title="我的活动" 
-      :border="false"
-      @clickLeft="handleBack"
-    />
     
     <!-- 分段器 -->
     <view class="segmented-container">
@@ -20,7 +13,7 @@
     </view>
     
     <!-- 我的报名活动 -->
-    <scroll-view 
+    <view 
       v-show="currentTab === 0" 
       scroll-y 
       class="content-scroll"
@@ -29,8 +22,8 @@
       @refresherrefresh="onRefresh"
     >
       <view class="section-header">
-        <uni-icons type="ticket" size="20" color="#FF6B00" />
-        <text class="section-title">我报名的活动</text>
+        <!-- <uni-icons type="ticket" size="20" color="#FF6B00" /> -->
+        <text class="section-title">✍️ 我报名的活动</text>
       </view>
       
       <!-- 活动列表 -->
@@ -93,7 +86,7 @@
         <button class="primary-btn" @click="navigateToDiscover">去发现</button>
       </empty-state>
       
-      <uni-load-more 
+      <!-- <uni-load-more 
         :status="loadStatus" 
         :content-text="{
           contentdown: '上拉加载更多',
@@ -101,11 +94,11 @@
           contentnomore: '没有更多了'
         }" 
         @clickLoadMore="loadMore"
-      />
-    </scroll-view>
+      /> -->
+    </view>
     
     <!-- 我的发布活动 -->
-    <scroll-view 
+    <view 
       v-show="currentTab === 1" 
       scroll-y 
       class="content-scroll"
@@ -114,8 +107,8 @@
       @refresherrefresh="onRefresh"
     >
       <view class="section-header">
-        <uni-icons type="sound" size="20" color="#FF6B00" />
-        <text class="section-title">我发布的活动</text>
+        <!-- <uni-icons type="sound" size="20" color="#FF6B00" /> -->
+        <text class="section-title">📢 我发布的活动</text>
       </view>
       
       <!-- 活动列表 -->
@@ -157,7 +150,7 @@
                   class="btn btn-manage" 
                   @click.stop="manageActivity(item)"
                 >
-                  {{ item.status === 'ended' ? '数据统计' : '管理' }}
+                  {{ item.status === 'ended' ? '数据统计' : '删除' }}
                 </button>
                 <button class="btn btn-detail" @click.stop="viewDetail(item)">
                   查看详情
@@ -177,7 +170,7 @@
         <button class="primary-btn" @click="navigateToCreate">创建活动</button>
       </empty-state>
       
-      <uni-load-more 
+      <!-- <uni-load-more 
         :status="loadStatus" 
         :content-text="{
           contentdown: '上拉加载更多',
@@ -185,8 +178,8 @@
           contentnomore: '没有更多了'
         }" 
         @clickLoadMore="loadMore"
-      />
-    </scroll-view>
+      /> -->
+    </view>
   </view>
 </template>
 
@@ -205,7 +198,7 @@ const enrolledActivities = ref([
   {
     id: 1,
     title: '周末户外登山活动 - 挑战青龙山',
-    image: '/static/activity1.jpg',
+    image: '../../static/abc.png',
     date: '2023年11月25日 08:00-17:00',
     location: '青龙山国家森林公园',
     participants: {
@@ -223,7 +216,7 @@ const publishedActivities = ref([
   {
     id: 4,
     title: '宠物爱好者交流聚会',
-    image: '/static/activity4.jpg',
+    image: '../../static/abc.png',
     date: '2023年12月2日 10:00-14:00',
     location: '人民公园草坪区',
     participants: {
@@ -324,55 +317,55 @@ const onRefresh = () => {
   }, 1000)
 }
 
-const loadMore = () => {
-  if (loadStatus.value !== 'more') return
+// const loadMore = () => {
+//   if (loadStatus.value !== 'more') return
   
-  loadStatus.value = 'loading'
-  setTimeout(() => {
-    // 模拟加载更多数据
-    if (currentTab.value === 0) {
-      enrolledActivities.value.push(...mockEnrolledData())
-    } else {
-      publishedActivities.value.push(...mockPublishedData())
-    }
-    loadStatus.value = 'noMore'
-  }, 1500)
-}
+//   loadStatus.value = 'loading'
+//   setTimeout(() => {
+//     // 模拟加载更多数据
+//     // if (currentTab.value === 0) {
+//     //   enrolledActivities.value.push(...mockEnrolledData())
+//     // } else {
+//     //   publishedActivities.value.push(...mockPublishedData())
+//     // }
+//     loadStatus.value = 'noMore'
+//   }, 1500)
+// }
 
-onReachBottom(() => {
-  loadMore()
-})
+// onReachBottom(() => {
+//   loadMore()
+// })
 
 // 模拟数据方法
-const mockEnrolledData = () => [...Array(2)].map((_, i) => ({
-  id: enrolledActivities.value.length + i + 1,
-  title: `新活动 ${enrolledActivities.value.length + i + 1}`,
-  image: `/static/activity${(enrolledActivities.value.length + i) % 6 + 1}.jpg`,
-  date: '2023年12月' + (15 + i) + '日',
-  location: '活动地点' + (enrolledActivities.value.length + i),
-  participants: {
-    current: Math.floor(Math.random() * 50),
-    total: 50
-  },
-  organizer: '组织者' + (enrolledActivities.value.length + i),
-  status: ['enrolled', 'pending', 'ended'][Math.floor(Math.random() * 3)],
-  tags: ['标签1', '标签2']
-}))
+// const mockEnrolledData = () => [...Array(2)].map((_, i) => ({
+//   id: enrolledActivities.value.length + i + 1,
+//   title: `新活动 ${enrolledActivities.value.length + i + 1}`,
+//   image: `/static/activity${(enrolledActivities.value.length + i) % 6 + 1}.jpg`,
+//   date: '2023年12月' + (15 + i) + '日',
+//   location: '活动地点' + (enrolledActivities.value.length + i),
+//   participants: {
+//     current: Math.floor(Math.random() * 50),
+//     total: 50
+//   },
+//   organizer: '组织者' + (enrolledActivities.value.length + i),
+//   status: ['enrolled', 'pending', 'ended'][Math.floor(Math.random() * 3)],
+//   tags: ['标签1', '标签2']
+// }))
 
-const mockPublishedData = () => [...Array(2)].map((_, i) => ({
-  id: publishedActivities.value.length + i + 1,
-  title: `新发布活动 ${publishedActivities.value.length + i + 1}`,
-  image: `/static/activity${(publishedActivities.value.length + i) % 6 + 1}.jpg`,
-  date: '2023年12月' + (20 + i) + '日',
-  location: '发布地点' + (publishedActivities.value.length + i),
-  participants: {
-    current: Math.floor(Math.random() * 100),
-    total: 100
-  },
-  organizer: '我',
-  status: ['ongoing', 'upcoming', 'ended'][Math.floor(Math.random() * 3)],
-  tags: ['发布标签1', '发布标签2']
-}))
+// const mockPublishedData = () => [...Array(2)].map((_, i) => ({
+//   id: publishedActivities.value.length + i + 1,
+//   title: `新发布活动 ${publishedActivities.value.length + i + 1}`,
+//   image: `/static/activity${(publishedActivities.value.length + i) % 6 + 1}.jpg`,
+//   date: '2023年12月' + (20 + i) + '日',
+//   location: '发布地点' + (publishedActivities.value.length + i),
+//   participants: {
+//     current: Math.floor(Math.random() * 100),
+//     total: 100
+//   },
+//   organizer: '我',
+//   status: ['ongoing', 'upcoming', 'ended'][Math.floor(Math.random() * 3)],
+//   tags: ['发布标签1', '发布标签2']
+// }))
 
 onLoad(() => {
   // 可以在这里加载真实数据
@@ -421,6 +414,7 @@ onLoad(() => {
   overflow: hidden;
   margin-bottom: 24rpx;
   box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.05);
+  
   
   &:active {
     opacity: 0.9;

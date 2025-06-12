@@ -1,12 +1,5 @@
 <template>
   <view class="page-container">
-    <!-- 自定义导航栏 -->
-    <uni-nav-bar 
-      left-icon="arrowleft" 
-      title="用户协议" 
-      :border="false"
-      @clickLeft="handleBack"
-    />
     
     <!-- 协议内容滚动区域 -->
     <scroll-view scroll-y class="content-scroll">

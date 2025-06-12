@@ -1,230 +1,271 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
 if (!Array) {
-  const _easycom_uni_nav_bar2 = common_vendor.resolveComponent("uni-nav-bar");
   const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
-  const _component_empty_state = common_vendor.resolveComponent("empty-state");
-  const _easycom_uni_load_more2 = common_vendor.resolveComponent("uni-load-more");
-  (_easycom_uni_nav_bar2 + _easycom_uni_icons2 + _component_empty_state + _easycom_uni_load_more2)();
+  _easycom_uni_icons2();
 }
-const _easycom_uni_nav_bar = () => "../../uni_modules/uni-nav-bar/components/uni-nav-bar/uni-nav-bar.js";
 const _easycom_uni_icons = () => "../../uni_modules/uni-icons/components/uni-icons/uni-icons.js";
-const _easycom_uni_load_more = () => "../../uni_modules/uni-load-more/components/uni-load-more/uni-load-more.js";
 if (!Math) {
-  (_easycom_uni_nav_bar + _easycom_uni_icons + _easycom_uni_load_more)();
+  _easycom_uni_icons();
 }
 const _sfc_main = {
   __name: "my-opportunity",
   setup(__props) {
-    const refreshing = common_vendor.ref(false);
-    const loadStatus = common_vendor.ref("more");
-    const myOpportunities = common_vendor.ref([
+    const myPosts = common_vendor.reactive([
       {
-        id: 1,
-        content: "寻找AI技术合作伙伴，共同开发智能客服系统，有意向请联系详谈",
-        tags: ["技术合作", "AI开发", "商务合作"],
-        time: "2023-11-15 14:30:00",
-        likes: 24,
-        comments: 8,
-        views: 156,
-        contactCount: 5
-      },
-      {
-        id: 2,
-        content: "优质供应链资源对接，主要提供电子产品原材料，寻求长期合作伙伴",
-        tags: ["供应链", "电子元件", "长期合作"],
-        time: "2023-10-20 09:15:00",
-        likes: 18,
-        comments: 12,
-        views: 210,
-        contactCount: 7
-      },
-      {
-        id: 3,
-        content: "招募线上教育课程讲师，要求有五年以上教学经验，科目不限",
-        tags: ["教育", "讲师", "兼职"],
-        time: "2023-12-01 10:00:00",
-        likes: 30,
-        comments: 5,
-        views: 180,
-        contactCount: 10
-      },
-      {
-        id: 4,
-        content: "寻求本地农产品电商平台合作，共同拓展市场，提供优质有机蔬菜",
-        tags: ["农产品", "电商", "合作"],
-        time: "2023-11-28 16:45:00",
+        id: 101,
+        // 增加ID以方便删除
+        user: "当前用户",
+        // 假设这是登录用户
+        time: "2025-06-16 10:00:00",
+        content: "我司寻求智能家居项目合作，主要方向为AIoT设备连接与数据分析平台。欢迎有相关经验的团队联系，可提供技术方案或产品。",
+        images: [
+          "https://via.placeholder.com/150/FF6A00/FFFFFF?text=智能家居1",
+          "https://via.placeholder.com/150/FF6A00/FFFFFF?text=智能家居2"
+        ],
+        tags: ["#智能家居", "#AIoT", "#项目合作"],
         likes: 15,
-        comments: 3,
-        views: 90,
-        contactCount: 2
+        dislikes: 0,
+        userAction: null,
+        saved: false
       },
       {
-        id: 5,
-        content: "招聘前端开发工程师，熟悉Vue.js和Uniapp，有小程序开发经验优先",
-        tags: ["招聘", "前端", "软件开发"],
-        time: "2023-12-05 11:20:00",
-        likes: 40,
-        comments: 15,
-        views: 250,
-        contactCount: 8
+        id: 102,
+        user: "当前用户",
+        time: "2025-06-15 14:30:00",
+        content: "本人有一批高质量二手办公家具转让，适合创业公司或小型办公室，价格优惠，可上门看货。",
+        images: [
+          "https://via.placeholder.com/150/007AFF/FFFFFF?text=办公家具1",
+          "https://via.placeholder.com/150/007AFF/FFFFFF?text=办公家具2",
+          "https://via.placeholder.com/150/007AFF/FFFFFF?text=办公家具3",
+          "https://via.placeholder.com/150/007AFF/FFFFFF?text=办公家具4",
+          "https://via.placeholder.com/150/007AFF/FFFFFF?text=办公家具5"
+        ],
+        tags: ["#二手转让", "#办公用品", "#创业福利"],
+        likes: 8,
+        dislikes: 1,
+        userAction: null,
+        saved: false
+      },
+      {
+        id: 103,
+        user: "当前用户",
+        time: "2025-06-14 09:00:00",
+        content: "寻找在营销策划、品牌推广方面有独到见解的专家，希望通过线上线下结合的方式提升品牌影响力。",
+        images: [],
+        // 无图片
+        tags: ["#营销策划", "#品牌推广", "#专家合作"],
+        likes: 20,
+        dislikes: 0,
+        userAction: null,
+        saved: true
+        // 模拟已被收藏
       }
     ]);
-    const handleBack = () => {
-      common_vendor.index.navigateBack();
-    };
-    const formatTime = (timeStr) => {
-      return timeStr.slice(0, 16);
-    };
-    const viewDetail = (item) => {
-      common_vendor.index.navigateTo({
-        url: `/pages/business/detail?id=${item.id}&from=mine`
+    const goBack = () => {
+      common_vendor.index.navigateBack({
+        delta: 1
       });
     };
-    const showDeleteConfirm = (item) => {
+    const deleteOpportunity = (id) => {
       common_vendor.index.showModal({
         title: "确认删除",
-        content: "确定要删除这条商机吗？删除后不可恢复",
-        confirmColor: "#FF6B00",
+        content: "您确定要删除这条商机吗？删除后将无法恢复。",
         success: (res) => {
           if (res.confirm) {
-            deleteOpportunity(item.id);
+            const index = myPosts.findIndex((post) => post.id === id);
+            if (index !== -1) {
+              myPosts.splice(index, 1);
+              common_vendor.index.showToast({
+                title: "删除成功",
+                icon: "success"
+              });
+            }
           }
         }
       });
     };
-    const deleteOpportunity = (id) => {
-      const initialLength = myOpportunities.value.length;
-      myOpportunities.value = myOpportunities.value.filter((item) => item.id !== id);
-      if (myOpportunities.value.length < initialLength) {
-        common_vendor.index.showToast({
-          title: "删除成功",
-          icon: "success"
-        });
+    const toggleAction = (post, action) => {
+      if (post.userAction === action) {
+        post.userAction = null;
+        if (action === "like") {
+          post.likes--;
+        } else {
+          post.dislikes--;
+        }
       } else {
-        common_vendor.index.showToast({
-          title: "删除失败",
-          icon: "none"
-        });
+        const prevAction = post.userAction;
+        post.userAction = action;
+        if (action === "like") {
+          post.likes++;
+          if (prevAction === "dislike") {
+            post.dislikes--;
+          }
+        } else {
+          post.dislikes++;
+          if (prevAction === "like") {
+            post.likes--;
+          }
+        }
       }
     };
-    const navigateToPost = () => {
-      common_vendor.index.navigateTo({
-        url: "/pages/business/post"
+    const toggleSave = (post) => {
+      post.saved = !post.saved;
+      common_vendor.index.showToast({
+        title: post.saved ? "已收藏" : "已取消收藏",
+        icon: "none"
       });
     };
-    const onRefresh = () => {
-      refreshing.value = true;
-      loadStatus.value = "more";
-      setTimeout(() => {
-        myOpportunities.value = mockOpportunityData(5);
-        refreshing.value = false;
-        common_vendor.index.showToast({
-          title: "刷新成功",
-          icon: "success"
-        });
-      }, 1e3);
+    const sharePost = (post) => {
+      common_vendor.index.showToast({
+        title: "分享功能即将上线",
+        icon: "none"
+      });
     };
-    const loadMore = () => {
-      if (loadStatus.value === "loading" || loadStatus.value === "noMore")
-        return;
-      loadStatus.value = "loading";
-      setTimeout(() => {
-        const newData = mockOpportunityData(3);
-        if (myOpportunities.value.length < 20) {
-          myOpportunities.value.push(...newData);
-          loadStatus.value = "more";
-        } else {
-          loadStatus.value = "noMore";
+    const postNew = () => {
+      common_vendor.index.navigateTo({
+        url: "/pages/home-opportunitiesPublish/home-opportunitiesPublish"
+      });
+    };
+    const skipApplicationBusinessCard = () => {
+      common_vendor.index.navigateTo({
+        url: "/pages/applicationBusinessCard/applicationBusinessCard"
+      });
+    };
+    const skipCommercialDetail = (id) => {
+      common_vendor.index.navigateTo({
+        url: `/pages/home-commercialDetail/home-commercialDetail?id=${id}`
+        // 实际项目中应传递商机ID
+      });
+    };
+    const previewImage = (urls, current) => {
+      common_vendor.index.previewImage({
+        urls,
+        current: urls[current],
+        longPressActions: {
+          itemList: ["发送给朋友", "保存图片", "收藏"],
+          success: function(data) {
+            common_vendor.index.__f__("log", "at pages/my-opportunity/my-opportunity.vue:313", "选中了第" + (data.tapIndex + 1) + "个按钮，第" + (data.index + 1) + "张图片");
+          },
+          fail: function(err) {
+            common_vendor.index.__f__("log", "at pages/my-opportunity/my-opportunity.vue:316", err.errMsg);
+          }
         }
-      }, 1500);
+      });
     };
-    const mockOpportunityData = (count) => {
-      const baseId = myOpportunities.value.length > 0 ? myOpportunities.value[myOpportunities.value.length - 1].id + 1 : 1;
-      return [...Array(count)].map((_, i) => ({
-        id: baseId + i,
-        content: `这是新加载的商机内容 ${baseId + i}，寻求合作伙伴共同开发项目，欢迎咨询！`,
-        tags: ["新标签", "合作", `主题${i + 1}`],
-        time: (/* @__PURE__ */ new Date()).toISOString().replace("T", " ").slice(0, 19),
-        likes: Math.floor(Math.random() * 50),
-        comments: Math.floor(Math.random() * 20),
-        views: Math.floor(Math.random() * 300),
-        contactCount: Math.floor(Math.random() * 10)
-      }));
-    };
-    common_vendor.onLoad(() => {
-    });
     return (_ctx, _cache) => {
       return common_vendor.e({
-        a: common_vendor.o(handleBack),
-        b: common_vendor.p({
-          ["left-icon"]: "arrowleft",
-          title: "我的商机",
-          border: false
+        a: common_vendor.p({
+          type: "left",
+          size: "22",
+          color: "#FFFFFF"
         }),
-        c: myOpportunities.value.length > 0
-      }, myOpportunities.value.length > 0 ? {
-        d: common_vendor.f(myOpportunities.value, (item, index, i0) => {
-          return {
-            a: common_vendor.t(formatTime(item.time)),
-            b: common_vendor.t(item.content),
-            c: common_vendor.o(($event) => viewDetail(item), item.id),
-            d: common_vendor.f(item.tags, (tag, tagIndex, i1) => {
+        b: common_vendor.o(goBack),
+        c: common_vendor.p({
+          type: "compose",
+          size: "20",
+          color: "#FFFFFF"
+        }),
+        d: common_vendor.o(postNew),
+        e: common_vendor.f(myPosts, (post, k0, i0) => {
+          return common_vendor.e({
+            a: common_vendor.t(post.user.charAt(0)),
+            b: common_vendor.o(skipApplicationBusinessCard, post.id),
+            c: common_vendor.t(post.user),
+            d: "481e0091-2-" + i0,
+            e: common_vendor.t(post.time),
+            f: "481e0091-3-" + i0,
+            g: common_vendor.o(($event) => deleteOpportunity(post.id), post.id),
+            h: common_vendor.t(post.content),
+            i: post.images && post.images.length
+          }, post.images && post.images.length ? {
+            j: common_vendor.f(post.images, (image, imgIndex, i1) => {
+              return {
+                a: image,
+                b: common_vendor.o(($event) => previewImage(post.images, imgIndex), imgIndex),
+                c: imgIndex
+              };
+            })
+          } : {}, {
+            k: common_vendor.f(post.tags, (tag, tagIndex, i1) => {
               return {
                 a: common_vendor.t(tag),
                 b: tagIndex
               };
             }),
-            e: "481e0091-1-" + i0,
-            f: common_vendor.t(item.likes),
-            g: "481e0091-2-" + i0,
-            h: common_vendor.t(item.comments),
-            i: "481e0091-3-" + i0,
-            j: common_vendor.t(item.views),
-            k: common_vendor.o(($event) => showDeleteConfirm(item), item.id),
-            l: item.id
-          };
-        }),
-        e: common_vendor.p({
-          type: "hand-up",
-          size: "16",
-          color: "#999"
+            l: "481e0091-4-" + i0,
+            m: common_vendor.t(post.likes),
+            n: "481e0091-5-" + i0,
+            o: common_vendor.t(post.dislikes),
+            p: "481e0091-6-" + i0,
+            q: common_vendor.p({
+              type: post.userAction === "like" ? "hand-up-filled" : "hand-up",
+              size: "20",
+              color: post.userAction === "like" ? "#e74c3c" : "#666"
+            }),
+            r: post.userAction === "like" ? 1 : "",
+            s: common_vendor.o(($event) => toggleAction(post, "like"), post.id),
+            t: "481e0091-7-" + i0,
+            v: common_vendor.p({
+              type: post.userAction === "dislike" ? "hand-down-filled" : "hand-down",
+              size: "20",
+              color: post.userAction === "dislike" ? "#3498db" : "#666"
+            }),
+            w: post.userAction === "dislike" ? 1 : "",
+            x: common_vendor.o(($event) => toggleAction(post, "dislike"), post.id),
+            y: "481e0091-8-" + i0,
+            z: common_vendor.p({
+              type: post.saved ? "star-filled" : "star",
+              size: "20",
+              color: post.saved ? "#FF6A00" : "#666"
+            }),
+            A: post.saved ? 1 : "",
+            B: common_vendor.o(($event) => toggleSave(post), post.id),
+            C: "481e0091-9-" + i0,
+            D: common_vendor.o(($event) => sharePost(), post.id),
+            E: post.id,
+            F: common_vendor.o(($event) => skipCommercialDetail(post.id), post.id)
+          });
         }),
         f: common_vendor.p({
-          type: "chat",
-          size: "16",
-          color: "#999"
+          type: "redo",
+          size: "14",
+          color: "#888"
         }),
         g: common_vendor.p({
-          type: "eye",
-          size: "16",
-          color: "#999"
-        })
-      } : {
-        h: common_vendor.o(navigateToPost),
+          type: "trash-fill",
+          size: "20",
+          color: "#FF6A00"
+        }),
+        h: common_vendor.p({
+          type: "hand-up-filled",
+          size: "18",
+          color: "#e74c3c"
+        }),
         i: common_vendor.p({
-          title: "暂无发布的商机",
-          description: "发布您的第一条商机信息，寻找合作伙伴"
-        })
-      }, {
+          type: "hand-down-filled",
+          size: "18",
+          color: "#3498db"
+        }),
         j: common_vendor.p({
-          status: loadStatus.value,
-          ["content-text"]: {
-            contentdown: "上拉加载更多",
-            contentrefresh: "正在加载...",
-            contentnomore: "没有更多了"
-          }
+          type: "redo",
+          size: "20",
+          color: "#666"
         }),
-        k: refreshing.value,
-        l: common_vendor.o(onRefresh),
-        m: common_vendor.o(loadMore),
-        n: common_vendor.p({
-          type: "plus",
-          size: "24",
-          color: "#fff"
+        k: myPosts.length === 0
+      }, myPosts.length === 0 ? {
+        l: common_vendor.p({
+          type: "info",
+          size: "60",
+          color: "#ccc"
         }),
-        o: common_vendor.o(navigateToPost)
-      });
+        m: common_vendor.p({
+          type: "compose",
+          size: "20",
+          color: "#FFFFFF"
+        }),
+        n: common_vendor.o(postNew)
+      } : {});
     };
   }
 };

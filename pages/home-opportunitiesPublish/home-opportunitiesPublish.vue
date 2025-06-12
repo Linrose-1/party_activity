@@ -1,28 +1,28 @@
 <<template>
   <view class="page">
     <!-- 顶部栏 -->
-    <view class="header">
+    <!-- <view class="header">
       <text class="header-title">发布新帖</text>
       <button class="close-btn" @click="onClose">×</button>
-    </view>
+    </view> -->
 
     <!-- 内容卡片 -->
     <view class="form-container">
       <view class="form-card">
         <view class="form-group">
-          <text class="form-label">帖子标题</text>
+          <view class="form-label">帖子标题</view>
           <input v-model="title" class="form-input" placeholder="请输入标题（最多50字）" maxlength="50" />
           <text class="hint">清晰明了的标题能吸引更多关注</text>
         </view>
 
         <view class="form-group">
-          <text class="form-label">帖子内容</text>
+          <view class="form-label">帖子内容</view>
           <textarea v-model="content" class="form-textarea" placeholder="详细描述您的商机、需求或经验分享..." />
           <text class="hint">支持Markdown格式，内容需大于20字</text>
         </view>
 
         <view class="form-group">
-          <text class="form-label">添加标签</text>
+          <view class="form-label">添加标签</view>
           <view class="tags-container">
             <view v-for="(tag, index) in tags" :key="index" class="tag">
               {{ tag }}
@@ -37,7 +37,7 @@
         </view>
 
         <view class="form-group">
-          <text class="form-label">上传图片</text>
+          <view class="form-label">上传图片</view>
           <view class="image-preview">
             <image v-for="(img, i) in images" :key="i" :src="img" mode="aspectFill" class="preview-img" />
           </view>
@@ -144,7 +144,7 @@ function onClose() {
   text-align: center;
 }
 .form-container {
-  margin-top: 20rpx;
+  /* margin-top: 20rpx; */
 }
 .form-card {
   background: white;
@@ -155,13 +155,13 @@ function onClose() {
 }
 .form-label {
   font-size: 28rpx;
-  margin-bottom: 10rpx;
+  margin-top: 10rpx;
   display: block;
   color: #666;
 }
 .form-input,
 .form-textarea {
-  width: 100%;
+  width: 95%;
   border: 1rpx solid #e0e0e0;
   border-radius: 12rpx;
   padding: 20rpx;
@@ -226,7 +226,7 @@ function onClose() {
 }
 .add-img-btn {
   margin-top: 16rpx;
-  padding: 20rpx;
+  padding: 10rpx;
   background: #FF8C37;
   color: white;
   border-radius: 30rpx;
@@ -254,7 +254,7 @@ function onClose() {
   background: linear-gradient(to right, #FF6A00, #FF8C37);
   color: white;
   border-radius: 30rpx;
-  padding: 24rpx;
+  padding: 14rpx;
   font-size: 30rpx;
   width: 100%;
   text-align: center;

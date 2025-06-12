@@ -63,8 +63,7 @@
     align-items: center;
     box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.1);
 }
-.search-container i.data-v-07e72d3c {
-    color: #FF6A00;
+.search-container uni-icons.data-v-07e72d3c { /* 针对 uni-icons 调整 */
     margin-right: 20rpx;
 }
 .search-container input.data-v-07e72d3c {
@@ -99,7 +98,7 @@
 .tabs.data-v-07e72d3c {
     display: flex;
     background: white;
-    padding: 20rpx 40rpx;
+    padding: 10rpx 40rpx;
     border-bottom: 2rpx solid #eee;
     position: -webkit-sticky;
     position: sticky;
@@ -109,11 +108,10 @@
 .tab.data-v-07e72d3c {
     flex: 1;
     text-align: center;
-    padding: 16rpx 0;
+    padding: 10rpx 0;
     font-size: 32rpx;
     color: #666;
     position: relative;
-    /* cursor: pointer; */ /* 在小程序中不适用 */
     transition: all 0.3s;
 }
 .tab.active.data-v-07e72d3c {
@@ -152,7 +150,7 @@
 .post-button.data-v-07e72d3c::after {
     border: none;
 }
-.post-button i.data-v-07e72d3c {
+.post-button uni-icons.data-v-07e72d3c { /* 针对 uni-icons 调整 */
     margin-right: 10rpx;
 }
 
@@ -210,6 +208,28 @@
     margin-bottom: 30rpx;
     color: #444;
 }
+
+/* 商机图片样式 */
+.post-images.data-v-07e72d3c {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16rpx; /* 图片之间的间距 */
+    margin-bottom: 30rpx;
+    overflow: hidden; /* 防止图片溢出 */
+}
+.image-wrapper.data-v-07e72d3c {
+    width: calc((100% - 32rpx) / 3); /* 两张图片间距16*2=32，所以减去32rpx */
+    aspect-ratio: 1 / 1; /* 保持图片正方形 */
+    border-radius: 12rpx;
+    overflow: hidden;
+    box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.08);
+}
+.post-image.data-v-07e72d3c {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* 裁剪图片以填充容器 */
+    display: block; /* 移除图片底部空白 */
+}
 .tags.data-v-07e72d3c {
     display: flex;
     flex-wrap: wrap;
@@ -240,78 +260,11 @@
     /* cursor: pointer; */
     transition: all 0.2s;
 }
-.action i.data-v-07e72d3c {
+.action uni-icons.data-v-07e72d3c { /* 针对 uni-icons 调整 */
     margin-right: 12rpx;
-    font-size: 32rpx;
 }
 .action.data-v-07e72d3c:active { /* 小程序使用 :active 模拟 :hover */
-    color: #FF6A00;
-}
-.action.like.active.data-v-07e72d3c {
-    color: #e74c3c;
-}
-.action.dislike.active.data-v-07e72d3c {
-    color: #3498db;
-}
-.action.share.data-v-07e72d3c:active { /* 小程序使用 :active 模拟 :hover */
-    color: #2ecc71;
-}
-
-/* 底部导航 */
-.bottom-nav.data-v-07e72d3c {
-    position: fixed;
-    bottom: 0;
-    /* left: 0; */
-    /* right: 0; */
-    left: 50%; /* 居中显示 */
-    transform: translateX(-50%); /* 居中显示 */
-    max-width: 1000rpx; /* 限制最大宽度与主内容区一致 */
-    width: 100%; /* 确保占据100%宽度，以便max-width生效 */
-    margin: 0 auto; /* 对 fixed 元素可能不生效，通过 left/transform 实现 */
-    background: white;
-    display: flex;
-    justify-content: space-around;
-    padding: 24rpx 0;
-    /* 适配底部安全区域 */
-    padding-bottom: calc(24rpx + env(safe-area-inset-bottom));
-    box-shadow: 0 -4rpx 20rpx rgba(0, 0, 0, 0.08);
-    border-top: 2rpx solid #f0f0f0;
-    z-index: 100;
-}
-.nav-item.data-v-07e72d3c {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    color: #888;
-    font-size: 24rpx;
-    /* cursor: pointer; */
-    transition: all 0.3s;
-}
-.nav-item i.data-v-07e72d3c {
-    font-size: 40rpx;
-    margin-bottom: 6rpx;
-}
-.nav-item.active.data-v-07e72d3c {
-    color: #FF6A00;
-}
-.nav-item.data-v-07e72d3c:active { /* 小程序使用 :active 模拟 :hover */
-    color: #FF6A00;
-}
-
-/* 微信小程序样式调整 */
-.wechat-style.data-v-07e72d3c {
-    position: relative;
-}
-.wechat-style.data-v-07e72d3c::after {
-    content: "微信小程序";
-    position: absolute;
-    top: 20rpx;
-    right: 20rpx;
-    background: rgba(255, 255, 255, 0.2);
-    color: white;
-    font-size: 24rpx;
-    padding: 6rpx 16rpx;
-    border-radius: 20rpx;
+    opacity: 0.7; /* 点击时稍微变暗 */
 }
 
 /* 赞踩统计 */
@@ -336,7 +289,28 @@
     align-items: center;
     color: #3498db;
 }
-.feedback-stats i.data-v-07e72d3c {
+.feedback-stats uni-icons.data-v-07e72d3c { /* 针对 uni-icons 调整 */
     margin-right: 10rpx;
-    font-size: 28rpx;
+}
+
+/* 微信小程序样式调整 */
+.wechat-style.data-v-07e72d3c {
+    position: relative;
+}
+.wechat-style.data-v-07e72d3c::after {
+    content: "微信小程序";
+    position: absolute;
+    top: 20rpx;
+    right: 20rpx;
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    font-size: 24rpx;
+    padding: 6rpx 16rpx;
+    border-radius: 20rpx;
+}
+.no-posts-message.data-v-07e72d3c {
+    text-align: center;
+    padding: 60rpx;
+    color: #999;
+    font-size: 32rpx;
 }

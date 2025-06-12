@@ -28,7 +28,7 @@
   text-align: center;
 }
 .form-container.data-v-90e28424 {
-  margin-top: 20rpx;
+  /* margin-top: 20rpx; */
 }
 .form-card.data-v-90e28424 {
   background: white;
@@ -39,13 +39,13 @@
 }
 .form-label.data-v-90e28424 {
   font-size: 28rpx;
-  margin-bottom: 10rpx;
+  margin-top: 10rpx;
   display: block;
   color: #666;
 }
 .form-input.data-v-90e28424,
 .form-textarea.data-v-90e28424 {
-  width: 100%;
+  width: 95%;
   border: 1rpx solid #e0e0e0;
   border-radius: 12rpx;
   padding: 20rpx;
@@ -110,7 +110,7 @@
 }
 .add-img-btn.data-v-90e28424 {
   margin-top: 16rpx;
-  padding: 20rpx;
+  padding: 10rpx;
   background: #FF8C37;
   color: white;
   border-radius: 30rpx;
@@ -138,7 +138,7 @@
   background: linear-gradient(to right, #FF6A00, #FF8C37);
   color: white;
   border-radius: 30rpx;
-  padding: 24rpx;
+  padding: 14rpx;
   font-size: 30rpx;
   width: 100%;
   text-align: center;
