@@ -8,6 +8,7 @@ const _easycom_uni_icons = () => "../../uni_modules/uni-icons/components/uni-ico
 if (!Math) {
   _easycom_uni_icons();
 }
+const FETCH_LOCATION_MIN_INTERVAL = 5e3;
 const _sfc_main = {
   __name: "home",
   setup(__props) {
@@ -19,9 +20,9 @@ const _sfc_main = {
         time: "2025-06-15 20:44:34",
         content: "我们公司正在寻找AI技术合作伙伴，开发新一代智能客服系统，有意向的可以私信我详谈。",
         images: [
-          "https://via.placeholder.com/150/FF6A00/FFFFFF?text=AI合作1",
-          "https://via.placeholder.com/150/FF6A00/FFFFFF?text=AI合作2",
-          "https://via.placeholder.com/150/FF6A00/FFFFFF?text=AI合作3"
+          "../../static/abc.png",
+          "../../static/abc.png",
+          "../../static/abc.png"
         ],
         tags: ["#技术合作", "#AI开发", "#商务合作"],
         likes: 24,
@@ -36,10 +37,10 @@ const _sfc_main = {
         time: "2025-06-15 20:44:34",
         content: "刚参加完供应链优化研讨会，获益良多。这次分享几个关于仓储管理的新思路，希望对同行有所帮助。",
         images: [
-          "https://via.placeholder.com/150/007AFF/FFFFFF?text=供应链1",
-          "https://via.placeholder.com/150/007AFF/FFFFFF?text=供应链2",
-          "https://via.placeholder.com/150/007AFF/FFFFFF?text=供应链3",
-          "https://via.placeholder.com/150/007AFF/FFFFFF?text=供应链4"
+          "../../static/abc.png",
+          "../../static/abc.png",
+          "../../static/abc.png",
+          "../../static/abc.png"
         ],
         tags: ["#供应链管理", "#仓储物流", "#经验分享"],
         likes: 45,
@@ -53,8 +54,8 @@ const _sfc_main = {
         time: "2025-06-15 20:44:34",
         content: "寻找医疗器械领域的投资机会，特别关注创新型医疗设备和AI辅助诊断方向，欢迎推荐优质项目。",
         images: [
-          "https://via.placeholder.com/150/4CAF50/FFFFFF?text=医疗投资1",
-          "https://via.placeholder.com/150/4CAF50/FFFFFF?text=医疗投资2"
+          "../../static/abc.png",
+          "../../static/abc.png"
         ],
         tags: ["#投资合作", "#医疗健康", "#项目对接"],
         likes: 32,
@@ -70,12 +71,12 @@ const _sfc_main = {
         time: "2025-06-15 18:00:00",
         content: "我在XX商圈新开了一家智能咖啡馆，提供共享办公空间和优质咖啡，欢迎附近的朋友来体验！",
         images: [
-          "https://via.placeholder.com/150/FF9800/FFFFFF?text=咖啡馆1",
-          "https://via.placeholder.com/150/FF9800/FFFFFF?text=咖啡馆2",
-          "https://via.placeholder.com/150/FF9800/FFFFFF?text=咖啡馆3",
-          "https://via.placeholder.com/150/FF9800/FFFFFF?text=咖啡馆4",
-          "https://via.placeholder.com/150/FF9800/FFFFFF?text=咖啡馆5",
-          "https://via.placeholder.com/150/FF9800/FFFFFF?text=咖啡馆6"
+          "../../static/abc.png",
+          "../../static/abc.png",
+          "../../static/abc.png",
+          "../../static/abc.png",
+          "../../static/abc.png",
+          "../../static/abc.png"
         ],
         tags: ["#本地商机", "#餐饮", "#共享空间"],
         likes: 12,
@@ -104,7 +105,7 @@ const _sfc_main = {
         time: "2025-06-15 10:00:00",
         content: "分享近期对新能源汽车板块的看法，认为下半年仍有较大增长潜力，欢迎交流。",
         images: [
-          "https://via.placeholder.com/150/795548/FFFFFF?text=新能源车"
+          "../../static/abc.png"
         ],
         tags: ["#股市分析", "#新能源", "#投资"],
         likes: 100,
@@ -118,8 +119,8 @@ const _sfc_main = {
         time: "2025-06-14 22:00:00",
         content: "针对东南亚跨境电商市场进行深度解析，欢迎寻找合作伙伴或想进入该市场的同行交流。",
         images: [
-          "https://via.placeholder.com/150/607D8B/FFFFFF?text=跨境电商1",
-          "https://via.placeholder.com/150/607D8B/FFFFFF?text=跨境电商2"
+          "../../static/abc.png",
+          "../../static/abc.png"
         ],
         tags: ["#跨境电商", "#东南亚市场", "#国际贸易"],
         likes: 78,
@@ -192,6 +193,86 @@ const _sfc_main = {
         url: "/pages/home-commercialDetail/home-commercialDetail"
       });
     };
+    let lastLocationFetchTimestamp = 0;
+    const handleTabClick = (tabName) => {
+      if (tabName === "nearby") {
+        common_vendor.index.getSetting({
+          success: (res) => {
+            if (res.authSetting["scope.userLocation"]) {
+              tryGetLocationAndSwitchTab(tabName);
+            } else {
+              common_vendor.index.authorize({
+                scope: "scope.userLocation",
+                success: () => {
+                  tryGetLocationAndSwitchTab(tabName);
+                },
+                fail: () => {
+                  common_vendor.index.showModal({
+                    title: "温馨提示",
+                    content: "您已拒绝获取位置信息，无法查看附近商机。请在设置中开启位置权限。",
+                    showCancel: false,
+                    confirmText: "我知道了"
+                  });
+                }
+              });
+            }
+          },
+          fail: (err) => {
+            common_vendor.index.__f__("error", "at pages/home/home.vue:426", "获取用户设置失败", err);
+            common_vendor.index.showToast({
+              title: "检查权限失败",
+              icon: "none"
+            });
+          }
+        });
+      } else {
+        activeTab.value = tabName;
+      }
+    };
+    const tryGetLocationAndSwitchTab = (tabName) => {
+      const currentTime = Date.now();
+      if (currentTime - lastLocationFetchTimestamp < FETCH_LOCATION_MIN_INTERVAL) {
+        common_vendor.index.__f__("log", "at pages/home/home.vue:450", "短时间内重复点击“附近”tab，跳过 uni.getLocation 调用，直接切换tab。");
+        activeTab.value = tabName;
+        common_vendor.index.showToast({
+          title: "位置信息已是最新",
+          icon: "none",
+          duration: 1e3
+        });
+        return;
+      }
+      common_vendor.index.getLocation({
+        type: "wgs84",
+        // 使用WGS84坐标系，适用于地图展示
+        success: (res) => {
+          const latitude = res.latitude;
+          const longitude = res.longitude;
+          common_vendor.index.__f__("log", "at pages/home/home.vue:465", "用户位置信息:", { latitude, longitude });
+          common_vendor.index.showToast({
+            title: "位置获取成功",
+            icon: "success",
+            duration: 1e3
+          });
+          activeTab.value = tabName;
+          lastLocationFetchTimestamp = currentTime;
+        },
+        fail: (err) => {
+          common_vendor.index.__f__("error", "at pages/home/home.vue:475", "获取位置失败", err);
+          let errorMessage = "获取位置失败，无法查看附近商机。";
+          if (err.errMsg.includes("频繁调用") || err.errMsg.includes("frequent call")) {
+            errorMessage = "您点击太快啦，请稍后再试。";
+          } else if (err.errMsg.includes("denied") || err.errMsg.includes("not authorized")) {
+            errorMessage = "您已拒绝获取位置信息，无法查看附近商机。请检查系统设置。";
+          }
+          common_vendor.index.showModal({
+            title: "温馨提示",
+            content: errorMessage,
+            showCancel: false,
+            confirmText: "我知道了"
+          });
+        }
+      });
+    };
     return (_ctx, _cache) => {
       return common_vendor.e({
         a: common_vendor.p({
@@ -200,11 +281,11 @@ const _sfc_main = {
           color: "#FF6A00"
         }),
         b: activeTab.value === "recommend" ? 1 : "",
-        c: common_vendor.o(($event) => activeTab.value = "recommend"),
+        c: common_vendor.o(($event) => handleTabClick("recommend")),
         d: activeTab.value === "nearby" ? 1 : "",
-        e: common_vendor.o(($event) => activeTab.value = "nearby"),
+        e: common_vendor.o(($event) => handleTabClick("nearby")),
         f: activeTab.value === "follow" ? 1 : "",
-        g: common_vendor.o(($event) => activeTab.value = "follow"),
+        g: common_vendor.o(($event) => handleTabClick("follow")),
         h: common_vendor.p({
           type: "compose",
           size: "18",
@@ -283,7 +364,9 @@ const _sfc_main = {
           color: "#666"
         }),
         n: displayedPosts.value.length === 0
-      }, displayedPosts.value.length === 0 ? {} : {});
+      }, displayedPosts.value.length === 0 ? {} : {}, {
+        o: displayedPosts.value.length > 0
+      }, displayedPosts.value.length > 0 ? {} : {});
     };
   }
 };

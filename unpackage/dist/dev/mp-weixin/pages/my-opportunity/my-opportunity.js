@@ -62,11 +62,6 @@ const _sfc_main = {
         // 模拟已被收藏
       }
     ]);
-    const goBack = () => {
-      common_vendor.index.navigateBack({
-        delta: 1
-      });
-    };
     const deleteOpportunity = (id) => {
       common_vendor.index.showModal({
         title: "确认删除",
@@ -145,36 +140,24 @@ const _sfc_main = {
         longPressActions: {
           itemList: ["发送给朋友", "保存图片", "收藏"],
           success: function(data) {
-            common_vendor.index.__f__("log", "at pages/my-opportunity/my-opportunity.vue:313", "选中了第" + (data.tapIndex + 1) + "个按钮，第" + (data.index + 1) + "张图片");
+            common_vendor.index.__f__("log", "at pages/my-opportunity/my-opportunity.vue:303", "选中了第" + (data.tapIndex + 1) + "个按钮，第" + (data.index + 1) + "张图片");
           },
           fail: function(err) {
-            common_vendor.index.__f__("log", "at pages/my-opportunity/my-opportunity.vue:316", err.errMsg);
+            common_vendor.index.__f__("log", "at pages/my-opportunity/my-opportunity.vue:306", err.errMsg);
           }
         }
       });
     };
     return (_ctx, _cache) => {
       return common_vendor.e({
-        a: common_vendor.p({
-          type: "left",
-          size: "22",
-          color: "#FFFFFF"
-        }),
-        b: common_vendor.o(goBack),
-        c: common_vendor.p({
-          type: "compose",
-          size: "20",
-          color: "#FFFFFF"
-        }),
-        d: common_vendor.o(postNew),
-        e: common_vendor.f(myPosts, (post, k0, i0) => {
+        a: common_vendor.f(myPosts, (post, k0, i0) => {
           return common_vendor.e({
             a: common_vendor.t(post.user.charAt(0)),
             b: common_vendor.o(skipApplicationBusinessCard, post.id),
             c: common_vendor.t(post.user),
-            d: "481e0091-2-" + i0,
+            d: "481e0091-0-" + i0,
             e: common_vendor.t(post.time),
-            f: "481e0091-3-" + i0,
+            f: "481e0091-1-" + i0,
             g: common_vendor.o(($event) => deleteOpportunity(post.id), post.id),
             h: common_vendor.t(post.content),
             i: post.images && post.images.length
@@ -193,11 +176,11 @@ const _sfc_main = {
                 b: tagIndex
               };
             }),
-            l: "481e0091-4-" + i0,
+            l: "481e0091-2-" + i0,
             m: common_vendor.t(post.likes),
-            n: "481e0091-5-" + i0,
+            n: "481e0091-3-" + i0,
             o: common_vendor.t(post.dislikes),
-            p: "481e0091-6-" + i0,
+            p: "481e0091-4-" + i0,
             q: common_vendor.p({
               type: post.userAction === "like" ? "hand-up-filled" : "hand-up",
               size: "20",
@@ -205,7 +188,7 @@ const _sfc_main = {
             }),
             r: post.userAction === "like" ? 1 : "",
             s: common_vendor.o(($event) => toggleAction(post, "like"), post.id),
-            t: "481e0091-7-" + i0,
+            t: "481e0091-5-" + i0,
             v: common_vendor.p({
               type: post.userAction === "dislike" ? "hand-down-filled" : "hand-down",
               size: "20",
@@ -213,7 +196,7 @@ const _sfc_main = {
             }),
             w: post.userAction === "dislike" ? 1 : "",
             x: common_vendor.o(($event) => toggleAction(post, "dislike"), post.id),
-            y: "481e0091-8-" + i0,
+            y: "481e0091-6-" + i0,
             z: common_vendor.p({
               type: post.saved ? "star-filled" : "star",
               size: "20",
@@ -221,50 +204,50 @@ const _sfc_main = {
             }),
             A: post.saved ? 1 : "",
             B: common_vendor.o(($event) => toggleSave(post), post.id),
-            C: "481e0091-9-" + i0,
+            C: "481e0091-7-" + i0,
             D: common_vendor.o(($event) => sharePost(), post.id),
             E: post.id,
             F: common_vendor.o(($event) => skipCommercialDetail(post.id), post.id)
           });
         }),
-        f: common_vendor.p({
+        b: common_vendor.p({
           type: "redo",
           size: "14",
           color: "#888"
         }),
-        g: common_vendor.p({
-          type: "trash-fill",
-          size: "20",
+        c: common_vendor.p({
+          type: "close",
+          size: "15",
           color: "#FF6A00"
         }),
-        h: common_vendor.p({
+        d: common_vendor.p({
           type: "hand-up-filled",
           size: "18",
           color: "#e74c3c"
         }),
-        i: common_vendor.p({
+        e: common_vendor.p({
           type: "hand-down-filled",
           size: "18",
           color: "#3498db"
         }),
-        j: common_vendor.p({
+        f: common_vendor.p({
           type: "redo",
           size: "20",
           color: "#666"
         }),
-        k: myPosts.length === 0
+        g: myPosts.length === 0
       }, myPosts.length === 0 ? {
-        l: common_vendor.p({
+        h: common_vendor.p({
           type: "info",
           size: "60",
           color: "#ccc"
         }),
-        m: common_vendor.p({
+        i: common_vendor.p({
           type: "compose",
           size: "20",
           color: "#FFFFFF"
         }),
-        n: common_vendor.o(postNew)
+        j: common_vendor.o(postNew)
       } : {});
     };
   }

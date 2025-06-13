@@ -1,15 +1,15 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
 if (!Array) {
-  const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
   const _easycom_uni_segmented_control2 = common_vendor.resolveComponent("uni-segmented-control");
+  const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
   const _component_empty_state = common_vendor.resolveComponent("empty-state");
-  (_easycom_uni_icons2 + _easycom_uni_segmented_control2 + _component_empty_state)();
+  (_easycom_uni_segmented_control2 + _easycom_uni_icons2 + _component_empty_state)();
 }
-const _easycom_uni_icons = () => "../../uni_modules/uni-icons/components/uni-icons/uni-icons.js";
 const _easycom_uni_segmented_control = () => "../../uni_modules/uni-segmented-control/components/uni-segmented-control/uni-segmented-control.js";
+const _easycom_uni_icons = () => "../../uni_modules/uni-icons/components/uni-icons/uni-icons.js";
 if (!Math) {
-  (_easycom_uni_icons + _easycom_uni_segmented_control)();
+  (_easycom_uni_segmented_control + _easycom_uni_icons)();
 }
 const _sfc_main = {
   __name: "my-collection",
@@ -72,11 +72,6 @@ const _sfc_main = {
         saved: true
       }
     ]);
-    const goBack = () => {
-      common_vendor.index.navigateBack({
-        delta: 1
-      });
-    };
     const switchTab = (e) => {
       currentTab.value = e.currentIndex;
       refreshing.value = false;
@@ -84,7 +79,7 @@ const _sfc_main = {
     const onRefresh = () => {
       refreshing.value = true;
       setTimeout(() => {
-        common_vendor.index.__f__("log", "at pages/my-collection/my-collection.vue:258", "数据刷新完成");
+        common_vendor.index.__f__("log", "at pages/my-collection/my-collection.vue:249", "数据刷新完成");
         refreshing.value = false;
         common_vendor.index.showToast({
           title: "刷新成功",
@@ -164,10 +159,10 @@ const _sfc_main = {
         longPressActions: {
           itemList: ["发送给朋友", "保存图片", "收藏"],
           success: function(data) {
-            common_vendor.index.__f__("log", "at pages/my-collection/my-collection.vue:344", "选中了第" + (data.tapIndex + 1) + "个按钮，第" + (data.index + 1) + "张图片");
+            common_vendor.index.__f__("log", "at pages/my-collection/my-collection.vue:335", "选中了第" + (data.tapIndex + 1) + "个按钮，第" + (data.index + 1) + "张图片");
           },
           fail: function(err) {
-            common_vendor.index.__f__("log", "at pages/my-collection/my-collection.vue:347", err.errMsg);
+            common_vendor.index.__f__("log", "at pages/my-collection/my-collection.vue:338", err.errMsg);
           }
         }
       });
@@ -176,30 +171,24 @@ const _sfc_main = {
     });
     return (_ctx, _cache) => {
       return common_vendor.e({
-        a: common_vendor.p({
-          type: "left",
-          size: "22",
-          color: "#FFFFFF"
-        }),
-        b: common_vendor.o(goBack),
-        c: common_vendor.o(switchTab),
-        d: common_vendor.p({
+        a: common_vendor.o(switchTab),
+        b: common_vendor.p({
           current: currentTab.value,
           values: tabs.value,
           ["style-type"]: "button",
           ["active-color"]: "#FF6B00"
         }),
-        e: favoriteActivities.length > 0
+        c: favoriteActivities.length > 0
       }, favoriteActivities.length > 0 ? {
-        f: common_vendor.f(favoriteActivities, (item, k0, i0) => {
+        d: common_vendor.f(favoriteActivities, (item, k0, i0) => {
           return {
             a: item.image,
             b: common_vendor.t(item.title),
-            c: "7c9d235a-2-" + i0,
+            c: "7c9d235a-1-" + i0,
             d: common_vendor.t(item.date),
-            e: "7c9d235a-3-" + i0,
+            e: "7c9d235a-2-" + i0,
             f: common_vendor.t(item.location),
-            g: "7c9d235a-4-" + i0,
+            g: "7c9d235a-3-" + i0,
             h: common_vendor.t(item.organizer),
             i: common_vendor.o(($event) => removeFavoriteActivity(item.id), item.id),
             j: common_vendor.o(($event) => skipActivityDetail(item.id), item.id),
@@ -207,41 +196,41 @@ const _sfc_main = {
             l: common_vendor.o(($event) => skipActivityDetail(item.id), item.id)
           };
         }),
-        g: common_vendor.p({
+        e: common_vendor.p({
           type: "calendar",
           size: "16",
           color: "#999"
         }),
-        h: common_vendor.p({
+        f: common_vendor.p({
           type: "map-pin",
           size: "16",
           color: "#999"
         }),
-        i: common_vendor.p({
+        g: common_vendor.p({
           type: "person",
           size: "16",
           color: "#999"
         })
       } : {
-        j: common_vendor.o(navigateToDiscoverActivities),
-        k: common_vendor.p({
+        h: common_vendor.o(navigateToDiscoverActivities),
+        i: common_vendor.p({
           title: "暂无收藏活动",
           description: "快去发现并收藏感兴趣的活动吧"
         })
       }, {
-        l: currentTab.value === 0,
-        m: refreshing.value,
-        n: common_vendor.o(onRefresh),
-        o: favoriteOpportunities.length > 0
+        j: currentTab.value === 0,
+        k: refreshing.value,
+        l: common_vendor.o(onRefresh),
+        m: favoriteOpportunities.length > 0
       }, favoriteOpportunities.length > 0 ? {
-        p: common_vendor.f(favoriteOpportunities, (post, k0, i0) => {
+        n: common_vendor.f(favoriteOpportunities, (post, k0, i0) => {
           return common_vendor.e({
             a: common_vendor.t(post.user.charAt(0)),
             b: common_vendor.o(skipApplicationBusinessCard, post.id),
             c: common_vendor.t(post.user),
-            d: "7c9d235a-6-" + i0,
+            d: "7c9d235a-5-" + i0,
             e: common_vendor.t(post.time),
-            f: "7c9d235a-7-" + i0,
+            f: "7c9d235a-6-" + i0,
             g: common_vendor.o(($event) => removeFavoriteOpportunity(post.id), post.id),
             h: common_vendor.t(post.content),
             i: post.images && post.images.length
@@ -260,44 +249,44 @@ const _sfc_main = {
                 b: tagIndex
               };
             }),
-            l: "7c9d235a-8-" + i0,
+            l: "7c9d235a-7-" + i0,
             m: common_vendor.t(post.likes),
-            n: "7c9d235a-9-" + i0,
+            n: "7c9d235a-8-" + i0,
             o: common_vendor.t(post.dislikes),
             p: post.id,
             q: common_vendor.o(($event) => skipCommercialDetail(post.id), post.id)
           });
         }),
-        q: common_vendor.p({
+        o: common_vendor.p({
           type: "redo",
           size: "14",
           color: "#888"
         }),
-        r: common_vendor.p({
+        p: common_vendor.p({
           type: "trash-fill",
           size: "20",
           color: "#FF6A00"
         }),
-        s: common_vendor.p({
+        q: common_vendor.p({
           type: "hand-up-filled",
           size: "18",
           color: "#e74c3c"
         }),
-        t: common_vendor.p({
+        r: common_vendor.p({
           type: "hand-down-filled",
           size: "18",
           color: "#3498db"
         })
       } : {
-        v: common_vendor.o(navigateToDiscoverOpportunities),
-        w: common_vendor.p({
+        s: common_vendor.o(navigateToDiscoverOpportunities),
+        t: common_vendor.p({
           title: "暂无收藏商机",
           description: "快去发现并收藏感兴趣的商机吧"
         })
       }, {
-        x: currentTab.value === 1,
-        y: refreshing.value,
-        z: common_vendor.o(onRefresh)
+        v: currentTab.value === 1,
+        w: refreshing.value,
+        x: common_vendor.o(onRefresh)
       });
     };
   }

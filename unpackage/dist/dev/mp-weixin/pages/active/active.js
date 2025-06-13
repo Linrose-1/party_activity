@@ -17,26 +17,7 @@ const _sfc_main = {
   __name: "active",
   setup(__props) {
     const searchKeyword = common_vendor.ref("");
-    common_vendor.ref(["全部类型", "交流会", "沙龙", "峰会", "分享会", "其他"]);
     const activeCategory = common_vendor.ref("全部类型");
-    common_vendor.ref([
-      {
-        label: "日期",
-        value: "date",
-        icon: "calendar"
-      },
-      {
-        label: "地区",
-        value: "location",
-        icon: "map-pin"
-      },
-      {
-        label: "附近",
-        value: "nearby",
-        icon: "location"
-      }
-    ]);
-    common_vendor.ref("date");
     const getDate = (type) => {
       const date2 = /* @__PURE__ */ new Date();
       let year = date2.getFullYear();
@@ -52,7 +33,7 @@ const _sfc_main = {
       return `${year}-${month}-${day}`;
     };
     common_vendor.ref("picker");
-    const array = common_vendor.ref(["全部类型", "交流会", "沙龙", "日本"]);
+    const array = common_vendor.ref(["全部类型", "交流会", "沙龙", "峰会", "分享会", "其他"]);
     const index = common_vendor.ref(0);
     const date = common_vendor.ref(getDate({
       format: true
@@ -60,7 +41,7 @@ const _sfc_main = {
     const startDate = common_vendor.computed(() => getDate("start"));
     const endDate = common_vendor.computed(() => getDate("end"));
     const bindPickerChange = (e) => {
-      common_vendor.index.__f__("log", "at pages/active/active.vue:168", "picker发送选择改变，携带值为", e.detail.value);
+      common_vendor.index.__f__("log", "at pages/active/active.vue:143", "picker发送选择改变，携带值为", e.detail.value);
       index.value = e.detail.value;
     };
     const bindDateChange = (e) => {
@@ -70,7 +51,7 @@ const _sfc_main = {
     const openMapToChooseLocation = () => {
       common_vendor.index.chooseLocation({
         success: (res) => {
-          common_vendor.index.__f__("log", "at pages/active/active.vue:184", "选择位置成功:", res);
+          common_vendor.index.__f__("log", "at pages/active/active.vue:155", "选择位置成功:", res);
           selectedLocationInfo.value = {
             name: res.name,
             address: res.address,
@@ -79,7 +60,7 @@ const _sfc_main = {
           };
         },
         fail: (err) => {
-          common_vendor.index.__f__("log", "at pages/active/active.vue:193", "选择位置失败:", err);
+          common_vendor.index.__f__("log", "at pages/active/active.vue:164", "选择位置失败:", err);
           if (err.errMsg.includes("cancel"))
             ;
           else {
@@ -91,27 +72,6 @@ const _sfc_main = {
         }
       });
     };
-    const showShareModal = common_vendor.ref(false);
-    const shareOptions = common_vendor.ref([
-      {
-        name: "微信",
-        platform: "wechat",
-        icon: "weixin",
-        bgColor: "wechat-bg"
-      },
-      {
-        name: "微博",
-        platform: "weibo",
-        icon: "weibo",
-        bgColor: "weibo-bg"
-      },
-      {
-        name: "朋友圈",
-        platform: "moments",
-        icon: "moments",
-        bgColor: "moments-bg"
-      }
-    ]);
     const activitiesData = common_vendor.ref([
       {
         id: 1,
@@ -181,19 +141,6 @@ const _sfc_main = {
       }
       return result;
     });
-    const openShareModal = () => {
-      showShareModal.value = true;
-    };
-    const closeShareModal = () => {
-      showShareModal.value = false;
-    };
-    const shareActivity = (platform) => {
-      common_vendor.index.showToast({
-        title: `已分享到${platform}`,
-        icon: "success"
-      });
-      closeShareModal();
-    };
     const publishActivity = () => {
       common_vendor.index.navigateTo({
         url: "/pages/active-publish/active-publish"
@@ -229,38 +176,20 @@ const _sfc_main = {
         q: common_vendor.f(filteredActivities.value, (activity, index2, i0) => {
           return {
             a: index2,
-            b: common_vendor.o(openShareModal, index2),
-            c: common_vendor.o(($event) => _ctx.detailActivity(), index2),
-            d: "12e513cf-3-" + i0,
-            e: common_vendor.p({
+            b: "12e513cf-3-" + i0,
+            c: common_vendor.p({
               activity
             })
           };
         }),
-        r: common_vendor.p({
+        r: filteredActivities.value.length > 0
+      }, filteredActivities.value.length > 0 ? {} : {}, {
+        s: common_vendor.p({
           type: "plus",
           size: "18",
           color: "white"
         }),
-        s: common_vendor.o(publishActivity),
-        t: common_vendor.f(shareOptions.value, (option, index2, i0) => {
-          return {
-            a: "12e513cf-5-" + i0,
-            b: common_vendor.p({
-              type: option.icon,
-              size: "24",
-              color: "white"
-            }),
-            c: common_vendor.n(option.bgColor),
-            d: common_vendor.t(option.name),
-            e: index2,
-            f: common_vendor.o(($event) => shareActivity(option.platform), index2)
-          };
-        }),
-        v: common_vendor.o(closeShareModal),
-        w: common_vendor.n({
-          active: showShareModal.value
-        })
+        t: common_vendor.o(publishActivity)
       });
     };
   }

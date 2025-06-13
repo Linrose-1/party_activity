@@ -339,7 +339,7 @@
 /* 添加评论 */
 .add-comment.data-v-361e9b2c {
     position: fixed;
-    bottom: 0;
+    bottom: -40rpx;
     left: 50%;
     transform: translateX(-50%);
     max-width: 750rpx;
@@ -347,7 +347,7 @@
     display: flex;
     align-items: center;
     background: white;
-    padding: 30rpx;
+    padding: 10rpx;
     /* 适配底部安全区域 */
     padding-bottom: calc(30rpx + env(safe-area-inset-bottom));
     box-shadow: 0 -10rpx 30rpx rgba(0,0,0,0.05);
@@ -374,14 +374,14 @@
     color: white;
     border: none;
     border-radius: 50rpx;
-    padding: 24rpx 50rpx;
+    /* padding: 24rpx 50rpx; */
     margin-left: 24rpx;
-    font-weight: 600;
+    font-weight: 500;
     transition: background 0.3s;
     box-shadow: 0 6rpx 20rpx rgba(255, 106, 0, 0.3);
     /* 移除小程序按钮默认样式 */
     -webkit-appearance: none;
-    background-color: transparent;
+    /* background-color: transparent; */
 }
 .add-comment button.data-v-361e9b2c::after {
     border: none;

@@ -98,7 +98,7 @@
 .tabs.data-v-07e72d3c {
     display: flex;
     background: white;
-    padding: 10rpx 40rpx;
+    padding: 0 40rpx;
     border-bottom: 2rpx solid #eee;
     position: -webkit-sticky;
     position: sticky;
@@ -108,7 +108,7 @@
 .tab.data-v-07e72d3c {
     flex: 1;
     text-align: center;
-    padding: 10rpx 0;
+    padding: 40rpx 0;
     font-size: 32rpx;
     color: #666;
     position: relative;
@@ -134,7 +134,8 @@
     color: white;
     border: none;
     border-radius: 40rpx;
-    padding: 16rpx 32rpx;
+    padding: 0 32rpx;
+	margin: 15rpx 0;
     font-size: 28rpx;
     font-weight: 600;
     /* cursor: pointer; */
@@ -243,31 +244,6 @@
     border-radius: 40rpx;
     font-size: 26rpx;
 }
-.post-actions.data-v-07e72d3c {
-    display: flex;
-    justify-content: space-between;
-    border-top: 2rpx solid #f0f0f0;
-    padding-top: 30rpx;
-}
-.action-group.data-v-07e72d3c {
-    display: flex;
-    gap: 40rpx;
-}
-.action.data-v-07e72d3c {
-    display: flex;
-    align-items: center;
-    color: #666;
-    /* cursor: pointer; */
-    transition: all 0.2s;
-}
-.action uni-icons.data-v-07e72d3c { /* 针对 uni-icons 调整 */
-    margin-right: 12rpx;
-}
-.action.data-v-07e72d3c:active { /* 小程序使用 :active 模拟 :hover */
-    opacity: 0.7; /* 点击时稍微变暗 */
-}
-
-/* 赞踩统计 */
 .feedback-stats.data-v-07e72d3c {
     display: flex;
     align-items: center;
@@ -292,6 +268,29 @@
 .feedback-stats uni-icons.data-v-07e72d3c { /* 针对 uni-icons 调整 */
     margin-right: 10rpx;
 }
+.post-actions.data-v-07e72d3c {
+    display: flex;
+    justify-content: space-between;
+    border-top: 2rpx solid #f0f0f0;
+    padding-top: 30rpx;
+}
+.action-group.data-v-07e72d3c {
+    display: flex;
+    gap: 40rpx;
+}
+.action.data-v-07e72d3c {
+    display: flex;
+    align-items: center;
+    color: #666;
+    /* cursor: pointer; */
+    transition: all 0.2s;
+}
+.action uni-icons.data-v-07e72d3c { /* 针对 uni-icons 调整 */
+    margin-right: 12rpx;
+}
+.action.data-v-07e72d3c:active { /* 小程序使用 :active 模拟 :hover */
+    opacity: 0.7; /* 点击时稍微变暗 */
+}
 
 /* 微信小程序样式调整 */
 .wechat-style.data-v-07e72d3c {
@@ -313,4 +312,13 @@
     padding: 60rpx;
     color: #999;
     font-size: 32rpx;
+}
+
+/* 新增样式：暂无更多内容提示 */
+.no-more-content-message.data-v-07e72d3c {
+    text-align: center;
+    padding: 40rpx 0; /* 上下内边距，让它不至于紧贴着上一个元素 */
+    color: #999; /* 颜色 */
+    font-size: 28rpx; /* 字体大小 */
+    margin-top: 20rpx; /* 与上方帖子卡片的间距 */
 }

@@ -1,14 +1,5 @@
 <template>
     <view class="my-favorites-app">
-        <!-- 顶部导航 -->
-        <view class="header">
-            <view class="back-btn" @click="goBack">
-                <uni-icons type="left" size="22" color="#FFFFFF"></uni-icons>
-            </view>
-            <h1>我的收藏</h1>
-            <!-- 右侧可以放置更多操作，此处暂时留空 -->
-            <view class="action-btn"></view> 
-        </view>
         
         <!-- 分段器 -->
         <view class="segmented-container">

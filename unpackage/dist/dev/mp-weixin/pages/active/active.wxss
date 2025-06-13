@@ -130,6 +130,15 @@
   padding: 0 32rpx;
 }
 
+/* 暂无更多内容提示 */
+.no-more-content.data-v-12e513cf {
+  text-align: center;
+  color: #999;
+  padding: 30rpx 0;
+  font-size: 28rpx;
+  margin-top: 20rpx;
+}
+
 /* 底部操作栏 */
 .action-bar.data-v-12e513cf {
   position: fixed;

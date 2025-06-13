@@ -21,21 +21,21 @@
             <div 
                 class="tab" 
                 :class="{ active: activeTab === 'recommend' }"
-                @click="activeTab = 'recommend'"
+                @click="handleTabClick('recommend')"
             >
                 推荐
             </div>
             <div 
                 class="tab" 
                 :class="{ active: activeTab === 'nearby' }"
-                @click="activeTab = 'nearby'"
+                @click="handleTabClick('nearby')"
             >
                 附近
             </div>
             <div 
                 class="tab" 
                 :class="{ active: activeTab === 'follow' }"
-                @click="activeTab = 'follow'"
+                @click="handleTabClick('follow')"
             >
                 关注
             </div>
@@ -150,6 +150,10 @@
             <div v-if="displayedPosts.length === 0" class="no-posts-message">
                 暂无相关商机，快去发布吧！
             </div>
+            <!-- 新增：暂无更多内容提示 -->
+            <div v-if="displayedPosts.length > 0" class="no-more-content-message">
+                暂无更多内容
+            </div>
         </div>
     </div>
 </template>
@@ -170,9 +174,9 @@ const recommendPosts = reactive([
         time: '2025-06-15 20:44:34',
         content: '我们公司正在寻找AI技术合作伙伴，开发新一代智能客服系统，有意向的可以私信我详谈。',
         images: [
-            'https://via.placeholder.com/150/FF6A00/FFFFFF?text=AI合作1',
-            'https://via.placeholder.com/150/FF6A00/FFFFFF?text=AI合作2',
-            'https://via.placeholder.com/150/FF6A00/FFFFFF?text=AI合作3'
+            '../../static/abc.png',
+            '../../static/abc.png',
+            '../../static/abc.png'
         ],
         tags: ['#技术合作', '#AI开发', '#商务合作'],
         likes: 24,
@@ -186,10 +190,10 @@ const recommendPosts = reactive([
         time: '2025-06-15 20:44:34',
         content: '刚参加完供应链优化研讨会，获益良多。这次分享几个关于仓储管理的新思路，希望对同行有所帮助。',
         images: [
-            'https://via.placeholder.com/150/007AFF/FFFFFF?text=供应链1',
-            'https://via.placeholder.com/150/007AFF/FFFFFF?text=供应链2',
-            'https://via.placeholder.com/150/007AFF/FFFFFF?text=供应链3',
-            'https://via.placeholder.com/150/007AFF/FFFFFF?text=供应链4'
+            '../../static/abc.png',
+            '../../static/abc.png',
+            '../../static/abc.png',
+            '../../static/abc.png'
         ],
         tags: ['#供应链管理', '#仓储物流', '#经验分享'],
         likes: 45,
@@ -203,8 +207,8 @@ const recommendPosts = reactive([
         time: '2025-06-15 20:44:34',
         content: '寻找医疗器械领域的投资机会，特别关注创新型医疗设备和AI辅助诊断方向，欢迎推荐优质项目。',
         images: [
-            'https://via.placeholder.com/150/4CAF50/FFFFFF?text=医疗投资1',
-            'https://via.placeholder.com/150/4CAF50/FFFFFF?text=医疗投资2'
+            '../../static/abc.png',
+            '../../static/abc.png'
         ],
         tags: ['#投资合作', '#医疗健康', '#项目对接'],
         likes: 32,
@@ -221,12 +225,12 @@ const nearbyPosts = reactive([
         time: '2025-06-15 18:00:00',
         content: '我在XX商圈新开了一家智能咖啡馆，提供共享办公空间和优质咖啡，欢迎附近的朋友来体验！',
         images: [
-            'https://via.placeholder.com/150/FF9800/FFFFFF?text=咖啡馆1',
-            'https://via.placeholder.com/150/FF9800/FFFFFF?text=咖啡馆2',
-            'https://via.placeholder.com/150/FF9800/FFFFFF?text=咖啡馆3',
-            'https://via.placeholder.com/150/FF9800/FFFFFF?text=咖啡馆4',
-            'https://via.placeholder.com/150/FF9800/FFFFFF?text=咖啡馆5',
-            'https://via.placeholder.com/150/FF9800/FFFFFF?text=咖啡馆6'
+            '../../static/abc.png',
+            '../../static/abc.png',
+            '../../static/abc.png',
+            '../../static/abc.png',
+            '../../static/abc.png',
+            '../../static/abc.png'
         ],
         tags: ['#本地商机', '#餐饮', '#共享空间'],
         likes: 12,
@@ -255,7 +259,7 @@ const followPosts = reactive([
         time: '2025-06-15 10:00:00',
         content: '分享近期对新能源汽车板块的看法，认为下半年仍有较大增长潜力，欢迎交流。',
         images: [
-            'https://via.placeholder.com/150/795548/FFFFFF?text=新能源车'
+            '../../static/abc.png'
         ],
         tags: ['#股市分析', '#新能源', '#投资'],
         likes: 100,
@@ -269,8 +273,8 @@ const followPosts = reactive([
         time: '2025-06-14 22:00:00',
         content: '针对东南亚跨境电商市场进行深度解析，欢迎寻找合作伙伴或想进入该市场的同行交流。',
         images: [
-            'https://via.placeholder.com/150/607D8B/FFFFFF?text=跨境电商1',
-            'https://via.placeholder.com/150/607D8B/FFFFFF?text=跨境电商2'
+            '../../static/abc.png',
+            '../../static/abc.png'
         ],
         tags: ['#跨境电商', '#东南亚市场', '#国际贸易'],
         likes: 78,
@@ -380,6 +384,113 @@ const skipCommercialDetail =() =>{
 		url:'/pages/home-commercialDetail/home-commercialDetail'
 	})
 }
+
+// 用于记录上次成功获取位置的时间戳
+let lastLocationFetchTimestamp = 0; 
+// 最小获取位置间隔（毫秒），例如 5 秒
+const FETCH_LOCATION_MIN_INTERVAL = 5000; 
+
+/**
+ * 处理标签页点击事件，特别是针对“附近”标签需要获取地理位置权限
+ * @param {string} tabName - 被点击的标签名称
+ */
+const handleTabClick = (tabName) => {
+    if (tabName === 'nearby') {
+        uni.getSetting({
+            success: (res) => {
+                if (res.authSetting['scope.userLocation']) {
+                    // 已授权，直接尝试获取位置
+                    tryGetLocationAndSwitchTab(tabName);
+                } else {
+                    // 未授权，请求授权
+                    uni.authorize({
+                        scope: 'scope.userLocation',
+                        success: () => {
+                            // 授权成功，尝试获取位置
+                            tryGetLocationAndSwitchTab(tabName);
+                        },
+                        fail: () => {
+                            // 授权失败（用户拒绝），不切换标签页，并提示用户
+                            uni.showModal({
+                                title: '温馨提示',
+                                content: '您已拒绝获取位置信息，无法查看附近商机。请在设置中开启位置权限。',
+                                showCancel: false,
+                                confirmText: '我知道了'
+                            });
+                            // 不切换标签页，保持在原tab
+                        }
+                    });
+                }
+            },
+            fail: (err) => {
+                console.error('获取用户设置失败', err);
+                uni.showToast({
+                    title: '检查权限失败',
+                    icon: 'none'
+                });
+                // 不切换标签页，保持在原tab
+            }
+        });
+    } else {
+        // 对于其他标签页，直接切换
+        activeTab.value = tabName;
+    }
+};
+
+/**
+ * 尝试获取用户地理位置并切换标签页
+ * 增加了对频繁调用的防抖处理
+ * @param {string} tabName - 目标标签名称
+ */
+const tryGetLocationAndSwitchTab = (tabName) => {
+    const currentTime = Date.now();
+
+    // 如果距离上次成功获取位置的时间不足最小间隔，则直接切换标签页，不重复调用 uni.getLocation
+    if (currentTime - lastLocationFetchTimestamp < FETCH_LOCATION_MIN_INTERVAL) {
+        console.log('短时间内重复点击“附近”tab，跳过 uni.getLocation 调用，直接切换tab。');
+        activeTab.value = tabName; // 仍然切换标签页以提供即时反馈
+        uni.showToast({
+            title: '位置信息已是最新',
+            icon: 'none',
+            duration: 1000
+        });
+        return;
+    }
+
+    uni.getLocation({
+        type: 'wgs84', // 使用WGS84坐标系，适用于地图展示
+        success: (res) => {
+            const latitude = res.latitude;
+            const longitude = res.longitude;
+            console.log('用户位置信息:', { latitude, longitude }); // 打印位置到控制台
+            uni.showToast({
+                title: '位置获取成功',
+                icon: 'success',
+                duration: 1000
+            });
+            activeTab.value = tabName; // 仅在位置获取成功后切换标签页
+            lastLocationFetchTimestamp = currentTime; // 更新上次成功获取时间
+        },
+        fail: (err) => {
+            console.error('获取位置失败', err);
+            let errorMessage = '获取位置失败，无法查看附近商机。';
+            // uni.getLocation 的 fail 回调会包含频繁调用的警告
+            if (err.errMsg.includes('频繁调用') || err.errMsg.includes('frequent call')) {
+                errorMessage = '您点击太快啦，请稍后再试。';
+            } else if (err.errMsg.includes('denied') || err.errMsg.includes('not authorized')) {
+                 // 尽管授权失败已在 uni.authorize 中处理，但以防万一这里也捕获
+                 errorMessage = '您已拒绝获取位置信息，无法查看附近商机。请检查系统设置。';
+            }
+            uni.showModal({
+                title: '温馨提示',
+                content: errorMessage,
+                showCancel: false,
+                confirmText: '我知道了'
+            });
+            // 获取位置失败，不切换标签页，保持在原tab
+        }
+    });
+};
 </script>
 
 <style scoped>
@@ -490,7 +601,7 @@ const skipCommercialDetail =() =>{
 .tabs {
     display: flex;
     background: white;
-    padding: 10rpx 40rpx;
+    padding: 0 40rpx;
     border-bottom: 2rpx solid #eee;
     position: sticky;
     top: 0;
@@ -500,7 +611,7 @@ const skipCommercialDetail =() =>{
 .tab {
     flex: 1;
     text-align: center;
-    padding: 10rpx 0;
+    padding: 40rpx 0;
     font-size: 32rpx;
     color: #666;
     position: relative;
@@ -529,7 +640,8 @@ const skipCommercialDetail =() =>{
     color: white;
     border: none;
     border-radius: 40rpx;
-    padding: 16rpx 32rpx;
+    padding: 0 32rpx;
+	margin: 15rpx 0;
     font-size: 28rpx;
     font-weight: 600;
     /* cursor: pointer; */
@@ -653,35 +765,6 @@ const skipCommercialDetail =() =>{
     font-size: 26rpx;
 }
 
-.post-actions {
-    display: flex;
-    justify-content: space-between;
-    border-top: 2rpx solid #f0f0f0;
-    padding-top: 30rpx;
-}
-
-.action-group {
-    display: flex;
-    gap: 40rpx;
-}
-
-.action {
-    display: flex;
-    align-items: center;
-    color: #666;
-    /* cursor: pointer; */
-    transition: all 0.2s;
-}
-
-.action uni-icons { /* 针对 uni-icons 调整 */
-    margin-right: 12rpx;
-}
-
-.action:active { /* 小程序使用 :active 模拟 :hover */
-    opacity: 0.7; /* 点击时稍微变暗 */
-}
-
-/* 赞踩统计 */
 .feedback-stats {
     display: flex;
     align-items: center;
@@ -710,6 +793,34 @@ const skipCommercialDetail =() =>{
     margin-right: 10rpx;
 }
 
+.post-actions {
+    display: flex;
+    justify-content: space-between;
+    border-top: 2rpx solid #f0f0f0;
+    padding-top: 30rpx;
+}
+
+.action-group {
+    display: flex;
+    gap: 40rpx;
+}
+
+.action {
+    display: flex;
+    align-items: center;
+    color: #666;
+    /* cursor: pointer; */
+    transition: all 0.2s;
+}
+
+.action uni-icons { /* 针对 uni-icons 调整 */
+    margin-right: 12rpx;
+}
+
+.action:active { /* 小程序使用 :active 模拟 :hover */
+    opacity: 0.7; /* 点击时稍微变暗 */
+}
+
 /* 微信小程序样式调整 */
 .wechat-style {
     position: relative;
@@ -732,5 +843,14 @@ const skipCommercialDetail =() =>{
     padding: 60rpx;
     color: #999;
     font-size: 32rpx;
+}
+
+/* 新增样式：暂无更多内容提示 */
+.no-more-content-message {
+    text-align: center;
+    padding: 40rpx 0; /* 上下内边距，让它不至于紧贴着上一个元素 */
+    color: #999; /* 颜色 */
+    font-size: 28rpx; /* 字体大小 */
+    margin-top: 20rpx; /* 与上方帖子卡片的间距 */
 }
 </style>

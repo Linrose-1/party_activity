@@ -1,15 +1,5 @@
 <template>
     <div class="my-opportunities-app">
-        <!-- 顶部区域 -->
-        <div class="header">
-            <div class="back-btn" @click="goBack">
-                <uni-icons type="left" size="22" color="#FFFFFF"></uni-icons>
-            </div>
-            <h1>我的商机</h1>
-            <div class="action-btn post-new-header-btn" @click="postNew">
-                <uni-icons type="compose" size="20" color="#FFFFFF"></uni-icons>
-            </div>
-        </div>
         
         <!-- 帖子列表 -->
         <div class="post-list">
@@ -32,7 +22,7 @@
                     </div>
                     <!-- 删除按钮 -->
                     <div class="delete-action" @click.stop="deleteOpportunity(post.id)">
-                        <uni-icons type="trash-fill" size="20" color="#FF6A00"></uni-icons>
+                        <uni-icons type="close" size="15" color="#FF6A00">删除</uni-icons>
                     </div>
                 </div>
                 
@@ -472,9 +462,9 @@ const previewImage = (urls, current) => {
 
 /* 删除按钮样式 */
 .delete-action {
-    padding: 10rpx 20rpx;
+    padding: 10rpx ;
     border-radius: 40rpx;
-    background: #ffebe6; /* 淡红色背景 */
+    background: #ffebe6;
     display: flex;
     align-items: center;
     justify-content: center;

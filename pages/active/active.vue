@@ -30,7 +30,8 @@
 								选择日期
 							</view>
 							<view class="uni-list-cell-db">
-								<picker mode="date" :value="date" :start="startDate" :end="endDate" @change="bindDateChange">
+								<picker mode="date" :value="date" :start="startDate" :end="endDate"
+									@change="bindDateChange">
 									<view class="uni-input">{{date}}</view>
 								</picker>
 							</view>
@@ -56,18 +57,14 @@
 			</uni-collapse-item>
 		</uni-collapse>
 
-
-		
-
-
-
 		<!-- 活动列表 -->
 		<view class="activity-list" scroll-y="true">
-			<ActivityCard v-for="(activity, index) in filteredActivities" :key="index" :activity="activity"
-				@share="openShareModal" @click="detailActivity()" />
+			<ActivityCard v-for="(activity, index) in filteredActivities" :key="index" :activity="activity"/>
 		</view>
-		
-		<view style="height: 60rpx;width: 100%;"></view>
+
+		<view v-if="filteredActivities.length > 0" class="no-more-content">
+			暂无更多活动
+		</view>
 
 		<!-- 底部操作栏 -->
 		<view class="action-bar">
@@ -78,7 +75,7 @@
 		</view>
 
 		<!-- 分享弹窗 -->
-		<view :class="['share-modal', {active: showShareModal}]">
+		<!-- <view :class="['share-modal', {active: showShareModal}]">
 			<view class="share-content">
 				<view class="share-header">
 					<text class="share-title">分享活动</text>
@@ -94,7 +91,7 @@
 				</view>
 				<view class="share-cancel" @click="closeShareModal">取消</view>
 			</view>
-		</view>
+		</view> -->
 	</view>
 </template>
 
@@ -104,33 +101,12 @@
 		computed
 	} from 'vue';
 	import ActivityCard from '@/components/ActivityCard.vue';
-	// import activitiesData from '@/data/activities.js';
 
 	// 搜索关键词
 	const searchKeyword = ref('');
 
 	// 分类筛选
-	const categories = ref(['全部类型', '交流会', '沙龙', '峰会', '分享会', '其他']);
 	const activeCategory = ref('全部类型');
-
-	// 其他筛选选项
-	const filterOptions = ref([{
-			label: '日期',
-			value: 'date',
-			icon: 'calendar'
-		},
-		{
-			label: '地区',
-			value: 'location',
-			icon: 'map-pin'
-		},
-		{
-			label: '附近',
-			value: 'nearby',
-			icon: 'location'
-		}
-	]);
-	const activeFilter = ref('date');
 
 	// 获取当前日期
 	const getDate = (type) => {
@@ -152,12 +128,11 @@
 
 	// 响应式数据
 	const title = ref('picker');
-	const array = ref(['全部类型', '交流会', '沙龙', '日本']);
+	const array = ref(['全部类型', '交流会', '沙龙', '峰会', '分享会', '其他']);
 	const index = ref(0);
 	const date = ref(getDate({
 		format: true
 	}));
-	// const time = ref('12:01');
 
 	// 计算属性
 	const startDate = computed(() => getDate('start'));
@@ -172,10 +147,6 @@
 	const bindDateChange = (e) => {
 		date.value = e.detail.value;
 	};
-
-	// const bindTimeChange = (e) => {
-	//   time.value = e.detail.value;
-	// };
 
 	const selectedLocationInfo = ref(null); // 用于存储地图选择结果
 	const openMapToChooseLocation = () => {
@@ -205,26 +176,26 @@
 
 
 	// 分享功能
-	const showShareModal = ref(false);
-	const shareOptions = ref([{
-			name: '微信',
-			platform: 'wechat',
-			icon: 'weixin',
-			bgColor: 'wechat-bg'
-		},
-		{
-			name: '微博',
-			platform: 'weibo',
-			icon: 'weibo',
-			bgColor: 'weibo-bg'
-		},
-		{
-			name: '朋友圈',
-			platform: 'moments',
-			icon: 'moments',
-			bgColor: 'moments-bg'
-		}
-	]);
+	// const showShareModal = ref(false);
+	// const shareOptions = ref([{
+	// 		name: '微信',
+	// 		platform: 'wechat',
+	// 		icon: 'weixin',
+	// 		bgColor: 'wechat-bg'
+	// 	},
+	// 	{
+	// 		name: '微博',
+	// 		platform: 'weibo',
+	// 		icon: 'weibo',
+	// 		bgColor: 'weibo-bg'
+	// 	},
+	// 	{
+	// 		name: '朋友圈',
+	// 		platform: 'moments',
+	// 		icon: 'moments',
+	// 		bgColor: 'moments-bg'
+	// 	}
+	// ]);
 
 	const activitiesData = ref([{
 			id: 1,
@@ -304,25 +275,6 @@
 		return result;
 	});
 
-	// 打开分享弹窗
-	const openShareModal = () => {
-		showShareModal.value = true;
-	};
-
-	// 关闭分享弹窗
-	const closeShareModal = () => {
-		showShareModal.value = false;
-	};
-
-	// 分享活动
-	const shareActivity = (platform) => {
-		uni.showToast({
-			title: `已分享到${platform}`,
-			icon: 'success'
-		});
-		closeShareModal();
-	};
-
 	// 发布活动
 	const publishActivity = () => {
 		uni.navigateTo({
@@ -385,10 +337,10 @@
 	}
 
 	/* 筛选区域 */
-	.collapse-title{
+	.collapse-title {
 		color: #FF6B00;
 	}
-	
+
 	.filters {
 		padding: 24rpx 32rpx;
 		background: white;
@@ -478,8 +430,15 @@
 	/* 活动列表 */
 	.activity-list {
 		padding: 0 32rpx;
-		// height: calc(100vh - 180rpx);
-		// margin-bottom: 20rpx;
+	}
+
+	/* 暂无更多内容提示 */
+	.no-more-content {
+		text-align: center;
+		color: #999;
+		padding: 30rpx 0;
+		font-size: 28rpx;
+		margin-top: 20rpx;
 	}
 
 	/* 底部操作栏 */

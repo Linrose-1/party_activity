@@ -85,24 +85,6 @@ const _sfc_main = {
       address: "",
       website: ""
     });
-    const goBack = () => {
-      common_vendor.index.navigateBack({
-        delta: 1
-      });
-    };
-    const showMoreActions = () => {
-      common_vendor.index.showActionSheet({
-        itemList: ["举报", "分享到..."],
-        success: function(res) {
-          common_vendor.index.__f__("log", "at pages/home-commercialDetail/home-commercialDetail.vue:284", "用户点击了", res.tapIndex);
-          if (res.tapIndex === 0) {
-            common_vendor.index.showToast({ title: "举报功能待完善", icon: "none" });
-          } else if (res.tapIndex === 1) {
-            shareOpportunity();
-          }
-        }
-      });
-    };
     const toggleAction = (item, action) => {
       if (item.userAction === action) {
         item.userAction = null;
@@ -188,41 +170,29 @@ const _sfc_main = {
         longPressActions: {
           itemList: ["发送给朋友", "保存图片", "收藏"],
           success: function(data) {
-            common_vendor.index.__f__("log", "at pages/home-commercialDetail/home-commercialDetail.vue:424", "选中了第" + (data.tapIndex + 1) + "个按钮，第" + (data.index + 1) + "张图片");
+            common_vendor.index.__f__("log", "at pages/home-commercialDetail/home-commercialDetail.vue:414", "选中了第" + (data.tapIndex + 1) + "个按钮，第" + (data.index + 1) + "张图片");
           },
           fail: function(err) {
-            common_vendor.index.__f__("log", "at pages/home-commercialDetail/home-commercialDetail.vue:427", err.errMsg);
+            common_vendor.index.__f__("log", "at pages/home-commercialDetail/home-commercialDetail.vue:417", err.errMsg);
           }
         }
       });
     };
     return (_ctx, _cache) => {
       return common_vendor.e({
-        a: common_vendor.p({
-          type: "left",
-          size: "22",
-          color: "#FFFFFF"
-        }),
-        b: common_vendor.o(goBack),
-        c: common_vendor.p({
-          type: "more-filled",
-          size: "20",
-          color: "#FFFFFF"
-        }),
-        d: common_vendor.o(showMoreActions),
-        e: common_vendor.t(postDetail.user.charAt(0)),
-        f: common_vendor.o(($event) => showContact(postDetail.user, postDetail.contact)),
-        g: common_vendor.t(postDetail.user),
-        h: common_vendor.p({
+        a: common_vendor.t(postDetail.user.charAt(0)),
+        b: common_vendor.o(($event) => showContact(postDetail.user, postDetail.contact)),
+        c: common_vendor.t(postDetail.user),
+        d: common_vendor.p({
           type: "redo",
           size: "14",
           color: "#888"
         }),
-        i: common_vendor.t(postDetail.time),
-        j: common_vendor.t(postDetail.content),
-        k: postDetail.images && postDetail.images.length
+        e: common_vendor.t(postDetail.time),
+        f: common_vendor.t(postDetail.content),
+        g: postDetail.images && postDetail.images.length
       }, postDetail.images && postDetail.images.length ? {
-        l: common_vendor.f(postDetail.images, (image, imgIndex, i0) => {
+        h: common_vendor.f(postDetail.images, (image, imgIndex, i0) => {
           return {
             a: image,
             b: common_vendor.o(($event) => previewImage(postDetail.images, imgIndex), imgIndex),
@@ -230,57 +200,57 @@ const _sfc_main = {
           };
         })
       } : {}, {
-        m: common_vendor.f(postDetail.tags, (tag, index, i0) => {
+        i: common_vendor.f(postDetail.tags, (tag, index, i0) => {
           return {
             a: common_vendor.t(tag),
             b: index
           };
         }),
-        n: common_vendor.p({
+        j: common_vendor.p({
           type: postDetail.userAction === "like" ? "hand-up-filled" : "hand-up",
           size: "18",
           color: postDetail.userAction === "like" ? "#e74c3c" : "#666"
         }),
-        o: common_vendor.t(postDetail.likes),
-        p: postDetail.userAction === "like" ? 1 : "",
-        q: common_vendor.o(($event) => toggleAction(postDetail, "like")),
-        r: common_vendor.p({
+        k: common_vendor.t(postDetail.likes),
+        l: postDetail.userAction === "like" ? 1 : "",
+        m: common_vendor.o(($event) => toggleAction(postDetail, "like")),
+        n: common_vendor.p({
           type: postDetail.userAction === "dislike" ? "hand-down-filled" : "hand-down",
           size: "18",
           color: postDetail.userAction === "dislike" ? "#3498db" : "#666"
         }),
-        s: common_vendor.t(postDetail.dislikes),
-        t: postDetail.userAction === "dislike" ? 1 : "",
-        v: common_vendor.o(($event) => toggleAction(postDetail, "dislike")),
-        w: common_vendor.p({
+        o: common_vendor.t(postDetail.dislikes),
+        p: postDetail.userAction === "dislike" ? 1 : "",
+        q: common_vendor.o(($event) => toggleAction(postDetail, "dislike")),
+        r: common_vendor.p({
           type: "redo",
           size: "18",
           color: "#666"
         }),
-        x: common_vendor.o(shareOpportunity),
-        y: common_vendor.p({
+        s: common_vendor.o(shareOpportunity),
+        t: common_vendor.p({
           type: postDetail.saved ? "star-filled" : "star",
           size: "18",
           color: postDetail.saved ? "#FF6A00" : "#666"
         }),
-        z: postDetail.saved ? 1 : "",
-        A: common_vendor.o(($event) => toggleBookmark(postDetail)),
-        B: common_vendor.p({
+        v: postDetail.saved ? 1 : "",
+        w: common_vendor.o(($event) => toggleBookmark(postDetail)),
+        x: common_vendor.p({
           type: "chatbubble-filled",
           size: "20",
           color: "#FF6A00"
         }),
-        C: common_vendor.t(comments.length),
-        D: common_vendor.f(comments, (comment, k0, i0) => {
+        y: common_vendor.t(comments.length),
+        z: common_vendor.f(comments, (comment, k0, i0) => {
           return {
             a: common_vendor.t(comment.user.charAt(0)),
             b: common_vendor.o(($event) => showContact(comment.user, comment.contact), comment.id),
             c: common_vendor.t(comment.user),
             d: common_vendor.t(comment.time),
             e: common_vendor.t(comment.text),
-            f: "361e9b2c-8-" + i0,
+            f: "361e9b2c-6-" + i0,
             g: common_vendor.o(($event) => replyComment(comment), comment.id),
-            h: "361e9b2c-9-" + i0,
+            h: "361e9b2c-7-" + i0,
             i: common_vendor.p({
               type: comment.userAction === "like" ? "hand-up-filled" : "hand-up",
               size: "16",
@@ -292,67 +262,67 @@ const _sfc_main = {
             m: comment.id
           };
         }),
-        E: common_vendor.p({
+        A: common_vendor.p({
           type: "chatbubble",
           size: "16",
           color: "#666"
         }),
-        F: comments.length === 0
+        B: comments.length === 0
       }, comments.length === 0 ? {} : {}, {
-        G: common_vendor.o(addComment),
-        H: newCommentText.value,
-        I: common_vendor.o(($event) => newCommentText.value = $event.detail.value),
-        J: common_vendor.o(addComment),
-        K: common_vendor.t(currentContact.name.charAt(0)),
-        L: common_vendor.t(currentContact.name),
-        M: currentContact.phone
+        C: common_vendor.o(addComment),
+        D: newCommentText.value,
+        E: common_vendor.o(($event) => newCommentText.value = $event.detail.value),
+        F: common_vendor.o(addComment),
+        G: common_vendor.t(currentContact.name.charAt(0)),
+        H: common_vendor.t(currentContact.name),
+        I: currentContact.phone
       }, currentContact.phone ? {
-        N: common_vendor.p({
+        J: common_vendor.p({
           type: "phone-filled",
           size: "18",
           color: "#FF6A00"
         }),
-        O: common_vendor.t(currentContact.phone)
+        K: common_vendor.t(currentContact.phone)
       } : {}, {
-        P: currentContact.email
+        L: currentContact.email
       }, currentContact.email ? {
-        Q: common_vendor.p({
+        M: common_vendor.p({
           type: "email-filled",
           size: "18",
           color: "#FF6A00"
         }),
-        R: common_vendor.t(currentContact.email)
+        N: common_vendor.t(currentContact.email)
       } : {}, {
-        S: currentContact.company
+        O: currentContact.company
       }, currentContact.company ? {
-        T: common_vendor.p({
+        P: common_vendor.p({
           type: "paperplane-filled",
           size: "18",
           color: "#FF6A00"
         }),
-        U: common_vendor.t(currentContact.company)
+        Q: common_vendor.t(currentContact.company)
       } : {}, {
-        V: currentContact.address
+        R: currentContact.address
       }, currentContact.address ? {
-        W: common_vendor.p({
+        S: common_vendor.p({
           type: "location-filled",
           size: "18",
           color: "#FF6A00"
         }),
-        X: common_vendor.t(currentContact.address)
+        T: common_vendor.t(currentContact.address)
       } : {}, {
-        Y: currentContact.website
+        U: currentContact.website
       }, currentContact.website ? {
-        Z: common_vendor.p({
+        V: common_vendor.p({
           type: "link",
           size: "18",
           color: "#FF6A00"
         }),
-        aa: common_vendor.t(currentContact.website)
+        W: common_vendor.t(currentContact.website)
       } : {}, {
-        ab: common_vendor.o(closeContact),
-        ac: showContactModal.value ? 1 : "",
-        ad: common_vendor.o(closeContact)
+        X: common_vendor.o(closeContact),
+        Y: showContactModal.value ? 1 : "",
+        Z: common_vendor.o(closeContact)
       });
     };
   }

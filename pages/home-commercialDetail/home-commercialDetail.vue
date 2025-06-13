@@ -1,15 +1,5 @@
 <template>
     <div class="business-opportunity-detail-app">
-        <!-- 顶部导航 -->
-        <div class="header">
-            <div class="back-btn" @click="goBack">
-                <uni-icons type="left" size="22" color="#FFFFFF"></uni-icons>
-            </div>
-            <h1>商机详情</h1>
-            <div class="action-btn" @click="showMoreActions">
-                <uni-icons type="more-filled" size="20" color="#FFFFFF"></uni-icons>
-            </div>
-        </div>
         
         <div class="container">
             <!-- 商机卡片 -->
@@ -811,7 +801,7 @@ const previewImage = (urls, current) => {
 /* 添加评论 */
 .add-comment {
     position: fixed;
-    bottom: 0;
+    bottom: -40rpx;
     left: 50%;
     transform: translateX(-50%);
     max-width: 750rpx;
@@ -819,7 +809,7 @@ const previewImage = (urls, current) => {
     display: flex;
     align-items: center;
     background: white;
-    padding: 30rpx;
+    padding: 10rpx;
     /* 适配底部安全区域 */
     padding-bottom: calc(30rpx + env(safe-area-inset-bottom));
     box-shadow: 0 -10rpx 30rpx rgba(0,0,0,0.05);
@@ -849,14 +839,14 @@ const previewImage = (urls, current) => {
     color: white;
     border: none;
     border-radius: 50rpx;
-    padding: 24rpx 50rpx;
+    /* padding: 24rpx 50rpx; */
     margin-left: 24rpx;
-    font-weight: 600;
+    font-weight: 500;
     transition: background 0.3s;
     box-shadow: 0 6rpx 20rpx rgba(255, 106, 0, 0.3);
     /* 移除小程序按钮默认样式 */
     -webkit-appearance: none;
-    background-color: transparent;
+    /* background-color: transparent; */
 }
 .add-comment button::after {
     border: none;
