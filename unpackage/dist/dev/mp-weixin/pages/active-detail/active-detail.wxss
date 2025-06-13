@@ -44,6 +44,16 @@
   border-radius: 20rpx;
   box-shadow: 0 10rpx 20rpx rgba(0, 0, 0, 0.05);
 }
+.participants-header.data-v-de6b8eea {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10rpx;
+}
+.participants-header .view-all-link.data-v-de6b8eea {
+  font-size: 24rpx;
+  color: #3a7bd5;
+  cursor: pointer;
+}
 .event-title.data-v-de6b8eea {
   font-size: 36rpx;
   font-weight: bold;
@@ -121,7 +131,8 @@
   color: #666;
 }
 .organizer-title.data-v-de6b8eea,
-.business-title.data-v-de6b8eea {
+.business-title.data-v-de6b8eea,
+.participants-title.data-v-de6b8eea {
   font-weight: bold;
   margin-bottom: 20rpx;
 }

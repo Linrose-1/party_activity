@@ -41,7 +41,7 @@ const _sfc_main = {
     const startDate = common_vendor.computed(() => getDate("start"));
     const endDate = common_vendor.computed(() => getDate("end"));
     const bindPickerChange = (e) => {
-      common_vendor.index.__f__("log", "at pages/active/active.vue:143", "picker发送选择改变，携带值为", e.detail.value);
+      common_vendor.index.__f__("log", "at pages/active/active.vue:124", "picker发送选择改变，携带值为", e.detail.value);
       index.value = e.detail.value;
     };
     const bindDateChange = (e) => {
@@ -51,7 +51,7 @@ const _sfc_main = {
     const openMapToChooseLocation = () => {
       common_vendor.index.chooseLocation({
         success: (res) => {
-          common_vendor.index.__f__("log", "at pages/active/active.vue:155", "选择位置成功:", res);
+          common_vendor.index.__f__("log", "at pages/active/active.vue:136", "选择位置成功:", res);
           selectedLocationInfo.value = {
             name: res.name,
             address: res.address,
@@ -60,7 +60,7 @@ const _sfc_main = {
           };
         },
         fail: (err) => {
-          common_vendor.index.__f__("log", "at pages/active/active.vue:164", "选择位置失败:", err);
+          common_vendor.index.__f__("log", "at pages/active/active.vue:145", "选择位置失败:", err);
           if (err.errMsg.includes("cancel"))
             ;
           else {

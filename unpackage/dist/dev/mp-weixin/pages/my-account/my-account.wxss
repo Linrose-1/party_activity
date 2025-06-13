@@ -308,119 +308,118 @@ body.data-v-04e670bd {
 }
 
 	/* 贡分获取区域 */
-	/* 贡分获取区域 */
 .points-section.data-v-04e670bd {
-	  background: white;
-	  border-radius: 40rpx;
-	  padding: 30rpx;
-	  margin-bottom: 50rpx;
-	  box-shadow: 0 10rpx 30rpx rgba(0, 0, 0, 0.05);
+		background: white;
+		border-radius: 40rpx;
+		padding: 30rpx;
+		margin-bottom: 50rpx;
+		box-shadow: 0 10rpx 30rpx rgba(0, 0, 0, 0.05);
 }
 .points-header.data-v-04e670bd {
-	  display: flex;
-	  justify-content: space-between;
-	  align-items: center;
-	  margin-bottom: 40rpx;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 40rpx;
 }
 .points-title.data-v-04e670bd {
-	  font-size: 36rpx;
-	  font-weight: bold;
-	  color: #333;
-	  display: flex;
-	  align-items: center;
+		font-size: 36rpx;
+		font-weight: bold;
+		color: #333;
+		display: flex;
+		align-items: center;
 }
 .points-title i.data-v-04e670bd {
-	  margin-right: 12rpx;
+		margin-right: 12rpx;
 }
 .points-value.data-v-04e670bd {
-	  font-size: 48rpx;
-	  font-weight: bold;
-	  color: #FF6B00;
+		font-size: 48rpx;
+		font-weight: bold;
+		color: #FF6B00;
 }
 .task-grid.data-v-04e670bd {
-	  display: grid;
-	  grid-template-columns: repeat(2, 1fr);
-	  gap: 50rpx;
-	  margin-top: 40rpx;
+		display: grid;
+		grid-template-columns: repeat(2, 1fr);
+		gap: 50rpx;
+		margin-top: 40rpx;
 }
 .task-card.data-v-04e670bd {
-	  background: #f9f9f9;
-	  border-radius: 30rpx;
-	  padding: 20rpx;
-	  transition: all 0.3s;
-	  position: relative;
-	  overflow: hidden;
-	  border: 2rpx solid #eee;
-	  display: flex;
-	  flex-direction: column;
+		background: #f9f9f9;
+		border-radius: 30rpx;
+		padding: 20rpx;
+		transition: all 0.3s;
+		position: relative;
+		overflow: hidden;
+		border: 2rpx solid #eee;
+		display: flex;
+		flex-direction: column;
 }
 .task-card.data-v-04e670bd:hover {
-	  transform: translateY(-10rpx);
-	  box-shadow: 0 16rpx 40rpx rgba(255, 107, 0, 0.15);
-	  border-color: #FF8C00;
+		transform: translateY(-10rpx);
+		box-shadow: 0 16rpx 40rpx rgba(255, 107, 0, 0.15);
+		border-color: #FF8C00;
 }
 .task-header.data-v-04e670bd {
-	  display: flex;
-	  align-items: center;
-	  margin-bottom: 20rpx;
+		display: flex;
+		align-items: center;
+		margin-bottom: 20rpx;
 }
 .task-icon.data-v-04e670bd {
-	  width: 60rpx;
-	  height: 60rpx;
-	  border-radius: 20rpx;
-	  background: #fff5e6;
-	  display: flex;
-	  align-items: center;
-	  justify-content: center;
-	  margin-right: 20rpx;
-	  color: #FF6B00;
-	  font-size: 36rpx;
-	  flex-shrink: 0;
+		width: 60rpx;
+		height: 60rpx;
+		border-radius: 20rpx;
+		background: #fff5e6;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		margin-right: 20rpx;
+		color: #FF6B00;
+		font-size: 36rpx;
+		flex-shrink: 0;
 }
 .task-name.data-v-04e670bd {
-	  font-size: 32rpx;
-	  font-weight: 600;
-	  color: #333;
+		font-size: 32rpx;
+		font-weight: 600;
+		color: #333;
 }
 .task-desc.data-v-04e670bd {
-	  font-size: 26rpx;
-	  color: #666;
-	  margin-bottom: 30rpx;
-	  line-height: 1.4;
-	  flex-grow: 1;
+		font-size: 26rpx;
+		color: #666;
+		margin-bottom: 30rpx;
+		line-height: 1.4;
+		flex-grow: 1;
 }
 .task-footer.data-v-04e670bd {
-	  display: flex;
-	  justify-content: space-between;
-	  align-items: center;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
 }
 .task-points.data-v-04e670bd {
-	  display: inline-block;
-	  background: rgba(255, 107, 0, 0.1);
-	  color: #FF6B00;
-	  padding: 8rpx 20rpx;
-	  border-radius: 40rpx;
-	  font-size: 28rpx;
-	  font-weight: 600;
+		display: inline-block;
+		background: rgba(255, 107, 0, 0.1);
+		color: #FF6B00;
+		padding: 8rpx 20rpx;
+		border-radius: 40rpx;
+		font-size: 28rpx;
+		font-weight: 600;
 }
 .task-button.data-v-04e670bd {
-	  width: 60rpx;
-	  height: 60rpx;
-	  border-radius: 50%;
-	  background: #FF6B00;
-	  color: white;
-	  display: flex;
-	  align-items: center;
-	  justify-content: center;
-	  cursor: pointer;
-	  transition: all 0.3s;
-	  border: none;
-	  font-size: 32rpx;
-	  flex-shrink: 0;
+		width: 60rpx;
+		height: 60rpx;
+		border-radius: 50%;
+		background: #FF6B00;
+		color: white;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		cursor: pointer;
+		transition: all 0.3s;
+		border: none;
+		font-size: 32rpx;
+		flex-shrink: 0;
 }
 .task-button.data-v-04e670bd:hover {
-	  transform: scale(1.1);
-	  background: #FF8C00;
+		transform: scale(1.1);
+		background: #FF8C00;
 }
 
 	/* 历史记录 */
@@ -655,4 +654,91 @@ body.data-v-04e670bd {
 		margin-bottom: 20rpx;
 		display: block;
 		font-size: 48rpx;
+}
+
+	/* 新增：智米模块样式 */
+.smart-rice-section.data-v-04e670bd {
+		background: linear-gradient(to right, #fefefe, #f9f9f9);
+		border-radius: 40rpx;
+		padding: 50rpx;
+		margin-bottom: 60rpx;
+		box-shadow: 0 10rpx 30rpx rgba(0, 0, 0, 0.05);
+		border: 2rpx solid #eee;
+}
+.smart-rice-header.data-v-04e670bd {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 40rpx;
+}
+.smart-rice-title.data-v-04e670bd {
+		font-size: 36rpx;
+		font-weight: bold;
+		color: #333;
+		display: flex;
+		align-items: center;
+}
+.smart-rice-title i.data-v-04e670bd {
+		margin-right: 12rpx;
+}
+.smart-rice-value.data-v-04e670bd {
+		font-size: 48rpx;
+		font-weight: bold;
+		color: #FF6B00;
+}
+.smart-rice-info.data-v-04e670bd {
+		font-size: 28rpx;
+		color: #666;
+		line-height: 1.6;
+		margin-bottom: 40rpx;
+}
+.smart-rice-info .exchange-rate.data-v-04e670bd {
+		margin-top: 15rpx;
+		font-size: 30rpx;
+		font-weight: 500;
+}
+.smart-rice-actions.data-v-04e670bd {
+		display: flex;
+		justify-content: space-around;
+		gap: 30rpx;
+		margin-bottom: 40rpx;
+}
+.action-button.data-v-04e670bd {
+		flex: 1;
+		height: 90rpx;
+		border-radius: 50rpx;
+		border: none;
+		color: white;
+		font-size: 32rpx;
+		font-weight: bold;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		cursor: pointer;
+		transition: all 0.3s;
+		box-shadow: 0 8rpx 20rpx rgba(0, 0, 0, 0.1);
+}
+.exchange-button.data-v-04e670bd {
+		background: linear-gradient(to right, #FF8C00, #FF6B00);
+}
+.recharge-button.data-v-04e670bd {
+		background: linear-gradient(to right, #007bff, #0056b3);
+}
+.action-button uni-icons.data-v-04e670bd {
+		margin-right: 15rpx;
+}
+.action-button.data-v-04e670bd:hover {
+		transform: translateY(-5rpx);
+		box-shadow: 0 12rpx 25rpx rgba(0, 0, 0, 0.2);
+}
+.smart-rice-note.data-v-04e670bd {
+		font-size: 26rpx;
+		color: #999;
+		text-align: center;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+}
+.smart-rice-note uni-icons.data-v-04e670bd {
+		margin-right: 10rpx;
 }

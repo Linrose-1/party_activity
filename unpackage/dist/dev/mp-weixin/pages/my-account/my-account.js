@@ -8,6 +8,7 @@ const _easycom_uni_icons = () => "../../uni_modules/uni-icons/components/uni-ico
 if (!Math) {
   _easycom_uni_icons();
 }
+const pointsPerSmartRice = 10;
 const maxPoints = 1e3;
 const _sfc_main = {
   __name: "my-account",
@@ -16,6 +17,7 @@ const _sfc_main = {
     common_vendor.ref(
       "青铜"
     );
+    const smartRice = common_vendor.ref(150);
     const tasks = common_vendor.ref([
       {
         icon: "calendar",
@@ -102,11 +104,15 @@ const _sfc_main = {
       return 0;
     });
     const progressWidth = common_vendor.computed(() => {
-      return points.value / maxPoints * 100 + "%";
+      const cappedPoints = Math.min(Math.max(points.value, 0), maxPoints);
+      return cappedPoints / maxPoints * 100 + "%";
     });
     const bronzeBadgeRef = common_vendor.ref(null);
     const handleTaskClick = (taskName, event) => {
-      alert(`开始任务：${taskName}`);
+      common_vendor.index.showToast({
+        title: `点击了任务：${taskName}`,
+        icon: "none"
+      });
       const card = event.currentTarget.closest(".task-card");
       if (card) {
         card.style.transform = "scale(0.98)";
@@ -126,6 +132,40 @@ const _sfc_main = {
         }, 300);
       }
     };
+    const handleExchangeSmartRice = () => {
+      common_vendor.index.showModal({
+        title: "兑换智米",
+        content: `兑换比例为 ${pointsPerSmartRice} 贡分 = 1 智米。请联系平台客服进行兑换操作。`,
+        showCancel: false,
+        confirmText: "联系客服",
+        success: (res) => {
+          if (res.confirm) {
+            contactCustomerService();
+          }
+        }
+      });
+    };
+    const handleRechargeSmartRice = () => {
+      common_vendor.index.showModal({
+        title: "充值智米",
+        content: "如需充值智米，请联系平台客服获取充值方式。",
+        showCancel: false,
+        confirmText: "联系客服",
+        success: (res) => {
+          if (res.confirm) {
+            contactCustomerService();
+          }
+        }
+      });
+    };
+    const contactCustomerService = () => {
+      common_vendor.index.showToast({
+        title: "正在为您跳转客服联系方式...",
+        icon: "none",
+        duration: 2e3
+      });
+      common_vendor.index.__f__("log", "at pages/my-account/my-account.vue:374", "用户点击了联系客服");
+    };
     common_vendor.onMounted(() => {
       if (bronzeBadgeRef.value) {
         setInterval(() => {
@@ -136,7 +176,20 @@ const _sfc_main = {
     if (typeof common_vendor.index === "undefined") {
       window.uni = {
         showToast: (options) => {
-          common_vendor.index.__f__("log", "at pages/my-account/my-account.vue:316", "Mock uni.showToast:", options.title);
+          common_vendor.index.__f__("log", "at pages/my-account/my-account.vue:391", "Mock uni.showToast:", options.title);
+        },
+        showModal: (options) => {
+          common_vendor.index.__f__("log", "at pages/my-account/my-account.vue:395", "Mock uni.showModal:", options.title, options.content);
+          if (confirm(`${options.title}
+${options.content}`)) {
+            options.success && options.success({
+              confirm: true
+            });
+          } else {
+            options.success && options.success({
+              cancel: true
+            });
+          }
         }
         // Add other uni methods if used, e.g., uni.navigateBack
       };
@@ -198,14 +251,38 @@ const _sfc_main = {
           color: "#fff"
         }),
         q: common_vendor.p({
+          type: "wallet",
+          size: "24",
+          color: "#FF6B00"
+        }),
+        r: common_vendor.t(smartRice.value),
+        s: common_vendor.t(pointsPerSmartRice),
+        t: common_vendor.p({
+          type: "forward",
+          size: "20",
+          color: "#fff"
+        }),
+        v: common_vendor.o(handleExchangeSmartRice),
+        w: common_vendor.p({
+          type: "redo",
+          size: "20",
+          color: "#fff"
+        }),
+        x: common_vendor.o(handleRechargeSmartRice),
+        y: common_vendor.p({
+          type: "info-filled",
+          size: "18",
+          color: "#FF6B00"
+        }),
+        z: common_vendor.p({
           type: "compose",
           size: "24",
           color: "#FF6B00"
         }),
-        r: common_vendor.t(points.value),
-        s: common_vendor.f(tasks.value, (task, index, i0) => {
+        A: common_vendor.t(points.value),
+        B: common_vendor.f(tasks.value, (task, index, i0) => {
           return {
-            a: "04e670bd-8-" + i0,
+            a: "04e670bd-12-" + i0,
             b: common_vendor.p({
               type: task.icon,
               size: "24",
@@ -214,24 +291,24 @@ const _sfc_main = {
             c: common_vendor.t(task.name),
             d: common_vendor.t(task.desc),
             e: common_vendor.t(task.points),
-            f: "04e670bd-9-" + i0,
+            f: "04e670bd-13-" + i0,
             g: common_vendor.o(($event) => handleTaskClick(task.name, $event), index),
             h: index
           };
         }),
-        t: common_vendor.p({
+        C: common_vendor.p({
           type: "plus",
           size: "20",
           color: "#fff"
         }),
-        v: common_vendor.p({
+        D: common_vendor.p({
           type: "bars",
           size: "24",
           color: "#FF6B00"
         }),
-        w: common_vendor.f(historyRecords.value, (record, index, i0) => {
+        E: common_vendor.f(historyRecords.value, (record, index, i0) => {
           return {
-            a: "04e670bd-11-" + i0,
+            a: "04e670bd-15-" + i0,
             b: common_vendor.p({
               type: record.icon,
               size: "20",

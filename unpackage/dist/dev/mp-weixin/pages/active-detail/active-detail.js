@@ -46,9 +46,8 @@ const _sfc_main = {
       });
     }
     function register() {
-      common_vendor.index.showToast({
-        title: "报名成功！",
-        icon: "success"
+      common_vendor.index.navigateTo({
+        url: "/pages/active-enroll/active-enroll"
       });
     }
     function viewAllUsers() {

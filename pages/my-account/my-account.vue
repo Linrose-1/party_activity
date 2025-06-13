@@ -1,163 +1,189 @@
 <template>
-	<div class="container">
+	<view class="container">
 		<!-- 账户详情 -->
-		<div class="account-detail-section">
-			<div class="section-header">
+		<view class="account-detail-section">
+			<view class="section-header">
 				<h2 class="section-title-main">账户信息详情</h2>
-			</div>
+			</view>
 
 			<!-- 邀请人模块 - 新增部分 -->
-			<div class="inviter-section">
-				<div class="section-title">
+			<view class="inviter-section">
+				<view class="section-title">
 					<uni-icons type="personadd" size="24" color="#FF6B00"></uni-icons>我的邀请人
-				</div>
+				</view>
 
-				<div class="inviter-card" v-if="inviter">
-					<div class="inviter-avatar">
-						<div class="avatar-placeholder">{{ inviter.name.charAt(0) }}</div>
-					</div>
-					<div class="inviter-info">
-						<div class="inviter-name">{{ inviter.name }}</div>
-						<div class="inviter-level">等级: {{ inviter.level }}</div>
-						<div class="inviter-date">邀请时间: {{ inviter.inviteDate }}</div>
-					</div>
-				</div>
+				<view class="inviter-card" v-if="inviter">
+					<view class="inviter-avatar">
+						<view class="avatar-placeholder">{{ inviter.name.charAt(0) }}</view>
+					</view>
+					<view class="inviter-info">
+						<view class="inviter-name">{{ inviter.name }}</view>
+						<view class="inviter-level">等级: {{ inviter.level }}</view>
+						<view class="inviter-date">邀请时间: {{ inviter.inviteDate }}</view>
+					</view>
+				</view>
 
-				<div class="no-inviter" v-else>
+				<view class="no-inviter" v-else>
 					<uni-icons type="info" size="24" color="#999"></uni-icons>
 					<p>您尚未被邀请或未填写邀请人</p>
-				</div>
-			</div>
+				</view>
+			</view>
 
 			<!-- 等级晋升系统 -->
-			<div class="level-system">
-				<div class="level-title">
+			<view class="level-system">
+				<view class="level-title">
 					<uni-icons type="medal" size="24" color="#FF6B00"></uni-icons> 等级晋升系统
-				</div>
+				</view>
 
-				<div class="current-level">
+				<view class="current-level">
 					<!-- Add ref for direct DOM access in onMounted -->
-					<div class="level-badge bronze" ref="bronzeBadgeRef">
-						<div class="level-name">青铜</div>
-						<div class="level-points">100-499分</div>
-					</div>
+					<view class="level-badge bronze" ref="bronzeBadgeRef">
+						<view class="level-name">青铜</view>
+						<view class="level-points">100-499分</view>
+					</view>
 
-					<div class="level-info">
+					<view class="level-info">
 						<h3>当前等级: 青铜</h3>
 						<view style="font-size: 26rpx;">您当前拥有<span>{{ points }}</span>贡分</view>
 						<view style="font-size: 26rpx;">距离下一等级还需 <span>{{ pointsToNextLevel }}</span>分</view>
 
-						<div class="progress-container">
-							<div class="progress-labels">
+						<view class="progress-container">
+							<view class="progress-labels">
 								<span>0</span>
 								<span>{{ maxPoints }}</span>
-							</div>
-							<div class="progress-bar">
-								<div class="progress-fill" :style="{ width: progressWidth }">
-									<div class="progress-marker" style="left: 10%;">
-										<div class="progress-marker-label">游客</div>
-									</div>
-									<div class="progress-marker" style="left: 50%;">
-										<div class="progress-marker-label">白银</div>
-									</div>
-									<div class="progress-marker" style="left: 100%;">
-										<div class="progress-marker-label">黄金</div>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
+							</view>
+							<view class="progress-bar">
+								<view class="progress-fill" :style="{ width: progressWidth }">
+									<view class="progress-marker" style="left: 10%;">
+										<view class="progress-marker-label">游客</view>
+									</view>
+									<view class="progress-marker" style="left: 50%;">
+										<view class="progress-marker-label">白银</view>
+									</view>
+									<view class="progress-marker" style="left: 100%;">
+										<view class="progress-marker-label">黄金</view>
+									</view>
+								</view>
+							</view>
+						</view>
+					</view>
+				</view>
 
-				<div class="level-steps">
-					<div class="level-step">
-						<div class="step-icon" style="background: #cd7f32;">
+				<view class="level-steps">
+					<view class="level-step">
+						<view class="step-icon" style="background: #cd7f32;">
 							<uni-icons type="person" size="20" color="#fff"></uni-icons>
-						</div>
-						<div class="step-name">游客</div>
-						<div class="step-points">0-99分</div>
-					</div>
+						</view>
+						<view class="step-name">游客</view>
+						<view class="step-points">0-99分</view>
+					</view>
 
-					<div class="level-step">
-						<div class="step-icon active" style="background: #cd7f32;">
+					<view class="level-step">
+						<view class="step-icon active" style="background: #cd7f32;">
 							<uni-icons type="shield" size="20" color="#fff"></uni-icons>
-						</div>
-						<div class="step-name">青铜</div>
-						<div class="step-points">100-499分</div>
-					</div>
+						</view>
+						<view class="step-name">青铜</view>
+						<view class="step-points">100-499分</view>
+					</view>
 
-					<div class="level-step">
-						<div class="step-icon" style="background: #c0c0c0;">
+					<view class="level-step">
+						<view class="step-icon" style="background: #c0c0c0;">
 							<uni-icons type="medal" size="20" color="#fff"></uni-icons>
-						</div>
-						<div class="step-name">白银</div>
-						<div class="step-points">500-999分</div>
-					</div>
+						</view>
+						<view class="step-name">白银</view>
+						<view class="step-points">500-999分</view>
+					</view>
 
-					<div class="level-step">
-						<div class="step-icon" style="background: #ffd700;">
+					<view class="level-step">
+						<view class="step-icon" style="background: #ffd700;">
 							<uni-icons type="crown" size="20" color="#fff"></uni-icons>
-						</div>
-						<div class="step-name">黄金</div>
-						<div class="step-points">1000+分</div>
-					</div>
-				</div>
-			</div>
+						</view>
+						<view class="step-name">黄金</view>
+						<view class="step-points">1000+分</view>
+					</view>
+				</view>
+			</view>
+
+			<!-- 新增：智米模块 -->
+			<view class="smart-rice-section">
+				<view class="smart-rice-header">
+					<view class="smart-rice-title">
+						<uni-icons type="wallet" size="24" color="#FF6B00"></uni-icons> 我的智米
+					</view>
+					<view class="smart-rice-value">{{ smartRice }} 智米</view>
+				</view>
+
+				<view class="smart-rice-info">
+					<p>智米可用于兑换平台内服务或商品。</p>
+					<p class="exchange-rate">兑换比例：<span style="color: #FF6B00; font-weight: bold;">{{ pointsPerSmartRice }} 贡分 = 1 智米</span></p>
+				</view>
+
+				<view class="smart-rice-actions">
+					<button class="action-button exchange-button" @click="handleExchangeSmartRice">
+						<uni-icons type="forward" size="20" color="#fff"></uni-icons> 兑换智米
+					</button>
+					<button class="action-button recharge-button" @click="handleRechargeSmartRice">
+						<uni-icons type="redo" size="20" color="#fff"></uni-icons> 充值智米
+					</button>
+				</view>
+				<p class="smart-rice-note">
+					<uni-icons type="info-filled" size="18" color="#FF6B00"></uni-icons> 贡分兑换智米或智米充值请联系平台客服。
+				</p>
+			</view>
+
 
 			<!-- 贡分获取区域 -->
-			<div class="points-section">
-			  <div class="points-header">
-			    <div class="points-title"> <uni-icons type="compose" size="24" color="#FF6B00"></uni-icons> 获取贡分</div>
-			    <div class="points-value">{{ points }}</div>
-			  </div>
-			
-			  <p style="font-size: 28rpx; color: #666; margin-bottom: 40rpx;">
-			    通过完成以下任务获取贡分，提升您的等级：
-			  </p>
-			
-			  <div class="task-grid">
-			    <div class="task-card" v-for="(task, index) in tasks" :key="index">
-			      <div class="task-header">
-			        <div class="task-icon">
-			          <uni-icons :type="task.icon" size="24" color="#FF6B00"></uni-icons>
-			        </div>
-			        <div class="task-name">{{ task.name }}</div>
-			      </div>
-			      <div class="task-desc">{{ task.desc }}</div>
-			      <div class="task-footer">
-			        <span class="task-points">{{ task.points }}</span>
-			        <button class="task-button" @click="handleTaskClick(task.name, $event)">
-			          <uni-icons type="plus" size="20" color="#fff"></uni-icons>
-			        </button>
-			      </div>
-			    </div>
-			  </div>
-			</div>
+			<view class="points-section">
+				<view class="points-header">
+					<view class="points-title"> <uni-icons type="compose" size="24" color="#FF6B00"></uni-icons> 获取贡分</view>
+					<view class="points-value">{{ points }}</view>
+				</view>
+
+				<p style="font-size: 28rpx; color: #666; margin-bottom: 40rpx;">
+					通过完成以下任务获取贡分，提升您的等级：
+				</p>
+
+				<view class="task-grid">
+					<view class="task-card" v-for="(task, index) in tasks" :key="index">
+						<view class="task-header">
+							<view class="task-icon">
+								<uni-icons :type="task.icon" size="24" color="#FF6B00"></uni-icons>
+							</view>
+							<view class="task-name">{{ task.name }}</view>
+						</view>
+						<view class="task-desc">{{ task.desc }}</view>
+						<view class="task-footer">
+							<span class="task-points">{{ task.points }}</span>
+							<button class="task-button" @click="handleTaskClick(task.name, $event)">
+								<uni-icons type="plus" size="20" color="#fff"></uni-icons>
+							</button>
+						</view>
+					</view>
+				</view>
+			</view>
 
 			<!-- 历史记录 -->
-			<div class="history-section">
-				<div class="history-title">
+			<view class="history-section">
+				<view class="history-title">
 					<uni-icons type="bars" size="24" color="#FF6B00"></uni-icons> 贡分历史记录
-				</div>
+				</view>
 
-				<div class="history-list">
-					<div class="history-item" v-for="(record, index) in historyRecords" :key="index"
+				<view class="history-list">
+					<view class="history-item" v-for="(record, index) in historyRecords" :key="index"
 						@click="handleHistoryClick($event)">
-						<div class="history-icon">
+						<view class="history-icon">
 							<uni-icons :type="record.icon" size="20" color="#FF6B00"></uni-icons>
-						</div>
-						<div class="history-details">
-							<div class="history-task">{{ record.task }}</div>
-							<div class="history-date">{{ record.date }}</div>
-						</div>
-						<div class="history-points">{{ record.points }}</div>
-					</div>
-				</div>
-			</div>
-		</div>
-
-
-	</div>
+						</view>
+						<view class="history-details">
+							<view class="history-task">{{ record.task }}</view>
+							<view class="history-date">{{ record.date }}</view>
+						</view>
+						<view class="history-points">{{ record.points }}</view>
+					</view>
+				</view>
+			</view>
+		</view>
+	</view>
 </template>
 
 <script setup>
@@ -171,6 +197,10 @@
 	const points = ref(2166);
 	const level = ref(
 	'青铜'); // Though not directly used for dynamic class in HTML, good to have it reactive if needed later.
+
+	// 新增智米相关数据
+	const smartRice = ref(150); // 假设用户当前拥有150智米
+	const pointsPerSmartRice = 10; // 兑换比例：10贡分 = 1智米
 
 	// Hardcoded data for tasks and history (can be fetched from API in real app)
 	const tasks = ref([{
@@ -253,14 +283,17 @@
 	const maxPoints = 1000; // Max points for the progress bar
 	const pointsToNextLevel = computed(() => {
 		// Assuming next level is 500 for Silver, then 1000 for Gold
-		if (points.value < 100) return 100 - points.value; // To Bronze
-		if (points.value < 500) return 500 - points.value; // To Silver
-		if (points.value < 1000) return 1000 - points.value; // To Gold
+		if (points.value < 100) return 100 - points.value; // To Bronze (游客0-99, 青铜100-499)
+		if (points.value < 500) return 500 - points.value; // To Silver (白银500-999)
+		if (points.value < 1000) return 1000 - points.value; // To Gold (黄金1000+)
 		return 0; // Already Gold or higher
 	});
 
 	const progressWidth = computed(() => {
-		return (points.value / maxPoints) * 100 + '%';
+		// 这里的进度条可能需要根据实际等级范围调整
+		// 假设进度条表示从0到1000的范围
+		const cappedPoints = Math.min(Math.max(points.value, 0), maxPoints);
+		return (cappedPoints / maxPoints) * 100 + '%';
 	});
 
 	// Template ref for the bronze badge for direct DOM manipulation in onMounted
@@ -274,7 +307,10 @@
 	};
 
 	const handleTaskClick = (taskName, event) => {
-		alert(`开始任务：${taskName}`);
+		uni.showToast({
+			title: `点击了任务：${taskName}`,
+			icon: 'none'
+		});
 		// Original effect: scale and shadow on click
 		const card = event.currentTarget.closest('.task-card');
 		if (card) {
@@ -299,6 +335,45 @@
 		}
 	};
 
+	// 新增智米相关方法
+	const handleExchangeSmartRice = () => {
+		uni.showModal({
+			title: '兑换智米',
+			content: `兑换比例为 ${pointsPerSmartRice} 贡分 = 1 智米。请联系平台客服进行兑换操作。`,
+			showCancel: false,
+			confirmText: '联系客服',
+			success: (res) => {
+				if (res.confirm) {
+					contactCustomerService();
+				}
+			}
+		});
+	};
+
+	const handleRechargeSmartRice = () => {
+		uni.showModal({
+			title: '充值智米',
+			content: '如需充值智米，请联系平台客服获取充值方式。',
+			showCancel: false,
+			confirmText: '联系客服',
+			success: (res) => {
+				if (res.confirm) {
+					contactCustomerService();
+				}
+			}
+		});
+	};
+
+	const contactCustomerService = () => {
+		uni.showToast({
+			title: '正在为您跳转客服联系方式...',
+			icon: 'none',
+			duration: 2000
+		});
+		// 实际应用中可以跳转到客服页面或显示客服电话/微信等
+		console.log('用户点击了联系客服');
+	};
+
 	// Lifecycle hook for DOM interactions
 	onMounted(() => {
 		// Bronze badge animation
@@ -316,6 +391,18 @@
 				console.log('Mock uni.showToast:', options.title);
 				// alert(options.title); // Or a simple browser toast implementation
 			},
+			showModal: (options) => {
+				console.log('Mock uni.showModal:', options.title, options.content);
+				if (confirm(`${options.title}\n${options.content}`)) {
+					options.success && options.success({
+						confirm: true
+					});
+				} else {
+					options.success && options.success({
+						cancel: true
+					});
+				}
+			},
 			// Add other uni methods if used, e.g., uni.navigateBack
 		};
 	}
@@ -328,7 +415,7 @@
 		avatar: '' // 如果有真实头像URL可以放在这里
 	});
 
-	// 新增方法
+	// 新增方法 (原有的，保留)
 	const contactInviter = () => {
 		uni.showToast({
 			title: `联系邀请人: ${inviter.value.name}`,
@@ -687,134 +774,133 @@
 	}
 
 	/* 贡分获取区域 */
-	/* 贡分获取区域 */
 	.points-section {
-	  background: white;
-	  border-radius: 40rpx;
-	  padding: 30rpx;
-	  margin-bottom: 50rpx;
-	  box-shadow: 0 10rpx 30rpx rgba(0, 0, 0, 0.05);
+		background: white;
+		border-radius: 40rpx;
+		padding: 30rpx;
+		margin-bottom: 50rpx;
+		box-shadow: 0 10rpx 30rpx rgba(0, 0, 0, 0.05);
 	}
-	
+
 	.points-header {
-	  display: flex;
-	  justify-content: space-between;
-	  align-items: center;
-	  margin-bottom: 40rpx;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 40rpx;
 	}
-	
+
 	.points-title {
-	  font-size: 36rpx;
-	  font-weight: bold;
-	  color: #333;
-	  display: flex;
-	  align-items: center;
+		font-size: 36rpx;
+		font-weight: bold;
+		color: #333;
+		display: flex;
+		align-items: center;
 	}
-	
+
 	.points-title i {
-	  margin-right: 12rpx;
+		margin-right: 12rpx;
 	}
-	
+
 	.points-value {
-	  font-size: 48rpx;
-	  font-weight: bold;
-	  color: #FF6B00;
+		font-size: 48rpx;
+		font-weight: bold;
+		color: #FF6B00;
 	}
-	
+
 	.task-grid {
-	  display: grid;
-	  grid-template-columns: repeat(2, 1fr);
-	  gap: 50rpx;
-	  margin-top: 40rpx;
+		display: grid;
+		grid-template-columns: repeat(2, 1fr);
+		gap: 50rpx;
+		margin-top: 40rpx;
 	}
-	
+
 	.task-card {
-	  background: #f9f9f9;
-	  border-radius: 30rpx;
-	  padding: 20rpx;
-	  transition: all 0.3s;
-	  position: relative;
-	  overflow: hidden;
-	  border: 2rpx solid #eee;
-	  display: flex;
-	  flex-direction: column;
+		background: #f9f9f9;
+		border-radius: 30rpx;
+		padding: 20rpx;
+		transition: all 0.3s;
+		position: relative;
+		overflow: hidden;
+		border: 2rpx solid #eee;
+		display: flex;
+		flex-direction: column;
 	}
-	
+
 	.task-card:hover {
-	  transform: translateY(-10rpx);
-	  box-shadow: 0 16rpx 40rpx rgba(255, 107, 0, 0.15);
-	  border-color: #FF8C00;
+		transform: translateY(-10rpx);
+		box-shadow: 0 16rpx 40rpx rgba(255, 107, 0, 0.15);
+		border-color: #FF8C00;
 	}
-	
+
 	.task-header {
-	  display: flex;
-	  align-items: center;
-	  margin-bottom: 20rpx;
+		display: flex;
+		align-items: center;
+		margin-bottom: 20rpx;
 	}
-	
+
 	.task-icon {
-	  width: 60rpx;
-	  height: 60rpx;
-	  border-radius: 20rpx;
-	  background: #fff5e6;
-	  display: flex;
-	  align-items: center;
-	  justify-content: center;
-	  margin-right: 20rpx;
-	  color: #FF6B00;
-	  font-size: 36rpx;
-	  flex-shrink: 0;
+		width: 60rpx;
+		height: 60rpx;
+		border-radius: 20rpx;
+		background: #fff5e6;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		margin-right: 20rpx;
+		color: #FF6B00;
+		font-size: 36rpx;
+		flex-shrink: 0;
 	}
-	
+
 	.task-name {
-	  font-size: 32rpx;
-	  font-weight: 600;
-	  color: #333;
+		font-size: 32rpx;
+		font-weight: 600;
+		color: #333;
 	}
-	
+
 	.task-desc {
-	  font-size: 26rpx;
-	  color: #666;
-	  margin-bottom: 30rpx;
-	  line-height: 1.4;
-	  flex-grow: 1;
+		font-size: 26rpx;
+		color: #666;
+		margin-bottom: 30rpx;
+		line-height: 1.4;
+		flex-grow: 1;
 	}
-	
+
 	.task-footer {
-	  display: flex;
-	  justify-content: space-between;
-	  align-items: center;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
 	}
-	
+
 	.task-points {
-	  display: inline-block;
-	  background: rgba(255, 107, 0, 0.1);
-	  color: #FF6B00;
-	  padding: 8rpx 20rpx;
-	  border-radius: 40rpx;
-	  font-size: 28rpx;
-	  font-weight: 600;
+		display: inline-block;
+		background: rgba(255, 107, 0, 0.1);
+		color: #FF6B00;
+		padding: 8rpx 20rpx;
+		border-radius: 40rpx;
+		font-size: 28rpx;
+		font-weight: 600;
 	}
-	
+
 	.task-button {
-	  width: 60rpx;
-	  height: 60rpx;
-	  border-radius: 50%;
-	  background: #FF6B00;
-	  color: white;
-	  display: flex;
-	  align-items: center;
-	  justify-content: center;
-	  cursor: pointer;
-	  transition: all 0.3s;
-	  border: none;
-	  font-size: 32rpx;
-	  flex-shrink: 0;
+		width: 60rpx;
+		height: 60rpx;
+		border-radius: 50%;
+		background: #FF6B00;
+		color: white;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		cursor: pointer;
+		transition: all 0.3s;
+		border: none;
+		font-size: 32rpx;
+		flex-shrink: 0;
 	}
-	
+
 	.task-button:hover {
-	  transform: scale(1.1);
-	  background: #FF8C00;
+		transform: scale(1.1);
+		background: #FF8C00;
 	}
 
 	/* 历史记录 */
@@ -1082,5 +1168,106 @@
 		margin-bottom: 20rpx;
 		display: block;
 		font-size: 48rpx;
+	}
+
+	/* 新增：智米模块样式 */
+	.smart-rice-section {
+		background: linear-gradient(to right, #fefefe, #f9f9f9);
+		border-radius: 40rpx;
+		padding: 50rpx;
+		margin-bottom: 60rpx;
+		box-shadow: 0 10rpx 30rpx rgba(0, 0, 0, 0.05);
+		border: 2rpx solid #eee;
+	}
+
+	.smart-rice-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 40rpx;
+	}
+
+	.smart-rice-title {
+		font-size: 36rpx;
+		font-weight: bold;
+		color: #333;
+		display: flex;
+		align-items: center;
+	}
+
+	.smart-rice-title i {
+		margin-right: 12rpx;
+	}
+
+	.smart-rice-value {
+		font-size: 48rpx;
+		font-weight: bold;
+		color: #FF6B00;
+	}
+
+	.smart-rice-info {
+		font-size: 28rpx;
+		color: #666;
+		line-height: 1.6;
+		margin-bottom: 40rpx;
+	}
+
+	.smart-rice-info .exchange-rate {
+		margin-top: 15rpx;
+		font-size: 30rpx;
+		font-weight: 500;
+	}
+
+	.smart-rice-actions {
+		display: flex;
+		justify-content: space-around;
+		gap: 30rpx;
+		margin-bottom: 40rpx;
+	}
+
+	.action-button {
+		flex: 1;
+		height: 90rpx;
+		border-radius: 50rpx;
+		border: none;
+		color: white;
+		font-size: 32rpx;
+		font-weight: bold;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		cursor: pointer;
+		transition: all 0.3s;
+		box-shadow: 0 8rpx 20rpx rgba(0, 0, 0, 0.1);
+	}
+
+	.exchange-button {
+		background: linear-gradient(to right, #FF8C00, #FF6B00);
+	}
+
+	.recharge-button {
+		background: linear-gradient(to right, #007bff, #0056b3);
+	}
+
+	.action-button uni-icons {
+		margin-right: 15rpx;
+	}
+
+	.action-button:hover {
+		transform: translateY(-5rpx);
+		box-shadow: 0 12rpx 25rpx rgba(0, 0, 0, 0.2);
+	}
+
+	.smart-rice-note {
+		font-size: 26rpx;
+		color: #999;
+		text-align: center;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.smart-rice-note uni-icons {
+		margin-right: 10rpx;
 	}
 </style>

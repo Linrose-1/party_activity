@@ -1,83 +1,76 @@
 <template>
-    <div class="business-card-apply-page">
-        <!-- 顶部导航 -->
-        <div class="header">
-            <div class="back-btn" @click="goBack">
-                <i class="fas fa-arrow-left"></i>
-            </div>
-            <h1>申请获取名片</h1>
-        </div>
+    <view class="business-card-apply-page">
         
-        <div class="container">
+        <view class="container">
             <!-- 申请卡片 -->
-            <div class="application-card">
-                <div class="target-user">
-                    <div class="target-avatar">{{ contactName.charAt(0) }}</div>
-                    <div class="target-name">{{ contactName }}</div>
-                    <div class="target-title">{{ contactCompany }}</div>
-                </div>
+            <view class="application-card">
+                <view class="target-user">
+                    <view class="target-avatar">{{ contactName.charAt(0) }}</view>
+                    <view class="target-name">{{ contactName }}</view>
+                    <view class="target-title">{{ contactCompany }}</view>
+                </view>
                 
-                <div class="description">
+                <view class="description">
                     您正在申请查看<span class="highlight">{{ contactName }}</span>的联系方式。请选择一种方式支付查看费用：
-                </div>
+                </view>
                 
-                <div class="cost-section">
-                    <div class="cost-title">选择支付方式</div>
+                <view class="cost-section">
+                    <view class="cost-title">选择支付方式</view>
                     
-                    <div class="cost-options">
-                        <div 
+                    <view class="cost-options">
+                        <view 
                             class="cost-option" 
                             :class="{selected: selectedOption === 'contribution'}" 
                             @click="selectOption('contribution')"
                         >
-                            <div class="currency-icon">
+                            <view class="currency-icon">
                                 <i class="fas fa-coins"></i>
-                            </div>
-                            <div class="cost-amount">10</div>
-                            <div class="cost-label">贡分</div>
-                        </div>
+                            </view>
+                            <view class="cost-amount">10</view>
+                            <view class="cost-label">贡分</view>
+                        </view>
                         
-                        <div 
+                        <view 
                             class="cost-option" 
                             :class="{selected: selectedOption === 'wisdom'}" 
                             @click="selectOption('wisdom')"
                         >
-                            <div class="currency-icon">
+                            <view class="currency-icon">
                                 <i class="fas fa-gem"></i>
-                            </div>
-                            <div class="cost-amount">1</div>
-                            <div class="cost-label">智米</div>
-                        </div>
-                    </div>
+                            </view>
+                            <view class="cost-amount">1</view>
+                            <view class="cost-label">智米</view>
+                        </view>
+                    </view>
                     
-                    <div class="user-balance">
-                        <div class="balance-item">
-                            <div>我的贡分</div>
-                            <div 
+                    <view class="user-balance">
+                        <view class="balance-item">
+                            <view>我的贡分</view>
+                            <view 
                                 class="balance-value" 
                                 :class="{ 'insufficient-value': userPoints.contribution < 10 && selectedOption === 'contribution' }"
                             >
                                 {{ userPoints.contribution }}
-                            </div>
-                        </div>
+                            </view>
+                        </view>
                         
-                        <div class="balance-item">
-                            <div>我的智米</div>
-                            <div 
+                        <view class="balance-item">
+                            <view>我的智米</view>
+                            <view 
                                 class="balance-value" 
                                 :class="{ 'insufficient-value': userPoints.wisdom < 1 && selectedOption === 'wisdom' }"
                             >
                                 {{ userPoints.wisdom }}
-                            </div>
-                        </div>
-                    </div>
+                            </view>
+                        </view>
+                    </view>
                     
-                    <div class="insufficient" v-if="showInsufficient">
+                    <view class="insufficient" v-if="showInsufficient">
                         <i class="fas fa-exclamation-circle"></i> 您的积分不足，请先获取更多积分
-                    </div>
-                </div>
+                    </view>
+                </view>
                 
-                <div class="action-buttons">
+                <view class="action-buttons">
                     <button class="btn btn-primary" @click="exchangePoints">
                         确认兑换
                     </button>
@@ -85,16 +78,19 @@
                     <button class="btn btn-secondary" @click="goToEarnPoints">
                         获取更多积分
                     </button>
-                </div>
+                </view>
                 
-                <div class="success-message" v-if="showSuccess">
-                    <i class="fas fa-check-circle"></i> 兑换成功！已为您显示联系方式
-                </div>
-            </div>
+                <view class="success-message" v-if="showSuccess">
+                    <i class="fas fa-check-circle"></i> 兑换成功！即将为您展示对方名片...
+                </view>
+            </view>
             
             <!-- 提示信息 -->
-            <div class="info-card">
-                <h3><i class="fas fa-lightbulb"></i> 为什么需要支付积分？</h3>
+            <view class="info-card">
+                <!-- 优化：添加图标和类名，标题内容居中 -->
+                <h1 class="info-card-title">
+                    <i class="fas fa-info-circle"></i> 为什么需要支付积分？
+                </h1>
                 <p>为了维护平台的商业环境和用户隐私，查看他人联系方式需要消耗积分。这有助于：</p>
                 <ul>
                     <li>确保联系请求的严肃性</li>
@@ -102,49 +98,10 @@
                     <li>维护高质量商业环境</li>
                     <li>激励用户贡献高质量内容</li>
                 </ul>
-            </div>
-        </div>
+            </view>
+        </view>
         
-        <!-- 联系方式弹窗 -->
-        <div class="contact-modal" :class="{active: showContactModal}" @click.self="closeContact">
-            <div class="contact-card">
-                <div class="contact-avatar">{{ contactName.charAt(0) }}</div>
-                <div class="contact-name">{{ contactName }}</div>
-                <div class="contact-info">
-                    <p><i class="fas fa-phone-alt"></i> 138 **** 5678</p>
-                    <p><i class="fas fa-envelope"></i> {{ contactEmail }}</p>
-                    <p><i class="fas fa-building"></i> {{ contactCompany }}</p>
-                    <p><i class="fas fa-map-marker-alt"></i> {{ contactAddress }}</p>
-                    <p><i class="fas fa-link"></i> {{ contactWebsite }}</p>
-                </div>
-                <button class="close-btn" @click="closeContact">关闭</button>
-            </div>
-        </div>
-        
-        <!-- 底部导航 -->
-        <div class="bottom-nav">
-            <div class="nav-item">
-                <i class="fas fa-home"></i>
-                <span>首页</span>
-            </div>
-            <div class="nav-item">
-                <i class="fas fa-briefcase"></i>
-                <span>商机</span>
-            </div>
-            <div class="nav-item active">
-                <i class="fas fa-user-friends"></i>
-                <span>人脉</span>
-            </div>
-            <div class="nav-item">
-                <i class="fas fa-wallet"></i>
-                <span>积分</span>
-            </div>
-            <div class="nav-item">
-                <i class="fas fa-user"></i>
-                <span>我的</span>
-            </div>
-        </div>
-    </div>
+    </view>
 </template>
 
 <script setup>
@@ -152,22 +109,19 @@ import { ref, reactive } from 'vue'; // Uni-app环境通常全局有uni对象
 
 // 当前用户积分数据
 const userPoints = reactive({
-    contribution: 8,  // 贡分
+    contribution: 11,  // 贡分
     wisdom: 0         // 智米
 });
 
-// 目标联系人信息
+// 目标联系人信息 (只需保留用到的，移除了邮箱、地址、网址，因为它们只在已移除的弹窗中使用)
 const contactName = ref('陈总');
 const contactCompany = ref('创新科技有限公司');
-const contactEmail = ref('chenzong@example.com');
-const contactAddress = ref('上海市浦东新区');
-const contactWebsite = ref('www.innotech-ai.com');
 
 // 状态管理
 const selectedOption = ref('contribution');
 const showInsufficient = ref(false);
 const showSuccess = ref(false);
-const showContactModal = ref(false);
+// showContactModal 变量不再需要，因为它相关的弹窗已移除
 
 // 选择支付方式
 const selectOption = (option) => {
@@ -199,10 +153,12 @@ const exchangePoints = () => {
             duration: 2000
         });
         
-        // 2秒后显示联系方式
+        // 2秒后跳转到我的名片页面
         setTimeout(() => {
             showSuccess.value = false;
-            showContactModal.value = true;
+            uni.navigateTo({
+                url: '/pages/my-businessCard/my-businessCard' // 兑换成功后跳转到的页面
+            });
         }, 2000);
     } else {
         showInsufficient.value = true;
@@ -214,14 +170,13 @@ const exchangePoints = () => {
     }
 };
 
-// 关闭联系方式弹窗
-const closeContact = () => {
-    showContactModal.value = false;
-};
+// 关闭联系方式弹窗 (此函数不再被调用，但如果将来有其他弹窗逻辑，可以保留此模式)
+// const closeContact = () => {
+//     showContactModal.value = false;
+// };
 
-// 返回上一页
+// 返回上一页 (此函数在模板中未被使用，但通常一个完整的页面会有返回按钮)
 const goBack = () => {
-    // 在 uni-app 项目中，可以使用 uni.navigateBack()
     uni.navigateBack({
         delta: 1 // 返回上一级页面
     });
@@ -229,16 +184,13 @@ const goBack = () => {
 
 // 前往赚取积分页面
 const goToEarnPoints = () => {
-    // 在 uni-app 项目中，可以使用 uni.navigateTo()
     uni.navigateTo({
-        url: '/pages/earn-points/earn-points' // 假设赚取积分页面路径为 /pages/earn-points/earn-points
+        url: '/pages/my-account/my-account' // 假设赚取积分页面路径为 /pages/earn-points/earn-points
     });
 };
 </script>
 
 <style scoped>
-
-
 /* 页面根容器样式，模拟 body 的布局和最大宽度 */
 .business-card-apply-page {
     background: linear-gradient(135deg, #f8f9fa, #e9ecef);
@@ -724,68 +676,80 @@ const goToEarnPoints = () => {
 }
 
 /* 提示卡片 */
+/* 提示卡片 */
 .info-card {
     background: white;
-    border-radius: 36rpx; /* 转换为 rpx */
-    padding: 40rpx; /* 转换为 rpx */
-    margin-top: 40rpx; /* 转换为 rpx */
-    box-shadow: 0 10rpx 40rpx rgba(0,0,0,0.05); /* 转换为 rpx */
-    border: 2rpx solid #eee; /* 转换为 rpx */
+    border-radius: 40rpx; /* 统一为 40rpx，与申请卡片保持一致 */
+    padding: 50rpx; /* 增加内边距，提供更多呼吸空间 */
+    margin-top: 50rpx; /* 调整顶部外边距，与申请卡片保持一致 */
+    box-shadow: 0 15rpx 50rpx rgba(0,0,0,0.08); /* 略微增强阴影，增加层次感 */
+    border: 2rpx solid #f0f0f0; /* 更柔和的边框颜色 */
+    position: relative; /* 为伪元素（如顶部线条）定位做准备 */
+    overflow: hidden; /* 确保内容在圆角内 */
 }
 
-.info-card h3 {
-    font-size: 36rpx; /* 转换为 rpx */
+/* 可以在顶部添加一条装饰线，与申请卡片形成视觉呼应 */
+.info-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 8rpx; /* 装饰线的高度 */
+    background: linear-gradient(to right, #4CAF50, #8BC34A); /* 使用绿色渐变，代表信息、成功 */
+    border-top-left-radius: 40rpx; /* 匹配父元素的圆角 */
+    border-top-right-radius: 40rpx; /* 匹配父元素的圆角 */
+}
+
+.info-card-title { /* 使用新的类名来控制标题样式 */
+    font-size: 42rpx; /* 标题字号略微加大，更醒目 */
     font-weight: 700;
-    color: #FF6A00;
-    margin-bottom: 30rpx; /* 转换为 rpx */
+    color: #333; /* 标题颜色改为深色，增加对比度 */
+    margin-bottom: 40rpx; /* 增加标题下方间距 */
     display: flex;
     align-items: center;
+    justify-content: center; /* 标题内容居中显示 */
+    text-align: center; /* 确保文本本身也居中 */
 }
 
-.info-card h3 i {
-    margin-right: 20rpx; /* 转换为 rpx */
-    font-size: 40rpx; /* 转换为 rpx */
+.info-card-title i { /* 图标样式 */
+    margin-right: 20rpx;
+    font-size: 48rpx; /* 图标字号加大 */
+    color: #4CAF50; /* 图标颜色使用绿色，代表信息、提示 */
+    text-shadow: 0 2rpx 4rpx rgba(0,0,0,0.1); /* 给图标添加细微阴影 */
 }
 
 .info-card p {
-    font-size: 28rpx; /* 转换为 rpx */
-    color: #555;
-    margin-bottom: 20rpx; /* 转换为 rpx */
-    line-height: 1.6;
+    font-size: 30rpx; /* 正文字号略微加大，提高可读性 */
+    color: #666; /* 颜色略微变浅，更柔和 */
+    margin-bottom: 25rpx; /* 调整段落下方间距 */
+    line-height: 1.7; /* 增加行高，提升阅读舒适度 */
+    text-align: justify; /* 文本两端对齐，使段落更规整 */
 }
 
 .info-card ul {
-    padding-left: 40rpx; /* 转换为 rpx */
-    margin-top: 20rpx; /* 转换为 rpx */
+    padding-left: 60rpx; /* 增加列表左侧内边距，提供更多缩进 */
+    margin-top: 30rpx; /* 增加列表上方间距 */
+    list-style: none; /* 移除默认的列表圆点 */
 }
 
 .info-card li {
-    font-size: 28rpx; /* 转换为 rpx */
-    color: #555;
-    margin-bottom: 16rpx; /* 转换为 rpx */
-    line-height: 1.5;
+    position: relative; /* 为自定义列表圆点定位做准备 */
+    font-size: 30rpx; /* 列表项字号与正文一致 */
+    color: #666; /* 列表项颜色与正文一致 */
+    margin-bottom: 20rpx; /* 增加列表项之间间距 */
+    line-height: 1.6;
+    padding-left: 40rpx; /* 为自定义圆点留出空间 */
 }
 
-/* 响应式调整 */
-/* uni-app 的 rpx 本身就是响应式的，但如果需要针对特定屏幕宽度进行调整，可以使用 @media */
-@media (max-width: 750rpx) { /* 模拟手机竖屏 */
-    .application-card {
-        padding: 40rpx; /* 转换为 rpx */
-    }
-    
-    .cost-options {
-        flex-direction: column; /* 小屏幕下选项垂直堆叠 */
-        align-items: center;
-    }
-    
-    .cost-option {
-        max-width: 100%; /* 占据全部可用宽度 */
-        width: 100%;
-    }
-    
-    .user-balance {
-        flex-direction: column; /* 小屏幕下余额信息垂直堆叠 */
-        gap: 30rpx; /* 转换为 rpx */
-    }
+.info-card li::before {
+    content: '\2022'; /* 使用 Unicode 圆点作为自定义圆点 */
+    font-size: 36rpx; /* 圆点字号 */
+    color: #4CAF50; /* 圆点颜色使用绿色 */
+    position: absolute;
+    left: 0;
+    top: 0rpx; /* 调整圆点垂直对齐 */
+    line-height: 1.6; /* 继承行高，使圆点与文本基线对齐 */
+    font-weight: bold;
 }
 </style>

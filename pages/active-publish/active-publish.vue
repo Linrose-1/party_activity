@@ -10,9 +10,6 @@
         </uni-forms-item>
 
         <uni-forms-item label="活动封面">
-          <!-- <view class="cover-upload" @click="uploadCover">
-            <text>{{ form.cover ? '已选择图片' : '点击上传封面图片' }}</text>
-          </view> -->
 		  <view class="cover-upload" @click="uploadCover">
 		      <image v-if="form.cover" :src="form.cover" mode="aspectFill"></image>
 		      <text v-else>点击上传封面图片</text>

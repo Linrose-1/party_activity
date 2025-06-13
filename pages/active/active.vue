@@ -59,7 +59,7 @@
 
 		<!-- 活动列表 -->
 		<view class="activity-list" scroll-y="true">
-			<ActivityCard v-for="(activity, index) in filteredActivities" :key="index" :activity="activity"/>
+			<ActivityCard v-for="(activity, index) in filteredActivities" :key="index" :activity="activity" />
 		</view>
 
 		<view v-if="filteredActivities.length > 0" class="no-more-content">
@@ -73,25 +73,6 @@
 				<text>发布活动</text>
 			</view>
 		</view>
-
-		<!-- 分享弹窗 -->
-		<!-- <view :class="['share-modal', {active: showShareModal}]">
-			<view class="share-content">
-				<view class="share-header">
-					<text class="share-title">分享活动</text>
-				</view>
-				<view class="share-options">
-					<view v-for="(option, index) in shareOptions" :key="index" class="share-option"
-						@click="shareActivity(option.platform)">
-						<view :class="['icon-wrapper', option.bgColor]">
-							<uni-icons :type="option.icon" size="24" color="white" />
-						</view>
-						<text>{{ option.name }}</text>
-					</view>
-				</view>
-				<view class="share-cancel" @click="closeShareModal">取消</view>
-			</view>
-		</view> -->
 	</view>
 </template>
 
@@ -173,29 +154,6 @@
 			}
 		});
 	}
-
-
-	// 分享功能
-	// const showShareModal = ref(false);
-	// const shareOptions = ref([{
-	// 		name: '微信',
-	// 		platform: 'wechat',
-	// 		icon: 'weixin',
-	// 		bgColor: 'wechat-bg'
-	// 	},
-	// 	{
-	// 		name: '微博',
-	// 		platform: 'weibo',
-	// 		icon: 'weibo',
-	// 		bgColor: 'weibo-bg'
-	// 	},
-	// 	{
-	// 		name: '朋友圈',
-	// 		platform: 'moments',
-	// 		icon: 'moments',
-	// 		bgColor: 'moments-bg'
-	// 	}
-	// ]);
 
 	const activitiesData = ref([{
 			id: 1,
@@ -371,61 +329,6 @@
 		}
 	}
 
-	.category-filter {
-		display: flex;
-		white-space: nowrap;
-		padding-bottom: 20rpx;
-		margin-bottom: 20rpx;
-
-		.category-btn {
-			padding: 12rpx 28rpx;
-			border-radius: 32rpx;
-			background: #f0f2f5;
-			color: #606770;
-			font-size: 28rpx;
-			margin-right: 16rpx;
-			border: none;
-			cursor: pointer;
-			transition: all 0.3s;
-
-			&:last-child {
-				margin-right: 0;
-			}
-
-			&.active {
-				background: linear-gradient(135deg, #FF6B00 0%, #FF8C00 100%);
-				color: white;
-			}
-		}
-	}
-
-	.location-filter {
-		display: flex;
-		justify-content: space-between;
-		gap: 20rpx;
-	}
-
-	.filter-option {
-		flex: 1;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		padding: 16rpx 0;
-		background: #f0f2f5;
-		border-radius: 16rpx;
-		font-size: 28rpx;
-		color: #606770;
-		transition: all 0.3s;
-
-		&.active {
-			background: linear-gradient(135deg, #FF6B00 0%, #FF8C00 100%);
-			color: white;
-		}
-
-		text {
-			margin-left: 10rpx;
-		}
-	}
 
 	/* 活动列表 */
 	.activity-list {
@@ -472,96 +375,5 @@
 	.register-btn {
 		background: linear-gradient(to right, #FF8C00, #FF6B00);
 		color: white;
-	}
-
-	/* 分享弹窗 */
-	.share-modal {
-		position: fixed;
-		top: 0;
-		left: 0;
-		right: 0;
-		bottom: 0;
-		background: rgba(0, 0, 0, 0.7);
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		z-index: 1000;
-		opacity: 0;
-		pointer-events: none;
-		transition: all 0.3s;
-
-		&.active {
-			opacity: 1;
-			pointer-events: all;
-		}
-	}
-
-	.share-content {
-		background: white;
-		border-radius: 32rpx;
-		width: 85%;
-		max-width: 640rpx;
-		overflow: hidden;
-	}
-
-	.share-header {
-		padding: 50rpx 0;
-		text-align: center;
-		border-bottom: 2rpx solid #eee;
-	}
-
-	.share-title {
-		font-size: 36rpx;
-		font-weight: 600;
-		color: #1c1e21;
-	}
-
-	.share-options {
-		display: flex;
-		justify-content: space-around;
-		padding: 50rpx 0;
-	}
-
-	.share-option {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		width: 33%;
-
-		text {
-			margin-top: 20rpx;
-			font-size: 28rpx;
-			color: #606770;
-		}
-	}
-
-	.icon-wrapper {
-		width: 100rpx;
-		height: 100rpx;
-		border-radius: 50%;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-
-		&.wechat-bg {
-			background: #07bc4c;
-		}
-
-		&.weibo-bg {
-			background: #e1306c;
-		}
-
-		&.moments-bg {
-			background: #1da1f2;
-		}
-	}
-
-	.share-cancel {
-		padding: 30rpx;
-		border-top: 2rpx solid #eee;
-		text-align: center;
-		color: #FF6B00;
-		font-weight: 500;
-		font-size: 32rpx;
 	}
 </style>

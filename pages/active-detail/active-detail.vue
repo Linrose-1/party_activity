@@ -96,8 +96,8 @@
 		<!-- 参与用户头像组 -->
 		<view class="participants-section">
 			<view class="participants-header">
-				<text class="participants-title">参与用户</text>
-				<text class="view-all-link" @click="viewAllUsers">查看全部 ></text>
+				<view class="participants-title">参与用户</view>
+				<view class="view-all-link" @click="viewAllUsers">查看全部 ></view>
 			</view>
 			<view class="participants-body">
 				<view class="avatar-group">
@@ -161,9 +161,6 @@
 		}
 	]
 
-	function goBack() {
-		uni.navigateBack()
-	}
 
 	function share() {
 		uni.showToast({
@@ -173,9 +170,8 @@
 	}
 
 	function register() {
-		uni.showToast({
-			title: '报名成功！',
-			icon: 'success'
+		uni.navigateTo({
+		  url:'/pages/active-enroll/active-enroll'
 		})
 	}
 
@@ -234,6 +230,18 @@
 		padding: 30rpx;
 		border-radius: 20rpx;
 		box-shadow: 0 10rpx 20rpx rgba(0, 0, 0, 0.05);
+	}
+	
+	.participants-header{
+		display: flex;
+		justify-content: space-between;
+		margin-bottom: 10rpx;
+		
+		.view-all-link{
+			font-size: 24rpx;
+			color: #3a7bd5;
+			cursor: pointer;
+		}
 	}
 
 	.event-title {
@@ -326,7 +334,8 @@
 	}
 	
 	.organizer-title,
-	.business-title{
+	.business-title,
+	.participants-title{
 		font-weight: bold;
 		margin-bottom: 20rpx;
 	}

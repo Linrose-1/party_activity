@@ -1,50 +1,47 @@
 <template>
-  <div class="container">
-    <div class="header">
+  <view class="container">
+    <view class="header">
       <h1>科技创新体验营活动报名</h1>
-    </div>
+    </view>
 
     <!-- 步骤指示器 -->
-    <div class="step-indicator">
-      <div class="step" :class="{ active: currentStep >= 1 }">
-        <div class="step-circle">1</div>
-        <div class="step-text">填写信息</div>
-      </div>
-      <div class="step" :class="{ active: currentStep >= 2 }">
-        <div class="step-circle">2</div>
-        <div class="step-text">支付费用</div>
-      </div>
-      <div class="step" :class="{ active: currentStep >= 3 }">
-        <div class="step-circle">3</div>
-        <div class="step-text">完成报名</div>
-      </div>
-    </div>
+    <view class="step-indicator">
+      <view class="step" :class="{ active: currentStep >= 1 }">
+        <view class="step-circle">1</view>
+        <view class="step-text">填写信息</view>
+      </view>
+      <view class="step" :class="{ active: currentStep >= 2 }">
+        <view class="step-circle">2</view>
+        <view class="step-text">支付费用</view>
+      </view>
+      <view class="step" :class="{ active: currentStep >= 3 }">
+        <view class="step-circle">3</view>
+        <view class="step-text">完成报名</view>
+      </view>
+    </view>
 
-    <div class="section">
-      <div class="section-title">
-        <!-- Uni-icons and Uni-easyinput are Uni-UI components.
-             In a real Uni-app project, they are typically auto-imported or globally registered.
-             For a standalone .vue file in a browser, ensure uni-ui.js is loaded globally. -->
+    <view class="section">
+      <view class="section-title">
         <uni-icons type="person" size="18" color="#FF6E00"></uni-icons>
         <span>组织者信息</span>
-      </div>
-      <div class="info-box">
-        <div><strong>姓名：</strong> 张经理</div>
-        <div><strong>单位：</strong> 创新科技活动策划部</div>
-        <div><strong>电话：</strong> 021-68881234</div>
-        <div><strong>活动时间：</strong> 2023年12月15日 14:00-17:00</div>
-        <div><strong>活动地点：</strong> 科技创新大厦3楼会议厅</div>
-      </div>
-    </div>
+      </view>
+      <view class="info-box">
+        <view><strong>姓名：</strong> 张经理</view>
+        <view><strong>单位：</strong> 创新科技活动策划部</view>
+        <view><strong>电话：</strong> 021-68881234</view>
+        <view><strong>活动时间：</strong> 2023年12月15日 14:00-17:00</view>
+        <view><strong>活动地点：</strong> 科技创新大厦3楼会议厅</view>
+      </view>
+    </view>
 
     <!-- 第一步：填写信息 -->
-    <div class="section" v-if="currentStep === 1">
-      <div class="section-title">
+    <view class="section" v-if="currentStep === 1">
+      <view class="section-title">
         <uni-icons type="compose" size="18" color="#FF6E00"></uni-icons>
         <span>填写报名信息</span>
-      </div>
+      </view>
 
-      <div class="input-item">
+      <view class="input-item">
         <label for="name">姓名</label>
         <uni-easyinput
           type="text"
@@ -52,9 +49,9 @@
           placeholder="请输入您的姓名"
           :styles="{ borderColor: '#eee', borderRadius: '12rpx' }"
         ></uni-easyinput>
-      </div>
+      </view>
 
-      <div class="input-item">
+      <view class="input-item">
         <label for="phone">手机号</label>
         <uni-easyinput
           type="tel"
@@ -62,9 +59,9 @@
           placeholder="请输入手机号"
           :styles="{ borderColor: '#eee', borderRadius: '12rpx' }"
         ></uni-easyinput>
-      </div>
+      </view>
 
-      <div class="input-item">
+      <view class="input-item">
         <label for="company">单位/学校</label>
         <uni-easyinput
           type="text"
@@ -72,7 +69,7 @@
           placeholder="请输入单位或学校名称"
           :styles="{ borderColor: '#eee', borderRadius: '12rpx' }"
         ></uni-easyinput>
-      </div>
+      </view>
 
       <button
         class="btn"
@@ -81,29 +78,29 @@
       >
         下一步：支付报名费
       </button>
-    </div>
+    </view>
 
     <!-- 第二步：支付费用 -->
-    <div class="section" v-if="currentStep === 2">
-      <div class="section-title">
+    <view class="section" v-if="currentStep === 2">
+      <view class="section-title">
         <uni-icons type="shop" size="18" color="#FF6E00"></uni-icons>
         <span>支付报名费用 <span class="price-tag">¥100.00</span></span>
-      </div>
+      </view>
 
-      <div class="qr-code">
+      <view class="qr-code">
         <img
           src="https://img.alicdn.com/imgextra/i1/6000000007751/O1CN01v7zfb41cDU2kq1elG_!!6000000007751-0-tps-248-248.jpg"
           alt="微信支付二维码"
         />
-        <div class="qr-note">请使用微信扫码完成支付</div>
-      </div>
+        <view class="qr-note">请使用微信扫码完成支付</view>
+      </view>
 
-      <div class="section-title">
+      <view class="section-title">
         <uni-icons type="image" size="18" color="#FF6E00"></uni-icons>
         <span>上传付款凭证</span>
-      </div>
+      </view>
 
-      <div
+      <view
         class="upload-box"
         :class="{ active: isDragging }"
         @dragover.prevent="isDragging = true"
@@ -111,20 +108,20 @@
         @drop="onDrop"
         @click="chooseImage"
       >
-        <div v-if="!screenshot">
-          <div class="upload-icon">
+        <view v-if="!screenshot">
+          <view class="upload-icon">
             <uni-icons type="plus" size="24" color="#FF6E00"></uni-icons>
-          </div>
-          <div class="upload-text">点击或拖拽上传付款截图</div>
-          <div
+          </view>
+          <view class="upload-text">点击或拖拽上传付款截图</view>
+          <view
             class="upload-text"
             style="font-size: 24rpx; margin-top: 10rpx"
           >
             支持JPG、PNG格式，小于5MB
-          </div>
-        </div>
+          </view>
+        </view>
         <img v-else :src="screenshot" class="preview-image" alt="付款截图" />
-      </div>
+      </view>
 
       <button
         class="btn"
@@ -133,47 +130,44 @@
       >
         提交报名信息
       </button>
-    </div>
+    </view>
 
     <!-- 第三步：完成报名 -->
-    <div v-if="currentStep === 3">
-      <div class="success-message">
-        <div class="success-icon">🎉</div>
-        <div>恭喜您报名成功！</div>
-        <div style="font-size: 28rpx; color: #666; margin-top: 30rpx">
+    <view v-if="currentStep === 3">
+      <view class="success-message">
+        <view class="success-icon">🎉</view>
+        <view>恭喜您报名成功！</view>
+        <view style="font-size: 28rpx; color: #666; margin-top: 30rpx">
           我们已发送确认短信至您的手机
-        </div>
-        <div style="font-size: 28rpx; color: #FF6E00; margin-top: 10rpx">
+        </view>
+        <view style="font-size: 28rpx; color: #FF6E00; margin-top: 10rpx">
           {{ formData.phone }}
-        </div>
-      </div>
+        </view>
+      </view>
 
-      <div class="section">
-        <div class="info-box">
-          <div><strong>活动名称：</strong> 科技创新体验营</div>
-          <div><strong>报名编号：</strong> {{ generateTicketNumber() }}</div>
-          <div><strong>报名时间：</strong> {{ currentDate }}</div>
-          <div><strong>温馨提示：</strong> 请于活动开始前15分钟携带本页面截图签到</div>
-        </div>
-      </div>
+      <view class="section">
+        <view class="info-box">
+          <view><strong>活动名称：</strong> 科技创新体验营</view>
+          <view><strong>报名编号：</strong> {{ generateTicketNumber() }}</view>
+          <view><strong>报名时间：</strong> {{ currentDate }}</view>
+          <view><strong>温馨提示：</strong> 请于活动开始前15分钟携带本页面截图签到</view>
+        </view>
+      </view>
 
       <button class="btn" @click="backToHome" style="margin: 30rpx">
         返回首页
       </button>
-    </div>
+    </view>
 
-    <div class="footer">
+    <view class="footer">
       <p>创新科技活动策划部 © 2023 版权所有</p>
       <p>客服电话: 021-68881234 | 服务时间: 9:00-18:00</p>
-    </div>
-  </div>
+    </view>
+  </view>
 </template>
 
 <script setup>
-import { ref, computed, reactive } from 'vue'; // ref, computed, reactive are typically auto-imported in <script setup> but explicitly listing them is good practice for clarity.
-// In a real Uni-app project, uni-ui components might be globally registered or imported as:
-// import { UniEasyinput, UniIcons } from '@dcloudio/uni-ui';
-// However, given the original CDN usage, they are assumed to be globally available.
+import { ref, computed, reactive } from 'vue'; 
 
 const currentStep = ref(1);
 const isDragging = ref(false);
@@ -295,18 +289,12 @@ const backToHome = () => {
 </script>
 
 <style scoped>
-/* Scoped styles ensure these styles only apply to this component */
-/* * {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-} */
-body {
+/* body {
   font-family: 'PingFang SC', 'Helvetica Neue', Arial, sans-serif;
   background-color: #f5f5f5;
   color: #333;
-  padding: 20rpx; /* Uni-app uses rpx, for web you might prefer px/rem/vw */
-}
+  padding: 20rpx;
+} */
 .container {
   max-width: 500px;
   margin: 0 auto;
@@ -353,7 +341,7 @@ body {
   line-height: 1.6;
   font-size: 28rpx;
 }
-.info-box div {
+.info-box view {
   margin: 15rpx 0;
 }
 label {
