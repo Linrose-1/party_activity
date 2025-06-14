@@ -1,46 +1,46 @@
 <template>
-    <div class="business-opportunity-detail-app">
+    <view class="business-opportunity-detail-app">
         
-        <div class="container">
+        <view class="container">
             <!-- 商机卡片 -->
-            <div class="opportunity-card">
-                <div class="author-info">
-                    <div class="author-avatar" @click="showContact(postDetail.user, postDetail.contact)">
+            <view class="opportunity-card">
+                <view class="author-info">
+                    <view class="author-avatar" @click="showContact(postDetail.user, postDetail.contact)">
                         {{ postDetail.user.charAt(0) }}
-                    </div>
+                    </view>
                     <!-- uni-app 不支持 :hover 和相邻选择器，这里tooltip简单模拟，实际复杂情况可用Popup组件 -->
-                    <div class="avatar-tooltip">点击获取联系方式</div>
-                    <div class="author-details">
-                        <div class="author-name">{{ postDetail.user }}</div>
-                        <div class="post-time">
+                    <view class="avatar-tooltip">点击获取联系方式</view>
+                    <view class="author-details">
+                        <view class="author-name">{{ postDetail.user }}</view>
+                        <view class="post-time">
                             <uni-icons type="redo" size="14" color="#888"></uni-icons> {{ postDetail.time }}
-                        </div>
-                    </div>
-                </div>
+                        </view>
+                    </view>
+                </view>
                 
-                <div class="opportunity-content">
+                <view class="opportunity-content">
                     {{ postDetail.content }}
-                </div>
+                </view>
 
                 <!-- 图片区域 -->
-                <div class="post-images" v-if="postDetail.images && postDetail.images.length">
-                    <div 
+                <view class="post-images" v-if="postDetail.images && postDetail.images.length">
+                    <view 
                         v-for="(image, imgIndex) in postDetail.images" 
                         :key="imgIndex" 
                         class="image-wrapper"
                     >
                         <img :src="image" alt="商机图片" class="post-image" @click.stop="previewImage(postDetail.images, imgIndex)" />
-                    </div>
-                </div>
+                    </view>
+                </view>
                 
-                <div class="tags">
-                    <div class="tag" v-for="(tag, index) in postDetail.tags" :key="index">
+                <view class="tags">
+                    <view class="tag" v-for="(tag, index) in postDetail.tags" :key="index">
                         {{ tag }}
-                    </div>
-                </div>
+                    </view>
+                </view>
                 
-                <div class="interactions">
-                    <div 
+                <view class="interactions">
+                    <view 
                         class="interaction-btn" 
                         :class="{ active: postDetail.userAction === 'like' }"
                         @click="toggleAction(postDetail, 'like')"
@@ -51,8 +51,8 @@
                             :color="postDetail.userAction === 'like' ? '#e74c3c' : '#666'"
                         ></uni-icons>
                         <span>{{ postDetail.likes }}</span>
-                    </div>
-                    <div 
+                    </view>
+                    <view 
                         class="interaction-btn" 
                         :class="{ active: postDetail.userAction === 'dislike' }"
                         @click="toggleAction(postDetail, 'dislike')"
@@ -63,11 +63,11 @@
                             :color="postDetail.userAction === 'dislike' ? '#3498db' : '#666'"
                         ></uni-icons>
                         <span>{{ postDetail.dislikes }}</span>
-                    </div>
-                    <div class="interaction-btn" @click="shareOpportunity">
+                    </view>
+                    <view class="interaction-btn" @click="shareOpportunity">
                         <uni-icons type="redo" size="18" color="#666"></uni-icons> 分享
-                    </div>
-                    <div 
+                    </view>
+                    <view 
                         class="interaction-btn" 
                         :class="{ active: postDetail.saved }"
                         @click="toggleBookmark(postDetail)"
@@ -78,32 +78,32 @@
                             :color="postDetail.saved ? '#FF6A00' : '#666'"
                         ></uni-icons>
                         收藏
-                    </div>
-                </div>
-            </div>
+                    </view>
+                </view>
+            </view>
             
             <!-- 评论区 -->
-            <div class="comments-section">
-                <div class="section-title">
+            <view class="comments-section">
+                <view class="section-title">
                     <uni-icons type="chatbubble-filled" size="20" color="#FF6A00"></uni-icons> 评论 ({{ comments.length }})
-                </div>
+                </view>
                 
-                <div class="comment-list">
-                    <div class="comment" v-for="comment in comments" :key="comment.id">
-                        <div class="comment-avatar" @click="showContact(comment.user, comment.contact)">
+                <view class="comment-list">
+                    <view class="comment" v-for="comment in comments" :key="comment.id">
+                        <view class="comment-avatar" @click="showContact(comment.user, comment.contact)">
                             {{ comment.user.charAt(0) }}
-                        </div>
-                        <div class="comment-content">
-                            <div class="comment-header">
-                                <div class="commenter-name">{{ comment.user }}</div>
-                                <div class="comment-time">{{ comment.time }}</div>
-                            </div>
-                            <div class="comment-text">{{ comment.text }}</div>
-                            <div class="comment-actions">
-                                <div class="comment-action" @click="replyComment(comment)">
+                        </view>
+                        <view class="comment-content">
+                            <view class="comment-header">
+                                <view class="commenter-name">{{ comment.user }}</view>
+                                <view class="comment-time">{{ comment.time }}</view>
+                            </view>
+                            <view class="comment-text">{{ comment.text }}</view>
+                            <view class="comment-actions">
+                                <view class="comment-action" @click="replyComment(comment)">
                                     <uni-icons type="chatbubble" size="16" color="#666"></uni-icons> 回复
-                                </div>
-                                <div 
+                                </view>
+                                <!-- <view 
                                     class="comment-action" 
                                     :class="{ active: comment.userAction === 'like' }"
                                     @click="toggleAction(comment, 'like')"
@@ -114,18 +114,18 @@
                                         :color="comment.userAction === 'like' ? '#e74c3c' : '#666'"
                                     ></uni-icons>
                                     <span>{{ comment.likes }}</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div v-if="comments.length === 0" class="no-comments-message">
+                                </view> -->
+                            </view>
+                        </view>
+                    </view>
+                    <view v-if="comments.length === 0" class="no-comments-message">
                         暂无评论，快来发表第一条评论吧！
-                    </div>
-                </div>
-            </div>
+                    </view>
+                </view>
+            </view>
             
             <!-- 添加评论区域 -->
-            <div class="add-comment">
+            <view class="add-comment">
                 <input 
                     type="text" 
                     v-model="newCommentText" 
@@ -134,15 +134,15 @@
                     confirm-type="send"
                 />
                 <button @click="addComment">发送</button>
-            </div>
-        </div>
+            </view>
+        </view>
         
         <!-- 联系方式弹窗 -->
-        <div class="contact-modal" :class="{ active: showContactModal }" @click.self="closeContact">
-            <div class="contact-card">
-                <div class="contact-avatar">{{ currentContact.name.charAt(0) }}</div>
-                <div class="contact-name">{{ currentContact.name }}</div>
-                <div class="contact-info">
+        <view class="contact-modal" :class="{ active: showContactModal }" @click.self="closeContact">
+            <view class="contact-card">
+                <view class="contact-avatar">{{ currentContact.name.charAt(0) }}</view>
+                <view class="contact-name">{{ currentContact.name }}</view>
+                <view class="contact-info">
                     <p v-if="currentContact.phone">
                         <uni-icons type="phone-filled" size="18" color="#FF6A00"></uni-icons> 
                         {{ currentContact.phone }}
@@ -163,11 +163,11 @@
                         <uni-icons type="link" size="18" color="#FF6A00"></uni-icons> 
                         {{ currentContact.website }}
                     </p>
-                </div>
+                </view>
                 <button class="close-btn" @click="closeContact">关闭</button>
-            </div>
-        </div>
-    </div>
+            </view>
+        </view>
+    </view>
 </template>
 
 <script setup>

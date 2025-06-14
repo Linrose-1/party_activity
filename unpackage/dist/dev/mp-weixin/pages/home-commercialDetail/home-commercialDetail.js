@@ -250,16 +250,7 @@ const _sfc_main = {
             e: common_vendor.t(comment.text),
             f: "361e9b2c-6-" + i0,
             g: common_vendor.o(($event) => replyComment(comment), comment.id),
-            h: "361e9b2c-7-" + i0,
-            i: common_vendor.p({
-              type: comment.userAction === "like" ? "hand-up-filled" : "hand-up",
-              size: "16",
-              color: comment.userAction === "like" ? "#e74c3c" : "#666"
-            }),
-            j: common_vendor.t(comment.likes),
-            k: comment.userAction === "like" ? 1 : "",
-            l: common_vendor.o(($event) => toggleAction(comment, "like"), comment.id),
-            m: comment.id
+            h: comment.id
           };
         }),
         A: common_vendor.p({
