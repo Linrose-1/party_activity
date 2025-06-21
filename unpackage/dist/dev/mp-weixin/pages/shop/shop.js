@@ -1,5 +1,6 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
+const utils_request = require("../../utils/request.js");
 if (!Array) {
   const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
   _easycom_uni_icons2();
@@ -16,6 +17,23 @@ const _sfc_main = {
     const activeFilter = common_vendor.ref("all");
     const loadingMore = common_vendor.ref(false);
     const hasMore = common_vendor.ref(true);
+    common_vendor.onMounted(() => {
+      getStoreList();
+    });
+    const getStoreList = async () => {
+      const result = await utils_request.request("/app-api/member/store/list", {
+        method: "GET",
+        // 请求方式
+        data: {
+          "pageNo": 1,
+          "pageSize": 10
+        }
+      });
+      common_vendor.index.__f__("log", "at pages/shop/shop.vue:87", "login result.data:", result);
+      if (result.error) {
+        common_vendor.index.__f__("log", "at pages/shop/shop.vue:91", "请求失败:", result.error);
+      }
+    };
     const allStores = common_vendor.ref([
       {
         id: 1,
@@ -83,12 +101,30 @@ const _sfc_main = {
       }
     ]);
     const filters = common_vendor.ref([
-      { name: "全部", value: "all" },
-      { name: "酒吧", value: "bar" },
-      { name: "美食", value: "food" },
-      { name: "KTV", value: "ktv" },
-      { name: "台球", value: "billiards" },
-      { name: "其他", value: "other" }
+      {
+        name: "全部",
+        value: "all"
+      },
+      {
+        name: "咖啡",
+        value: "bar"
+      },
+      {
+        name: "茶馆",
+        value: "food"
+      },
+      {
+        name: "美食",
+        value: "ktv"
+      },
+      {
+        name: "酒吧",
+        value: "billiards"
+      },
+      {
+        name: "其他",
+        value: "other"
+      }
     ]);
     const filteredStores = common_vendor.computed(() => {
       let result = allStores.value;
@@ -123,7 +159,7 @@ const _sfc_main = {
         url: `/pages/store/detail?id=${store.id}&name=${store.name}`
         // 示例导航
       });
-      common_vendor.index.__f__("log", "at pages/shop/shop.vue:196", "进入", store.name, "详情页");
+      common_vendor.index.__f__("log", "at pages/shop/shop.vue:233", "进入", store.name, "详情页");
     };
     const shareStore = () => {
       common_vendor.index.navigateTo({
@@ -135,7 +171,7 @@ const _sfc_main = {
         title: "申请上榜",
         icon: "none"
       });
-      common_vendor.index.__f__("log", "at pages/shop/shop.vue:210", "点击申请上榜");
+      common_vendor.index.__f__("log", "at pages/shop/shop.vue:247", "点击申请上榜");
     };
     return (_ctx, _cache) => {
       return common_vendor.e({

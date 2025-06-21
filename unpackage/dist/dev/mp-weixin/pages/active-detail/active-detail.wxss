@@ -37,7 +37,9 @@
 .event-content.data-v-de6b8eea,
 .organizer-section.data-v-de6b8eea,
 .business-section.data-v-de6b8eea,
-.participants-section.data-v-de6b8eea {
+.participants-section.data-v-de6b8eea,
+.sponsor-section.data-v-de6b8eea {
+  /* 添加 sponsor-section */
   background: #fff;
   margin: 30rpx;
   padding: 30rpx;
@@ -89,8 +91,14 @@
   font-size: 32rpx;
   font-weight: bold;
   margin: 30rpx 0 20rpx;
+  /* 可以根据需要调整 */
   border-left: 10rpx solid #FF6B00;
   padding-left: 20rpx;
+}
+
+/* 新增：如果 section-title 在新区块内，去除顶部 margin */
+.sponsor-section .section-title.data-v-de6b8eea {
+  margin-top: 0;
 }
 .event-description.data-v-de6b8eea {
   font-size: 28rpx;
@@ -132,13 +140,17 @@
 }
 .organizer-title.data-v-de6b8eea,
 .business-title.data-v-de6b8eea,
-.participants-title.data-v-de6b8eea {
+.participants-title.data-v-de6b8eea,
+.sponsor-title.data-v-de6b8eea {
+  /* 添加 sponsor-title */
   font-weight: bold;
   margin-bottom: 20rpx;
 }
 .organizer-info.data-v-de6b8eea,
 .business-info.data-v-de6b8eea,
-.participants-body.data-v-de6b8eea {
+.participants-body.data-v-de6b8eea,
+.sponsor-info.data-v-de6b8eea {
+  /* 添加 sponsor-info */
   display: flex;
   align-items: center;
   gap: 20rpx;
@@ -153,13 +165,30 @@
   align-items: center;
   justify-content: center;
 }
+
+/* 新增：赞助商Logo样式 */
+.sponsor-logo.data-v-de6b8eea {
+  width: 120rpx;
+  /* 根据实际Logo大小调整 */
+  height: 120rpx;
+  border-radius: 10rpx;
+  /* 方形或圆角矩形，更适合公司Logo */
+  object-fit: contain;
+  /* 保持图片比例并完整显示 */
+  background-color: #f0f0f0;
+  border: 1rpx solid #eee;
+}
 .organizer-name.data-v-de6b8eea,
-.business-name.data-v-de6b8eea {
+.business-name.data-v-de6b8eea,
+.sponsor-name.data-v-de6b8eea {
+  /* 添加 sponsor-name */
   font-weight: bold;
   font-size: 28rpx;
 }
 .organizer-company.data-v-de6b8eea,
-.business-meta text.data-v-de6b8eea {
+.business-meta text.data-v-de6b8eea,
+.sponsor-description.data-v-de6b8eea {
+  /* 添加 sponsor-description */
   font-size: 24rpx;
   color: #666;
 }

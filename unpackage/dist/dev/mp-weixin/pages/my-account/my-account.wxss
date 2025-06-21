@@ -139,7 +139,7 @@ body.data-v-04e670bd {
 .level-system.data-v-04e670bd {
 		background: linear-gradient(to right, #f9f9f9, #f0f0f0);
 		border-radius: 40rpx;
-		padding: 50rpx;
+		padding: 50rpx 10rpx;
 		margin-bottom: 60rpx;
 		position: relative;
 		overflow: hidden;
@@ -187,11 +187,11 @@ body.data-v-04e670bd {
 		background: linear-gradient(to bottom, #FFD700, #D4AF37);
 }
 .level-badge .level-name.data-v-04e670bd {
-		font-size: 32rpx;
+		font-size: 28rpx;
 		margin-bottom: 6rpx;
 }
 .level-badge .level-points.data-v-04e670bd {
-		font-size: 28rpx;
+		font-size: 24rpx;
 		opacity: 0.9;
 }
 .level-info.data-v-04e670bd {
@@ -306,6 +306,167 @@ body.data-v-04e670bd {
 		font-size: 24rpx;
 		color: #666;
 }
+
+	/* ============= 会员等级晋升系统样式 ============= */
+.membership-level-system.data-v-04e670bd {
+		background: #ffffff;
+		border-radius: 40rpx;
+		padding: 50rpx;
+		margin-top: 60rpx;
+		margin-bottom: 60rpx;
+		box-shadow: 0 10rpx 30rpx rgba(0, 0, 0, 0.05);
+		border: 1px solid #f0f0f0;
+}
+.membership-title.data-v-04e670bd {
+		font-size: 40rpx;
+		font-weight: bold;
+		margin-bottom: 20rpx;
+		color: #333;
+		display: flex;
+		align-items: center;
+}
+.membership-title uni-icons.data-v-04e670bd {
+		margin-right: 20rpx;
+}
+	
+	/* 新增：当前会员状态样式 */
+.membership-status.data-v-04e670bd {
+		background: linear-gradient(135deg, #fffaf2, #fff5e6);
+		border-radius: 30rpx;
+		padding: 40rpx;
+		margin-bottom: 40rpx;
+		border: 2rpx solid #ffe8cc;
+}
+.status-text.data-v-04e670bd {
+		font-size: 30rpx;
+		color: #664d03;
+		margin-bottom: 20rpx;
+		line-height: 1.5;
+}
+.status-text.data-v-04e670bd:last-child {
+		margin-bottom: 0;
+}
+.status-highlight.data-v-04e670bd {
+		font-weight: 700;
+		color: #e67e22;
+}
+.next-level-progress.data-v-04e670bd {
+		font-size: 32rpx;
+}
+.next-level-name.data-v-04e670bd {
+		font-weight: bold;
+		color: #d35400;
+}
+.amount-needed.data-v-04e670bd {
+		font-size: 36rpx;
+		font-weight: bold;
+		color: #ff0000;
+		margin: 0 8rpx;
+}
+.status-max-level.data-v-04e670bd {
+		font-size: 32rpx;
+		font-weight: bold;
+		color: #28a745;
+		display: flex;
+		align-items: center;
+}
+.status-max-level uni-icons.data-v-04e670bd {
+		margin-right: 12rpx;
+}
+.membership-description.data-v-04e670bd {
+		font-size: 28rpx;
+		color: #666;
+		margin-bottom: 50rpx;
+		line-height: 1.6;
+		text-align: center;
+}
+.membership-levels.data-v-04e670bd {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(250rpx, 1fr));
+		gap: 30rpx;
+}
+.membership-level-item.data-v-04e670bd {
+		border-radius: 30rpx;
+		padding: 30rpx 20rpx;
+		text-align: center;
+		transition: transform 0.3s, box-shadow 0.3s;
+		cursor: pointer;
+}
+.membership-level-item.data-v-04e670bd:hover {
+		transform: translateY(-8rpx);
+		box-shadow: 0 12rpx 30rpx rgba(0, 0, 0, 0.1);
+}
+.membership-level-item .level-icon.data-v-04e670bd {
+		margin-bottom: 20rpx;
+		height: 60rpx;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+}
+.membership-level-item .level-name.data-v-04e670bd {
+		font-size: 30rpx;
+		font-weight: 600;
+		margin-bottom: 10rpx;
+}
+.membership-level-item .level-price.data-v-04e670bd {
+		font-size: 28rpx;
+		font-weight: 500;
+}
+
+	/* 不同等级的颜色区分 */
+.visitor.data-v-04e670bd {
+		background-color: #f8f9fa;
+		border: 2rpx solid #dee2e6;
+}
+.visitor .level-name.data-v-04e670bd {
+		color: #6c757d;
+}
+.visitor .level-price.data-v-04e670bd {
+		color: #6c757d;
+}
+.bronze-member.data-v-04e670bd {
+		background-color: #fff4e6;
+		border: 2rpx solid #fed8b1;
+}
+.bronze-member .level-name.data-v-04e670bd {
+		color: #CD7F32;
+}
+.bronze-member .level-price.data-v-04e670bd {
+		color: #8C6B46;
+}
+.silver-member.data-v-04e670bd {
+		background-color: #f1f3f5;
+		border: 2rpx solid #ced4da;
+}
+.silver-member .level-name.data-v-04e670bd {
+		color: #868e96;
+}
+.silver-member .level-price.data-v-04e670bd {
+		color: #495057;
+}
+.gold-member.data-v-04e670bd {
+		background-color: #fff9db;
+		border: 2rpx solid #ffec8b;
+}
+.gold-member .level-name.data-v-04e670bd {
+		color: #e6a23c;
+}
+.gold-member .level-price.data-v-04e670bd {
+		color: #c67c00;
+}
+.diamond-member.data-v-04e670bd {
+		background-color: #343a40;
+		border: 2rpx solid #495057;
+}
+.diamond-member .level-name.data-v-04e670bd {
+		color: #f8f9fa;
+}
+.diamond-member .level-price.data-v-04e670bd {
+		color: #dee2e6;
+}
+
+	/* ============= 样式结束 ============= */
+
 
 	/* 贡分获取区域 */
 .points-section.data-v-04e670bd {

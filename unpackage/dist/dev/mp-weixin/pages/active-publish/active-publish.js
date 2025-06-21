@@ -3,30 +3,39 @@ const common_vendor = require("../../common/vendor.js");
 if (!Array) {
   const _easycom_uni_easyinput2 = common_vendor.resolveComponent("uni-easyinput");
   const _easycom_uni_forms_item2 = common_vendor.resolveComponent("uni-forms-item");
+  const _easycom_uni_data_select2 = common_vendor.resolveComponent("uni-data-select");
   const _easycom_uni_datetime_picker2 = common_vendor.resolveComponent("uni-datetime-picker");
+  const _easycom_uni_data_checkbox2 = common_vendor.resolveComponent("uni-data-checkbox");
   const _easycom_uni_forms2 = common_vendor.resolveComponent("uni-forms");
   const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
-  (_easycom_uni_easyinput2 + _easycom_uni_forms_item2 + _easycom_uni_datetime_picker2 + _easycom_uni_forms2 + _easycom_uni_icons2)();
+  (_easycom_uni_easyinput2 + _easycom_uni_forms_item2 + _easycom_uni_data_select2 + _easycom_uni_datetime_picker2 + _easycom_uni_data_checkbox2 + _easycom_uni_forms2 + _easycom_uni_icons2)();
 }
 const _easycom_uni_easyinput = () => "../../uni_modules/uni-easyinput/components/uni-easyinput/uni-easyinput.js";
 const _easycom_uni_forms_item = () => "../../uni_modules/uni-forms/components/uni-forms-item/uni-forms-item.js";
+const _easycom_uni_data_select = () => "../../uni_modules/uni-data-select/components/uni-data-select/uni-data-select.js";
 const _easycom_uni_datetime_picker = () => "../../uni_modules/uni-datetime-picker/components/uni-datetime-picker/uni-datetime-picker.js";
+const _easycom_uni_data_checkbox = () => "../../uni_modules/uni-data-checkbox/components/uni-data-checkbox/uni-data-checkbox.js";
 const _easycom_uni_forms = () => "../../uni_modules/uni-forms/components/uni-forms/uni-forms.js";
 const _easycom_uni_icons = () => "../../uni_modules/uni-icons/components/uni-icons/uni-icons.js";
 if (!Math) {
-  (_easycom_uni_easyinput + _easycom_uni_forms_item + _easycom_uni_datetime_picker + _easycom_uni_forms + _easycom_uni_icons)();
+  (_easycom_uni_easyinput + _easycom_uni_forms_item + _easycom_uni_data_select + _easycom_uni_datetime_picker + _easycom_uni_data_checkbox + _easycom_uni_forms + _easycom_uni_icons)();
 }
 const _sfc_main = {
   __name: "active-publish",
   setup(__props) {
     const form = common_vendor.ref({
       title: "互联网创业者交流会",
+      activityType: "交流会",
+      // 新增：活动类型字段，并设置默认值
       cover: "",
       enrollTime: ["2025-06-15 14:00:00", "2025-06-15 17:00:00"],
       time: ["2025-06-15 14:00:00", "2025-06-15 17:00:00"],
       location: "上海市浦东新区张江高科技园区",
       capacity: 50,
-      fee: 100,
+      enrollmentType: "aa",
+      aaFee: 100,
+      sponsorLogo: "",
+      sponsorName: "",
       description: `本次互联网创业者交流会旨在为行业内的创业者提供一个交流思想、分享经验的平台。...`,
       agenda: [
         { title: "主题演讲", desc: "行业大咖分享创业经验" },
@@ -42,11 +51,52 @@ const _sfc_main = {
       businessPhone: "021-68881234",
       businessHours: "09:00-22:00 (每日营业)"
     });
+    const activityTypeOptions = common_vendor.ref([
+      { value: "交流会", text: "交流会" },
+      { value: "沙龙", text: "沙龙" },
+      { value: "峰会", text: "峰会" },
+      { value: "分享会", text: "分享会" },
+      { value: "创业猎伙", text: "创业猎伙" },
+      { value: "其他", text: "其他" }
+    ]);
+    const enrollmentOptions = common_vendor.ref([
+      { text: "AA", value: "aa" },
+      { text: "赞助", value: "sponsor" }
+    ]);
+    const selectedLocationInfo = common_vendor.ref(null);
+    const openMapToChooseLocation = () => {
+      common_vendor.index.chooseLocation({
+        success: (res) => {
+          common_vendor.index.__f__("log", "at pages/active-publish/active-publish.vue:226", "选择位置成功:", res);
+          selectedLocationInfo.value = {
+            name: res.name,
+            address: res.address,
+            latitude: res.latitude,
+            longitude: res.longitude
+          };
+          form.value.location = res.address || res.name;
+        },
+        fail: (err) => {
+          common_vendor.index.__f__("log", "at pages/active-publish/active-publish.vue:237", "选择位置失败:", err);
+          if (err.errMsg.includes("cancel"))
+            ;
+          else {
+            common_vendor.index.showToast({
+              title: "选择位置失败",
+              icon: "none"
+            });
+          }
+        }
+      });
+    };
     function uploadCover() {
       common_vendor.index.chooseImage({ count: 1, success: (res) => form.value.cover = res.tempFilePaths[0] });
     }
     function uploadCode() {
       common_vendor.index.chooseImage({ count: 1, success: (res) => form.value.qrcode = res.tempFilePaths[0] });
+    }
+    function uploadSponsorLogo() {
+      common_vendor.index.chooseImage({ count: 1, success: (res) => form.value.sponsorLogo = res.tempFilePaths[0] });
     }
     function addAgenda() {
       form.value.agenda.push({ title: "", desc: "" });
@@ -56,12 +106,96 @@ const _sfc_main = {
     }
     function saveDraft() {
       common_vendor.index.showToast({ title: "活动已保存为草稿", icon: "none" });
+      common_vendor.index.__f__("log", "at pages/active-publish/active-publish.vue:278", "保存草稿:", form.value);
     }
     function publish() {
+      if (!form.value.title) {
+        common_vendor.index.showToast({ title: "请输入活动标题", icon: "none" });
+        return;
+      }
+      if (!form.value.activityType) {
+        common_vendor.index.showToast({ title: "请选择活动类型", icon: "none" });
+        return;
+      }
+      if (!form.value.cover) {
+        common_vendor.index.showToast({ title: "请上传活动封面", icon: "none" });
+        return;
+      }
+      if (!form.value.time || form.value.time.length !== 2) {
+        common_vendor.index.showToast({ title: "请选择活动时间", icon: "none" });
+        return;
+      }
+      if (!form.value.enrollTime || form.value.enrollTime.length !== 2) {
+        common_vendor.index.showToast({ title: "请选择报名时间", icon: "none" });
+        return;
+      }
+      if (!form.value.location) {
+        common_vendor.index.showToast({ title: "请选择活动地点", icon: "none" });
+        return;
+      }
+      if (!form.value.capacity || form.value.capacity <= 0) {
+        common_vendor.index.showToast({ title: "请输入正确的总名额", icon: "none" });
+        return;
+      }
+      if (form.value.enrollmentType === "aa") {
+        if (form.value.aaFee === null || form.value.aaFee < 0) {
+          common_vendor.index.showToast({ title: "请输入正确的预报名费用", icon: "none" });
+          return;
+        }
+      } else if (form.value.enrollmentType === "sponsor") {
+        if (!form.value.sponsorName) {
+          common_vendor.index.showToast({ title: "请输入公司名称", icon: "none" });
+          return;
+        }
+        if (!form.value.sponsorLogo) {
+          common_vendor.index.showToast({ title: "请上传公司Logo", icon: "none" });
+          return;
+        }
+      }
+      if (!form.value.description) {
+        common_vendor.index.showToast({ title: "请输入活动介绍", icon: "none" });
+        return;
+      }
+      if (!form.value.organizer) {
+        common_vendor.index.showToast({ title: "请输入组织者姓名", icon: "none" });
+        return;
+      }
+      if (!form.value.organization) {
+        common_vendor.index.showToast({ title: "请输入组织单位", icon: "none" });
+        return;
+      }
+      if (!form.value.phone) {
+        common_vendor.index.showToast({ title: "请输入联系电话", icon: "none" });
+        return;
+      }
       common_vendor.index.showToast({ title: "活动发布成功！", icon: "success" });
+      common_vendor.index.__f__("log", "at pages/active-publish/active-publish.vue:335", "发布活动:", form.value);
     }
     const searchKeyword = common_vendor.ref("");
-    common_vendor.ref([]);
+    const filteredShops = common_vendor.ref([]);
+    const allShops = common_vendor.ref([
+      { id: 1, name: "创客空间咖啡厅", address: "张江高科技园区88号" },
+      { id: 2, name: "创业孵化园会议中心", address: "浦东新区XX路123号" },
+      { id: 3, name: "数字未来展厅", address: "杨浦区YY路456号" },
+      { id: 4, name: "科技创新中心", address: "徐汇区ZZ路789号" }
+    ]);
+    function filterShops() {
+      const keyword = searchKeyword.value.trim().toLowerCase();
+      if (!keyword) {
+        filteredShops.value = [];
+        return;
+      }
+      filteredShops.value = allShops.value.filter(
+        (shop) => shop.name.toLowerCase().includes(keyword) || shop.address.toLowerCase().includes(keyword)
+      );
+    }
+    function selectShop(shop) {
+      form.value.businessName = shop.name;
+      form.value.businessAddress = shop.address;
+      common_vendor.index.showToast({ title: `已选择：${shop.name}`, icon: "none" });
+      filteredShops.value = [];
+      searchKeyword.value = shop.name;
+    }
     return (_ctx, _cache) => {
       return common_vendor.e({
         a: common_vendor.o(($event) => form.value.title = $event),
@@ -70,134 +204,209 @@ const _sfc_main = {
           modelValue: form.value.title
         }),
         c: common_vendor.p({
-          label: "活动标题"
+          label: "活动标题",
+          required: true
         }),
-        d: form.value.cover
+        d: common_vendor.o(($event) => form.value.activityType = $event),
+        e: common_vendor.p({
+          localdata: activityTypeOptions.value,
+          placeholder: "请选择活动类型",
+          modelValue: form.value.activityType
+        }),
+        f: common_vendor.p({
+          label: "活动类型",
+          required: true
+        }),
+        g: form.value.cover
       }, form.value.cover ? {
-        e: form.value.cover
+        h: form.value.cover
       } : {}, {
-        f: common_vendor.o(uploadCover),
-        g: common_vendor.p({
-          label: "活动封面"
+        i: common_vendor.o(uploadCover),
+        j: common_vendor.p({
+          label: "活动封面",
+          required: true
         }),
-        h: common_vendor.o(($event) => form.value.time = $event),
-        i: common_vendor.p({
+        k: common_vendor.o(($event) => form.value.time = $event),
+        l: common_vendor.p({
           type: "datetimerange",
           rangeSeparator: "至",
           modelValue: form.value.time
         }),
-        j: common_vendor.p({
-          label: "活动时间"
+        m: common_vendor.p({
+          label: "活动时间",
+          required: true
         }),
-        k: common_vendor.o(($event) => form.value.enrollTime = $event),
-        l: common_vendor.p({
+        n: common_vendor.o(($event) => form.value.enrollTime = $event),
+        o: common_vendor.p({
           type: "datetimerange",
           rangeSeparator: "至",
           modelValue: form.value.enrollTime
         }),
-        m: common_vendor.p({
-          label: "报名时间"
-        }),
-        n: common_vendor.o(($event) => form.value.location = $event),
-        o: common_vendor.p({
-          placeholder: "请输入活动地点",
-          modelValue: form.value.location
-        }),
         p: common_vendor.p({
-          label: "活动地点"
+          label: "报名时间",
+          required: true
         }),
-        q: common_vendor.o(($event) => form.value.capacity = $event),
-        r: common_vendor.p({
+        q: selectedLocationInfo.value
+      }, selectedLocationInfo.value ? {
+        r: common_vendor.t(selectedLocationInfo.value.address || selectedLocationInfo.value.name)
+      } : {}, {
+        s: common_vendor.o(openMapToChooseLocation),
+        t: common_vendor.p({
+          label: "活动地点",
+          required: true
+        }),
+        v: common_vendor.o(($event) => form.value.capacity = $event),
+        w: common_vendor.p({
           type: "number",
+          placeholder: "请输入活动总名额",
           modelValue: form.value.capacity
         }),
-        s: common_vendor.p({
-          label: "总名额"
+        x: common_vendor.p({
+          label: "总名额",
+          required: true
         }),
-        t: common_vendor.o(($event) => form.value.fee = $event),
-        v: common_vendor.p({
-          type: "number",
-          modelValue: form.value.fee
+        y: common_vendor.o(($event) => form.value.enrollmentType = $event),
+        z: common_vendor.p({
+          localdata: enrollmentOptions.value,
+          mode: "button",
+          modelValue: form.value.enrollmentType
         }),
-        w: common_vendor.p({
-          label: "报名费用 (元)"
+        A: common_vendor.p({
+          label: "报名类型",
+          required: true
         }),
-        x: common_vendor.o(($event) => form.value.description = $event),
-        y: common_vendor.p({
+        B: form.value.enrollmentType === "aa"
+      }, form.value.enrollmentType === "aa" ? {
+        C: common_vendor.o(($event) => form.value.aaFee = $event),
+        D: common_vendor.p({
+          type: "digit",
+          placeholder: "请输入预报名费用",
+          modelValue: form.value.aaFee
+        }),
+        E: common_vendor.p({
+          label: "预报名费用 (元)",
+          required: true
+        })
+      } : {}, {
+        F: form.value.enrollmentType === "sponsor"
+      }, form.value.enrollmentType === "sponsor" ? common_vendor.e({
+        G: common_vendor.o(($event) => form.value.sponsorName = $event),
+        H: common_vendor.p({
+          placeholder: "请输入赞助公司名称",
+          modelValue: form.value.sponsorName
+        }),
+        I: common_vendor.p({
+          label: "公司名称",
+          required: true
+        }),
+        J: form.value.sponsorLogo
+      }, form.value.sponsorLogo ? {
+        K: form.value.sponsorLogo
+      } : {}, {
+        L: common_vendor.o(uploadSponsorLogo),
+        M: common_vendor.p({
+          label: "公司Logo",
+          required: true
+        })
+      }) : {}, {
+        N: common_vendor.o(($event) => form.value.description = $event),
+        O: common_vendor.p({
           type: "textarea",
           autoHeight: true,
+          placeholder: "请输入活动详细介绍",
           modelValue: form.value.description
         }),
-        z: common_vendor.p({
-          label: "活动介绍"
+        P: common_vendor.p({
+          label: "活动介绍",
+          required: true
         }),
-        A: common_vendor.f(form.value.agenda, (item, index, i0) => {
+        Q: common_vendor.f(form.value.agenda, (item, index, i0) => {
           return {
-            a: "d21abf49-16-" + i0,
+            a: "d21abf49-22-" + i0,
             b: common_vendor.o(($event) => item.title = $event, index),
             c: common_vendor.p({
               placeholder: "环节标题",
               modelValue: item.title
             }),
-            d: "d21abf49-17-" + i0,
+            d: "d21abf49-23-" + i0,
             e: common_vendor.o(($event) => item.desc = $event, index),
             f: common_vendor.p({
               placeholder: "环节描述",
               modelValue: item.desc
             }),
             g: common_vendor.o(($event) => removeAgenda(index), index),
-            h: "d21abf49-18-" + i0,
+            h: "d21abf49-24-" + i0,
             i: index
           };
         }),
-        B: common_vendor.p({
+        R: common_vendor.p({
           type: "close"
         }),
-        C: common_vendor.p({
+        S: common_vendor.p({
           type: "plusempty"
         }),
-        D: common_vendor.o(addAgenda),
-        E: common_vendor.o(($event) => form.value.organizer = $event),
-        F: common_vendor.p({
+        T: common_vendor.o(addAgenda),
+        U: common_vendor.o(($event) => form.value.organizer = $event),
+        V: common_vendor.p({
+          placeholder: "请输入组织者姓名",
           modelValue: form.value.organizer
         }),
-        G: common_vendor.p({
-          label: "组织者姓名"
+        W: common_vendor.p({
+          label: "组织者姓名",
+          required: true
         }),
-        H: common_vendor.o(($event) => form.value.organization = $event),
-        I: common_vendor.p({
+        X: common_vendor.o(($event) => form.value.organization = $event),
+        Y: common_vendor.p({
+          placeholder: "请输入组织单位名称",
           modelValue: form.value.organization
         }),
-        J: common_vendor.p({
-          label: "组织单位"
+        Z: common_vendor.p({
+          label: "组织单位",
+          required: true
         }),
-        K: common_vendor.o(($event) => form.value.phone = $event),
-        L: common_vendor.p({
+        aa: common_vendor.o(($event) => form.value.phone = $event),
+        ab: common_vendor.p({
+          type: "number",
+          placeholder: "请输入联系电话",
           modelValue: form.value.phone
         }),
-        M: common_vendor.p({
-          label: "联系电话"
+        ac: common_vendor.p({
+          label: "联系电话",
+          required: true
         }),
-        N: form.value.qrcode
+        ad: form.value.qrcode
       }, form.value.qrcode ? {
-        O: form.value.qrcode
+        ae: form.value.qrcode
       } : {}, {
-        P: common_vendor.o(uploadCode),
-        Q: common_vendor.p({
+        af: common_vendor.o(uploadCode),
+        ag: common_vendor.p({
           label: "收款码上传"
         }),
-        R: common_vendor.o(_ctx.filterShops),
-        S: common_vendor.o(($event) => searchKeyword.value = $event),
-        T: common_vendor.p({
+        ah: common_vendor.o(filterShops),
+        ai: common_vendor.o(($event) => searchKeyword.value = $event),
+        aj: common_vendor.p({
           placeholder: "搜索店铺名称",
           modelValue: searchKeyword.value
         }),
-        U: form.value.businessName
+        ak: searchKeyword.value && filteredShops.value.length > 0
+      }, searchKeyword.value && filteredShops.value.length > 0 ? {
+        al: common_vendor.f(filteredShops.value, (shop, k0, i0) => {
+          return {
+            a: common_vendor.t(shop.name),
+            b: common_vendor.t(shop.address),
+            c: shop.id,
+            d: form.value.businessName === shop.name ? 1 : "",
+            e: common_vendor.o(($event) => selectShop(shop), shop.id)
+          };
+        })
+      } : searchKeyword.value && filteredShops.value.length === 0 ? {} : {}, {
+        am: searchKeyword.value && filteredShops.value.length === 0,
+        an: form.value.businessName
       }, form.value.businessName ? {
-        V: common_vendor.t(form.value.businessName)
+        ao: common_vendor.t(form.value.businessName)
       } : {}, {
-        W: common_vendor.o(saveDraft),
-        X: common_vendor.o(publish)
+        ap: common_vendor.o(saveDraft),
+        aq: common_vendor.o(publish)
       });
     };
   }

@@ -19,7 +19,8 @@
     "pages/my-active/my-active",
     "pages/my-opportunity/my-opportunity",
     "pages/my-collection/my-collection",
-    "pages/user-agreement/user-agreement"
+    "pages/user-agreement/user-agreement",
+    "pages/location/location"
   ],
   "window": {
     "navigationBarTextStyle": "black",
@@ -43,6 +44,12 @@
         "text": "活动",
         "iconPath": "/static/tabbar/active.png",
         "selectedIconPath": "/static/tabbar/active-active.png"
+      },
+      {
+        "pagePath": "pages/location/location",
+        "text": "附近",
+        "iconPath": "/static/tabbar/location.png",
+        "selectedIconPath": "/static/tabbar/location-active.png"
       },
       {
         "pagePath": "pages/shop/shop",

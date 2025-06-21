@@ -33,7 +33,7 @@ const _sfc_main = {
       return `${year}-${month}-${day}`;
     };
     common_vendor.ref("picker");
-    const array = common_vendor.ref(["全部类型", "交流会", "沙龙", "峰会", "分享会", "其他"]);
+    const array = common_vendor.ref(["全部类型", "交流会", "沙龙", "峰会", "分享会", "创业猎伙", "其他"]);
     const index = common_vendor.ref(0);
     const date = common_vendor.ref(getDate({
       format: true

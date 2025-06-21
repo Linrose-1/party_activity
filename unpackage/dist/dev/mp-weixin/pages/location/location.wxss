@@ -1,0 +1,211 @@
+/* 水平间距 */
+/* 水平间距 */
+.nearby-container.data-v-4d9b4fcb {
+  background-color: #f8f9fa;
+  min-height: 100vh;
+}
+
+/* 顶部导航 */
+.header.data-v-4d9b4fcb {
+  background-color: #fff;
+  color: white;
+  padding: 20rpx 30rpx;
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
+  padding-top: var(--status-bar-height);
+  /* 适配刘海屏 */
+}
+.header .title.data-v-4d9b4fcb {
+  font-size: 36rpx;
+  font-weight: 600;
+  text-align: center;
+  margin: 10rpx 0 20rpx;
+}
+.header .tabs-wrapper.data-v-4d9b4fcb {
+  margin: 0 auto;
+}
+.content-area.data-v-4d9b4fcb {
+  padding: 0 32rpx;
+}
+
+/* 摇一摇区域 */
+.shake-container.data-v-4d9b4fcb {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 70vh;
+  text-align: center;
+}
+.shake-btn.data-v-4d9b4fcb {
+  width: 360rpx;
+  height: 360rpx;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ff6b00 0%, #ff8c00 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 44rpx;
+  font-weight: bold;
+  box-shadow: 0 20rpx 50rpx rgba(255, 107, 0, 0.4);
+  transition: all 0.2s ease;
+}
+.shake-btn.data-v-4d9b4fcb:active {
+  transform: scale(0.95);
+  box-shadow: 0 10rpx 30rpx rgba(255, 107, 0, 0.5);
+}
+.shake-icon.data-v-4d9b4fcb {
+  animation: pulse-4d9b4fcb 2s infinite;
+}
+.shake-hint.data-v-4d9b4fcb {
+  margin-top: 60rpx;
+  font-size: 28rpx;
+  color: #666;
+  max-width: 600rpx;
+  line-height: 1.6;
+}
+
+/* 加载中 */
+.loading-container.data-v-4d9b4fcb {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 70vh;
+  color: #666;
+}
+.loading-spinner.data-v-4d9b4fcb {
+  width: 50rpx;
+  height: 50rpx;
+  border: 4rpx solid #e0e0e0;
+  border-top-color: #ff6b00;
+  border-radius: 50%;
+  animation: spin-4d9b4fcb 1s linear infinite;
+  margin-bottom: 20rpx;
+}
+.loading-text.data-v-4d9b4fcb {
+  font-size: 28rpx;
+}
+
+/* 列表区域 */
+.list-container.data-v-4d9b4fcb {
+  padding-top: 30rpx;
+}
+.list-title.data-v-4d9b4fcb {
+  font-size: 40rpx;
+  font-weight: 600;
+  margin-bottom: 30rpx;
+  display: flex;
+  align-items: center;
+}
+.list-title text.data-v-4d9b4fcb {
+  margin-left: 16rpx;
+}
+
+/* 商友卡片样式 (活动卡片样式由组件自身决定) */
+.business-card.data-v-4d9b4fcb {
+  background: white;
+  border-radius: 24rpx;
+  padding: 30rpx;
+  display: flex;
+  margin-bottom: 30rpx;
+  box-shadow: 0 4rpx 24rpx rgba(0, 0, 0, 0.05);
+}
+.business-card .business-avatar.data-v-4d9b4fcb {
+  width: 140rpx;
+  height: 140rpx;
+  border-radius: 50%;
+  margin-right: 30rpx;
+  border: 4rpx solid #ff8c00;
+}
+.business-card .card-position.data-v-4d9b4fcb,
+.business-card .card-company.data-v-4d9b4fcb {
+  font-size: 26rpx;
+  margin-bottom: 5rpx;
+  opacity: 0.95;
+}
+.business-card .business-info.data-v-4d9b4fcb {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.business-card .business-name.data-v-4d9b4fcb {
+  font-size: 34rpx;
+  font-weight: 600;
+  margin-bottom: 10rpx;
+}
+.business-card .distance.data-v-4d9b4fcb {
+  color: #ff6b00;
+  font-weight: normal;
+}
+.business-card .business-position.data-v-4d9b4fcb {
+  color: #666;
+  margin-bottom: 16rpx;
+  font-size: 26rpx;
+}
+.business-card .business-tags.data-v-4d9b4fcb {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+}
+.business-card .business-tag.data-v-4d9b4fcb {
+  background: #f0f2f5;
+  color: #666;
+  padding: 6rpx 20rpx;
+  border-radius: 40rpx;
+  font-size: 24rpx;
+}
+.business-card .connect-btn.data-v-4d9b4fcb {
+  background: linear-gradient(135deg, #ff6b00 0%, #ff8c00 100%);
+  color: white;
+  border: none;
+  padding: 0 30rpx;
+  border-radius: 40rpx;
+  font-weight: 500;
+  align-self: center;
+  font-size: 26rpx;
+  margin-left: 20rpx;
+}
+.business-card .connect-btn.data-v-4d9b4fcb::after {
+  border: none;
+}
+
+/* 动画 */
+@keyframes pulse-4d9b4fcb {
+0% {
+    transform: scale(1);
+}
+50% {
+    transform: scale(1.1);
+}
+100% {
+    transform: scale(1);
+}
+}
+@keyframes spin-4d9b4fcb {
+0% {
+    transform: rotate(0deg);
+}
+100% {
+    transform: rotate(360deg);
+}
+}
+.fade-in.data-v-4d9b4fcb {
+  animation: fadeIn-4d9b4fcb 0.5s ease-out;
+}
+@keyframes fadeIn-4d9b4fcb {
+from {
+    opacity: 0;
+    transform: translateY(20px);
+}
+to {
+    opacity: 1;
+    transform: translateY(0);
+}
+}

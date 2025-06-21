@@ -14,9 +14,39 @@ const _sfc_main = {
   __name: "my-account",
   setup(__props) {
     const points = common_vendor.ref(2166);
-    common_vendor.ref(
-      "青铜"
-    );
+    const rechargedAmount = common_vendor.ref(8888);
+    const membershipLevels = common_vendor.ref([
+      { name: "游客会员", threshold: 0 },
+      { name: "青铜会员", threshold: 100 },
+      { name: "白银会员", threshold: 365 },
+      { name: "黄金会员", threshold: 3650 },
+      { name: "黑钻会员", threshold: 36500 },
+      // 添加一个无限大的“顶层”，方便计算
+      { name: "至尊", threshold: Infinity }
+    ]);
+    const currentMembershipLevel = common_vendor.computed(() => {
+      const amount = rechargedAmount.value;
+      for (let i = membershipLevels.value.length - 1; i >= 0; i--) {
+        if (amount >= membershipLevels.value[i].threshold) {
+          return membershipLevels.value[i];
+        }
+      }
+      return membershipLevels.value[0];
+    });
+    const nextMembershipLevel = common_vendor.computed(() => {
+      const currentIndex = membershipLevels.value.findIndex((level) => level.name === currentMembershipLevel.value.name);
+      if (currentIndex < membershipLevels.value.length - 2) {
+        return membershipLevels.value[currentIndex + 1];
+      }
+      return null;
+    });
+    const amountToNextLevel = common_vendor.computed(() => {
+      if (nextMembershipLevel.value) {
+        const needed = nextMembershipLevel.value.threshold - rechargedAmount.value;
+        return Math.max(0, needed);
+      }
+      return 0;
+    });
     const smartRice = common_vendor.ref(150);
     const tasks = common_vendor.ref([
       {
@@ -103,7 +133,7 @@ const _sfc_main = {
         return 1e3 - points.value;
       return 0;
     });
-    const progressWidth = common_vendor.computed(() => {
+    common_vendor.computed(() => {
       const cappedPoints = Math.min(Math.max(points.value, 0), maxPoints);
       return cappedPoints / maxPoints * 100 + "%";
     });
@@ -164,7 +194,7 @@ const _sfc_main = {
         icon: "none",
         duration: 2e3
       });
-      common_vendor.index.__f__("log", "at pages/my-account/my-account.vue:374", "用户点击了联系客服");
+      common_vendor.index.__f__("log", "at pages/my-account/my-account.vue:480", "用户点击了联系客服");
     };
     common_vendor.onMounted(() => {
       if (bronzeBadgeRef.value) {
@@ -176,10 +206,10 @@ const _sfc_main = {
     if (typeof common_vendor.index === "undefined") {
       window.uni = {
         showToast: (options) => {
-          common_vendor.index.__f__("log", "at pages/my-account/my-account.vue:391", "Mock uni.showToast:", options.title);
+          common_vendor.index.__f__("log", "at pages/my-account/my-account.vue:497", "Mock uni.showToast:", options.title);
         },
         showModal: (options) => {
-          common_vendor.index.__f__("log", "at pages/my-account/my-account.vue:395", "Mock uni.showModal:", options.title, options.content);
+          common_vendor.index.__f__("log", "at pages/my-account/my-account.vue:501", "Mock uni.showModal:", options.title, options.content);
           if (confirm(`${options.title}
 ${options.content}`)) {
             options.success && options.success({
@@ -228,35 +258,30 @@ ${options.content}`)) {
         }),
         i: common_vendor.t(points.value),
         j: common_vendor.t(pointsToNextLevel.value),
-        k: common_vendor.t(maxPoints),
-        l: progressWidth.value,
-        m: common_vendor.p({
-          type: "person",
-          size: "20",
-          color: "#fff"
+        k: common_vendor.p({
+          type: "vip",
+          size: "24",
+          color: "#FFD700"
         }),
-        n: common_vendor.p({
-          type: "shield",
-          size: "20",
-          color: "#fff"
-        }),
-        o: common_vendor.p({
-          type: "medal",
-          size: "20",
-          color: "#fff"
-        }),
-        p: common_vendor.p({
-          type: "crown",
-          size: "20",
-          color: "#fff"
-        }),
+        l: common_vendor.t(currentMembershipLevel.value.name),
+        m: common_vendor.t(rechargedAmount.value),
+        n: amountToNextLevel.value > 0 && nextMembershipLevel.value
+      }, amountToNextLevel.value > 0 && nextMembershipLevel.value ? {
+        o: common_vendor.t(nextMembershipLevel.value.name),
+        p: common_vendor.t(amountToNextLevel.value)
+      } : {
         q: common_vendor.p({
+          type: "cloud-upload",
+          size: "18",
+          color: "#28a745"
+        })
+      }, {
+        r: common_vendor.p({
           type: "wallet",
           size: "24",
           color: "#FF6B00"
         }),
-        r: common_vendor.t(smartRice.value),
-        s: common_vendor.t(pointsPerSmartRice),
+        s: common_vendor.t(smartRice.value),
         t: common_vendor.p({
           type: "forward",
           size: "20",
@@ -282,7 +307,7 @@ ${options.content}`)) {
         A: common_vendor.t(points.value),
         B: common_vendor.f(tasks.value, (task, index, i0) => {
           return {
-            a: "04e670bd-12-" + i0,
+            a: "04e670bd-10-" + i0,
             b: common_vendor.p({
               type: task.icon,
               size: "24",
@@ -291,7 +316,7 @@ ${options.content}`)) {
             c: common_vendor.t(task.name),
             d: common_vendor.t(task.desc),
             e: common_vendor.t(task.points),
-            f: "04e670bd-13-" + i0,
+            f: "04e670bd-11-" + i0,
             g: common_vendor.o(($event) => handleTaskClick(task.name, $event), index),
             h: index
           };
@@ -308,7 +333,7 @@ ${options.content}`)) {
         }),
         E: common_vendor.f(historyRecords.value, (record, index, i0) => {
           return {
-            a: "04e670bd-15-" + i0,
+            a: "04e670bd-13-" + i0,
             b: common_vendor.p({
               type: record.icon,
               size: "20",

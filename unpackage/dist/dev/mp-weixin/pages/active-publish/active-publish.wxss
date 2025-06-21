@@ -36,6 +36,27 @@
   border-left: 10rpx solid #FF6F00;
   padding-left: 20rpx;
 }
+.uni-list-cell-db.data-v-d21abf49 {
+  margin-left: 10rpx;
+  padding: 20rpx;
+  margin: 10rpx 0;
+  border: #ffe1d2 solid 1rpx;
+  min-width: 500rpx;
+}
+.uni-list-cell-db .uni-input.data-v-d21abf49 {
+  margin-left: 10rpx;
+  font-size: 28rpx;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.uni-list-cell-db .uni-input .placeholder.data-v-d21abf49 {
+  color: #939393;
+}
+.uni-list-cell-db .uni-input .arrow.data-v-d21abf49 {
+  color: #999;
+  font-size: 32rpx;
+}
 .cover-upload.data-v-d21abf49 {
   border: 2rpx dashed #ccc;
   border-radius: 16rpx;
@@ -56,9 +77,7 @@
 }
 .cover-upload image.data-v-d21abf49 {
   width: 100%;
-  /* 图片宽度填充容器 */
   height: 100%;
-  /* 图片高度填充容器 */
 }
 .activity-item.data-v-d21abf49 {
   margin: 20rpx 0;
@@ -70,6 +89,18 @@
   display: flex;
   flex-direction: column;
   gap: 20rpx;
+  position: relative;
+}
+.input-group .uni-icons.data-v-d21abf49 {
+  position: absolute;
+  right: 20rpx;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #999;
+  font-size: 40rpx !important;
+}
+.input-group uni-easyinput.data-v-d21abf49 .uni-easyinput__content {
+  padding-right: 60rpx;
 }
 .add-btn.data-v-d21abf49 {
   display: flex;
@@ -87,7 +118,7 @@
   display: flex;
   background-color: #fff;
   padding: 20rpx 0;
-  box-shadow: 0 -5rpx 10rpx rgba(0, 0, 0, 0.05);
+  z-index: 999;
 }
 .action-btn.data-v-d21abf49 {
   flex: 1;
@@ -113,6 +144,13 @@
   display: flex;
   flex-direction: column;
   gap: 20rpx;
+  max-height: 300rpx;
+  /* 设置最大高度并允许滚动 */
+  overflow-y: auto;
+  border: 1rpx solid #eee;
+  border-radius: 10rpx;
+  padding: 10rpx;
+  margin-bottom: 20rpx;
 }
 .shop-item.data-v-d21abf49 {
   padding: 20rpx;
@@ -120,6 +158,9 @@
   border-radius: 16rpx;
   font-size: 28rpx;
   cursor: pointer;
+}
+.shop-item.data-v-d21abf49:active {
+  background-color: #e0e0e0;
 }
 .shop-item.selected.data-v-d21abf49 {
   background-color: #FF6F00;
@@ -130,4 +171,15 @@
   margin-top: 20rpx;
   color: #666;
   font-size: 26rpx;
+}
+
+/* 修复 uni-data-select 样式可能不一致的问题 */
+.data-v-d21abf49 .uni-select {
+  font-size: 28rpx !important;
+}
+.data-v-d21abf49 .uni-select__input-text {
+  color: #333;
+}
+.data-v-d21abf49 .uni-select__input-placeholder {
+  color: #939393;
 }

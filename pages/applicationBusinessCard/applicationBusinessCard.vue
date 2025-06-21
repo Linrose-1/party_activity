@@ -18,18 +18,7 @@
                     <view class="cost-title">选择支付方式</view>
                     
                     <view class="cost-options">
-                        <view 
-                            class="cost-option" 
-                            :class="{selected: selectedOption === 'contribution'}" 
-                            @click="selectOption('contribution')"
-                        >
-                            <view class="currency-icon">
-                                <i class="fas fa-coins"></i>
-                            </view>
-                            <view class="cost-amount">10</view>
-                            <view class="cost-label">贡分</view>
-                        </view>
-                        
+                        <!-- 贡分支付选项已移除 -->
                         <view 
                             class="cost-option" 
                             :class="{selected: selectedOption === 'wisdom'}" 
@@ -44,21 +33,12 @@
                     </view>
                     
                     <view class="user-balance">
-                        <view class="balance-item">
-                            <view>我的贡分</view>
-                            <view 
-                                class="balance-value" 
-                                :class="{ 'insufficient-value': userPoints.contribution < 10 && selectedOption === 'contribution' }"
-                            >
-                                {{ userPoints.contribution }}
-                            </view>
-                        </view>
-                        
+                        <!-- 贡分余额显示已移除 -->
                         <view class="balance-item">
                             <view>我的智米</view>
                             <view 
                                 class="balance-value" 
-                                :class="{ 'insufficient-value': userPoints.wisdom < 1 && selectedOption === 'wisdom' }"
+                                :class="{ 'insufficient-value': userPoints.wisdom < 1 }"
                             >
                                 {{ userPoints.wisdom }}
                             </view>
@@ -66,7 +46,7 @@
                     </view>
                     
                     <view class="insufficient" v-if="showInsufficient">
-                        <i class="fas fa-exclamation-circle"></i> 您的积分不足，请先获取更多积分
+                        <i class="fas fa-exclamation-circle"></i> 您的智米不足，请先获取更多积分
                     </view>
                 </view>
                 
@@ -84,10 +64,23 @@
                     <i class="fas fa-check-circle"></i> 兑换成功！即将为您展示对方名片...
                 </view>
             </view>
+
+            <!-- 格式化申请好友语卡片 -->
+            <view class="friend-request-card">
+                <h1 class="friend-request-title">
+                    <i class="fas fa-comment-dots"></i> 申请好友语
+                </h1>
+                <p class="friend-request-desc">复制以下文字，方便快速添加对方微信：</p>
+                <view class="message-box">
+                    <text selectable class="formatted-message">{{ formattedFriendRequestMessage }}</text>
+                    <button class="copy-btn" @click="copyFriendRequestMessage">
+                        ⧉复制
+                    </button>
+                </view>
+            </view>
             
             <!-- 提示信息 -->
             <view class="info-card">
-                <!-- 优化：添加图标和类名，标题内容居中 -->
                 <h1 class="info-card-title">
                     <i class="fas fa-info-circle"></i> 为什么需要支付积分？
                 </h1>
@@ -105,25 +98,31 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'; // Uni-app环境通常全局有uni对象
+import { ref, reactive, computed } from 'vue'; 
+import { onLoad } from '@dcloudio/uni-app';
+// Uni-app环境通常全局有uni对象，无需额外导入
+
+// 模拟当前用户信息（请根据实际业务从全局状态或API获取）
+const myName = ref('张明');
+const myCompany = ref('未来科技');
+const myWork = ref('人工智能项目管理'); // 模拟用户从事的工作
 
 // 当前用户积分数据
 const userPoints = reactive({
-    contribution: 11,  // 贡分
+    // contribution: 11,  // 贡分已移除
     wisdom: 0         // 智米
 });
 
-// 目标联系人信息 (只需保留用到的，移除了邮箱、地址、网址，因为它们只在已移除的弹窗中使用)
+// 目标联系人信息 
 const contactName = ref('陈总');
 const contactCompany = ref('创新科技有限公司');
 
 // 状态管理
-const selectedOption = ref('contribution');
+const selectedOption = ref('wisdom'); // 默认选中智米
 const showInsufficient = ref(false);
 const showSuccess = ref(false);
-// showContactModal 变量不再需要，因为它相关的弹窗已移除
 
-// 选择支付方式
+// 选择支付方式 (现在只有一个选项，但保留函数以防未来扩展)
 const selectOption = (option) => {
     selectedOption.value = option;
     showInsufficient.value = false; // 切换选项时隐藏积分不足提示
@@ -132,12 +131,8 @@ const selectOption = (option) => {
 // 兑换积分
 const exchangePoints = () => {
     let sufficient = false;
-    if (selectedOption.value === 'contribution') {
-        if (userPoints.contribution >= 10) {
-            userPoints.contribution -= 10;
-            sufficient = true;
-        }
-    } else if (selectedOption.value === 'wisdom') {
+    // 智米兑换逻辑
+    if (selectedOption.value === 'wisdom') {
         if (userPoints.wisdom >= 1) {
             userPoints.wisdom -= 1;
             sufficient = true;
@@ -163,31 +158,52 @@ const exchangePoints = () => {
     } else {
         showInsufficient.value = true;
         uni.showToast({
-            title: '积分不足，请先获取更多积分',
+            title: '智米不足，请先获取更多积分',
             icon: 'error', // 可以在uni-app中使用'none'并自定义图标
             duration: 2000
         });
     }
 };
 
-// 关闭联系方式弹窗 (此函数不再被调用，但如果将来有其他弹窗逻辑，可以保留此模式)
-// const closeContact = () => {
-//     showContactModal.value = false;
-// };
-
-// 返回上一页 (此函数在模板中未被使用，但通常一个完整的页面会有返回按钮)
-const goBack = () => {
-    uni.navigateBack({
-        delta: 1 // 返回上一级页面
-    });
-};
-
 // 前往赚取积分页面
 const goToEarnPoints = () => {
     uni.navigateTo({
-        url: '/pages/my-account/my-account' // 假设赚取积分页面路径为 /pages/earn-points/earn-points
+        url: '/pages/my-account/my-account' // 假设赚取积分页面路径为 /pages/my-account/my-account
     });
 };
+
+// 计算属性：格式化申请好友语
+const formattedFriendRequestMessage = computed(() => {
+    return `您好！我是${myCompany.value}${myName.value}，目前在从事与您项目关联的${myWork.value}工作。我从聚一聚获得您的微信。请通过。`;
+});
+
+// 复制申请好友语
+const copyFriendRequestMessage = () => {
+    uni.setClipboardData({
+        data: formattedFriendRequestMessage.value,
+        success: () => {
+            uni.showToast({
+                title: '复制成功！',
+                icon: 'success',
+                duration: 1500
+            });
+        },
+        fail: (err) => {
+            uni.showToast({
+                title: '复制失败，请重试',
+                icon: 'none',
+                duration: 1500
+            });
+            console.error('复制到剪贴板失败', err);
+        }
+    });
+};
+
+// 页面加载时可以模拟获取用户积分（实际项目中会从API获取）
+onLoad(() => {
+    // 模拟数据加载，实际应从后端获取
+    userPoints.wisdom = 5; // 假设用户有5个智米
+});
 </script>
 
 <style scoped>
@@ -212,7 +228,7 @@ const goToEarnPoints = () => {
     -webkit-overflow-scrolling: touch; /* 提升 iOS 滚动流畅度 */
 }
 
-/* 顶部导航 */
+/* 顶部导航 (此处模板中已移除，保留样式以防需要) */
 .header {
     background: linear-gradient(135deg, #FF6A00, #FF8C00);
     color: white;
@@ -230,7 +246,6 @@ const goToEarnPoints = () => {
 .header .back-btn {
     font-size: 44rpx; /* 转换为 rpx */
     margin-right: 30rpx; /* 转换为 rpx */
-    /* cursor: pointer; 在小程序中不适用 */
     width: 72rpx; /* 转换为 rpx */
     height: 72rpx; /* 转换为 rpx */
     border-radius: 50%;
@@ -240,7 +255,7 @@ const goToEarnPoints = () => {
     transition: background 0.3s;
 }
 
-.header .back-btn:active { /* 在小程序中使用 :active 模拟 :hover */
+.header .back-btn:active {
     background: rgba(255, 255, 255, 0.2);
 }
 
@@ -340,19 +355,19 @@ const goToEarnPoints = () => {
 
 .cost-options {
     display: flex;
-    justify-content: center;
+    justify-content: center; /* 确保单个选项也能居中 */
     gap: 40rpx; /* 转换为 rpx */
     margin-bottom: 20rpx; /* 转换为 rpx */
 }
 
 .cost-option {
-    flex: 1;
+    /* 移除 flex: 1; 因为现在只有一个选项，flex:1 会使其占据所有空间 */
     max-width: 300rpx; /* 转换为 rpx */
+    min-width: 280rpx; /* 确保有最小宽度，避免内容过少时太窄 */
     border: 4rpx solid #e0e0e0; /* 转换为 rpx */
     border-radius: 30rpx; /* 转换为 rpx */
     padding: 30rpx; /* 转换为 rpx */
     text-align: center;
-    /* cursor: pointer; */
     transition: all 0.3s;
     position: relative;
     background: white;
@@ -401,7 +416,7 @@ const goToEarnPoints = () => {
 
 .user-balance {
     display: flex;
-    justify-content: center;
+    justify-content: center; /* 单个项目时也能居中 */
     gap: 60rpx; /* 转换为 rpx */
     margin: 40rpx 0; /* 转换为 rpx */
     padding: 30rpx; /* 转换为 rpx */
@@ -437,16 +452,14 @@ const goToEarnPoints = () => {
     border-radius: 24rpx; /* 转换为 rpx */
     font-size: 34rpx; /* 转换为 rpx */
     font-weight: 600;
-    /* cursor: pointer; */
     transition: all 0.3s;
     text-align: center;
     border: none;
-    /* 针对 uni-app 按钮默认样式进行重置 */
     -webkit-appearance: none;
     background-color: transparent;
-    line-height: 1; /* 消除默认 button 的行高影响 */
+    line-height: 1;
 }
-/* 移除小程序按钮的默认边框 */
+
 .btn::after {
     border: none;
 }
@@ -457,7 +470,7 @@ const goToEarnPoints = () => {
     box-shadow: 0 10rpx 30rpx rgba(255, 106, 0, 0.3); /* 转换为 rpx */
 }
 
-.btn-primary:active { /* 在小程序中使用 :active 模拟 :hover */
+.btn-primary:active {
     background: linear-gradient(135deg, #e05a00, #e07a00);
     transform: translateY(-4rpx); /* 转换为 rpx */
     box-shadow: 0 14rpx 36rpx rgba(255, 106, 0, 0.4); /* 转换为 rpx */
@@ -468,7 +481,7 @@ const goToEarnPoints = () => {
     color: #666;
 }
 
-.btn-secondary:active { /* 在小程序中使用 :active 模拟 :hover */
+.btn-secondary:active {
     background: #e0e0e0;
 }
 
@@ -477,7 +490,7 @@ const goToEarnPoints = () => {
     font-size: 28rpx; /* 转换为 rpx */
     margin-top: 20rpx; /* 转换为 rpx */
     text-align: center;
-    display: flex; /* 使用 flex 布局图标和文字 */
+    display: flex;
     align-items: center;
     justify-content: center;
     gap: 10rpx; /* 转换为 rpx */
@@ -491,7 +504,7 @@ const goToEarnPoints = () => {
     margin-top: 40rpx; /* 转换为 rpx */
     text-align: center;
     animation: fadeIn 0.5s;
-    display: flex; /* 使用 flex 布局图标和文字 */
+    display: flex;
     align-items: center;
     justify-content: center;
     gap: 10rpx; /* 转换为 rpx */
@@ -503,161 +516,215 @@ const goToEarnPoints = () => {
     to { opacity: 1; transform: translateY(0); }
 }
 
-/* 联系方式弹窗 */
-.contact-modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0,0,0,0.7);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-    opacity: 0;
-    pointer-events: none; /* 默认不响应事件 */
-    transition: opacity 0.3s;
-}
-
-.contact-modal.active {
-    opacity: 1;
-    pointer-events: all; /* 激活时响应事件 */
-}
-
-.contact-card {
+/* 新增的格式化申请好友语卡片样式 */
+.friend-request-card {
     background: white;
-    border-radius: 40rpx; /* 转换为 rpx */
-    width: 85%;
-    max-width: 640rpx; /* 转换为 rpx */
-    padding: 60rpx; /* 转换为 rpx */
-    text-align: center;
-    transform: translateY(60rpx); /* 转换为 rpx */
-    transition: transform 0.4s;
-    box-shadow: 0 30rpx 80rpx rgba(0,0,0,0.3); /* 转换为 rpx */
+    border-radius: 40rpx;
+    margin-top: 50rpx; /* 与上一个卡片保持间距 */
+    padding: 50rpx;
+    box-shadow: 0 15rpx 50rpx rgba(0,0,0,0.08);
+    border: 2rpx solid #f0f0f0;
     position: relative;
     overflow: hidden;
 }
 
-.contact-modal.active .contact-card {
-    transform: translateY(0);
-}
-
-.contact-card::before {
+.friend-request-card::before {
     content: '';
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
-    height: 10rpx; /* 转换为 rpx */
-    background: linear-gradient(to right, #4CAF50, #2E7D32);
+    height: 8rpx;
+    background: linear-gradient(to right, #007bff, #0056b3); /* 蓝色渐变 */
+    border-top-left-radius: 40rpx;
+    border-top-right-radius: 40rpx;
 }
 
-.contact-avatar {
-    width: 180rpx; /* 转换为 rpx */
-    height: 180rpx; /* 转换为 rpx */
-    border-radius: 50%;
-    background: linear-gradient(135deg, #4CAF50, #2E7D32);
+.friend-request-title {
+    font-size: 42rpx;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 20rpx; /* 调整标题下方间距 */
     display: flex;
     align-items: center;
     justify-content: center;
-    color: white;
-    font-weight: bold;
-    font-size: 72rpx; /* 转换为 rpx */
-    margin: 0 auto 40rpx; /* 转换为 rpx */
-    border: 6rpx solid white; /* 转换为 rpx */
-    box-shadow: 0 10rpx 30rpx rgba(0,0,0,0.2); /* 转换为 rpx */
-}
-
-.contact-name {
-    font-size: 44rpx; /* 转换为 rpx */
-    font-weight: 700;
-    margin-bottom: 50rpx; /* 转换为 rpx */
-    color: #333;
-}
-
-.contact-info {
-    background: #f1f8e9;
-    border-radius: 30rpx; /* 转换为 rpx */
-    padding: 40rpx; /* 转换为 rpx */
-    margin: 40rpx 0; /* 转换为 rpx */
-    text-align: left;
-    border: 2rpx solid #dcedc8; /* 转换为 rpx */
-}
-
-.contact-info p {
-    margin: 28rpx 0; /* 转换为 rpx */
-    display: flex;
-    align-items: center;
-    font-size: 30rpx; /* 转换为 rpx */
-}
-
-.contact-info i {
-    margin-right: 24rpx; /* 转换为 rpx */
-    color: #4CAF50;
-    width: 48rpx; /* 转换为 rpx */
-    font-size: 36rpx; /* 转换为 rpx */
     text-align: center;
 }
 
-.close-btn {
-    background: #4CAF50;
-    color: white;
-    border: none;
-    border-radius: 50rpx; /* 转换为 rpx */
-    padding: 28rpx 50rpx; /* 转换为 rpx */
-    width: 100%;
-    font-weight: 600;
-    /* cursor: pointer; */
-    margin-top: 20rpx; /* 转换为 rpx */
-    font-size: 32rpx; /* 转换为 rpx */
-    box-shadow: 0 8rpx 24rpx rgba(76, 175, 80, 0.4); /* 转换为 rpx */
-    transition: background 0.3s;
+.friend-request-title i {
+    margin-right: 20rpx;
+    font-size: 48rpx;
+    color: #007bff; /* 图标颜色 */
+    text-shadow: 0 2rpx 4rpx rgba(0,0,0,0.1);
+}
 
-    /* 针对 uni-app 按钮默认样式进行重置 */
+.friend-request-desc {
+    font-size: 28rpx;
+    color: #777;
+    text-align: center;
+    margin-bottom: 30rpx;
+}
+
+.message-box {
+    background: #f8f9fa;
+    border: 2rpx solid #e9ecef;
+    border-radius: 20rpx;
+    padding: 30rpx;
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* 文本和按钮居中 */
+    gap: 20rpx; /* 文本和按钮间距 */
+}
+
+.formatted-message {
+    width: 100%;
+    font-size: 30rpx;
+    color: #555;
+    line-height: 1.6;
+    text-align: left; /* 文本左对齐 */
+    word-break: break-all; /* 确保长文本换行 */
+}
+
+.copy-btn {
+    background: #007bff;
+    color: black;
+    border: none;
+    border-radius: 24rpx;
+    padding: 20rpx 40rpx;
+    font-size: 30rpx;
+    font-weight: 600;
+    box-shadow: 0 8rpx 20rpx rgba(0, 123, 255, 0.3);
+    transition: background 0.3s;
+    width: auto; /* 按钮宽度自适应内容 */
+    /* uni-app 按钮默认样式重置 */
     -webkit-appearance: none;
     background-color: transparent;
-    line-height: 1; /* 消除默认 button 的行高影响 */
+    line-height: 1;
+    display: flex; /* 让图标和文字在按钮内水平居中 */
+    align-items: center;
+    justify-content: center;
+    gap: 10rpx; /* 图标和文字间距 */
 }
-/* 移除小程序按钮的默认边框 */
-.close-btn::after {
+
+.copy-btn::after {
     border: none;
 }
 
-.close-btn:active { /* 在小程序中使用 :active 模拟 :hover */
-    background: #388E3C;
+.copy-btn:active {
+    background: #0056b3;
+    transform: translateY(-2rpx);
+    box-shadow: 0 10rpx 24rpx rgba(0, 123, 255, 0.4);
 }
 
-/* 底部导航 */
+.copy-btn i {
+    font-size: 32rpx;
+}
+
+
+/* 提示卡片 */
+.info-card {
+    background: white;
+    border-radius: 40rpx;
+    padding: 50rpx;
+    margin-top: 50rpx;
+    box-shadow: 0 15rpx 50rpx rgba(0,0,0,0.08);
+    border: 2rpx solid #f0f0f0;
+    position: relative;
+    overflow: hidden;
+}
+
+.info-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 8rpx;
+    background: linear-gradient(to right, #4CAF50, #8BC34A);
+    border-top-left-radius: 40rpx;
+    border-top-right-radius: 40rpx;
+}
+
+.info-card-title {
+    font-size: 42rpx;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 40rpx;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.info-card-title i {
+    margin-right: 20rpx;
+    font-size: 48rpx;
+    color: #4CAF50;
+    text-shadow: 0 2rpx 4rpx rgba(0,0,0,0.1);
+}
+
+.info-card p {
+    font-size: 30rpx;
+    color: #666;
+    margin-bottom: 25rpx;
+    line-height: 1.7;
+    text-align: justify;
+}
+
+.info-card ul {
+    padding-left: 60rpx;
+    margin-top: 30rpx;
+    list-style: none;
+}
+
+.info-card li {
+    position: relative;
+    font-size: 30rpx;
+    color: #666;
+    margin-bottom: 20rpx;
+    line-height: 1.6;
+    padding-left: 40rpx;
+}
+
+.info-card li::before {
+    content: '\2022';
+    font-size: 36rpx;
+    color: #4CAF50;
+    position: absolute;
+    left: 0;
+    top: 0rpx;
+    line-height: 1.6;
+    font-weight: bold;
+}
+
+/* 底部导航 (此处模板中已移除，保留样式以防需要) */
 .bottom-nav {
     position: fixed;
     bottom: 0;
-    left: 50%; /* 居中显示 */
-    transform: translateX(-50%); /* 居中显示 */
-    width: 100%; /* 确保占据100%宽度，以便 max-width 生效 */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
     background: white;
     display: flex;
     justify-content: space-around;
-    padding: 24rpx 0; /* 转换为 rpx */
-    /* 适配底部安全区域 (例如 iPhone 刘海屏) */
+    padding: 24rpx 0;
     padding-bottom: calc(24rpx + env(safe-area-inset-bottom));
-    border-top: 2rpx solid #e0e0e0; /* 转换为 rpx */
-    box-shadow: 0 -10rpx 30rpx rgba(0,0,0,0.05); /* 转换为 rpx */
-    max-width: 750rpx; /* 与页面内容最大宽度保持一致 */
+    border-top: 2rpx solid #e0e0e0;
+    box-shadow: 0 -10rpx 30rpx rgba(0,0,0,0.05);
+    max-width: 750rpx;
     z-index: 100;
-    border-top-left-radius: 40rpx; /* 转换为 rpx */
-    border-top-right-radius: 40rpx; /* 转换为 rpx */
+    border-top-left-radius: 40rpx;
+    border-top-right-radius: 40rpx;
 }
 
 .nav-item {
     display: flex;
     flex-direction: column;
     align-items: center;
-    font-size: 24rpx; /* 转换为 rpx */
+    font-size: 24rpx;
     color: #888;
-    /* cursor: pointer; */
-    padding: 10rpx 30rpx; /* 转换为 rpx */
-    border-radius: 30rpx; /* 转换为 rpx */
+    padding: 10rpx 30rpx;
+    border-radius: 30rpx;
     transition: all 0.3s;
 }
 
@@ -667,89 +734,11 @@ const goToEarnPoints = () => {
 }
 
 .nav-item i {
-    font-size: 44rpx; /* 转换为 rpx */
-    margin-bottom: 10rpx; /* 转换为 rpx */
+    font-size: 44rpx;
+    margin-bottom: 10rpx;
 }
 
 .nav-item span {
     font-weight: 500;
-}
-
-/* 提示卡片 */
-/* 提示卡片 */
-.info-card {
-    background: white;
-    border-radius: 40rpx; /* 统一为 40rpx，与申请卡片保持一致 */
-    padding: 50rpx; /* 增加内边距，提供更多呼吸空间 */
-    margin-top: 50rpx; /* 调整顶部外边距，与申请卡片保持一致 */
-    box-shadow: 0 15rpx 50rpx rgba(0,0,0,0.08); /* 略微增强阴影，增加层次感 */
-    border: 2rpx solid #f0f0f0; /* 更柔和的边框颜色 */
-    position: relative; /* 为伪元素（如顶部线条）定位做准备 */
-    overflow: hidden; /* 确保内容在圆角内 */
-}
-
-/* 可以在顶部添加一条装饰线，与申请卡片形成视觉呼应 */
-.info-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 8rpx; /* 装饰线的高度 */
-    background: linear-gradient(to right, #4CAF50, #8BC34A); /* 使用绿色渐变，代表信息、成功 */
-    border-top-left-radius: 40rpx; /* 匹配父元素的圆角 */
-    border-top-right-radius: 40rpx; /* 匹配父元素的圆角 */
-}
-
-.info-card-title { /* 使用新的类名来控制标题样式 */
-    font-size: 42rpx; /* 标题字号略微加大，更醒目 */
-    font-weight: 700;
-    color: #333; /* 标题颜色改为深色，增加对比度 */
-    margin-bottom: 40rpx; /* 增加标题下方间距 */
-    display: flex;
-    align-items: center;
-    justify-content: center; /* 标题内容居中显示 */
-    text-align: center; /* 确保文本本身也居中 */
-}
-
-.info-card-title i { /* 图标样式 */
-    margin-right: 20rpx;
-    font-size: 48rpx; /* 图标字号加大 */
-    color: #4CAF50; /* 图标颜色使用绿色，代表信息、提示 */
-    text-shadow: 0 2rpx 4rpx rgba(0,0,0,0.1); /* 给图标添加细微阴影 */
-}
-
-.info-card p {
-    font-size: 30rpx; /* 正文字号略微加大，提高可读性 */
-    color: #666; /* 颜色略微变浅，更柔和 */
-    margin-bottom: 25rpx; /* 调整段落下方间距 */
-    line-height: 1.7; /* 增加行高，提升阅读舒适度 */
-    text-align: justify; /* 文本两端对齐，使段落更规整 */
-}
-
-.info-card ul {
-    padding-left: 60rpx; /* 增加列表左侧内边距，提供更多缩进 */
-    margin-top: 30rpx; /* 增加列表上方间距 */
-    list-style: none; /* 移除默认的列表圆点 */
-}
-
-.info-card li {
-    position: relative; /* 为自定义列表圆点定位做准备 */
-    font-size: 30rpx; /* 列表项字号与正文一致 */
-    color: #666; /* 列表项颜色与正文一致 */
-    margin-bottom: 20rpx; /* 增加列表项之间间距 */
-    line-height: 1.6;
-    padding-left: 40rpx; /* 为自定义圆点留出空间 */
-}
-
-.info-card li::before {
-    content: '\2022'; /* 使用 Unicode 圆点作为自定义圆点 */
-    font-size: 36rpx; /* 圆点字号 */
-    color: #4CAF50; /* 圆点颜色使用绿色 */
-    position: absolute;
-    left: 0;
-    top: 0rpx; /* 调整圆点垂直对齐 */
-    line-height: 1.6; /* 继承行高，使圆点与文本基线对齐 */
-    font-weight: bold;
 }
 </style>

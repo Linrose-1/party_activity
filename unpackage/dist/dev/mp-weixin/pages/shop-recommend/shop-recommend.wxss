@@ -4,25 +4,40 @@
 .container {
   background-color: #f8f8f8;
   min-height: 100vh;
-  padding-bottom: 40px;
+  padding-bottom: 40rpx;
 }
 .form-container {
-  padding: 20px;
+  padding: 20rpx;
   background: white;
-  margin: 20px;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  margin: 20rpx;
+  border-radius: 12rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.05);
 }
 .form-group {
-  margin-bottom: 20px;
+  margin-bottom: 20rpx;
 }
 .form-group .uni-easyinput {
-  border: 1px solid #eee;
-  border-radius: 8px;
-  padding: 10px;
+  border: 1rpx solid #eee;
+  border-radius: 8rpx;
+  padding: 10rpx 0;
+  margin: 10rpx 0;
 }
 .form-group .uni-easyinput.is-input-border {
-  border: 1px solid #eee;
+  border: 1rpx solid #eee;
+}
+.uni-list-cell-db {
+  margin-left: 10rpx;
+  padding: 20rpx;
+  margin: 10rpx 0;
+  border: #ffe1d2 solid 1rpx;
+  min-width: 500rpx;
+}
+.uni-list-cell-db .uni-input {
+  margin-left: 10rpx;
+  font-size: 28rpx;
+}
+.uni-list-cell-db .uni-input .placeholder {
+  color: #939393;
 }
 .submit-btn {
   display: flex;
@@ -31,10 +46,10 @@
   width: 100%;
   background: #FF6B00;
   color: white;
-  padding: 8px;
-  font-size: 16px;
+  padding: 10rpx;
+  font-size: 32rpx;
   border: none;
-  border-radius: 8px;
+  border-radius: 8rpx;
   transition: background 0.3s;
 }
 .submit-btn:active {
@@ -43,15 +58,16 @@
 .footer {
   text-align: center;
   color: #666;
-  font-size: 13px;
-  margin-top: 40px;
-  padding: 0 20px;
+  font-size: 26rpx;
+  margin-top: 40rpx;
+  padding: 0 20rpx;
+  color: #717171;
 }
  .uni-nav-bar .uni-nav-bar--fixed {
   background-color: white;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1rpx solid #eee;
 }
  .uni-nav-bar .uni-nav-bar-text {
   font-weight: bold;
-  font-size: 18px;
+  font-size: 18rpx;
 }

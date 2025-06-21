@@ -32,77 +32,139 @@
 			<!-- 等级晋升系统 -->
 			<view class="level-system">
 				<view class="level-title">
-					<uni-icons type="medal" size="24" color="#FF6B00"></uni-icons> 等级晋升系统
+					<uni-icons type="medal" size="24" color="#FF6B00"></uni-icons> 社交等级晋升系统
 				</view>
 
 				<view class="current-level">
 					<!-- Add ref for direct DOM access in onMounted -->
 					<view class="level-badge bronze" ref="bronzeBadgeRef">
-						<view class="level-name">青铜</view>
-						<view class="level-points">100-499分</view>
+						<view class="level-name">联合流猩人</view>
+						<view class="level-points">0-99分</view>
 					</view>
 
 					<view class="level-info">
-						<h3>当前等级: 青铜</h3>
-						<view style="font-size: 26rpx;">您当前拥有<span>{{ points }}</span>贡分</view>
-						<view style="font-size: 26rpx;">距离下一等级还需 <span>{{ pointsToNextLevel }}</span>分</view>
-
-						<view class="progress-container">
-							<view class="progress-labels">
-								<span>0</span>
-								<span>{{ maxPoints }}</span>
-							</view>
-							<view class="progress-bar">
-								<view class="progress-fill" :style="{ width: progressWidth }">
-									<view class="progress-marker" style="left: 10%;">
-										<view class="progress-marker-label">游客</view>
-									</view>
-									<view class="progress-marker" style="left: 50%;">
-										<view class="progress-marker-label">白银</view>
-									</view>
-									<view class="progress-marker" style="left: 100%;">
-										<view class="progress-marker-label">黄金</view>
-									</view>
-								</view>
-							</view>
+						<h3>当前等级: <span style="color: #ff7707;font-weight: 600;">联合流猩人</span></h3>
+						<view style="font-size: 26rpx;">您当前拥有<span style="color: #ff0000;">{{ points }}</span>贡分</view>
+						<view style="font-size: 26rpx;">距离下一等级还需 <span style="color: #ff7707;">{{ pointsToNextLevel }}</span> 贡分
 						</view>
+
 					</view>
 				</view>
 
 				<view class="level-steps">
 					<view class="level-step">
-						<view class="step-icon" style="background: #cd7f32;">
-							<uni-icons type="person" size="20" color="#fff"></uni-icons>
+						<view class="step-icon" style="background: #E0E0E0;">
+							☆
 						</view>
-						<view class="step-name">游客</view>
+						<view class="step-name">联合流猩人</view>
 						<view class="step-points">0-99分</view>
 					</view>
 
 					<view class="level-step">
-						<view class="step-icon active" style="background: #cd7f32;">
-							<uni-icons type="shield" size="20" color="#fff"></uni-icons>
+						<view class="step-icon" style="background: #A5D6A7;">
+							★
 						</view>
-						<view class="step-name">青铜</view>
+						<view class="step-name">联合月猩人</view>
 						<view class="step-points">100-499分</view>
 					</view>
 
 					<view class="level-step">
-						<view class="step-icon" style="background: #c0c0c0;">
-							<uni-icons type="medal" size="20" color="#fff"></uni-icons>
+						<view class="step-icon" style="background: #4FC3F7;">
+							✯
 						</view>
-						<view class="step-name">白银</view>
+						<view class="step-name">联合伙猩人</view>
 						<view class="step-points">500-999分</view>
 					</view>
 
 					<view class="level-step">
-						<view class="step-icon" style="background: #ffd700;">
-							<uni-icons type="crown" size="20" color="#fff"></uni-icons>
+						<view class="step-icon" style="background: #BA68C8;">
+							✪
 						</view>
-						<view class="step-name">黄金</view>
-						<view class="step-points">1000+分</view>
+						<view class="step-name">联合创猩人</view>
+						<view class="step-points">1000-2000分</view>
+					</view>
+
+					<view class="level-step">
+						<view class="step-icon" style="background: #FFD54F;">
+							✦
+						</view>
+						<view class="step-name">联合创始猿</view>
+						<view class="step-points">2000+分</view>
 					</view>
 				</view>
 			</view>
+
+			<!-- ============== 修改后的会员等级晋升系统 ============== -->
+			<view class="membership-level-system">
+				<view class="membership-title">
+					<uni-icons type="vip" size="24" color="#FFD700"></uni-icons> 会员等级晋升系统
+				</view>
+
+				<!-- 新增：当前会员等级状态显示 -->
+				<view class="membership-status">
+					<view class="status-text">
+						当前等级: <span class="status-highlight">{{ currentMembershipLevel.name }}</span>
+					</view>
+					<view class="status-text">
+						已累计充值: <span class="status-highlight">{{ rechargedAmount }} 元</span>
+					</view>
+					<view class="status-text next-level-progress" v-if="amountToNextLevel > 0 && nextMembershipLevel">
+						距离 <span class="next-level-name">{{ nextMembershipLevel.name }}</span> 还需
+						<span class="amount-needed">{{ amountToNextLevel }} 元</span>
+					</view>
+					<view class="status-text status-max-level" v-else>
+						<uni-icons type="cloud-upload" size="18" color="#28a745"></uni-icons>
+						恭喜您，已达到最高会员等级！
+					</view>
+				</view>
+
+				<p class="membership-description">
+					会员等级根据累计充值金额进行晋升
+				</p>
+				<view class="membership-levels">
+					<!-- 游客 -->
+					<view class="membership-level-item visitor">
+						<view class="level-icon">
+							👤
+						</view>
+						<view class="level-name">游客会员</view>
+						<view class="level-price">充值 0 元</view>
+					</view>
+					<!-- 青铜 -->
+					<view class="membership-level-item bronze-member">
+						<view class="level-icon">
+							🪙
+						</view>
+						<view class="level-name">青铜会员</view>
+						<view class="level-price">充值 100 元</view>
+					</view>
+					<!-- 白银 -->
+					<view class="membership-level-item silver-member">
+						<view class="level-icon">
+							🔶
+						</view>
+						<view class="level-name">白银会员</view>
+						<view class="level-price">充值 365 元</view>
+					</view>
+					<!-- 黄金 -->
+					<view class="membership-level-item gold-member">
+						<view class="level-icon">
+							🌟
+						</view>
+						<view class="level-name">黄金会员</view>
+						<view class="level-price">充值 3,650 元</view>
+					</view>
+					<!-- 黑钻 -->
+					<view class="membership-level-item diamond-member">
+						<view class="level-icon">
+							💎
+						</view>
+						<view class="level-name">黑钻会员</view>
+						<view class="level-price">充值 36,500 元</view>
+					</view>
+				</view>
+			</view>
+			<!-- ============== 修改内容结束 ============== -->
 
 			<!-- 新增：智米模块 -->
 			<view class="smart-rice-section">
@@ -115,19 +177,18 @@
 
 				<view class="smart-rice-info">
 					<p>智米可用于兑换平台内服务或商品。</p>
-					<p class="exchange-rate">兑换比例：<span style="color: #FF6B00; font-weight: bold;">{{ pointsPerSmartRice }} 贡分 = 1 智米</span></p>
 				</view>
 
 				<view class="smart-rice-actions">
 					<button class="action-button exchange-button" @click="handleExchangeSmartRice">
-						<uni-icons type="forward" size="20" color="#fff"></uni-icons> 兑换智米
+						<uni-icons type="forward" size="20" color="#fff"></uni-icons> 申请兑换
 					</button>
 					<button class="action-button recharge-button" @click="handleRechargeSmartRice">
 						<uni-icons type="redo" size="20" color="#fff"></uni-icons> 充值智米
 					</button>
 				</view>
 				<p class="smart-rice-note">
-					<uni-icons type="info-filled" size="18" color="#FF6B00"></uni-icons> 贡分兑换智米或智米充值请联系平台客服。
+					<uni-icons type="info-filled" size="18" color="#FF6B00"></uni-icons> 智米充值请联系平台客服。
 				</p>
 			</view>
 
@@ -195,8 +256,53 @@
 
 	// 响应式数据
 	const points = ref(2166);
-	const level = ref(
-	'青铜'); // Though not directly used for dynamic class in HTML, good to have it reactive if needed later.
+
+	// 新增：会员等级相关数据
+	// !! 这里设置用户已充值金额，可以修改这个值来测试不同等级的显示效果
+	const rechargedAmount = ref(8888); 
+	
+	// 定义会员等级及其门槛
+	const membershipLevels = ref([
+		{ name: '游客会员', threshold: 0 },
+		{ name: '青铜会员', threshold: 100 },
+		{ name: '白银会员', threshold: 365 },
+		{ name: '黄金会员', threshold: 3650 },
+		{ name: '黑钻会员', threshold: 36500 },
+		// 添加一个无限大的“顶层”，方便计算
+		{ name: '至尊', threshold: Infinity } 
+	]);
+
+	// 计算当前会员等级
+	const currentMembershipLevel = computed(() => {
+		const amount = rechargedAmount.value;
+		// 从高到低查找，找到第一个满足条件的等级
+		for (let i = membershipLevels.value.length - 1; i >= 0; i--) {
+			if (amount >= membershipLevels.value[i].threshold) {
+				return membershipLevels.value[i];
+			}
+		}
+		return membershipLevels.value[0]; // 默认返回游客
+	});
+
+	// 计算下一会员等级
+	const nextMembershipLevel = computed(() => {
+		const currentIndex = membershipLevels.value.findIndex(level => level.name === currentMembershipLevel.value.name);
+		// 确保不是最后一个有效等级
+		if (currentIndex < membershipLevels.value.length - 2) {
+			return membershipLevels.value[currentIndex + 1];
+		}
+		return null; // 已是最高等级，没有下一级
+	});
+
+	// 计算距离下一等级还需的金额
+	const amountToNextLevel = computed(() => {
+		if (nextMembershipLevel.value) {
+			const needed = nextMembershipLevel.value.threshold - rechargedAmount.value;
+			return Math.max(0, needed); // 确保结果不为负
+		}
+		return 0; // 已是最高等级
+	});
+
 
 	// 新增智米相关数据
 	const smartRice = ref(150); // 假设用户当前拥有150智米
@@ -579,7 +685,7 @@
 	.level-system {
 		background: linear-gradient(to right, #f9f9f9, #f0f0f0);
 		border-radius: 40rpx;
-		padding: 50rpx;
+		padding: 50rpx 10rpx;
 		margin-bottom: 60rpx;
 		position: relative;
 		overflow: hidden;
@@ -635,12 +741,12 @@
 	}
 
 	.level-badge .level-name {
-		font-size: 32rpx;
+		font-size: 28rpx;
 		margin-bottom: 6rpx;
 	}
 
 	.level-badge .level-points {
-		font-size: 28rpx;
+		font-size: 24rpx;
 		opacity: 0.9;
 	}
 
@@ -772,6 +878,198 @@
 		font-size: 24rpx;
 		color: #666;
 	}
+
+	/* ============= 会员等级晋升系统样式 ============= */
+	.membership-level-system {
+		background: #ffffff;
+		border-radius: 40rpx;
+		padding: 50rpx;
+		margin-top: 60rpx;
+		margin-bottom: 60rpx;
+		box-shadow: 0 10rpx 30rpx rgba(0, 0, 0, 0.05);
+		border: 1px solid #f0f0f0;
+	}
+
+	.membership-title {
+		font-size: 40rpx;
+		font-weight: bold;
+		margin-bottom: 20rpx;
+		color: #333;
+		display: flex;
+		align-items: center;
+	}
+
+	.membership-title uni-icons {
+		margin-right: 20rpx;
+	}
+	
+	/* 新增：当前会员状态样式 */
+	.membership-status {
+		background: linear-gradient(135deg, #fffaf2, #fff5e6);
+		border-radius: 30rpx;
+		padding: 40rpx;
+		margin-bottom: 40rpx;
+		border: 2rpx solid #ffe8cc;
+	}
+	
+	.status-text {
+		font-size: 30rpx;
+		color: #664d03;
+		margin-bottom: 20rpx;
+		line-height: 1.5;
+	}
+	
+	.status-text:last-child {
+		margin-bottom: 0;
+	}
+	
+	.status-highlight {
+		font-weight: 700;
+		color: #e67e22;
+	}
+	
+	.next-level-progress {
+		font-size: 32rpx;
+	}
+	
+	.next-level-name {
+		font-weight: bold;
+		color: #d35400;
+	}
+	
+	.amount-needed {
+		font-size: 36rpx;
+		font-weight: bold;
+		color: #ff0000;
+		margin: 0 8rpx;
+	}
+	
+	.status-max-level {
+		font-size: 32rpx;
+		font-weight: bold;
+		color: #28a745;
+		display: flex;
+		align-items: center;
+	}
+	
+	.status-max-level uni-icons {
+		margin-right: 12rpx;
+	}
+	
+	.membership-description {
+		font-size: 28rpx;
+		color: #666;
+		margin-bottom: 50rpx;
+		line-height: 1.6;
+		text-align: center;
+	}
+
+	.membership-levels {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(250rpx, 1fr));
+		gap: 30rpx;
+	}
+
+	.membership-level-item {
+		border-radius: 30rpx;
+		padding: 30rpx 20rpx;
+		text-align: center;
+		transition: transform 0.3s, box-shadow 0.3s;
+		cursor: pointer;
+	}
+
+	.membership-level-item:hover {
+		transform: translateY(-8rpx);
+		box-shadow: 0 12rpx 30rpx rgba(0, 0, 0, 0.1);
+	}
+
+	.membership-level-item .level-icon {
+		margin-bottom: 20rpx;
+		height: 60rpx;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.membership-level-item .level-name {
+		font-size: 30rpx;
+		font-weight: 600;
+		margin-bottom: 10rpx;
+	}
+
+	.membership-level-item .level-price {
+		font-size: 28rpx;
+		font-weight: 500;
+	}
+
+	/* 不同等级的颜色区分 */
+	.visitor {
+		background-color: #f8f9fa;
+		border: 2rpx solid #dee2e6;
+	}
+
+	.visitor .level-name {
+		color: #6c757d;
+	}
+
+	.visitor .level-price {
+		color: #6c757d;
+	}
+
+	.bronze-member {
+		background-color: #fff4e6;
+		border: 2rpx solid #fed8b1;
+	}
+
+	.bronze-member .level-name {
+		color: #CD7F32;
+	}
+
+	.bronze-member .level-price {
+		color: #8C6B46;
+	}
+
+	.silver-member {
+		background-color: #f1f3f5;
+		border: 2rpx solid #ced4da;
+	}
+
+	.silver-member .level-name {
+		color: #868e96;
+	}
+
+	.silver-member .level-price {
+		color: #495057;
+	}
+
+	.gold-member {
+		background-color: #fff9db;
+		border: 2rpx solid #ffec8b;
+	}
+
+	.gold-member .level-name {
+		color: #e6a23c;
+	}
+
+	.gold-member .level-price {
+		color: #c67c00;
+	}
+
+	.diamond-member {
+		background-color: #343a40;
+		border: 2rpx solid #495057;
+	}
+
+	.diamond-member .level-name {
+		color: #f8f9fa;
+	}
+
+	.diamond-member .level-price {
+		color: #dee2e6;
+	}
+
+	/* ============= 样式结束 ============= */
+
 
 	/* 贡分获取区域 */
 	.points-section {

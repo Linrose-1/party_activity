@@ -109,7 +109,7 @@
 
 	// 响应式数据
 	const title = ref('picker');
-	const array = ref(['全部类型', '交流会', '沙龙', '峰会', '分享会', '其他']);
+	const array = ref(['全部类型', '交流会', '沙龙', '峰会', '分享会','创业猎伙' ,'其他']);
 	const index = ref(0);
 	const date = ref(getDate({
 		format: true

@@ -1,4 +1,5 @@
 
+/* 原有样式保持不变 */
 .page.data-v-90e28424 {
   padding: 20rpx;
   background-color: #f9f9f9;
@@ -42,6 +43,7 @@
   margin-top: 10rpx;
   display: block;
   color: #666;
+  margin-bottom: 10rpx; /* 为label增加一点下边距 */
 }
 .form-input.data-v-90e28424,
 .form-textarea.data-v-90e28424 {
@@ -58,6 +60,23 @@
 .hint.data-v-90e28424 {
   font-size: 24rpx;
   color: #999;
+}
+/* 新增：单选框组样式 */
+.radio-group-container.data-v-90e28424 {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 40rpx; /* 选项之间的间距 */
+  margin-top: 10rpx;
+}
+.radio-item.data-v-90e28424 {
+  display: flex;
+  align-items: center;
+  font-size: 28rpx;
+  color: #333;
+}
+.radio-item text.data-v-90e28424 {
+  margin-left: 10rpx;
 }
 .tags-container.data-v-90e28424 {
   display: flex;
@@ -103,19 +122,61 @@
   gap: 16rpx;
   margin-top: 10rpx;
 }
-.preview-img.data-v-90e28424 {
+.image-wrapper.data-v-90e28424 {
+  position: relative;
   width: 150rpx;
   height: 150rpx;
   border-radius: 12rpx;
+  overflow: hidden;
 }
-.add-img-btn.data-v-90e28424 {
-  margin-top: 16rpx;
-  padding: 10rpx;
-  background: #FF8C37;
+.preview-img.data-v-90e28424 {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.delete-image-btn.data-v-90e28424 {
+  position: absolute;
+  top: 0rpx;
+  right: 0rpx;
+  width: 40rpx;
+  height: 40rpx;
+  background-color: rgba(0, 0, 0, 0.5);
   color: white;
-  border-radius: 30rpx;
-  text-align: center;
+  border-radius: 0 12rpx 0 12rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-size: 28rpx;
+  font-weight: bold;
+  z-index: 10;
+}
+.delete-image-btn.data-v-90e28424:active {
+    background-color: rgba(0, 0, 0, 0.7);
+}
+.add-img-placeholder.data-v-90e28424 {
+  width: 150rpx;
+  height: 150rpx;
+  border: 2rpx dashed #ccc;
+  border-radius: 12rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #999;
+  font-size: 24rpx;
+  transition: border-color 0.2s ease, color 0.2s ease;
+}
+.add-img-placeholder i.data-v-90e28424 {
+    font-size: 48rpx;
+    margin-bottom: 10rpx;
+    color: inherit;
+}
+.add-img-placeholder text.data-v-90e28424 {
+    font-size: 24rpx;
+}
+.add-img-placeholder.data-v-90e28424:active {
+    border-color: #FF6A00;
+    color: #FF6A00;
 }
 .section-title.data-v-90e28424 {
   font-size: 30rpx;

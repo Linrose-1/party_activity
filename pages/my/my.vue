@@ -286,7 +286,7 @@ const onViewDetail = () => {
 	background: #fff;
 	padding: 30rpx;
 	border-radius: 20rpx;
-	margin-top: 30rpx;
+	margin-top: 50rpx;
 }
 
 .account-grid {
@@ -455,14 +455,14 @@ const onViewDetail = () => {
 .qrcode-actions {
 	display: flex;
 	justify-content: center;
-	gap: 30rpx;
-	margin-top: 20rpx;
+	gap: 50rpx;
+	margin: 20rpx 0;
 }
 
 .qrcode-btn {
-	background: rgba(255, 255, 255, 0.3);
+	background-color: #FF8F3D;
 	color: white;
-	padding: 10rpx 30rpx;
+	padding: 10rpx 100rpx;
 	border-radius: 30rpx;
 	font-size: 24rpx;
 	cursor: pointer;

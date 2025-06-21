@@ -7224,9 +7224,9 @@ function initOnError() {
   };
 }
 function initRuntimeSocketService() {
-  const hosts = "172.20.10.4,127.0.0.1";
+  const hosts = "192.168.1.2,127.0.0.1";
   const port = "8090";
-  const id = "mp-weixin_BNqibF";
+  const id = "mp-weixin_IriD0Q";
   const lazy = typeof swan !== "undefined";
   let restoreError = lazy ? () => {
   } : initOnError();
@@ -8289,6 +8289,12 @@ const pages = [
     style: {
       navigationBarTitleText: "用户协议"
     }
+  },
+  {
+    path: "pages/location/location",
+    style: {
+      navigationBarTitleText: "附近"
+    }
   }
 ];
 const tabBar = {
@@ -8307,6 +8313,12 @@ const tabBar = {
       text: "活动",
       iconPath: "/static/tabbar/active.png",
       selectedIconPath: "/static/tabbar/active-active.png"
+    },
+    {
+      pagePath: "pages/location/location",
+      text: "附近",
+      iconPath: "/static/tabbar/location.png",
+      selectedIconPath: "/static/tabbar/location-active.png"
     },
     {
       pagePath: "pages/shop/shop",
@@ -11187,6 +11199,7 @@ exports.nr = nr;
 exports.o = o$1;
 exports.onLoad = onLoad;
 exports.onMounted = onMounted;
+exports.onUnmounted = onUnmounted;
 exports.p = p$1;
 exports.reactive = reactive;
 exports.ref = ref;

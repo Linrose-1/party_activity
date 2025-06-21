@@ -11,6 +11,10 @@ if (!Math) {
 const _sfc_main = {
   __name: "active-detail",
   setup(__props) {
+    const enrollmentType = common_vendor.ref("sponsor");
+    const fee = common_vendor.ref(100);
+    const sponsorName = common_vendor.ref("未来科技股份有限公司");
+    const sponsorLogo = common_vendor.ref("/static/sponsor_logo.png");
     const avatars = [
       "https://randomuser.me/api/portraits/women/1.jpg",
       "https://randomuser.me/api/portraits/men/2.jpg",
@@ -57,7 +61,7 @@ const _sfc_main = {
       });
     }
     return (_ctx, _cache) => {
-      return {
+      return common_vendor.e({
         a: common_vendor.p({
           type: "calendar",
           size: "18",
@@ -68,33 +72,44 @@ const _sfc_main = {
           size: "18",
           color: "#FF6B00"
         }),
-        c: common_vendor.f(activities, (item, index, i0) => {
+        c: enrollmentType.value === "aa"
+      }, enrollmentType.value === "aa" ? {
+        d: common_vendor.t(fee.value)
+      } : enrollmentType.value === "sponsor" ? {} : {}, {
+        e: enrollmentType.value === "sponsor",
+        f: common_vendor.f(activities, (item, index, i0) => {
           return {
             a: common_vendor.t(item.title),
             b: common_vendor.t(item.desc),
             c: index
           };
         }),
-        d: common_vendor.p({
+        g: common_vendor.p({
           type: "person-filled",
           size: "24",
           color: "#fff"
         }),
-        e: common_vendor.p({
+        h: common_vendor.p({
           type: "shop-filled",
           size: "24",
           color: "#fff"
         }),
-        f: common_vendor.o(viewAllUsers),
-        g: common_vendor.f(avatars, (avatar, index, i0) => {
+        i: common_vendor.o(viewAllUsers),
+        j: common_vendor.f(avatars, (avatar, index, i0) => {
           return {
             a: index,
             b: avatar
           };
         }),
-        h: common_vendor.o(share),
-        i: common_vendor.o(register)
-      };
+        k: enrollmentType.value === "sponsor"
+      }, enrollmentType.value === "sponsor" ? {
+        l: sponsorLogo.value,
+        m: common_vendor.t(sponsorName.value),
+        n: common_vendor.t(sponsorName.value)
+      } : {}, {
+        o: common_vendor.o(share),
+        p: common_vendor.o(register)
+      });
     };
   }
 };

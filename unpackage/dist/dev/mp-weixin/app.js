@@ -22,6 +22,7 @@ if (!Math) {
   "./pages/my-opportunity/my-opportunity.js";
   "./pages/my-collection/my-collection.js";
   "./pages/user-agreement/user-agreement.js";
+  "./pages/location/location.js";
 }
 const _sfc_main = {
   onLaunch: function() {

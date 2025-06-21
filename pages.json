@@ -1,5 +1,7 @@
 {
 	"pages": [
+		
+		
 		{
 			"path": "pages/home/home",
 			"style": {
@@ -137,6 +139,13 @@
 			{
 				"navigationBarTitleText" : "用户协议"
 			}
+		},
+		{
+			"path" : "pages/location/location",
+			"style" : 
+			{
+				"navigationBarTitleText" : "附近"
+			}
 		}
 	],
 	
@@ -156,6 +165,12 @@
 					"text": "活动",
 					"iconPath": "/static/tabbar/active.png",
 					"selectedIconPath": "/static/tabbar/active-active.png"
+				},
+				{
+					"pagePath": "pages/location/location",
+					"text": "附近",
+					"iconPath": "/static/tabbar/location.png",
+					"selectedIconPath": "/static/tabbar/location-active.png"
 				},
 				{
 					"pagePath": "pages/shop/shop",

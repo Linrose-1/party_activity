@@ -24,8 +24,12 @@
 					<view class="stat-value">50</view>
 					<view class="stat-label">总名额</view>
 				</view>
+				<!-- 修改报名费显示逻辑 -->
 				<view class="stat-item">
-					<view class="stat-value">100</view>
+					<view class="stat-value">
+						<text v-if="enrollmentType === 'aa'">{{ fee }}</text>
+						<text v-else-if="enrollmentType === 'sponsor'">免费</text>
+					</view>
 					<view class="stat-label">报名费</view>
 				</view>
 			</view>
@@ -42,9 +46,6 @@
 			<text class="section-title">活动内容</text>
 			<view class="activity-grid">
 				<view class="activity-item" v-for="(item, index) in activities" :key="index">
-					<!-- <view class="activity-icon">
-            <uni-icons :type="item.icon" size="20" color="#fff" />
-          </view> -->
 					<view class="activity-title">{{ item.title }}</view>
 					<view class="activity-desc">{{ item.desc }}</view>
 				</view>
@@ -109,6 +110,18 @@
 				</text>
 			</view>
 		</view>
+
+		<!-- 新增：赞助商信息区域 -->
+		<view class="sponsor-section" v-if="enrollmentType === 'sponsor'">
+			<view class="section-title">赞助单位</view>
+			<view class="sponsor-info">
+				<image :src="sponsorLogo" class="sponsor-logo"></image>
+				<view class="sponsor-details">
+					<view class="sponsor-name">{{ sponsorName }}</view>
+					<view class="sponsor-description">感谢{{ sponsorName }}对本次活动的大力支持！</view>
+				</view>
+			</view>
+		</view>
 		
 		<view style="margin: 20rpx auto;flex: 1; text-align: center;">报名截止时间：<span style="color: #ff1a3c;">2025-6-30 13:45:00</span></view>
 
@@ -132,6 +145,17 @@
 		onLoad
 	} from '@dcloudio/uni-app'
 
+	// 用于控制报名模式，'aa' 或 'sponsor'
+	const enrollmentType = ref('sponsor'); // 默认为AA模式，测试赞助模式请改为 'sponsor'
+
+	// AA 模式下的报名费用
+	const fee = ref(100); // 假设AA模式下费用是100元
+
+	// 赞助模式下的公司信息
+	const sponsorName = ref('未来科技股份有限公司');
+	const sponsorLogo = ref('/static/sponsor_logo.png'); // 请替换为你的实际Logo图片路径
+
+	// 模拟参与用户头像
 	const avatars = [
 		'https://randomuser.me/api/portraits/women/1.jpg',
 		'https://randomuser.me/api/portraits/men/2.jpg',
@@ -139,6 +163,7 @@
 		'https://randomuser.me/api/portraits/men/4.jpg'
 	]
 
+	// 模拟活动内容
 	const activities = [{
 			icon: 'sound',
 			title: '主题演讲',
@@ -224,7 +249,8 @@
 	.event-content,
 	.organizer-section,
 	.business-section,
-	.participants-section {
+	.participants-section,
+	.sponsor-section { /* 添加 sponsor-section */
 		background: #fff;
 		margin: 30rpx;
 		padding: 30rpx;
@@ -284,10 +310,15 @@
 	.section-title {
 		font-size: 32rpx;
 		font-weight: bold;
-		margin: 30rpx 0 20rpx;
+		margin: 30rpx 0 20rpx; /* 可以根据需要调整 */
 		border-left: 10rpx solid #FF6B00;
 		padding-left: 20rpx;
 	}
+	/* 新增：如果 section-title 在新区块内，去除顶部 margin */
+	.sponsor-section .section-title {
+		margin-top: 0;
+	}
+
 
 	.event-description {
 		font-size: 28rpx;
@@ -335,14 +366,16 @@
 	
 	.organizer-title,
 	.business-title,
-	.participants-title{
+	.participants-title,
+	.sponsor-title { /* 添加 sponsor-title */
 		font-weight: bold;
 		margin-bottom: 20rpx;
 	}
 
 	.organizer-info,
 	.business-info,
-	.participants-body {
+	.participants-body,
+	.sponsor-info { /* 添加 sponsor-info */
 		display: flex;
 		align-items: center;
 		gap: 20rpx;
@@ -358,15 +391,26 @@
 		align-items: center;
 		justify-content: center;
 	}
+	/* 新增：赞助商Logo样式 */
+	.sponsor-logo {
+		width: 120rpx; /* 根据实际Logo大小调整 */
+		height: 120rpx;
+		border-radius: 10rpx; /* 方形或圆角矩形，更适合公司Logo */
+		object-fit: contain; /* 保持图片比例并完整显示 */
+		background-color: #f0f0f0;
+		border: 1rpx solid #eee;
+	}
 
 	.organizer-name,
-	.business-name {
+	.business-name,
+	.sponsor-name { /* 添加 sponsor-name */
 		font-weight: bold;
 		font-size: 28rpx;
 	}
 
 	.organizer-company,
-	.business-meta text {
+	.business-meta text,
+	.sponsor-description { /* 添加 sponsor-description */
 		font-size: 24rpx;
 		color: #666;
 	}

@@ -5,11 +5,11 @@
       <form @submit.prevent="handleSubmit">
         <!-- 店铺名称 -->
         <view class="form-group">
-          <uni-label>店铺名称</uni-label>
+          <uni-label>聚店名称</uni-label>
           <uni-easyinput 
             type="text" 
             v-model="form.name" 
-            placeholder="请输入店铺名称" 
+            placeholder="请输入聚店名称" 
             :inputBorder="false"
             required
           />
@@ -17,14 +17,23 @@
 
         <!-- 店铺地址 -->
         <view class="form-group">
-          <uni-label>店铺地址</uni-label>
-          <uni-easyinput 
+          <uni-label>聚店地址</uni-label>
+		  <view class="uni-list-cell-db">
+		  	<view @click="openMapToChooseLocation" class="uni-input">
+		  		<!-- 显示选择结果 -->
+		  		<text
+		  			v-if="selectedLocationInfo">{{ selectedLocationInfo.address || selectedLocationInfo.name }}</text>
+		  		<text v-else class="placeholder">点击选择位置</text>
+		  		<text class="arrow">></text>
+		  	</view>
+		  </view>
+          <!-- <uni-easyinput 
             type="text" 
             v-model="form.address" 
             placeholder="请输入详细地址" 
             :inputBorder="false"
             required
-          />
+          /> -->
         </view>
 
         <!-- 推荐理由 -->
@@ -93,6 +102,32 @@ const handleSubmit = () => {
   })
 }
 
+const selectedLocationInfo = ref(null); // 用于存储地图选择结果
+	const openMapToChooseLocation = () => {
+		uni.chooseLocation({
+			success: (res) => {
+				console.log('选择位置成功:', res);
+				selectedLocationInfo.value = {
+					name: res.name,
+					address: res.address,
+					latitude: res.latitude,
+					longitude: res.longitude
+				};
+			},
+			fail: (err) => {
+				console.log('选择位置失败:', err);
+				if (err.errMsg.includes('cancel')) {
+					// 用户取消了选择
+				} else {
+					uni.showToast({
+						title: '选择位置失败',
+						icon: 'none'
+					});
+				}
+			}
+		});
+	}
+
 // 页面加载时执行
 onLoad(() => {
   // 可以在这里初始化数据
@@ -111,31 +146,49 @@ $border: #eee;
 .container {
   background-color: $light-bg;
   min-height: 100vh;
-  padding-bottom: 40px;
+  padding-bottom: 40rpx;
 }
 
 .form-container {
-  padding: 20px;
+  padding: 20rpx;
   background: white;
-  margin: 20px;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  margin: 20rpx;
+  border-radius: 12rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.05);
 }
 
 .form-group {
-  margin-bottom: 20px;
+  margin-bottom: 20rpx;
   
   // 自定义 uni-easyinput 样式
   :deep(.uni-easyinput) {
-    border: 1px solid $border;
-    border-radius: 8px;
-    padding: 10px;
-    
+    border: 1rpx solid $border;
+    border-radius: 8rpx;
+    padding: 10rpx 0;
+    margin: 10rpx 0;
     &.is-input-border {
-      border: 1px solid $border;
+      border: 1rpx solid $border;
     }
   }
 }
+
+.uni-list-cell-db {
+			margin-left: 10rpx;
+			padding: 20rpx;
+			margin: 10rpx 0;
+			border: #ffe1d2 solid 1rpx;
+			min-width: 500rpx;
+
+			.uni-input {
+				margin-left: 10rpx;
+				font-size: 28rpx;
+				
+				
+				.placeholder{
+					color: #939393;
+				}
+			}
+		}
 
 .submit-btn {
   display: flex;
@@ -144,10 +197,10 @@ $border: #eee;
   width: 100%;
   background: $primary;
   color: white;
-  padding: 8px;
-  font-size: 16px;
+  padding: 10rpx;
+  font-size: 32rpx;
   border: none;
-  border-radius: 8px;
+  border-radius: 8rpx;
   transition: background 0.3s;
   
   &:active {
@@ -158,21 +211,22 @@ $border: #eee;
 .footer {
   text-align: center;
   color: $gray-text;
-  font-size: 13px;
-  margin-top: 40px;
-  padding: 0 20px;
+  font-size: 26rpx;
+  margin-top: 40rpx;
+  padding: 0 20rpx;
+  color: #717171;
 }
 
 // 自定义导航栏样式
 :deep(.uni-nav-bar) {
   .uni-nav-bar--fixed {
     background-color: white;
-    border-bottom: 1px solid $border;
+    border-bottom: 1rpx solid $border;
   }
   
   .uni-nav-bar-text {
     font-weight: bold;
-    font-size: 18px;
+    font-size: 18rpx;
   }
 }
 </style>
