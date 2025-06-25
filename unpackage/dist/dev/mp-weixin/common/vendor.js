@@ -7226,7 +7226,7 @@ function initOnError() {
 function initRuntimeSocketService() {
   const hosts = "192.168.1.2,127.0.0.1";
   const port = "8090";
-  const id = "mp-weixin_IriD0Q";
+  const id = "mp-weixin_x66rAn";
   const lazy = typeof swan !== "undefined";
   let restoreError = lazy ? () => {
   } : initOnError();
@@ -8169,6 +8169,8 @@ const createHook = (lifecycle) => (hook, target = getCurrentInstance()) => {
   !isInSSRComponentSetup && injectHook(lifecycle, hook, target);
 };
 const onLoad = /* @__PURE__ */ createHook(ON_LOAD);
+const onUnload = /* @__PURE__ */ createHook(ON_UNLOAD);
+const onReachBottom = /* @__PURE__ */ createHook(ON_REACH_BOTTOM);
 const pages = [
   {
     path: "pages/home/home",
@@ -8294,6 +8296,12 @@ const pages = [
     path: "pages/location/location",
     style: {
       navigationBarTitleText: "附近"
+    }
+  },
+  {
+    path: "pages/shop-list/shop-list",
+    style: {
+      navigationBarTitleText: "聚店列表"
     }
   }
 ];
@@ -11199,6 +11207,8 @@ exports.nr = nr;
 exports.o = o$1;
 exports.onLoad = onLoad;
 exports.onMounted = onMounted;
+exports.onReachBottom = onReachBottom;
+exports.onUnload = onUnload;
 exports.onUnmounted = onUnmounted;
 exports.p = p$1;
 exports.reactive = reactive;
@@ -11208,4 +11218,5 @@ exports.s = s$1;
 exports.sr = sr;
 exports.t = t$1;
 exports.unref = unref;
+exports.watch = watch;
 //# sourceMappingURL=../../.sourcemap/mp-weixin/common/vendor.js.map

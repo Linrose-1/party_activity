@@ -38,36 +38,70 @@ const _sfc_main = {
       sponsorName: "",
       description: `本次互联网创业者交流会旨在为行业内的创业者提供一个交流思想、分享经验的平台。...`,
       agenda: [
-        { title: "主题演讲", desc: "行业大咖分享创业经验" },
-        { title: "圆桌论坛", desc: "创业者互动讨论" },
-        { title: "自由交流", desc: "拓展人脉资源" }
+        {
+          title: "主题演讲",
+          desc: "行业大咖分享创业经验"
+        },
+        {
+          title: "圆桌论坛",
+          desc: "创业者互动讨论"
+        },
+        {
+          title: "自由交流",
+          desc: "拓展人脉资源"
+        }
       ],
       organizer: "张经理",
       organization: "创新科技活动策划部",
       phone: "021-68881234",
       qrcode: "",
-      businessName: "创客空间咖啡厅",
-      businessAddress: "张江高科技园区88号",
-      businessPhone: "021-68881234",
-      businessHours: "09:00-22:00 (每日营业)"
+      // 商圈信息现在默认为空，等待用户选择
+      businessName: "",
+      businessAddress: "",
+      businessPhone: "",
+      businessHours: ""
     });
     const activityTypeOptions = common_vendor.ref([
-      { value: "交流会", text: "交流会" },
-      { value: "沙龙", text: "沙龙" },
-      { value: "峰会", text: "峰会" },
-      { value: "分享会", text: "分享会" },
-      { value: "创业猎伙", text: "创业猎伙" },
-      { value: "其他", text: "其他" }
+      {
+        value: "交流会",
+        text: "交流会"
+      },
+      {
+        value: "沙龙",
+        text: "沙龙"
+      },
+      {
+        value: "峰会",
+        text: "峰会"
+      },
+      {
+        value: "分享会",
+        text: "分享会"
+      },
+      {
+        value: "创业猎伙",
+        text: "创业猎伙"
+      },
+      {
+        value: "其他",
+        text: "其他"
+      }
     ]);
     const enrollmentOptions = common_vendor.ref([
-      { text: "AA", value: "aa" },
-      { text: "赞助", value: "sponsor" }
+      {
+        text: "AA",
+        value: "aa"
+      },
+      {
+        text: "赞助",
+        value: "sponsor"
+      }
     ]);
     const selectedLocationInfo = common_vendor.ref(null);
     const openMapToChooseLocation = () => {
       common_vendor.index.chooseLocation({
         success: (res) => {
-          common_vendor.index.__f__("log", "at pages/active-publish/active-publish.vue:226", "选择位置成功:", res);
+          common_vendor.index.__f__("log", "at pages/active-publish/active-publish.vue:235", "选择位置成功:", res);
           selectedLocationInfo.value = {
             name: res.name,
             address: res.address,
@@ -77,7 +111,7 @@ const _sfc_main = {
           form.value.location = res.address || res.name;
         },
         fail: (err) => {
-          common_vendor.index.__f__("log", "at pages/active-publish/active-publish.vue:237", "选择位置失败:", err);
+          common_vendor.index.__f__("log", "at pages/active-publish/active-publish.vue:246", "选择位置失败:", err);
           if (err.errMsg.includes("cancel"))
             ;
           else {
@@ -90,112 +124,172 @@ const _sfc_main = {
       });
     };
     function uploadCover() {
-      common_vendor.index.chooseImage({ count: 1, success: (res) => form.value.cover = res.tempFilePaths[0] });
+      common_vendor.index.chooseImage({
+        count: 1,
+        success: (res) => form.value.cover = res.tempFilePaths[0]
+      });
     }
     function uploadCode() {
-      common_vendor.index.chooseImage({ count: 1, success: (res) => form.value.qrcode = res.tempFilePaths[0] });
+      common_vendor.index.chooseImage({
+        count: 1,
+        success: (res) => form.value.qrcode = res.tempFilePaths[0]
+      });
     }
     function uploadSponsorLogo() {
-      common_vendor.index.chooseImage({ count: 1, success: (res) => form.value.sponsorLogo = res.tempFilePaths[0] });
+      common_vendor.index.chooseImage({
+        count: 1,
+        success: (res) => form.value.sponsorLogo = res.tempFilePaths[0]
+      });
     }
     function addAgenda() {
-      form.value.agenda.push({ title: "", desc: "" });
+      form.value.agenda.push({
+        title: "",
+        desc: ""
+      });
     }
     function removeAgenda(index) {
       form.value.agenda.splice(index, 1);
     }
     function saveDraft() {
-      common_vendor.index.showToast({ title: "活动已保存为草稿", icon: "none" });
-      common_vendor.index.__f__("log", "at pages/active-publish/active-publish.vue:278", "保存草稿:", form.value);
+      common_vendor.index.showToast({
+        title: "活动已保存为草稿",
+        icon: "none"
+      });
+      common_vendor.index.__f__("log", "at pages/active-publish/active-publish.vue:302", "保存草稿:", form.value);
     }
     function publish() {
       if (!form.value.title) {
-        common_vendor.index.showToast({ title: "请输入活动标题", icon: "none" });
+        common_vendor.index.showToast({
+          title: "请输入活动标题",
+          icon: "none"
+        });
         return;
       }
       if (!form.value.activityType) {
-        common_vendor.index.showToast({ title: "请选择活动类型", icon: "none" });
+        common_vendor.index.showToast({
+          title: "请选择活动类型",
+          icon: "none"
+        });
         return;
       }
       if (!form.value.cover) {
-        common_vendor.index.showToast({ title: "请上传活动封面", icon: "none" });
+        common_vendor.index.showToast({
+          title: "请上传活动封面",
+          icon: "none"
+        });
         return;
       }
       if (!form.value.time || form.value.time.length !== 2) {
-        common_vendor.index.showToast({ title: "请选择活动时间", icon: "none" });
+        common_vendor.index.showToast({
+          title: "请选择活动时间",
+          icon: "none"
+        });
         return;
       }
       if (!form.value.enrollTime || form.value.enrollTime.length !== 2) {
-        common_vendor.index.showToast({ title: "请选择报名时间", icon: "none" });
+        common_vendor.index.showToast({
+          title: "请选择报名时间",
+          icon: "none"
+        });
         return;
       }
       if (!form.value.location) {
-        common_vendor.index.showToast({ title: "请选择活动地点", icon: "none" });
+        common_vendor.index.showToast({
+          title: "请选择活动地点",
+          icon: "none"
+        });
         return;
       }
       if (!form.value.capacity || form.value.capacity <= 0) {
-        common_vendor.index.showToast({ title: "请输入正确的总名额", icon: "none" });
+        common_vendor.index.showToast({
+          title: "请输入正确的总名额",
+          icon: "none"
+        });
         return;
       }
       if (form.value.enrollmentType === "aa") {
         if (form.value.aaFee === null || form.value.aaFee < 0) {
-          common_vendor.index.showToast({ title: "请输入正确的预报名费用", icon: "none" });
+          common_vendor.index.showToast({
+            title: "请输入正确的预报名费用",
+            icon: "none"
+          });
           return;
         }
       } else if (form.value.enrollmentType === "sponsor") {
         if (!form.value.sponsorName) {
-          common_vendor.index.showToast({ title: "请输入公司名称", icon: "none" });
+          common_vendor.index.showToast({
+            title: "请输入公司名称",
+            icon: "none"
+          });
           return;
         }
         if (!form.value.sponsorLogo) {
-          common_vendor.index.showToast({ title: "请上传公司Logo", icon: "none" });
+          common_vendor.index.showToast({
+            title: "请上传公司Logo",
+            icon: "none"
+          });
           return;
         }
       }
       if (!form.value.description) {
-        common_vendor.index.showToast({ title: "请输入活动介绍", icon: "none" });
+        common_vendor.index.showToast({
+          title: "请输入活动介绍",
+          icon: "none"
+        });
         return;
       }
       if (!form.value.organizer) {
-        common_vendor.index.showToast({ title: "请输入组织者姓名", icon: "none" });
+        common_vendor.index.showToast({
+          title: "请输入组织者姓名",
+          icon: "none"
+        });
         return;
       }
       if (!form.value.organization) {
-        common_vendor.index.showToast({ title: "请输入组织单位", icon: "none" });
+        common_vendor.index.showToast({
+          title: "请输入组织单位",
+          icon: "none"
+        });
         return;
       }
       if (!form.value.phone) {
-        common_vendor.index.showToast({ title: "请输入联系电话", icon: "none" });
+        common_vendor.index.showToast({
+          title: "请输入联系电话",
+          icon: "none"
+        });
         return;
       }
-      common_vendor.index.showToast({ title: "活动发布成功！", icon: "success" });
-      common_vendor.index.__f__("log", "at pages/active-publish/active-publish.vue:335", "发布活动:", form.value);
-    }
-    const searchKeyword = common_vendor.ref("");
-    const filteredShops = common_vendor.ref([]);
-    const allShops = common_vendor.ref([
-      { id: 1, name: "创客空间咖啡厅", address: "张江高科技园区88号" },
-      { id: 2, name: "创业孵化园会议中心", address: "浦东新区XX路123号" },
-      { id: 3, name: "数字未来展厅", address: "杨浦区YY路456号" },
-      { id: 4, name: "科技创新中心", address: "徐汇区ZZ路789号" }
-    ]);
-    function filterShops() {
-      const keyword = searchKeyword.value.trim().toLowerCase();
-      if (!keyword) {
-        filteredShops.value = [];
+      if (!form.value.businessName) {
+        common_vendor.index.showToast({
+          title: "请选择合作店铺",
+          icon: "none"
+        });
         return;
       }
-      filteredShops.value = allShops.value.filter(
-        (shop) => shop.name.toLowerCase().includes(keyword) || shop.address.toLowerCase().includes(keyword)
-      );
+      common_vendor.index.showToast({
+        title: "活动发布成功！",
+        icon: "success"
+      });
+      common_vendor.index.__f__("log", "at pages/active-publish/active-publish.vue:425", "发布活动:", form.value);
     }
-    function selectShop(shop) {
-      form.value.businessName = shop.name;
-      form.value.businessAddress = shop.address;
-      common_vendor.index.showToast({ title: `已选择：${shop.name}`, icon: "none" });
-      filteredShops.value = [];
-      searchKeyword.value = shop.name;
+    common_vendor.ref("");
+    common_vendor.ref([]);
+    function goToSelectShop() {
+      common_vendor.index.navigateTo({
+        url: "/pages/shop-list/shop-list"
+        // 这是我们下一步要创建的页面路径
+      });
     }
+    common_vendor.onLoad(() => {
+      common_vendor.index.$on("shopSelected", (shop) => {
+        common_vendor.index.__f__("log", "at pages/active-publish/active-publish.vue:443", "接收到选择的店铺信息:", shop);
+        form.value.businessName = shop.storeName;
+        form.value.businessAddress = shop.fullAddress;
+      });
+    });
+    common_vendor.onUnload(() => {
+      common_vendor.index.$off("shopSelected");
+    });
     return (_ctx, _cache) => {
       return common_vendor.e({
         a: common_vendor.o(($event) => form.value.title = $event),
@@ -382,31 +476,17 @@ const _sfc_main = {
         ag: common_vendor.p({
           label: "收款码上传"
         }),
-        ah: common_vendor.o(filterShops),
-        ai: common_vendor.o(($event) => searchKeyword.value = $event),
-        aj: common_vendor.p({
-          placeholder: "搜索店铺名称",
-          modelValue: searchKeyword.value
-        }),
-        ak: searchKeyword.value && filteredShops.value.length > 0
-      }, searchKeyword.value && filteredShops.value.length > 0 ? {
-        al: common_vendor.f(filteredShops.value, (shop, k0, i0) => {
-          return {
-            a: common_vendor.t(shop.name),
-            b: common_vendor.t(shop.address),
-            c: shop.id,
-            d: form.value.businessName === shop.name ? 1 : "",
-            e: common_vendor.o(($event) => selectShop(shop), shop.id)
-          };
-        })
-      } : searchKeyword.value && filteredShops.value.length === 0 ? {} : {}, {
-        am: searchKeyword.value && filteredShops.value.length === 0,
-        an: form.value.businessName
+        ah: form.value.businessName
       }, form.value.businessName ? {
-        ao: common_vendor.t(form.value.businessName)
+        ai: common_vendor.t(form.value.businessName)
       } : {}, {
-        ap: common_vendor.o(saveDraft),
-        aq: common_vendor.o(publish)
+        aj: common_vendor.o(goToSelectShop),
+        ak: common_vendor.p({
+          label: "合作店铺",
+          required: true
+        }),
+        al: common_vendor.o(saveDraft),
+        am: common_vendor.o(publish)
       });
     };
   }

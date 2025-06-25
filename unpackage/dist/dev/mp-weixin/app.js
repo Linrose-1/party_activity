@@ -23,6 +23,7 @@ if (!Math) {
   "./pages/my-collection/my-collection.js";
   "./pages/user-agreement/user-agreement.js";
   "./pages/location/location.js";
+  "./pages/shop-list/shop-list.js";
 }
 const _sfc_main = {
   onLaunch: function() {

@@ -37,14 +37,14 @@ const _sfc_main = {
           size: "20",
           color: "#FF6B00"
         }),
-        b: common_vendor.t(__props.store.name),
+        b: common_vendor.t(__props.store.storeName),
         c: common_vendor.p({
           type: "location-filled",
           size: "16",
           color: "#FF6B00"
         }),
         d: common_vendor.t(__props.store.distance),
-        e: common_vendor.t(__props.store.description),
+        e: common_vendor.t(__props.store.storeDescription),
         f: common_vendor.f(__props.store.tags, (tag, k0, i0) => {
           return {
             a: common_vendor.t(tag),

@@ -146,6 +146,13 @@
 			{
 				"navigationBarTitleText" : "附近"
 			}
+		},
+		{
+			"path" : "pages/shop-list/shop-list",
+			"style" : 
+			{
+				"navigationBarTitleText" : "聚店列表"
+			}
 		}
 	],
 	

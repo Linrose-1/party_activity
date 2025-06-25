@@ -4,7 +4,7 @@
       <view class="store-header">
         <view class="store-name">
           <uni-icons :type="store.icon" size="20" color="#FF6B00"></uni-icons>
-          <text>{{ store.name }}</text>
+          <text>{{ store.storeName }}</text>
         </view>
         <view class="distance">
           <uni-icons type="location-filled" size="16" color="#FF6B00"></uni-icons>
@@ -12,7 +12,7 @@
         </view>
       </view>
       <view class="store-desc">
-        {{ store.description }}
+        {{ store.storeDescription }}
       </view>
       <view class="store-footer">
         <view class="store-tags">

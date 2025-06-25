@@ -10,96 +10,131 @@ if (!Math) {
   (_easycom_uni_icons + StoreCard)();
 }
 const StoreCard = () => "../../components/StoreCard.js";
+const pageSize = 5;
 const _sfc_main = {
   __name: "shop",
   setup(__props) {
     const searchTerm = common_vendor.ref("");
     const activeFilter = common_vendor.ref("all");
+    const allStores = common_vendor.ref([]);
     const loadingMore = common_vendor.ref(false);
     const hasMore = common_vendor.ref(true);
-    common_vendor.onMounted(() => {
-      getStoreList();
-    });
+    const pageNo = common_vendor.ref(1);
+    const userLocation = common_vendor.ref(null);
     const getStoreList = async () => {
-      const result = await utils_request.request("/app-api/member/store/list", {
+      if (loadingMore.value || !hasMore.value) {
+        return;
+      }
+      if (!userLocation.value) {
+        common_vendor.index.__f__("log", "at pages/shop/shop.vue:95", "等待位置信息获取...");
+        allStores.value = [];
+        hasMore.value = false;
+        return;
+      }
+      loadingMore.value = true;
+      const params = {
+        pageNo: pageNo.value,
+        pageSize,
+        storeName: searchTerm.value.trim()
+        // longitude: userLocation.value.longitude, 
+        // latitude: userLocation.value.latitude,
+      };
+      const {
+        data: result,
+        // 将 newList 重命名为 result，因为它现在是 { list: [], total: 6 }
+        error
+      } = await utils_request.request("/app-api/member/store/list", {
         method: "GET",
-        // 请求方式
-        data: {
-          "pageNo": 1,
-          "pageSize": 10
-        }
+        data: params
       });
-      common_vendor.index.__f__("log", "at pages/shop/shop.vue:87", "login result.data:", result);
-      if (result.error) {
-        common_vendor.index.__f__("log", "at pages/shop/shop.vue:91", "请求失败:", result.error);
+      common_vendor.index.__f__("log", "at pages/shop/shop.vue:122", "API Response:", result);
+      loadingMore.value = false;
+      if (error) {
+        common_vendor.index.__f__("error", "at pages/shop/shop.vue:127", "获取店铺列表失败:", error);
+        common_vendor.index.showToast({
+          title: error,
+          icon: "none"
+        });
+        return;
+      }
+      const newList = result ? result.list : [];
+      const total = result ? result.total : 0;
+      if (newList && newList.length > 0) {
+        allStores.value = pageNo.value === 1 ? newList : [...allStores.value, ...newList];
+        pageNo.value++;
+        hasMore.value = allStores.value.length < total;
+      } else {
+        if (pageNo.value === 1) {
+          allStores.value = [];
+        }
+        hasMore.value = false;
       }
     };
-    const allStores = common_vendor.ref([
-      {
-        id: 1,
-        name: "蓝调酒吧",
-        category: "bar",
-        distance: "0.8km",
-        description: "爵士乐主题酒吧，提供各类特色鸡尾酒和精酿啤酒，环境优雅，适合朋友聚会和小型派对。",
-        tags: ["鸡尾酒", "爵士乐", "聚会"],
-        icon: "cocktail"
-        // FontAwesome 图标名称
-      },
-      {
-        id: 2,
-        name: "川味小厨",
-        category: "food",
-        distance: "0.3km",
-        description: "地道川菜馆，主打麻辣火锅和各式川味小吃，食材新鲜，口味正宗，价格实惠。",
-        tags: ["川菜", "火锅", "麻辣"],
-        icon: "utensils"
-      },
-      {
-        id: 3,
-        name: "星光KTV",
-        category: "ktv",
-        distance: "1.2km",
-        description: "高端KTV娱乐场所，拥有豪华包间和专业音响设备，提供丰富歌单和优质服务，适合公司团建和生日派对。",
-        tags: ["豪华包间", "专业音响", "团建"],
-        icon: "microphone-alt"
-      },
-      {
-        id: 4,
-        name: "王者台球俱乐部",
-        category: "billiards",
-        distance: "1.5km",
-        description: "专业台球俱乐部，拥有国际标准球台，环境舒适，提供饮品和小吃，定期举办台球比赛。",
-        tags: ["专业球台", "比赛", "休闲娱乐"],
-        icon: "dice"
-      },
-      {
-        id: 5,
-        name: "意大利披萨屋",
-        category: "food",
-        distance: "0.9km",
-        description: "正宗意式披萨餐厅，采用传统窑烤工艺，食材进口，提供多种意式美食和葡萄酒。",
-        tags: ["窑烤披萨", "意式美食", "葡萄酒"],
-        icon: "pizza-slice"
-      },
-      {
-        id: 6,
-        name: "精酿啤酒屋",
-        category: "bar",
-        distance: "1.7km",
-        description: "自酿啤酒专门店，提供20多种手工精酿啤酒，搭配美式烧烤和小吃，工业风装修风格。",
-        tags: ["手工啤酒", "美式烧烤", "工业风"],
-        icon: "beer"
-      },
-      {
-        id: 7,
-        name: "麦霸主题KTV",
-        category: "ktv",
-        distance: "2.1km",
-        description: "主题包厢KTV，每个包厢有不同主题装饰，最新曲库，智能点歌系统，提供自助餐服务。",
-        tags: ["主题包厢", "最新曲库", "自助餐"],
-        icon: "music"
+    common_vendor.onMounted(() => {
+      const storedLocation = common_vendor.index.getStorageSync("userLocation");
+      if (storedLocation) {
+        common_vendor.index.__f__("log", "at pages/shop/shop.vue:162", "从缓存加载位置信息:", storedLocation);
+        userLocation.value = storedLocation;
+        getStoreList();
+      } else {
+        common_vendor.index.__f__("log", "at pages/shop/shop.vue:168", "缓存中无位置信息，开始请求授权...");
+        common_vendor.index.getLocation({
+          type: "gcj02",
+          // 国测局坐标，适用于大多数国内地图服务
+          success: (res) => {
+            common_vendor.index.__f__("log", "at pages/shop/shop.vue:172", "成功获取位置信息:", res);
+            const location = {
+              latitude: res.latitude,
+              longitude: res.longitude
+            };
+            userLocation.value = location;
+            common_vendor.index.setStorageSync("userLocation", location);
+            getStoreList();
+          },
+          fail: (err) => {
+            common_vendor.index.__f__("error", "at pages/shop/shop.vue:185", "获取位置信息失败:", err);
+            common_vendor.index.showModal({
+              title: "定位失败",
+              content: "无法获取您的位置信息，将无法为您推荐附近的聚店。请检查系统定位服务是否开启，并允许应用获取位置权限。",
+              showCancel: false,
+              success: () => {
+                allStores.value = [];
+                hasMore.value = false;
+              }
+            });
+          }
+        });
       }
-    ]);
+    });
+    const loadMore = () => {
+      if (userLocation.value) {
+        getStoreList();
+      }
+    };
+    const handleRefresh = () => {
+      pageNo.value = 1;
+      allStores.value = [];
+      hasMore.value = true;
+      if (userLocation.value) {
+        getStoreList();
+      }
+    };
+    common_vendor.watch(activeFilter, () => {
+      handleRefresh();
+    });
+    const filteredStores = common_vendor.computed(() => allStores.value);
+    let searchTimer = null;
+    const onSearchInput = () => {
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(() => {
+        common_vendor.index.__f__("log", "at pages/shop/shop.vue:231", `搜索关键词: ${searchTerm.value}`);
+        handleRefresh();
+      }, 500);
+    };
+    const handleSearchClick = () => {
+      clearTimeout(searchTimer);
+      handleRefresh();
+    };
     const filters = common_vendor.ref([
       {
         name: "全部",
@@ -107,59 +142,32 @@ const _sfc_main = {
       },
       {
         name: "咖啡",
-        value: "bar"
+        value: "coffee"
       },
       {
         name: "茶馆",
-        value: "food"
+        value: "tea-house"
       },
       {
         name: "美食",
-        value: "ktv"
+        value: "food"
       },
       {
         name: "酒吧",
-        value: "billiards"
+        value: "bar"
       },
       {
         name: "其他",
         value: "other"
       }
     ]);
-    const filteredStores = common_vendor.computed(() => {
-      let result = allStores.value;
-      if (activeFilter.value !== "all") {
-        result = result.filter((store) => store.category === activeFilter.value);
-      }
-      if (searchTerm.value.trim() !== "") {
-        const lowerCaseSearchTerm = searchTerm.value.toLowerCase().trim();
-        result = result.filter(
-          (store) => store.name.toLowerCase().includes(lowerCaseSearchTerm) || store.description.toLowerCase().includes(lowerCaseSearchTerm)
-        );
-      }
-      return result;
-    });
-    const onSearchInput = () => {
-    };
     const selectFilter = (filterValue) => {
       activeFilter.value = filterValue;
     };
-    const loadMoreStores = () => {
-      if (loadingMore.value || !hasMore.value) {
-        return;
-      }
-      loadingMore.value = true;
-      setTimeout(() => {
-        hasMore.value = false;
-        loadingMore.value = false;
-      }, 1e3);
-    };
     const goToStoreDetail = (store) => {
       common_vendor.index.navigateTo({
-        url: `/pages/store/detail?id=${store.id}&name=${store.name}`
-        // 示例导航
+        url: `/pages/store/detail?id=${store.id}`
       });
-      common_vendor.index.__f__("log", "at pages/shop/shop.vue:233", "进入", store.name, "详情页");
     };
     const shareStore = () => {
       common_vendor.index.navigateTo({
@@ -171,7 +179,6 @@ const _sfc_main = {
         title: "申请上榜",
         icon: "none"
       });
-      common_vendor.index.__f__("log", "at pages/shop/shop.vue:247", "点击申请上榜");
     };
     return (_ctx, _cache) => {
       return common_vendor.e({
@@ -182,7 +189,8 @@ const _sfc_main = {
         }),
         b: common_vendor.o([($event) => searchTerm.value = $event.detail.value, onSearchInput]),
         c: searchTerm.value,
-        d: common_vendor.f(filters.value, (filter, k0, i0) => {
+        d: common_vendor.o(handleSearchClick),
+        e: common_vendor.f(filters.value, (filter, k0, i0) => {
           return {
             a: common_vendor.t(filter.name),
             b: filter.value,
@@ -190,7 +198,7 @@ const _sfc_main = {
             d: common_vendor.o(($event) => selectFilter(filter.value), filter.value)
           };
         }),
-        e: common_vendor.f(filteredStores.value, (store, k0, i0) => {
+        f: common_vendor.f(filteredStores.value, (store, k0, i0) => {
           return {
             a: store.id,
             b: common_vendor.o(($event) => goToStoreDetail(store), store.id),
@@ -200,43 +208,43 @@ const _sfc_main = {
             })
           };
         }),
-        f: loadingMore.value
+        g: loadingMore.value
       }, loadingMore.value ? {
-        g: common_vendor.p({
+        h: common_vendor.p({
           type: "spinner-cycle",
           size: "20",
           color: "#999"
         })
       } : {}, {
-        h: !hasMore.value && filteredStores.value.length > 0
-      }, !hasMore.value && filteredStores.value.length > 0 ? {
-        i: common_vendor.p({
+        i: !hasMore.value && allStores.value.length > 0
+      }, !hasMore.value && allStores.value.length > 0 ? {
+        j: common_vendor.p({
           type: "checkmarkempty",
           size: "20",
           color: "#999"
         })
       } : {}, {
-        j: filteredStores.value.length === 0 && !loadingMore.value
-      }, filteredStores.value.length === 0 && !loadingMore.value ? {
-        k: common_vendor.p({
+        k: allStores.value.length === 0 && !loadingMore.value
+      }, allStores.value.length === 0 && !loadingMore.value ? {
+        l: common_vendor.p({
           type: "info",
           size: "60",
           color: "#ffd8c1"
         })
       } : {}, {
-        l: common_vendor.o(loadMoreStores),
-        m: common_vendor.p({
+        m: common_vendor.o(loadMore),
+        n: common_vendor.p({
           type: "redo",
           size: "20",
           color: "#333"
         }),
-        n: common_vendor.o(shareStore),
-        o: common_vendor.p({
+        o: common_vendor.o(shareStore),
+        p: common_vendor.p({
           type: "plus-filled",
           size: "20",
           color: "#fff"
         }),
-        p: common_vendor.o(applyToList)
+        q: common_vendor.o(applyToList)
       });
     };
   }
