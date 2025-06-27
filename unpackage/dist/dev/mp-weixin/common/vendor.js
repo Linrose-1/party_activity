@@ -7224,9 +7224,9 @@ function initOnError() {
   };
 }
 function initRuntimeSocketService() {
-  const hosts = "192.168.1.2,127.0.0.1";
+  const hosts = "192.168.1.4,127.0.0.1";
   const port = "8090";
-  const id = "mp-weixin_x66rAn";
+  const id = "mp-weixin_9iLh4O";
   const lazy = typeof swan !== "undefined";
   let restoreError = lazy ? () => {
   } : initOnError();
@@ -8171,6 +8171,7 @@ const createHook = (lifecycle) => (hook, target = getCurrentInstance()) => {
 const onLoad = /* @__PURE__ */ createHook(ON_LOAD);
 const onUnload = /* @__PURE__ */ createHook(ON_UNLOAD);
 const onReachBottom = /* @__PURE__ */ createHook(ON_REACH_BOTTOM);
+const onPullDownRefresh = /* @__PURE__ */ createHook(ON_PULL_DOWN_REFRESH);
 const pages = [
   {
     path: "pages/home/home",
@@ -8302,6 +8303,12 @@ const pages = [
     path: "pages/shop-list/shop-list",
     style: {
       navigationBarTitleText: "聚店列表"
+    }
+  },
+  {
+    path: "pages/my-setting/my-setting",
+    style: {
+      navigationBarTitleText: "设置"
     }
   }
 ];
@@ -11207,6 +11214,7 @@ exports.nr = nr;
 exports.o = o$1;
 exports.onLoad = onLoad;
 exports.onMounted = onMounted;
+exports.onPullDownRefresh = onPullDownRefresh;
 exports.onReachBottom = onReachBottom;
 exports.onUnload = onUnload;
 exports.onUnmounted = onUnmounted;

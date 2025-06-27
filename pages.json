@@ -153,6 +153,13 @@
 			{
 				"navigationBarTitleText" : "聚店列表"
 			}
+		},
+		{
+			"path" : "pages/my-setting/my-setting",
+			"style" : 
+			{
+				"navigationBarTitleText" : "设置"
+			}
 		}
 	],
 	

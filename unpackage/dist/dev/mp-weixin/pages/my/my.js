@@ -1,13 +1,43 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
+const utils_request = require("../../utils/request.js");
 const _sfc_main = {
   __name: "my",
   setup(__props) {
+    common_vendor.onMounted(() => {
+      getUserInfo();
+    });
+    const userInfo = common_vendor.ref({});
+    const getUserInfo = async () => {
+      const result = await utils_request.request("/app-api/member/user/get", {
+        method: "GET"
+        // 请求方式
+        // data: postData
+      });
+      common_vendor.index.__f__("log", "at pages/my/my.vue:125", "getUserInfo result:", result);
+      userInfo.value = result.data;
+      common_vendor.index.__f__("log", "at pages/my/my.vue:128", "getUserInfo userInfo:", userInfo.value);
+      if (result.error) {
+        common_vendor.index.__f__("log", "at pages/my/my.vue:131", "请求失败:", result.error);
+      }
+    };
     const accountList = common_vendor.ref([
-      { value: 266, label: "我的贡分" },
-      { value: 15, label: "我的活动" },
-      { value: 15, label: "我的商机" },
-      { value: 0, label: "我的智米" }
+      {
+        value: 266,
+        label: "我的贡分"
+      },
+      {
+        value: 15,
+        label: "我的活动"
+      },
+      {
+        value: 15,
+        label: "我的商机"
+      },
+      {
+        value: 0,
+        label: "我的智米"
+      }
     ]);
     const featureList = common_vendor.ref([
       {
@@ -34,6 +64,12 @@ const _sfc_main = {
         icon: "../../static/icon/protocols.png",
         path: "/pages/user-agreement/user-agreement"
       }
+      // {
+      //   name: '设置', 
+      //   desc: '设置您的功能、退出登录等', 
+      //   icon: '../../static/icon/设置.png',
+      //   path: '/pages/my-setting/my-setting' 
+      // }
     ]);
     const navigateToFeature = (path) => {
       common_vendor.index.navigateTo({
@@ -86,22 +122,28 @@ const _sfc_main = {
         url: "/pages/my-businessCard/my-businessCard"
       });
     };
+    const skipToLogin = () => {
+      common_vendor.index.navigateTo({
+        url: "/pages/index/index"
+      });
+    };
     return (_ctx, _cache) => {
       return {
-        a: common_vendor.o(onEdit),
-        b: common_vendor.o(onViewAll),
-        c: common_vendor.f(accountList.value, (item, k0, i0) => {
+        a: common_vendor.t(userInfo.value.nickname),
+        b: common_vendor.o(onEdit),
+        c: common_vendor.o(onViewAll),
+        d: common_vendor.f(accountList.value, (item, k0, i0) => {
           return {
             a: common_vendor.t(item.value),
             b: common_vendor.t(item.label),
             c: item.label
           };
         }),
-        d: common_vendor.o(onViewDetail),
-        e: common_vendor.o(($event) => copyToClipboard("138138")),
-        f: common_vendor.o(saveQrcode),
-        g: common_vendor.o(shareQrcode),
-        h: common_vendor.f(featureList.value, (item, k0, i0) => {
+        e: common_vendor.o(onViewDetail),
+        f: common_vendor.o(($event) => copyToClipboard("138138")),
+        g: common_vendor.o(saveQrcode),
+        h: common_vendor.o(shareQrcode),
+        i: common_vendor.f(featureList.value, (item, k0, i0) => {
           return {
             a: item.icon,
             b: common_vendor.t(item.name),
@@ -109,7 +151,8 @@ const _sfc_main = {
             d: item.name,
             e: common_vendor.o(($event) => navigateToFeature(item.path), item.name)
           };
-        })
+        }),
+        j: common_vendor.o(skipToLogin)
       };
     };
   }

@@ -1,0 +1,1 @@
+{"version":3,"file":"my-setting.js","sources":["C:/Program Files/yingyong/HBuilderX.3.99.2023122611/HBuilderX/plugins/uniapp-cli-vite/uniPage:/cGFnZXMvbXktc2V0dGluZy9teS1zZXR0aW5nLnZ1ZQ"],"sourcesContent":["import MiniProgramPage from 'D:/evagi/party_activity/pages/my-setting/my-setting.vue'\nwx.createPage(MiniProgramPage)"],"names":[],"mappings":";;;;;;;AACA,GAAG,WAAW,eAAe;"}

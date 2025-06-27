@@ -8,8 +8,8 @@
 				</view>
 				<view class="user-details">
 					<view class="user-name">
-						王明
-						<text class="badge">黄金</text>
+						{{userInfo.nickname}}
+						<!-- <text class="badge">黄金</text> -->
 					</view>
 					<view class="user-title">市场总监 | 创新科技有限公司</view>
 					<view class="user-company">
@@ -83,9 +83,10 @@
 				<text class="section-title-main">功能中心</text>
 			</view>
 			<view class="features-list">
-				<view class="feature-item" v-for="item in featureList" :key="item.name" @tap="navigateToFeature(item.path)">
+				<view class="feature-item" v-for="item in featureList" :key="item.name"
+					@tap="navigateToFeature(item.path)">
 					<!-- <view class="feature-icon"><text :class="item.icon"></text></view> -->
-					<img :src="item.icon" alt="" class="feature-icon"/>
+					<img :src="item.icon" alt="" class="feature-icon" />
 					<!-- <img src="../../static/icon/活动.png" alt="" class="feature-icon"/> -->
 					<view class="feature-content">
 						<view class="feature-name">{{ item.name }}</view>
@@ -95,376 +96,428 @@
 				</view>
 			</view>
 		</view>
+
+		<button style="margin-top: 30rpx;background-color: red;color: white;" @click="skipToLogin">退出登录</button>
 	</view>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+	import {
+		ref,
+		onMounted
+	} from 'vue'
+	import request from '../../utils/request.js';
 
-const accountList = ref([
-	{ value: 266, label: '我的贡分' },
-	{ value: 15, label: '我的活动' },
-	{ value: 15, label: '我的商机' },
-	{ value: 0, label: '我的智米' }
-])
+	onMounted(() => {
+		getUserInfo();
+	});
+	
+	const userInfo = ref({})
 
-const featureList = ref([
-  { 
-    name: '我的活动', 
-    desc: '已报名/已发布的活动', 
-    icon: '../../static/icon/活动.png',
-    path: '/pages/my-active/my-active' 
-  },
-  { 
-    name: '我的商机', 
-    desc: '查看您发布的商机', 
-    icon: '../../static/icon/商机.png',
-    path: '/pages/my-opportunity/my-opportunity' 
-  },
-  { 
-    name: '我的收藏', 
-    desc: '收藏的活动和商机', 
-    icon: '../../static/icon/收藏.png',
-    path: '/pages/my-collection/my-collection' 
-  },
-  { 
-    name: '用户协议', 
-    desc: '查看用户协议、隐私协议等', 
-    icon: '../../static/icon/protocols.png',
-    path: '/pages/user-agreement/user-agreement' 
-  }
-])
-
-const navigateToFeature = (path) => {
-  uni.navigateTo({
-    url: path
-  })
-}
-
-const onEdit = () => {
-	uni.navigateTo({
-		url:'/pages/my-edit/my-edit'
-	})
-}
-
-const onViewAll = () => {
-	uni.showToast({
-		title: '查看账户详情',
-		icon: 'none'
-	})
-	uni.navigateTo({
-		url:'/pages/my-account/my-account'
-	})
-}
-
-// MyCard 组件中的函数也放这里
-const copyToClipboard = (text) => {
-	uni.setClipboardData({
-		data: text,
-		success: () => {
-			uni.showToast({
-				title: '已复制',
-				icon: 'none'
-			})
+	//获取用户的基本信息
+	const getUserInfo = async () => {
+		// 调用封装的请求方法
+		const result = await request('/app-api/member/user/get', {
+			method: 'GET', // 请求方式
+			// data: postData
+		});
+		// 如果请求成功，打印返回的数据
+		console.log('getUserInfo result:', result);
+		
+		userInfo.value = result.data
+		console.log('getUserInfo userInfo:', userInfo.value);
+		// 如果请求失败，打印错误信息
+		if (result.error) {
+			console.log('请求失败:', result.error);
 		}
-	})
-}
+	};
 
-const saveQrcode = () => {
-	uni.showToast({
-		title: '二维码已保存',
-		icon: 'none'
-	})
-}
+	const accountList = ref([{
+			value: 266,
+			label: '我的贡分'
+		},
+		{
+			value: 15,
+			label: '我的活动'
+		},
+		{
+			value: 15,
+			label: '我的商机'
+		},
+		{
+			value: 0,
+			label: '我的智米'
+		}
+	])
 
-const shareQrcode = () => {
-	uni.showToast({
-		title: '二维码已分享',
-		icon: 'none'
-	})
-}
+	const featureList = ref([{
+			name: '我的活动',
+			desc: '已报名/已发布的活动',
+			icon: '../../static/icon/活动.png',
+			path: '/pages/my-active/my-active'
+		},
+		{
+			name: '我的商机',
+			desc: '查看您发布的商机',
+			icon: '../../static/icon/商机.png',
+			path: '/pages/my-opportunity/my-opportunity'
+		},
+		{
+			name: '我的收藏',
+			desc: '收藏的活动和商机',
+			icon: '../../static/icon/收藏.png',
+			path: '/pages/my-collection/my-collection'
+		},
+		{
+			name: '用户协议',
+			desc: '查看用户协议、隐私协议等',
+			icon: '../../static/icon/protocols.png',
+			path: '/pages/user-agreement/user-agreement'
+		},
+		// {
+		//   name: '设置', 
+		//   desc: '设置您的功能、退出登录等', 
+		//   icon: '../../static/icon/设置.png',
+		//   path: '/pages/my-setting/my-setting' 
+		// }
+	])
 
-const onViewDetail = () => {
-	uni.showToast({
-		title: '查看名片详情',
-		icon: 'none'
-	})
-	uni.navigateTo({
-		url:'/pages/my-businessCard/my-businessCard'
-	})
-}
+	const navigateToFeature = (path) => {
+		uni.navigateTo({
+			url: path
+		})
+	}
+
+	const onEdit = () => {
+		uni.navigateTo({
+			url: '/pages/my-edit/my-edit'
+		})
+	}
+
+	const onViewAll = () => {
+		uni.showToast({
+			title: '查看账户详情',
+			icon: 'none'
+		})
+		uni.navigateTo({
+			url: '/pages/my-account/my-account'
+		})
+	}
+
+	// MyCard 组件中的函数也放这里
+	const copyToClipboard = (text) => {
+		uni.setClipboardData({
+			data: text,
+			success: () => {
+				uni.showToast({
+					title: '已复制',
+					icon: 'none'
+				})
+			}
+		})
+	}
+
+	const saveQrcode = () => {
+		uni.showToast({
+			title: '二维码已保存',
+			icon: 'none'
+		})
+	}
+
+	const shareQrcode = () => {
+		uni.showToast({
+			title: '二维码已分享',
+			icon: 'none'
+		})
+	}
+
+	const onViewDetail = () => {
+		uni.showToast({
+			title: '查看名片详情',
+			icon: 'none'
+		})
+		uni.navigateTo({
+			url: '/pages/my-businessCard/my-businessCard'
+		})
+	}
+
+	const skipToLogin = () => {
+		uni.navigateTo({
+			url: '/pages/index/index'
+		})
+	}
 </script>
 
 <style scoped>
-/* 主页面样式 */
+	/* 主页面样式 */
 
-.container {
-	padding: 30rpx;
-}
+	.container {
+		padding: 30rpx;
+	}
 
-.user-header {
-	background: linear-gradient(135deg, #FF8C00, #FF6B00);
-	padding: 40rpx;
-	border-radius: 20rpx;
-	color: white;
-	position: relative;
-}
+	.user-header {
+		background: linear-gradient(135deg, #FF8C00, #FF6B00);
+		padding: 40rpx;
+		border-radius: 20rpx;
+		color: white;
+		position: relative;
+	}
 
-.avatar {
-	width: 140rpx;
-	height: 140rpx;
-	border-radius: 50%;
-	overflow: hidden;
-	margin-right: 20rpx;
-}
+	.avatar {
+		width: 140rpx;
+		height: 140rpx;
+		border-radius: 50%;
+		overflow: hidden;
+		margin-right: 20rpx;
+	}
 
-.avatar-img {
-	width: 100%;
-	height: 100%;
-	object-fit: cover;
-}
+	.avatar-img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+	}
 
-.user-info {
-	display: flex;
-	align-items: center;
-	margin-bottom: 20rpx;
-}
+	.user-info {
+		display: flex;
+		align-items: center;
+		margin-bottom: 20rpx;
+	}
 
-.user-name {
-	font-size: 36rpx;
-	font-weight: bold;
-	display: flex;
-	align-items: center;
-}
+	.user-name {
+		font-size: 36rpx;
+		font-weight: bold;
+		display: flex;
+		align-items: center;
+	}
 
-.badge {
-	background: #ffd700;
-	color: #8a6d00;
-	padding: 6rpx 14rpx;
-	border-radius: 20rpx;
-	margin-left: 10rpx;
-	font-size: 22rpx;
-}
+	.badge {
+		background: #ffd700;
+		color: #8a6d00;
+		padding: 6rpx 14rpx;
+		border-radius: 20rpx;
+		margin-left: 10rpx;
+		font-size: 22rpx;
+	}
 
-.user-title,
-.user-company {
-	font-size: 24rpx;
-	margin-top: 6rpx;
-}
+	.user-title,
+	.user-company {
+		font-size: 24rpx;
+		margin-top: 6rpx;
+	}
 
-.edit-btn {
-	position: absolute;
-	right: 30rpx;
-	top: 30rpx;
-	font-size: 24rpx;
-	background: rgba(255, 255, 255, 0.2);
-	padding: 10rpx 20rpx;
-	border-radius: 30rpx;
-	cursor: pointer;
-}
+	.edit-btn {
+		position: absolute;
+		right: 30rpx;
+		top: 30rpx;
+		font-size: 24rpx;
+		background: rgba(255, 255, 255, 0.2);
+		padding: 10rpx 20rpx;
+		border-radius: 30rpx;
+		cursor: pointer;
+	}
 
-.section-header {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	margin-bottom: 20rpx;
-}
+	.section-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 20rpx;
+	}
 
-.section-title-main {
-	font-size: 32rpx;
-	font-weight: bold;
-}
+	.section-title-main {
+		font-size: 32rpx;
+		font-weight: bold;
+	}
 
-.view-all {
-	font-size: 24rpx;
-	color: #3a7bd5;
-	cursor: pointer;
-}
+	.view-all {
+		font-size: 24rpx;
+		color: #3a7bd5;
+		cursor: pointer;
+	}
 
-.account-section,
-.features-section {
-	background: #fff;
-	padding: 30rpx;
-	border-radius: 20rpx;
-	margin-top: 50rpx;
-}
+	.account-section,
+	.features-section {
+		background: #fff;
+		padding: 30rpx;
+		border-radius: 20rpx;
+		margin-top: 50rpx;
+	}
 
-.account-grid {
-	display: grid;
-	grid-template-columns: repeat(4, 1fr);
-	gap: 20rpx;
-}
+	.account-grid {
+		display: grid;
+		grid-template-columns: repeat(4, 1fr);
+		gap: 20rpx;
+	}
 
-.account-item {
-	text-align: center;
-}
+	.account-item {
+		text-align: center;
+	}
 
-.account-value {
-	font-size: 36rpx;
-	color: #FF6B00;
-	font-weight: bold;
-}
+	.account-value {
+		font-size: 36rpx;
+		color: #FF6B00;
+		font-weight: bold;
+	}
 
-.account-label {
-	font-size: 24rpx;
-	color: #666;
-}
+	.account-label {
+		font-size: 24rpx;
+		color: #666;
+	}
 
-.feature-item {
-	display: flex;
-	align-items: center;
-	background: #f9f9f9;
-	padding: 20rpx;
-	border-radius: 20rpx;
-	margin-bottom: 20rpx;
-}
+	.feature-item {
+		display: flex;
+		align-items: center;
+		background: #f9f9f9;
+		padding: 20rpx;
+		border-radius: 20rpx;
+		margin-bottom: 20rpx;
+	}
 
-.feature-icon {
-	width: 60rpx;
-	height: 60rpx;
-	font-size: 32rpx;
-	color: #FF6B00;
-	margin-right: 20rpx;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-}
+	.feature-icon {
+		width: 60rpx;
+		height: 60rpx;
+		font-size: 32rpx;
+		color: #FF6B00;
+		margin-right: 20rpx;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
 
-.feature-name {
-	font-size: 28rpx;
-	font-weight: bold;
-	color: #333;
-}
+	.feature-name {
+		font-size: 28rpx;
+		font-weight: bold;
+		color: #333;
+	}
 
-.feature-desc {
-	font-size: 24rpx;
-	color: #999;
-}
+	.feature-desc {
+		font-size: 24rpx;
+		color: #999;
+	}
 
-.chevron-icon {
-	font-size: 30rpx;
-	color: #ccc;
-	margin-left: auto;
-}
+	.chevron-icon {
+		font-size: 30rpx;
+		color: #ccc;
+		margin-left: auto;
+	}
 
-/* MyCard部分样式 */
+	/* MyCard部分样式 */
 
-.card-section {
-	background: #fff;
-	padding: 30rpx;
-	border-radius: 20rpx;
-	margin-top: 30rpx;
-}
+	.card-section {
+		background: #fff;
+		padding: 30rpx;
+		border-radius: 20rpx;
+		margin-top: 30rpx;
+	}
 
-.ai-card {
-	background: linear-gradient(135deg, #FF8C00, #FF6B00);
-	padding: 30rpx;
-	border-radius: 20rpx;
-	color: white;
-}
+	.ai-card {
+		background: linear-gradient(135deg, #FF8C00, #FF6B00);
+		padding: 30rpx;
+		border-radius: 20rpx;
+		color: white;
+	}
 
-.card-top {
-	display: flex;
-	align-items: center;
-	margin-bottom: 30rpx;
-}
+	.card-top {
+		display: flex;
+		align-items: center;
+		margin-bottom: 30rpx;
+	}
 
-.card-avatar {
-	width: 160rpx;
-	height: 160rpx;
-	border-radius: 30rpx;
-	overflow: hidden;
-	margin-right: 20rpx;
-}
+	.card-avatar {
+		width: 160rpx;
+		height: 160rpx;
+		border-radius: 30rpx;
+		overflow: hidden;
+		margin-right: 20rpx;
+	}
 
-.card-name {
-	font-size: 36rpx;
-	font-weight: bold;
-	display: flex;
-	align-items: center;
-	margin-bottom: 10rpx;
-}
+	.card-name {
+		font-size: 36rpx;
+		font-weight: bold;
+		display: flex;
+		align-items: center;
+		margin-bottom: 10rpx;
+	}
 
-.vip-badge {
-	background: #ffd700;
-	color: #8a6d00;
-	padding: 6rpx 14rpx;
-	border-radius: 20rpx;
-	font-size: 20rpx;
-	margin-left: 10rpx;
-}
+	.vip-badge {
+		background: #ffd700;
+		color: #8a6d00;
+		padding: 6rpx 14rpx;
+		border-radius: 20rpx;
+		font-size: 20rpx;
+		margin-left: 10rpx;
+	}
 
-.card-position,
-.card-company {
-	font-size: 26rpx;
-	margin-bottom: 5rpx;
-	opacity: 0.95;
-}
+	.card-position,
+	.card-company {
+		font-size: 26rpx;
+		margin-bottom: 5rpx;
+		opacity: 0.95;
+	}
 
-.contact-info {
-	display: grid;
-	grid-template-columns: 1fr;
-	gap: 15rpx;
-	background: rgba(255, 255, 255, 0.2);
-	padding: 20rpx;
-	border-radius: 20rpx;
-	margin-bottom: 30rpx;
-}
+	.contact-info {
+		display: grid;
+		grid-template-columns: 1fr;
+		gap: 15rpx;
+		background: rgba(255, 255, 255, 0.2);
+		padding: 20rpx;
+		border-radius: 20rpx;
+		margin-bottom: 30rpx;
+	}
 
-.contact-item {
-	display: flex;
-	align-items: center;
-	font-size: 26rpx;
-	cursor: pointer;
-}
+	.contact-item {
+		display: flex;
+		align-items: center;
+		font-size: 26rpx;
+		cursor: pointer;
+	}
 
-.copy-btn {
-	margin-left: auto;
-	font-size: 24rpx;
-	color: #fff;
-	background: rgba(255, 255, 255, 0.3);
-	padding: 6rpx 16rpx;
-	border-radius: 30rpx;
-}
+	.copy-btn {
+		margin-left: auto;
+		font-size: 24rpx;
+		color: #fff;
+		background: rgba(255, 255, 255, 0.3);
+		padding: 6rpx 16rpx;
+		border-radius: 30rpx;
+	}
 
-.qrcode-section {
-	text-align: center;
-	color: white;
-}
+	.qrcode-section {
+		text-align: center;
+		color: white;
+	}
 
-.qrcode-title {
-	font-size: 26rpx;
-	margin-bottom: 20rpx;
-}
+	.qrcode-title {
+		font-size: 26rpx;
+		margin-bottom: 20rpx;
+	}
 
-.qrcode-container {
-	width: 200rpx;
-	height: 200rpx;
-	margin: 0 auto;
-	background: white;
-	padding: 10rpx;
-	border-radius: 12rpx;
-}
+	.qrcode-container {
+		width: 200rpx;
+		height: 200rpx;
+		margin: 0 auto;
+		background: white;
+		padding: 10rpx;
+		border-radius: 12rpx;
+	}
 
-.qrcode-img {
-	width: 100%;
-	height: 100%;
-	object-fit: contain;
-}
+	.qrcode-img {
+		width: 100%;
+		height: 100%;
+		object-fit: contain;
+	}
 
-.qrcode-actions {
-	display: flex;
-	justify-content: center;
-	gap: 50rpx;
-	margin: 20rpx 0;
-}
+	.qrcode-actions {
+		display: flex;
+		justify-content: center;
+		gap: 50rpx;
+		margin: 20rpx 0;
+	}
 
-.qrcode-btn {
-	background-color: #FF8F3D;
-	color: white;
-	padding: 10rpx 100rpx;
-	border-radius: 30rpx;
-	font-size: 24rpx;
-	cursor: pointer;
-}
+	.qrcode-btn {
+		background-color: #FF8F3D;
+		color: white;
+		padding: 10rpx 100rpx;
+		border-radius: 30rpx;
+		font-size: 24rpx;
+		cursor: pointer;
+	}
 </style>

@@ -1,3 +1,4 @@
+<!-- 这里的 template 是完整的，您可以直接替换原有的 template -->
 <template>
 	<view class="container">
 		<!-- 顶部标题和搜索 -->
@@ -12,6 +13,7 @@
 		<uni-collapse>
 			<uni-collapse-item title="活动筛选" :open="true" class="collapse-title">
 				<view class="filters">
+					<!-- 选择类型 -->
 					<view class="uni-list">
 						<view class="uni-list-cell">
 							<view class="uni-list-cell-left register-btn">
@@ -24,6 +26,22 @@
 							</view>
 						</view>
 					</view>
+					
+					<!-- 【新增】选择状态 -->
+					<view class="uni-list">
+						<view class="uni-list-cell">
+							<view class="uni-list-cell-left register-btn">
+								选择状态
+							</view>
+							<view class="uni-list-cell-db">
+								<picker @change="bindStatusPickerChange" :value="statusIndex" :range="statusArray">
+									<view class="uni-input">{{statusArray[statusIndex]}}</view>
+								</picker>
+							</view>
+						</view>
+					</view>
+
+					<!-- 选择日期 -->
 					<view class="uni-list">
 						<view class="uni-list-cell">
 							<view class="uni-list-cell-left register-btn">
@@ -37,6 +55,8 @@
 							</view>
 						</view>
 					</view>
+					
+					<!-- 选择位置 -->
 					<view class="uni-list">
 						<view class="uni-list-cell">
 							<view class="uni-list-cell-left register-btn">
@@ -59,11 +79,17 @@
 
 		<!-- 活动列表 -->
 		<view class="activity-list" scroll-y="true">
-			<ActivityCard v-for="(activity, index) in filteredActivities" :key="index" :activity="activity" />
+		    <ActivityCard v-for="(activity, index) in activitiesData" :key="activity.id" :activity="activity" />
 		</view>
 
-		<view v-if="filteredActivities.length > 0" class="no-more-content">
+		<!-- 【修改后】根据新的状态变量来显示提示 -->
+		<view v-if="!hasMore && activitiesData.length > 0" class="no-more-content">
 			暂无更多活动
+		</view>
+		
+		<!-- 【可选新增】如果希望在列表为空时也显示提示，可以添加一个空状态 -->
+		<view v-if="!loading && activitiesData.length === 0" class="no-more-content">
+			暂无活动，快去发布一个吧！
 		</view>
 
 		<!-- 底部操作栏 -->
@@ -79,17 +105,39 @@
 <script setup>
 	import {
 		ref,
-		computed
+		computed,
+		onMounted,
+		watch
 	} from 'vue';
+	import {
+		onReachBottom // 【新增】导入 onReachBottom 生命周期钩子
+	} from '@dcloudio/uni-app';
 	import ActivityCard from '@/components/ActivityCard.vue';
+	import request from '../../utils/request.js';
 
-	// 搜索关键词
-	const searchKeyword = ref('');
+	// 【新增】定义加载状态和分页相关状态
+	const loading = ref(false); // 是否正在加载中
+	const hasMore = ref(true); // 是否还有更多数据
+	const pageNo = ref(1); // 当前页码
+	const pageSize = 10; // 每页加载10条
+	
+	// 【修改】活动列表数据，初始为空，将通过接口获取
+	const activitiesData = ref([]);
 
-	// 分类筛选
-	const activeCategory = ref('全部类型');
+	// 页面挂载时，首先获取一次活动列表
+	onMounted(() => {
+		getActiveList();
+	});
 
-	// 获取当前日期
+	// 【新增】滑动到底部时触发，用于分页加载
+	onReachBottom(() => {
+		console.log('滑动到底部，触发加载更多');
+		if (hasMore.value && !loading.value) {
+			getActiveList(true); // 调用 getActiveList 并传入 true 表示是加载更多
+		}
+	});
+
+
 	const getDate = (type) => {
 		const date = new Date();
 		let year = date.getFullYear();
@@ -107,29 +155,46 @@
 		return `${year}-${month}-${day}`;
 	};
 
-	// 响应式数据
-	const title = ref('picker');
-	const array = ref(['全部类型', '交流会', '沙龙', '峰会', '分享会','创业猎伙' ,'其他']);
+	// --- 筛选条件 ---
+	const searchKeyword = ref('');
+	const array = ref(['全部类型', '交流会', '沙龙', '峰会', '分享会', '创业猎伙', '其他']);
 	const index = ref(0);
+	const activeCategory = ref('全部类型');
 	const date = ref(getDate({
 		format: true
 	}));
+	const statusArray = ref(['全部状态', '未开始', '报名中', '即将开始', '进行中', '已结束', '已取消']);
+	const statusIndex = ref(0);
+	const selectedStatus = ref('全部状态');
+	const selectedLocationInfo = ref(null);
 
 	// 计算属性
 	const startDate = computed(() => getDate('start'));
 	const endDate = computed(() => getDate('end'));
 
-	// 方法
+
+	// --- 方法 ---
+
+	// 类型选择器改变
 	const bindPickerChange = (e) => {
-		console.log('picker发送选择改变，携带值为', e.detail.value);
 		index.value = e.detail.value;
+		activeCategory.value = array.value[e.detail.value];
+		// 【修改】筛选条件变化后，不再手动调用，交由 watch 处理
 	};
 
+	// 日期选择器改变 (注意：日期筛选暂未加入 getActiveList 的 params，如需使用请参照其他筛选条件添加)
 	const bindDateChange = (e) => {
 		date.value = e.detail.value;
 	};
 
-	const selectedLocationInfo = ref(null); // 用于存储地图选择结果
+	// 状态选择器改变
+	const bindStatusPickerChange = (e) => {
+		statusIndex.value = e.detail.value;
+		selectedStatus.value = statusArray.value[e.detail.value];
+		// 【修改】筛选条件变化后，不再手动调用，交由 watch 处理
+	};
+
+	// 位置选择
 	const openMapToChooseLocation = () => {
 		uni.chooseLocation({
 			success: (res) => {
@@ -140,98 +205,123 @@
 					latitude: res.latitude,
 					longitude: res.longitude
 				};
+				// 【修改】筛选条件变化后，不再手动调用，交由 watch 处理
 			},
 			fail: (err) => {
 				console.log('选择位置失败:', err);
-				if (err.errMsg.includes('cancel')) {
-					// 用户取消了选择
-				} else {
-					uni.showToast({
-						title: '选择位置失败',
-						icon: 'none'
-					});
-				}
 			}
 		});
 	}
-
-	const activitiesData = ref([{
-			id: 1,
-			title: "互联网创业者交流会",
-			image: "https://images.unsplash.com/photo-1553877522-43269d4ea984?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-			date: "2025-05-28 14:00-16:00",
-			location: "上海市浦东新区张江高科技园区",
-			participants: {
-				current: 32,
-				total: 50
-			},
-			tags: ["交流会", "线下活动"],
-			organizer: "张经理"
-		},
-		{
-			id: 2,
-			title: "2025金融科技峰会",
-			image: "https://images.unsplash.com/photo-1533750349088-cd871a92f312?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-			date: "2025-06-15 09:00-17:00",
-			location: "上海国际会议中心",
-			participants: {
-				current: 180,
-				total: 200
-			},
-			tags: ["峰会", "线下活动"],
-			organizer: "李主管"
-		},
-		{
-			id: 3,
-			title: "AI技术分享会",
-			image: "https://images.unsplash.com/photo-1553877522-43269d4ea984?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-			date: "2025-06-05 19:00-21:00",
-			location: "北京市海淀区中关村创业大街",
-			participants: {
-				current: 45,
-				total: 60
-			},
-			tags: ["分享会", "线下活动"],
-			organizer: "王教授"
-		},
-		{
-			id: 4,
-			title: "当代艺术沙龙",
-			image: "https://images.unsplash.com/photo-1497366754035-f200968a6e72?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-			date: "2025-06-10 15:00-17:00",
-			location: "广州市天河区艺术中心",
-			participants: {
-				current: 28,
-				total: 40
-			},
-			tags: ["沙龙", "线下活动", "其他"],
-			organizer: "陈馆长"
+	
+	/**
+	 * 【核心修改】重构 getActiveList 方法
+	 * @param {boolean} isLoadMore - 是否为加载更多操作。true: 追加数据; false: 刷新列表
+	 */
+	const getActiveList = async (isLoadMore = false) => {
+		// 如果正在加载中，则直接返回，防止重复请求
+		if (loading.value) {
+			return;
 		}
-
-	])
-
-	// 计算过滤后的活动列表
-	const filteredActivities = computed(() => {
-		let result = [...activitiesData.value];
-
-		// 分类筛选
-		if (activeCategory.value !== '全部类型') {
-			result = result.filter(activity =>
-				activity.tags.includes(activeCategory.value)
-			);
+		// 如果是加载更多，但已经没有更多数据了，也直接返回
+		if (isLoadMore && !hasMore.value) {
+			return;
 		}
-
-		// 搜索筛选
-		if (searchKeyword.value) {
-			const keyword = searchKeyword.value.toLowerCase();
-			result = result.filter(activity =>
-				activity.title.toLowerCase().includes(keyword) ||
-				activity.location.toLowerCase().includes(keyword)
-			);
+	
+		loading.value = true;
+	
+		// 如果不是加载更多（即是刷新或新搜索），则重置分页和数据
+		if (!isLoadMore) {
+			pageNo.value = 1;
+			activitiesData.value = [];
+			hasMore.value = true;
 		}
+	
+		// 状态中文到数字的映射，后端通常使用数字
+		const statusMap = {
+			'全部状态': '', // 传空字符串表示查询全部
+			'未开始': 1,
+			'报名中': 2,
+			'即将开始': 3,
+			'进行中': 4,
+			'已结束': 5,
+			'已取消': 0
+		};
+	
+		// 构造请求参数
+		const params = {
+			pageNo: pageNo.value,
+			pageSize: pageSize,
+			name: searchKeyword.value, // 搜索框内容
+			category: activeCategory.value === '全部类型' ? '' : activeCategory.value, // 活动类型
+			status: statusMap[selectedStatus.value], // 活动状态
+			longitude: selectedLocationInfo.value ? selectedLocationInfo.value.longitude : '', // 经度
+			latitude: selectedLocationInfo.value ? selectedLocationInfo.value.latitude : '' // 纬度
+		};
+	
+		try {
+			console.log('发起活动列表请求, 参数:', params);
+			// 调用封装的请求方法
+			const result = await request('/app-api/member/activity/list', {
+				method: 'GET',
+				data: params
+			});
+			
+			// 【关键修改】修正成功条件的判断逻辑
+			if (result && !result.error && result.data) { 
+				// 从 result.data 中解构出列表数据，并提供一个空数组作为默认值
+				const list = result.data.list || [];
+	
+				if (isLoadMore) {
+					// 加载更多：追加数据
+					activitiesData.value = [...activitiesData.value, ...list];
+				} else {
+					// 刷新/搜索：直接替换数据
+					activitiesData.value = list;
+				}
+	
+				// 判断是否还有更多数据
+				// 后端返回的 total 是总条数，我们可以用当前已加载的数量和总数比较
+				// result.data.total 是后端返回的总条目数
+				if (activitiesData.value.length >= result.data.total) {
+					hasMore.value = false;
+				} else {
+	                hasMore.value = true;
+	            }
+	
+				// 如果成功获取到数据，页码 +1，为下一次加载做准备
+				pageNo.value++;
+	
+				console.log('活动列表获取成功:', activitiesData.value);
+			} else {
+				// 请求失败或 code 不为 0
+				console.error('获取活动列表失败:', result);
+				hasMore.value = false; // 出错时也认为没有更多数据了
+			}
+		} catch (error) {
+			console.error('请求异常:', error);
+			hasMore.value = false; // 异常时也认为没有更多数据了
+		} finally {
+			loading.value = false; // 结束加载状态
+		}
+	};
+	
+	// 【新增】使用 watch 监听所有筛选条件的变化
+	// 当任何一个筛选条件改变时，都触发一次新的搜索（不是加载更多）
+	watch(
+		[searchKeyword, activeCategory, selectedStatus, selectedLocationInfo], 
+		() => {
+			// 为了防止短时间内快速输入触发多次请求，可以加入防抖
+			// 这里为了简单，直接调用
+			console.log('筛选条件变化，重新搜索...');
+			getActiveList(false);
+		},
+		{ deep: true } // deep: true 确保能监听到 selectedLocationInfo 对象的内部变化
+	);
 
-		return result;
-	});
+
+	// 【删除】旧的 filteredActivities 计算属性，因为现在数据获取和筛选都在 getActiveList 中完成
+	// const filteredActivities = computed(() => { ... }); // 此部分已删除
+
 
 	// 发布活动
 	const publishActivity = () => {

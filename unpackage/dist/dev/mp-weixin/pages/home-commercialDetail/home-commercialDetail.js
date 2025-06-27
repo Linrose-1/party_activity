@@ -1,5 +1,6 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
+const utils_request = require("../../utils/request.js");
 if (!Array) {
   const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
   _easycom_uni_icons2();
@@ -11,32 +12,80 @@ if (!Math) {
 const _sfc_main = {
   __name: "home-commercialDetail",
   setup(__props) {
+    const isLoading = common_vendor.ref(true);
+    const postId = common_vendor.ref(null);
     const postDetail = common_vendor.reactive({
-      id: 1,
-      user: "陈总",
-      time: "1小时前",
-      content: "我们公司正在寻找AI技术合作伙伴，开发新一代智能客服系统。要求具备自然语言处理和机器学习经验，有相关行业解决方案的团队优先。项目周期预计6个月，预算面议。期待与有实力的团队合作，共同打造行业领先的智能客服解决方案。",
-      images: [
-        "https://via.placeholder.com/150/FF6A00/FFFFFF?text=AI合作图1",
-        "https://via.placeholder.com/150/FF6A00/FFFFFF?text=AI合作图2",
-        "https://via.placeholder.com/150/FF6A00/FFFFFF?text=AI合作图3",
-        "https://via.placeholder.com/150/FF6A00/FFFFFF?text=AI合作图4"
-      ],
-      tags: ["#技术合作", "#AI开发", "#商务合作", "#智能客服"],
-      likes: 24,
-      dislikes: 3,
+      id: null,
+      user: "",
+      // 用户名先置空
+      userId: null,
+      time: "",
+      content: "",
+      images: [],
+      tags: [],
+      likes: 0,
+      dislikes: 0,
       userAction: null,
-      // 'like' or 'dislike'
-      saved: false,
-      contact: {
-        // 模拟联系方式
-        phone: "138 **** 5678",
-        email: "chenzong@example.com",
-        company: "创新科技有限公司",
-        address: "上海市浦东新区",
-        website: "www.innotech-ai.com"
+      saved: false
+    });
+    function formatTimestamp(timestamp) {
+      if (!timestamp)
+        return "";
+      const date = new Date(timestamp);
+      const Y = date.getFullYear();
+      const M = (date.getMonth() + 1).toString().padStart(2, "0");
+      const D = date.getDate().toString().padStart(2, "0");
+      const h = date.getHours().toString().padStart(2, "0");
+      const m = date.getMinutes().toString().padStart(2, "0");
+      return `${Y}-${M}-${D} ${h}:${m}`;
+    }
+    common_vendor.onLoad((options) => {
+      if (options && options.id) {
+        postId.value = options.id;
+        getBusinessOpportunitiesDetail();
+      } else {
+        common_vendor.index.__f__("error", "at pages/home-commercialDetail/home-commercialDetail.vue:160", "未接收到商机ID");
+        common_vendor.index.showToast({ title: "加载失败，无效的商机", icon: "none" });
+        setTimeout(() => common_vendor.index.navigateBack(), 1500);
       }
     });
+    const getBusinessOpportunitiesDetail = async () => {
+      isLoading.value = true;
+      try {
+        const result = await utils_request.request("/app-api/member/business-opportunities/get", {
+          method: "GET",
+          data: { id: postId.value }
+        });
+        common_vendor.index.__f__("log", "at pages/home-commercialDetail/home-commercialDetail.vue:175", "getBusinessOpportunitiesDetail result:", result);
+        if (result && !result.error && result.data) {
+          const item = result.data;
+          postDetail.id = item.id;
+          postDetail.content = item.postContent;
+          postDetail.images = item.postImg ? String(item.postImg).split(",").filter((img) => img) : [];
+          try {
+            const parsedTags = JSON.parse(item.tags || "[]");
+            postDetail.tags = Array.isArray(parsedTags) ? parsedTags : item.tags ? String(item.tags).split(",") : [];
+          } catch (e) {
+            postDetail.tags = item.tags ? String(item.tags).split(",") : [];
+          }
+          postDetail.likes = item.likesCount || 0;
+          postDetail.dislikes = item.dislikesCount || 0;
+          postDetail.userAction = item.userLikeStr || null;
+          postDetail.saved = item.followFlag === 1;
+          postDetail.time = formatTimestamp(item.createTime);
+          postDetail.user = item.contactPerson || "匿名用户";
+          postDetail.userId = item.userId;
+        } else {
+          const errorMsg = result && result.error ? result.error.message : "获取详情失败";
+          common_vendor.index.showToast({ title: errorMsg, icon: "none" });
+        }
+      } catch (error) {
+        common_vendor.index.__f__("error", "at pages/home-commercialDetail/home-commercialDetail.vue:229", "获取商机详情失败:", error);
+        common_vendor.index.showToast({ title: "网络请求异常", icon: "none" });
+      } finally {
+        isLoading.value = false;
+      }
+    };
     const comments = common_vendor.reactive([
       {
         id: 1,
@@ -45,7 +94,11 @@ const _sfc_main = {
         text: "我们团队有5年AI客服系统开发经验，已完成多个金融行业智能客服项目。已私信您联系方式，期待进一步沟通！",
         likes: 5,
         userAction: null,
-        contact: { phone: "139 **** 1234", email: "zhang@example.com", company: "智联科技" }
+        contact: {
+          phone: "139 **** 1234",
+          email: "zhang@example.com",
+          company: "智联科技"
+        }
       },
       {
         id: 2,
@@ -54,7 +107,11 @@ const _sfc_main = {
         text: "您好，我们有成熟的NLP技术团队，开发过多个智能客服系统。能否提供更具体的需求文档？谢谢！",
         likes: 2,
         userAction: null,
-        contact: { phone: "137 **** 5678", email: "wang@example.com", company: "未来智能" }
+        contact: {
+          phone: "137 **** 5678",
+          email: "wang@example.com",
+          company: "未来智能"
+        }
       },
       {
         id: 3,
@@ -63,7 +120,11 @@ const _sfc_main = {
         text: "我们专注于AI语音交互系统，有自有专利技术，可以显著提升客服效率。已发送公司介绍到私信，请查收。",
         likes: 1,
         userAction: null,
-        contact: { phone: "136 **** 9012", email: "li@example.com", company: "声学智能" }
+        contact: {
+          phone: "136 **** 9012",
+          email: "li@example.com",
+          company: "声学智能"
+        }
       },
       {
         id: 4,
@@ -72,19 +133,14 @@ const _sfc_main = {
         text: "我们公司刚完成一个电商智能客服项目，支持多语言处理。已私信您案例演示链接，欢迎查看。",
         likes: 0,
         userAction: null,
-        contact: { phone: "135 **** 3456", email: "zhao@example.com", company: "电商通" }
+        contact: {
+          phone: "135 **** 3456",
+          email: "zhao@example.com",
+          company: "电商通"
+        }
       }
     ]);
     const newCommentText = common_vendor.ref("");
-    const showContactModal = common_vendor.ref(false);
-    const currentContact = common_vendor.reactive({
-      name: "",
-      phone: "",
-      email: "",
-      company: "",
-      address: "",
-      website: ""
-    });
     const toggleAction = (item, action) => {
       if (item.userAction === action) {
         item.userAction = null;
@@ -122,13 +178,6 @@ const _sfc_main = {
         icon: "none"
       });
     };
-    const showContact = (userName, contactInfo) => {
-      Object.assign(currentContact, { name: userName, ...contactInfo });
-      showContactModal.value = true;
-    };
-    const closeContact = () => {
-      showContactModal.value = false;
-    };
     const replyComment = (comment) => {
       common_vendor.index.showToast({
         title: `回复 ${comment.user}: 功能待完善`,
@@ -148,7 +197,10 @@ const _sfc_main = {
           text,
           likes: 0,
           userAction: null,
-          contact: { phone: "188 **** 8888", email: "current@example.com" }
+          contact: {
+            phone: "188 **** 8888",
+            email: "current@example.com"
+          }
           // 模拟当前用户联系方式
         });
         newCommentText.value = "";
@@ -170,18 +222,31 @@ const _sfc_main = {
         longPressActions: {
           itemList: ["发送给朋友", "保存图片", "收藏"],
           success: function(data) {
-            common_vendor.index.__f__("log", "at pages/home-commercialDetail/home-commercialDetail.vue:414", "选中了第" + (data.tapIndex + 1) + "个按钮，第" + (data.index + 1) + "张图片");
+            common_vendor.index.__f__("log", "at pages/home-commercialDetail/home-commercialDetail.vue:434", "选中了第" + (data.tapIndex + 1) + "个按钮，第" + (data.index + 1) + "张图片");
           },
           fail: function(err) {
-            common_vendor.index.__f__("log", "at pages/home-commercialDetail/home-commercialDetail.vue:417", err.errMsg);
+            common_vendor.index.__f__("log", "at pages/home-commercialDetail/home-commercialDetail.vue:437", err.errMsg);
           }
         }
+      });
+    };
+    const navigateToBusinessCard = (userId) => {
+      if (!userId) {
+        common_vendor.index.__f__("warn", "at pages/home-commercialDetail/home-commercialDetail.vue:449", "navigateToBusinessCard: userId is missing.");
+        common_vendor.index.showToast({
+          title: "无法查看该用户主页",
+          icon: "none"
+        });
+        return;
+      }
+      common_vendor.index.navigateTo({
+        url: `/pages/applicationBusinessCard/applicationBusinessCard?userId=${userId}`
       });
     };
     return (_ctx, _cache) => {
       return common_vendor.e({
         a: common_vendor.t(postDetail.user.charAt(0)),
-        b: common_vendor.o(($event) => showContact(postDetail.user, postDetail.contact)),
+        b: common_vendor.o(($event) => navigateToBusinessCard(postDetail.userId)),
         c: common_vendor.t(postDetail.user),
         d: common_vendor.p({
           type: "redo",
@@ -244,7 +309,7 @@ const _sfc_main = {
         z: common_vendor.f(comments, (comment, k0, i0) => {
           return {
             a: common_vendor.t(comment.user.charAt(0)),
-            b: common_vendor.o(($event) => showContact(comment.user, comment.contact), comment.id),
+            b: common_vendor.o(($event) => navigateToBusinessCard(comment.userId), comment.id),
             c: common_vendor.t(comment.user),
             d: common_vendor.t(comment.time),
             e: common_vendor.t(comment.text),
@@ -263,57 +328,7 @@ const _sfc_main = {
         C: common_vendor.o(addComment),
         D: newCommentText.value,
         E: common_vendor.o(($event) => newCommentText.value = $event.detail.value),
-        F: common_vendor.o(addComment),
-        G: common_vendor.t(currentContact.name.charAt(0)),
-        H: common_vendor.t(currentContact.name),
-        I: currentContact.phone
-      }, currentContact.phone ? {
-        J: common_vendor.p({
-          type: "phone-filled",
-          size: "18",
-          color: "#FF6A00"
-        }),
-        K: common_vendor.t(currentContact.phone)
-      } : {}, {
-        L: currentContact.email
-      }, currentContact.email ? {
-        M: common_vendor.p({
-          type: "email-filled",
-          size: "18",
-          color: "#FF6A00"
-        }),
-        N: common_vendor.t(currentContact.email)
-      } : {}, {
-        O: currentContact.company
-      }, currentContact.company ? {
-        P: common_vendor.p({
-          type: "paperplane-filled",
-          size: "18",
-          color: "#FF6A00"
-        }),
-        Q: common_vendor.t(currentContact.company)
-      } : {}, {
-        R: currentContact.address
-      }, currentContact.address ? {
-        S: common_vendor.p({
-          type: "location-filled",
-          size: "18",
-          color: "#FF6A00"
-        }),
-        T: common_vendor.t(currentContact.address)
-      } : {}, {
-        U: currentContact.website
-      }, currentContact.website ? {
-        V: common_vendor.p({
-          type: "link",
-          size: "18",
-          color: "#FF6A00"
-        }),
-        W: common_vendor.t(currentContact.website)
-      } : {}, {
-        X: common_vendor.o(closeContact),
-        Y: showContactModal.value ? 1 : "",
-        Z: common_vendor.o(closeContact)
+        F: common_vendor.o(addComment)
       });
     };
   }

@@ -21,7 +21,8 @@
     "pages/my-collection/my-collection",
     "pages/user-agreement/user-agreement",
     "pages/location/location",
-    "pages/shop-list/shop-list"
+    "pages/shop-list/shop-list",
+    "pages/my-setting/my-setting"
   ],
   "window": {
     "navigationBarTextStyle": "black",

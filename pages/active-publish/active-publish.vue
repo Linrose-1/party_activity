@@ -5,86 +5,89 @@
 			<view class="section-title">基本信息</view>
 
 			<uni-forms>
+				<!-- activityTitle -->
 				<uni-forms-item label="活动标题" required>
-					<uni-easyinput v-model="form.title" placeholder="请输入活动标题" />
+					<uni-easyinput v-model="form.activityTitle" placeholder="请输入活动标题" />
 				</uni-forms-item>
 
-				<!-- 新增的活动类型选择 -->
+				<!-- tags (原 activityType) -->
 				<uni-forms-item label="活动类型" required>
-					<uni-data-select v-model="form.activityType" :localdata="activityTypeOptions"
-						placeholder="请选择活动类型"></uni-data-select>
+					<uni-data-select v-model="form.tag" :localdata="tagOptions" placeholder="请选择活动类型"></uni-data-select>
 				</uni-forms-item>
-				<!-- 新增部分结束 -->
 
+				<!-- coverImageUrl -->
 				<uni-forms-item label="活动封面" required>
 					<view class="cover-upload" @click="uploadCover">
-						<image v-if="form.cover" :src="form.cover" mode="aspectFill"></image>
+						<image v-if="form.coverImageUrl" :src="form.coverImageUrl" mode="aspectFill"></image>
 						<text v-else>点击上传封面图片</text>
 					</view>
 				</uni-forms-item>
 
+				<!-- startDatetime & endDatetime (由 time 数组驱动) -->
 				<uni-forms-item label="活动时间" required>
-					<uni-datetime-picker type="datetimerange" v-model="form.time" rangeSeparator="至" />
+					<uni-datetime-picker type="datetimerange" v-model="timeRange" rangeSeparator="至" />
 				</uni-forms-item>
 
+				<!-- registrationStartDatetime & registrationEndDatetime (由 enrollTime 数组驱动) -->
 				<uni-forms-item label="报名时间" required>
-					<uni-datetime-picker type="datetimerange" v-model="form.enrollTime" rangeSeparator="至" />
+					<uni-datetime-picker type="datetimerange" v-model="enrollTimeRange" rangeSeparator="至" />
 				</uni-forms-item>
 
+				<!-- locationAddress, longitude, latitude -->
 				<uni-forms-item label="活动地点" required>
 					<view class="uni-list-cell-db">
 						<view @click="openMapToChooseLocation" class="uni-input">
-							<!-- 显示选择结果 -->
-							<text
-								v-if="selectedLocationInfo">{{ selectedLocationInfo.address || selectedLocationInfo.name }}</text>
+							<text v-if="form.locationAddress">{{ form.locationAddress }}</text>
 							<text v-else class="placeholder">点击选择位置</text>
 							<text class="arrow">></text>
 						</view>
 					</view>
 				</uni-forms-item>
 
+				<!-- totalSlots -->
 				<uni-forms-item label="总名额" required>
-					<uni-easyinput type="number" v-model="form.capacity" placeholder="请输入活动总名额" />
+					<uni-easyinput type="number" v-model="form.totalSlots" placeholder="请输入活动总名额" />
 				</uni-forms-item>
 
-				<!-- 修改报名费用部分 -->
+				<!-- activityFunds -->
 				<uni-forms-item label="报名类型" required>
-					<uni-data-checkbox v-model="form.enrollmentType" :localdata="enrollmentOptions"
+					<uni-data-checkbox v-model="form.activityFunds" :localdata="enrollmentOptions"
 						mode="button"></uni-data-checkbox>
 				</uni-forms-item>
 
-				<!-- AA模式下的预报名费用 -->
-				<uni-forms-item label="预报名费用 (元)" v-if="form.enrollmentType === 'aa'" required>
-					<uni-easyinput type="digit" v-model="form.aaFee" placeholder="请输入预报名费用" />
+				<!-- registrationFee (当 activityFunds 为 1 'AA') -->
+				<uni-forms-item label="预报名费用 (元)" v-if="form.activityFunds === 1" required>
+					<uni-easyinput type="digit" v-model="form.registrationFee" placeholder="请输入预报名费用" />
 				</uni-forms-item>
 
-				<!-- 赞助模式下的公司信息 -->
-				<template v-if="form.enrollmentType === 'sponsor'">
+				<!-- companyName & companyLogo (当 activityFunds 为 2 '赞助') -->
+				<template v-if="form.activityFunds === 2">
 					<uni-forms-item label="公司名称" required>
-						<uni-easyinput v-model="form.sponsorName" placeholder="请输入赞助公司名称" />
+						<uni-easyinput v-model="form.companyName" placeholder="请输入赞助公司名称" />
 					</uni-forms-item>
 					<uni-forms-item label="公司Logo" required>
 						<view class="cover-upload" @click="uploadSponsorLogo">
-							<image v-if="form.sponsorLogo" :src="form.sponsorLogo" mode="aspectFit"></image>
+							<image v-if="form.companyLogo" :src="form.companyLogo" mode="aspectFit"></image>
 							<text v-else>点击上传公司Logo图片</text>
 						</view>
 					</uni-forms-item>
 				</template>
-				<!-- 修改报名费用部分 结束 -->
 
 			</uni-forms>
 		</view>
 
 		<view class="form-section">
 			<view class="section-title">活动详情</view>
+			<!-- activityDescription -->
 			<uni-forms-item label="活动介绍" required>
-				<uni-easyinput type="textarea" autoHeight v-model="form.description" placeholder="请输入活动详细介绍" />
+				<uni-easyinput type="textarea" autoHeight v-model="form.activityDescription" placeholder="请输入活动详细介绍" />
 			</uni-forms-item>
 
-			<view v-for="(item, index) in form.agenda" :key="index" class="activity-item">
+			<!-- activitySessions -->
+			<view v-for="(item, index) in form.activitySessions" :key="index" class="activity-item">
 				<view class="input-group">
-					<uni-easyinput v-model="item.title" placeholder="环节标题" />
-					<uni-easyinput v-model="item.desc" placeholder="环节描述" />
+					<uni-easyinput v-model="item.sessionTitle" placeholder="环节标题" />
+					<uni-easyinput v-model="item.sessionDescription" placeholder="环节描述" />
 					<uni-icons type="close" @click="removeAgenda(index)" />
 				</view>
 			</view>
@@ -98,21 +101,21 @@
 			<view class="section-title">组织者信息</view>
 
 			<uni-forms>
-				<uni-forms-item label="组织者姓名" required>
-					<uni-easyinput v-model="form.organizer" placeholder="请输入组织者姓名" />
-				</uni-forms-item>
-
+				<!-- organizerUnitName -->
 				<uni-forms-item label="组织单位" required>
-					<uni-easyinput v-model="form.organization" placeholder="请输入组织单位名称" />
+					<uni-easyinput v-model="form.organizerUnitName" placeholder="请输入组织单位名称" />
 				</uni-forms-item>
 
+				<!-- organizerContactPhone -->
 				<uni-forms-item label="联系电话" required>
-					<uni-easyinput type="number" v-model="form.phone" placeholder="请输入联系电话" />
+					<uni-easyinput type="number" v-model="form.organizerContactPhone" placeholder="请输入联系电话" />
 				</uni-forms-item>
 
+				<!-- organizerPaymentQrCodeUrl -->
 				<uni-forms-item label="收款码上传">
 					<view class="cover-upload" @click="uploadCode">
-						<image v-if="form.qrcode" :src="form.qrcode" mode="aspectFit"></image>
+						<image v-if="form.organizerPaymentQrCodeUrl" :src="form.organizerPaymentQrCodeUrl"
+							mode="aspectFit"></image>
 						<text v-else>点击上传收款码图片</text>
 					</view>
 				</uni-forms-item>
@@ -121,19 +124,17 @@
 
 		<view class="form-section">
 			<view class="section-title">商圈信息</view>
-
+			<!-- associatedStoreId -->
 			<uni-forms-item label="合作店铺" required>
 				<view class="uni-list-cell-db">
 					<view @click="goToSelectShop" class="uni-input">
-						<!-- 显示选择结果 -->
-						<text v-if="form.businessName">{{ form.businessName }}</text>
+						<text v-if="associatedStoreName">{{ associatedStoreName }}</text>
 						<text v-else class="placeholder">点击选择合作店铺</text>
 						<text class="arrow">></text>
 					</view>
 				</view>
 			</uni-forms-item>
 		</view>
-
 
 		<!-- 底部操作栏 -->
 		<view class="action-bar">
@@ -145,108 +146,104 @@
 
 <script setup>
 	import {
-		ref
-	} from 'vue'
+		ref,
+		onMounted
+	} from 'vue';
 	import {
 		onLoad,
 		onUnload
-	} from '@dcloudio/uni-app'
+	} from '@dcloudio/uni-app';
+	import request from '../../utils/request.js';
 
+	onMounted(() => {
+		getActiveType();
+	});
+
+	// 用于UI组件绑定的时间范围数组
+	const timeRange = ref(['2025-07-19 14:00:00', '2025-07-19 17:00:00']);
+	const enrollTimeRange = ref(['2025-07-15 14:00:00', '2025-07-18 17:00:00']);
+
+	// 用于显示合作店铺名称，不提交给后端
+	const associatedStoreName = ref('');
+
+	// 表单数据模型，字段名与后端API完全对应
 	const form = ref({
-		title: '互联网创业者交流会',
-		activityType: '交流会', // 新增：活动类型字段，并设置默认值
-		cover: '',
-		enrollTime: ['2025-06-15 14:00:00', '2025-06-15 17:00:00'],
-		time: ['2025-06-15 14:00:00', '2025-06-15 17:00:00'],
-		location: '上海市浦东新区张江高科技园区',
-		capacity: 50,
-		enrollmentType: 'aa',
-		aaFee: 100,
-		sponsorLogo: '',
-		sponsorName: '',
-		description: `本次互联网创业者交流会旨在为行业内的创业者提供一个交流思想、分享经验的平台。...`,
-		agenda: [{
-				title: '主题演讲',
-				desc: '行业大咖分享创业经验'
+		activityTitle: '互联网创业者交流会',
+		activityDescription: '本次互联网创业者交流会旨在为行业内的创业者提供一个交流思想、分享经验的平台。...',
+		totalSlots: 50,
+		activityFunds: 1, // 1: AA, 2: 赞助
+		registrationFee: 100,
+		companyName: '',
+		companyLogo: '',
+		locationAddress: '', // 由地图选择填充
+		latitude: null, // 由地图选择填充
+		longitude: null, // 由地图选择填充
+		coverImageUrl: '',
+		organizerUnitName: '创新科技活动策划部',
+		organizerContactPhone: '021-68881234',
+		organizerPaymentQrCodeUrl: '',
+		associatedStoreId: null, // 由店铺选择页面填充
+		tag: '交流会', // 这是UI选择的单值，提交时会放入`tags`数组
+		activitySessions: [{
+				sessionTitle: '主题演讲',
+				sessionDescription: '行业大咖分享创业经验'
 			},
 			{
-				title: '圆桌论坛',
-				desc: '创业者互动讨论'
+				sessionTitle: '圆桌论坛',
+				sessionDescription: '创业者互动讨论'
 			},
 			{
-				title: '自由交流',
-				desc: '拓展人脉资源'
+				sessionTitle: '自由交流',
+				sessionDescription: '拓展人脉资源'
 			}
 		],
-		organizer: '张经理',
-		organization: '创新科技活动策划部',
-		phone: '021-68881234',
-		qrcode: '',
-		// 商圈信息现在默认为空，等待用户选择
-		businessName: '',
-		businessAddress: '',
-		businessPhone: '',
-		businessHours: ''
-	})
+	});
 
-	// 新增：活动类型选项
-	// 注意：“全部类型”通常用于列表筛选，在创建表单中一般不提供，因此这里未包含
-	const activityTypeOptions = ref([{
-			value: '交流会',
-			text: '交流会'
-		},
-		{
-			value: '沙龙',
-			text: '沙龙'
-		},
-		{
-			value: '峰会',
-			text: '峰会'
-		},
-		{
-			value: '分享会',
-			text: '分享会'
-		},
-		{
-			value: '创业猎伙',
-			text: '创业猎伙'
-		},
-		{
-			value: '其他',
-			text: '其他'
+	// 活动类型/标签选项
+	const tagOptions = ref([]); // 初始化为空数组
+
+	const getActiveType = async () => {
+		// 调用封装的请求方法
+		const result = await request('/app-api/system/dict-data/type', {
+			method: 'GET', // 请求方式
+			data: {
+				type: "member_activity_category "
+			}
+		});
+		// 如果请求成功，打印返回的数据
+		console.log('getActiveType result:', result);
+		tagOptions.value = result.data.map(item => ({
+			value: item.value, // 使用后端返回的value
+			text: item.label // 使用后端返回的label
+		}));
+		console.log('tagOptions updated:', tagOptions.value);
+		// 如果请求失败，打印错误信息
+		if (result.error) {
+			console.log('请求失败:', result.error);
 		}
-	]);
+	};
 
-	// 报名类型选项
+	// 报名类型选项，值与后端定义一致
 	const enrollmentOptions = ref([{
 			text: 'AA',
-			value: 'aa'
+			value: 1
 		},
 		{
 			text: '赞助',
-			value: 'sponsor'
+			value: 2
 		}
 	]);
 
-	const selectedLocationInfo = ref(null); // 用于存储地图选择结果
+	// 地图选择位置
 	const openMapToChooseLocation = () => {
 		uni.chooseLocation({
 			success: (res) => {
-				console.log('选择位置成功:', res);
-				selectedLocationInfo.value = {
-					name: res.name,
-					address: res.address,
-					latitude: res.latitude,
-					longitude: res.longitude
-				};
-				// 同时更新 form.location 以便验证和提交
-				form.value.location = res.address || res.name;
+				form.value.locationAddress = res.address || res.name;
+				form.value.latitude = res.latitude;
+				form.value.longitude = res.longitude;
 			},
 			fail: (err) => {
-				console.log('选择位置失败:', err);
-				if (err.errMsg.includes('cancel')) {
-					// 用户取消了选择
-				} else {
+				if (!err.errMsg.includes('cancel')) {
 					uni.showToast({
 						title: '选择位置失败',
 						icon: 'none'
@@ -254,125 +251,141 @@
 				}
 			}
 		});
-	}
+	};
 
-	function goBack() {
-		uni.navigateBack()
-	}
-
+	// 上传函数，更新对应字段
 	function uploadCover() {
 		uni.chooseImage({
 			count: 1,
-			success: res => form.value.cover = res.tempFilePaths[0]
-		})
+			success: res => form.value.coverImageUrl = res.tempFilePaths[0]
+		});
 	}
 
 	function uploadCode() {
 		uni.chooseImage({
 			count: 1,
-			success: res => form.value.qrcode = res.tempFilePaths[0]
-		})
+			success: res => form.value.organizerPaymentQrCodeUrl = res.tempFilePaths[0]
+		});
 	}
 
-	// 新增：上传公司Logo的方法
 	function uploadSponsorLogo() {
 		uni.chooseImage({
 			count: 1,
-			success: res => form.value.sponsorLogo = res.tempFilePaths[0]
-		})
+			success: res => form.value.companyLogo = res.tempFilePaths[0]
+		});
 	}
 
+	// 动态增删活动环节
 	function addAgenda() {
-		form.value.agenda.push({
-			title: '',
-			desc: ''
-		})
+		form.value.activitySessions.push({
+			sessionTitle: '',
+			sessionDescription: ''
+		});
 	}
 
 	function removeAgenda(index) {
-		form.value.agenda.splice(index, 1)
+		form.value.activitySessions.splice(index, 1);
 	}
+
+	// 跳转到店铺选择页面
+	function goToSelectShop() {
+		uni.navigateTo({
+			url: '/pages/shop-list/shop-list'
+		});
+	}
+
+	// 监听店铺选择结果
+	onLoad(() => {
+		uni.$on('shopSelected', (shop) => {
+			// **重要**: shop-list 页面需要返回一个包含 id 和 storeName 的对象
+			console.log('接收到选择的店铺信息:', shop);
+			form.value.associatedStoreId = shop.id;
+			associatedStoreName.value = shop.storeName;
+		});
+	});
+
+	onUnload(() => {
+		uni.$off('shopSelected');
+	});
 
 	function saveDraft() {
 		uni.showToast({
 			title: '活动已保存为草稿',
 			icon: 'none'
-		})
-		// 实际保存逻辑
+		});
+		createActive()
 		console.log('保存草稿:', form.value);
+
 	}
 
 	function publish() {
-		// 验证表单数据
-		// 简单验证示例：
-		if (!form.value.title) {
+		// --- 表单验证 (使用新字段) ---
+		if (!form.value.activityTitle) {
 			uni.showToast({
 				title: '请输入活动标题',
 				icon: 'none'
 			});
 			return;
 		}
-		// 新增：验证活动类型
-		if (!form.value.activityType) {
+		if (!form.value.tag) {
 			uni.showToast({
 				title: '请选择活动类型',
 				icon: 'none'
 			});
 			return;
 		}
-		if (!form.value.cover) {
+		if (!form.value.coverImageUrl) {
 			uni.showToast({
 				title: '请上传活动封面',
 				icon: 'none'
 			});
 			return;
 		}
-		if (!form.value.time || form.value.time.length !== 2) {
+		if (!timeRange.value || timeRange.value.length !== 2) {
 			uni.showToast({
 				title: '请选择活动时间',
 				icon: 'none'
 			});
 			return;
 		}
-		if (!form.value.enrollTime || form.value.enrollTime.length !== 2) {
+		if (!enrollTimeRange.value || enrollTimeRange.value.length !== 2) {
 			uni.showToast({
 				title: '请选择报名时间',
 				icon: 'none'
 			});
 			return;
 		}
-		if (!form.value.location) {
+		if (!form.value.locationAddress) {
 			uni.showToast({
 				title: '请选择活动地点',
 				icon: 'none'
 			});
 			return;
 		}
-		if (!form.value.capacity || form.value.capacity <= 0) {
+		if (!form.value.totalSlots || form.value.totalSlots <= 0) {
 			uni.showToast({
 				title: '请输入正确的总名额',
 				icon: 'none'
 			});
 			return;
 		}
-
-		if (form.value.enrollmentType === 'aa') {
-			if (form.value.aaFee === null || form.value.aaFee < 0) {
+		if (form.value.activityFunds === 1) { // AA
+			if (form.value.registrationFee === null || form.value.registrationFee < 0) {
 				uni.showToast({
 					title: '请输入正确的预报名费用',
 					icon: 'none'
 				});
 				return;
 			}
-		} else if (form.value.enrollmentType === 'sponsor') {
-			if (!form.value.sponsorName) {
+		} else if (form.value.activityFunds === 2) { // 赞助
+			if (!form.value.companyName) {
 				uni.showToast({
 					title: '请输入公司名称',
 					icon: 'none'
 				});
 				return;
 			}
-			if (!form.value.sponsorLogo) {
+			if (!form.value.companyLogo) {
 				uni.showToast({
 					title: '请上传公司Logo',
 					icon: 'none'
@@ -380,37 +393,28 @@
 				return;
 			}
 		}
-
-		if (!form.value.description) {
+		if (!form.value.activityDescription) {
 			uni.showToast({
 				title: '请输入活动介绍',
 				icon: 'none'
 			});
 			return;
 		}
-		if (!form.value.organizer) {
-			uni.showToast({
-				title: '请输入组织者姓名',
-				icon: 'none'
-			});
-			return;
-		}
-		if (!form.value.organization) {
+		if (!form.value.organizerUnitName) {
 			uni.showToast({
 				title: '请输入组织单位',
 				icon: 'none'
 			});
 			return;
 		}
-		if (!form.value.phone) {
+		if (!form.value.organizerContactPhone) {
 			uni.showToast({
 				title: '请输入联系电话',
 				icon: 'none'
 			});
 			return;
 		}
-		// 可以添加更复杂的电话号码格式验证
-		if (!form.value.businessName) {
+		if (!form.value.associatedStoreId) {
 			uni.showToast({
 				title: '请选择合作店铺',
 				icon: 'none'
@@ -418,43 +422,77 @@
 			return;
 		}
 
+		// --- 构建最终提交给后端的 payload ---
+		const payload = JSON.parse(JSON.stringify(form.value));
+
+		// 1. 【修改】处理时间范围，转换为毫秒时间戳
+		// 使用 new Date(...).getTime() 将日期字符串转换为毫秒时间戳
+		payload.startDatetime = new Date(timeRange.value[0]).getTime();
+		payload.endDatetime = new Date(timeRange.value[1]).getTime();
+		payload.registrationStartDatetime = new Date(enrollTimeRange.value[0]).getTime();
+		payload.registrationEndDatetime = new Date(enrollTimeRange.value[1]).getTime();
+
+		// 2. 【修改】处理活动类型 (category) 和标签 (tags)
+		// 首先从 tagOptions 中找到当前选中的项
+		const selectedTagOption = tagOptions.value.find(option => option.value === payload.tag);
+		if (selectedTagOption) {
+			// 【新增】将选中项的 value 赋值给 category
+			payload.category = selectedTagOption.value;
+			// 【修改】将选中项的 text 赋值给 tags 数组
+			payload.tags = [selectedTagOption.text];
+		} else {
+			// 如果出于某种原因找不到，做一个降级处理，虽然在正常流程下不太可能发生
+			payload.category = payload.tag;
+			payload.tags = [payload.tag];
+		}
+		// 删除临时的 tag 字段，因为它已经被处理成 category 和 tags
+		delete payload.tag;
+
+		// 3. 处理活动环节，添加 sessionOrder
+		payload.activitySessions = payload.activitySessions.map((session, index) => ({
+			...session,
+			sessionOrder: index + 1 // 顺序从1开始
+		}));
+
+		// 4. 清理AA或赞助模式下的多余字段
+		if (payload.activityFunds === 1) { // AA 模式
+			delete payload.companyName;
+			delete payload.companyLogo;
+		} else { // 赞助模式
+			delete payload.registrationFee;
+		}
+
 		uni.showToast({
 			title: '活动发布成功！',
 			icon: 'success'
-		})
-		console.log('发布活动:', form.value);
-		// 可在此处提交表单并跳转页面
+		});
+
+		// 最终打印完全符合后端接口要求的 payload
+		console.log('发布活动 - 最终Payload:', payload);
+
+		// 在这里可以发起网络请求，将 payload 发送给后端
+		// uni.request({ url: 'YOUR_API_ENDPOINT', method: 'POST', data: payload, ... })
+		createActive(payload)
 	}
 
-	const searchKeyword = ref('')
-	const filteredShops = ref([])
-
-
-	// 1. 定义跳转到店铺选择页面的函数
-	function goToSelectShop() {
-		uni.navigateTo({
-			url: '/pages/shop-list/shop-list' // 这是我们下一步要创建的页面路径
+	const createActive = async (payload) => {
+		console.log("payload", payload)
+		// 调用封装的请求方法
+		const result = await request('/app-api/member/activity/create', {
+			method: 'POST', // 请求方式
+			data: payload
 		});
-	}
-
-	// 2. 在页面加载时，监听从选择页面传回的事件
-	onLoad(() => {
-		uni.$on('shopSelected', (shop) => {
-			console.log('接收到选择的店铺信息:', shop);
-			form.value.businessName = shop.storeName;
-			form.value.businessAddress = shop.fullAddress;
-			// 如果有其他店铺信息，也在这里一并赋值
-			// form.value.businessPhone = shop.phone;
-		});
-	});
-
-	// 3. 在页面卸载时，移除事件监听，防止内存泄漏
-	onUnload(() => {
-		uni.$off('shopSelected');
-	});
+		// 如果请求成功，打印返回的数据
+		console.log('createActive result:', result);
+		// 如果请求失败，打印错误信息
+		if (result.error) {
+			console.log('请求失败:', result.error);
+		}
+	};
 </script>
 
 <style lang="scss" scoped>
+	/* 样式部分无需修改，此处省略，请沿用您之前的样式 */
 	.page {
 		background-color: #f8f8f8;
 		padding-bottom: 160rpx;

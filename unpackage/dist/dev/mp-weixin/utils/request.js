@@ -16,7 +16,7 @@ const request = async (url, options = {}) => {
   };
   const token = common_vendor.index.getStorageSync("token");
   if (token) {
-    config.header["Authorization"] = `Bearer ${token}`;
+    config.header["Authorization"] = token;
   }
   try {
     const res = await common_vendor.index.request(config);

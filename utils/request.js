@@ -19,8 +19,11 @@ const request = async (url, options = {}) => {
 
 	// 获取 access_token 并加入请求头
 	const token = uni.getStorageSync('token');
+	// const token = '0cdbffcfe50141019187077afdf4fb6f';
 	if (token) {
-	  config.header['Authorization'] = `Bearer ${token}`; 
+		// config.header['Authorization'] = `Bearer ${token}`;
+		config.header['Authorization'] = token;
+
 	}
 
 	// 添加 ngrok-skip-browser-warning 头

@@ -89,7 +89,7 @@
 		if (loadingMore.value || !hasMore.value) {
 			return;
 		}
-	
+
 		// 如果还没有获取到位置信息，则不发起请求
 		if (!userLocation.value) {
 			console.log('等待位置信息获取...');
@@ -97,9 +97,9 @@
 			hasMore.value = false; // 避免触发loadMore
 			return;
 		}
-	
+
 		loadingMore.value = true;
-	
+
 		const params = {
 			pageNo: pageNo.value,
 			pageSize: pageSize,
@@ -107,9 +107,9 @@
 			// longitude: userLocation.value.longitude, 
 			// latitude: userLocation.value.latitude,
 		};
-	    
-	    // --- 修改开始 ---
-	
+
+		// --- 修改开始 ---
+
 		// 1. 修改变量名，因为返回的不再是列表，而是一个包含列表的对象
 		const {
 			data: result, // 将 newList 重命名为 result，因为它现在是 { list: [], total: 6 }
@@ -118,11 +118,11 @@
 			method: 'GET',
 			data: params
 		});
-	
+
 		console.log("API Response:", result) // 打印完整的响应对象
-	
+
 		loadingMore.value = false;
-	
+
 		if (error) {
 			console.error('获取店铺列表失败:', error);
 			uni.showToast({
@@ -131,12 +131,12 @@
 			});
 			return;
 		}
-	
+
 		// 2. 从 result 对象中获取真正的列表数组
 		//    并进行安全检查，防止 result 或 result.list 为 null 或 undefined
 		const newList = result ? result.list : [];
 		const total = result ? result.total : 0;
-	
+
 		if (newList && newList.length > 0) {
 			// 3. 使用 newList (即 result.list) 来更新 allStores
 			allStores.value = pageNo.value === 1 ? newList : [...allStores.value, ...newList];
@@ -149,14 +149,14 @@
 			}
 			hasMore.value = false;
 		}
-	    // --- 修改结束 ---
+		// --- 修改结束 ---
 	};
 
 	// 修改：页面挂载时的逻辑
 	onMounted(() => {
 		// 1. 尝试从本地缓存中获取位置信息
 		const storedLocation = uni.getStorageSync('userLocation');
-		
+
 		if (storedLocation) {
 			// 2. 如果缓存中存在，则直接使用
 			console.log('从缓存加载位置信息:', storedLocation);
@@ -308,7 +308,7 @@
 		display: flex;
 		flex-direction: column;
 		height: 100vh;
-		background-color:#ededed;
+		background-color: #ededed;
 		color: #333;
 		font-size: 16px;
 	}
@@ -339,7 +339,7 @@
 		color: #333;
 		margin-left: 10rpx;
 	}
-	
+
 	/* 新增：搜索按钮的样式 */
 	.search-btn {
 		background: #FF6B00;
@@ -349,13 +349,15 @@
 		border-radius: 16rpx;
 		font-size: 24rpx;
 		cursor: pointer;
-		margin-left: 10rpx; /* 与输入框隔开一些距离 */
-		line-height: 1.2; /* 修正按钮文字垂直居中 */
+		margin-left: 10rpx;
+		/* 与输入框隔开一些距离 */
+		line-height: 1.2;
+		/* 修正按钮文字垂直居中 */
 		height: auto;
 		display: inline-flex;
 		align-items: center;
 	}
-	
+
 	/* 新增：去除uni-app按钮默认边框 */
 	.search-btn::after {
 		border: none;

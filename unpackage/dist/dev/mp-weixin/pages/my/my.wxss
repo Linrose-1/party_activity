@@ -1,234 +1,234 @@
 
-/* 主页面样式 */
+	/* 主页面样式 */
 .container.data-v-2f1ef635 {
-	padding: 30rpx;
+		padding: 30rpx;
 }
 .user-header.data-v-2f1ef635 {
-	background: linear-gradient(135deg, #FF8C00, #FF6B00);
-	padding: 40rpx;
-	border-radius: 20rpx;
-	color: white;
-	position: relative;
+		background: linear-gradient(135deg, #FF8C00, #FF6B00);
+		padding: 40rpx;
+		border-radius: 20rpx;
+		color: white;
+		position: relative;
 }
 .avatar.data-v-2f1ef635 {
-	width: 140rpx;
-	height: 140rpx;
-	border-radius: 50%;
-	overflow: hidden;
-	margin-right: 20rpx;
+		width: 140rpx;
+		height: 140rpx;
+		border-radius: 50%;
+		overflow: hidden;
+		margin-right: 20rpx;
 }
 .avatar-img.data-v-2f1ef635 {
-	width: 100%;
-	height: 100%;
-	object-fit: cover;
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
 }
 .user-info.data-v-2f1ef635 {
-	display: flex;
-	align-items: center;
-	margin-bottom: 20rpx;
+		display: flex;
+		align-items: center;
+		margin-bottom: 20rpx;
 }
 .user-name.data-v-2f1ef635 {
-	font-size: 36rpx;
-	font-weight: bold;
-	display: flex;
-	align-items: center;
+		font-size: 36rpx;
+		font-weight: bold;
+		display: flex;
+		align-items: center;
 }
 .badge.data-v-2f1ef635 {
-	background: #ffd700;
-	color: #8a6d00;
-	padding: 6rpx 14rpx;
-	border-radius: 20rpx;
-	margin-left: 10rpx;
-	font-size: 22rpx;
+		background: #ffd700;
+		color: #8a6d00;
+		padding: 6rpx 14rpx;
+		border-radius: 20rpx;
+		margin-left: 10rpx;
+		font-size: 22rpx;
 }
 .user-title.data-v-2f1ef635,
-.user-company.data-v-2f1ef635 {
-	font-size: 24rpx;
-	margin-top: 6rpx;
+	.user-company.data-v-2f1ef635 {
+		font-size: 24rpx;
+		margin-top: 6rpx;
 }
 .edit-btn.data-v-2f1ef635 {
-	position: absolute;
-	right: 30rpx;
-	top: 30rpx;
-	font-size: 24rpx;
-	background: rgba(255, 255, 255, 0.2);
-	padding: 10rpx 20rpx;
-	border-radius: 30rpx;
-	cursor: pointer;
+		position: absolute;
+		right: 30rpx;
+		top: 30rpx;
+		font-size: 24rpx;
+		background: rgba(255, 255, 255, 0.2);
+		padding: 10rpx 20rpx;
+		border-radius: 30rpx;
+		cursor: pointer;
 }
 .section-header.data-v-2f1ef635 {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	margin-bottom: 20rpx;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 20rpx;
 }
 .section-title-main.data-v-2f1ef635 {
-	font-size: 32rpx;
-	font-weight: bold;
+		font-size: 32rpx;
+		font-weight: bold;
 }
 .view-all.data-v-2f1ef635 {
-	font-size: 24rpx;
-	color: #3a7bd5;
-	cursor: pointer;
+		font-size: 24rpx;
+		color: #3a7bd5;
+		cursor: pointer;
 }
 .account-section.data-v-2f1ef635,
-.features-section.data-v-2f1ef635 {
-	background: #fff;
-	padding: 30rpx;
-	border-radius: 20rpx;
-	margin-top: 50rpx;
+	.features-section.data-v-2f1ef635 {
+		background: #fff;
+		padding: 30rpx;
+		border-radius: 20rpx;
+		margin-top: 50rpx;
 }
 .account-grid.data-v-2f1ef635 {
-	display: grid;
-	grid-template-columns: repeat(4, 1fr);
-	gap: 20rpx;
+		display: grid;
+		grid-template-columns: repeat(4, 1fr);
+		gap: 20rpx;
 }
 .account-item.data-v-2f1ef635 {
-	text-align: center;
+		text-align: center;
 }
 .account-value.data-v-2f1ef635 {
-	font-size: 36rpx;
-	color: #FF6B00;
-	font-weight: bold;
+		font-size: 36rpx;
+		color: #FF6B00;
+		font-weight: bold;
 }
 .account-label.data-v-2f1ef635 {
-	font-size: 24rpx;
-	color: #666;
+		font-size: 24rpx;
+		color: #666;
 }
 .feature-item.data-v-2f1ef635 {
-	display: flex;
-	align-items: center;
-	background: #f9f9f9;
-	padding: 20rpx;
-	border-radius: 20rpx;
-	margin-bottom: 20rpx;
+		display: flex;
+		align-items: center;
+		background: #f9f9f9;
+		padding: 20rpx;
+		border-radius: 20rpx;
+		margin-bottom: 20rpx;
 }
 .feature-icon.data-v-2f1ef635 {
-	width: 60rpx;
-	height: 60rpx;
-	font-size: 32rpx;
-	color: #FF6B00;
-	margin-right: 20rpx;
-	display: flex;
-	align-items: center;
-	justify-content: center;
+		width: 60rpx;
+		height: 60rpx;
+		font-size: 32rpx;
+		color: #FF6B00;
+		margin-right: 20rpx;
+		display: flex;
+		align-items: center;
+		justify-content: center;
 }
 .feature-name.data-v-2f1ef635 {
-	font-size: 28rpx;
-	font-weight: bold;
-	color: #333;
+		font-size: 28rpx;
+		font-weight: bold;
+		color: #333;
 }
 .feature-desc.data-v-2f1ef635 {
-	font-size: 24rpx;
-	color: #999;
+		font-size: 24rpx;
+		color: #999;
 }
 .chevron-icon.data-v-2f1ef635 {
-	font-size: 30rpx;
-	color: #ccc;
-	margin-left: auto;
+		font-size: 30rpx;
+		color: #ccc;
+		margin-left: auto;
 }
 
-/* MyCard部分样式 */
+	/* MyCard部分样式 */
 .card-section.data-v-2f1ef635 {
-	background: #fff;
-	padding: 30rpx;
-	border-radius: 20rpx;
-	margin-top: 30rpx;
+		background: #fff;
+		padding: 30rpx;
+		border-radius: 20rpx;
+		margin-top: 30rpx;
 }
 .ai-card.data-v-2f1ef635 {
-	background: linear-gradient(135deg, #FF8C00, #FF6B00);
-	padding: 30rpx;
-	border-radius: 20rpx;
-	color: white;
+		background: linear-gradient(135deg, #FF8C00, #FF6B00);
+		padding: 30rpx;
+		border-radius: 20rpx;
+		color: white;
 }
 .card-top.data-v-2f1ef635 {
-	display: flex;
-	align-items: center;
-	margin-bottom: 30rpx;
+		display: flex;
+		align-items: center;
+		margin-bottom: 30rpx;
 }
 .card-avatar.data-v-2f1ef635 {
-	width: 160rpx;
-	height: 160rpx;
-	border-radius: 30rpx;
-	overflow: hidden;
-	margin-right: 20rpx;
+		width: 160rpx;
+		height: 160rpx;
+		border-radius: 30rpx;
+		overflow: hidden;
+		margin-right: 20rpx;
 }
 .card-name.data-v-2f1ef635 {
-	font-size: 36rpx;
-	font-weight: bold;
-	display: flex;
-	align-items: center;
-	margin-bottom: 10rpx;
+		font-size: 36rpx;
+		font-weight: bold;
+		display: flex;
+		align-items: center;
+		margin-bottom: 10rpx;
 }
 .vip-badge.data-v-2f1ef635 {
-	background: #ffd700;
-	color: #8a6d00;
-	padding: 6rpx 14rpx;
-	border-radius: 20rpx;
-	font-size: 20rpx;
-	margin-left: 10rpx;
+		background: #ffd700;
+		color: #8a6d00;
+		padding: 6rpx 14rpx;
+		border-radius: 20rpx;
+		font-size: 20rpx;
+		margin-left: 10rpx;
 }
 .card-position.data-v-2f1ef635,
-.card-company.data-v-2f1ef635 {
-	font-size: 26rpx;
-	margin-bottom: 5rpx;
-	opacity: 0.95;
+	.card-company.data-v-2f1ef635 {
+		font-size: 26rpx;
+		margin-bottom: 5rpx;
+		opacity: 0.95;
 }
 .contact-info.data-v-2f1ef635 {
-	display: grid;
-	grid-template-columns: 1fr;
-	gap: 15rpx;
-	background: rgba(255, 255, 255, 0.2);
-	padding: 20rpx;
-	border-radius: 20rpx;
-	margin-bottom: 30rpx;
+		display: grid;
+		grid-template-columns: 1fr;
+		gap: 15rpx;
+		background: rgba(255, 255, 255, 0.2);
+		padding: 20rpx;
+		border-radius: 20rpx;
+		margin-bottom: 30rpx;
 }
 .contact-item.data-v-2f1ef635 {
-	display: flex;
-	align-items: center;
-	font-size: 26rpx;
-	cursor: pointer;
+		display: flex;
+		align-items: center;
+		font-size: 26rpx;
+		cursor: pointer;
 }
 .copy-btn.data-v-2f1ef635 {
-	margin-left: auto;
-	font-size: 24rpx;
-	color: #fff;
-	background: rgba(255, 255, 255, 0.3);
-	padding: 6rpx 16rpx;
-	border-radius: 30rpx;
+		margin-left: auto;
+		font-size: 24rpx;
+		color: #fff;
+		background: rgba(255, 255, 255, 0.3);
+		padding: 6rpx 16rpx;
+		border-radius: 30rpx;
 }
 .qrcode-section.data-v-2f1ef635 {
-	text-align: center;
-	color: white;
+		text-align: center;
+		color: white;
 }
 .qrcode-title.data-v-2f1ef635 {
-	font-size: 26rpx;
-	margin-bottom: 20rpx;
+		font-size: 26rpx;
+		margin-bottom: 20rpx;
 }
 .qrcode-container.data-v-2f1ef635 {
-	width: 200rpx;
-	height: 200rpx;
-	margin: 0 auto;
-	background: white;
-	padding: 10rpx;
-	border-radius: 12rpx;
+		width: 200rpx;
+		height: 200rpx;
+		margin: 0 auto;
+		background: white;
+		padding: 10rpx;
+		border-radius: 12rpx;
 }
 .qrcode-img.data-v-2f1ef635 {
-	width: 100%;
-	height: 100%;
-	object-fit: contain;
+		width: 100%;
+		height: 100%;
+		object-fit: contain;
 }
 .qrcode-actions.data-v-2f1ef635 {
-	display: flex;
-	justify-content: center;
-	gap: 50rpx;
-	margin: 20rpx 0;
+		display: flex;
+		justify-content: center;
+		gap: 50rpx;
+		margin: 20rpx 0;
 }
 .qrcode-btn.data-v-2f1ef635 {
-	background-color: #FF8F3D;
-	color: white;
-	padding: 10rpx 100rpx;
-	border-radius: 30rpx;
-	font-size: 24rpx;
-	cursor: pointer;
+		background-color: #FF8F3D;
+		color: white;
+		padding: 10rpx 100rpx;
+		border-radius: 30rpx;
+		font-size: 24rpx;
+		cursor: pointer;
 }

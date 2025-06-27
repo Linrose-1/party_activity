@@ -1,48 +1,74 @@
 <template>
   <view class="activity-card">
-    <view @click="detailActivity()">
-      <image :src="activity.image" class="activity-image" mode="aspectFill" />
-      <text class="activity-title">{{ activity.title }}</text>
+    <!-- 【修改】将点击事件的参数传入 -->
+    <view @click="detailActivity(activity.id)">
+      <!-- 【修改】绑定正确的图片字段 -->
+      <image :src="activity.coverImageUrl" class="activity-image" mode="aspectFill" />
+      <!-- 【修改】绑定正确的标题字段 -->
+      <text class="activity-title">{{ activity.activityTitle }}</text>
       
       <view class="activity-info">
         <uni-icons type="calendar" size="16" color="#FF6B00" />
-        <text>{{ activity.date }}</text>
+        <!-- 【修改】使用格式化后的日期 -->
+        <text>{{ formattedDate }}</text>
       </view>
       
       <view class="activity-info">
         <uni-icons type="map-pin" size="16" color="#FF6B00" />
-        <text>{{ activity.location }}</text>
+        <!-- 【修改】绑定正确的地点字段 (请确认API是否返回了 location 字段) -->
+        <text>{{ activity.location || '线上活动' }}</text>
       </view>
       
       <view class="activity-stats">
-        <view class="participants">{{ activity.participants.current }}/{{ activity.participants.total }} 人参与</view>
+        <!-- 
+          【关键修改】
+          不再使用嵌套的 participants 对象，而是使用后端直接返回的字段。
+          - participantCount: 当前参与人数
+          - maxParticipants: 总人数
+          使用 || 提供了默认值，防止后端没返回该字段时报错。
+        -->
+        <view class="participants">
+          {{ activity.participantCount || 0 }}/{{ activity.maxParticipants || '不限' }} 人参与
+        </view>
       </view>
       
+      <!-- 
+        【修改】后端数据中没有 tags 数组，暂时注释掉。
+        您可以根据需要，将 categoryName 等字段作为标签展示。
+        例如: <view class="tag">{{ activity.categoryName }}</view>
+      -->
+      <!--
       <view class="activity-tags">
         <view v-for="(tag, index) in activity.tags" :key="index" class="tag">
           {{ tag }}
         </view>
       </view>
+      -->
     </view>
     
     <view class="activity-footer">
       <view class="organizer">
         <uni-icons type="person" size="16" color="#FF6B00" />
-        <text>{{ activity.organizer }}</text>
+        <!-- 
+          【修改】绑定正确的组织者字段。
+          请根据API确认是 organizer 还是 organizerName 或其他。
+        -->
+        <text>{{ activity.organizerName || '主办方' }}</text>
       </view>
       <view class="action-buttons">
         <button class="btn btn-favorite" @click.stop="toggleFavorite">
           <uni-icons :type="isFavorite ? 'heart-filled' : 'heart'" size="16" color="#FF6B00" />
           <text>{{ isFavorite ? '已收藏' : '收藏' }}</text>
         </button>
-        <button class="btn btn-primary" @click.stop="registerActivity">报名</button>
+        <!-- 【修改】将点击事件的参数传入 -->
+        <button class="btn btn-primary" @click.stop="registerActivity(activity.id)">报名</button>
       </view>
     </view>
   </view>
 </template>
 
 <script setup>
-import { defineProps, defineEmits, ref } from 'vue';
+import { defineProps, defineEmits, ref, computed } from 'vue';
 
 const props = defineProps({
   activity: {
@@ -55,26 +81,43 @@ const emit = defineEmits(['favorite']);
 
 const isFavorite = ref(false);
 
+// 【新增】格式化日期
+const formattedDate = computed(() => {
+	if (!props.activity.startDatetime) {
+		return '时间待定';
+	}
+	const date = new Date(props.activity.startDatetime);
+	const Y = date.getFullYear();
+	const M = (date.getMonth() + 1).toString().padStart(2, '0');
+	const D = date.getDate().toString().padStart(2, '0');
+	const h = date.getHours().toString().padStart(2, '0');
+	const m = date.getMinutes().toString().padStart(2, '0');
+	return `${Y}-${M}-${D} ${h}:${m}`;
+});
+
+
 const toggleFavorite = () => {
   isFavorite.value = !isFavorite.value;
   emit('favorite', isFavorite.value);
 };
 
-const registerActivity = () => {
+// 【修改】接收活动ID，用于跳转传参
+const registerActivity = (activityId) => {
   uni.navigateTo({
-    url:'/pages/active-enroll/active-enroll'
+    url:`/pages/active-enroll/active-enroll?id=${activityId}`
   })
 };
 
-// 活动详情
-const detailActivity = () => {
+// 【修改】接收活动ID，用于跳转传参
+const detailActivity = (activityId) => {
   uni.navigateTo({
-    url: '/pages/active-detail/active-detail'
+    url: `/pages/active-detail/active-detail?id=${activityId}`
   });
 };
 </script>
 
 <style lang="scss" scoped>
+/* 您的样式代码保持不变，这里省略以保持简洁 */
 .activity-card {
   background: white;
   border-radius: 24rpx;
