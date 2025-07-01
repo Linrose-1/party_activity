@@ -204,6 +204,7 @@
 	    if (!result.error && result.data && result.data.accessToken) {
 	      // 存储accessToken
 	      uni.setStorageSync('token', result.data.accessToken);
+		  uni.setStorageSync('userId',result.data.userId)
 	      
 	      // 跳转到首页
 	      uni.reLaunch({

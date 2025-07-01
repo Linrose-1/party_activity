@@ -14,6 +14,7 @@ if (!Math) {
 const _sfc_main = {
   __name: "home",
   setup(__props) {
+    const loggedInUserId = common_vendor.ref(null);
     const isLogin = common_vendor.ref(true);
     const member = common_vendor.ref("白银");
     const hasPaidMembership = common_vendor.computed(() => {
@@ -26,11 +27,14 @@ const _sfc_main = {
     const pageNo = common_vendor.ref(1);
     const pageSize = common_vendor.ref(10);
     const loadingStatus = common_vendor.ref("more");
+    const isActionInProgress = common_vendor.ref(false);
     const location = common_vendor.reactive({
       longitude: "",
       latitude: ""
     });
     common_vendor.onMounted(() => {
+      loggedInUserId.value = common_vendor.index.getStorageSync("userId");
+      common_vendor.index.__f__("log", "at pages/home/home.vue:181", "当前列表页登录用户ID:", loggedInUserId.value);
       getBusinessOpportunitiesList(true);
     });
     common_vendor.onReachBottom(() => {
@@ -78,26 +82,23 @@ const _sfc_main = {
           method: "GET",
           data: params
         });
-        common_vendor.index.__f__("log", "at pages/home/home.vue:258", "getBusinessOpportunitiesList:", result);
         if (result && !result.error && result.data && result.data.list) {
           const apiData = result.data;
           const mappedData = apiData.list.map((item) => ({
             id: item.id,
             content: item.postContent,
-            // 修正：处理 postImg 可能为 null 的情况，并支持逗号分隔
             images: item.postImg ? String(item.postImg).split(",").filter((img) => img) : [],
-            // 修正：处理 tags 可能为 null 的情况
-            tags: item.tags ? String(item.tags).split(",").filter((tag) => tag) : [],
-            likes: item.likesCount,
-            dislikes: item.dislikesCount,
+            tags: item.tags ? Array.isArray(item.tags) ? item.tags : String(item.tags).split(",").filter((tag) => tag) : [],
+            likes: item.likesCount || 0,
+            // 确保是数字
+            dislikes: item.dislikesCount || 0,
+            // 确保是数字
             userAction: item.userLikeStr || null,
             isSaved: item.followFlag === 1,
             isFollowedUser: item.followUserFlag === 1,
-            // 修正：使用 formatTimestamp 函数格式化时间
             time: formatTimestamp(item.createTime),
             user: {
               id: item.userId,
-              // 使用 contactPerson 作为用户名
               name: item.contactPerson || "匿名用户",
               avatar: ""
             }
@@ -110,12 +111,12 @@ const _sfc_main = {
             pageNo.value++;
           }
         } else {
-          loadingStatus.value = "more";
+          loadingStatus.value = "noMore";
           const errorMsg = result && result.error ? result.error.message : "加载失败";
           common_vendor.index.showToast({ title: errorMsg, icon: "none" });
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/home/home.vue:306", "getBusinessOpportunitiesList error:", error);
+        common_vendor.index.__f__("error", "at pages/home/home.vue:271", "getBusinessOpportunitiesList error:", error);
         loadingStatus.value = "more";
         common_vendor.index.showToast({ title: "网络请求异常", icon: "none" });
       } finally {
@@ -159,55 +160,133 @@ const _sfc_main = {
       common_vendor.index.getLocation({
         type: "wgs84",
         success: (res) => {
-          common_vendor.index.__f__("log", "at pages/home/home.vue:370", "用户位置信息:", res);
           location.longitude = res.longitude.toString();
           location.latitude = res.latitude.toString();
           getBusinessOpportunitiesList(true);
         },
         fail: (err) => {
-          common_vendor.index.__f__("error", "at pages/home/home.vue:378", "获取位置失败", err);
-          common_vendor.index.showToast({ title: "获取位置失败", icon: "none" });
           getBusinessOpportunitiesList(true);
         },
-        complete: () => {
-          common_vendor.index.hideLoading();
-        }
+        complete: () => common_vendor.index.hideLoading()
       });
     };
-    const toggleAction = (post, action) => {
-      if (post.userAction === action) {
+    const toggleAction = async (post, clickedAction) => {
+      if (isActionInProgress.value)
+        return;
+      if (!loggedInUserId.value) {
+        common_vendor.index.showToast({ title: "请先登录", icon: "none" });
+        return;
+      }
+      isActionInProgress.value = true;
+      const originalAction = post.userAction;
+      const originalLikes = post.likes;
+      const originalDislikes = post.dislikes;
+      if (post.userAction === clickedAction) {
         post.userAction = null;
-        if (action === "like")
+        if (clickedAction === "like")
           post.likes--;
         else
           post.dislikes--;
       } else {
-        const prevAction = post.userAction;
-        post.userAction = action;
-        if (action === "like") {
+        post.userAction = clickedAction;
+        if (clickedAction === "like") {
           post.likes++;
-          if (prevAction === "dislike")
+          if (originalAction === "dislike")
             post.dislikes--;
         } else {
           post.dislikes++;
-          if (prevAction === "like")
+          if (originalAction === "like")
             post.likes--;
         }
       }
+      try {
+        const requestData = {
+          userId: loggedInUserId.value,
+          targetId: post.id,
+          targetType: "post",
+          action: post.userAction
+          // 发送更新后的action ('like', 'dislike' 或 null)
+        };
+        const result = await utils_request.request("/app-api/member/like-action/add", {
+          method: "POST",
+          data: requestData
+        });
+        if (result && result.error) {
+          post.userAction = originalAction;
+          post.likes = originalLikes;
+          post.dislikes = originalDislikes;
+          common_vendor.index.showToast({ title: "操作失败", icon: "none" });
+        }
+      } catch (error) {
+        post.userAction = originalAction;
+        post.likes = originalLikes;
+        post.dislikes = originalDislikes;
+        common_vendor.index.showToast({ title: "操作失败，请重试", icon: "none" });
+      } finally {
+        isActionInProgress.value = false;
+      }
     };
-    const toggleSave = (post) => {
-      post.isSaved = !post.isSaved;
-      common_vendor.index.showToast({
-        title: post.isSaved ? "已收藏" : "已取消收藏",
-        icon: "none"
-      });
+    const toggleSave = async (post) => {
+      if (isActionInProgress.value)
+        return;
+      if (!loggedInUserId.value) {
+        common_vendor.index.showToast({ title: "请先登录", icon: "none" });
+        return;
+      }
+      isActionInProgress.value = true;
+      const originalStatus = post.isSaved;
+      post.isSaved = !originalStatus;
+      const apiUrl = post.isSaved ? "/app-api/member/follow/add" : "/app-api/member/follow/del";
+      try {
+        const requestData = {
+          userId: loggedInUserId.value,
+          targetId: post.id,
+          targetType: "post"
+        };
+        const result = await utils_request.request(apiUrl, { method: "POST", data: requestData });
+        if (result && result.error) {
+          post.isSaved = originalStatus;
+          common_vendor.index.showToast({ title: "操作失败", icon: "none" });
+        } else {
+          common_vendor.index.showToast({ title: post.isSaved ? "已收藏" : "已取消收藏", icon: "none" });
+        }
+      } catch (error) {
+        post.isSaved = originalStatus;
+        common_vendor.index.showToast({ title: "操作失败，请重试", icon: "none" });
+      } finally {
+        isActionInProgress.value = false;
+      }
     };
-    const toggleFollow = (post) => {
-      post.isFollowedUser = !post.isFollowedUser;
-      common_vendor.index.showToast({
-        title: post.isFollowedUser ? "已关注" : "已取消关注",
-        icon: "none"
-      });
+    const toggleFollow = async (post) => {
+      if (isActionInProgress.value)
+        return;
+      if (!loggedInUserId.value) {
+        common_vendor.index.showToast({ title: "请先登录", icon: "none" });
+        return;
+      }
+      isActionInProgress.value = true;
+      const originalStatus = post.isFollowedUser;
+      post.isFollowedUser = !originalStatus;
+      const apiUrl = post.isFollowedUser ? "/app-api/member/follow/add" : "/app-api/member/follow/del";
+      try {
+        const requestData = {
+          userId: loggedInUserId.value,
+          targetId: post.user.id,
+          targetType: "post_user"
+        };
+        const result = await utils_request.request(apiUrl, { method: "POST", data: requestData });
+        if (result && result.error) {
+          post.isFollowedUser = originalStatus;
+          common_vendor.index.showToast({ title: "操作失败", icon: "none" });
+        } else {
+          common_vendor.index.showToast({ title: post.isFollowedUser ? "已关注" : "已取消关注", icon: "none" });
+        }
+      } catch (error) {
+        post.isFollowedUser = originalStatus;
+        common_vendor.index.showToast({ title: "操作失败，请重试", icon: "none" });
+      } finally {
+        isActionInProgress.value = false;
+      }
     };
     const sharePost = (post) => {
       common_vendor.index.showToast({ title: "分享功能即将上线", icon: "none" });
@@ -267,81 +346,84 @@ const _sfc_main = {
             b: common_vendor.o(skipApplicationBusinessCard, post.id),
             c: common_vendor.t(post.user.name),
             d: common_vendor.t(post.time),
-            e: common_vendor.t(post.isFollowedUser ? "已关注" : "关注"),
-            f: post.isFollowedUser ? 1 : "",
-            g: common_vendor.o(($event) => toggleFollow(post), post.id)
-          }, isLogin.value && hasPaidMembership.value ? common_vendor.e({
-            h: common_vendor.t(post.content),
-            i: post.images && post.images.length
+            e: loggedInUserId.value !== post.user.id
+          }, loggedInUserId.value !== post.user.id ? {
+            f: common_vendor.t(post.isFollowedUser ? "已关注" : "关注"),
+            g: post.isFollowedUser ? 1 : "",
+            h: common_vendor.o(($event) => toggleFollow(post), post.id)
+          } : {}, isLogin.value && hasPaidMembership.value ? common_vendor.e({
+            i: common_vendor.t(post.content),
+            j: post.images && post.images.length
           }, post.images && post.images.length ? {
-            j: common_vendor.f(post.images, (image, imgIndex, i1) => {
+            k: common_vendor.f(post.images, (image, imgIndex, i1) => {
               return {
                 a: image,
                 b: imgIndex
               };
             })
           } : {}, {
-            k: post.tags && post.tags.length
+            l: post.tags && post.tags.length
           }, post.tags && post.tags.length ? {
-            l: common_vendor.f(post.tags, (tag, tagIndex, i1) => {
+            m: common_vendor.f(post.tags, (tag, tagIndex, i1) => {
               return {
                 a: common_vendor.t(tag),
                 b: tagIndex
               };
             })
           } : {}, {
-            m: "07e72d3c-2-" + i0,
-            n: common_vendor.p({
+            n: "07e72d3c-2-" + i0,
+            o: common_vendor.p({
               type: "hand-up-filled",
               size: "18",
               color: "#e74c3c"
             }),
-            o: common_vendor.t(post.likes),
-            p: "07e72d3c-3-" + i0,
-            q: common_vendor.p({
+            p: common_vendor.t(post.likes),
+            q: "07e72d3c-3-" + i0,
+            r: common_vendor.p({
               type: "hand-down-filled",
               size: "18",
               color: "#3498db"
             }),
-            r: common_vendor.t(post.dislikes),
-            s: "07e72d3c-4-" + i0,
-            t: common_vendor.p({
+            s: common_vendor.t(post.dislikes),
+            t: "07e72d3c-4-" + i0,
+            v: common_vendor.p({
               type: post.userAction === "like" ? "hand-up-filled" : "hand-up",
               size: "20",
               color: post.userAction === "like" ? "#e74c3c" : "#666"
             }),
-            v: post.userAction === "like" ? 1 : "",
-            w: common_vendor.o(($event) => toggleAction(post, "like"), post.id),
-            x: "07e72d3c-5-" + i0,
-            y: common_vendor.p({
+            w: post.userAction === "like" ? 1 : "",
+            x: common_vendor.o(($event) => toggleAction(post, "like"), post.id),
+            y: "07e72d3c-5-" + i0,
+            z: common_vendor.p({
               type: post.userAction === "dislike" ? "hand-down-filled" : "hand-down",
               size: "20",
               color: post.userAction === "dislike" ? "#3498db" : "#666"
             }),
-            z: post.userAction === "dislike" ? 1 : "",
-            A: common_vendor.o(($event) => toggleAction(post, "dislike"), post.id),
-            B: "07e72d3c-6-" + i0,
-            C: common_vendor.p({
+            A: post.userAction === "dislike" ? 1 : "",
+            B: common_vendor.o(($event) => toggleAction(post, "dislike"), post.id),
+            C: "07e72d3c-6-" + i0,
+            D: common_vendor.p({
               type: post.isSaved ? "star-filled" : "star",
               size: "20",
               color: post.isSaved ? "#FF6A00" : "#666"
             }),
-            D: post.isSaved ? 1 : "",
-            E: common_vendor.o(($event) => toggleSave(post), post.id),
-            F: "07e72d3c-7-" + i0,
-            G: common_vendor.p({
+            E: common_vendor.t(post.isSaved ? "已收藏" : "收藏"),
+            F: post.isSaved ? 1 : "",
+            G: common_vendor.o(($event) => toggleSave(post), post.id),
+            H: "07e72d3c-7-" + i0,
+            I: common_vendor.p({
               type: "redo",
               size: "20",
               color: "#666"
             }),
-            H: common_vendor.o(($event) => sharePost(), post.id)
+            J: common_vendor.o(($event) => sharePost(), post.id)
           }) : isLogin.value && !hasPaidMembership.value ? {
-            I: common_vendor.o(goToMembership, post.id)
+            K: common_vendor.o(goToMembership, post.id)
           } : {
-            J: common_vendor.o(goToLogin, post.id)
+            L: common_vendor.o(goToLogin, post.id)
           }, {
-            K: post.id,
-            L: common_vendor.o(($event) => handlePostClick(post), post.id)
+            M: post.id,
+            N: common_vendor.o(($event) => handlePostClick(post), post.id)
           });
         }),
         q: isLogin.value && hasPaidMembership.value,

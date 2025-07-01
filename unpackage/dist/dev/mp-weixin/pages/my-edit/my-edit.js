@@ -25,286 +25,223 @@ const _sfc_main = {
     });
     const formRef = common_vendor.ref(null);
     const form = common_vendor.ref({
+      nickname: "",
       avatar: "",
       realName: "",
-      // name -> realName
-      sex: "",
-      // gender -> sex
-      birth: "",
-      // 该字段接口没有，暂时保留
+      sex: null,
+      birthday: "",
       locationAddress: "",
-      // location -> locationAddress
       professionalTitle: "",
-      // job -> professionalTitle
       companyName: "",
-      // company -> companyName
       mobile: "",
-      // phone -> mobile
       wechatQrCodeUrl: "",
-      // wechatQr -> wechatQrCodeUrl
       personalBio: "",
-      // intro -> personalBio
-      inviteCode: "",
-      // 该字段接口没有，暂时保留
-      latitude: "",
-      // 地图选择后赋值
-      longitude: ""
-      // 地图选择后赋值
+      latitude: null,
+      longitude: null
     });
     const rules = {
-      avatar: {
-        required: true,
-        errorMessage: "请上传头像"
-      },
-      realName: {
-        // name -> realName
-        required: true,
-        errorMessage: "请输入真实姓名"
-      },
-      sex: {
-        // gender -> sex
-        required: true,
-        errorMessage: "请选择性别"
-      },
-      professionalTitle: {
-        // job -> professionalTitle
-        required: true,
-        errorMessage: "请输入职业"
-      },
-      companyName: {
-        // company -> companyName
-        required: true,
-        errorMessage: "请输入公司/机构名称"
-      },
-      mobile: [
-        {
-          // phone -> mobile
-          required: true,
-          errorMessage: "请输入手机号码"
-        },
-        {
-          pattern: /^1[3-9]\d{9}$/,
-          errorMessage: "请输入有效的手机号"
-        }
-      ]
+      nickname: { rules: [{ required: true, errorMessage: "请输入用户昵称" }] },
+      avatar: { rules: [{ required: true, errorMessage: "请上传头像" }] },
+      sex: { rules: [{ type: "number", required: true, errorMessage: "请选择性别" }] }
     };
-    const genderOptions = [
-      {
-        value: 1,
-        // 'male' -> 1
-        text: "男"
-      },
-      {
-        value: 2,
-        // 'female' -> 2
-        text: "女"
+    const genderOptions = [{ value: 1, text: "男" }, { value: 2, text: "女" }];
+    const today = common_vendor.computed(() => {
+      const date = /* @__PURE__ */ new Date();
+      return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
+    });
+    const getUserInfo = async () => {
+      try {
+        const result = await utils_request.request("/app-api/member/user/get", { method: "GET" });
+        if (result.data) {
+          const userInfo = result.data;
+          Object.keys(form.value).forEach((key) => {
+            if (userInfo[key] !== void 0 && userInfo[key] !== null) {
+              form.value[key] = userInfo[key];
+            }
+          });
+        } else {
+          common_vendor.index.showToast({ title: result.msg || "获取用户信息失败", icon: "none" });
+        }
+      } catch (error) {
+        common_vendor.index.showToast({ title: "网络错误，请稍后再试", icon: "error" });
       }
-      // 你可以根据实际情况保留或删除“其他”
-      // {
-      // 	value: 0, // 'other' -> 0 (通常 0 代表未知)
-      // 	text: '其他'
-      // },
-    ];
+    };
     function chooseAvatar() {
       common_vendor.index.chooseImage({
         count: 1,
+        sourceType: ["album", "camera"],
         success: (res) => {
           form.value.avatar = res.tempFilePaths[0];
         }
       });
     }
-    const openMapToChooseLocation = () => {
-      common_vendor.index.chooseLocation({
-        success: (res) => {
-          form.value.locationAddress = res.address || res.name;
-          form.value.latitude = res.latitude;
-          form.value.longitude = res.longitude;
-          common_vendor.index.__f__("log", "at pages/my-edit/my-edit.vue:176", res);
-        },
-        fail: (err) => {
-          if (!err.errMsg.includes("cancel")) {
-            common_vendor.index.showToast({
-              title: "选择位置失败",
-              icon: "none"
-            });
-          }
-        }
-      });
-    };
-    const phoneCodes = ["+86", "+852", "+853", "+886"];
-    const codeIndex = common_vendor.ref(0);
-    function chooseImage() {
+    function chooseWechatQr() {
       common_vendor.index.chooseImage({
         count: 1,
+        sourceType: ["album", "camera"],
         success: (res) => {
           form.value.wechatQrCodeUrl = res.tempFilePaths[0];
         }
       });
     }
-    function submitForm() {
-      formRef.value.validate().then(() => {
-        common_vendor.index.showToast({
-          title: "保存成功",
-          icon: "success"
-        });
-        common_vendor.index.__f__("log", "at pages/my-edit/my-edit.vue:210", "准备提交的表单数据:", form.value);
-      }).catch((err) => {
-        common_vendor.index.__f__("log", "at pages/my-edit/my-edit.vue:212", "验证失败：", err);
-      });
-    }
-    function onCodeChange(e) {
-      codeIndex.value = e.detail.value;
-    }
-    const getUserInfo = async () => {
-      try {
-        const result = await utils_request.request("/app-api/member/user/get", {
-          method: "GET"
-        });
-        common_vendor.index.__f__("log", "at pages/my-edit/my-edit.vue:227", "getUserInfo result:", result);
-        if (result && result.data) {
-          const userInfo = result.data;
-          form.value.avatar = userInfo.avatar;
-          form.value.realName = userInfo.realName;
-          form.value.sex = userInfo.sex;
-          form.value.locationAddress = userInfo.locationAddress;
-          form.value.professionalTitle = userInfo.professionalTitle;
-          form.value.companyName = userInfo.companyName;
-          form.value.mobile = userInfo.mobile;
-          form.value.wechatQrCodeUrl = userInfo.wechatQrCodeUrl;
-          form.value.personalBio = userInfo.personalBio;
-          form.value.latitude = userInfo.latitude;
-          form.value.longitude = userInfo.longitude;
-        } else {
-          common_vendor.index.__f__("log", "at pages/my-edit/my-edit.vue:247", "未能获取到用户信息:", result ? result.msg : "无返回数据");
+    const openMapToChooseLocation = () => {
+      common_vendor.index.chooseLocation({
+        latitude: form.value.latitude || void 0,
+        longitude: form.value.longitude || void 0,
+        success: (res) => {
+          form.value.locationAddress = res.address || res.name;
+          form.value.latitude = res.latitude;
+          form.value.longitude = res.longitude;
         }
-      } catch (error) {
-        common_vendor.index.__f__("log", "at pages/my-edit/my-edit.vue:250", "请求失败:", error);
-        common_vendor.index.showToast({
-          title: "获取信息失败",
-          icon: "error"
-        });
-      }
+      });
+    };
+    const previewImage = (url) => {
+      common_vendor.index.previewImage({ urls: [url] });
+    };
+    const submitForm = () => {
+      formRef.value.validate().then(async () => {
+        common_vendor.index.showLoading({ title: "正在保存..." });
+        try {
+          const result = await utils_request.request("/app-api/member/user/update", {
+            method: "PUT",
+            data: form.value
+            // request 工具会自动处理文件上传
+          });
+          if (result) {
+            common_vendor.index.showToast({ title: "保存成功", icon: "success" });
+            setTimeout(() => {
+              common_vendor.index.navigateBack();
+            }, 1500);
+          } else {
+            common_vendor.index.showToast({ title: result.msg || "保存失败", icon: "none" });
+          }
+        } catch (error) {
+          common_vendor.index.__f__("error", "at pages/my-edit/my-edit.vue:209", "提交失败:", error);
+          common_vendor.index.showToast({ title: "保存失败，请稍后重试", icon: "error" });
+        } finally {
+          common_vendor.index.hideLoading();
+        }
+      }).catch((err) => {
+        common_vendor.index.__f__("log", "at pages/my-edit/my-edit.vue:216", "表单验证失败：", err);
+        common_vendor.index.showToast({ title: "请检查并填写必填项", icon: "none" });
+      });
     };
     return (_ctx, _cache) => {
       return common_vendor.e({
-        a: common_vendor.o(chooseAvatar),
-        b: form.value.avatar
+        a: form.value.avatar
       }, form.value.avatar ? {
-        c: form.value.avatar
+        b: form.value.avatar
       } : {}, {
-        d: common_vendor.p({
+        c: common_vendor.t(form.value.avatar ? "更换头像" : "上传头像"),
+        d: common_vendor.o(chooseAvatar),
+        e: common_vendor.p({
           label: "头像",
-          name: "avatar",
-          required: true
+          name: "avatar"
         }),
-        e: common_vendor.o(($event) => form.value.name = $event),
-        f: common_vendor.p({
-          placeholder: "请输入真实姓名",
-          modelValue: form.value.name
-        }),
+        f: common_vendor.o(($event) => form.value.nickname = $event),
         g: common_vendor.p({
-          label: "真实姓名",
-          name: "name",
-          required: true
+          placeholder: "请输入用户昵称",
+          modelValue: form.value.nickname
         }),
-        h: common_vendor.o(($event) => form.value.gender = $event),
-        i: common_vendor.p({
-          localdata: genderOptions,
-          modelValue: form.value.gender
+        h: common_vendor.p({
+          label: "用户昵称",
+          name: "nickname"
         }),
+        i: common_vendor.o(($event) => form.value.realName = $event),
         j: common_vendor.p({
-          label: "性别",
-          name: "gender",
-          required: true
+          placeholder: "请输入真实姓名",
+          modelValue: form.value.realName
         }),
-        k: common_vendor.o(($event) => form.value.birth = $event),
-        l: common_vendor.p({
-          type: "date",
-          modelValue: form.value.birth
+        k: common_vendor.p({
+          label: "真实姓名",
+          name: "realName"
         }),
+        l: common_vendor.o(($event) => form.value.sex = $event),
         m: common_vendor.p({
-          label: "出生日期",
-          name: "birth"
+          localdata: genderOptions,
+          placeholder: "请选择性别",
+          modelValue: form.value.sex
         }),
-        n: form.value.location
-      }, form.value.location ? {
-        o: common_vendor.t(form.value.location)
-      } : {}, {
-        p: common_vendor.o(openMapToChooseLocation),
+        n: common_vendor.p({
+          label: "性别",
+          name: "sex"
+        }),
+        o: common_vendor.o(($event) => form.value.birthday = $event),
+        p: common_vendor.p({
+          type: "date",
+          end: today.value,
+          ["return-type"]: "string",
+          modelValue: form.value.birthday
+        }),
         q: common_vendor.p({
+          label: "出生日期",
+          name: "birthday"
+        }),
+        r: form.value.locationAddress
+      }, form.value.locationAddress ? {
+        s: common_vendor.t(form.value.locationAddress)
+      } : {}, {
+        t: common_vendor.o(openMapToChooseLocation),
+        v: common_vendor.p({
           label: "所在地",
-          name: "location"
+          name: "locationAddress"
         }),
-        r: common_vendor.o(($event) => form.value.job = $event),
-        s: common_vendor.p({
-          placeholder: "请输入职业",
-          modelValue: form.value.job
-        }),
-        t: common_vendor.p({
-          label: "职业",
-          name: "job",
-          required: true
-        }),
-        v: common_vendor.o(($event) => form.value.company = $event),
-        w: common_vendor.p({
-          placeholder: "请输入公司或机构名称",
-          modelValue: form.value.company
-        }),
+        w: common_vendor.o(($event) => form.value.professionalTitle = $event),
         x: common_vendor.p({
-          label: "公司/机构",
-          name: "company",
-          required: true
+          placeholder: "请输入职业",
+          modelValue: form.value.professionalTitle
         }),
-        y: common_vendor.t(phoneCodes[codeIndex.value]),
-        z: phoneCodes,
-        A: codeIndex.value,
-        B: common_vendor.o(onCodeChange),
-        C: common_vendor.o(($event) => form.value.phone = $event),
+        y: common_vendor.p({
+          label: "职业",
+          name: "professionalTitle"
+        }),
+        z: common_vendor.o(($event) => form.value.companyName = $event),
+        A: common_vendor.p({
+          placeholder: "请输入公司或机构名称",
+          modelValue: form.value.companyName
+        }),
+        B: common_vendor.p({
+          label: "公司/机构",
+          name: "companyName"
+        }),
+        C: common_vendor.o(($event) => form.value.mobile = $event),
         D: common_vendor.p({
-          placeholder: "请输入手机号码",
-          modelValue: form.value.phone
+          disabled: true,
+          modelValue: form.value.mobile
         }),
         E: common_vendor.p({
           label: "手机号码",
-          name: "phone",
-          required: true
+          name: "mobile"
         }),
-        F: common_vendor.o(chooseImage),
-        G: form.value.wechatQr
-      }, form.value.wechatQr ? {
-        H: form.value.wechatQr
+        F: form.value.wechatQrCodeUrl
+      }, form.value.wechatQrCodeUrl ? {
+        G: form.value.wechatQrCodeUrl,
+        H: common_vendor.o(($event) => previewImage(form.value.wechatQrCodeUrl))
       } : {}, {
-        I: common_vendor.p({
-          label: "微信二维码",
-          name: "wechatQr"
-        }),
-        J: common_vendor.o(($event) => form.value.intro = $event),
+        I: common_vendor.t(form.value.wechatQrCodeUrl ? "更换二维码" : "上传二维码"),
+        J: common_vendor.o(chooseWechatQr),
         K: common_vendor.p({
+          label: "微信二维码",
+          name: "wechatQrCodeUrl"
+        }),
+        L: common_vendor.o(($event) => form.value.personalBio = $event),
+        M: common_vendor.p({
           type: "textarea",
           placeholder: "介绍一下自己...",
-          modelValue: form.value.intro
+          modelValue: form.value.personalBio
         }),
-        L: common_vendor.p({
-          label: "个人简介",
-          name: "intro"
-        }),
-        M: common_vendor.o(($event) => form.value.inviteCode = $event),
         N: common_vendor.p({
-          placeholder: "填写对方的邀请码（可选）",
-          modelValue: form.value.inviteCode
+          label: "个人简介",
+          name: "personalBio"
         }),
-        O: common_vendor.p({
-          label: "邀请码",
-          name: "inviteCode"
-        }),
-        P: common_vendor.sr(formRef, "13622257-1", {
+        O: common_vendor.sr(formRef, "13622257-0", {
           "k": "formRef"
         }),
-        Q: common_vendor.p({
+        P: common_vendor.p({
           modelValue: form.value,
           rules
         }),
-        R: common_vendor.o(submitForm)
+        Q: common_vendor.o(submitForm)
       });
     };
   }

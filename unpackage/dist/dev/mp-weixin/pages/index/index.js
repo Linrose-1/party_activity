@@ -106,18 +106,19 @@ const _sfc_main = {
         common_vendor.index.__f__("log", "at pages/index/index.vue:201", "Login result:", result);
         if (!result.error && result.data && result.data.accessToken) {
           common_vendor.index.setStorageSync("token", result.data.accessToken);
+          common_vendor.index.setStorageSync("userId", result.data.userId);
           common_vendor.index.reLaunch({
             url: "/pages/home/home"
           });
         } else {
-          common_vendor.index.__f__("log", "at pages/index/index.vue:214", "登录失败:", result.error || "未知错误");
+          common_vendor.index.__f__("log", "at pages/index/index.vue:215", "登录失败:", result.error || "未知错误");
           common_vendor.index.showToast({
             title: "登录失败",
             icon: "none"
           });
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/index/index.vue:223", "登录请求异常:", error);
+        common_vendor.index.__f__("error", "at pages/index/index.vue:224", "登录请求异常:", error);
         common_vendor.index.showToast({
           title: "请求异常，请重试",
           icon: "none"

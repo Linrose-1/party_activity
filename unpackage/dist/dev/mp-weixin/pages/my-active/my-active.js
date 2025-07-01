@@ -4,12 +4,14 @@ if (!Array) {
   const _easycom_uni_segmented_control2 = common_vendor.resolveComponent("uni-segmented-control");
   const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
   const _component_empty_state = common_vendor.resolveComponent("empty-state");
-  (_easycom_uni_segmented_control2 + _easycom_uni_icons2 + _component_empty_state)();
+  const _easycom_uni_badge2 = common_vendor.resolveComponent("uni-badge");
+  (_easycom_uni_segmented_control2 + _easycom_uni_icons2 + _component_empty_state + _easycom_uni_badge2)();
 }
 const _easycom_uni_segmented_control = () => "../../uni_modules/uni-segmented-control/components/uni-segmented-control/uni-segmented-control.js";
 const _easycom_uni_icons = () => "../../uni_modules/uni-icons/components/uni-icons/uni-icons.js";
+const _easycom_uni_badge = () => "../../uni_modules/uni-badge/components/uni-badge/uni-badge.js";
 if (!Math) {
-  (_easycom_uni_segmented_control + _easycom_uni_icons)();
+  (_easycom_uni_segmented_control + _easycom_uni_icons + _easycom_uni_badge)();
 }
 const _sfc_main = {
   __name: "my-active",
@@ -17,7 +19,6 @@ const _sfc_main = {
     const currentTab = common_vendor.ref(0);
     const tabs = common_vendor.ref(["我的报名", "我的发布"]);
     const refreshing = common_vendor.ref(false);
-    const loadStatus = common_vendor.ref("more");
     const enrolledActivities = common_vendor.ref([
       {
         id: 1,
@@ -25,15 +26,30 @@ const _sfc_main = {
         image: "../../static/abc.png",
         date: "2023年11月25日 08:00-17:00",
         location: "青龙山国家森林公园",
-        participants: {
-          current: 28,
-          total: 50
-        },
-        organizer: "户外探险俱乐部",
-        status: "enrolled",
-        tags: ["户外", "运动"]
+        participants: { current: 28, total: 50 },
+        status: "enrolled"
+        // 状态：已报名
+      },
+      {
+        id: 2,
+        title: "城市摄影行走 - 发现老街角的故事",
+        image: "../../static/abc.png",
+        date: "2023年12月10日 14:00-17:00",
+        location: "市中心老城区",
+        participants: { current: 15, total: 20 },
+        status: "refund_pending"
+        // 状态：待退款
+      },
+      {
+        id: 3,
+        title: "社区公益烘焙课程",
+        image: "../../static/abc.png",
+        date: "2023年10月20日 10:00-12:00",
+        location: "幸福社区活动中心",
+        participants: { current: 12, total: 12 },
+        status: "ended"
+        // 状态：已结束
       }
-      // 更多数据...
     ]);
     const publishedActivities = common_vendor.ref([
       {
@@ -42,19 +58,44 @@ const _sfc_main = {
         image: "../../static/abc.png",
         date: "2023年12月2日 10:00-14:00",
         location: "人民公园草坪区",
-        participants: {
-          current: 23,
-          total: 30
-        },
-        organizer: "我",
+        participants: { current: 23, total: 30 },
         status: "ongoing",
-        tags: ["宠物", "社交"]
+        // 状态：进行中
+        refundRequests: 2
+      },
+      {
+        id: 5,
+        title: "周末手工皮具体验课",
+        image: "../../static/abc.png",
+        date: "2023年12月9日 13:00-16:00",
+        location: "创意工坊A座",
+        participants: { current: 8, total: 10 },
+        status: "canceled"
+        // 状态：已取消，待处理退款
+      },
+      {
+        id: 6,
+        title: "科技新品发布会早鸟票",
+        image: "../../static/abc.png",
+        date: "2024年1月15日 09:00",
+        location: "国际会展中心",
+        participants: { current: 95, total: 200 },
+        status: "upcoming"
+        // 状态：未开始
+      },
+      {
+        id: 7,
+        title: "秋季音乐节",
+        image: "../../static/abc.png",
+        date: "2023年09月30日",
+        location: "奥林匹克体育中心",
+        participants: { current: 5e3, total: 5e3 },
+        status: "ended"
+        // 状态：已结束
       }
-      // 更多数据...
     ]);
     const switchTab = (e) => {
       currentTab.value = e.currentIndex;
-      loadStatus.value = "more";
     };
     const getStatusText = (status) => {
       const statusMap = {
@@ -62,7 +103,11 @@ const _sfc_main = {
         pending: "待审核",
         ended: "已结束",
         ongoing: "进行中",
-        upcoming: "未开始"
+        upcoming: "未开始",
+        refund_pending: "待退款",
+        // 新状态文本
+        canceled: "已取消"
+        // 新状态文本
       };
       return statusMap[status] || "";
     };
@@ -79,16 +124,49 @@ const _sfc_main = {
     const cancelEnroll = (item) => {
       common_vendor.index.showModal({
         title: "提示",
-        content: "确定要取消报名此活动吗？",
+        content: "确定要取消报名吗？取消后需申请退款。",
         success: (res) => {
           if (res.confirm) {
-            enrolledActivities.value = enrolledActivities.value.filter((act) => act.id !== item.id);
+            const activity = enrolledActivities.value.find((act) => act.id === item.id);
+            if (activity) {
+              activity.status = "refund_pending";
+            }
             common_vendor.index.showToast({
-              title: "已取消报名",
-              icon: "success"
+              title: "已取消，请申请退款",
+              icon: "none"
             });
           }
         }
+      });
+    };
+    const applyForRefund = (item) => {
+      common_vendor.index.navigateTo({
+        url: `/pages/my-active-apply/my-active-apply?id=${item.id}`
+      });
+    };
+    const cancelActivity = (item) => {
+      common_vendor.index.showModal({
+        title: "警告",
+        content: "确定要取消您发布的此活动吗？此操作不可逆，且需要您为所有已报名用户处理退款。",
+        confirmColor: "#f44336",
+        // 红色警告
+        success: (res) => {
+          if (res.confirm) {
+            const activity = publishedActivities.value.find((act) => act.id === item.id);
+            if (activity) {
+              activity.status = "canceled";
+            }
+            common_vendor.index.showToast({
+              title: "活动已取消",
+              icon: "none"
+            });
+          }
+        }
+      });
+    };
+    const manageRefunds = (item, mode) => {
+      common_vendor.index.navigateTo({
+        url: `/pages/my-active-manage/my-active-manage?id=${item.id}&mode=${mode}`
       });
     };
     const manageActivity = (item) => {
@@ -152,9 +230,13 @@ const _sfc_main = {
           }, item.status === "enrolled" ? {
             m: common_vendor.o(($event) => cancelEnroll(item), index)
           } : {}, {
-            n: common_vendor.o(($event) => viewDetail(item), index),
-            o: index,
-            p: common_vendor.o(($event) => handleActivityClick(item), index)
+            n: item.status === "refund_pending"
+          }, item.status === "refund_pending" ? {
+            o: common_vendor.o(($event) => applyForRefund(item), index)
+          } : {}, {
+            p: common_vendor.o(($event) => viewDetail(item), index),
+            q: index,
+            r: common_vendor.o(($event) => handleActivityClick(item), index)
           });
         }),
         e: common_vendor.p({
@@ -185,7 +267,7 @@ const _sfc_main = {
         m: publishedActivities.value.length > 0
       }, publishedActivities.value.length > 0 ? {
         n: common_vendor.f(publishedActivities.value, (item, index, i0) => {
-          return {
+          return common_vendor.e({
             a: item.image,
             b: common_vendor.t(item.title),
             c: common_vendor.t(getStatusText(item.status)),
@@ -197,12 +279,31 @@ const _sfc_main = {
             i: "37541c0b-7-" + i0,
             j: common_vendor.t(item.participants.current),
             k: common_vendor.t(item.participants.total),
-            l: common_vendor.t(item.status === "ended" ? "数据统计" : "删除"),
-            m: common_vendor.o(($event) => manageActivity(item), index),
-            n: common_vendor.o(($event) => viewDetail(item), index),
-            o: index,
-            p: common_vendor.o(($event) => handleActivityClick(item), index)
-          };
+            l: ["ongoing", "upcoming"].includes(item.status) && item.refundRequests > 0
+          }, ["ongoing", "upcoming"].includes(item.status) && item.refundRequests > 0 ? {
+            m: "37541c0b-8-" + i0,
+            n: common_vendor.p({
+              text: item.refundRequests,
+              type: "error"
+            }),
+            o: common_vendor.o(($event) => manageRefunds(item, "individual"), index)
+          } : {}, {
+            p: ["ongoing", "upcoming"].includes(item.status)
+          }, ["ongoing", "upcoming"].includes(item.status) ? {
+            q: common_vendor.o(($event) => cancelActivity(item), index)
+          } : {}, {
+            r: item.status === "canceled"
+          }, item.status === "canceled" ? {
+            s: common_vendor.o(($event) => manageRefunds(item, "all"), index)
+          } : {}, {
+            t: item.status === "ended"
+          }, item.status === "ended" ? {
+            v: common_vendor.o(($event) => manageActivity(item), index)
+          } : {}, {
+            w: common_vendor.o(($event) => viewDetail(item), index),
+            x: index,
+            y: common_vendor.o(($event) => handleActivityClick(item), index)
+          });
         }),
         o: common_vendor.p({
           type: "calendar",

@@ -1,14 +1,4 @@
 
-.business-opportunity-app.data-v-07e72d3c {
-		background-color: #f9f9f9;
-		color: #333;
-		max-width: 1000rpx;
-		margin: 0 auto;
-		padding-bottom: 160rpx;
-		min-height: 100vh;
-		display: flex;
-		flex-direction: column;
-}
 .header.data-v-07e72d3c {
 		background: linear-gradient(135deg, #FF6A00, #FF8C37);
 		color: white;

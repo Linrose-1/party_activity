@@ -1,4 +1,3 @@
-<!-- 这里的 template 是完整的，您可以直接替换原有的 template -->
 <template>
 	<view class="container">
 		<!-- 顶部标题和搜索 -->
@@ -26,7 +25,7 @@
 							</view>
 						</view>
 					</view>
-					
+
 					<!-- 【新增】选择状态 -->
 					<view class="uni-list">
 						<view class="uni-list-cell">
@@ -55,7 +54,7 @@
 							</view>
 						</view>
 					</view>
-					
+
 					<!-- 选择位置 -->
 					<view class="uni-list">
 						<view class="uni-list-cell">
@@ -79,14 +78,14 @@
 
 		<!-- 活动列表 -->
 		<view class="activity-list" scroll-y="true">
-		    <ActivityCard v-for="(activity, index) in activitiesData" :key="activity.id" :activity="activity" />
+			<ActivityCard v-for="(activity, index) in activitiesData" :key="activity.id" :activity="activity" @refreshList="getActiveList(false)"  />
 		</view>
 
 		<!-- 【修改后】根据新的状态变量来显示提示 -->
 		<view v-if="!hasMore && activitiesData.length > 0" class="no-more-content">
 			暂无更多活动
 		</view>
-		
+
 		<!-- 【可选新增】如果希望在列表为空时也显示提示，可以添加一个空状态 -->
 		<view v-if="!loading && activitiesData.length === 0" class="no-more-content">
 			暂无活动，快去发布一个吧！
@@ -110,18 +109,16 @@
 		watch
 	} from 'vue';
 	import {
-		onReachBottom // 【新增】导入 onReachBottom 生命周期钩子
+		onReachBottom
 	} from '@dcloudio/uni-app';
 	import ActivityCard from '@/components/ActivityCard.vue';
 	import request from '../../utils/request.js';
 
-	// 【新增】定义加载状态和分页相关状态
 	const loading = ref(false); // 是否正在加载中
 	const hasMore = ref(true); // 是否还有更多数据
 	const pageNo = ref(1); // 当前页码
 	const pageSize = 10; // 每页加载10条
-	
-	// 【修改】活动列表数据，初始为空，将通过接口获取
+
 	const activitiesData = ref([]);
 
 	// 页面挂载时，首先获取一次活动列表
@@ -129,7 +126,7 @@
 		getActiveList();
 	});
 
-	// 【新增】滑动到底部时触发，用于分页加载
+	// 滑动到底部时触发，用于分页加载
 	onReachBottom(() => {
 		console.log('滑动到底部，触发加载更多');
 		if (hasMore.value && !loading.value) {
@@ -212,7 +209,7 @@
 			}
 		});
 	}
-	
+
 	/**
 	 * 【核心修改】重构 getActiveList 方法
 	 * @param {boolean} isLoadMore - 是否为加载更多操作。true: 追加数据; false: 刷新列表
@@ -226,16 +223,16 @@
 		if (isLoadMore && !hasMore.value) {
 			return;
 		}
-	
+
 		loading.value = true;
-	
+
 		// 如果不是加载更多（即是刷新或新搜索），则重置分页和数据
 		if (!isLoadMore) {
 			pageNo.value = 1;
 			activitiesData.value = [];
 			hasMore.value = true;
 		}
-	
+
 		// 状态中文到数字的映射，后端通常使用数字
 		const statusMap = {
 			'全部状态': '', // 传空字符串表示查询全部
@@ -246,7 +243,7 @@
 			'已结束': 5,
 			'已取消': 0
 		};
-	
+
 		// 构造请求参数
 		const params = {
 			pageNo: pageNo.value,
@@ -257,7 +254,7 @@
 			longitude: selectedLocationInfo.value ? selectedLocationInfo.value.longitude : '', // 经度
 			latitude: selectedLocationInfo.value ? selectedLocationInfo.value.latitude : '' // 纬度
 		};
-	
+
 		try {
 			console.log('发起活动列表请求, 参数:', params);
 			// 调用封装的请求方法
@@ -265,12 +262,12 @@
 				method: 'GET',
 				data: params
 			});
-			
+
 			// 【关键修改】修正成功条件的判断逻辑
-			if (result && !result.error && result.data) { 
+			if (result && !result.error && result.data) {
 				// 从 result.data 中解构出列表数据，并提供一个空数组作为默认值
 				const list = result.data.list || [];
-	
+
 				if (isLoadMore) {
 					// 加载更多：追加数据
 					activitiesData.value = [...activitiesData.value, ...list];
@@ -278,19 +275,19 @@
 					// 刷新/搜索：直接替换数据
 					activitiesData.value = list;
 				}
-	
+
 				// 判断是否还有更多数据
 				// 后端返回的 total 是总条数，我们可以用当前已加载的数量和总数比较
 				// result.data.total 是后端返回的总条目数
 				if (activitiesData.value.length >= result.data.total) {
 					hasMore.value = false;
 				} else {
-	                hasMore.value = true;
-	            }
-	
+					hasMore.value = true;
+				}
+
 				// 如果成功获取到数据，页码 +1，为下一次加载做准备
 				pageNo.value++;
-	
+
 				console.log('活动列表获取成功:', activitiesData.value);
 			} else {
 				// 请求失败或 code 不为 0
@@ -304,23 +301,19 @@
 			loading.value = false; // 结束加载状态
 		}
 	};
-	
-	// 【新增】使用 watch 监听所有筛选条件的变化
+
 	// 当任何一个筛选条件改变时，都触发一次新的搜索（不是加载更多）
 	watch(
-		[searchKeyword, activeCategory, selectedStatus, selectedLocationInfo], 
+		[searchKeyword, activeCategory, selectedStatus, selectedLocationInfo],
 		() => {
 			// 为了防止短时间内快速输入触发多次请求，可以加入防抖
 			// 这里为了简单，直接调用
 			console.log('筛选条件变化，重新搜索...');
 			getActiveList(false);
-		},
-		{ deep: true } // deep: true 确保能监听到 selectedLocationInfo 对象的内部变化
+		}, {
+			deep: true
+		} // deep: true 确保能监听到 selectedLocationInfo 对象的内部变化
 	);
-
-
-	// 【删除】旧的 filteredActivities 计算属性，因为现在数据获取和筛选都在 getActiveList 中完成
-	// const filteredActivities = computed(() => { ... }); // 此部分已删除
 
 
 	// 发布活动

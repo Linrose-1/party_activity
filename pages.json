@@ -1,19 +1,19 @@
 {
 	"pages": [
 		
-		
+		{
+			"path": "pages/index/index",
+			"style": {
+				"navigationBarTitleText": "聚一聚"
+			}
+		},
 		{
 			"path": "pages/home/home",
 			"style": {
 				"navigationBarTitleText": "首页"
 			}
 		},
-		{
-			"path": "pages/index/index",
-			"style": {
-				"navigationBarTitleText": "uni-app"
-			}
-		},
+		
 		{
 			"path" : "pages/active/active",
 			"style" : 
@@ -159,6 +159,34 @@
 			"style" : 
 			{
 				"navigationBarTitleText" : "设置"
+			}
+		},
+		{
+			"path" : "pages/my-follow/my-follow",
+			"style" : 
+			{
+				"navigationBarTitleText" : "我的关注"
+			}
+		},
+		{
+			"path" : "pages/my-active-apply/my-active-apply",
+			"style" : 
+			{
+				"navigationBarTitleText" : "申请退款"
+			}
+		},
+		{
+			"path" : "pages/my-active-manage/my-active-manage",
+			"style" : 
+			{
+				"navigationBarTitleText" : "处理退款"
+			}
+		},
+		{
+			"path" : "pages/my-active-approval/my-active-approval",
+			"style" : 
+			{
+				"navigationBarTitleText" : "退款审批"
 			}
 		}
 	],

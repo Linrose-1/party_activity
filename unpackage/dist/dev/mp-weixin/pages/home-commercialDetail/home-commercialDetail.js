@@ -14,10 +14,12 @@ const _sfc_main = {
   setup(__props) {
     const isLoading = common_vendor.ref(true);
     const postId = common_vendor.ref(null);
+    const loggedInUserId = common_vendor.ref(null);
+    const showFollowButton = common_vendor.ref(false);
+    const isActionInProgress = common_vendor.ref(false);
     const postDetail = common_vendor.reactive({
       id: null,
       user: "",
-      // 用户名先置空
       userId: null,
       time: "",
       content: "",
@@ -26,11 +28,19 @@ const _sfc_main = {
       likes: 0,
       dislikes: 0,
       userAction: null,
-      saved: false
+      saved: false,
+      isFollowedUser: false
+    });
+    const comments = common_vendor.ref([]);
+    const newCommentText = common_vendor.ref("");
+    const replyToCommentId = common_vendor.ref(0);
+    const replyToNickname = common_vendor.ref("");
+    const commentInputPlaceholder = common_vendor.computed(() => {
+      return replyToNickname.value ? `回复 @${replyToNickname.value}` : "发表你的评论...";
     });
     function formatTimestamp(timestamp) {
       if (!timestamp)
-        return "";
+        return "刚刚";
       const date = new Date(timestamp);
       const Y = date.getFullYear();
       const M = (date.getMonth() + 1).toString().padStart(2, "0");
@@ -40,208 +50,254 @@ const _sfc_main = {
       return `${Y}-${M}-${D} ${h}:${m}`;
     }
     common_vendor.onLoad((options) => {
+      loggedInUserId.value = common_vendor.index.getStorageSync("userId");
       if (options && options.id) {
         postId.value = options.id;
         getBusinessOpportunitiesDetail();
       } else {
-        common_vendor.index.__f__("error", "at pages/home-commercialDetail/home-commercialDetail.vue:160", "未接收到商机ID");
+        common_vendor.index.__f__("error", "at pages/home-commercialDetail/home-commercialDetail.vue:171", "未接收到商机ID");
         common_vendor.index.showToast({ title: "加载失败，无效的商机", icon: "none" });
         setTimeout(() => common_vendor.index.navigateBack(), 1500);
       }
     });
+    common_vendor.onMounted(() => {
+    });
     const getBusinessOpportunitiesDetail = async () => {
       isLoading.value = true;
+      showFollowButton.value = false;
       try {
         const result = await utils_request.request("/app-api/member/business-opportunities/get", {
           method: "GET",
           data: { id: postId.value }
         });
-        common_vendor.index.__f__("log", "at pages/home-commercialDetail/home-commercialDetail.vue:175", "getBusinessOpportunitiesDetail result:", result);
         if (result && !result.error && result.data) {
           const item = result.data;
           postDetail.id = item.id;
           postDetail.content = item.postContent;
           postDetail.images = item.postImg ? String(item.postImg).split(",").filter((img) => img) : [];
-          try {
-            const parsedTags = JSON.parse(item.tags || "[]");
-            postDetail.tags = Array.isArray(parsedTags) ? parsedTags : item.tags ? String(item.tags).split(",") : [];
-          } catch (e) {
-            postDetail.tags = item.tags ? String(item.tags).split(",") : [];
-          }
           postDetail.likes = item.likesCount || 0;
           postDetail.dislikes = item.dislikesCount || 0;
-          postDetail.userAction = item.userLikeStr || null;
-          postDetail.saved = item.followFlag === 1;
           postDetail.time = formatTimestamp(item.createTime);
           postDetail.user = item.contactPerson || "匿名用户";
           postDetail.userId = item.userId;
+          postDetail.saved = item.followFlag === 1;
+          postDetail.isFollowedUser = item.followUserFlag === 1;
+          postDetail.userAction = item.userLikeStr || null;
+          if (loggedInUserId.value && item.userId && loggedInUserId.value != item.userId) {
+            showFollowButton.value = true;
+          }
+          getCommentList();
         } else {
-          const errorMsg = result && result.error ? result.error.message : "获取详情失败";
-          common_vendor.index.showToast({ title: errorMsg, icon: "none" });
+          common_vendor.index.showToast({ title: "获取详情失败", icon: "none" });
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/home-commercialDetail/home-commercialDetail.vue:229", "获取商机详情失败:", error);
+        common_vendor.index.__f__("error", "at pages/home-commercialDetail/home-commercialDetail.vue:210", "获取商机详情失败:", error);
         common_vendor.index.showToast({ title: "网络请求异常", icon: "none" });
       } finally {
         isLoading.value = false;
       }
     };
-    const comments = common_vendor.reactive([
-      {
-        id: 1,
-        user: "张经理",
-        time: "45分钟前",
-        text: "我们团队有5年AI客服系统开发经验，已完成多个金融行业智能客服项目。已私信您联系方式，期待进一步沟通！",
-        likes: 5,
-        userAction: null,
-        contact: {
-          phone: "139 **** 1234",
-          email: "zhang@example.com",
-          company: "智联科技"
+    const flattenComments = (apiComments, replyToUser = null) => {
+      let flatList = [];
+      if (!Array.isArray(apiComments))
+        return flatList;
+      apiComments.forEach((comment) => {
+        const userVO = comment.memberUserBaseVO || {};
+        let displayText = comment.content;
+        if (replyToUser) {
+          displayText = `回复 @${replyToUser}: ${displayText}`;
         }
-      },
-      {
-        id: 2,
-        user: "王总监",
-        time: "30分钟前",
-        text: "您好，我们有成熟的NLP技术团队，开发过多个智能客服系统。能否提供更具体的需求文档？谢谢！",
-        likes: 2,
-        userAction: null,
-        contact: {
-          phone: "137 **** 5678",
-          email: "wang@example.com",
-          company: "未来智能"
+        flatList.push({
+          id: comment.id,
+          userId: comment.userId,
+          user: userVO.nickname || "匿名用户",
+          avatar: userVO.avatar,
+          time: formatTimestamp(comment.createTime),
+          text: displayText,
+          parentId: comment.parentId
+        });
+        if (comment.childrenList && comment.childrenList.length > 0) {
+          const childComments = flattenComments(comment.childrenList, userVO.nickname || "匿名用户");
+          flatList = flatList.concat(childComments);
         }
-      },
-      {
-        id: 3,
-        user: "李技术",
-        time: "15分钟前",
-        text: "我们专注于AI语音交互系统，有自有专利技术，可以显著提升客服效率。已发送公司介绍到私信，请查收。",
-        likes: 1,
-        userAction: null,
-        contact: {
-          phone: "136 **** 9012",
-          email: "li@example.com",
-          company: "声学智能"
-        }
-      },
-      {
-        id: 4,
-        user: "赵总",
-        time: "10分钟前",
-        text: "我们公司刚完成一个电商智能客服项目，支持多语言处理。已私信您案例演示链接，欢迎查看。",
-        likes: 0,
-        userAction: null,
-        contact: {
-          phone: "135 **** 3456",
-          email: "zhao@example.com",
-          company: "电商通"
-        }
-      }
-    ]);
-    const newCommentText = common_vendor.ref("");
-    const toggleAction = (item, action) => {
-      if (item.userAction === action) {
-        item.userAction = null;
-        if (action === "like") {
-          item.likes--;
-        } else {
-          item.dislikes--;
-        }
-      } else {
-        const prevAction = item.userAction;
-        item.userAction = action;
-        if (action === "like") {
-          item.likes++;
-          if (prevAction === "dislike") {
-            item.dislikes--;
-          }
-        } else {
-          item.dislikes++;
-          if (prevAction === "like") {
-            item.likes--;
-          }
-        }
-      }
-    };
-    const toggleBookmark = (post) => {
-      post.saved = !post.saved;
-      common_vendor.index.showToast({
-        title: post.saved ? "已收藏" : "已取消收藏",
-        icon: "none"
       });
+      return flatList;
     };
-    const shareOpportunity = () => {
-      common_vendor.index.showToast({
-        title: "分享功能即将上线",
-        icon: "none"
-      });
+    const getCommentList = async () => {
+      try {
+        const result = await utils_request.request("/app-api/member/comment/select-type-target-id", {
+          method: "GET",
+          data: { targetType: "post", targetId: postId.value }
+        });
+        if (result && !result.error && Array.isArray(result.data)) {
+          comments.value = flattenComments(result.data);
+        } else {
+          comments.value = [];
+        }
+      } catch (error) {
+        common_vendor.index.__f__("error", "at pages/home-commercialDetail/home-commercialDetail.vue:255", "请求评论列表异常:", error);
+      }
     };
     const replyComment = (comment) => {
-      common_vendor.index.showToast({
-        title: `回复 ${comment.user}: 功能待完善`,
-        icon: "none"
-      });
-      newCommentText.value = `@${comment.user} `;
+      replyToCommentId.value = comment.id;
+      replyToNickname.value = comment.user;
+      common_vendor.index.showToast({ title: `正在回复 ${comment.user}`, icon: "none" });
     };
-    const addComment = () => {
-      const text = newCommentText.value.trim();
-      if (text) {
-        const newId = comments.length > 0 ? Math.max(...comments.map((c) => c.id)) + 1 : 1;
-        comments.unshift({
-          id: newId,
-          user: "当前用户",
-          // 实际应为登录用户
-          time: "刚刚",
-          text,
-          likes: 0,
-          userAction: null,
-          contact: {
-            phone: "188 **** 8888",
-            email: "current@example.com"
-          }
-          // 模拟当前用户联系方式
+    const addComment = async () => {
+      var _a;
+      const content = newCommentText.value.trim();
+      if (!content) {
+        common_vendor.index.showToast({ title: "评论内容不能为空", icon: "none" });
+        return;
+      }
+      if (!loggedInUserId.value) {
+        common_vendor.index.showToast({ title: "请先登录再评论", icon: "none" });
+        return;
+      }
+      common_vendor.index.showLoading({ title: "发布中..." });
+      try {
+        const requestData = {
+          userId: loggedInUserId.value,
+          targetId: postId.value,
+          targetType: "post",
+          parentId: replyToCommentId.value,
+          content
+        };
+        const result = await utils_request.request("/app-api/member/comment/create", {
+          method: "POST",
+          data: requestData
         });
-        newCommentText.value = "";
-        common_vendor.index.showToast({
-          title: "评论成功",
-          icon: "success"
-        });
-      } else {
-        common_vendor.index.showToast({
-          title: "评论内容不能为空",
-          icon: "none"
-        });
+        if (result && !result.error) {
+          common_vendor.index.showToast({ title: "评论成功", icon: "success" });
+          newCommentText.value = "";
+          replyToCommentId.value = 0;
+          replyToNickname.value = "";
+          await getCommentList();
+        } else {
+          common_vendor.index.showToast({ title: ((_a = result.error) == null ? void 0 : _a.message) || "评论失败", icon: "none" });
+        }
+      } catch (error) {
+        common_vendor.index.__f__("error", "at pages/home-commercialDetail/home-commercialDetail.vue:298", "创建评论异常:", error);
+        common_vendor.index.showToast({ title: "评论失败，请稍后重试", icon: "none" });
+      } finally {
+        common_vendor.index.hideLoading();
       }
     };
-    const previewImage = (urls, current) => {
-      common_vendor.index.previewImage({
-        urls,
-        current: urls[current],
-        longPressActions: {
-          itemList: ["发送给朋友", "保存图片", "收藏"],
-          success: function(data) {
-            common_vendor.index.__f__("log", "at pages/home-commercialDetail/home-commercialDetail.vue:434", "选中了第" + (data.tapIndex + 1) + "个按钮，第" + (data.index + 1) + "张图片");
-          },
-          fail: function(err) {
-            common_vendor.index.__f__("log", "at pages/home-commercialDetail/home-commercialDetail.vue:437", err.errMsg);
-          }
+    const toggleFollow = async (post) => {
+      if (isActionInProgress.value)
+        return;
+      if (!loggedInUserId.value) {
+        common_vendor.index.showToast({ title: "请先登录", icon: "none" });
+        return;
+      }
+      isActionInProgress.value = true;
+      const isAdding = !post.isFollowedUser;
+      const apiUrl = isAdding ? "/app-api/member/follow/add" : "/app-api/member/follow/del";
+      common_vendor.index.showLoading({ title: "请稍候..." });
+      try {
+        const requestData = {
+          userId: loggedInUserId.value,
+          targetId: post.userId,
+          targetType: "post_user"
+        };
+        const result = await utils_request.request(apiUrl, {
+          method: "POST",
+          data: requestData
+        });
+        if (result && result.error) {
+          common_vendor.index.showToast({ title: "操作失败", icon: "none" });
         }
-      });
+      } catch (error) {
+        common_vendor.index.__f__("error", "at pages/home-commercialDetail/home-commercialDetail.vue:334", "关注/取关用户异常:", error);
+        common_vendor.index.showToast({ title: "操作失败，请重试", icon: "none" });
+      } finally {
+        common_vendor.index.hideLoading();
+        await getBusinessOpportunitiesDetail();
+        isActionInProgress.value = false;
+      }
+    };
+    const toggleAction = async (item, clickedAction) => {
+      if (isActionInProgress.value)
+        return;
+      if (!loggedInUserId.value) {
+        common_vendor.index.showToast({ title: "请先登录", icon: "none" });
+        return;
+      }
+      isActionInProgress.value = true;
+      common_vendor.index.showLoading({ title: "请稍候..." });
+      const apiActionToSend = item.userAction === clickedAction ? "" : clickedAction;
+      try {
+        const requestData = {
+          userId: loggedInUserId.value,
+          targetId: item.id,
+          // 目标是商机的ID
+          targetType: "post",
+          // 类型是post
+          action: apiActionToSend
+          // 发送 'like', 'dislike', 或 ''
+        };
+        common_vendor.index.__f__("log", "at pages/home-commercialDetail/home-commercialDetail.vue:367", "点赞/踩/取消 操作, 请求:", requestData);
+        const result = await utils_request.request("/app-api/member/like-action/add", {
+          method: "POST",
+          data: requestData
+        });
+        if (result && result.error) {
+          common_vendor.index.showToast({ title: "操作失败", icon: "none" });
+        }
+      } catch (error) {
+        common_vendor.index.__f__("error", "at pages/home-commercialDetail/home-commercialDetail.vue:379", "点赞/踩操作异常:", error);
+        common_vendor.index.showToast({ title: "操作失败，请重试", icon: "none" });
+      } finally {
+        common_vendor.index.hideLoading();
+        await getBusinessOpportunitiesDetail();
+        isActionInProgress.value = false;
+      }
+    };
+    const toggleBookmark = async (post) => {
+      if (isActionInProgress.value)
+        return;
+      if (!loggedInUserId.value) {
+        common_vendor.index.showToast({ title: "请先登录", icon: "none" });
+        return;
+      }
+      isActionInProgress.value = true;
+      const isAdding = !post.saved;
+      const apiUrl = isAdding ? "/app-api/member/follow/add" : "/app-api/member/follow/del";
+      common_vendor.index.showLoading({ title: "请稍候..." });
+      try {
+        const requestData = {
+          userId: loggedInUserId.value,
+          targetId: post.id,
+          targetType: "post"
+        };
+        const result = await utils_request.request(apiUrl, {
+          method: "POST",
+          data: requestData
+        });
+        if (result && result.error) {
+          common_vendor.index.showToast({ title: "操作失败", icon: "none" });
+        }
+      } catch (error) {
+        common_vendor.index.__f__("error", "at pages/home-commercialDetail/home-commercialDetail.vue:419", "收藏/取消收藏商机异常:", error);
+        common_vendor.index.showToast({ title: "操作失败，请重试", icon: "none" });
+      } finally {
+        common_vendor.index.hideLoading();
+        await getBusinessOpportunitiesDetail();
+        isActionInProgress.value = false;
+      }
+    };
+    const shareOpportunity = () => {
+      common_vendor.index.showToast({ title: "分享功能即将上线", icon: "none" });
+    };
+    const previewImage = (urls, current) => {
+      common_vendor.index.previewImage({ urls, current: urls[current] });
     };
     const navigateToBusinessCard = (userId) => {
       if (!userId) {
-        common_vendor.index.__f__("warn", "at pages/home-commercialDetail/home-commercialDetail.vue:449", "navigateToBusinessCard: userId is missing.");
-        common_vendor.index.showToast({
-          title: "无法查看该用户主页",
-          icon: "none"
-        });
+        common_vendor.index.showToast({ title: "无法查看该用户主页", icon: "none" });
         return;
       }
-      common_vendor.index.navigateTo({
-        url: `/pages/applicationBusinessCard/applicationBusinessCard?userId=${userId}`
-      });
+      common_vendor.index.navigateTo({ url: `/pages/applicationBusinessCard/applicationBusinessCard?userId=${userId}` });
     };
     return (_ctx, _cache) => {
       return common_vendor.e({
@@ -254,10 +310,16 @@ const _sfc_main = {
           color: "#888"
         }),
         e: common_vendor.t(postDetail.time),
-        f: common_vendor.t(postDetail.content),
-        g: postDetail.images && postDetail.images.length
+        f: showFollowButton.value
+      }, showFollowButton.value ? {
+        g: common_vendor.t(postDetail.isFollowedUser ? "已关注" : "关注"),
+        h: postDetail.isFollowedUser ? 1 : "",
+        i: common_vendor.o(($event) => toggleFollow(postDetail))
+      } : {}, {
+        j: common_vendor.t(postDetail.content),
+        k: postDetail.images && postDetail.images.length
       }, postDetail.images && postDetail.images.length ? {
-        h: common_vendor.f(postDetail.images, (image, imgIndex, i0) => {
+        l: common_vendor.f(postDetail.images, (image, imgIndex, i0) => {
           return {
             a: image,
             b: common_vendor.o(($event) => previewImage(postDetail.images, imgIndex), imgIndex),
@@ -265,70 +327,73 @@ const _sfc_main = {
           };
         })
       } : {}, {
-        i: common_vendor.f(postDetail.tags, (tag, index, i0) => {
+        m: common_vendor.f(postDetail.tags, (tag, index, i0) => {
           return {
             a: common_vendor.t(tag),
             b: index
           };
         }),
-        j: common_vendor.p({
+        n: common_vendor.p({
           type: postDetail.userAction === "like" ? "hand-up-filled" : "hand-up",
           size: "18",
           color: postDetail.userAction === "like" ? "#e74c3c" : "#666"
         }),
-        k: common_vendor.t(postDetail.likes),
-        l: postDetail.userAction === "like" ? 1 : "",
-        m: common_vendor.o(($event) => toggleAction(postDetail, "like")),
-        n: common_vendor.p({
+        o: common_vendor.t(postDetail.likes),
+        p: postDetail.userAction === "like" ? 1 : "",
+        q: common_vendor.o(($event) => toggleAction(postDetail, "like")),
+        r: common_vendor.p({
           type: postDetail.userAction === "dislike" ? "hand-down-filled" : "hand-down",
           size: "18",
           color: postDetail.userAction === "dislike" ? "#3498db" : "#666"
         }),
-        o: common_vendor.t(postDetail.dislikes),
-        p: postDetail.userAction === "dislike" ? 1 : "",
-        q: common_vendor.o(($event) => toggleAction(postDetail, "dislike")),
-        r: common_vendor.p({
+        s: common_vendor.t(postDetail.dislikes),
+        t: postDetail.userAction === "dislike" ? 1 : "",
+        v: common_vendor.o(($event) => toggleAction(postDetail, "dislike")),
+        w: common_vendor.p({
           type: "redo",
           size: "18",
           color: "#666"
         }),
-        s: common_vendor.o(shareOpportunity),
-        t: common_vendor.p({
+        x: common_vendor.o(shareOpportunity),
+        y: common_vendor.p({
           type: postDetail.saved ? "star-filled" : "star",
           size: "18",
           color: postDetail.saved ? "#FF6A00" : "#666"
         }),
-        v: postDetail.saved ? 1 : "",
-        w: common_vendor.o(($event) => toggleBookmark(postDetail)),
-        x: common_vendor.p({
+        z: common_vendor.t(postDetail.saved ? "已收藏" : "收藏"),
+        A: postDetail.saved ? 1 : "",
+        B: common_vendor.o(($event) => toggleBookmark(postDetail)),
+        C: common_vendor.p({
           type: "chatbubble-filled",
           size: "20",
           color: "#FF6A00"
         }),
-        y: common_vendor.t(comments.length),
-        z: common_vendor.f(comments, (comment, k0, i0) => {
+        D: common_vendor.t(comments.value.length),
+        E: common_vendor.f(comments.value, (comment, k0, i0) => {
           return {
-            a: common_vendor.t(comment.user.charAt(0)),
+            a: common_vendor.t(comment.user ? comment.user.charAt(0) : "匿"),
             b: common_vendor.o(($event) => navigateToBusinessCard(comment.userId), comment.id),
-            c: common_vendor.t(comment.user),
+            c: common_vendor.t(comment.user || "匿名用户"),
             d: common_vendor.t(comment.time),
             e: common_vendor.t(comment.text),
             f: "361e9b2c-6-" + i0,
             g: common_vendor.o(($event) => replyComment(comment), comment.id),
-            h: comment.id
+            h: comment.id,
+            i: comment.parentId !== 0 ? 1 : ""
           };
         }),
-        A: common_vendor.p({
+        F: common_vendor.p({
           type: "chatbubble",
           size: "16",
           color: "#666"
         }),
-        B: comments.length === 0
-      }, comments.length === 0 ? {} : {}, {
-        C: common_vendor.o(addComment),
-        D: newCommentText.value,
-        E: common_vendor.o(($event) => newCommentText.value = $event.detail.value),
-        F: common_vendor.o(addComment)
+        G: comments.value.length === 0
+      }, comments.value.length === 0 ? {} : {}, {
+        H: commentInputPlaceholder.value,
+        I: common_vendor.o(addComment),
+        J: newCommentText.value,
+        K: common_vendor.o(($event) => newCommentText.value = $event.detail.value),
+        L: common_vendor.o(addComment)
       });
     };
   }

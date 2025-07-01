@@ -4,16 +4,20 @@
 		<view class="user-header">
 			<view class="user-info">
 				<view class="avatar">
-					<image class="avatar-img" src="https://randomuser.me/api/portraits/men/41.jpg" />
+					<!-- 动态绑定头像，提供一个默认头像以防链接为空 -->
+					<image class="avatar-img" :src="userInfo.avatar || '../../static/images/default-avatar.png'" />
 				</view>
 				<view class="user-details">
 					<view class="user-name">
-						{{userInfo.nickname}}
-						<!-- <text class="badge">黄金</text> -->
+						<!-- 动态绑定昵称和会员等级 -->
+						{{ userInfo.nickname }}
+						<text class="badge" v-if="userInfo.topUpLevel && userInfo.topUpLevel.name">{{ userInfo.topUpLevel.name }}</text>
 					</view>
-					<view class="user-title">市场总监 | 创新科技有限公司</view>
+					<!-- 使用计算属性动态显示职位和公司 -->
+					<view class="user-title">{{ userTitleAndCompany }}</view>
 					<view class="user-company">
-						我的邀请人：<span style="font-weight: bold;">rose</span>
+						<!-- 动态绑定邀请人 -->
+						我的邀请人：<span style="font-weight: bold;">{{ userInfo.parentName || '无' }}</span>
 					</view>
 				</view>
 			</view>
@@ -27,6 +31,7 @@
 				<text class="view-all" @tap="onViewAll">查看全部 ›</text>
 			</view>
 			<view class="account-grid">
+				<!-- v-for 循环使用计算属性 accountList -->
 				<view class="account-item" v-for="item in accountList" :key="item.label">
 					<view class="account-value">{{ item.value }}</view>
 					<view class="account-label">{{ item.label }}</view>
@@ -34,7 +39,7 @@
 			</view>
 		</view>
 
-		<!-- AI名片，原MyCard.vue代码整合进这里 -->
+		<!-- AI名片 -->
 		<view class="card-section">
 			<view class="section-header">
 				<text class="section-title-main">我的名片</text>
@@ -44,21 +49,25 @@
 			<view class="ai-card">
 				<view class="card-top">
 					<view class="card-avatar">
-						<image class="avatar-img" src="https://randomuser.me/api/portraits/men/41.jpg" />
+						<image class="avatar-img" :src="userInfo.avatar || '../../static/images/default-avatar.png'" />
 					</view>
 					<view class="card-details">
 						<view class="card-name">
-							王明 <text class="vip-badge">黄金</text>
+							<!-- 优先显示真实姓名，否则显示昵称 -->
+							{{ userInfo.realName || userInfo.nickname }} 
+							<text class="vip-badge" v-if="userInfo.topUpLevel && userInfo.topUpLevel.name">{{ userInfo.topUpLevel.name }}</text>
 						</view>
-						<view class="card-position"><text class="iconfont">👤</text> 市场总监</view>
-						<view class="card-company"><text class="iconfont">🏢</text> 创新科技有限公司</view>
+						<!-- 动态绑定职位和公司 -->
+						<view class="card-position" v-if="userInfo.professionalTitle"><text class="iconfont">👤</text> {{ userInfo.professionalTitle }}</view>
+						<view class="card-company" v-if="userInfo.companyName"><text class="iconfont">🏢</text> {{ userInfo.companyName }}</view>
 					</view>
 				</view>
 
 				<view class="contact-info">
-					<view class="contact-item" @tap="copyToClipboard('138138')">
+					<!-- 动态绑定邀请码并传入复制函数 -->
+					<view class="contact-item" @tap="copyToClipboard(userInfo.shardCode)">
 						<text class="iconfont">我的邀请码：</text>
-						<text style="font-weight: bold;">138138</text>
+						<text style="font-weight: bold;">{{ userInfo.shardCode || '暂无' }}</text>
 						<text class="copy-btn">复制</text>
 					</view>
 				</view>
@@ -66,8 +75,8 @@
 				<view class="qrcode-section">
 					<text class="qrcode-title">微信二维码 - 扫码添加好友</text>
 					<view class="qrcode-container">
-						<image class="qrcode-img"
-							src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://weixin.qq.com/r/example" />
+						<!-- 动态绑定微信二维码，提供一个默认图 -->
+						<image class="qrcode-img" :src="userInfo.wechatQrCodeUrl || '../../static/images/default-qrcode.png'" />
 					</view>
 					<view class="qrcode-actions">
 						<button class="qrcode-btn" @tap="saveQrcode">保存</button>
@@ -85,9 +94,7 @@
 			<view class="features-list">
 				<view class="feature-item" v-for="item in featureList" :key="item.name"
 					@tap="navigateToFeature(item.path)">
-					<!-- <view class="feature-icon"><text :class="item.icon"></text></view> -->
 					<img :src="item.icon" alt="" class="feature-icon" />
-					<!-- <img src="../../static/icon/活动.png" alt="" class="feature-icon"/> -->
 					<view class="feature-content">
 						<view class="feature-name">{{ item.name }}</view>
 						<view class="feature-desc">{{ item.desc }}</view>
@@ -104,57 +111,80 @@
 <script setup>
 	import {
 		ref,
-		onMounted
+		onMounted,
+		computed // 引入 computed
 	} from 'vue'
 	import request from '../../utils/request.js';
 
 	onMounted(() => {
 		getUserInfo();
 	});
-	
+
 	const userInfo = ref({})
 
 	//获取用户的基本信息
 	const getUserInfo = async () => {
-		// 调用封装的请求方法
-		const result = await request('/app-api/member/user/get', {
-			method: 'GET', // 请求方式
-			// data: postData
-		});
-		// 如果请求成功，打印返回的数据
-		console.log('getUserInfo result:', result);
-		
-		userInfo.value = result.data
-		console.log('getUserInfo userInfo:', userInfo.value);
-		// 如果请求失败，打印错误信息
-		if (result.error) {
-			console.log('请求失败:', result.error);
+		try {
+			const result = await request('/app-api/member/user/get', {
+				method: 'GET',
+			});
+			if (result) {
+				userInfo.value = result.data;
+				console.log('getUserInfo userInfo:', userInfo.value);
+			} else {
+				console.log('请求业务失败:', result.msg);
+			}
+		} catch (error) {
+			console.log('请求失败:', error);
 		}
 	};
-
-	const accountList = ref([{
-			value: 266,
-			label: '我的贡分'
-		},
-		{
-			value: 15,
-			label: '我的活动'
-		},
-		{
-			value: 15,
-			label: '我的商机'
-		},
-		{
-			value: 0,
-			label: '我的智米'
+	
+	// 使用 computed 创建动态的账户信息列表
+	const accountList = computed(() => {
+		const user = userInfo.value;
+		return [{
+				// API返回的是 currExperience，代表当前贡分
+				value: user.currExperience || 0,
+				label: '我的贡分'
+			},
+			{
+				value: user.activityCount || 0,
+				label: '我的活动'
+			},
+			{
+				value: user.postCount || 0,
+				label: '我的商机'
+			},
+			{
+				value: user.point || 0,
+				label: '我的智米'
+			}
+		]
+	})
+	
+	// 使用 computed 优雅地处理职位和公司的显示逻辑
+	const userTitleAndCompany = computed(() => {
+		const title = userInfo.value.professionalTitle;
+		const company = userInfo.value.companyName;
+		if (title && company) {
+			return `${title} | ${company}`;
 		}
-	])
+		// 如果只有一个，或者都没有，则只显示有的那一个，或显示默认文本
+		return title || company || '暂未设置职位和公司';
+	});
+
 
 	const featureList = ref([{
 			name: '我的活动',
 			desc: '已报名/已发布的活动',
 			icon: '../../static/icon/活动.png',
 			path: '/pages/my-active/my-active'
+		},
+		{
+			name: '我的关注',
+			desc: '查看您关注的商友',
+			icon: '../../static/icon/加关注.png',
+			path: '/pages/my-follow/my-follow'
 		},
 		{
 			name: '我的商机',
@@ -174,12 +204,6 @@
 			icon: '../../static/icon/protocols.png',
 			path: '/pages/user-agreement/user-agreement'
 		},
-		// {
-		//   name: '设置', 
-		//   desc: '设置您的功能、退出登录等', 
-		//   icon: '../../static/icon/设置.png',
-		//   path: '/pages/my-setting/my-setting' 
-		// }
 	])
 
 	const navigateToFeature = (path) => {
@@ -195,17 +219,16 @@
 	}
 
 	const onViewAll = () => {
-		uni.showToast({
-			title: '查看账户详情',
-			icon: 'none'
-		})
 		uni.navigateTo({
 			url: '/pages/my-account/my-account'
 		})
 	}
 
-	// MyCard 组件中的函数也放这里
 	const copyToClipboard = (text) => {
+		if (!text) {
+			uni.showToast({ title: '没有可复制的内容', icon: 'none' });
+			return;
+		}
 		uni.setClipboardData({
 			data: text,
 			success: () => {
@@ -232,10 +255,6 @@
 	}
 
 	const onViewDetail = () => {
-		uni.showToast({
-			title: '查看名片详情',
-			icon: 'none'
-		})
 		uni.navigateTo({
 			url: '/pages/my-businessCard/my-businessCard'
 		})

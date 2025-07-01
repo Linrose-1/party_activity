@@ -1,7 +1,7 @@
 {
   "pages": [
-    "pages/home/home",
     "pages/index/index",
+    "pages/home/home",
     "pages/active/active",
     "pages/shop/shop",
     "pages/my/my",
@@ -22,7 +22,11 @@
     "pages/user-agreement/user-agreement",
     "pages/location/location",
     "pages/shop-list/shop-list",
-    "pages/my-setting/my-setting"
+    "pages/my-setting/my-setting",
+    "pages/my-follow/my-follow",
+    "pages/my-active-apply/my-active-apply",
+    "pages/my-active-manage/my-active-manage",
+    "pages/my-active-approval/my-active-approval"
   ],
   "window": {
     "navigationBarTextStyle": "black",

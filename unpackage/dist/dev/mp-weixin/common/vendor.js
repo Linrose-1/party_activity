@@ -7224,9 +7224,9 @@ function initOnError() {
   };
 }
 function initRuntimeSocketService() {
-  const hosts = "192.168.1.4,127.0.0.1";
+  const hosts = "172.20.10.4,127.0.0.1";
   const port = "8090";
-  const id = "mp-weixin_9iLh4O";
+  const id = "mp-weixin_DpwPJx";
   const lazy = typeof swan !== "undefined";
   let restoreError = lazy ? () => {
   } : initOnError();
@@ -8174,15 +8174,15 @@ const onReachBottom = /* @__PURE__ */ createHook(ON_REACH_BOTTOM);
 const onPullDownRefresh = /* @__PURE__ */ createHook(ON_PULL_DOWN_REFRESH);
 const pages = [
   {
-    path: "pages/home/home",
+    path: "pages/index/index",
     style: {
-      navigationBarTitleText: "首页"
+      navigationBarTitleText: "聚一聚"
     }
   },
   {
-    path: "pages/index/index",
+    path: "pages/home/home",
     style: {
-      navigationBarTitleText: "uni-app"
+      navigationBarTitleText: "首页"
     }
   },
   {
@@ -8309,6 +8309,30 @@ const pages = [
     path: "pages/my-setting/my-setting",
     style: {
       navigationBarTitleText: "设置"
+    }
+  },
+  {
+    path: "pages/my-follow/my-follow",
+    style: {
+      navigationBarTitleText: "我的关注"
+    }
+  },
+  {
+    path: "pages/my-active-apply/my-active-apply",
+    style: {
+      navigationBarTitleText: "申请退款"
+    }
+  },
+  {
+    path: "pages/my-active-manage/my-active-manage",
+    style: {
+      navigationBarTitleText: "处理退款"
+    }
+  },
+  {
+    path: "pages/my-active-approval/my-active-approval",
+    style: {
+      navigationBarTitleText: "退款审批"
     }
   }
 ];
@@ -11227,4 +11251,5 @@ exports.sr = sr;
 exports.t = t$1;
 exports.unref = unref;
 exports.watch = watch;
+exports.wx$1 = wx$1;
 //# sourceMappingURL=../../.sourcemap/mp-weixin/common/vendor.js.map

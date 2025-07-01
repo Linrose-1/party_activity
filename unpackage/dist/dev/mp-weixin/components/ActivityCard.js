@@ -1,5 +1,6 @@
 "use strict";
 const common_vendor = require("../common/vendor.js");
+const utils_request = require("../utils/request.js");
 if (!Array) {
   const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
   _easycom_uni_icons2();
@@ -16,11 +17,12 @@ const _sfc_main = {
       required: true
     }
   },
-  emits: ["favorite"],
+  emits: ["refreshList"],
   setup(__props, { emit: __emit }) {
     const props = __props;
     const emit = __emit;
-    const isFavorite = common_vendor.ref(false);
+    const isFavorite = common_vendor.ref(props.activity.followFlag === 1);
+    const loading = common_vendor.ref(false);
     const formattedDate = common_vendor.computed(() => {
       if (!props.activity.startDatetime) {
         return "时间待定";
@@ -33,9 +35,51 @@ const _sfc_main = {
       const m = date.getMinutes().toString().padStart(2, "0");
       return `${Y}-${M}-${D} ${h}:${m}`;
     });
-    const toggleFavorite = () => {
-      isFavorite.value = !isFavorite.value;
-      emit("favorite", isFavorite.value);
+    const toggleFavorite = async () => {
+      if (loading.value) {
+        return;
+      }
+      loading.value = true;
+      const userId = common_vendor.index.getStorageSync("userId");
+      if (!userId) {
+        common_vendor.index.showToast({ title: "请先登录", icon: "none" });
+        loading.value = false;
+        return;
+      }
+      const isCurrentlyFavorite = isFavorite.value;
+      const endpoint = isCurrentlyFavorite ? "/app-api/member/follow/del" : "/app-api/member/follow/add";
+      const successMessage = isCurrentlyFavorite ? "已取消收藏" : "收藏成功";
+      const payload = {
+        userId,
+        targetId: props.activity.id,
+        targetType: "activity"
+        // 固定为 activity
+      };
+      try {
+        const result = await utils_request.request(endpoint, {
+          method: "POST",
+          data: payload
+        });
+        if (result && !result.error) {
+          common_vendor.index.showToast({
+            title: successMessage,
+            icon: "success"
+          });
+          emit("refreshList");
+        } else {
+          common_vendor.index.showToast({
+            title: result.error || "操作失败，请重试",
+            icon: "none"
+          });
+        }
+      } catch (error) {
+        common_vendor.index.showToast({
+          title: "网络错误，请稍后重试",
+          icon: "none"
+        });
+      } finally {
+        loading.value = false;
+      }
     };
     const registerActivity = (activityId) => {
       common_vendor.index.navigateTo({
@@ -43,7 +87,9 @@ const _sfc_main = {
       });
     };
     const detailActivity = (activityId) => {
+      common_vendor.index.__f__("log", "at components/ActivityCard.vue:160", "准备跳转到详情页，活动ID:", activityId);
       common_vendor.index.navigateTo({
+        // 关键在这里：将 activityId 拼接到 url 的查询参数中
         url: `/pages/active-detail/active-detail?id=${activityId}`
       });
     };
@@ -62,24 +108,31 @@ const _sfc_main = {
           size: "16",
           color: "#FF6B00"
         }),
-        f: common_vendor.t(__props.activity.location || "线上活动"),
-        g: common_vendor.t(__props.activity.participantCount || 0),
-        h: common_vendor.t(__props.activity.maxParticipants || "不限"),
-        i: common_vendor.o(($event) => detailActivity(__props.activity.id)),
-        j: common_vendor.p({
+        f: common_vendor.t(__props.activity.locationAddress || "线上活动"),
+        g: common_vendor.t(__props.activity.joinCount || 0),
+        h: common_vendor.t(__props.activity.totalSlots || "不限"),
+        i: common_vendor.f(__props.activity.tags, (tag, index, i0) => {
+          return {
+            a: common_vendor.t(tag),
+            b: index
+          };
+        }),
+        j: common_vendor.o(($event) => detailActivity(__props.activity.id)),
+        k: common_vendor.p({
           type: "person",
           size: "16",
           color: "#FF6B00"
         }),
-        k: common_vendor.t(__props.activity.organizerName || "主办方"),
-        l: common_vendor.p({
+        l: common_vendor.t(__props.activity.organizerUnitName || "主办方"),
+        m: common_vendor.p({
           type: isFavorite.value ? "heart-filled" : "heart",
           size: "16",
           color: "#FF6B00"
         }),
-        m: common_vendor.t(isFavorite.value ? "已收藏" : "收藏"),
-        n: common_vendor.o(toggleFavorite),
-        o: common_vendor.o(($event) => registerActivity(__props.activity.id))
+        n: common_vendor.t(isFavorite.value ? "已收藏" : "收藏"),
+        o: common_vendor.o(toggleFavorite),
+        p: loading.value,
+        q: common_vendor.o(($event) => registerActivity(__props.activity.id))
       };
     };
   }

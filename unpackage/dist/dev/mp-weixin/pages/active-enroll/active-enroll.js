@@ -1,5 +1,6 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
+const utils_request = require("../../utils/request.js");
 if (!Array) {
   const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
   const _easycom_uni_easyinput2 = common_vendor.resolveComponent("uni-easyinput");
@@ -14,12 +15,24 @@ const _sfc_main = {
   __name: "active-enroll",
   setup(__props) {
     const currentStep = common_vendor.ref(1);
-    const isDragging = common_vendor.ref(false);
-    const screenshot = common_vendor.ref(null);
     const formData = common_vendor.reactive({
-      name: "",
-      phone: "",
-      company: ""
+      userName: "",
+      userPhone: "",
+      contactAddress: "",
+      remark: "",
+      paymentScreenshotUrl: ""
+      // 用于存储上传后的真实网络URL
+    });
+    const activityId = common_vendor.ref(null);
+    const activityDetail = common_vendor.ref(null);
+    common_vendor.onLoad((options) => {
+      if (options.id) {
+        activityId.value = options.id;
+        getActiveDetail();
+      } else {
+        common_vendor.index.__f__("error", "at pages/active-enroll/active-enroll.vue:180", "未接收到活动ID！");
+        common_vendor.index.showToast({ title: "加载活动详情失败，缺少ID", icon: "none" });
+      }
     });
     const currentDate = (/* @__PURE__ */ new Date()).toLocaleString("zh-CN", {
       year: "numeric",
@@ -29,46 +42,137 @@ const _sfc_main = {
       minute: "2-digit",
       second: "2-digit"
     }).replace(/\//g, "-");
+    const formatRangeTime = (start, end) => {
+      const format = (timestamp) => {
+        if (!timestamp)
+          return "";
+        const date = new Date(timestamp);
+        return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, "0")}-${date.getDate().toString().padStart(2, "0")} ${date.getHours().toString().padStart(2, "0")}:${date.getMinutes().toString().padStart(2, "0")}`;
+      };
+      return `${format(start)} - ${format(end)}`;
+    };
+    const formattedRegistrationTime = common_vendor.computed(() => {
+      if (!activityDetail.value)
+        return "待定";
+      return formatRangeTime(activityDetail.value.registrationStartDatetime, activityDetail.value.registrationEndDatetime);
+    });
+    const isQueuing = common_vendor.computed(() => {
+      if (!activityDetail.value)
+        return false;
+      return (activityDetail.value.joinCount || 0) >= activityDetail.value.totalSlots;
+    });
     const canSubmitStep1 = common_vendor.computed(() => {
-      return formData.name.trim() && /^1[3-9]\d{9}$/.test(formData.phone);
+      const baseValid = formData.userName.trim() && /^1[3-9]\d{9}$/.test(formData.userPhone);
+      if (isQueuing.value) {
+        return baseValid && formData.remark.trim();
+      }
+      return baseValid;
     });
     const confirmSignup = () => {
       if (!canSubmitStep1.value) {
-        if (!formData.name.trim()) {
+        if (!formData.userName.trim()) {
           common_vendor.index.showToast({ title: "请输入姓名", icon: "none" });
           return;
         }
-        if (!/^1[3-9]\d{9}$/.test(formData.phone)) {
+        if (!/^1[3-9]\d{9}$/.test(formData.userPhone)) {
           common_vendor.index.showToast({ title: "请输入有效的手机号", icon: "none" });
+          return;
+        }
+        if (isQueuing.value && !formData.remark.trim()) {
+          common_vendor.index.showToast({ title: "报名已满，请填写申请理由", icon: "none" });
           return;
         }
       }
       currentStep.value = 2;
     };
     const chooseImage = () => {
-      const mockImages = [
-        "https://img.alicdn.com/imgextra/i1/6000000007751/O1CN01v7zfb41cDU2kq1elG_!!6000000007751-0-tps-248-248.jpg",
-        // Add more mock images if desired
-        "https://via.placeholder.com/300/FF6E00/FFFFFF?text=Mock+Payment"
-      ];
-      screenshot.value = mockImages[Math.floor(Math.random() * mockImages.length)];
+      common_vendor.index.chooseImage({
+        count: 1,
+        sizeType: ["compressed"],
+        sourceType: ["album", "camera"],
+        success: async (res) => {
+          const tempFilePath = res.tempFilePaths[0];
+          common_vendor.index.showLoading({ title: "上传中..." });
+          try {
+            const baseURL = "http://8.163.18.207:48080";
+            const token = common_vendor.index.getStorageSync("token");
+            const uploadResult = await common_vendor.index.uploadFile({
+              url: baseURL + "/app-api/infra/file/upload",
+              // 完整的上传URL
+              filePath: tempFilePath,
+              name: "file",
+              // 后端接收文件的 key
+              header: {
+                "Authorization": token || ""
+              }
+            });
+            common_vendor.index.hideLoading();
+            if (uploadResult.statusCode === 200) {
+              const responseData = JSON.parse(uploadResult.data);
+              if (responseData.code === 0) {
+                formData.paymentScreenshotUrl = responseData.data;
+                common_vendor.index.showToast({ title: "上传成功", icon: "success" });
+              } else {
+                common_vendor.index.showToast({ title: responseData.msg || "上传失败", icon: "none" });
+              }
+            } else {
+              common_vendor.index.showToast({ title: `上传失败(${uploadResult.statusCode})`, icon: "none" });
+            }
+          } catch (error) {
+            common_vendor.index.hideLoading();
+            common_vendor.index.__f__("error", "at pages/active-enroll/active-enroll.vue:268", "上传异常:", error);
+            common_vendor.index.showToast({ title: "上传异常", icon: "none" });
+          }
+        }
+      });
     };
-    const onDrop = (e) => {
-      e.preventDefault();
-      isDragging.value = false;
-      chooseImage();
+    const getActiveDetail = async () => {
+      if (!activityId.value)
+        return;
+      const result = await utils_request.request("/app-api/member/activity/get", {
+        method: "GET",
+        data: { id: activityId.value }
+      });
+      if (result && !result.error) {
+        activityDetail.value = result.data;
+      } else {
+        common_vendor.index.__f__("log", "at pages/active-enroll/active-enroll.vue:286", "请求失败:", result ? result.error : "无返回结果");
+      }
     };
-    const submitForm = () => {
-      if (!screenshot.value) {
+    const joinActivity = async () => {
+      if (!formData.paymentScreenshotUrl) {
         common_vendor.index.showToast({ title: "请上传付款截图", icon: "none" });
         return;
       }
       common_vendor.index.showLoading({ title: "提交中...", mask: true });
-      setTimeout(() => {
+      const userId = common_vendor.index.getStorageSync("userId");
+      if (!userId) {
         common_vendor.index.hideLoading();
+        common_vendor.index.showToast({ title: "无法获取用户信息，请重新登录", icon: "none" });
+        return;
+      }
+      const params = {
+        activityId: activityId.value,
+        userId,
+        registeredAt: (/* @__PURE__ */ new Date()).toISOString(),
+        paymentScreenshotUrl: formData.paymentScreenshotUrl,
+        userName: formData.userName,
+        userPhone: formData.userPhone,
+        contactAddress: formData.contactAddress,
+        remark: formData.remark
+      };
+      const result = await utils_request.request("/app-api/member/activity-join/join-activity", {
+        method: "POST",
+        data: params
+      });
+      common_vendor.index.hideLoading();
+      if (result && !result.error) {
+        common_vendor.index.showToast({ title: "报名成功！", icon: "success" });
         currentStep.value = 3;
-        common_vendor.index.showToast({ title: "提交成功", icon: "success" });
-      }, 1500);
+      } else {
+        common_vendor.index.__f__("log", "at pages/active-enroll/active-enroll.vue:327", "报名失败:", result ? result.error : "无返回结果");
+        common_vendor.index.showToast({ title: result.error || "报名失败，请重试", icon: "none" });
+      }
     };
     const generateTicketNumber = () => {
       const letters = "ABCDEFGHJKLMNPQRSTUVWXYZ";
@@ -77,102 +181,120 @@ const _sfc_main = {
       return `TK${randomLetter}${randomNumbers}`;
     };
     const backToHome = () => {
-      common_vendor.index.showToast({ title: "返回首页", icon: "success" });
-      setTimeout(() => {
-        currentStep.value = 1;
-        formData.name = "";
-        formData.phone = "";
-        formData.company = "";
-        screenshot.value = null;
-      }, 1500);
+      common_vendor.index.navigateBack();
     };
     return (_ctx, _cache) => {
       return common_vendor.e({
-        a: currentStep.value >= 1 ? 1 : "",
-        b: currentStep.value >= 2 ? 1 : "",
-        c: currentStep.value >= 3 ? 1 : "",
-        d: common_vendor.p({
+        a: common_vendor.t(activityDetail.value ? activityDetail.value.activityTitle : "活动报名"),
+        b: currentStep.value >= 1 ? 1 : "",
+        c: currentStep.value >= 2 ? 1 : "",
+        d: currentStep.value >= 3 ? 1 : "",
+        e: activityDetail.value
+      }, activityDetail.value ? {
+        f: common_vendor.p({
           type: "person",
           size: "18",
           color: "#FF6E00"
         }),
-        e: currentStep.value === 1
-      }, currentStep.value === 1 ? {
-        f: common_vendor.p({
+        g: common_vendor.t(activityDetail.value.organizerUnitName),
+        h: common_vendor.t(activityDetail.value.organizerContactPhone),
+        i: common_vendor.t(formatRangeTime(activityDetail.value.startDatetime, activityDetail.value.endDatetime)),
+        j: common_vendor.t(formattedRegistrationTime.value),
+        k: common_vendor.t(activityDetail.value.locationAddress)
+      } : {}, {
+        l: currentStep.value === 1
+      }, currentStep.value === 1 ? common_vendor.e({
+        m: common_vendor.p({
           type: "compose",
           size: "18",
           color: "#FF6E00"
         }),
-        g: common_vendor.o(($event) => formData.name = $event),
-        h: common_vendor.p({
+        n: common_vendor.o(($event) => formData.userName = $event),
+        o: common_vendor.p({
           type: "text",
           placeholder: "请输入您的姓名",
           styles: {
             borderColor: "#eee",
             borderRadius: "12rpx"
           },
-          modelValue: formData.name
+          modelValue: formData.userName
         }),
-        i: common_vendor.o(($event) => formData.phone = $event),
-        j: common_vendor.p({
+        p: common_vendor.o(($event) => formData.userPhone = $event),
+        q: common_vendor.p({
           type: "tel",
           placeholder: "请输入手机号",
           styles: {
             borderColor: "#eee",
             borderRadius: "12rpx"
           },
-          modelValue: formData.phone
+          modelValue: formData.userPhone
         }),
-        k: common_vendor.o(($event) => formData.company = $event),
-        l: common_vendor.p({
+        r: common_vendor.o(($event) => formData.contactAddress = $event),
+        s: common_vendor.p({
           type: "text",
           placeholder: "请输入单位或学校名称",
           styles: {
             borderColor: "#eee",
             borderRadius: "12rpx"
           },
-          modelValue: formData.company
+          modelValue: formData.contactAddress
         }),
-        m: !canSubmitStep1.value ? 1 : "",
-        n: common_vendor.o(confirmSignup)
+        t: isQueuing.value
+      }, isQueuing.value ? {
+        v: common_vendor.o(($event) => formData.remark = $event),
+        w: common_vendor.p({
+          type: "textarea",
+          autoHeight: true,
+          placeholder: "当前报名人数已满，填写申请理由可提高审核通过率",
+          styles: {
+            borderColor: "#eee",
+            borderRadius: "12rpx"
+          },
+          modelValue: formData.remark
+        })
       } : {}, {
-        o: currentStep.value === 2
-      }, currentStep.value === 2 ? common_vendor.e({
-        p: common_vendor.p({
+        x: !canSubmitStep1.value ? 1 : "",
+        y: common_vendor.o(confirmSignup)
+      }) : {}, {
+        z: currentStep.value === 2 && activityDetail.value
+      }, currentStep.value === 2 && activityDetail.value ? common_vendor.e({
+        A: common_vendor.p({
           type: "shop",
           size: "18",
           color: "#FF6E00"
         }),
-        q: common_vendor.p({
+        B: common_vendor.t(activityDetail.value.registrationFee),
+        C: activityDetail.value.organizerPaymentQrCodeUrl,
+        D: common_vendor.p({
           type: "image",
           size: "18",
           color: "#FF6E00"
         }),
-        r: !screenshot.value
-      }, !screenshot.value ? {
-        s: common_vendor.p({
+        E: !formData.paymentScreenshotUrl
+      }, !formData.paymentScreenshotUrl ? {
+        F: common_vendor.p({
           type: "plus",
           size: "24",
           color: "#FF6E00"
         })
       } : {
-        t: screenshot.value
+        G: formData.paymentScreenshotUrl
       }, {
-        v: isDragging.value ? 1 : "",
-        w: common_vendor.o(($event) => isDragging.value = true),
-        x: common_vendor.o(($event) => isDragging.value = false),
-        y: common_vendor.o(onDrop),
-        z: common_vendor.o(chooseImage),
-        A: !screenshot.value ? 1 : "",
-        B: common_vendor.o(submitForm)
+        H: common_vendor.o(chooseImage),
+        I: !formData.paymentScreenshotUrl ? 1 : "",
+        J: common_vendor.o(joinActivity)
       }) : {}, {
-        C: currentStep.value === 3
-      }, currentStep.value === 3 ? {
-        D: common_vendor.t(formData.phone),
-        E: common_vendor.t(generateTicketNumber()),
-        F: common_vendor.t(common_vendor.unref(currentDate)),
-        G: common_vendor.o(backToHome)
-      } : {});
+        K: currentStep.value === 3
+      }, currentStep.value === 3 ? common_vendor.e({
+        L: common_vendor.t(formData.userPhone),
+        M: activityDetail.value
+      }, activityDetail.value ? {
+        N: common_vendor.t(activityDetail.value.activityTitle),
+        O: common_vendor.t(generateTicketNumber()),
+        P: common_vendor.t(common_vendor.unref(currentDate))
+      } : {}, {
+        Q: common_vendor.o(backToHome)
+      }) : {});
     };
   }
 };

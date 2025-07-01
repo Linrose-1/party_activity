@@ -49,6 +49,10 @@
 					<uni-easyinput type="number" v-model="form.totalSlots" placeholder="请输入活动总名额" />
 				</uni-forms-item>
 
+				<uni-forms-item label="最低起聚名额" required>
+					<uni-easyinput type="number" v-model="form.limitSlots" placeholder="请输入最低起聚名额" />
+				</uni-forms-item>
+
 				<!-- activityFunds -->
 				<uni-forms-item label="报名类型" required>
 					<uni-data-checkbox v-model="form.activityFunds" :localdata="enrollmentOptions"
@@ -161,7 +165,7 @@
 
 	// 用于UI组件绑定的时间范围数组
 	const timeRange = ref(['2025-07-19 14:00:00', '2025-07-19 17:00:00']);
-	const enrollTimeRange = ref(['2025-07-15 14:00:00', '2025-07-18 17:00:00']);
+	const enrollTimeRange = ref(['2025-07-1 14:00:00', '2025-07-18 17:00:00']);
 
 	// 用于显示合作店铺名称，不提交给后端
 	const associatedStoreName = ref('');
@@ -171,6 +175,7 @@
 		activityTitle: '互联网创业者交流会',
 		activityDescription: '本次互联网创业者交流会旨在为行业内的创业者提供一个交流思想、分享经验的平台。...',
 		totalSlots: 50,
+		limitSlots: 10,
 		activityFunds: 1, // 1: AA, 2: 赞助
 		registrationFee: 100,
 		companyName: '',
@@ -365,6 +370,21 @@
 		if (!form.value.totalSlots || form.value.totalSlots <= 0) {
 			uni.showToast({
 				title: '请输入正确的总名额',
+				icon: 'none'
+			});
+			return;
+		}
+		if (!form.value.limitSlots || form.value.limitSlots <= 0) {
+			uni.showToast({
+				title: '请输入正确的最低起聚名额',
+				icon: 'none'
+			});
+			return;
+		}
+		// 【新增】逻辑验证：最低名额不能大于总名额
+		if (parseInt(form.value.limitSlots) > parseInt(form.value.totalSlots)) {
+			uni.showToast({
+				title: '最低起聚名额不能大于总名额',
 				icon: 'none'
 			});
 			return;

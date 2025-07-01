@@ -1,0 +1,150 @@
+/* 水平间距 */
+/* 水平间距 */
+.refund-apply-page.data-v-0198e019 {
+  background-color: #f5f7fa;
+  min-height: 100vh;
+  padding: 24rpx;
+  padding-bottom: 160rpx;
+  box-sizing: border-box;
+}
+.info-banner.data-v-0198e019 {
+  display: flex;
+  align-items: center;
+  padding: 16rpx 24rpx;
+  background-color: #fffbe6;
+  color: #d46b08;
+  font-size: 26rpx;
+  border-radius: 12rpx;
+  margin-bottom: 24rpx;
+}
+.info-banner text.data-v-0198e019 {
+  margin-left: 12rpx;
+}
+.card.data-v-0198e019 {
+  background-color: #fff;
+  border-radius: 16rpx;
+  padding: 32rpx;
+  margin-bottom: 24rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.05);
+}
+.card-title.data-v-0198e019 {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #1c1e21;
+  position: relative;
+  padding-left: 24rpx;
+  margin-bottom: 24rpx;
+}
+.card-title.data-v-0198e019::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 8rpx;
+  height: 32rpx;
+  background-color: #FF6B00;
+  border-radius: 4rpx;
+}
+.activity-card .activity-details.data-v-0198e019 {
+  display: flex;
+  align-items: flex-start;
+}
+.activity-card .activity-image.data-v-0198e019 {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 12rpx;
+  margin-right: 24rpx;
+  flex-shrink: 0;
+}
+.activity-card .info-text-group.data-v-0198e019 {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+.activity-card .activity-title.data-v-0198e019 {
+  font-size: 30rpx;
+  font-weight: 500;
+  color: #333;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+}
+.activity-card .info-line.data-v-0198e019 {
+  display: flex;
+  align-items: center;
+  font-size: 26rpx;
+  color: #666;
+}
+.activity-card .info-line text.data-v-0198e019 {
+  margin-left: 12rpx;
+}
+.activity-card .divider.data-v-0198e019 {
+  height: 1rpx;
+  background-color: #f0f2f5;
+  margin: 32rpx 0;
+}
+.activity-card .refund-amount.data-v-0198e019 {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.activity-card .refund-amount .label.data-v-0198e019 {
+  font-size: 28rpx;
+  color: #666;
+}
+.activity-card .refund-amount .amount.data-v-0198e019 {
+  font-size: 44rpx;
+  font-weight: bold;
+  color: #FF6B00;
+}
+.upload-card .upload-notice.data-v-0198e019 {
+  font-size: 26rpx;
+  color: #999;
+  line-height: 1.6;
+  margin-bottom: 32rpx;
+}
+.upload-card .file-picker-wrapper.data-v-0198e019 .uni-file-picker__container {
+  justify-content: center;
+}
+.upload-card .file-picker-wrapper.data-v-0198e019 .file-picker__box {
+  width: 350rpx;
+  height: 350rpx;
+  border-radius: 16rpx;
+}
+.upload-card .file-picker-wrapper.data-v-0198e019 .file-picker__box-content {
+  border-radius: 16rpx;
+}
+.bottom-bar.data-v-0198e019 {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: #fff;
+  padding: 24rpx;
+  padding-bottom: calc(24rpx + constant(safe-area-inset-bottom));
+  padding-bottom: calc(24rpx + env(safe-area-inset-bottom));
+  box-shadow: 0 -4rpx 12rpx rgba(0, 0, 0, 0.08);
+  z-index: 10;
+}
+.submit-btn.data-v-0198e019 {
+  background: linear-gradient(135deg, #FF6B00 0%, #FF8C00 100%);
+  color: white;
+  border-radius: 44rpx;
+  font-size: 32rpx;
+  font-weight: 500;
+  height: 88rpx;
+  line-height: 88rpx;
+  border: none;
+}
+.submit-btn.data-v-0198e019::after {
+  border: none;
+}
+.submit-btn[disabled].data-v-0198e019 {
+  background: #fabca0;
+  color: #fff;
+  opacity: 0.8;
+}

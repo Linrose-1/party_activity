@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "退款审批",
+  "usingComponents": {
+    "uni-icons": "../../uni_modules/uni-icons/components/uni-icons/uni-icons"
+  }
+}

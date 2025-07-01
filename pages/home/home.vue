@@ -55,10 +55,9 @@
 						<div class="post-time">{{ post.time }}</div>
 					</div>
 					<!-- 关注用户状态绑定到 post.isFollowedUser -->
-					<button class="follow-button" :class="{ 'followed': post.isFollowedUser }"
-						@click.stop="toggleFollow(post)">
-						{{ post.isFollowedUser ? '已关注' : '关注' }}
-					</button>
+					<button v-if="loggedInUserId !== post.user.id" class="follow-button" :class="{ 'followed': post.isFollowedUser }" @click.stop="toggleFollow(post)">
+											{{ post.isFollowedUser ? '已关注' : '关注' }}
+										</button>
 				</div>
 
 				<!-- ==================== 内容权限控制逻辑 ==================== -->
@@ -107,11 +106,11 @@
 							</div>
 						</div>
 						<div class="action-group">
-							<!-- 收藏状态绑定到 post.isSaved -->
+							<!-- ==================== 修改点：动态显示收藏状态文本 ==================== -->
 							<div class="action comment" :class="{ active: post.isSaved }" @click.stop="toggleSave(post)">
 								<uni-icons :type="post.isSaved ? 'star-filled' : 'star'" size="20"
 									:color="post.isSaved ? '#FF6A00' : '#666'"></uni-icons>
-								<span>收藏</span>
+								<span>{{ post.isSaved ? '已收藏' : '收藏' }}</span>
 							</div>
 							<div class="action share" @click.stop="sharePost(post)">
 								<uni-icons type="redo" size="20" color="#666"></uni-icons>
@@ -135,7 +134,7 @@
 			<!-- 加载状态提示 -->
 			<view class="loading-status">
 				<view v-if="postList.length === 0 && loadingStatus === 'noMore'" class="no-posts-message">
-					暂无相关商机，快去发布吧！
+					暂无相关商机！
 				</view>
 				<view v-else-if="loadingStatus === 'loading'">
 					<uni-load-more status="loading" contentText.loading="正在加载..."></uni-load-more>
@@ -150,64 +149,51 @@
 
 <script setup>
 	import { ref, reactive, computed, onMounted } from 'vue';
-	// 引入uni-app的生命周期钩子
 	import { onReachBottom, onPullDownRefresh } from '@dcloudio/uni-app';
 	import request from '../../utils/request.js';
-
-	// ==================== 用户状态模拟 (保持不变) ====================
+	
+	const loggedInUserId = ref(null);
 	const isLogin = ref(true);
 	const member = ref('白银');
 	const hasPaidMembership = computed(() => {
 		const paidLevels = ['青铜', '白银', '黄金', '黑钻'];
 		return paidLevels.includes(member.value);
 	});
-	// =========================================================
 
-	// ==================== 数据状态重构 ====================
-	// 帖子列表，将从此列表动态加载数据
 	const postList = ref([]);
-	// 当前激活的标签页, 1:推荐 2:附近 3:关注 4:创业猎伙
 	const activeTab = ref(1); 
-	// 搜索关键词
 	const searchQuery = ref('');
 	
-	// 分页相关状态
 	const pageNo = ref(1);
-	const pageSize = ref(10); // 每页条数
-	// 加载状态： 'more'-可以加载更多, 'loading'-正在加载, 'noMore'-没有更多了
+	const pageSize = ref(10);
 	const loadingStatus = ref('more');
 	
-	// 地理位置状态
+	// ==================== 新增：状态锁，防止用户快速重复点击 ====================
+	const isActionInProgress = ref(false);
+	
 	const location = reactive({
 		longitude: '',
 		latitude: ''
 	});
-	// =========================================================
 	
 	onMounted(() => {
-		// 页面加载时，获取初始数据
-		getBusinessOpportunitiesList(true); // true表示刷新列表
+		loggedInUserId.value = uni.getStorageSync('userId');
+		console.log('当前列表页登录用户ID:', loggedInUserId.value);
+		getBusinessOpportunitiesList(true);
 	});
 
-	// 监听用户上拉触底事件，用于分页加载
 	onReachBottom(() => {
 		if (loadingStatus.value === 'more') {
-			getBusinessOpportunitiesList(); // 加载下一页
+			getBusinessOpportunitiesList();
 		}
 	});
 
-	// 监听用户下拉刷新动作
 	onPullDownRefresh(() => {
-		getBusinessOpportunitiesList(true); // 刷新列表
+		getBusinessOpportunitiesList(true);
 	});
 	
-	/**
-	 * 格式化时间戳为 'YYYY-MM-DD HH:mm'
-	 * @param {number} timestamp - 时间戳 (毫秒)
-	 * @returns {string} 格式化后的时间字符串
-	 */
 	function formatTimestamp(timestamp) {
-		if (!timestamp) return ''; // 如果时间戳为空或0，返回空字符串
+		if (!timestamp) return '';
 		const date = new Date(timestamp);
 		const Y = date.getFullYear();
 		const M = (date.getMonth() + 1).toString().padStart(2, '0');
@@ -217,23 +203,16 @@
 		return `${Y}-${M}-${D} ${h}:${m}`;
 	}
 	
-	/**
-	 * 核心方法：获取商机列表
-	 * @param {boolean} isRefresh - 是否为刷新操作。true会清空列表，false会追加数据。
-	 */
 	const getBusinessOpportunitiesList = async (isRefresh = false) => {
-		// 防止重复加载
 		if (loadingStatus.value === 'loading') return;
 		loadingStatus.value = 'loading';
 		
-		// 如果是刷新操作，重置分页和列表
 		if (isRefresh) {
 			pageNo.value = 1;
 			postList.value = [];
-			loadingStatus.value = 'more'; // 重置加载状态
+			loadingStatus.value = 'more';
 		}
 	
-		// 构建请求参数
 		const params = {
 			pageNo: pageNo.value,
 			pageSize: pageSize.value,
@@ -250,94 +229,66 @@
 		}
 		
 		try {
-			// 调用封装的请求方法
 			const result = await request('/app-api/member/business-opportunities/list', {
 				method: 'GET',
 				data: params
 			});
-			console.log('getBusinessOpportunitiesList:', result);
-	
-			// 修正：根据您提供的日志，正确检查返回结果
+			
 			if (result && !result.error && result.data && result.data.list) {
-				
-				const apiData = result.data; // 将 result.data 赋值给一个变量
-	
-				// 将API返回的数据映射为前端需要的格式
+				const apiData = result.data;
 				const mappedData = apiData.list.map(item => ({
 					id: item.id,
 					content: item.postContent,
-					// 修正：处理 postImg 可能为 null 的情况，并支持逗号分隔
 					images: item.postImg ? String(item.postImg).split(',').filter(img => img) : [],
-					// 修正：处理 tags 可能为 null 的情况
-					tags: item.tags ? String(item.tags).split(',').filter(tag => tag) : [],
-					likes: item.likesCount,
-					dislikes: item.dislikesCount,
+					tags: item.tags ? (Array.isArray(item.tags) ? item.tags : String(item.tags).split(',').filter(tag => tag)) : [],
+					likes: item.likesCount || 0, // 确保是数字
+					dislikes: item.dislikesCount || 0, // 确保是数字
 					userAction: item.userLikeStr || null,
 					isSaved: item.followFlag === 1,
 					isFollowedUser: item.followUserFlag === 1,
-					// 修正：使用 formatTimestamp 函数格式化时间
 					time: formatTimestamp(item.createTime), 
 					user: {
 						id: item.userId,
-						// 使用 contactPerson 作为用户名
 						name: item.contactPerson || '匿名用户',
 						avatar: '' 
 					}
 				}));
 	
-				// 追加数据到列表
 				postList.value = [...postList.value, ...mappedData];
 	
-				// 修正：使用接口返回的 total 来判断是否加载完毕
 				if (postList.value.length >= apiData.total) {
-					loadingStatus.value = 'noMore'; // 数据已全部加载
+					loadingStatus.value = 'noMore';
 				} else {
-					loadingStatus.value = 'more'; // 还可以加载更多
-					pageNo.value++; // 页码+1，为下次加载做准备
+					loadingStatus.value = 'more';
+					pageNo.value++;
 				}
 			} else {
-				// API返回错误或数据格式不符
-				loadingStatus.value = 'more'; // 允许重试
-				// 修正：如果您的 request 工具返回 error 对象，可以这样提示
+				loadingStatus.value = 'noMore'; // 如果出错，也标记为noMore，防止无限加载
 				const errorMsg = result && result.error ? result.error.message : '加载失败';
 				uni.showToast({ title: errorMsg, icon: 'none' });
 			}
 		} catch (error) {
 			console.error('getBusinessOpportunitiesList error:', error);
-			loadingStatus.value = 'more'; // 允许重试
+			loadingStatus.value = 'more';
 			uni.showToast({ title: '网络请求异常', icon: 'none' });
 		} finally {
-			// 停止下拉刷新动画
 			uni.stopPullDownRefresh();
 		}
 	};
 
-	/**
-	 * 处理搜索按钮点击和键盘回车事件
-	 */
 	const handleSearch = () => {
-		// 直接调用刷新列表的方法，它会自动带上 searchQuery
 		getBusinessOpportunitiesList(true);
 	};
 	
-	/**
-	 * 处理标签页点击事件
-	 * @param {number} tabIndex - 点击的tab对应的索引
-	 */
 	const handleTabClick = (tabIndex) => {
-		if (activeTab.value === tabIndex) return; // 点击当前tab不刷新
-
+		if (activeTab.value === tabIndex) return;
 		activeTab.value = tabIndex;
-		
-		// 如果点击的是 "附近"
 		if (tabIndex === 2) {
 			uni.getSetting({
 				success: (res) => {
-					// 检查是否已授权
 					if (res.authSetting['scope.userLocation']) {
 						getLocationAndFetchData();
 					} else {
-						// 未授权，则请求授权
 						uni.authorize({
 							scope: 'scope.userLocation',
 							success: () => getLocationAndFetchData(),
@@ -354,119 +305,192 @@
 				}
 			});
 		} else {
-			// 点击其他tab，直接刷新列表
 			getBusinessOpportunitiesList(true);
 		}
 	};
 
-	/**
-	 * 获取用户地理位置并刷新数据
-	 */
 	const getLocationAndFetchData = () => {
 		uni.showLoading({ title: '正在定位...' });
 		uni.getLocation({
 			type: 'wgs84',
 			success: (res) => {
-				console.log('用户位置信息:', res);
-				// 更新位置状态
 				location.longitude = res.longitude.toString();
 				location.latitude = res.latitude.toString();
-				// 获取到位置后，刷新列表
 				getBusinessOpportunitiesList(true);
 			},
 			fail: (err) => {
-				console.error('获取位置失败', err);
-				uni.showToast({ title: '获取位置失败', icon: 'none' });
-				// 即使定位失败，也刷新一次列表（不带经纬度）
 				getBusinessOpportunitiesList(true); 
 			},
-			complete: () => {
-				uni.hideLoading();
-			}
+			complete: () => uni.hideLoading()
 		});
 	};
 	
-	// ==================== 以下为页面交互方法 (基本保持不变，但操作对象已变为postList) ====================
+	// ==================== 以下为修改后的交互方法 ====================
 	
 	/**
 	 * 切换点赞/踩状态
 	 */
-	const toggleAction = (post, action) => {
-		// 此处为前端模拟，实际项目需要调用后端接口更新状态
-		if (post.userAction === action) {
+	const toggleAction = async (post, clickedAction) => {
+		if (isActionInProgress.value) return;
+		if (!loggedInUserId.value) {
+			uni.showToast({ title: '请先登录', icon: 'none' });
+			return;
+		}
+		
+		isActionInProgress.value = true;
+		
+		const originalAction = post.userAction;
+		const originalLikes = post.likes;
+		const originalDislikes = post.dislikes;
+
+		// 乐观更新UI
+		if (post.userAction === clickedAction) {
 			post.userAction = null;
-			if (action === 'like') post.likes--;
+			if (clickedAction === 'like') post.likes--;
 			else post.dislikes--;
 		} else {
-			const prevAction = post.userAction;
-			post.userAction = action;
-			if (action === 'like') {
+			post.userAction = clickedAction;
+			if (clickedAction === 'like') {
 				post.likes++;
-				if (prevAction === 'dislike') post.dislikes--;
+				if (originalAction === 'dislike') post.dislikes--;
 			} else {
 				post.dislikes++;
-				if (prevAction === 'like') post.likes--;
+				if (originalAction === 'like') post.likes--;
 			}
+		}
+
+		try {
+			const requestData = {
+				userId: loggedInUserId.value,
+				targetId: post.id,
+				targetType: 'post',
+				action: post.userAction, // 发送更新后的action ('like', 'dislike' 或 null)
+			};
+
+			const result = await request('/app-api/member/like-action/add', {
+				method: 'POST',
+				data: requestData,
+			});
+
+			if (result && result.error) {
+				// API失败，回滚UI
+				post.userAction = originalAction;
+				post.likes = originalLikes;
+				post.dislikes = originalDislikes;
+				uni.showToast({ title: '操作失败', icon: 'none' });
+			}
+			
+		} catch (error) {
+			// 网络异常，回滚UI
+			post.userAction = originalAction;
+			post.likes = originalLikes;
+			post.dislikes = originalDislikes;
+			uni.showToast({ title: '操作失败，请重试', icon: 'none' });
+		} finally {
+			isActionInProgress.value = false;
 		}
 	};
 
 	/**
 	 * 切换收藏状态
 	 */
-	const toggleSave = (post) => {
-		// isSaved 来源于 followFlag
-		post.isSaved = !post.isSaved;
-		// 实际项目应调用收藏/取消收藏接口
-		uni.showToast({
-			title: post.isSaved ? '已收藏' : '已取消收藏',
-			icon: 'none'
-		});
+	const toggleSave = async (post) => {
+		if (isActionInProgress.value) return;
+		if (!loggedInUserId.value) {
+			uni.showToast({ title: '请先登录', icon: 'none' });
+			return;
+		}
+
+		isActionInProgress.value = true;
+		const originalStatus = post.isSaved;
+		
+		// 乐观更新
+		post.isSaved = !originalStatus;
+
+		const apiUrl = post.isSaved ? '/app-api/member/follow/add' : '/app-api/member/follow/del';
+		
+		try {
+			const requestData = {
+				userId: loggedInUserId.value,
+				targetId: post.id,
+				targetType: 'post'
+			};
+			const result = await request(apiUrl, { method: 'POST', data: requestData });
+			
+			if (result && result.error) {
+				// 失败回滚
+				post.isSaved = originalStatus;
+				uni.showToast({ title: '操作失败', icon: 'none' });
+			} else {
+				uni.showToast({ title: post.isSaved ? '已收藏' : '已取消收藏', icon: 'none' });
+			}
+		} catch (error) {
+			// 失败回滚
+			post.isSaved = originalStatus;
+			uni.showToast({ title: '操作失败，请重试', icon: 'none' });
+		} finally {
+			isActionInProgress.value = false;
+		}
 	};
 
 	/**
 	 * 切换关注用户状态
 	 */
-	const toggleFollow = (post) => {
-		// isFollowedUser 来源于 followUserFlag
-		post.isFollowedUser = !post.isFollowedUser;
-		// 实际项目应调用关注/取消关注用户接口
-		uni.showToast({
-			title: post.isFollowedUser ? '已关注' : '已取消关注',
-			icon: 'none'
-		});
+	const toggleFollow = async (post) => {
+		if (isActionInProgress.value) return;
+		if (!loggedInUserId.value) {
+			uni.showToast({ title: '请先登录', icon: 'none' });
+			return;
+		}
+
+		isActionInProgress.value = true;
+		const originalStatus = post.isFollowedUser;
+
+		// 乐观更新
+		post.isFollowedUser = !originalStatus;
+
+		const apiUrl = post.isFollowedUser ? '/app-api/member/follow/add' : '/app-api/member/follow/del';
+		
+		try {
+			const requestData = {
+				userId: loggedInUserId.value,
+				targetId: post.user.id,
+				targetType: 'post_user'
+			};
+			const result = await request(apiUrl, { method: 'POST', data: requestData });
+
+			if (result && result.error) {
+				// 失败回滚
+				post.isFollowedUser = originalStatus;
+				uni.showToast({ title: '操作失败', icon: 'none' });
+			} else {
+				uni.showToast({ title: post.isFollowedUser ? '已关注' : '已取消关注', icon: 'none' });
+			}
+		} catch (error) {
+			// 失败回滚
+			post.isFollowedUser = originalStatus;
+			uni.showToast({ title: '操作失败，请重试', icon: 'none' });
+		} finally {
+			isActionInProgress.value = false;
+		}
 	};
 
-	/**
-	 * 分享帖子
-	 */
 	const sharePost = (post) => {
 		uni.showToast({ title: '分享功能即将上线', icon: 'none' });
 	};
 
-	/**
-	 * 跳转到发布新帖页面
-	 */
 	const postNew = () => {
 		uni.navigateTo({ url: '/pages/home-opportunitiesPublish/home-opportunitiesPublish' });
 	};
 
-	/**
-	 * 处理跳转到登录页面的函数
-	 */
 	const goToLogin = () => {
 		uni.showToast({ title: '正在前往登录页...', icon: 'none' });
 	};
 
-	/**
-	 * 处理跳转到会员页面的函数
-	 */
 	const goToMembership = () => {
 		uni.showToast({ title: '正在前往会员中心...', icon: 'none' });
 	};
 
-	/**
-	 * 帖子卡片点击事件处理
-	 */
 	const handlePostClick = (post) => {
 		if (isLogin.value && hasPaidMembership.value) {
 			skipCommercialDetail(post.id);
@@ -477,35 +501,18 @@
 		}
 	};
 
-	/**
-	 * 跳转到个人名片页面
-	 */
 	const skipApplicationBusinessCard = () => {
 		uni.navigateTo({ url: '/pages/applicationBusinessCard/applicationBusinessCard' });
 	}
 
-	/**
-	 * 跳转到商机详情页
-	 */
 	const skipCommercialDetail = (postId) => {
 		uni.navigateTo({ url: `/pages/home-commercialDetail/home-commercialDetail?id=${postId}` });
 	}
 	
-	// getLogin方法在当前逻辑中未用于API认证，暂时保留
-	const getLogin = () => { /* ... */ }
+	const getLogin = () => {}
 </script>
 
 <style scoped>
-	.business-opportunity-app {
-		background-color: #f9f9f9;
-		color: #333;
-		max-width: 1000rpx;
-		margin: 0 auto;
-		padding-bottom: 160rpx;
-		min-height: 100vh;
-		display: flex;
-		flex-direction: column;
-	}
 
 	.header {
 		background: linear-gradient(135deg, #FF6A00, #FF8C37);

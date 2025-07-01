@@ -1,66 +1,52 @@
 <template>
   <view class="activity-card">
-    <!-- 【修改】将点击事件的参数传入 -->
+    <!-- 将点击事件的参数传入 -->
     <view @click="detailActivity(activity.id)">
-      <!-- 【修改】绑定正确的图片字段 -->
+      <!-- 绑定正确的图片字段 -->
       <image :src="activity.coverImageUrl" class="activity-image" mode="aspectFill" />
-      <!-- 【修改】绑定正确的标题字段 -->
+      <!-- 绑定正确的标题字段 -->
       <text class="activity-title">{{ activity.activityTitle }}</text>
       
       <view class="activity-info">
         <uni-icons type="calendar" size="16" color="#FF6B00" />
-        <!-- 【修改】使用格式化后的日期 -->
+        <!-- 使用格式化后的日期 -->
         <text>{{ formattedDate }}</text>
       </view>
       
       <view class="activity-info">
         <uni-icons type="map-pin" size="16" color="#FF6B00" />
-        <!-- 【修改】绑定正确的地点字段 (请确认API是否返回了 location 字段) -->
-        <text>{{ activity.location || '线上活动' }}</text>
+        <!-- 绑定正确的地点字段 (locationAddress) -->
+        <text>{{ activity.locationAddress || '线上活动' }}</text>
       </view>
       
       <view class="activity-stats">
-        <!-- 
-          【关键修改】
-          不再使用嵌套的 participants 对象，而是使用后端直接返回的字段。
-          - participantCount: 当前参与人数
-          - maxParticipants: 总人数
-          使用 || 提供了默认值，防止后端没返回该字段时报错。
-        -->
         <view class="participants">
-          {{ activity.participantCount || 0 }}/{{ activity.maxParticipants || '不限' }} 人参与
+          <!-- 绑定正确的报名人数(joinCount)和总名额(totalSlots) -->
+          {{ activity.joinCount || 0 }}/{{ activity.totalSlots || '不限' }} 人参与
         </view>
       </view>
       
-      <!-- 
-        【修改】后端数据中没有 tags 数组，暂时注释掉。
-        您可以根据需要，将 categoryName 等字段作为标签展示。
-        例如: <view class="tag">{{ activity.categoryName }}</view>
-      -->
-      <!--
       <view class="activity-tags">
+        <!-- 后端返回的 tags 是一个数组，可以直接使用 -->
         <view v-for="(tag, index) in activity.tags" :key="index" class="tag">
           {{ tag }}
         </view>
       </view>
-      -->
+     
     </view>
     
     <view class="activity-footer">
       <view class="organizer">
         <uni-icons type="person" size="16" color="#FF6B00" />
-        <!-- 
-          【修改】绑定正确的组织者字段。
-          请根据API确认是 organizer 还是 organizerName 或其他。
-        -->
-        <text>{{ activity.organizerName || '主办方' }}</text>
+        <!-- 绑定正确的组织者字段 (organizerUnitName) -->
+        <text>{{ activity.organizerUnitName || '主办方' }}</text>
       </view>
       <view class="action-buttons">
-        <button class="btn btn-favorite" @click.stop="toggleFavorite">
+        <!-- 【修改】添加 :disabled="loading" 防止重复点击 -->
+        <button class="btn btn-favorite" @click.stop="toggleFavorite" :disabled="loading">
           <uni-icons :type="isFavorite ? 'heart-filled' : 'heart'" size="16" color="#FF6B00" />
           <text>{{ isFavorite ? '已收藏' : '收藏' }}</text>
         </button>
-        <!-- 【修改】将点击事件的参数传入 -->
         <button class="btn btn-primary" @click.stop="registerActivity(activity.id)">报名</button>
       </view>
     </view>
@@ -69,6 +55,8 @@
 
 <script setup>
 import { defineProps, defineEmits, ref, computed } from 'vue';
+// 【新增】导入你的请求工具
+import request from '../utils/request.js'; 
 
 const props = defineProps({
   activity: {
@@ -77,11 +65,15 @@ const props = defineProps({
   }
 });
 
-const emit = defineEmits(['favorite']);
+// 【修改】定义 emits，用于通知父组件刷新列表
+const emit = defineEmits(['refreshList']);
 
-const isFavorite = ref(false);
+// 根据 props.activity.followFlag 初始化 isFavorite 的状态
+const isFavorite = ref(props.activity.followFlag === 1);
 
-// 【新增】格式化日期
+// 【新增】添加一个加载状态，防止用户在请求期间重复点击
+const loading = ref(false);
+
 const formattedDate = computed(() => {
 	if (!props.activity.startDatetime) {
 		return '时间待定';
@@ -95,29 +87,86 @@ const formattedDate = computed(() => {
 	return `${Y}-${M}-${D} ${h}:${m}`;
 });
 
+// 【修改】重写 toggleFavorite 函数，使其成为一个异步函数来处理 API 请求
+const toggleFavorite = async () => {
+  // 如果正在请求中，则直接返回
+  if (loading.value) {
+    return;
+  }
+  loading.value = true;
 
-const toggleFavorite = () => {
-  isFavorite.value = !isFavorite.value;
-  emit('favorite', isFavorite.value);
+  // 从本地存储获取用户ID
+  const userId = uni.getStorageSync('userId');
+  if (!userId) {
+    uni.showToast({ title: '请先登录', icon: 'none' });
+    loading.value = false;
+    return;
+  }
+  
+  // 根据当前收藏状态决定调用哪个接口
+  const isCurrentlyFavorite = isFavorite.value;
+  const endpoint = isCurrentlyFavorite ? '/app-api/member/follow/del' : '/app-api/member/follow/add';
+  const successMessage = isCurrentlyFavorite ? '已取消收藏' : '收藏成功';
+
+  // 构造请求体
+  const payload = {
+    userId: userId,
+    targetId: props.activity.id,
+    targetType: "activity" // 固定为 activity
+  };
+
+  try {
+    const result = await request(endpoint, {
+      method: 'POST',
+      data: payload
+    });
+
+    if (result && !result.error) {
+      // API 调用成功
+      uni.showToast({
+        title: successMessage,
+        icon: 'success'
+      });
+      // 发送事件通知父组件刷新列表
+      emit('refreshList');
+    } else {
+      // API 调用失败，显示错误信息
+      uni.showToast({
+        title: result.error || '操作失败，请重试',
+        icon: 'none'
+      });
+    }
+  } catch (error) {
+    // 网络或其他异常
+    uni.showToast({
+      title: '网络错误，请稍后重试',
+      icon: 'none'
+    });
+  } finally {
+    // 无论成功或失败，最后都将加载状态设为 false
+    // 注意：因为父组件会刷新，此处的 loading 状态会自动重置，但这样做更健壮
+    loading.value = false;
+  }
 };
 
-// 【修改】接收活动ID，用于跳转传参
+
 const registerActivity = (activityId) => {
   uni.navigateTo({
     url:`/pages/active-enroll/active-enroll?id=${activityId}`
   })
 };
 
-// 【修改】接收活动ID，用于跳转传参
 const detailActivity = (activityId) => {
+  console.log('准备跳转到详情页，活动ID:', activityId); // 增加一个打印，方便调试
   uni.navigateTo({
-    url: `/pages/active-detail/active-detail?id=${activityId}`
+    // 关键在这里：将 activityId 拼接到 url 的查询参数中
+    url: `/pages/active-detail/active-detail?id=${activityId}` 
   });
 };
 </script>
 
 <style lang="scss" scoped>
-/* 您的样式代码保持不变，这里省略以保持简洁 */
+/* 您的样式代码保持不变 */
 .activity-card {
   background: white;
   border-radius: 24rpx;

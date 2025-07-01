@@ -26,7 +26,7 @@ const _sfc_main = {
       getActiveList();
     });
     common_vendor.onReachBottom(() => {
-      common_vendor.index.__f__("log", "at pages/active/active.vue:134", "滑动到底部，触发加载更多");
+      common_vendor.index.__f__("log", "at pages/active/active.vue:131", "滑动到底部，触发加载更多");
       if (hasMore.value && !loading.value) {
         getActiveList(true);
       }
@@ -72,7 +72,7 @@ const _sfc_main = {
     const openMapToChooseLocation = () => {
       common_vendor.index.chooseLocation({
         success: (res) => {
-          common_vendor.index.__f__("log", "at pages/active/active.vue:201", "选择位置成功:", res);
+          common_vendor.index.__f__("log", "at pages/active/active.vue:198", "选择位置成功:", res);
           selectedLocationInfo.value = {
             name: res.name,
             address: res.address,
@@ -81,7 +81,7 @@ const _sfc_main = {
           };
         },
         fail: (err) => {
-          common_vendor.index.__f__("log", "at pages/active/active.vue:211", "选择位置失败:", err);
+          common_vendor.index.__f__("log", "at pages/active/active.vue:208", "选择位置失败:", err);
         }
       });
     };
@@ -123,7 +123,7 @@ const _sfc_main = {
         // 纬度
       };
       try {
-        common_vendor.index.__f__("log", "at pages/active/active.vue:262", "发起活动列表请求, 参数:", params);
+        common_vendor.index.__f__("log", "at pages/active/active.vue:259", "发起活动列表请求, 参数:", params);
         const result = await utils_request.request("/app-api/member/activity/list", {
           method: "GET",
           data: params
@@ -141,13 +141,13 @@ const _sfc_main = {
             hasMore.value = true;
           }
           pageNo.value++;
-          common_vendor.index.__f__("log", "at pages/active/active.vue:294", "活动列表获取成功:", activitiesData.value);
+          common_vendor.index.__f__("log", "at pages/active/active.vue:291", "活动列表获取成功:", activitiesData.value);
         } else {
-          common_vendor.index.__f__("error", "at pages/active/active.vue:297", "获取活动列表失败:", result);
+          common_vendor.index.__f__("error", "at pages/active/active.vue:294", "获取活动列表失败:", result);
           hasMore.value = false;
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/active/active.vue:301", "请求异常:", error);
+        common_vendor.index.__f__("error", "at pages/active/active.vue:298", "请求异常:", error);
         hasMore.value = false;
       } finally {
         loading.value = false;
@@ -156,10 +156,12 @@ const _sfc_main = {
     common_vendor.watch(
       [searchKeyword, activeCategory, selectedStatus, selectedLocationInfo],
       () => {
-        common_vendor.index.__f__("log", "at pages/active/active.vue:315", "筛选条件变化，重新搜索...");
+        common_vendor.index.__f__("log", "at pages/active/active.vue:311", "筛选条件变化，重新搜索...");
         getActiveList(false);
       },
-      { deep: true }
+      {
+        deep: true
+      }
       // deep: true 确保能监听到 selectedLocationInfo 对象的内部变化
     );
     const publishActivity = () => {
@@ -201,8 +203,9 @@ const _sfc_main = {
         v: common_vendor.f(activitiesData.value, (activity, index2, i0) => {
           return {
             a: activity.id,
-            b: "12e513cf-3-" + i0,
-            c: common_vendor.p({
+            b: common_vendor.o(($event) => getActiveList(false), activity.id),
+            c: "12e513cf-3-" + i0,
+            d: common_vendor.p({
               activity
             })
           };
