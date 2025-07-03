@@ -1,6 +1,7 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
 const utils_request = require("../../utils/request.js");
+const utils_upload = require("../../utils/upload.js");
 const _sfc_main = {
   __name: "home-opportunitiesPublish",
   setup(__props) {
@@ -40,16 +41,84 @@ const _sfc_main = {
     function removeTag(index) {
       tags.value.splice(index, 1);
     }
-    function handleChooseImage() {
+    async function handleChooseImage() {
       common_vendor.index.chooseImage({
         count: 9 - images.value.length,
-        sizeType: ["original", "compressed"],
         sourceType: ["album", "camera"],
-        success: (res) => {
-          images.value = images.value.concat(res.tempFilePaths);
-        },
-        fail: (err) => {
-          common_vendor.index.__f__("log", "at pages/home-opportunitiesPublish/home-opportunitiesPublish.vue:135", "取消选择图片", err);
+        success: async (res) => {
+          const filesToUpload = res.tempFiles;
+          const validFiles = filesToUpload.filter((file) => {
+            if (file.size > 5 * 1024 * 1024) {
+              common_vendor.index.showToast({
+                title: `文件 ${file.name || ""} 过大，已忽略`,
+                icon: "none"
+              });
+              return false;
+            }
+            return true;
+          });
+          if (validFiles.length === 0)
+            return;
+          common_vendor.index.showLoading({
+            title: `正在上传 ${validFiles.length} 张图片...`,
+            mask: true
+          });
+          const uploadPromises = validFiles.map((file) => utils_upload.uploadFile(file.path, {
+            directory: "post"
+          }));
+          const results = await Promise.all(uploadPromises);
+          common_vendor.index.hideLoading();
+          const successfulUrls = [];
+          let failedCount = 0;
+          results.forEach((result) => {
+            if (result.data) {
+              successfulUrls.push(result.data);
+            } else {
+              failedCount++;
+              common_vendor.index.__f__("error", "at pages/home-opportunitiesPublish/home-opportunitiesPublish.vue:175", "上传失败:", result.error);
+            }
+          });
+          images.value = images.value.concat(successfulUrls);
+          if (failedCount > 0) {
+            common_vendor.index.showToast({
+              title: `${failedCount} 张图片上传失败`,
+              icon: "none"
+            });
+          }
+        }
+      });
+    }
+    function replaceImage(index) {
+      common_vendor.index.chooseImage({
+        count: 1,
+        success: async (res) => {
+          const file = res.tempFiles[0];
+          if (file.size > 5 * 1024 * 1024) {
+            return common_vendor.index.showToast({
+              title: "文件大小不能超过5MB",
+              icon: "none"
+            });
+          }
+          common_vendor.index.showLoading({
+            title: "正在替换...",
+            mask: true
+          });
+          const result = await utils_upload.uploadFile(file.path, {
+            directory: "post"
+          });
+          common_vendor.index.hideLoading();
+          if (result.data) {
+            images.value[index] = result.data;
+            common_vendor.index.showToast({
+              title: "图片已替换",
+              icon: "none"
+            });
+          } else {
+            common_vendor.index.showToast({
+              title: result.error,
+              icon: "error"
+            });
+          }
         }
       });
     }
@@ -60,40 +129,14 @@ const _sfc_main = {
         success: (res) => {
           if (res.confirm) {
             images.value.splice(index, 1);
-            common_vendor.index.showToast({
-              title: "图片已删除",
-              icon: "none"
-            });
           }
         }
       });
     }
-    function replaceImage(index) {
-      common_vendor.index.chooseImage({
-        count: 1,
-        sizeType: ["original", "compressed"],
-        sourceType: ["album", "camera"],
-        success: (res) => {
-          images.value[index] = res.tempFilePaths[0];
-          common_vendor.index.showToast({
-            title: "图片已替换",
-            icon: "none"
-          });
-        },
-        fail: (err) => {
-          common_vendor.index.__f__("log", "at pages/home-opportunitiesPublish/home-opportunitiesPublish.vue:169", "取消替换图片", err);
-        }
-      });
-    }
     function submitPost() {
-      if (!title.value.trim())
+      if (!title.value.trim() || title.value.length > 50)
         return common_vendor.index.showToast({
-          title: "请输入帖子标题",
-          icon: "none"
-        });
-      if (title.value.length > 50)
-        return common_vendor.index.showToast({
-          title: "标题不能超过50字",
+          title: "请检查标题",
           icon: "none"
         });
       if (!content.value.trim() || content.value.length < 20)
@@ -117,45 +160,41 @@ const _sfc_main = {
           icon: "none"
         });
       const postData = {
-        // [必需] 用户ID，根据您的要求固定为 247
         userId: 247,
-        // [可选] 帖子标题，对应接口的 postTitle
         postTitle: title.value,
-        // [必需] 商机类型，将前端的中文 "普通商机"/"创业猎伙" 转换为后端需要的 "0"/"1"
         postType: topic.value === "普通商机" ? "0" : "1",
-        // [必需] 商机详细内容，对应接口的 postContent
         postContent: content.value,
-        // [必需] 商机图片，接口要求是 string。这里假设将图片URL数组用逗号拼接成字符串。
-        // 注意：在实际应用中，images.value 应该是上传到服务器后返回的URL列表。
         postImg: images.value.join(","),
-        // [必需] 发布时间，生成当前时间的 ISO 格式字符串
         postedAt: (/* @__PURE__ */ new Date()).toISOString(),
-        // [必需] 是否可以评论，对应接口的 commentFlag
         commentFlag: allowComments.value,
-        // [必需] 是否可以查看名片，对应接口的 cardFlag
         cardFlag: showProfile.value,
-        // [可选] 标签，对应接口的 tags
         tags: tags.value,
-        // [必需] 商机状态，根据您的要求默认为 'active'
         status: "active"
       };
-      common_vendor.index.__f__("log", "at pages/home-opportunitiesPublish/home-opportunitiesPublish.vue:238", "--- 准备提交到后端的帖子数据 (已格式化) ---");
-      common_vendor.index.__f__("log", "at pages/home-opportunitiesPublish/home-opportunitiesPublish.vue:239", postData);
+      common_vendor.index.__f__("log", "at pages/home-opportunitiesPublish/home-opportunitiesPublish.vue:281", "--- 准备提交到后端的帖子数据 (图片已是URL) ---", postData);
       createOpportunities(postData);
-      common_vendor.index.showToast({
-        title: "发布请求已发送",
-        icon: "success"
-      });
     }
     const createOpportunities = async (postData) => {
+      common_vendor.index.showLoading({
+        title: "正在发布...",
+        mask: true
+      });
       const result = await utils_request.request("/app-api/member/business-opportunities/create", {
         method: "POST",
-        // 请求方式
         data: postData
       });
-      common_vendor.index.__f__("log", "at pages/home-opportunitiesPublish/home-opportunitiesPublish.vue:258", "createActive result:", result);
-      if (result.error) {
-        common_vendor.index.__f__("log", "at pages/home-opportunitiesPublish/home-opportunitiesPublish.vue:261", "请求失败:", result.error);
+      common_vendor.index.hideLoading();
+      if (result.data !== null) {
+        common_vendor.index.showToast({
+          title: "发布成功！",
+          icon: "success"
+        });
+        setTimeout(() => common_vendor.index.navigateBack(), 1500);
+      } else {
+        common_vendor.index.showToast({
+          title: result.error || "发布失败",
+          icon: "none"
+        });
       }
     };
     return (_ctx, _cache) => {

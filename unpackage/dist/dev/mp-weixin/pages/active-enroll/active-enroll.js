@@ -1,6 +1,7 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
 const utils_request = require("../../utils/request.js");
+const utils_upload = require("../../utils/upload.js");
 if (!Array) {
   const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
   const _easycom_uni_easyinput2 = common_vendor.resolveComponent("uni-easyinput");
@@ -30,7 +31,7 @@ const _sfc_main = {
         activityId.value = options.id;
         getActiveDetail();
       } else {
-        common_vendor.index.__f__("error", "at pages/active-enroll/active-enroll.vue:180", "未接收到活动ID！");
+        common_vendor.index.__f__("error", "at pages/active-enroll/active-enroll.vue:181", "未接收到活动ID！");
         common_vendor.index.showToast({ title: "加载活动详情失败，缺少ID", icon: "none" });
       }
     });
@@ -91,37 +92,20 @@ const _sfc_main = {
         sizeType: ["compressed"],
         sourceType: ["album", "camera"],
         success: async (res) => {
-          const tempFilePath = res.tempFilePaths[0];
-          common_vendor.index.showLoading({ title: "上传中..." });
-          try {
-            const baseURL = "http://8.163.18.207:48080";
-            const token = common_vendor.index.getStorageSync("token");
-            const uploadResult = await common_vendor.index.uploadFile({
-              url: baseURL + "/app-api/infra/file/upload",
-              // 完整的上传URL
-              filePath: tempFilePath,
-              name: "file",
-              // 后端接收文件的 key
-              header: {
-                "Authorization": token || ""
-              }
-            });
-            common_vendor.index.hideLoading();
-            if (uploadResult.statusCode === 200) {
-              const responseData = JSON.parse(uploadResult.data);
-              if (responseData.code === 0) {
-                formData.paymentScreenshotUrl = responseData.data;
-                common_vendor.index.showToast({ title: "上传成功", icon: "success" });
-              } else {
-                common_vendor.index.showToast({ title: responseData.msg || "上传失败", icon: "none" });
-              }
-            } else {
-              common_vendor.index.showToast({ title: `上传失败(${uploadResult.statusCode})`, icon: "none" });
-            }
-          } catch (error) {
-            common_vendor.index.hideLoading();
-            common_vendor.index.__f__("error", "at pages/active-enroll/active-enroll.vue:268", "上传异常:", error);
-            common_vendor.index.showToast({ title: "上传异常", icon: "none" });
+          const file = res.tempFiles[0];
+          const maxSize = 5 * 1024 * 1024;
+          if (file.size > maxSize) {
+            return common_vendor.index.showToast({ title: "文件大小不能超过5MB", icon: "none" });
+          }
+          common_vendor.index.showLoading({ title: "上传中...", mask: true });
+          const result = await utils_upload.uploadFile(file.path, { directory: "payment-proof" });
+          common_vendor.index.hideLoading();
+          if (result.data) {
+            formData.paymentScreenshotUrl = result.data;
+            common_vendor.index.showToast({ title: "上传成功", icon: "success" });
+          } else {
+            common_vendor.index.__f__("error", "at pages/active-enroll/active-enroll.vue:256", "上传失败:", result.error);
+            common_vendor.index.showToast({ title: result.error || "上传失败", icon: "none" });
           }
         }
       });
@@ -136,7 +120,7 @@ const _sfc_main = {
       if (result && !result.error) {
         activityDetail.value = result.data;
       } else {
-        common_vendor.index.__f__("log", "at pages/active-enroll/active-enroll.vue:286", "请求失败:", result ? result.error : "无返回结果");
+        common_vendor.index.__f__("log", "at pages/active-enroll/active-enroll.vue:274", "请求失败:", result ? result.error : "无返回结果");
       }
     };
     const joinActivity = async () => {
@@ -170,7 +154,7 @@ const _sfc_main = {
         common_vendor.index.showToast({ title: "报名成功！", icon: "success" });
         currentStep.value = 3;
       } else {
-        common_vendor.index.__f__("log", "at pages/active-enroll/active-enroll.vue:327", "报名失败:", result ? result.error : "无返回结果");
+        common_vendor.index.__f__("log", "at pages/active-enroll/active-enroll.vue:315", "报名失败:", result ? result.error : "无返回结果");
         common_vendor.index.showToast({ title: result.error || "报名失败，请重试", icon: "none" });
       }
     };

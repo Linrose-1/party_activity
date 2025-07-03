@@ -184,3 +184,9 @@
 .data-v-d21abf49 .uni-select__input-placeholder {
   color: #939393;
 }
+
+/* 【新增】这个类用于在 picker 打开时降低操作栏的层级 */
+.action-bar.z-index-low.data-v-d21abf49 {
+  z-index: 1;
+  /* 或者 z-index: auto; */
+}

@@ -1,6 +1,7 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
 const utils_request = require("../../utils/request.js");
+const utils_upload = require("../../utils/upload.js");
 if (!Array) {
   const _easycom_uni_forms_item2 = common_vendor.resolveComponent("uni-forms-item");
   const _easycom_uni_easyinput2 = common_vendor.resolveComponent("uni-easyinput");
@@ -49,6 +50,35 @@ const _sfc_main = {
       const date = /* @__PURE__ */ new Date();
       return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
     });
+    const handleImageUpload = (field, directory) => {
+      common_vendor.index.chooseImage({
+        count: 1,
+        sourceType: ["album", "camera"],
+        success: async (res) => {
+          const file = res.tempFiles[0];
+          const maxSize = 5 * 1024 * 1024;
+          if (file.size > maxSize) {
+            return common_vendor.index.showToast({ title: "文件大小不能超过5MB", icon: "none" });
+          }
+          common_vendor.index.showLoading({ title: "上传中...", mask: true });
+          const result = await utils_upload.uploadFile(file.path, { directory });
+          common_vendor.index.hideLoading();
+          if (result.data) {
+            form.value[field] = result.data;
+            common_vendor.index.showToast({ title: "上传成功", icon: "none" });
+          } else {
+            common_vendor.index.__f__("error", "at pages/my-edit/my-edit.vue:162", "上传失败:", result.error);
+            common_vendor.index.showToast({ title: result.error || "上传失败", icon: "none" });
+          }
+        }
+      });
+    };
+    function chooseAvatar() {
+      handleImageUpload("avatar", "avatar");
+    }
+    function chooseWechatQr() {
+      handleImageUpload("wechatQrCodeUrl", "qrcode");
+    }
     const getUserInfo = async () => {
       try {
         const result = await utils_request.request("/app-api/member/user/get", { method: "GET" });
@@ -66,24 +96,6 @@ const _sfc_main = {
         common_vendor.index.showToast({ title: "网络错误，请稍后再试", icon: "error" });
       }
     };
-    function chooseAvatar() {
-      common_vendor.index.chooseImage({
-        count: 1,
-        sourceType: ["album", "camera"],
-        success: (res) => {
-          form.value.avatar = res.tempFilePaths[0];
-        }
-      });
-    }
-    function chooseWechatQr() {
-      common_vendor.index.chooseImage({
-        count: 1,
-        sourceType: ["album", "camera"],
-        success: (res) => {
-          form.value.wechatQrCodeUrl = res.tempFilePaths[0];
-        }
-      });
-    }
     const openMapToChooseLocation = () => {
       common_vendor.index.chooseLocation({
         latitude: form.value.latitude || void 0,
@@ -101,29 +113,22 @@ const _sfc_main = {
     const submitForm = () => {
       formRef.value.validate().then(async () => {
         common_vendor.index.showLoading({ title: "正在保存..." });
-        try {
-          const result = await utils_request.request("/app-api/member/user/update", {
-            method: "PUT",
-            data: form.value
-            // request 工具会自动处理文件上传
-          });
-          if (result) {
-            common_vendor.index.showToast({ title: "保存成功", icon: "success" });
-            setTimeout(() => {
-              common_vendor.index.navigateBack();
-            }, 1500);
-          } else {
-            common_vendor.index.showToast({ title: result.msg || "保存失败", icon: "none" });
-          }
-        } catch (error) {
-          common_vendor.index.__f__("error", "at pages/my-edit/my-edit.vue:209", "提交失败:", error);
-          common_vendor.index.showToast({ title: "保存失败，请稍后重试", icon: "error" });
-        } finally {
-          common_vendor.index.hideLoading();
+        const result = await utils_request.request("/app-api/member/user/update", {
+          method: "PUT",
+          data: form.value
+          // 直接提交包含图片 URL 的表单数据
+        });
+        common_vendor.index.hideLoading();
+        if (result.data !== null) {
+          common_vendor.index.showToast({ title: "保存成功", icon: "success" });
+          setTimeout(() => {
+            common_vendor.index.navigateBack();
+          }, 1500);
+        } else {
+          common_vendor.index.showToast({ title: result.error || "保存失败", icon: "none" });
         }
       }).catch((err) => {
-        common_vendor.index.__f__("log", "at pages/my-edit/my-edit.vue:216", "表单验证失败：", err);
-        common_vendor.index.showToast({ title: "请检查并填写必填项", icon: "none" });
+        common_vendor.index.__f__("log", "at pages/my-edit/my-edit.vue:237", "表单验证失败：", err);
       });
     };
     return (_ctx, _cache) => {

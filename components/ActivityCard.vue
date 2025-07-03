@@ -4,8 +4,14 @@
     <view @click="detailActivity(activity.id)">
       <!-- 绑定正确的图片字段 -->
       <image :src="activity.coverImageUrl" class="activity-image" mode="aspectFill" />
-      <!-- 绑定正确的标题字段 -->
-      <text class="activity-title">{{ activity.activityTitle }}</text>
+      
+	  <view class="activity-header">
+	        <text class="activity-title">{{ activity.activityTitle }}</text>
+	        <!-- 显示活动状态的标签 -->
+	        <view v-if="activity.statusStr" :class="['status-tag', getStatusClass(activity.statusStr)]">
+	          {{ activity.statusStr }}
+	        </view>
+	      </view>
       
       <view class="activity-info">
         <uni-icons type="calendar" size="16" color="#FF6B00" />
@@ -42,7 +48,7 @@
         <text>{{ activity.organizerUnitName || '主办方' }}</text>
       </view>
       <view class="action-buttons">
-        <!-- 【修改】添加 :disabled="loading" 防止重复点击 -->
+        <!-- 添加 :disabled="loading" 防止重复点击 -->
         <button class="btn btn-favorite" @click.stop="toggleFavorite" :disabled="loading">
           <uni-icons :type="isFavorite ? 'heart-filled' : 'heart'" size="16" color="#FF6B00" />
           <text>{{ isFavorite ? '已收藏' : '收藏' }}</text>
@@ -55,7 +61,6 @@
 
 <script setup>
 import { defineProps, defineEmits, ref, computed } from 'vue';
-// 【新增】导入你的请求工具
 import request from '../utils/request.js'; 
 
 const props = defineProps({
@@ -65,13 +70,10 @@ const props = defineProps({
   }
 });
 
-// 【修改】定义 emits，用于通知父组件刷新列表
 const emit = defineEmits(['refreshList']);
 
-// 根据 props.activity.followFlag 初始化 isFavorite 的状态
 const isFavorite = ref(props.activity.followFlag === 1);
 
-// 【新增】添加一个加载状态，防止用户在请求期间重复点击
 const loading = ref(false);
 
 const formattedDate = computed(() => {
@@ -87,15 +89,25 @@ const formattedDate = computed(() => {
 	return `${Y}-${M}-${D} ${h}:${m}`;
 });
 
-// 【修改】重写 toggleFavorite 函数，使其成为一个异步函数来处理 API 请求
+const getStatusClass = (statusStr) => {
+  const classMap = {
+    '已取消': 'canceled',
+    '未开始': 'upcoming',
+    '报名中': 'enrolled',
+    '即将开始': 'upcoming',
+    '进行中': 'ongoing',
+    '已结束': 'ended',
+    '待退款': 'refund_pending'
+  };
+  return classMap[statusStr] || '';
+};
+
 const toggleFavorite = async () => {
-  // 如果正在请求中，则直接返回
   if (loading.value) {
     return;
   }
   loading.value = true;
 
-  // 从本地存储获取用户ID
   const userId = uni.getStorageSync('userId');
   if (!userId) {
     uni.showToast({ title: '请先登录', icon: 'none' });
@@ -103,16 +115,14 @@ const toggleFavorite = async () => {
     return;
   }
   
-  // 根据当前收藏状态决定调用哪个接口
   const isCurrentlyFavorite = isFavorite.value;
   const endpoint = isCurrentlyFavorite ? '/app-api/member/follow/del' : '/app-api/member/follow/add';
   const successMessage = isCurrentlyFavorite ? '已取消收藏' : '收藏成功';
 
-  // 构造请求体
   const payload = {
     userId: userId,
     targetId: props.activity.id,
-    targetType: "activity" // 固定为 activity
+    targetType: "activity"
   };
 
   try {
@@ -122,33 +132,26 @@ const toggleFavorite = async () => {
     });
 
     if (result && !result.error) {
-      // API 调用成功
       uni.showToast({
         title: successMessage,
         icon: 'success'
       });
-      // 发送事件通知父组件刷新列表
       emit('refreshList');
     } else {
-      // API 调用失败，显示错误信息
       uni.showToast({
         title: result.error || '操作失败，请重试',
         icon: 'none'
       });
     }
   } catch (error) {
-    // 网络或其他异常
     uni.showToast({
       title: '网络错误，请稍后重试',
       icon: 'none'
     });
   } finally {
-    // 无论成功或失败，最后都将加载状态设为 false
-    // 注意：因为父组件会刷新，此处的 loading 状态会自动重置，但这样做更健壮
     loading.value = false;
   }
 };
-
 
 const registerActivity = (activityId) => {
   uni.navigateTo({
@@ -157,16 +160,13 @@ const registerActivity = (activityId) => {
 };
 
 const detailActivity = (activityId) => {
-  console.log('准备跳转到详情页，活动ID:', activityId); // 增加一个打印，方便调试
   uni.navigateTo({
-    // 关键在这里：将 activityId 拼接到 url 的查询参数中
     url: `/pages/active-detail/active-detail?id=${activityId}` 
   });
 };
 </script>
 
 <style lang="scss" scoped>
-/* 您的样式代码保持不变 */
 .activity-card {
   background: white;
   border-radius: 24rpx;
@@ -185,12 +185,57 @@ const detailActivity = (activityId) => {
   box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.1);
 }
 
+.activity-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 20rpx;
+    margin-bottom: 24rpx;
+}
+
 .activity-title {
   font-size: 36rpx;
   font-weight: 600;
-  margin-bottom: 24rpx;
   color: #1c1e21;
-  display: block;
+  flex: 1; /* 占据剩余空间，防止标题过长时状态标签被挤下去 */
+}
+
+/* 【核心修改】状态标签样式 */
+.status-tag {
+  font-size: 24rpx;
+  padding: 6rpx 16rpx;
+  border-radius: 8rpx;
+  white-space: nowrap;
+  
+  /* 报名中/进行中 (绿色 - 活力) */
+  &.enrolled, &.ongoing {
+    background-color: #e8f5e9;
+    color: #27ae60;
+  }
+  
+  /* 未开始/即将开始 (橙色 - 提醒, 使用App主题色) */
+  &.upcoming {
+    background-color: #fff0e5;
+    color: #fa8c16;
+  }
+  
+  /* 已结束 (灰色 - 失效) */
+  &.ended {
+    background-color: #f0f2f5;
+    color: #909399;
+  }
+  
+  /* 待退款 (蓝色 - 信息) */
+  &.refund_pending {
+    background-color: #ecf5ff;
+    color: #409eff;
+  }
+
+  /* 已取消 (红色 - 警告) */
+  &.canceled {
+    background-color: #fef0f0;
+    color: #f56c6c;
+  }
 }
 
 .activity-info {

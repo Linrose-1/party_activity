@@ -85,22 +85,29 @@
 		ref
 	} from 'vue'
 	import request from '../../utils/request.js';
+	// 【核心】从我们新建的模块中导入 uploadFile 函数
+	import uploadFile from '../../utils/upload.js';
 
+	// --- 页面表单数据 (与之前相同) ---
 	const title = ref('商机标题')
 	const content = ref('商机内容商机内容商机内容商机内容商机内容商机内容商机内容商机内容商机内容')
-	const topic = ref('普通商机') // 新增：专题选择，默认'普通商机'
+	const topic = ref('普通商机')
 	const tags = ref([])
 	const tagInput = ref('')
-	const images = ref([])
+	const images = ref([]) // 这个数组将存储上传成功后返回的【URL】
 	const showProfile = ref(true)
 	const allowComments = ref(true)
 
-	// 新增：处理专题选择变化的函数
+	// --- 【删除】这里不再需要本地的 uploadFile 函数了！---
+	// const uploadFile = async (...) => { ... } // <= 这段代码被删除
+
+	// --- 表单交互函数 (与之前相同) ---
 	function topicChange(e) {
 		topic.value = e.detail.value
 	}
 
 	function addTag() {
+		// ... 逻辑不变 ...
 		let val = tagInput.value.trim()
 		if (!val) return uni.showToast({
 			title: '请输入标签',
@@ -123,64 +130,122 @@
 		tags.value.splice(index, 1)
 	}
 
-	function handleChooseImage() {
+	// --- 【核心修改】图片处理函数，现在调用导入的 uploadFile ---
+
+	// 处理多图片选择和上传
+	async function handleChooseImage() {
 		uni.chooseImage({
 			count: 9 - images.value.length,
-			sizeType: ['original', 'compressed'],
 			sourceType: ['album', 'camera'],
-			success: res => {
-				images.value = images.value.concat(res.tempFilePaths)
+			success: async (res) => {
+				const filesToUpload = res.tempFiles;
+				const validFiles = filesToUpload.filter(file => {
+					if (file.size > 5 * 1024 * 1024) {
+						uni.showToast({
+							title: `文件 ${file.name || ''} 过大，已忽略`,
+							icon: 'none'
+						});
+						return false;
+					}
+					return true;
+				});
+
+				if (validFiles.length === 0) return;
+
+				uni.showLoading({
+					title: `正在上传 ${validFiles.length} 张图片...`,
+					mask: true
+				});
+
+				// 【关键】使用 Promise.all 并发上传，调用的是导入的 uploadFile 工具
+				const uploadPromises = validFiles.map(file => uploadFile(file.path, {
+					directory: 'post'
+				}));
+				const results = await Promise.all(uploadPromises);
+
+				uni.hideLoading();
+
+				const successfulUrls = [];
+				let failedCount = 0;
+				results.forEach(result => {
+					if (result.data) {
+						successfulUrls.push(result.data);
+					} else {
+						failedCount++;
+						console.error('上传失败:', result.error); // 在控制台打印详细错误
+					}
+				});
+
+				images.value = images.value.concat(successfulUrls);
+
+				if (failedCount > 0) {
+					uni.showToast({
+						title: `${failedCount} 张图片上传失败`,
+						icon: 'none'
+					});
+				}
 			},
-			fail: (err) => {
-				console.log("取消选择图片", err);
-			}
-		})
+		});
 	}
 
+	// 替换单张图片
+	function replaceImage(index) {
+		uni.chooseImage({
+			count: 1,
+			success: async (res) => {
+				const file = res.tempFiles[0];
+				if (file.size > 5 * 1024 * 1024) {
+					return uni.showToast({
+						title: '文件大小不能超过5MB',
+						icon: 'none'
+					});
+				}
+
+				uni.showLoading({
+					title: '正在替换...',
+					mask: true
+				});
+
+				// 【关键】调用导入的 uploadFile 工具
+				const result = await uploadFile(file.path, {
+					directory: 'post'
+				});
+				uni.hideLoading();
+
+				if (result.data) {
+					images.value[index] = result.data;
+					uni.showToast({
+						title: '图片已替换',
+						icon: 'none'
+					});
+				} else {
+					uni.showToast({
+						title: result.error,
+						icon: 'error'
+					});
+				}
+			},
+		});
+	}
+
+	// 删除图片
 	function deleteImage(index) {
 		uni.showModal({
 			title: '提示',
 			content: '确定要删除这张图片吗？',
 			success: (res) => {
 				if (res.confirm) {
-					images.value.splice(index, 1)
-					uni.showToast({
-						title: '图片已删除',
-						icon: 'none'
-					})
+					images.value.splice(index, 1);
 				}
 			}
-		})
+		});
 	}
 
-	function replaceImage(index) {
-		uni.chooseImage({
-			count: 1,
-			sizeType: ['original', 'compressed'],
-			sourceType: ['album', 'camera'],
-			success: res => {
-				images.value[index] = res.tempFilePaths[0]
-				uni.showToast({
-					title: '图片已替换',
-					icon: 'none'
-				})
-			},
-			fail: (err) => {
-				console.log("取消替换图片", err);
-			}
-		})
-	}
-
-	// 修改：发布帖子的函数，增加了校验和打印逻辑
-	// 请用下面的函数替换您代码中原有的 submitPost 函数
+	// --- 提交表单 (逻辑无需改动) ---
 	function submitPost() {
-		// 1. 必填项校验
-		if (!title.value.trim()) return uni.showToast({
-			title: '请输入帖子标题',
-			icon: 'none'
-		})
-		if (title.value.length > 50) return uni.showToast({
-			title: '标题不能超过50字',
+		// ... 您的验证逻辑非常完善，无需改动 ...
+		if (!title.value.trim() || title.value.length > 50) return uni.showToast({
+			title: '请检查标题',
 			icon: 'none'
 		})
 		if (!content.value.trim() || content.value.length < 20) return uni.showToast({
@@ -198,67 +263,47 @@
 		if (images.value.length === 0) return uni.showToast({
 			title: '请至少上传一张图片',
 			icon: 'none'
-		}) // 根据接口文档，图片是必填的
+		})
 
-		// 2. 构造要提交的、符合后端接口文档的表单数据
 		const postData = {
-			// [必需] 用户ID，根据您的要求固定为 247
 			userId: 247,
-
-			// [可选] 帖子标题，对应接口的 postTitle
 			postTitle: title.value,
-
-			// [必需] 商机类型，将前端的中文 "普通商机"/"创业猎伙" 转换为后端需要的 "0"/"1"
 			postType: topic.value === '普通商机' ? '0' : '1',
-
-			// [必需] 商机详细内容，对应接口的 postContent
 			postContent: content.value,
-
-			// [必需] 商机图片，接口要求是 string。这里假设将图片URL数组用逗号拼接成字符串。
-			// 注意：在实际应用中，images.value 应该是上传到服务器后返回的URL列表。
 			postImg: images.value.join(','),
-
-			// [必需] 发布时间，生成当前时间的 ISO 格式字符串
 			postedAt: new Date().toISOString(),
-
-			// [必需] 是否可以评论，对应接口的 commentFlag
 			commentFlag: allowComments.value,
-
-			// [必需] 是否可以查看名片，对应接口的 cardFlag
 			cardFlag: showProfile.value,
-
-			// [可选] 标签，对应接口的 tags
 			tags: tags.value,
-
-			// [必需] 商机状态，根据您的要求默认为 'active'
 			status: 'active'
 		};
 
-		// 3. 在控制台打印将要发送到后端的数据，方便调试
-		console.log('--- 准备提交到后端的帖子数据 (已格式化) ---');
-		console.log(postData);
-
-		// 4. 调用API请求函数
-		createOpportunities(postData)
-
-		// 5. 提示发布成功 (之后可以对接后端API的返回结果)
-		uni.showToast({
-			title: '发布请求已发送',
-			icon: 'success'
-		})
+		console.log('--- 准备提交到后端的帖子数据 (图片已是URL) ---', postData);
+		createOpportunities(postData);
 	}
 
 	const createOpportunities = async (postData) => {
-		// 调用封装的请求方法
+		uni.showLoading({
+			title: '正在发布...',
+			mask: true
+		});
 		const result = await request('/app-api/member/business-opportunities/create', {
-			method: 'POST', // 请求方式
+			method: 'POST',
 			data: postData
 		});
-		// 如果请求成功，打印返回的数据
-		console.log('createActive result:', result);
-		// 如果请求失败，打印错误信息
-		if (result.error) {
-			console.log('请求失败:', result.error);
+		uni.hideLoading();
+
+		if (result.data !== null) {
+			uni.showToast({
+				title: '发布成功！',
+				icon: 'success'
+			});
+			setTimeout(() => uni.navigateBack(), 1500);
+		} else {
+			uni.showToast({
+				title: result.error || '发布失败',
+				icon: 'none'
+			});
 		}
 	};
 </script>

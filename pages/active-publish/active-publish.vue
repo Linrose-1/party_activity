@@ -23,14 +23,22 @@
 					</view>
 				</uni-forms-item>
 
-				<!-- startDatetime & endDatetime (由 time 数组驱动) -->
+				<!-- 【修改】活动时间选择器 -->
 				<uni-forms-item label="活动时间" required>
-					<uni-datetime-picker type="datetimerange" v-model="timeRange" rangeSeparator="至" />
+					<!-- 用一个 view 包裹并监听点击事件来打开 picker -->
+					<view @click="isPickerOpen = true">
+						<uni-datetime-picker type="datetimerange" v-model="timeRange" rangeSeparator="至"
+							@change="isPickerOpen = false" @maskClick="isPickerOpen = false" />
+					</view>
 				</uni-forms-item>
 
-				<!-- registrationStartDatetime & registrationEndDatetime (由 enrollTime 数组驱动) -->
+				<!-- 【修改】报名时间选择器 -->
 				<uni-forms-item label="报名时间" required>
-					<uni-datetime-picker type="datetimerange" v-model="enrollTimeRange" rangeSeparator="至" />
+					<!-- 同样用 view 包裹 -->
+					<view @click="isPickerOpen = true">
+						<uni-datetime-picker type="datetimerange" v-model="enrollTimeRange" rangeSeparator="至"
+							@change="isPickerOpen = false" @maskClick="isPickerOpen = false" />
+					</view>
 				</uni-forms-item>
 
 				<!-- locationAddress, longitude, latitude -->
@@ -141,10 +149,10 @@
 		</view>
 
 		<!-- 底部操作栏 -->
-		<view class="action-bar">
-			<view class="action-btn save-btn" @click="saveDraft">保存草稿</view>
-			<view class="action-btn publish-btn" @click="publish">发布活动</view>
-		</view>
+		<view class="action-bar" :class="{ 'z-index-low': isPickerOpen }">
+					<view class="action-btn save-btn" @click="saveDraft">保存草稿</view>
+					<view class="action-btn publish-btn" @click="publish">发布活动</view>
+				</view>
 	</view>
 </template>
 
@@ -158,10 +166,13 @@
 		onUnload
 	} from '@dcloudio/uni-app';
 	import request from '../../utils/request.js';
+	import uploadFile from '../../utils/upload.js';
 
 	onMounted(() => {
 		getActiveType();
 	});
+
+	const isPickerOpen = ref(false);
 
 	// 用于UI组件绑定的时间范围数组
 	const timeRange = ref(['2025-07-19 14:00:00', '2025-07-19 17:00:00']);
@@ -259,25 +270,62 @@
 	};
 
 	// 上传函数，更新对应字段
-	function uploadCover() {
+	const handleImageUpload = (field, directory) => {
 		uni.chooseImage({
 			count: 1,
-			success: res => form.value.coverImageUrl = res.tempFilePaths[0]
-		});
-	}
+			sizeType: ['compressed'],
+			sourceType: ['album', 'camera'],
+			success: async (res) => {
+				const file = res.tempFiles[0];
+				const maxSize = 5 * 1024 * 1024; // 5MB
+				if (file.size > maxSize) {
+					return uni.showToast({
+						title: '文件大小不能超过5MB',
+						icon: 'none'
+					});
+				}
 
-	function uploadCode() {
-		uni.chooseImage({
-			count: 1,
-			success: res => form.value.organizerPaymentQrCodeUrl = res.tempFilePaths[0]
+				uni.showLoading({
+					title: '上传中...',
+					mask: true
+				});
+
+				// 【关键】直接调用导入的 uploadFile 工具函数
+				const result = await uploadFile(file.path, {
+					directory: directory
+				});
+
+				uni.hideLoading();
+
+				if (result.data) {
+					// 动态地更新 form 对象中指定的字段为返回的 URL
+					form.value[field] = result.data;
+					uni.showToast({
+						title: '上传成功',
+						icon: 'none'
+					});
+				} else {
+					console.error("上传失败:", result.error);
+					uni.showToast({
+						title: result.error || '上传失败',
+						icon: 'none'
+					});
+				}
+			}
 		});
+	};
+
+	// --- 【简化】具体的上传调用，现在它们都调用统一的处理器 ---
+	function uploadCover() {
+		handleImageUpload('coverImageUrl', 'activity-cover');
 	}
 
 	function uploadSponsorLogo() {
-		uni.chooseImage({
-			count: 1,
-			success: res => form.value.companyLogo = res.tempFilePaths[0]
-		});
+		handleImageUpload('companyLogo', 'sponsor-logo');
+	}
+
+	function uploadCode() {
+		handleImageUpload('organizerPaymentQrCodeUrl', 'payment-qrcode');
 	}
 
 	// 动态增删活动环节
@@ -735,5 +783,10 @@
 
 	::v-deep .uni-select__input-placeholder {
 		color: #939393;
+	}
+	
+	/* 【新增】这个类用于在 picker 打开时降低操作栏的层级 */
+	.action-bar.z-index-low {
+		z-index: 1; /* 或者 z-index: auto; */
 	}
 </style>

@@ -1,5 +1,6 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
+const utils_request = require("../../utils/request.js");
 if (!Array) {
   const _easycom_uni_segmented_control2 = common_vendor.resolveComponent("uni-segmented-control");
   const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
@@ -19,13 +20,15 @@ const _sfc_main = {
     const shaken = common_vendor.ref(false);
     const loading = common_vendor.ref(false);
     const shakeDebounce = common_vendor.ref(true);
+    const userLocation = common_vendor.ref(null);
+    const activityPageNo = common_vendor.ref(1);
+    const activityHasMore = common_vendor.ref(true);
+    const businessPageNo = common_vendor.ref(1);
+    const businessHasMore = common_vendor.ref(true);
     const activities = common_vendor.ref([]);
     const businesses = common_vendor.ref([]);
     const handleTabClick = (e) => {
       currentTab.value = e.currentIndex;
-    };
-    const startShake = () => {
-      triggerShakeSequence();
     };
     const triggerShakeSequence = () => {
       if (!shakeDebounce.value)
@@ -36,99 +39,144 @@ const _sfc_main = {
     const getLocationAndProceed = () => {
       common_vendor.index.getLocation({
         type: "gcj02",
-        // 推荐使用 gcj02，兼容性更好
-        success: (res) => {
-          common_vendor.index.__f__("log", "at pages/location/location.vue:126", "✅ 获取用户位置成功:");
-          common_vendor.index.__f__("log", "at pages/location/location.vue:127", `   - 纬度: ${res.latitude}`);
-          common_vendor.index.__f__("log", "at pages/location/location.vue:128", `   - 经度: ${res.longitude}`);
-          executeShakeActions();
+        success: async (res) => {
+          common_vendor.index.__f__("log", "at pages/location/location.vue:134", "✅ 获取用户位置成功:", res);
+          userLocation.value = {
+            latitude: res.latitude,
+            longitude: res.longitude
+          };
+          shaken.value = true;
+          loading.value = true;
+          common_vendor.index.vibrateShort();
+          try {
+            await Promise.all([
+              getNearbyActivities(false),
+              getNearbyBusinesses(false)
+            ]);
+            common_vendor.index.__f__("log", "at pages/location/location.vue:151", "✅ 附近活动和商友数据均已加载完毕");
+          } catch (error) {
+            common_vendor.index.__f__("error", "at pages/location/location.vue:153", "❌ 加载初始数据时发生错误:", error);
+          } finally {
+            loading.value = false;
+            setTimeout(() => {
+              shakeDebounce.value = true;
+            }, 1e3);
+          }
         },
         fail: (err) => {
-          common_vendor.index.__f__("error", "at pages/location/location.vue:134", "❌ 获取位置失败:", err);
-          if (err.errMsg && (err.errMsg.includes("auth deny") || err.errMsg.includes("auth denied"))) {
-            common_vendor.index.showModal({
-              title: "需要位置权限",
-              content: "我们需要您的位置信息来发现附近的活动和商友，请在设置中打开位置权限。",
-              confirmText: "去设置",
-              showCancel: true,
-              success: (modalRes) => {
-                if (modalRes.confirm) {
-                  common_vendor.index.openSetting();
-                }
-              }
-            });
-          } else {
-            common_vendor.index.showToast({
-              title: "获取位置失败，请检查系统定位服务是否开启",
-              icon: "none"
-            });
-          }
+          common_vendor.index.__f__("error", "at pages/location/location.vue:164", "❌ 获取位置失败:", err);
           shakeDebounce.value = true;
         }
       });
     };
-    const executeShakeActions = () => {
-      loading.value = true;
-      shaken.value = true;
-      common_vendor.index.vibrateShort();
-      setTimeout(() => {
-        loadMockData();
+    const getNearbyActivities = async (isLoadMore = false) => {
+      if (isLoadMore && (!activityHasMore.value || loading.value))
+        return;
+      if (isLoadMore)
+        loading.value = true;
+      if (!isLoadMore) {
+        activityPageNo.value = 1;
+        activities.value = [];
+        activityHasMore.value = true;
+      }
+      const params = {
+        pageNo: activityPageNo.value,
+        pageSize: 10,
+        longitude: userLocation.value.longitude,
+        latitude: userLocation.value.latitude
+      };
+      const result = await utils_request.request("/app-api/member/activity/list", {
+        method: "GET",
+        data: params
+      });
+      if (result && !result.error && result.data) {
+        const list = result.data.list || [];
+        activities.value = isLoadMore ? [...activities.value, ...list] : list;
+        if (activities.value.length >= result.data.total)
+          activityHasMore.value = false;
+        activityPageNo.value++;
+      } else {
+        activityHasMore.value = false;
+      }
+      if (isLoadMore)
         loading.value = false;
-        setTimeout(() => {
-          shakeDebounce.value = true;
-        }, 1e3);
-      }, 1500);
     };
-    const loadMockData = () => {
-      activities.value = [
-        {
-          id: 1,
-          title: "互联网创业者交流会",
-          image: "https://images.unsplash.com/photo-1553877522-43269d4ea984?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-          date: "今天 14:00-16:00",
-          location: "创业咖啡厅",
-          participants: { current: 32, total: 50 },
-          // 修改为对象
-          tags: ["创业", "交流会"],
-          organizer: "创业咖啡厅"
-          // 补充组织者信息
-        },
-        {
-          id: 2,
-          title: "2025金融科技峰会",
-          image: "https://images.unsplash.com/photo-1533750349088-cd871a92f312?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-          date: "明天 09:00-17:00",
-          location: "国际会议中心",
-          participants: { current: 180, total: 200 },
-          tags: ["金融", "科技"],
-          organizer: "金融时报"
-        }
-      ];
-      businesses.value = [
-        {
-          id: 1,
-          name: "张明",
-          position: "产品总监",
-          avatar: "https://randomuser.me/api/portraits/men/32.jpg",
-          firms: "创新科技有限公司",
-          distance: "120米"
-        },
-        {
-          id: 2,
-          name: "李华",
-          position: "技术主管",
-          avatar: "https://randomuser.me/api/portraits/women/44.jpg",
-          firms: "创新科技有限公司",
-          distance: "560米"
-        }
-      ];
-    };
-    const handleFavorite = (isFavorite) => {
-      common_vendor.index.__f__("log", "at pages/location/location.vue:233", "收藏状态改变:", isFavorite);
-      common_vendor.index.showToast({
-        title: isFavorite ? "收藏成功" : "取消收藏",
-        icon: "none"
+    const getNearbyBusinesses = async (isLoadMore = false) => {
+      if (isLoadMore && (!businessHasMore.value || loading.value))
+        return;
+      if (isLoadMore)
+        loading.value = true;
+      if (!isLoadMore) {
+        businessPageNo.value = 1;
+        businesses.value = [];
+        businessHasMore.value = true;
+      }
+      const params = {
+        pageNo: businessPageNo.value,
+        pageSize: 10,
+        longitude: userLocation.value.longitude,
+        latitude: userLocation.value.latitude
+      };
+      common_vendor.index.__f__("log", "at pages/location/location.vue:231", "发起附近商友列表请求, 参数:", params);
+      const result = await utils_request.request("/app-api/member/user/list", {
+        method: "GET",
+        data: params
       });
+      common_vendor.index.__f__("log", "at pages/location/location.vue:236", "发起附近商友列表result:", result);
+      if (result && !result.error && result.data) {
+        const list = result.data.list || [];
+        list.forEach((item) => {
+          item.isFollowed = false;
+          item.loading = false;
+        });
+        businesses.value = isLoadMore ? [...businesses.value, ...list] : list;
+        if (businesses.value.length >= result.data.total) {
+          businessHasMore.value = false;
+        }
+        businessPageNo.value++;
+      } else {
+        common_vendor.index.__f__("error", "at pages/location/location.vue:250", "获取附近商友列表失败:", result.error);
+        businessHasMore.value = false;
+      }
+      if (isLoadMore)
+        loading.value = false;
+    };
+    const handleConnect = async (business) => {
+      business.loading = true;
+      const userId = common_vendor.index.getStorageSync("userId");
+      if (!userId) {
+        common_vendor.index.showToast({
+          title: "请先登录",
+          icon: "none"
+        });
+        business.loading = false;
+        return;
+      }
+      const endpoint = business.isFollowed ? "/app-api/member/follow/del" : "/app-api/member/follow/add";
+      const successMessage = business.isFollowed ? "已取消关注" : "关注成功";
+      const payload = {
+        userId,
+        targetId: business.id,
+        targetType: "post_user"
+        // 【关键】目标类型为用户
+      };
+      const result = await utils_request.request(endpoint, {
+        method: "POST",
+        data: payload
+      });
+      if (result && !result.error) {
+        common_vendor.index.showToast({
+          title: successMessage,
+          icon: "success"
+        });
+        business.isFollowed = !business.isFollowed;
+      } else {
+        common_vendor.index.showToast({
+          title: result.error || "操作失败",
+          icon: "none"
+        });
+      }
+      business.loading = false;
     };
     common_vendor.onMounted(() => {
       common_vendor.index.onAccelerometerChange((res) => {
@@ -137,8 +185,17 @@ const _sfc_main = {
         }
       });
     });
-    common_vendor.onUnmounted(() => {
-      common_vendor.index.stopAccelerometer();
+    common_vendor.onUnmounted(() => common_vendor.index.stopAccelerometer());
+    common_vendor.onReachBottom(() => {
+      if (loading.value)
+        return;
+      if (currentTab.value === 0 && activityHasMore.value) {
+        common_vendor.index.__f__("log", "at pages/location/location.vue:321", "滑动到底部，加载更多附近活动...");
+        getNearbyActivities(true);
+      } else if (currentTab.value === 1 && businessHasMore.value) {
+        common_vendor.index.__f__("log", "at pages/location/location.vue:324", "滑动到底部，加载更多附近商友...");
+        getNearbyBusinesses(true);
+      }
     });
     return (_ctx, _cache) => {
       return common_vendor.e({
@@ -156,8 +213,8 @@ const _sfc_main = {
           size: "60",
           color: "#FFFFFF"
         }),
-        e: common_vendor.o(startShake)
-      } : loading.value ? {} : {
+        e: common_vendor.o(triggerShakeSequence)
+      } : loading.value ? {} : common_vendor.e({
         g: common_vendor.p({
           type: "calendar-filled",
           size: "20",
@@ -166,31 +223,48 @@ const _sfc_main = {
         h: common_vendor.f(activities.value, (activity, k0, i0) => {
           return {
             a: activity.id,
-            b: common_vendor.o(handleFavorite, activity.id),
+            b: common_vendor.o(triggerShakeSequence, activity.id),
             c: "4d9b4fcb-3-" + i0,
             d: common_vendor.p({
               activity
             })
           };
         }),
-        i: currentTab.value === 0,
-        j: common_vendor.p({
+        i: !activityHasMore.value && activities.value.length > 0
+      }, !activityHasMore.value && activities.value.length > 0 ? {} : {}, {
+        j: activities.value.length === 0
+      }, activities.value.length === 0 ? {} : {}, {
+        k: currentTab.value === 0,
+        l: common_vendor.p({
           type: "staff-filled",
           size: "20",
           color: "#FF6B00"
         }),
-        k: common_vendor.f(businesses.value, (business, k0, i0) => {
-          return {
-            a: business.avatar,
-            b: common_vendor.t(business.name),
-            c: common_vendor.t(business.distance),
-            d: common_vendor.t(business.position),
-            e: common_vendor.t(business.firms),
-            f: business.id
-          };
+        m: common_vendor.f(businesses.value, (business, k0, i0) => {
+          return common_vendor.e({
+            a: business.avatar || "/static/images/default-avatar.png",
+            b: common_vendor.t(business.nickname),
+            c: business.professionalTitle
+          }, business.professionalTitle ? {
+            d: common_vendor.t(business.professionalTitle)
+          } : {}, {
+            e: business.companyName
+          }, business.companyName ? {
+            f: common_vendor.t(business.companyName)
+          } : {}, {
+            g: common_vendor.t(business.isFollowed ? "已关注" : "关注"),
+            h: common_vendor.o(($event) => handleConnect(business), business.id),
+            i: business.loading,
+            j: business.isFollowed ? 1 : "",
+            k: business.id
+          });
         }),
-        l: currentTab.value === 1
-      }, {
+        n: !businessHasMore.value && businesses.value.length > 0
+      }, !businessHasMore.value && businesses.value.length > 0 ? {} : {}, {
+        o: businesses.value.length === 0
+      }, businesses.value.length === 0 ? {} : {}, {
+        p: currentTab.value === 1
+      }), {
         f: loading.value
       });
     };

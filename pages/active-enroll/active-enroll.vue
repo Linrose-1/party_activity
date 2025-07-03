@@ -158,6 +158,7 @@
 		onLoad
 	} from '@dcloudio/uni-app'
 	import request from '../../utils/request.js';
+	import uploadFile from '../../utils/upload.js';
 
 	const currentStep = ref(1);
 	
@@ -226,51 +227,38 @@
 	
 	// 【核心修改】将上传逻辑替换为真实的 uni.uploadFile 调用
 	const chooseImage = () => {
-		uni.chooseImage({
-			count: 1,
-			sizeType: ['compressed'],
-			sourceType: ['album', 'camera'],
-			success: async (res) => {
-				const tempFilePath = res.tempFilePaths[0];
-				
-				uni.showLoading({ title: '上传中...' });
-				
-				try {
-					// 【重要】确保 baseURL 是你后端服务的正确地址
-					const baseURL = 'http://8.163.18.207:48080'; 
-					const token = uni.getStorageSync('token');
-
-					const uploadResult = await uni.uploadFile({
-						url: baseURL + '/app-api/infra/file/upload', // 完整的上传URL
-						filePath: tempFilePath,
-						name: 'file', // 后端接收文件的 key
-						header: {
-							'Authorization': token || ''
-						},
-					});
-
-					uni.hideLoading();
-
-					if (uploadResult.statusCode === 200) {
-						const responseData = JSON.parse(uploadResult.data);
-						if (responseData.code === 0) {
-							// 上传成功，将返回的真实URL赋值给 formData
-							formData.paymentScreenshotUrl = responseData.data;
-							uni.showToast({ title: '上传成功', icon: 'success' });
-						} else {
-							uni.showToast({ title: responseData.msg || '上传失败', icon: 'none' });
-						}
-					} else {
-						uni.showToast({ title: `上传失败(${uploadResult.statusCode})`, icon: 'none' });
+			uni.chooseImage({
+				count: 1,
+				sizeType: ['compressed'],
+				sourceType: ['album', 'camera'],
+				success: async (res) => {
+					const file = res.tempFiles[0];
+	
+					// (可选) 文件大小校验
+					const maxSize = 5 * 1024 * 1024; // 5MB
+					if (file.size > maxSize) {
+						return uni.showToast({ title: '文件大小不能超过5MB', icon: 'none' });
 					}
-				} catch (error) {
+	
+					uni.showLoading({ title: '上传中...', mask: true });
+	
+					// 【关键】直接调用导入的 uploadFile 工具函数
+					// 为付款凭证指定一个清晰的目录名，方便后端管理
+					const result = await uploadFile(file.path, { directory: 'payment-proof' });
+	
 					uni.hideLoading();
-					console.error("上传异常:", error);
-					uni.showToast({ title: '上传异常', icon: 'none' });
+	
+					if (result.data) {
+						// 上传成功，将返回的真实URL赋值给 formData
+						formData.paymentScreenshotUrl = result.data;
+						uni.showToast({ title: '上传成功', icon: 'success' });
+					} else {
+						console.error("上传失败:", result.error);
+						uni.showToast({ title: result.error || '上传失败', icon: 'none' });
+					}
 				}
-			}
-		});
-	};
+			});
+		};
 
 	// 【移除】onDrop 函数，因为它在小程序中无效
 

@@ -35,6 +35,18 @@ const _sfc_main = {
       const m = date.getMinutes().toString().padStart(2, "0");
       return `${Y}-${M}-${D} ${h}:${m}`;
     });
+    const getStatusClass = (statusStr) => {
+      const classMap = {
+        "已取消": "canceled",
+        "未开始": "upcoming",
+        "报名中": "enrolled",
+        "即将开始": "upcoming",
+        "进行中": "ongoing",
+        "已结束": "ended",
+        "待退款": "refund_pending"
+      };
+      return classMap[statusStr] || "";
+    };
     const toggleFavorite = async () => {
       if (loading.value) {
         return;
@@ -53,7 +65,6 @@ const _sfc_main = {
         userId,
         targetId: props.activity.id,
         targetType: "activity"
-        // 固定为 activity
       };
       try {
         const result = await utils_request.request(endpoint, {
@@ -87,53 +98,56 @@ const _sfc_main = {
       });
     };
     const detailActivity = (activityId) => {
-      common_vendor.index.__f__("log", "at components/ActivityCard.vue:160", "准备跳转到详情页，活动ID:", activityId);
       common_vendor.index.navigateTo({
-        // 关键在这里：将 activityId 拼接到 url 的查询参数中
         url: `/pages/active-detail/active-detail?id=${activityId}`
       });
     };
     return (_ctx, _cache) => {
-      return {
+      return common_vendor.e({
         a: __props.activity.coverImageUrl,
         b: common_vendor.t(__props.activity.activityTitle),
-        c: common_vendor.p({
+        c: __props.activity.statusStr
+      }, __props.activity.statusStr ? {
+        d: common_vendor.t(__props.activity.statusStr),
+        e: common_vendor.n(getStatusClass(__props.activity.statusStr))
+      } : {}, {
+        f: common_vendor.p({
           type: "calendar",
           size: "16",
           color: "#FF6B00"
         }),
-        d: common_vendor.t(formattedDate.value),
-        e: common_vendor.p({
+        g: common_vendor.t(formattedDate.value),
+        h: common_vendor.p({
           type: "map-pin",
           size: "16",
           color: "#FF6B00"
         }),
-        f: common_vendor.t(__props.activity.locationAddress || "线上活动"),
-        g: common_vendor.t(__props.activity.joinCount || 0),
-        h: common_vendor.t(__props.activity.totalSlots || "不限"),
-        i: common_vendor.f(__props.activity.tags, (tag, index, i0) => {
+        i: common_vendor.t(__props.activity.locationAddress || "线上活动"),
+        j: common_vendor.t(__props.activity.joinCount || 0),
+        k: common_vendor.t(__props.activity.totalSlots || "不限"),
+        l: common_vendor.f(__props.activity.tags, (tag, index, i0) => {
           return {
             a: common_vendor.t(tag),
             b: index
           };
         }),
-        j: common_vendor.o(($event) => detailActivity(__props.activity.id)),
-        k: common_vendor.p({
+        m: common_vendor.o(($event) => detailActivity(__props.activity.id)),
+        n: common_vendor.p({
           type: "person",
           size: "16",
           color: "#FF6B00"
         }),
-        l: common_vendor.t(__props.activity.organizerUnitName || "主办方"),
-        m: common_vendor.p({
+        o: common_vendor.t(__props.activity.organizerUnitName || "主办方"),
+        p: common_vendor.p({
           type: isFavorite.value ? "heart-filled" : "heart",
           size: "16",
           color: "#FF6B00"
         }),
-        n: common_vendor.t(isFavorite.value ? "已收藏" : "收藏"),
-        o: common_vendor.o(toggleFavorite),
-        p: loading.value,
-        q: common_vendor.o(($event) => registerActivity(__props.activity.id))
-      };
+        q: common_vendor.t(isFavorite.value ? "已收藏" : "收藏"),
+        r: common_vendor.o(toggleFavorite),
+        s: loading.value,
+        t: common_vendor.o(($event) => registerActivity(__props.activity.id))
+      });
     };
   }
 };

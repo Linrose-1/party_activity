@@ -91,6 +91,7 @@
 		computed
 	} from 'vue';
 	import request from '../../utils/request.js';
+	import uploadFile from '../../utils/upload.js';
 
 	onMounted(() => {
 		getUserInfo();
@@ -126,6 +127,54 @@
 		const date = new Date();
 		return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
 	});
+	
+	
+	// --- 【核心修改】统一的图片上传处理器 ---
+		/**
+		 * 处理单张图片上传的通用函数
+		 * @param {string} field - 要更新的 form 字段名, e.g., 'avatar'
+		 * @param {string} directory - 上传到服务器的目录, e.g., 'avatar'
+		 */
+		const handleImageUpload = (field, directory) => {
+			uni.chooseImage({
+				count: 1,
+				sourceType: ['album', 'camera'],
+				success: async (res) => {
+					const file = res.tempFiles[0];
+					
+					const maxSize = 5 * 1024 * 1024; // 5MB
+					if (file.size > maxSize) {
+						return uni.showToast({ title: '文件大小不能超过5MB', icon: 'none' });
+					}
+					
+					uni.showLoading({ title: '上传中...', mask: true });
+					
+					// 【关键】直接调用导入的 uploadFile 工具函数
+					const result = await uploadFile(file.path, { directory: directory });
+					
+					uni.hideLoading();
+					
+					if (result.data) {
+						// 动态地更新 form 对象中指定的字段为返回的 URL
+						form.value[field] = result.data;
+						uni.showToast({ title: '上传成功', icon: 'none' });
+					} else {
+						console.error("上传失败:", result.error);
+						uni.showToast({ title: result.error || '上传失败', icon: 'none' });
+					}
+				}
+			});
+		};
+	
+		// --- 【简化】具体的上传调用 ---
+		function chooseAvatar() {
+			handleImageUpload('avatar', 'avatar');
+		}
+	
+		function chooseWechatQr() {
+			handleImageUpload('wechatQrCodeUrl', 'qrcode');
+		}
+	
 
 	const getUserInfo = async () => {
 		try {
@@ -144,30 +193,7 @@
 			uni.showToast({ title: '网络错误，请稍后再试', icon: 'error' });
 		}
 	};
-	
-	// --- 页面交互函数 ---
-	
-	// 【修改】上传头像，只获取本地路径
-	function chooseAvatar() {
-		uni.chooseImage({
-			count: 1,
-			sourceType: ['album', 'camera'],
-			success: res => {
-				form.value.avatar = res.tempFilePaths[0];
-			}
-		});
-	}
-
-	// 【修改】上传微信二维码，只获取本地路径
-	function chooseWechatQr() {
-		uni.chooseImage({
-			count: 1,
-			sourceType: ['album', 'camera'],
-			success: res => {
-				form.value.wechatQrCodeUrl = res.tempFilePaths[0];
-			}
-		});
-	}
+		
 
 	const openMapToChooseLocation = () => {
 		uni.chooseLocation({
@@ -187,36 +213,31 @@
 
 	// --- 【核心修改】提交表单 ---
 	const submitForm = () => {
-		formRef.value.validate().then(async () => {
-			uni.showLoading({ title: '正在保存...' });
-			
-			try {
-				// 直接将包含本地路径的 form 对象传递给 request 工具
+			formRef.value.validate().then(async () => {
+				uni.showLoading({ title: '正在保存...' });
+				
+				// 此处逻辑大大简化，因为图片 URL 已经提前获取并存在 form.value 中了
 				const result = await request('/app-api/member/user/update', {
 					method: 'PUT',
-					data: form.value // request 工具会自动处理文件上传
+					data: form.value // 直接提交包含图片 URL 的表单数据
 				});
-
-				if (result) {
+	
+				uni.hideLoading();
+	
+				if (result.data !== null) { // 使用 request 工具的返回格式判断
 					uni.showToast({ title: '保存成功', icon: 'success' });
 					setTimeout(() => {
 						uni.navigateBack();
 					}, 1500);
 				} else {
-					uni.showToast({ title: result.msg || '保存失败', icon: 'none' });
+					uni.showToast({ title: result.error || '保存失败', icon: 'none' });
 				}
-			} catch (error) {
-				console.error("提交失败:", error);
-				uni.showToast({ title: '保存失败，请稍后重试', icon: 'error' });
-			} finally {
-				uni.hideLoading();
-			}
-			
-		}).catch(err => {
-			console.log('表单验证失败：', err);
-			uni.showToast({ title: '请检查并填写必填项', icon: 'none' });
-		});
-	}
+				
+			}).catch(err => {
+				console.log('表单验证失败：', err);
+				// uni-forms 会自动弹出第一个错误提示，这里可以只做日志记录或通用提示
+			});
+		}
 </script>
 
 <style scoped lang="scss">

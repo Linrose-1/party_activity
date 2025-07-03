@@ -1,5 +1,6 @@
 /* 水平间距 */
 /* 水平间距 */
+/* 样式部分保持不变，仅新增 loading-container 和 no-more-content */
 .nearby-container.data-v-4d9b4fcb {
   background-color: #f8f9fa;
   min-height: 100vh;
@@ -16,13 +17,6 @@
   z-index: 100;
   box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
   padding-top: var(--status-bar-height);
-  /* 适配刘海屏 */
-}
-.header .title.data-v-4d9b4fcb {
-  font-size: 36rpx;
-  font-weight: 600;
-  text-align: center;
-  margin: 10rpx 0 20rpx;
 }
 .header .tabs-wrapper.data-v-4d9b4fcb {
   margin: 0 auto;
@@ -70,13 +64,14 @@
   line-height: 1.6;
 }
 
-/* 加载中 */
+/* 【修改】将原 loading-container 样式用于列表加载中 */
 .loading-container.data-v-4d9b4fcb {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 70vh;
+  padding: 40rpx 0;
+  /* 调整为列表内的间距 */
   color: #666;
 }
 .loading-spinner.data-v-4d9b4fcb {
@@ -89,6 +84,14 @@
   margin-bottom: 20rpx;
 }
 .loading-text.data-v-4d9b4fcb {
+  font-size: 28rpx;
+}
+
+/* 【新增】暂无更多提示 */
+.no-more-content.data-v-4d9b4fcb {
+  text-align: center;
+  color: #999;
+  padding: 30rpx 0;
   font-size: 28rpx;
 }
 
@@ -115,6 +118,7 @@
   display: flex;
   margin-bottom: 30rpx;
   box-shadow: 0 4rpx 24rpx rgba(0, 0, 0, 0.05);
+  /* 【新增】已关注按钮的样式 */
 }
 .business-card .business-avatar.data-v-4d9b4fcb {
   width: 140rpx;
@@ -175,6 +179,10 @@
 .business-card .connect-btn.data-v-4d9b4fcb::after {
   border: none;
 }
+.business-card .connect-btn.connected.data-v-4d9b4fcb {
+  background: #f0f2f5;
+  color: #999;
+}
 
 /* 动画 */
 @keyframes pulse-4d9b4fcb {
@@ -208,4 +216,7 @@ to {
     opacity: 1;
     transform: translateY(0);
 }
+}
+.iconfont.data-v-4d9b4fcb {
+  margin-right: 10rpx;
 }
