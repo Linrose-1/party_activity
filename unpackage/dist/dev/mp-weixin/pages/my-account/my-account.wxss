@@ -1,14 +1,38 @@
 
-	/*
-  The rpx unit is Uni-app specific. For a pure web project, you might prefer px, rem, or vw units.
-  For Uni-app, rpx is standard for responsive sizing.
-*/
-	/* * {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: 'PingFang SC', 'Helvetica Neue', Arial, sans-serif;
-} */
+/* ================== 历史记录模块新增/修改样式 ================== */
+.history-empty.data-v-04e670bd {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	padding: 80rpx 40rpx;
+	color: #999;
+	font-size: 28rpx;
+}
+.history-empty text.data-v-04e670bd {
+	margin-top: 20rpx;
+}
+.history-icon.positive-bg.data-v-04e670bd {
+	background-color: #e8f5e9; /* 绿色背景 */
+}
+.history-icon.negative-bg.data-v-04e670bd {
+	background-color: #fce4e4; /* 红色背景 */
+}
+.history-points.positive.data-v-04e670bd {
+	color: #28a745; /* 绿色 */
+}
+.history-points.negative.data-v-04e670bd {
+	color: #dc3545; /* 红色 */
+}
+
+/* 新增：当前会员等级高亮样式 */
+.current-member-highlight.data-v-04e670bd {
+	transform: translateY(-8rpx);
+	box-shadow: 0 12rpx 30rpx rgba(0, 0, 0, 0.15) !important;
+	border: 4rpx solid #FF6B00 !important;
+}
+
+/* ================== 以下为页面原有全部样式 (保持不变) ================== */
 body.data-v-04e670bd {
 		background: linear-gradient(135deg, #f8f9fa, #e9ecef);
 		color: #333;
@@ -20,8 +44,6 @@ body.data-v-04e670bd {
 		max-width: 750rpx;
 		margin: 0 auto;
 }
-
-	/* 顶部用户信息 */
 .user-header.data-v-04e670bd {
 		background: linear-gradient(135deg, #FF8C00, #FF6B00);
 		color: white;
@@ -101,8 +123,6 @@ body.data-v-04e670bd {
 .back-btn.data-v-04e670bd:hover {
 		background: rgba(255, 255, 255, 0.3);
 }
-
-	/* 账户详情区域 */
 .account-detail-section.data-v-04e670bd {
 		background: white;
 		margin: 0 0 50rpx;
@@ -134,8 +154,6 @@ body.data-v-04e670bd {
 		background: linear-gradient(to bottom, #FF8C00, #FF6B00);
 		border-radius: 10rpx;
 }
-
-	/* 等级晋升系统 */
 .level-system.data-v-04e670bd {
 		background: linear-gradient(to right, #f9f9f9, #f0f0f0);
 		border-radius: 40rpx;
@@ -306,8 +324,6 @@ body.data-v-04e670bd {
 		font-size: 24rpx;
 		color: #666;
 }
-
-	/* ============= 会员等级晋升系统样式 ============= */
 .membership-level-system.data-v-04e670bd {
 		background: #ffffff;
 		border-radius: 40rpx;
@@ -328,8 +344,6 @@ body.data-v-04e670bd {
 .membership-title uni-icons.data-v-04e670bd {
 		margin-right: 20rpx;
 }
-	
-	/* 新增：当前会员状态样式 */
 .membership-status.data-v-04e670bd {
 		background: linear-gradient(135deg, #fffaf2, #fff5e6);
 		border-radius: 30rpx;
@@ -412,8 +426,6 @@ body.data-v-04e670bd {
 		font-size: 28rpx;
 		font-weight: 500;
 }
-
-	/* 不同等级的颜色区分 */
 .visitor.data-v-04e670bd {
 		background-color: #f8f9fa;
 		border: 2rpx solid #dee2e6;
@@ -464,11 +476,6 @@ body.data-v-04e670bd {
 .diamond-member .level-price.data-v-04e670bd {
 		color: #dee2e6;
 }
-
-	/* ============= 样式结束 ============= */
-
-
-	/* 贡分获取区域 */
 .points-section.data-v-04e670bd {
 		background: white;
 		border-radius: 40rpx;
@@ -582,8 +589,6 @@ body.data-v-04e670bd {
 		transform: scale(1.1);
 		background: #FF8C00;
 }
-
-	/* 历史记录 */
 .history-section.data-v-04e670bd {
 		background: white;
 		border-radius: 40rpx;
@@ -612,7 +617,6 @@ body.data-v-04e670bd {
 		border-bottom: 2rpx solid #f0f0f0;
 		align-items: center;
 		transition: background-color 0.3s ease;
-		/* Add transition for smooth highlight */
 		cursor: pointer;
 }
 .history-item.data-v-04e670bd:last-child {
@@ -627,7 +631,6 @@ body.data-v-04e670bd {
 		align-items: center;
 		justify-content: center;
 		margin-right: 30rpx;
-		color: #FF6B00;
 		font-size: 36rpx;
 }
 .history-details.data-v-04e670bd {
@@ -644,11 +647,8 @@ body.data-v-04e670bd {
 }
 .history-points.data-v-04e670bd {
 		font-weight: bold;
-		color: #FF6B00;
 		font-size: 32rpx;
 }
-
-	/* 底部导航 */
 .bottom-nav.data-v-04e670bd {
 		position: fixed;
 		bottom: 0;
@@ -684,8 +684,6 @@ body.data-v-04e670bd {
 		color: #3a7bd5;
 		transform: translateY(-10rpx);
 }
-
-	/* 动画效果 */
 @keyframes pulse-04e670bd {
 0% {
 			transform: scale(1);
@@ -720,8 +718,6 @@ body.data-v-04e670bd {
 		background: radial-gradient(circle, rgba(255, 107, 0, 0.1) 0%, rgba(255, 107, 0, 0) 70%);
 		border-radius: 50%;
 }
-
-	/* 邀请人模块样式 */
 .inviter-section.data-v-04e670bd {
 		background: white;
 		border-radius: 40rpx;
@@ -816,8 +812,6 @@ body.data-v-04e670bd {
 		display: block;
 		font-size: 48rpx;
 }
-
-	/* 新增：智米模块样式 */
 .smart-rice-section.data-v-04e670bd {
 		background: linear-gradient(to right, #fefefe, #f9f9f9);
 		border-radius: 40rpx;

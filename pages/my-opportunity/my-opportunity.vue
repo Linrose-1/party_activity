@@ -1,637 +1,487 @@
 <template>
-    <div class="my-opportunities-app">
-        
-        <!-- 帖子列表 -->
-        <div class="post-list">
-            <!-- 帖子卡片 -->
-            <div 
-                v-for="post in myPosts" 
-                :key="post.id" 
-                class="post-card"
-                @click="skipCommercialDetail(post.id)"
-            >
-                <div class="post-header">
-                    <div class="user-info">
-                        <div class="avatar" @click.stop="skipApplicationBusinessCard">{{ post.user.charAt(0) }}</div>
-                        <div class="user-details-wrapper">
-                            <div class="user-name">{{ post.user }}</div>
-                            <div class="post-time">
-                                <uni-icons type="redo" size="14" color="#888"></uni-icons> {{ post.time }}
-                            </div>
-                        </div>
-                    </div>
-                    <!-- 删除按钮 -->
-                    <div class="delete-action" @click.stop="deleteOpportunity(post.id)">
-                        <uni-icons type="close" size="15" color="#FF6A00">删除</uni-icons>
-                    </div>
-                </div>
-                
-                <div class="post-content">
-                    {{ post.content }}
-                </div>
+	<view class="my-opportunities-app">
 
-                <!-- 商机图片区域 -->
-                <div class="post-images" v-if="post.images && post.images.length">
-                    <div 
-                        v-for="(image, imgIndex) in post.images" 
-                        :key="imgIndex" 
-                        class="image-wrapper"
-                    >
-                        <img :src="image" alt="商机图片" class="post-image" @click.stop="previewImage(post.images, imgIndex)" />
-                    </div>
-                </div>
+		<!-- 搜索框 -->
+		<!-- <view class="search-bar-container">
+			<uni-search-bar v-model="searchKey" placeholder="搜索商机标题、内容等" cancelButton="none" @confirm="handleSearch"
+				@clear="handleClear" />
+		</view> -->
 
-                <div class="tags">
-                    <div 
-                        v-for="(tag, tagIndex) in post.tags" 
-                        :key="tagIndex" 
-                        class="tag"
-                    >
-                        {{ tag }}
-                    </div>
-                </div>
-                
-                <!-- 赞踩统计 -->
-                <div class="feedback-stats">
-                    <div class="like-count">
-                        <uni-icons type="hand-up-filled" size="18" color="#e74c3c"></uni-icons>
-                        <span>{{ post.likes }}</span>
-                    </div>
-                    <div class="dislike-count">
-                        <uni-icons type="hand-down-filled" size="18" color="#3498db"></uni-icons>
-                        <span>{{ post.dislikes }}</span>
-                    </div>
-                </div>
-                
-                <div class="post-actions">
-                    <div class="action-group">
-                        <div 
-                            class="action like" 
-                            :class="{ active: post.userAction === 'like' }"
-                            @click.stop="toggleAction(post, 'like')"
-                        >
-                            <uni-icons 
-                                :type="post.userAction === 'like' ? 'hand-up-filled' : 'hand-up'" 
-                                size="20"
-                                :color="post.userAction === 'like' ? '#e74c3c' : '#666'"
-                            ></uni-icons>
-                            <span>赞</span>
-                        </div>
-                        <div 
-                            class="action dislike" 
-                            :class="{ active: post.userAction === 'dislike' }"
-                            @click.stop="toggleAction(post, 'dislike')"
-                        >
-                            <uni-icons 
-                                :type="post.userAction === 'dislike' ? 'hand-down-filled' : 'hand-down'" 
-                                size="20"
-                                :color="post.userAction === 'dislike' ? '#3498db' : '#666'"
-                            ></uni-icons>
-                            <span>踩</span>
-                        </div>
-                    </div>
-                    <div class="action-group">
-                        <div 
-                            class="action comment"
-                            :class="{ active: post.saved }"
-                            @click.stop="toggleSave(post)"
-                        >
-                            <uni-icons 
-                                :type="post.saved ? 'star-filled' : 'star'" 
-                                size="20"
-                                :color="post.saved ? '#FF6A00' : '#666'"
-                            ></uni-icons>
-                            <span>收藏</span>
-                        </div>
-                        <div class="action share" @click.stop="sharePost(post)">
-                            <uni-icons type="redo" size="20" color="#666"></uni-icons>
-                            <span>分享</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
+		<!-- 帖子列表 -->
+		<view class="post-list">
+			<!-- 帖子卡片 - v-for 循环动态数据 postList -->
+			<view v-for="post in postList" :key="post.id" class="post-card" @click="skipCommercialDetail(post.id)">
+				<view class="post-header">
+					<view class="user-info">
+						<view class="avatar" @click.stop="skipApplicationBusinessCard">
+							{{ post.contactPerson ? post.contactPerson.charAt(0) : '商' }}
+						</view>
+						<view class="user-details-wrapper">
+							<view class="user-name">{{ post.contactPerson || '匿名用户' }}</view>
+							<view class="post-time">
+								<!-- 1. 数据显示优化：使用 formatTimestamp 函数转换时间 -->
+								<uni-icons type="redo" size="14" color="#888"></uni-icons>
+								{{ formatTimestamp(post.createTime) }}
+							</view>
+						</view>
+					</view>
+					<!-- 删除按钮 -->
+					<view class="delete-action" @click.stop="deleteOpportunity(post.id)">
+						<uni-icons type="close" size="15" color="#FF6A00">删除</uni-icons>
+					</view>
+				</view>
 
-            <!-- 如果没有帖子显示 -->
-            <div v-if="myPosts.length === 0" class="no-posts-message">
-                <uni-icons type="info" size="60" color="#ccc"></uni-icons>
-                <p>您还没有发布任何商机</p>
-                <button class="empty-post-button" @click="postNew">
-                    <uni-icons type="compose" size="20" color="#FFFFFF"></uni-icons> 发布我的第一个商机
-                </button>
-            </div>
-        </div>
-    </div>
+				<view class="post-content">
+					{{ post.postContent }}
+				</view>
+
+				<view class="post-images" v-if="post.postImg">
+					<view v-for="(image, imgIndex) in post.postImg.split(',')" :key="imgIndex" class="image-wrapper">
+						<img :src="image" alt="商机图片" class="post-image"
+							@click.stop="previewImage(post.postImg.split(','), imgIndex)" />
+					</view>
+				</view>
+
+				<view class="tags" v-if="post.tags && post.tags.length > 0">
+					<view v-for="(tag, tagIndex) in post.tags" :key="tagIndex" class="tag">
+						{{ tag }}
+					</view>
+				</view>
+
+				<view class="feedback-stats">
+					<view class="like-count">
+						<uni-icons type="hand-up-filled" size="18" color="#e74c3c"></uni-icons>
+						<span>{{ post.likesCount }}</span>
+					</view>
+					<view class="dislike-count">
+						<uni-icons type="hand-down-filled" size="18" color="#3498db"></uni-icons>
+						<span>{{ post.dislikesCount }}</span>
+					</view>
+				</view>
+
+			</view>
+
+			<uni-load-more v-if="postList.length > 0" :status="loadStatus"></uni-load-more>
+
+			<view v-if="postList.length === 0 && loadStatus === 'noMore'" class="no-posts-message">
+				<uni-icons type="info" size="60" color="#ccc"></uni-icons>
+				<p>您还没有发布任何商机</p>
+				<button class="empty-post-button" @click="postNew">
+					<uni-icons type="compose" size="20" color="#FFFFFF"></uni-icons> 发布我的第一个商机
+				</button>
+			</view>
+		</view>
+	</view>
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue';
+	import {
+		ref
+	} from 'vue';
+	import {
+		onLoad,
+		onReachBottom,
+		onPullDownRefresh
+	} from '@dcloudio/uni-app';
+	import request from '@/utils/request.js'; // ‼️ 请确保此路径相对于您的页面文件是正确的
 
-// 模拟“我的商机”数据
-const myPosts = reactive([
-    {
-        id: 101, // 增加ID以方便删除
-        user: '当前用户', // 假设这是登录用户
-        time: '2025-06-16 10:00:00',
-        content: '我司寻求智能家居项目合作，主要方向为AIoT设备连接与数据分析平台。欢迎有相关经验的团队联系，可提供技术方案或产品。',
-        images: [
-            'https://via.placeholder.com/150/FF6A00/FFFFFF?text=智能家居1',
-            'https://via.placeholder.com/150/FF6A00/FFFFFF?text=智能家居2'
-        ],
-        tags: ['#智能家居', '#AIoT', '#项目合作'],
-        likes: 15,
-        dislikes: 0,
-        userAction: null,
-        saved: false
-    },
-    {
-        id: 102,
-        user: '当前用户',
-        time: '2025-06-15 14:30:00',
-        content: '本人有一批高质量二手办公家具转让，适合创业公司或小型办公室，价格优惠，可上门看货。',
-        images: [
-            'https://via.placeholder.com/150/007AFF/FFFFFF?text=办公家具1',
-            'https://via.placeholder.com/150/007AFF/FFFFFF?text=办公家具2',
-            'https://via.placeholder.com/150/007AFF/FFFFFF?text=办公家具3',
-            'https://via.placeholder.com/150/007AFF/FFFFFF?text=办公家具4',
-            'https://via.placeholder.com/150/007AFF/FFFFFF?text=办公家具5'
-        ],
-        tags: ['#二手转让', '#办公用品', '#创业福利'],
-        likes: 8,
-        dislikes: 1,
-        userAction: null,
-        saved: false
-    },
-    {
-        id: 103,
-        user: '当前用户',
-        time: '2025-06-14 09:00:00',
-        content: '寻找在营销策划、品牌推广方面有独到见解的专家，希望通过线上线下结合的方式提升品牌影响力。',
-        images: [], // 无图片
-        tags: ['#营销策划', '#品牌推广', '#专家合作'],
-        likes: 20,
-        dislikes: 0,
-        userAction: null,
-        saved: true // 模拟已被收藏
-    }
-]);
+	// --- 状态定义 ---
+	const postList = ref([]);
+	const searchKey = ref('');
+	const pageNo = ref(1);
+	const pageSize = ref(10);
+	const total = ref(0);
+	const loadStatus = ref('more');
 
-/**
- * 返回上一页
- */
-const goBack = () => {
-    uni.navigateBack({
-        delta: 1
-    });
-};
+	// --- 辅助函数 ---
 
-/**
- * 删除商机
- * @param {number} id - 要删除的商机ID
- */
-const deleteOpportunity = (id) => {
-    uni.showModal({
-        title: '确认删除',
-        content: '您确定要删除这条商机吗？删除后将无法恢复。',
-        success: (res) => {
-            if (res.confirm) {
-                const index = myPosts.findIndex(post => post.id === id);
-                if (index !== -1) {
-                    myPosts.splice(index, 1);
-                    uni.showToast({
-                        title: '删除成功',
-                        icon: 'success'
-                    });
-                }
-            }
-        }
-    });
-};
+	/**
+	 * 1. 新增：格式化时间戳为 'YYYY-MM-DD HH:mm:ss'
+	 * @param {number} timestamp - 时间戳 (例如 1750339776000)
+	 * @returns {string} 格式化后的日期字符串
+	 */
+	const formatTimestamp = (timestamp) => {
+		if (!timestamp) return '';
+		const date = new Date(timestamp);
+		const Y = date.getFullYear();
+		const M = (date.getMonth() + 1).toString().padStart(2, '0');
+		const D = date.getDate().toString().padStart(2, '0');
+		const h = date.getHours().toString().padStart(2, '0');
+		const m = date.getMinutes().toString().padStart(2, '0');
+		const s = date.getSeconds().toString().padStart(2, '0');
+		return `${Y}-${M}-${D} ${h}:${m}:${s}`;
+	};
 
-/**
- * 切换点赞/踩状态 (与商机发现页通用逻辑)
- * @param {Object} post - 帖子对象
- * @param {string} action - 'like' 或 'dislike'
- */
-const toggleAction = (post, action) => {
-    if (post.userAction === action) {
-        post.userAction = null;
-        if (action === 'like') {
-            post.likes--;
-        } else {
-            post.dislikes--;
-        }
-    } else {
-        const prevAction = post.userAction;
-        post.userAction = action;
-        if (action === 'like') {
-            post.likes++;
-            if (prevAction === 'dislike') {
-                post.dislikes--;
-            }
-        } else {
-            post.dislikes++;
-            if (prevAction === 'like') {
-                post.likes--;
-            }
-        }
-    }
-};
+	// --- 核心数据请求函数 ---
+	const getMyOpportunitiesList = async (isRefresh = false) => {
+		if (loadStatus.value === 'loading' || (loadStatus.value === 'noMore' && !isRefresh)) {
+			return;
+		}
+		if (isRefresh) {
+			pageNo.value = 1;
+			postList.value = [];
+			loadStatus.value = 'more';
+		}
+		loadStatus.value = 'loading';
+		const params = {
+			pageNo: pageNo.value,
+			pageSize: pageSize.value,
+			// searchKey: searchKey.value.trim(),
+			userId: 247
+		};
+		const {
+			data,
+			error
+		} = await request('/app-api/member/business-opportunities/my-list', {
+			method: 'GET',
+			data: params
+		});
+		
+		console.log("我的商机",data)
 
-/**
- * 切换收藏状态 (与商机发现页通用逻辑)
- * @param {Object} post - 帖子对象
- */
-const toggleSave = (post) => {
-    post.saved = !post.saved;
-    uni.showToast({
-        title: post.saved ? '已收藏' : '已取消收藏',
-        icon: 'none'
-    });
-};
+		if (isRefresh) {
+			uni.stopPullDownRefresh();
+		}
+		if (error) {
+			uni.showToast({
+				title: error,
+				icon: 'none'
+			});
+			loadStatus.value = 'more';
+			return;
+		}
+		if (data && data.list && data.list.length > 0) {
+			postList.value = [...postList.value, ...data.list];
+			total.value = data.total;
+			if (postList.value.length >= total.value) {
+				loadStatus.value = 'noMore';
+			} else {
+				loadStatus.value = 'more';
+				pageNo.value++;
+			}
+		} else {
+			if (pageNo.value === 1) {
+				total.value = 0;
+				postList.value = [];
+			}
+			loadStatus.value = 'noMore';
+		}
+	};
 
-/**
- * 分享帖子 (与商机发现页通用逻辑)
- * @param {Object} post - 帖子对象
- */
-const sharePost = (post) => {
-    uni.showToast({
-        title: '分享功能即将上线',
-        icon: 'none'
-    });
-};
+	// --- 事件处理函数 ---
+	const handleSearch = () => {
+		getMyOpportunitiesList(true);
+	};
+	const handleClear = () => {
+		searchKey.value = '';
+		getMyOpportunitiesList(true);
+	};
 
-/**
- * 跳转到发布新帖页面
- */
-const postNew = () => {
-    uni.navigateTo({
-    	url:'/pages/home-opportunitiesPublish/home-opportunitiesPublish'
-    })
-};
+	/**
+	 * 2. 功能实现：删除商机
+	 * @param {number} id - 要删除的商机ID
+	 */
+	const deleteOpportunity = (id) => {
+		uni.showModal({
+			title: '确认删除',
+			content: '您确定要删除这条商机吗？删除后将无法恢复。',
+			success: async (res) => {
+				if (res.confirm) {
+					uni.showLoading({
+						title: '删除中...'
+					});
 
-/**
- * 跳转到个人名片页面
- */
-const skipApplicationBusinessCard = () =>{
-	uni.navigateTo({
-		url:'/pages/applicationBusinessCard/applicationBusinessCard'
-	})
-}
+					// 调用后端的删除接口
+					const {
+						error
+					} = await request('/app-api/member/business-opportunities/delete', {
+						method: 'POST',
+						data: {
+							id: id
+						} // 符合接口文档的请求体
+					});
 
-/**
- * 跳转到商机详情页
- * @param {number} id - 商机ID
- */
-const skipCommercialDetail = (id) =>{
-	uni.navigateTo({
-		url:`/pages/home-commercialDetail/home-commercialDetail?id=${id}` // 实际项目中应传递商机ID
-	})
-}
+					uni.hideLoading();
 
-/**
- * 预览图片 (与商机详情页通用逻辑)
- * @param {Array} urls - 图片URL数组
- * @param {number} current - 当前点击图片的索引
- */
-const previewImage = (urls, current) => {
-    uni.previewImage({
-        urls: urls,
-        current: urls[current],
-        longPressActions: {
-            itemList: ['发送给朋友', '保存图片', '收藏'],
-            success: function(data) {
-                console.log('选中了第' + (data.tapIndex + 1) + '个按钮，第' + (data.index + 1) + '张图片');
-            },
-            fail: function(err) {
-                console.log(err.errMsg);
-            }
-        }
-    });
-};
+					if (error) {
+						uni.showToast({
+							title: '删除失败: ' + error,
+							icon: 'none'
+						});
+						return;
+					}
+
+					uni.showToast({
+						title: '删除成功',
+						icon: 'success'
+					});
+
+					// 删除成功后，刷新列表以保证数据同步
+					getMyOpportunitiesList(true);
+				}
+			}
+		});
+	};
+
+	// --- 页面跳转函数 ---
+	const postNew = () => {
+		uni.navigateTo({
+			url: '/pages/home-opportunitiesPublish/home-opportunitiesPublish'
+		})
+	};
+	const skipApplicationBusinessCard = () => {
+		uni.navigateTo({
+			url: '/pages/applicationBusinessCard/applicationBusinessCard'
+		})
+	};
+	const skipCommercialDetail = (id) => {
+		uni.navigateTo({
+			url: `/pages/home-commercialDetail/home-commercialDetail?id=${id}`
+		})
+	};
+	const previewImage = (urls, current) => {
+		uni.previewImage({
+			urls: urls,
+			current: urls[current]
+		});
+	};
+
+	// --- Uni-app 页面生命周期钩子 ---
+	onLoad(() => {
+		getMyOpportunitiesList(true);
+	});
+	onReachBottom(() => {
+		getMyOpportunitiesList();
+	});
+	onPullDownRefresh(() => {
+		getMyOpportunitiesList(true);
+	});
 </script>
 
 <style scoped>
-/* 全局/基础样式 */
-/* * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
-} */
+	/* 页面根容器样式 */
+	.my-opportunities-app {
+		background-color: #f9f9f9;
+		color: #333;
+		max-width: 750rpx;
+		margin: 0 auto;
+		min-height: 100vh;
+		display: flex;
+		flex-direction: column;
+	}
 
-/* 页面根容器样式，模拟 body 的布局和最大宽度 */
-.my-opportunities-app {
-    background-color: #f9f9f9;
-    color: #333;
-    max-width: 750rpx; /* 限制内容最大宽度 */
-    margin: 0 auto; /* 居中显示 */
-    padding-bottom: 40rpx; /* 页面底部留空 */
-    min-height: 100vh; /* 确保内容不足时也能占满高度 */
-    display: flex;
-    flex-direction: column;
-}
+	/* 搜索框容器样式 */
+	.search-bar-container {
+		padding: 16rpx 20rpx;
+		background-color: #ffffff;
+		position: sticky;
+		/* 吸顶效果 */
+		top: 0;
+		z-index: 99;
+		box-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.03);
+	}
 
-/* 顶部区域样式 - 复用商机详情页的 Header 风格 */
-.header {
-    background: linear-gradient(135deg, #FF6A00, #FF8C00);
-    color: white;
-    padding: 36rpx 40rpx;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    box-shadow: 0 6rpx 24rpx rgba(255, 106, 0, 0.3);
-    display: flex;
-    align-items: center;
-    border-bottom-left-radius: 30rpx;
-    border-bottom-right-radius: 30rpx;
-}
+	/* 帖子列表样式 */
+	.post-list {
+		padding: 30rpx;
+		flex: 1;
+		padding-bottom: 40rpx;
+	}
 
-.header .back-btn {
-    font-size: 44rpx;
-    margin-right: 30rpx;
-    width: 72rpx;
-    height: 72rpx;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background 0.3s;
-}
+	.post-card {
+		background: white;
+		border-radius: 30rpx;
+		padding: 40rpx;
+		margin-bottom: 30rpx;
+		box-shadow: 0 6rpx 20rpx rgba(0, 0, 0, 0.05);
+		transition: transform 0.3s, box-shadow 0.3s;
+	}
 
-.header .back-btn:active { /* uni-app 模拟 :hover */
-    background: rgba(255, 255, 255, 0.2);
-}
+	.post-card:active {
+		transform: translateY(-6rpx);
+		box-shadow: 0 10rpx 30rpx rgba(0, 0, 0, 0.1);
+	}
 
-.header h1 {
-    font-size: 40rpx;
-    font-weight: 600;
-    flex-grow: 1;
-    text-shadow: 0 2rpx 4rpx rgba(0,0,0,0.2);
-}
+	.post-header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		margin-bottom: 30rpx;
+	}
 
-.header .action-btn {
-    font-size: 40rpx;
-    width: 72rpx;
-    height: 72rpx;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background 0.3s;
-}
+	.post-header .user-info {
+		display: flex;
+		align-items: center;
+		flex: 1;
+	}
 
-.header .action-btn:active { /* uni-app 模拟 :hover */
-    background: rgba(255, 255, 255, 0.2);
-}
+	.avatar {
+		width: 90rpx;
+		height: 90rpx;
+		border-radius: 50%;
+		background: linear-gradient(135deg, #FF6A00, #FF8C37);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		color: white;
+		font-weight: bold;
+		font-size: 36rpx;
+		margin-right: 24rpx;
+		flex-shrink: 0;
+	}
 
-/* 发布按钮在 Header 中 */
-.post-new-header-btn uni-icons {
-    /* 调整图标颜色，确保在深色背景下可见 */
-    color: white !important; 
-}
+	.user-details-wrapper {
+		flex: 1;
+	}
 
+	.user-name {
+		font-weight: 600;
+		font-size: 32rpx;
+		margin-bottom: 6rpx;
+	}
 
-/* 帖子列表样式 - 复用商机发现页的样式 */
-.post-list {
-    padding: 30rpx;
-    flex: 1; /* 让列表占据剩余空间 */
-    overflow-y: auto; /* 允许列表内容滚动 */
-}
+	.post-time {
+		font-size: 26rpx;
+		color: #888;
+		display: flex;
+		align-items: center;
+	}
 
-.post-card {
-    background: white;
-    border-radius: 30rpx;
-    padding: 40rpx;
-    margin-bottom: 30rpx;
-    box-shadow: 0 6rpx 20rpx rgba(0, 0, 0, 0.05);
-    transition: transform 0.3s, box-shadow 0.3s;
-}
+	.post-time uni-icons {
+		margin-right: 10rpx;
+	}
 
-.post-card:active { /* 小程序使用 :active 模拟 :hover */
-    transform: translateY(-6rpx);
-    box-shadow: 0 10rpx 30rpx rgba(0, 0, 0, 0.1);
-}
+	.delete-action {
+		padding: 10rpx;
+		border-radius: 40rpx;
+		background: #ffebe6;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		margin-left: 20rpx;
+		transition: background 0.3s;
+	}
 
-.post-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between; /* 使删除按钮右对齐 */
-    margin-bottom: 30rpx;
-}
+	.delete-action:active {
+		background: #ffdbcc;
+	}
 
-.post-header .user-info {
-    display: flex;
-    align-items: center;
-    flex: 1; /* 占据剩余空间 */
-}
+	.delete-action uni-icons {
+		color: #FF6A00 !important;
+	}
 
-.avatar {
-    width: 90rpx;
-    height: 90rpx;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #FF6A00, #FF8C37);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-weight: bold;
-    font-size: 36rpx;
-    margin-right: 24rpx;
-    flex-shrink: 0; /* 防止头像被压缩 */
-}
+	.post-content {
+		font-size: 30rpx;
+		line-height: 1.5;
+		margin-bottom: 30rpx;
+		color: #444;
+	}
 
-.user-details-wrapper {
-    flex: 1;
-}
+	.post-images {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 16rpx;
+		margin-bottom: 30rpx;
+		overflow: hidden;
+	}
 
-.user-name {
-    font-weight: 600;
-    font-size: 32rpx;
-    margin-bottom: 6rpx;
-}
+	.image-wrapper {
+		width: calc((100% - 32rpx) / 3);
+		aspect-ratio: 1 / 1;
+		border-radius: 12rpx;
+		overflow: hidden;
+		box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.08);
+	}
 
-.post-time {
-    font-size: 26rpx;
-    color: #888;
-    display: flex;
-    align-items: center;
-}
-.post-time uni-icons {
-    margin-right: 10rpx;
-}
+	.post-image {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		display: block;
+	}
 
-/* 删除按钮样式 */
-.delete-action {
-    padding: 10rpx ;
-    border-radius: 40rpx;
-    background: #ffebe6;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-left: 20rpx; /* 与用户信息分隔 */
-    transition: background 0.3s;
-}
-.delete-action:active {
-    background: #ffdbcc; /* 点击态 */
-}
-.delete-action uni-icons {
-    color: #FF6A00 !important; /* 确保图标颜色 */
-}
+	.tags {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 16rpx;
+		margin-bottom: 30rpx;
+	}
 
+	.tag {
+		background: #fff0e6;
+		color: #FF6A00;
+		padding: 10rpx 24rpx;
+		border-radius: 40rpx;
+		font-size: 26rpx;
+	}
 
-.post-content {
-    font-size: 30rpx;
-    line-height: 1.5;
-    margin-bottom: 30rpx;
-    color: #444;
-}
+	.feedback-stats {
+		display: flex;
+		align-items: center;
+		background: #f8f8f8;
+		border-radius: 30rpx;
+		padding: 16rpx 30rpx;
+		font-size: 28rpx;
+		color: #666;
+	}
 
-/* 商机图片样式 - 复用商机发现页的样式 */
-.post-images {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 16rpx; /* 图片之间的间距 */
-    margin-bottom: 30rpx;
-    overflow: hidden; /* 防止图片溢出 */
-}
+	.feedback-stats .like-count {
+		display: flex;
+		align-items: center;
+		margin-right: 30rpx;
+		color: #e74c3c;
+	}
 
-.image-wrapper {
-    width: calc((100% - 32rpx) / 3); /* 两张图片间距16*2=32，所以减去32rpx */
-    aspect-ratio: 1 / 1; /* 保持图片正方形 */
-    border-radius: 12rpx;
-    overflow: hidden;
-    box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.08);
-}
+	.feedback-stats .dislike-count {
+		display: flex;
+		align-items: center;
+		color: #3498db;
+	}
 
-.post-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover; /* 裁剪图片以填充容器 */
-    display: block; /* 移除图片底部空白 */
-}
+	.feedback-stats uni-icons {
+		margin-right: 10rpx;
+	}
 
-.tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 16rpx;
-    margin-bottom: 30rpx;
-}
+	.no-posts-message {
+		text-align: center;
+		padding: 100rpx 40rpx;
+		color: #999;
+		font-size: 32rpx;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		gap: 30rpx;
+		margin-top: 50rpx;
+	}
 
-.tag {
-    background: #fff0e6;
-    color: #FF6A00;
-    padding: 10rpx 24rpx;
-    border-radius: 40rpx;
-    font-size: 26rpx;
-}
+	.no-posts-message p {
+		margin: 20rpx 0;
+	}
 
-/* 赞踩统计 - 复用商机发现页的样式 */
-.feedback-stats {
-    display: flex;
-    align-items: center;
-    background: #f8f8f8;
-    border-radius: 30rpx;
-    padding: 16rpx 30rpx;
-    font-size: 28rpx;
-    color: #666;
-    margin-bottom: 30rpx; /* 在操作区上方添加间距 */
-}
+	.empty-post-button {
+		background: linear-gradient(to right, #FF6A00, #FF8C37);
+		color: white;
+		border: none;
+		border-radius: 60rpx;
+		padding: 24rpx 50rpx;
+		font-size: 32rpx;
+		font-weight: 600;
+		box-shadow: 0 6rpx 16rpx rgba(255, 106, 0, 0.4);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		margin-top: 40rpx;
+		-webkit-appearance: none;
+		background-color: transparent;
+	}
 
-.feedback-stats .like-count {
-    display: flex;
-    align-items: center;
-    margin-right: 30rpx;
-    color: #e74c3c;
-}
+	.empty-post-button::after {
+		border: none;
+	}
 
-.feedback-stats .dislike-count {
-    display: flex;
-    align-items: center;
-    color: #3498db;
-}
-
-.feedback-stats uni-icons { /* 针对 uni-icons 调整 */
-    margin-right: 10rpx;
-}
-
-.post-actions {
-    display: flex;
-    justify-content: space-between;
-    border-top: 2rpx solid #f0f0f0;
-    padding-top: 30rpx;
-}
-
-.action-group {
-    display: flex;
-    gap: 40rpx;
-}
-
-.action {
-    display: flex;
-    align-items: center;
-    color: #666;
-    transition: all 0.2s;
-}
-
-.action uni-icons { /* 针对 uni-icons 调整 */
-    margin-right: 12rpx;
-}
-
-.action:active { /* 小程序使用 :active 模拟 :hover */
-    opacity: 0.7; /* 点击时稍微变暗 */
-}
-
-.action.like.active {
-    color: #e74c3c;
-}
-
-.action.dislike.active {
-    color: #3498db;
-}
-
-.action.comment.active { /* 收藏激活状态 */
-    color: #FF6A00;
-}
-
-/* 没有商机时的提示信息 */
-.no-posts-message {
-    text-align: center;
-    padding: 100rpx 40rpx;
-    color: #999;
-    font-size: 32rpx;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 30rpx;
-}
-
-.no-posts-message p {
-    margin: 20rpx 0;
-}
-
-.empty-post-button {
-    background: linear-gradient(to right, #FF6A00, #FF8C37);
-    color: white;
-    border: none;
-    border-radius: 60rpx;
-    padding: 24rpx 50rpx;
-    font-size: 32rpx;
-    font-weight: 600;
-    box-shadow: 0 6rpx 16rpx rgba(255, 106, 0, 0.4);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-top: 40rpx;
-    /* 移除小程序按钮默认边框和背景 */
-    -webkit-appearance: none;
-    background-color: transparent;
-}
-.empty-post-button::after {
-    border: none;
-}
-.empty-post-button uni-icons {
-    margin-right: 15rpx;
-    color: white !important; /* 确保图标颜色 */
-}
+	.empty-post-button uni-icons {
+		margin-right: 15rpx;
+		color: white !important;
+	}
 </style>

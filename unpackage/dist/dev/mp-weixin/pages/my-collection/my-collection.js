@@ -1,173 +1,217 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
+const utils_request = require("../../utils/request.js");
 if (!Array) {
   const _easycom_uni_segmented_control2 = common_vendor.resolveComponent("uni-segmented-control");
   const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
+  const _easycom_uni_load_more2 = common_vendor.resolveComponent("uni-load-more");
   const _component_empty_state = common_vendor.resolveComponent("empty-state");
-  (_easycom_uni_segmented_control2 + _easycom_uni_icons2 + _component_empty_state)();
+  (_easycom_uni_segmented_control2 + _easycom_uni_icons2 + _easycom_uni_load_more2 + _component_empty_state)();
 }
 const _easycom_uni_segmented_control = () => "../../uni_modules/uni-segmented-control/components/uni-segmented-control/uni-segmented-control.js";
 const _easycom_uni_icons = () => "../../uni_modules/uni-icons/components/uni-icons/uni-icons.js";
+const _easycom_uni_load_more = () => "../../uni_modules/uni-load-more/components/uni-load-more/uni-load-more.js";
 if (!Math) {
-  (_easycom_uni_segmented_control + _easycom_uni_icons)();
+  (_easycom_uni_segmented_control + _easycom_uni_icons + _easycom_uni_load_more)();
 }
+const pageSize = 10;
 const _sfc_main = {
   __name: "my-collection",
   setup(__props) {
     const currentTab = common_vendor.ref(0);
     const tabs = common_vendor.ref(["收藏的活动", "收藏的商机"]);
     const refreshing = common_vendor.ref(false);
-    const favoriteActivities = common_vendor.reactive([
-      {
-        id: 1,
-        title: "周末户外登山活动 - 挑战青龙山",
-        image: "https://via.placeholder.com/300/FF6B00/FFFFFF?text=登山活动",
-        date: "2023年11月25日 08:00-17:00",
-        location: "青龙山国家森林公园",
-        participants: { current: 28, total: 50 },
-        organizer: "户外探险俱乐部",
-        tags: ["户外", "运动"]
-      },
-      {
-        id: 2,
-        title: "科技创新交流沙龙",
-        image: "https://via.placeholder.com/300/4CAF50/FFFFFF?text=科技沙龙",
-        date: "2023年12月10日 14:00-17:00",
-        location: "市科技馆报告厅",
-        participants: { current: 80, total: 100 },
-        organizer: "创新科技协会",
-        tags: ["科技", "交流", "创新"]
+    const userId = common_vendor.ref(null);
+    const favoriteActivities = common_vendor.ref([]);
+    const activityPageNo = common_vendor.ref(1);
+    const activityLoadingStatus = common_vendor.ref("more");
+    const favoriteOpportunities = common_vendor.ref([]);
+    const opportunityPageNo = common_vendor.ref(1);
+    const opportunityLoadingStatus = common_vendor.ref("more");
+    common_vendor.onLoad(() => {
+      userId.value = common_vendor.index.getStorageSync("userId");
+      if (!userId.value) {
+        common_vendor.index.showToast({
+          title: "请先登录",
+          icon: "none",
+          duration: 2e3
+        });
+        return;
       }
-    ]);
-    const favoriteOpportunities = common_vendor.reactive([
-      {
-        id: 101,
-        user: "李总",
-        time: "2025-06-16 10:00:00",
-        content: "我司寻求智能家居项目合作，主要方向为AIoT设备连接与数据分析平台。欢迎有相关经验的团队联系，可提供技术方案或产品。",
-        images: [
-          "https://via.placeholder.com/150/FF6A00/FFFFFF?text=智能家居1",
-          "https://via.placeholder.com/150/FF6A00/FFFFFF?text=智能家居2"
-        ],
-        tags: ["#智能家居", "#AIoT", "#项目合作"],
-        likes: 15,
-        dislikes: 0,
-        userAction: null,
-        saved: true
-      },
-      {
-        id: 102,
-        user: "王经理",
-        time: "2025-06-15 14:30:00",
-        content: "本人有一批高质量二手办公家具转让，适合创业公司或小型办公室，价格优惠，可上门看货。",
-        images: [
-          "https://via.placeholder.com/150/007AFF/FFFFFF?text=办公家具1",
-          "https://via.placeholder.com/150/007AFF/FFFFFF?text=办公家具2",
-          "https://via.placeholder.com/150/007AFF/FFFFFF?text=办公家具3"
-        ],
-        tags: ["#二手转让", "#办公用品", "#创业福利"],
-        likes: 8,
-        dislikes: 1,
-        userAction: null,
-        saved: true
+      getFavorites(true);
+    });
+    const getFavorites = async (isRefresh = false) => {
+      const isActivityTab = currentTab.value === 0;
+      const currentStatus = isActivityTab ? activityLoadingStatus.value : opportunityLoadingStatus.value;
+      if (currentStatus === "loading" || currentStatus === "noMore" && !isRefresh) {
+        if (isRefresh)
+          refreshing.value = false;
+        return;
       }
-    ]);
+      if (isRefresh) {
+        if (isActivityTab) {
+          activityPageNo.value = 1;
+          favoriteActivities.value = [];
+          activityLoadingStatus.value = "more";
+        } else {
+          opportunityPageNo.value = 1;
+          favoriteOpportunities.value = [];
+          opportunityLoadingStatus.value = "more";
+        }
+      }
+      if (isActivityTab) {
+        activityLoadingStatus.value = "loading";
+      } else {
+        opportunityLoadingStatus.value = "loading";
+      }
+      const params = {
+        pageNo: isActivityTab ? activityPageNo.value : opportunityPageNo.value,
+        pageSize,
+        userId: userId.value,
+        targetType: isActivityTab ? "activity" : "post"
+      };
+      try {
+        const result = await utils_request.request("/app-api/member/follow/page", {
+          method: "GET",
+          data: params
+        });
+        common_vendor.index.__f__("log", "at pages/my-collection/my-collection.vue:227", `获取收藏的${isActivityTab ? "活动" : "商机"}:`, result);
+        if (result && !result.error && result.data) {
+          const rawList = result.data.list || [];
+          if (isActivityTab) {
+            const filteredList = rawList.filter((item) => item.activityRespVO && typeof item.activityRespVO === "object");
+            favoriteActivities.value.push(...filteredList);
+            activityPageNo.value++;
+            activityLoadingStatus.value = rawList.length < pageSize ? "noMore" : "more";
+          } else {
+            const filteredList = rawList.filter((item) => item.postRespVO && typeof item.postRespVO === "object").map((item) => {
+              const post = item.postRespVO;
+              post.contactPerson = post.contactPerson || "匿名";
+              post.postContent = post.postContent || "暂无内容";
+              post.postImg = post.postImg || "";
+              post.tags = post.tags || [];
+              post.likesCount = post.likesCount || 0;
+              post.dislikesCount = post.dislikesCount || 0;
+              return item;
+            });
+            favoriteOpportunities.value.push(...filteredList);
+            opportunityPageNo.value++;
+            opportunityLoadingStatus.value = rawList.length < pageSize ? "noMore" : "more";
+          }
+        } else {
+          if (isActivityTab)
+            activityLoadingStatus.value = "noMore";
+          else
+            opportunityLoadingStatus.value = "noMore";
+          common_vendor.index.showToast({
+            title: result.error || "加载失败",
+            icon: "none"
+          });
+        }
+      } catch (error) {
+        if (isActivityTab)
+          activityLoadingStatus.value = "noMore";
+        else
+          opportunityLoadingStatus.value = "noMore";
+        common_vendor.index.showToast({
+          title: "网络请求异常",
+          icon: "none"
+        });
+      } finally {
+        if (isRefresh) {
+          refreshing.value = false;
+        }
+      }
+    };
+    const removeFavorite = async (followId, type) => {
+      common_vendor.index.showModal({
+        title: "取消收藏",
+        content: `确定要取消收藏此${type === "activity" ? "活动" : "商机"}吗？`,
+        success: async (res) => {
+          if (res.confirm) {
+            const payload = {
+              targetId: followId,
+              userId: userId.value,
+              targetType: type
+              // 'type' 参数的值就是 'activity' 或 'post'
+            };
+            const {
+              error
+            } = await utils_request.request("/app-api/member/follow/del", {
+              method: "POST",
+              data: payload
+              // 使用新的请求体
+            });
+            if (!error) {
+              common_vendor.index.showToast({
+                title: "已取消收藏",
+                icon: "success"
+              });
+              if (type === "activity") {
+                const index = favoriteActivities.value.findIndex((item) => item.id === followId);
+                if (index !== -1)
+                  favoriteActivities.value.splice(index, 1);
+              } else {
+                const index = favoriteOpportunities.value.findIndex((item) => item.id === followId);
+                if (index !== -1)
+                  favoriteOpportunities.value.splice(index, 1);
+              }
+            } else {
+              common_vendor.index.showToast({
+                title: error || "操作失败",
+                icon: "none"
+              });
+            }
+          }
+        }
+      });
+    };
     const switchTab = (e) => {
+      if (currentTab.value === e.currentIndex)
+        return;
       currentTab.value = e.currentIndex;
-      refreshing.value = false;
+      const isActivityTab = currentTab.value === 0;
+      const shouldLoad = isActivityTab ? favoriteActivities.value.length === 0 : favoriteOpportunities.value.length === 0;
+      if (shouldLoad) {
+        getFavorites(true);
+      }
     };
     const onRefresh = () => {
       refreshing.value = true;
-      setTimeout(() => {
-        common_vendor.index.__f__("log", "at pages/my-collection/my-collection.vue:249", "数据刷新完成");
-        refreshing.value = false;
-        common_vendor.index.showToast({
-          title: "刷新成功",
-          icon: "success"
-        });
-      }, 1e3);
+      getFavorites(true);
     };
-    const skipActivityDetail = (id) => {
-      common_vendor.index.navigateTo({
-        url: `/pages/active-detail/active-detail?id=${id}`
-        // 假设活动详情页路由
-      });
+    const loadMore = () => {
+      getFavorites(false);
     };
-    const removeFavoriteActivity = (id) => {
-      common_vendor.index.showModal({
-        title: "取消收藏",
-        content: "确定要取消收藏此活动吗？",
-        success: (res) => {
-          if (res.confirm) {
-            const index = favoriteActivities.findIndex((activity) => activity.id === id);
-            if (index !== -1) {
-              favoriteActivities.splice(index, 1);
-              common_vendor.index.showToast({
-                title: "已取消收藏",
-                icon: "success"
-              });
-            }
-          }
-        }
-      });
+    const formatTimestamp = (timestamp) => {
+      if (!timestamp)
+        return "时间待定";
+      const date = new Date(timestamp);
+      const Y = date.getFullYear();
+      const M = (date.getMonth() + 1).toString().padStart(2, "0");
+      const D = date.getDate().toString().padStart(2, "0");
+      const h = date.getHours().toString().padStart(2, "0");
+      const m = date.getMinutes().toString().padStart(2, "0");
+      return `${Y}-${M}-${D} ${h}:${m}`;
     };
-    const navigateToDiscoverActivities = () => {
-      common_vendor.index.switchTab({
-        url: "/pages/activity/index"
-        // 假设活动发现页的tabbar路径
-      });
-    };
-    const skipCommercialDetail = (id) => {
-      common_vendor.index.navigateTo({
-        url: `/pages/home-commercialDetail/home-commercialDetail?id=${id}`
-        // 假设商机详情页路由
-      });
-    };
-    const removeFavoriteOpportunity = (id) => {
-      common_vendor.index.showModal({
-        title: "取消收藏",
-        content: "确定要取消收藏此商机吗？",
-        success: (res) => {
-          if (res.confirm) {
-            const index = favoriteOpportunities.findIndex((post) => post.id === id);
-            if (index !== -1) {
-              favoriteOpportunities.splice(index, 1);
-              common_vendor.index.showToast({
-                title: "已取消收藏",
-                icon: "success"
-              });
-            }
-          }
-        }
-      });
-    };
-    const navigateToDiscoverOpportunities = () => {
-      common_vendor.index.switchTab({
-        url: "/pages/home/index"
-        // 假设商机发现页的tabbar路径
-      });
-    };
-    const skipApplicationBusinessCard = () => {
-      common_vendor.index.navigateTo({
-        url: "/pages/applicationBusinessCard/applicationBusinessCard"
-      });
-    };
-    const previewImage = (urls, current) => {
-      common_vendor.index.previewImage({
-        urls,
-        current: urls[current],
-        longPressActions: {
-          itemList: ["发送给朋友", "保存图片", "收藏"],
-          success: function(data) {
-            common_vendor.index.__f__("log", "at pages/my-collection/my-collection.vue:335", "选中了第" + (data.tapIndex + 1) + "个按钮，第" + (data.index + 1) + "张图片");
-          },
-          fail: function(err) {
-            common_vendor.index.__f__("log", "at pages/my-collection/my-collection.vue:338", err.errMsg);
-          }
-        }
-      });
-    };
-    common_vendor.onLoad(() => {
+    const previewImage = (urls, current) => common_vendor.index.previewImage({
+      urls,
+      current
+    });
+    const skipActivityDetail = (id) => common_vendor.index.navigateTo({
+      url: `/pages/active-detail/active-detail?id=${id}`
+    });
+    const navigateToDiscoverActivities = () => common_vendor.index.switchTab({
+      url: "/pages/activity/index"
+    });
+    const skipCommercialDetail = (id) => common_vendor.index.navigateTo({
+      url: `/pages/home-commercialDetail/home-commercialDetail?id=${id}`
+    });
+    const navigateToDiscoverOpportunities = () => common_vendor.index.switchTab({
+      url: "/pages/home/index"
+    });
+    const skipApplicationBusinessCard = () => common_vendor.index.navigateTo({
+      url: "/pages/applicationBusinessCard/applicationBusinessCard"
     });
     return (_ctx, _cache) => {
       return common_vendor.e({
@@ -178,22 +222,22 @@ const _sfc_main = {
           ["style-type"]: "button",
           ["active-color"]: "#FF6B00"
         }),
-        c: favoriteActivities.length > 0
-      }, favoriteActivities.length > 0 ? {
-        d: common_vendor.f(favoriteActivities, (item, k0, i0) => {
+        c: favoriteActivities.value.length > 0
+      }, favoriteActivities.value.length > 0 ? {
+        d: common_vendor.f(favoriteActivities.value, (item, k0, i0) => {
           return {
-            a: item.image,
-            b: common_vendor.t(item.title),
+            a: item.activityRespVO.coverImageUrl,
+            b: common_vendor.t(item.activityRespVO.activityTitle),
             c: "7c9d235a-1-" + i0,
-            d: common_vendor.t(item.date),
+            d: common_vendor.t(formatTimestamp(item.activityRespVO.startDatetime)),
             e: "7c9d235a-2-" + i0,
-            f: common_vendor.t(item.location),
+            f: common_vendor.t(item.activityRespVO.locationAddress),
             g: "7c9d235a-3-" + i0,
-            h: common_vendor.t(item.organizer),
-            i: common_vendor.o(($event) => removeFavoriteActivity(item.id), item.id),
-            j: common_vendor.o(($event) => skipActivityDetail(item.id), item.id),
+            h: common_vendor.t(item.activityRespVO.organizerUnitName),
+            i: common_vendor.o(($event) => removeFavorite(item.id, "activity"), item.id),
+            j: common_vendor.o(($event) => skipActivityDetail(item.activityRespVO.id), item.id),
             k: item.id,
-            l: common_vendor.o(($event) => skipActivityDetail(item.id), item.id)
+            l: common_vendor.o(($event) => skipActivityDetail(item.activityRespVO.id), item.id)
           };
         }),
         e: common_vendor.p({
@@ -211,82 +255,103 @@ const _sfc_main = {
           size: "16",
           color: "#999"
         })
-      } : {
-        h: common_vendor.o(navigateToDiscoverActivities),
+      } : {}, {
+        h: favoriteActivities.value.length > 0
+      }, favoriteActivities.value.length > 0 ? {
         i: common_vendor.p({
+          status: activityLoadingStatus.value
+        })
+      } : {}, {
+        j: activityLoadingStatus.value === "noMore" && favoriteActivities.value.length === 0
+      }, activityLoadingStatus.value === "noMore" && favoriteActivities.value.length === 0 ? {
+        k: common_vendor.o(navigateToDiscoverActivities),
+        l: common_vendor.p({
           title: "暂无收藏活动",
           description: "快去发现并收藏感兴趣的活动吧"
         })
-      }, {
-        j: currentTab.value === 0,
-        k: refreshing.value,
-        l: common_vendor.o(onRefresh),
-        m: favoriteOpportunities.length > 0
-      }, favoriteOpportunities.length > 0 ? {
-        n: common_vendor.f(favoriteOpportunities, (post, k0, i0) => {
+      } : {}, {
+        m: currentTab.value === 0,
+        n: refreshing.value,
+        o: common_vendor.o(onRefresh),
+        p: common_vendor.o(loadMore),
+        q: favoriteOpportunities.value.length > 0
+      }, favoriteOpportunities.value.length > 0 ? {
+        r: common_vendor.f(favoriteOpportunities.value, (item, k0, i0) => {
           return common_vendor.e({
-            a: common_vendor.t(post.user.charAt(0)),
-            b: common_vendor.o(skipApplicationBusinessCard, post.id),
-            c: common_vendor.t(post.user),
-            d: "7c9d235a-5-" + i0,
-            e: common_vendor.t(post.time),
-            f: "7c9d235a-6-" + i0,
-            g: common_vendor.o(($event) => removeFavoriteOpportunity(post.id), post.id),
-            h: common_vendor.t(post.content),
-            i: post.images && post.images.length
-          }, post.images && post.images.length ? {
-            j: common_vendor.f(post.images, (image, imgIndex, i1) => {
+            a: common_vendor.t(item.postRespVO.contactPerson.charAt(0)),
+            b: common_vendor.o(skipApplicationBusinessCard, item.id),
+            c: common_vendor.t(item.postRespVO.contactPerson),
+            d: "7c9d235a-6-" + i0,
+            e: common_vendor.t(formatTimestamp(item.postRespVO.createTime)),
+            f: "7c9d235a-7-" + i0,
+            g: common_vendor.o(($event) => removeFavorite(item.id, "post"), item.id),
+            h: common_vendor.t(item.postRespVO.postContent),
+            i: item.postRespVO.postImg && item.postRespVO.postImg.length
+          }, item.postRespVO.postImg && item.postRespVO.postImg.length ? {
+            j: common_vendor.f(item.postRespVO.postImg.split(","), (image, imgIndex, i1) => {
               return {
                 a: image,
-                b: common_vendor.o(($event) => previewImage(post.images, imgIndex), imgIndex),
+                b: common_vendor.o(($event) => previewImage(item.postRespVO.postImg.split(","), imgIndex), imgIndex),
                 c: imgIndex
               };
             })
           } : {}, {
-            k: common_vendor.f(post.tags, (tag, tagIndex, i1) => {
+            k: item.postRespVO.tags && item.postRespVO.tags.length
+          }, item.postRespVO.tags && item.postRespVO.tags.length ? {
+            l: common_vendor.f(item.postRespVO.tags, (tag, tagIndex, i1) => {
               return {
                 a: common_vendor.t(tag),
                 b: tagIndex
               };
-            }),
-            l: "7c9d235a-7-" + i0,
-            m: common_vendor.t(post.likes),
-            n: "7c9d235a-8-" + i0,
-            o: common_vendor.t(post.dislikes),
-            p: post.id,
-            q: common_vendor.o(($event) => skipCommercialDetail(post.id), post.id)
+            })
+          } : {}, {
+            m: "7c9d235a-8-" + i0,
+            n: common_vendor.t(item.postRespVO.likesCount),
+            o: "7c9d235a-9-" + i0,
+            p: common_vendor.t(item.postRespVO.dislikesCount),
+            q: item.id,
+            r: common_vendor.o(($event) => skipCommercialDetail(item.postRespVO.id), item.id)
           });
         }),
-        o: common_vendor.p({
+        s: common_vendor.p({
           type: "redo",
           size: "14",
           color: "#888"
         }),
-        p: common_vendor.p({
+        t: common_vendor.p({
           type: "trash-fill",
           size: "20",
           color: "#FF6A00"
         }),
-        q: common_vendor.p({
+        v: common_vendor.p({
           type: "hand-up-filled",
           size: "18",
           color: "#e74c3c"
         }),
-        r: common_vendor.p({
+        w: common_vendor.p({
           type: "hand-down-filled",
           size: "18",
           color: "#3498db"
         })
-      } : {
-        s: common_vendor.o(navigateToDiscoverOpportunities),
-        t: common_vendor.p({
+      } : {}, {
+        x: favoriteOpportunities.value.length > 0
+      }, favoriteOpportunities.value.length > 0 ? {
+        y: common_vendor.p({
+          status: opportunityLoadingStatus.value
+        })
+      } : {}, {
+        z: opportunityLoadingStatus.value === "noMore" && favoriteOpportunities.value.length === 0
+      }, opportunityLoadingStatus.value === "noMore" && favoriteOpportunities.value.length === 0 ? {
+        A: common_vendor.o(navigateToDiscoverOpportunities),
+        B: common_vendor.p({
           title: "暂无收藏商机",
           description: "快去发现并收藏感兴趣的商机吧"
         })
-      }, {
-        v: currentTab.value === 1,
-        w: refreshing.value,
-        x: common_vendor.o(onRefresh)
+      } : {}, {
+        C: currentTab.value === 1,
+        D: refreshing.value,
+        E: common_vendor.o(onRefresh),
+        F: common_vendor.o(loadMore)
       });
     };
   }

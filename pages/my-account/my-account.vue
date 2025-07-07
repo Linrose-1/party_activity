@@ -1,25 +1,23 @@
 <template>
 	<view class="container">
-		<!-- 账户详情 -->
-		<view class="account-detail-section">
+		<!-- 使用 v-if="userInfo" 确保在数据加载完成后再渲染，防止错误 -->
+		<view class="account-detail-section" v-if="userInfo">
 			<view class="section-header">
 				<h2 class="section-title-main">账户信息详情</h2>
 			</view>
 
-			<!-- 邀请人模块 - 新增部分 -->
+			<!-- 邀请人模块 -->
 			<view class="inviter-section">
 				<view class="section-title">
 					<uni-icons type="personadd" size="24" color="#FF6B00"></uni-icons>我的邀请人
 				</view>
 
-				<view class="inviter-card" v-if="inviter">
+				<view class="inviter-card" v-if="userInfo.parentName">
 					<view class="inviter-avatar">
-						<view class="avatar-placeholder">{{ inviter.name.charAt(0) }}</view>
+						<view class="avatar-placeholder">{{ userInfo.parentName.charAt(0) }}</view>
 					</view>
 					<view class="inviter-info">
-						<view class="inviter-name">{{ inviter.name }}</view>
-						<view class="inviter-level">等级: {{ inviter.level }}</view>
-						<view class="inviter-date">邀请时间: {{ inviter.inviteDate }}</view>
+						<view class="inviter-name">{{ userInfo.parentName }}</view>
 					</view>
 				</view>
 
@@ -29,85 +27,72 @@
 				</view>
 			</view>
 
-			<!-- 等级晋升系统 -->
+			<!-- 社交等级晋升系统 -->
 			<view class="level-system">
 				<view class="level-title">
 					<uni-icons type="medal" size="24" color="#FF6B00"></uni-icons> 社交等级晋升系统
 				</view>
 
 				<view class="current-level">
-					<!-- Add ref for direct DOM access in onMounted -->
-					<view class="level-badge bronze" ref="bronzeBadgeRef">
-						<view class="level-name">联合流猩人</view>
-						<view class="level-points">0-99分</view>
+					<view class="level-badge bronze">
+						<view class="level-name">{{ userInfo.level.name }}</view>
+						<view class="level-points">{{ userInfo.level.icon }}</view>
 					</view>
 
 					<view class="level-info">
-						<h3>当前等级: <span style="color: #ff7707;font-weight: 600;">联合流猩人</span></h3>
-						<view style="font-size: 26rpx;">您当前拥有<span style="color: #ff0000;">{{ points }}</span>贡分</view>
+						<h3>当前等级: <span style="color: #ff7707;font-weight: 600;">{{ userInfo.level.name }}</span></h3>
+						<view style="font-size: 26rpx;">您当前拥有<span style="color: #ff0000;">{{ userInfo.currExperience }}</span>贡分</view>
 						<view style="font-size: 26rpx;">距离下一等级还需 <span style="color: #ff7707;">{{ pointsToNextLevel }}</span> 贡分
 						</view>
-
 					</view>
 				</view>
 
 				<view class="level-steps">
+                    <!-- 等级阶梯保持静态展示 -->
 					<view class="level-step">
-						<view class="step-icon" style="background: #E0E0E0;">
-							☆
-						</view>
+						<view class="step-icon" style="background: #E0E0E0;">☆</view>
 						<view class="step-name">联合流猩人</view>
 						<view class="step-points">0-99分</view>
 					</view>
-
 					<view class="level-step">
-						<view class="step-icon" style="background: #A5D6A7;">
-							★
-						</view>
+						<view class="step-icon" style="background: #A5D6A7;">★</view>
 						<view class="step-name">联合月猩人</view>
 						<view class="step-points">100-499分</view>
 					</view>
-
 					<view class="level-step">
-						<view class="step-icon" style="background: #4FC3F7;">
-							✯
-						</view>
+						<view class="step-icon" style="background: #4FC3F7;">✯</view>
 						<view class="step-name">联合伙猩人</view>
 						<view class="step-points">500-999分</view>
 					</view>
-
 					<view class="level-step">
-						<view class="step-icon" style="background: #BA68C8;">
-							✪
-						</view>
+						<view class="step-icon" style="background: #BA68C8;">✪</view>
 						<view class="step-name">联合创猩人</view>
 						<view class="step-points">1000-2000分</view>
 					</view>
-
 					<view class="level-step">
-						<view class="step-icon" style="background: #FFD54F;">
-							✦
-						</view>
+						<view class="step-icon" style="background: #FFD54F;">✦</view>
 						<view class="step-name">联合创始猿</view>
 						<view class="step-points">2000+分</view>
 					</view>
 				</view>
 			</view>
 
-			<!-- ============== 修改后的会员等级晋升系统 ============== -->
+			<!-- ================= 会员等级晋升系统 (已修改) ================= -->
 			<view class="membership-level-system">
 				<view class="membership-title">
 					<uni-icons type="vip" size="24" color="#FFD700"></uni-icons> 会员等级晋升系统
 				</view>
 
-				<!-- 新增：当前会员等级状态显示 -->
+				<!-- 动态显示当前会员等级状态 -->
 				<view class="membership-status">
 					<view class="status-text">
 						当前等级: <span class="status-highlight">{{ currentMembershipLevel.name }}</span>
 					</view>
+                    <!-- 新增：显示累计充值金额 -->
 					<view class="status-text">
-						已累计充值: <span class="status-highlight">{{ rechargedAmount }} 元</span>
+						已累计充值: <span class="status-highlight">{{ userInfo.topUpExperience || 0 }} 元</span>
 					</view>
+                    <!-- 恢复：显示距离下一等级还需金额 -->
 					<view class="status-text next-level-progress" v-if="amountToNextLevel > 0 && nextMembershipLevel">
 						距离 <span class="next-level-name">{{ nextMembershipLevel.name }}</span> 还需
 						<span class="amount-needed">{{ amountToNextLevel }} 元</span>
@@ -121,64 +106,48 @@
 				<p class="membership-description">
 					会员等级根据累计充值金额进行晋升
 				</p>
+				
 				<view class="membership-levels">
-					<!-- 游客 -->
-					<view class="membership-level-item visitor">
-						<view class="level-icon">
-							👤
-						</view>
+					<view class="membership-level-item visitor" :class="{'current-member-highlight': userInfo.topUpLevel.name === '游客会员'}">
+						<view class="level-icon">👤</view>
 						<view class="level-name">游客会员</view>
 						<view class="level-price">充值 0 元</view>
 					</view>
-					<!-- 青铜 -->
-					<view class="membership-level-item bronze-member">
-						<view class="level-icon">
-							🪙
-						</view>
+					<view class="membership-level-item bronze-member" :class="{'current-member-highlight': userInfo.topUpLevel.name === '青铜会员'}">
+						<view class="level-icon">🪙</view>
 						<view class="level-name">青铜会员</view>
 						<view class="level-price">充值 100 元</view>
 					</view>
-					<!-- 白银 -->
-					<view class="membership-level-item silver-member">
-						<view class="level-icon">
-							🔶
-						</view>
+					<view class="membership-level-item silver-member" :class="{'current-member-highlight': userInfo.topUpLevel.name === '白银会员'}">
+						<view class="level-icon">🔶</view>
 						<view class="level-name">白银会员</view>
 						<view class="level-price">充值 365 元</view>
 					</view>
-					<!-- 黄金 -->
-					<view class="membership-level-item gold-member">
-						<view class="level-icon">
-							🌟
-						</view>
+					<view class="membership-level-item gold-member" :class="{'current-member-highlight': userInfo.topUpLevel.name === '黄金会员'}">
+						<view class="level-icon">🌟</view>
 						<view class="level-name">黄金会员</view>
 						<view class="level-price">充值 3,650 元</view>
 					</view>
-					<!-- 黑钻 -->
-					<view class="membership-level-item diamond-member">
-						<view class="level-icon">
-							💎
-						</view>
+					<view class="membership-level-item diamond-member" :class="{'current-member-highlight': userInfo.topUpLevel.name === '黑钻会员'}">
+						<view class="level-icon">💎</view>
 						<view class="level-name">黑钻会员</view>
 						<view class="level-price">充值 36,500 元</view>
 					</view>
 				</view>
 			</view>
-			<!-- ============== 修改内容结束 ============== -->
+            <!-- ================= 会员等级系统修改结束 ================= -->
 
-			<!-- 新增：智米模块 -->
+			<!-- 我的智米模块 -->
 			<view class="smart-rice-section">
 				<view class="smart-rice-header">
 					<view class="smart-rice-title">
 						<uni-icons type="wallet" size="24" color="#FF6B00"></uni-icons> 我的智米
 					</view>
-					<view class="smart-rice-value">{{ smartRice }} 智米</view>
+					<view class="smart-rice-value">{{ userInfo.point }} 智米</view>
 				</view>
-
 				<view class="smart-rice-info">
 					<p>智米可用于兑换平台内服务或商品。</p>
 				</view>
-
 				<view class="smart-rice-actions">
 					<button class="action-button exchange-button" @click="handleExchangeSmartRice">
 						<uni-icons type="forward" size="20" color="#fff"></uni-icons> 申请兑换
@@ -192,18 +161,15 @@
 				</p>
 			</view>
 
-
 			<!-- 贡分获取区域 -->
 			<view class="points-section">
 				<view class="points-header">
 					<view class="points-title"> <uni-icons type="compose" size="24" color="#FF6B00"></uni-icons> 获取贡分</view>
-					<view class="points-value">{{ points }}</view>
+					<view class="points-value">{{ userInfo.currExperience }}</view>
 				</view>
-
 				<p style="font-size: 28rpx; color: #666; margin-bottom: 40rpx;">
 					通过完成以下任务获取贡分，提升您的等级：
 				</p>
-
 				<view class="task-grid">
 					<view class="task-card" v-for="(task, index) in tasks" :key="index">
 						<view class="task-header">
@@ -229,38 +195,77 @@
 					<uni-icons type="bars" size="24" color="#FF6B00"></uni-icons> 贡分历史记录
 				</view>
 
-				<view class="history-list">
-					<view class="history-item" v-for="(record, index) in historyRecords" :key="index"
-						@click="handleHistoryClick($event)">
-						<view class="history-icon">
-							<uni-icons :type="record.icon" size="20" color="#FF6B00"></uni-icons>
+				<view v-if="historyList.length === 0 && historyLoadStatus === 'noMore'" class="history-empty">
+					<uni-icons type="info-filled" size="40" color="#ccc"></uni-icons>
+					<text>暂无贡分记录</text>
+				</view>
+
+				<view v-else class="history-list">
+					<view class="history-item" v-for="(record, index) in historyList" :key="record.createTime + '-' + index">
+						<view class="history-icon" :class="{ 'positive-bg': record.experience >= 0, 'negative-bg': record.experience < 0 }">
+							<uni-icons 
+								:type="record.experience >= 0 ? 'arrow-up' : 'arrow-down'" 
+								size="20" 
+								:color="record.experience >= 0 ? '#28a745' : '#dc3545'">
+							</uni-icons>
 						</view>
 						<view class="history-details">
-							<view class="history-task">{{ record.task }}</view>
-							<view class="history-date">{{ record.date }}</view>
+							<view class="history-task">{{ record.title }}</view>
+							<view class="history-date">{{ formatTimestamp(record.createTime) }}</view>
 						</view>
-						<view class="history-points">{{ record.points }}</view>
+						<view class="history-points" :class="{ 'positive': record.experience >= 0, 'negative': record.experience < 0 }">
+							{{ record.experience > 0 ? '+' : '' }}{{ record.experience }}
+						</view>
 					</view>
 				</view>
+
+				<uni-load-more v-if="historyList.length > 0" :status="historyLoadStatus"></uni-load-more>
 			</view>
 		</view>
 	</view>
 </template>
 
 <script setup>
-	import {
-		ref,
-		computed,
-		onMounted
-	} from 'vue';
+	import { ref, computed, onMounted } from 'vue';
+	import { onReachBottom } from '@dcloudio/uni-app';
+	import request from '../../utils/request.js'; // ‼️ 请确保此路径正确
 
-	// 响应式数据
-	const points = ref(2166);
-
-	// 新增：会员等级相关数据
-	// !! 这里设置用户已充值金额，可以修改这个值来测试不同等级的显示效果
-	const rechargedAmount = ref(8888); 
+	// ======================= 用户基本信息模块 =======================
+	const userInfo = ref(null);
 	
+	onMounted(() => {
+		fetchUserInfo().then(() => {
+			if (userInfo.value) {
+				getHistoryList(true);
+			}
+		});
+	});
+	
+	const fetchUserInfo = async () => {
+		uni.showLoading({ title: '加载中...' });
+		const { data, error } = await request('/app-api/member/user/get', { method: 'GET' });
+		uni.hideLoading();
+
+		if (error) {
+			uni.showToast({ title: `加载失败: ${error}`, icon: 'none' });
+			return;
+		}
+		userInfo.value = data;
+	};
+
+	// 计算属性 - 距离下一社交等级所需贡分
+	const pointsToNextLevel = computed(() => {
+		if (!userInfo.value) return 0;
+		const currentPoints = userInfo.value.currExperience;
+		
+		if (currentPoints < 100) return 100 - currentPoints;
+		if (currentPoints < 500) return 500 - currentPoints;
+		if (currentPoints < 1000) return 1000 - currentPoints;
+		if (currentPoints < 2000) return 2000 - currentPoints;
+		return 0;
+	});
+
+	// ======================= 会员等级模块 (已修改) =======================
 	// 定义会员等级及其门槛
 	const membershipLevels = ref([
 		{ name: '游客会员', threshold: 0 },
@@ -268,26 +273,30 @@
 		{ name: '白银会员', threshold: 365 },
 		{ name: '黄金会员', threshold: 3650 },
 		{ name: '黑钻会员', threshold: 36500 },
-		// 添加一个无限大的“顶层”，方便计算
+		// 添加一个无限大的“顶层”，方便计算，用户不会看到
 		{ name: '至尊', threshold: Infinity } 
 	]);
 
 	// 计算当前会员等级
 	const currentMembershipLevel = computed(() => {
-		const amount = rechargedAmount.value;
+		// 确保 userInfo 和 topUpExperience 已加载
+		if (!userInfo.value || typeof userInfo.value.topUpExperience === 'undefined') {
+			return membershipLevels.value[0]; // 返回默认值
+		}
+		const amount = userInfo.value.topUpExperience;
 		// 从高到低查找，找到第一个满足条件的等级
 		for (let i = membershipLevels.value.length - 1; i >= 0; i--) {
 			if (amount >= membershipLevels.value[i].threshold) {
 				return membershipLevels.value[i];
 			}
 		}
-		return membershipLevels.value[0]; // 默认返回游客
+		return membershipLevels.value[0];
 	});
 
 	// 计算下一会员等级
 	const nextMembershipLevel = computed(() => {
 		const currentIndex = membershipLevels.value.findIndex(level => level.name === currentMembershipLevel.value.name);
-		// 确保不是最后一个有效等级
+		// 确保不是最后一个有效等级（-2 是因为我们加了一个无限大的顶层）
 		if (currentIndex < membershipLevels.value.length - 2) {
 			return membershipLevels.value[currentIndex + 1];
 		}
@@ -296,156 +305,92 @@
 
 	// 计算距离下一等级还需的金额
 	const amountToNextLevel = computed(() => {
-		if (nextMembershipLevel.value) {
-			const needed = nextMembershipLevel.value.threshold - rechargedAmount.value;
+		if (nextMembershipLevel.value && userInfo.value) {
+			const needed = nextMembershipLevel.value.threshold - userInfo.value.topUpExperience;
 			return Math.max(0, needed); // 确保结果不为负
 		}
 		return 0; // 已是最高等级
 	});
 
+	// ======================= 贡分历史记录模块 =======================
+	const historyList = ref([]);
+	const historyPageNo = ref(1);
+	const historyPageSize = ref(10);
+	const historyTotal = ref(0);
+	const historyLoadStatus = ref('more');
 
-	// 新增智米相关数据
-	const smartRice = ref(150); // 假设用户当前拥有150智米
-	const pointsPerSmartRice = 10; // 兑换比例：10贡分 = 1智米
-
-	// Hardcoded data for tasks and history (can be fetched from API in real app)
-	const tasks = ref([{
-			icon: 'calendar',
-			name: '参与活动',
-			desc: '参加平台组织的线上/线下活动',
-			points: '+5分/次'
-		},
-		{
-			icon: 'flag',
-			name: '组织活动',
-			desc: '成功组织并举办一次活动',
-			points: '+30分/次'
-		},
-		{
-			icon: 'sound',
-			name: '分享商机',
-			desc: '分享有价值的商业机会',
-			points: '+10分/次'
-		},
-		{
-			icon: 'personadd',
-			name: '邀请好友',
-			desc: '成功邀请好友注册并认证',
-			points: '+20分/人'
-		},
-		{
-			icon: 'chat',
-			name: '每日签到',
-			desc: '每日登录并签到',
-			points: '+1分/天'
-		},
-		{
-			icon: 'star',
-			name: '完善资料',
-			desc: '完善个人和企业资料',
-			points: '+50分'
-		},
-	]);
-
-	const historyRecords = ref([{
-			icon: 'calendar',
-			task: '参与线上营销活动',
-			date: '2023-10-15 14:30',
-			points: '+5'
-		},
-		{
-			icon: 'sound',
-			task: '分享商机：供应链合作',
-			date: '2023-10-14 10:15',
-			points: '+10'
-		},
-		{
-			icon: 'personadd',
-			task: '邀请好友：张先生',
-			date: '2023-10-12 16:45',
-			points: '+20'
-		},
-		{
-			icon: 'chat',
-			task: '每日签到',
-			date: '2023-10-12 09:02',
-			points: '+1'
-		},
-		{
-			icon: 'calendar',
-			task: '参与产品发布会',
-			date: '2023-10-10 13:20',
-			points: '+5'
-		},
-		{
-			icon: 'star',
-			task: '完善企业资料',
-			date: '2023-10-08 11:30',
-			points: '+50'
-		},
-	]);
-
-	// Computed properties for progress
-	const maxPoints = 1000; // Max points for the progress bar
-	const pointsToNextLevel = computed(() => {
-		// Assuming next level is 500 for Silver, then 1000 for Gold
-		if (points.value < 100) return 100 - points.value; // To Bronze (游客0-99, 青铜100-499)
-		if (points.value < 500) return 500 - points.value; // To Silver (白银500-999)
-		if (points.value < 1000) return 1000 - points.value; // To Gold (黄金1000+)
-		return 0; // Already Gold or higher
-	});
-
-	const progressWidth = computed(() => {
-		// 这里的进度条可能需要根据实际等级范围调整
-		// 假设进度条表示从0到1000的范围
-		const cappedPoints = Math.min(Math.max(points.value, 0), maxPoints);
-		return (cappedPoints / maxPoints) * 100 + '%';
-	});
-
-	// Template ref for the bronze badge for direct DOM manipulation in onMounted
-	const bronzeBadgeRef = ref(null);
-
-	// Methods
-	const goBack = () => {
-		// In a real Uni-app project, you'd use uni.navigateBack()
-		// uni.navigateBack();
-		alert('返回上一页'); // For browser demo
-	};
-
-	const handleTaskClick = (taskName, event) => {
-		uni.showToast({
-			title: `点击了任务：${taskName}`,
-			icon: 'none'
+	const getHistoryList = async (isRefresh = false) => {
+		if (historyLoadStatus.value === 'loading' || (historyLoadStatus.value === 'noMore' && !isRefresh)) {
+			return;
+		}
+		if (isRefresh) {
+			historyPageNo.value = 1;
+			historyList.value = [];
+			historyLoadStatus.value = 'more';
+		}
+		historyLoadStatus.value = 'loading';
+		const params = {
+			pageNo: historyPageNo.value,
+			pageSize: historyPageSize.value,
+		};
+		const { data, error } = await request('/app-api/member/experience-record/page', {
+			method: 'GET',
+			data: params,
 		});
-		// Original effect: scale and shadow on click
-		const card = event.currentTarget.closest('.task-card');
-		if (card) {
-			card.style.transform = 'scale(0.98)';
-			card.style.boxShadow = '0 8rpx 20rpx rgba(255, 107, 0, 0.2)';
-
-			setTimeout(() => {
-				card.style.transform = '';
-				card.style.boxShadow = '';
-			}, 200);
+		if (error) {
+			historyLoadStatus.value = 'more';
+			uni.showToast({ title: `历史记录加载失败: ${error}`, icon: 'none' });
+			return;
+		}
+		if (data && data.list) {
+			historyList.value.push(...data.list);
+			historyTotal.value = data.total;
+			if (historyList.value.length >= historyTotal.value) {
+				historyLoadStatus.value = 'noMore';
+			} else {
+				historyLoadStatus.value = 'more';
+				historyPageNo.value++;
+			}
+		} else {
+			historyLoadStatus.value = 'noMore';
 		}
 	};
+	
+	onReachBottom(() => {
+		getHistoryList();
+	});
 
-	const handleHistoryClick = (event) => {
-		// Original effect: highlight on click
-		const item = event.currentTarget;
-		if (item) {
-			item.style.backgroundColor = '#fff9f0';
-			setTimeout(() => {
-				item.style.backgroundColor = '';
-			}, 300);
-		}
+	// ======================= 辅助函数 =======================
+	const formatTimestamp = (timestamp) => {
+		if (!timestamp) return '';
+		const date = new Date(timestamp);
+		const Y = date.getFullYear();
+		const M = (date.getMonth() + 1).toString().padStart(2, '0');
+		const D = date.getDate().toString().padStart(2, '0');
+		const h = date.getHours().toString().padStart(2, '0');
+		const m = date.getMinutes().toString().padStart(2, '0');
+		const s = date.getSeconds().toString().padStart(2, '0');
+		return `${Y}-${M}-${D} ${h}:${m}:${s}`;
 	};
 
-	// 新增智米相关方法
+	// ======================= 静态数据和方法 (保持不变) =======================
+	const tasks = ref([
+		{ icon: 'calendar', name: '参与活动', desc: '参加平台组织的线上/线下活动', points: '+5分/次' },
+		{ icon: 'flag', name: '组织活动', desc: '成功组织并举办一次活动', points: '+30分/次' },
+		{ icon: 'sound', name: '分享商机', desc: '分享有价值的商业机会', points: '+10分/次' },
+		{ icon: 'personadd', name: '邀请好友', desc: '成功邀请好友注册并认证', points: '+20分/人' },
+		{ icon: 'chat', name: '每日签到', desc: '每日登录并签到', points: '+1分/天' },
+		{ icon: 'star', name: '完善资料', desc: '完善个人和企业资料', points: '+50分' },
+	]);
+	
+	const handleTaskClick = (taskName, event) => {
+		uni.showToast({ title: `点击了任务：${taskName}`, icon: 'none' });
+	};
+	
 	const handleExchangeSmartRice = () => {
 		uni.showModal({
 			title: '兑换智米',
-			content: `兑换比例为 ${pointsPerSmartRice} 贡分 = 1 智米。请联系平台客服进行兑换操作。`,
+			content: `请联系平台客服进行兑换操作。`,
 			showCancel: false,
 			confirmText: '联系客服',
 			success: (res) => {
@@ -471,77 +416,45 @@
 	};
 
 	const contactCustomerService = () => {
-		uni.showToast({
-			title: '正在为您跳转客服联系方式...',
-			icon: 'none',
-			duration: 2000
-		});
-		// 实际应用中可以跳转到客服页面或显示客服电话/微信等
-		console.log('用户点击了联系客服');
-	};
-
-	// Lifecycle hook for DOM interactions
-	onMounted(() => {
-		// Bronze badge animation
-		if (bronzeBadgeRef.value) {
-			setInterval(() => {
-				bronzeBadgeRef.value.classList.toggle('pulse');
-			}, 5000);
-		}
-	});
-
-	// Mock uni object for browser environment if not in Uni-app
-	if (typeof uni === 'undefined') {
-		window.uni = {
-			showToast: (options) => {
-				console.log('Mock uni.showToast:', options.title);
-				// alert(options.title); // Or a simple browser toast implementation
-			},
-			showModal: (options) => {
-				console.log('Mock uni.showModal:', options.title, options.content);
-				if (confirm(`${options.title}\n${options.content}`)) {
-					options.success && options.success({
-						confirm: true
-					});
-				} else {
-					options.success && options.success({
-						cancel: true
-					});
-				}
-			},
-			// Add other uni methods if used, e.g., uni.navigateBack
-		};
-	}
-
-	// 新增邀请人数据
-	const inviter = ref({
-		name: '张经理',
-		level: '黄金会员',
-		inviteDate: '2023-09-15',
-		avatar: '' // 如果有真实头像URL可以放在这里
-	});
-
-	// 新增方法 (原有的，保留)
-	const contactInviter = () => {
-		uni.showToast({
-			title: `联系邀请人: ${inviter.value.name}`,
-			icon: 'none'
-		});
+		uni.showToast({ title: '正在为您跳转客服联系方式...', icon: 'none', duration: 2000 });
 	};
 </script>
 
 <style scoped>
-	/*
-  The rpx unit is Uni-app specific. For a pure web project, you might prefer px, rem, or vw units.
-  For Uni-app, rpx is standard for responsive sizing.
-*/
-	/* * {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: 'PingFang SC', 'Helvetica Neue', Arial, sans-serif;
-} */
+/* ================== 历史记录模块新增/修改样式 ================== */
+.history-empty {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	padding: 80rpx 40rpx;
+	color: #999;
+	font-size: 28rpx;
+}
+.history-empty text {
+	margin-top: 20rpx;
+}
+.history-icon.positive-bg {
+	background-color: #e8f5e9; /* 绿色背景 */
+}
+.history-icon.negative-bg {
+	background-color: #fce4e4; /* 红色背景 */
+}
+.history-points.positive {
+	color: #28a745; /* 绿色 */
+}
+.history-points.negative {
+	color: #dc3545; /* 红色 */
+}
 
+/* 新增：当前会员等级高亮样式 */
+.current-member-highlight {
+	transform: translateY(-8rpx);
+	box-shadow: 0 12rpx 30rpx rgba(0, 0, 0, 0.15) !important;
+	border: 4rpx solid #FF6B00 !important;
+}
+
+/* ================== 以下为页面原有全部样式 (保持不变) ================== */
 	body {
 		background: linear-gradient(135deg, #f8f9fa, #e9ecef);
 		color: #333;
@@ -555,7 +468,6 @@
 		margin: 0 auto;
 	}
 
-	/* 顶部用户信息 */
 	.user-header {
 		background: linear-gradient(135deg, #FF8C00, #FF6B00);
 		color: white;
@@ -645,7 +557,6 @@
 		background: rgba(255, 255, 255, 0.3);
 	}
 
-	/* 账户详情区域 */
 	.account-detail-section {
 		background: white;
 		margin: 0 0 50rpx;
@@ -681,7 +592,6 @@
 		border-radius: 10rpx;
 	}
 
-	/* 等级晋升系统 */
 	.level-system {
 		background: linear-gradient(to right, #f9f9f9, #f0f0f0);
 		border-radius: 40rpx;
@@ -879,7 +789,6 @@
 		color: #666;
 	}
 
-	/* ============= 会员等级晋升系统样式 ============= */
 	.membership-level-system {
 		background: #ffffff;
 		border-radius: 40rpx;
@@ -902,8 +811,7 @@
 	.membership-title uni-icons {
 		margin-right: 20rpx;
 	}
-	
-	/* 新增：当前会员状态样式 */
+
 	.membership-status {
 		background: linear-gradient(135deg, #fffaf2, #fff5e6);
 		border-radius: 30rpx;
@@ -1002,7 +910,6 @@
 		font-weight: 500;
 	}
 
-	/* 不同等级的颜色区分 */
 	.visitor {
 		background-color: #f8f9fa;
 		border: 2rpx solid #dee2e6;
@@ -1068,10 +975,6 @@
 		color: #dee2e6;
 	}
 
-	/* ============= 样式结束 ============= */
-
-
-	/* 贡分获取区域 */
 	.points-section {
 		background: white;
 		border-radius: 40rpx;
@@ -1201,7 +1104,6 @@
 		background: #FF8C00;
 	}
 
-	/* 历史记录 */
 	.history-section {
 		background: white;
 		border-radius: 40rpx;
@@ -1234,7 +1136,6 @@
 		border-bottom: 2rpx solid #f0f0f0;
 		align-items: center;
 		transition: background-color 0.3s ease;
-		/* Add transition for smooth highlight */
 		cursor: pointer;
 	}
 
@@ -1251,7 +1152,6 @@
 		align-items: center;
 		justify-content: center;
 		margin-right: 30rpx;
-		color: #FF6B00;
 		font-size: 36rpx;
 	}
 
@@ -1272,11 +1172,9 @@
 
 	.history-points {
 		font-weight: bold;
-		color: #FF6B00;
 		font-size: 32rpx;
 	}
 
-	/* 底部导航 */
 	.bottom-nav {
 		position: fixed;
 		bottom: 0;
@@ -1317,7 +1215,6 @@
 		transform: translateY(-10rpx);
 	}
 
-	/* 动画效果 */
 	@keyframes pulse {
 		0% {
 			transform: scale(1);
@@ -1358,7 +1255,6 @@
 		border-radius: 50%;
 	}
 
-	/* 邀请人模块样式 */
 	.inviter-section {
 		background: white;
 		border-radius: 40rpx;
@@ -1468,7 +1364,6 @@
 		font-size: 48rpx;
 	}
 
-	/* 新增：智米模块样式 */
 	.smart-rice-section {
 		background: linear-gradient(to right, #fefefe, #f9f9f9);
 		border-radius: 40rpx;

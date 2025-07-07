@@ -1,0 +1,107 @@
+/* 水平间距 */
+/* 水平间距 */
+.followed-users-page.data-v-653bbb27 {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background-color: #f8f9fa;
+}
+.content-scroll.data-v-653bbb27 {
+  flex: 1;
+  height: 1px;
+  /* 关键，用于撑开 scroll-view */
+}
+.user-list.data-v-653bbb27 {
+  padding: 24rpx;
+}
+.user-card.data-v-653bbb27 {
+  display: flex;
+  align-items: center;
+  background-color: #fff;
+  padding: 30rpx;
+  border-radius: 24rpx;
+  margin-bottom: 24rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.04);
+  transition: background-color 0.2s;
+}
+.user-card.data-v-653bbb27:active {
+  background-color: #f9f9f9;
+}
+.user-avatar.data-v-653bbb27 {
+  width: 100rpx;
+  height: 100rpx;
+  border-radius: 50%;
+  margin-right: 24rpx;
+  flex-shrink: 0;
+  border: 1rpx solid #eee;
+}
+.user-info.data-v-653bbb27 {
+  flex: 1;
+  min-width: 0;
+}
+.user-name.data-v-653bbb27 {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8rpx;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.user-company.data-v-653bbb27 {
+  font-size: 26rpx;
+  color: #888;
+  display: flex;
+  align-items: center;
+}
+.user-company text.data-v-653bbb27 {
+  margin-left: 8rpx;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.unfollow-btn.data-v-653bbb27 {
+  background-color: #f0f2f5;
+  color: #666;
+  border: none;
+  padding: 0 30rpx;
+  height: 60rpx;
+  line-height: 60rpx;
+  border-radius: 40rpx;
+  font-size: 26rpx;
+  margin-left: 20rpx;
+  flex-shrink: 0;
+}
+.unfollow-btn.data-v-653bbb27::after {
+  border: none;
+}
+.unfollow-btn.data-v-653bbb27:active {
+  opacity: 0.8;
+}
+.empty-state.data-v-653bbb27 {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding-top: 200rpx;
+  color: #999;
+}
+.empty-text.data-v-653bbb27 {
+  font-size: 28rpx;
+  margin: 24rpx 0;
+}
+.primary-btn.data-v-653bbb27 {
+  background: linear-gradient(135deg, #FF6B00 0%, #FF8C00 100%);
+  color: white;
+  border: none;
+  padding: 0 48rpx;
+  height: 72rpx;
+  line-height: 72rpx;
+  border-radius: 12rpx;
+  font-size: 28rpx;
+  font-weight: 500;
+  margin-top: 24rpx;
+}
+.primary-btn.data-v-653bbb27::after {
+  border: none;
+}

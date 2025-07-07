@@ -1,5 +1,6 @@
 /* 水平间距 */
 /* 水平间距 */
+/* 样式部分保持不变，因为结构和类名没有改变 */
 .my-favorites-app.data-v-7c9d235a {
   display: flex;
   flex-direction: column;
@@ -9,44 +10,6 @@
   /* 限制内容最大宽度 */
   margin: 0 auto;
   /* 居中显示 */
-}
-
-/* 顶部导航 - 复用之前的样式 */
-.header.data-v-7c9d235a {
-  background: linear-gradient(135deg, #FF6A00, #FF8C00);
-  color: white;
-  padding: 36rpx 40rpx;
-  position: -webkit-sticky;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  box-shadow: 0 6rpx 24rpx rgba(255, 106, 0, 0.3);
-  display: flex;
-  align-items: center;
-  border-bottom-left-radius: 30rpx;
-  border-bottom-right-radius: 30rpx;
-}
-.header .back-btn.data-v-7c9d235a, .header .action-btn.data-v-7c9d235a {
-  font-size: 44rpx;
-  width: 72rpx;
-  height: 72rpx;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.3s;
-}
-.header .back-btn.data-v-7c9d235a {
-  margin-right: 30rpx;
-}
-.header .back-btn.data-v-7c9d235a:active, .header .action-btn.data-v-7c9d235a:active {
-  background: rgba(255, 255, 255, 0.2);
-}
-.header h1.data-v-7c9d235a {
-  font-size: 40rpx;
-  font-weight: 600;
-  flex-grow: 1;
-  text-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.2);
 }
 
 /* 分段器容器 */
@@ -146,15 +109,6 @@
 .organizer text.data-v-7c9d235a {
   margin-left: 8rpx;
 }
-.participants.data-v-7c9d235a {
-  display: flex;
-  align-items: center;
-  font-size: 24rpx;
-  color: #999;
-}
-.participants text.data-v-7c9d235a {
-  margin-left: 8rpx;
-}
 .action-buttons.data-v-7c9d235a {
   display: flex;
   gap: 16rpx;
@@ -167,7 +121,6 @@
   font-size: 24rpx;
   font-weight: 500;
   border: none;
-  /* 移除小程序按钮默认样式 */
   -webkit-appearance: none;
   background-color: transparent;
 }
@@ -183,10 +136,9 @@
   color: #f44336;
 }
 
-/* 商机卡片 - 复用“我的商机”页面样式 */
+/* 商机卡片 */
 .post-list.data-v-7c9d235a {
   padding: 0;
-  /* 内部padding由post-card自身控制 */
   flex: 1;
   overflow-y: auto;
 }
@@ -327,7 +279,10 @@
   margin-right: 10rpx;
 }
 
-/* 空状态组件样式 */
+/* 空状态容器 */
+.empty-state-container.data-v-7c9d235a {
+  padding-top: 80rpx;
+}
 .empty-state.data-v-7c9d235a {
   text-align: center;
   padding: 80rpx 0;
@@ -338,22 +293,6 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-}
-.empty-state .empty-icon.data-v-7c9d235a {
-  /* uni-icons 自带尺寸，这里可以不设置 */
-  color: #e0e0e0;
-  margin-bottom: 24rpx;
-}
-.empty-state p.data-v-7c9d235a {
-  font-size: 32rpx;
-  font-weight: 600;
-  color: #333;
-  margin-bottom: 16rpx;
-}
-.empty-state .empty-desc.data-v-7c9d235a {
-  font-size: 26rpx;
-  color: #999;
-  margin-bottom: 40rpx;
 }
 .primary-btn.data-v-7c9d235a {
   background: linear-gradient(135deg, #FF6B00 0%, #FF8C00 100%);
@@ -366,7 +305,6 @@
   font-size: 28rpx;
   font-weight: 500;
   margin-top: 24rpx;
-  /* 移除小程序按钮默认样式 */
   -webkit-appearance: none;
   background-color: transparent;
 }

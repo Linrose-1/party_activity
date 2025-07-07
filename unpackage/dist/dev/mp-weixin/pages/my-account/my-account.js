@@ -1,31 +1,65 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
+const utils_request = require("../../utils/request.js");
 if (!Array) {
   const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
-  _easycom_uni_icons2();
+  const _easycom_uni_load_more2 = common_vendor.resolveComponent("uni-load-more");
+  (_easycom_uni_icons2 + _easycom_uni_load_more2)();
 }
 const _easycom_uni_icons = () => "../../uni_modules/uni-icons/components/uni-icons/uni-icons.js";
+const _easycom_uni_load_more = () => "../../uni_modules/uni-load-more/components/uni-load-more/uni-load-more.js";
 if (!Math) {
-  _easycom_uni_icons();
+  (_easycom_uni_icons + _easycom_uni_load_more)();
 }
-const pointsPerSmartRice = 10;
-const maxPoints = 1e3;
 const _sfc_main = {
   __name: "my-account",
   setup(__props) {
-    const points = common_vendor.ref(2166);
-    const rechargedAmount = common_vendor.ref(8888);
+    const userInfo = common_vendor.ref(null);
+    common_vendor.onMounted(() => {
+      fetchUserInfo().then(() => {
+        if (userInfo.value) {
+          getHistoryList(true);
+        }
+      });
+    });
+    const fetchUserInfo = async () => {
+      common_vendor.index.showLoading({ title: "加载中..." });
+      const { data, error } = await utils_request.request("/app-api/member/user/get", { method: "GET" });
+      common_vendor.index.hideLoading();
+      if (error) {
+        common_vendor.index.showToast({ title: `加载失败: ${error}`, icon: "none" });
+        return;
+      }
+      userInfo.value = data;
+    };
+    const pointsToNextLevel = common_vendor.computed(() => {
+      if (!userInfo.value)
+        return 0;
+      const currentPoints = userInfo.value.currExperience;
+      if (currentPoints < 100)
+        return 100 - currentPoints;
+      if (currentPoints < 500)
+        return 500 - currentPoints;
+      if (currentPoints < 1e3)
+        return 1e3 - currentPoints;
+      if (currentPoints < 2e3)
+        return 2e3 - currentPoints;
+      return 0;
+    });
     const membershipLevels = common_vendor.ref([
       { name: "游客会员", threshold: 0 },
       { name: "青铜会员", threshold: 100 },
       { name: "白银会员", threshold: 365 },
       { name: "黄金会员", threshold: 3650 },
       { name: "黑钻会员", threshold: 36500 },
-      // 添加一个无限大的“顶层”，方便计算
+      // 添加一个无限大的“顶层”，方便计算，用户不会看到
       { name: "至尊", threshold: Infinity }
     ]);
     const currentMembershipLevel = common_vendor.computed(() => {
-      const amount = rechargedAmount.value;
+      if (!userInfo.value || typeof userInfo.value.topUpExperience === "undefined") {
+        return membershipLevels.value[0];
+      }
+      const amount = userInfo.value.topUpExperience;
       for (let i = membershipLevels.value.length - 1; i >= 0; i--) {
         if (amount >= membershipLevels.value[i].threshold) {
           return membershipLevels.value[i];
@@ -41,131 +75,83 @@ const _sfc_main = {
       return null;
     });
     const amountToNextLevel = common_vendor.computed(() => {
-      if (nextMembershipLevel.value) {
-        const needed = nextMembershipLevel.value.threshold - rechargedAmount.value;
+      if (nextMembershipLevel.value && userInfo.value) {
+        const needed = nextMembershipLevel.value.threshold - userInfo.value.topUpExperience;
         return Math.max(0, needed);
       }
       return 0;
     });
-    const smartRice = common_vendor.ref(150);
-    const tasks = common_vendor.ref([
-      {
-        icon: "calendar",
-        name: "参与活动",
-        desc: "参加平台组织的线上/线下活动",
-        points: "+5分/次"
-      },
-      {
-        icon: "flag",
-        name: "组织活动",
-        desc: "成功组织并举办一次活动",
-        points: "+30分/次"
-      },
-      {
-        icon: "sound",
-        name: "分享商机",
-        desc: "分享有价值的商业机会",
-        points: "+10分/次"
-      },
-      {
-        icon: "personadd",
-        name: "邀请好友",
-        desc: "成功邀请好友注册并认证",
-        points: "+20分/人"
-      },
-      {
-        icon: "chat",
-        name: "每日签到",
-        desc: "每日登录并签到",
-        points: "+1分/天"
-      },
-      {
-        icon: "star",
-        name: "完善资料",
-        desc: "完善个人和企业资料",
-        points: "+50分"
+    const historyList = common_vendor.ref([]);
+    const historyPageNo = common_vendor.ref(1);
+    const historyPageSize = common_vendor.ref(10);
+    const historyTotal = common_vendor.ref(0);
+    const historyLoadStatus = common_vendor.ref("more");
+    const getHistoryList = async (isRefresh = false) => {
+      if (historyLoadStatus.value === "loading" || historyLoadStatus.value === "noMore" && !isRefresh) {
+        return;
       }
-    ]);
-    const historyRecords = common_vendor.ref([
-      {
-        icon: "calendar",
-        task: "参与线上营销活动",
-        date: "2023-10-15 14:30",
-        points: "+5"
-      },
-      {
-        icon: "sound",
-        task: "分享商机：供应链合作",
-        date: "2023-10-14 10:15",
-        points: "+10"
-      },
-      {
-        icon: "personadd",
-        task: "邀请好友：张先生",
-        date: "2023-10-12 16:45",
-        points: "+20"
-      },
-      {
-        icon: "chat",
-        task: "每日签到",
-        date: "2023-10-12 09:02",
-        points: "+1"
-      },
-      {
-        icon: "calendar",
-        task: "参与产品发布会",
-        date: "2023-10-10 13:20",
-        points: "+5"
-      },
-      {
-        icon: "star",
-        task: "完善企业资料",
-        date: "2023-10-08 11:30",
-        points: "+50"
+      if (isRefresh) {
+        historyPageNo.value = 1;
+        historyList.value = [];
+        historyLoadStatus.value = "more";
       }
-    ]);
-    const pointsToNextLevel = common_vendor.computed(() => {
-      if (points.value < 100)
-        return 100 - points.value;
-      if (points.value < 500)
-        return 500 - points.value;
-      if (points.value < 1e3)
-        return 1e3 - points.value;
-      return 0;
-    });
-    common_vendor.computed(() => {
-      const cappedPoints = Math.min(Math.max(points.value, 0), maxPoints);
-      return cappedPoints / maxPoints * 100 + "%";
-    });
-    const bronzeBadgeRef = common_vendor.ref(null);
-    const handleTaskClick = (taskName, event) => {
-      common_vendor.index.showToast({
-        title: `点击了任务：${taskName}`,
-        icon: "none"
+      historyLoadStatus.value = "loading";
+      const params = {
+        pageNo: historyPageNo.value,
+        pageSize: historyPageSize.value
+      };
+      const { data, error } = await utils_request.request("/app-api/member/experience-record/page", {
+        method: "GET",
+        data: params
       });
-      const card = event.currentTarget.closest(".task-card");
-      if (card) {
-        card.style.transform = "scale(0.98)";
-        card.style.boxShadow = "0 8rpx 20rpx rgba(255, 107, 0, 0.2)";
-        setTimeout(() => {
-          card.style.transform = "";
-          card.style.boxShadow = "";
-        }, 200);
+      if (error) {
+        historyLoadStatus.value = "more";
+        common_vendor.index.showToast({ title: `历史记录加载失败: ${error}`, icon: "none" });
+        return;
+      }
+      if (data && data.list) {
+        historyList.value.push(...data.list);
+        historyTotal.value = data.total;
+        if (historyList.value.length >= historyTotal.value) {
+          historyLoadStatus.value = "noMore";
+        } else {
+          historyLoadStatus.value = "more";
+          historyPageNo.value++;
+        }
+      } else {
+        historyLoadStatus.value = "noMore";
       }
     };
-    const handleHistoryClick = (event) => {
-      const item = event.currentTarget;
-      if (item) {
-        item.style.backgroundColor = "#fff9f0";
-        setTimeout(() => {
-          item.style.backgroundColor = "";
-        }, 300);
-      }
+    common_vendor.onReachBottom(() => {
+      getHistoryList();
+    });
+    const formatTimestamp = (timestamp) => {
+      if (!timestamp)
+        return "";
+      const date = new Date(timestamp);
+      const Y = date.getFullYear();
+      const M = (date.getMonth() + 1).toString().padStart(2, "0");
+      const D = date.getDate().toString().padStart(2, "0");
+      const h = date.getHours().toString().padStart(2, "0");
+      const m = date.getMinutes().toString().padStart(2, "0");
+      const s = date.getSeconds().toString().padStart(2, "0");
+      return `${Y}-${M}-${D} ${h}:${m}:${s}`;
+    };
+    const tasks = common_vendor.ref([
+      { icon: "calendar", name: "参与活动", desc: "参加平台组织的线上/线下活动", points: "+5分/次" },
+      { icon: "flag", name: "组织活动", desc: "成功组织并举办一次活动", points: "+30分/次" },
+      { icon: "sound", name: "分享商机", desc: "分享有价值的商业机会", points: "+10分/次" },
+      { icon: "personadd", name: "邀请好友", desc: "成功邀请好友注册并认证", points: "+20分/人" },
+      { icon: "chat", name: "每日签到", desc: "每日登录并签到", points: "+1分/天" },
+      { icon: "star", name: "完善资料", desc: "完善个人和企业资料", points: "+50分" }
+    ]);
+    const handleTaskClick = (taskName, event) => {
+      common_vendor.index.showToast({ title: `点击了任务：${taskName}`, icon: "none" });
     };
     const handleExchangeSmartRice = () => {
       common_vendor.index.showModal({
         title: "兑换智米",
-        content: `兑换比例为 ${pointsPerSmartRice} 贡分 = 1 智米。请联系平台客服进行兑换操作。`,
+        content: `请联系平台客服进行兑换操作。`,
         showCancel: false,
         confirmText: "联系客服",
         success: (res) => {
@@ -189,123 +175,91 @@ const _sfc_main = {
       });
     };
     const contactCustomerService = () => {
-      common_vendor.index.showToast({
-        title: "正在为您跳转客服联系方式...",
-        icon: "none",
-        duration: 2e3
-      });
-      common_vendor.index.__f__("log", "at pages/my-account/my-account.vue:480", "用户点击了联系客服");
+      common_vendor.index.showToast({ title: "正在为您跳转客服联系方式...", icon: "none", duration: 2e3 });
     };
-    common_vendor.onMounted(() => {
-      if (bronzeBadgeRef.value) {
-        setInterval(() => {
-          bronzeBadgeRef.value.classList.toggle("pulse");
-        }, 5e3);
-      }
-    });
-    if (typeof common_vendor.index === "undefined") {
-      window.uni = {
-        showToast: (options) => {
-          common_vendor.index.__f__("log", "at pages/my-account/my-account.vue:497", "Mock uni.showToast:", options.title);
-        },
-        showModal: (options) => {
-          common_vendor.index.__f__("log", "at pages/my-account/my-account.vue:501", "Mock uni.showModal:", options.title, options.content);
-          if (confirm(`${options.title}
-${options.content}`)) {
-            options.success && options.success({
-              confirm: true
-            });
-          } else {
-            options.success && options.success({
-              cancel: true
-            });
-          }
-        }
-        // Add other uni methods if used, e.g., uni.navigateBack
-      };
-    }
-    const inviter = common_vendor.ref({
-      name: "张经理",
-      level: "黄金会员",
-      inviteDate: "2023-09-15",
-      avatar: ""
-      // 如果有真实头像URL可以放在这里
-    });
     return (_ctx, _cache) => {
       return common_vendor.e({
-        a: common_vendor.p({
+        a: userInfo.value
+      }, userInfo.value ? common_vendor.e({
+        b: common_vendor.p({
           type: "personadd",
           size: "24",
           color: "#FF6B00"
         }),
-        b: inviter.value
-      }, inviter.value ? {
-        c: common_vendor.t(inviter.value.name.charAt(0)),
-        d: common_vendor.t(inviter.value.name),
-        e: common_vendor.t(inviter.value.level),
-        f: common_vendor.t(inviter.value.inviteDate)
+        c: userInfo.value.parentName
+      }, userInfo.value.parentName ? {
+        d: common_vendor.t(userInfo.value.parentName.charAt(0)),
+        e: common_vendor.t(userInfo.value.parentName)
       } : {
-        g: common_vendor.p({
+        f: common_vendor.p({
           type: "info",
           size: "24",
           color: "#999"
         })
       }, {
-        h: common_vendor.p({
+        g: common_vendor.p({
           type: "medal",
           size: "24",
           color: "#FF6B00"
         }),
-        i: common_vendor.t(points.value),
-        j: common_vendor.t(pointsToNextLevel.value),
-        k: common_vendor.p({
+        h: common_vendor.t(userInfo.value.level.name),
+        i: common_vendor.t(userInfo.value.level.icon),
+        j: common_vendor.t(userInfo.value.level.name),
+        k: common_vendor.t(userInfo.value.currExperience),
+        l: common_vendor.t(pointsToNextLevel.value),
+        m: common_vendor.p({
           type: "vip",
           size: "24",
           color: "#FFD700"
         }),
-        l: common_vendor.t(currentMembershipLevel.value.name),
-        m: common_vendor.t(rechargedAmount.value),
-        n: amountToNextLevel.value > 0 && nextMembershipLevel.value
+        n: common_vendor.t(currentMembershipLevel.value.name),
+        o: common_vendor.t(userInfo.value.topUpExperience || 0),
+        p: amountToNextLevel.value > 0 && nextMembershipLevel.value
       }, amountToNextLevel.value > 0 && nextMembershipLevel.value ? {
-        o: common_vendor.t(nextMembershipLevel.value.name),
-        p: common_vendor.t(amountToNextLevel.value)
+        q: common_vendor.t(nextMembershipLevel.value.name),
+        r: common_vendor.t(amountToNextLevel.value)
       } : {
-        q: common_vendor.p({
+        s: common_vendor.p({
           type: "cloud-upload",
           size: "18",
           color: "#28a745"
         })
       }, {
-        r: common_vendor.p({
+        t: userInfo.value.topUpLevel.name === "游客会员" ? 1 : "",
+        v: userInfo.value.topUpLevel.name === "青铜会员" ? 1 : "",
+        w: userInfo.value.topUpLevel.name === "白银会员" ? 1 : "",
+        x: userInfo.value.topUpLevel.name === "黄金会员" ? 1 : "",
+        y: userInfo.value.topUpLevel.name === "黑钻会员" ? 1 : "",
+        z: common_vendor.p({
           type: "wallet",
           size: "24",
           color: "#FF6B00"
         }),
-        s: common_vendor.t(smartRice.value),
-        t: common_vendor.p({
+        A: common_vendor.t(userInfo.value.point),
+        B: common_vendor.p({
           type: "forward",
           size: "20",
           color: "#fff"
         }),
-        v: common_vendor.o(handleExchangeSmartRice),
-        w: common_vendor.p({
+        C: common_vendor.o(handleExchangeSmartRice),
+        D: common_vendor.p({
           type: "redo",
           size: "20",
           color: "#fff"
         }),
-        x: common_vendor.o(handleRechargeSmartRice),
-        y: common_vendor.p({
+        E: common_vendor.o(handleRechargeSmartRice),
+        F: common_vendor.p({
           type: "info-filled",
           size: "18",
           color: "#FF6B00"
         }),
-        z: common_vendor.p({
+        G: common_vendor.p({
           type: "compose",
           size: "24",
           color: "#FF6B00"
         }),
-        A: common_vendor.t(points.value),
-        B: common_vendor.f(tasks.value, (task, index, i0) => {
+        H: common_vendor.t(userInfo.value.currExperience),
+        I: common_vendor.f(tasks.value, (task, index, i0) => {
           return {
             a: "04e670bd-10-" + i0,
             b: common_vendor.p({
@@ -317,36 +271,54 @@ ${options.content}`)) {
             d: common_vendor.t(task.desc),
             e: common_vendor.t(task.points),
             f: "04e670bd-11-" + i0,
-            g: common_vendor.o(($event) => handleTaskClick(task.name, $event), index),
+            g: common_vendor.o(($event) => handleTaskClick(task.name), index),
             h: index
           };
         }),
-        C: common_vendor.p({
+        J: common_vendor.p({
           type: "plus",
           size: "20",
           color: "#fff"
         }),
-        D: common_vendor.p({
+        K: common_vendor.p({
           type: "bars",
           size: "24",
           color: "#FF6B00"
         }),
-        E: common_vendor.f(historyRecords.value, (record, index, i0) => {
+        L: historyList.value.length === 0 && historyLoadStatus.value === "noMore"
+      }, historyList.value.length === 0 && historyLoadStatus.value === "noMore" ? {
+        M: common_vendor.p({
+          type: "info-filled",
+          size: "40",
+          color: "#ccc"
+        })
+      } : {
+        N: common_vendor.f(historyList.value, (record, index, i0) => {
           return {
-            a: "04e670bd-13-" + i0,
+            a: "04e670bd-14-" + i0,
             b: common_vendor.p({
-              type: record.icon,
+              type: record.experience >= 0 ? "arrow-up" : "arrow-down",
               size: "20",
-              color: "#FF6B00"
+              color: record.experience >= 0 ? "#28a745" : "#dc3545"
             }),
-            c: common_vendor.t(record.task),
-            d: common_vendor.t(record.date),
-            e: common_vendor.t(record.points),
-            f: index,
-            g: common_vendor.o(($event) => handleHistoryClick($event), index)
+            c: record.experience >= 0 ? 1 : "",
+            d: record.experience < 0 ? 1 : "",
+            e: common_vendor.t(record.title),
+            f: common_vendor.t(formatTimestamp(record.createTime)),
+            g: common_vendor.t(record.experience > 0 ? "+" : ""),
+            h: common_vendor.t(record.experience),
+            i: record.experience >= 0 ? 1 : "",
+            j: record.experience < 0 ? 1 : "",
+            k: record.createTime + "-" + index
           };
         })
-      });
+      }, {
+        O: historyList.value.length > 0
+      }, historyList.value.length > 0 ? {
+        P: common_vendor.p({
+          status: historyLoadStatus.value
+        })
+      } : {}) : {});
     };
   }
 };

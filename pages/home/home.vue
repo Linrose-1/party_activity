@@ -3,9 +3,9 @@
 		<!-- 顶部区域 -->
 		<div class="header wechat-style">
 			<!-- ... header部分内容保持不变 ... -->
-			<div class="app-title">聚一聚</div>
+			<div class="app-title">猩聚社</div>
 			<div class="app-subtitle">商友连接·商机分享</div>
-			<div class="app-description">· ·连接全球精英商友· ·</div>
+			<div class="app-description">连接全球精英商友</div>
 
 			<view class="search-section">
 				<view class="search-container">
