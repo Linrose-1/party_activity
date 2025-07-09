@@ -46,6 +46,7 @@ const _sfc_main = {
           method: "GET",
           data: params
         });
+        common_vendor.index.__f__("log", "at pages/my-active/my-active.vue:238", "我的活动", result);
         if (result && !result.error && result.data) {
           const list = result.data.list || [];
           const total = result.data.total || 0;
@@ -137,8 +138,12 @@ const _sfc_main = {
         }
       });
     };
-    const applyForRefund = (activityId) => {
-      common_vendor.index.navigateTo({ url: `/pages/my-active-apply/my-active-apply?id=${activityId}` });
+    const applyForRefund = (activityItem) => {
+      const activityJson = JSON.stringify(activityItem);
+      const encodedData = encodeURIComponent(activityJson);
+      common_vendor.index.navigateTo({
+        url: `/pages/my-active-apply/my-active-apply?item=${encodedData}`
+      });
     };
     const cancelActivity = (activityId) => {
       common_vendor.index.showModal({
@@ -163,11 +168,15 @@ const _sfc_main = {
         }
       });
     };
-    const manageRefunds = (activityId, mode) => {
-      common_vendor.index.navigateTo({ url: `/pages/my-active-manage/my-active-manage?id=${activityId}&mode=${mode}` });
+    const manageRefunds = (activityItem, mode) => {
+      const activityJson = JSON.stringify(activityItem);
+      const encodedData = encodeURIComponent(activityJson);
+      common_vendor.index.navigateTo({
+        url: `/pages/my-active-manage/my-active-manage?item=${encodedData}&mode=${mode}`
+      });
     };
     const navigateToDiscover = () => {
-      common_vendor.index.switchTab({ url: "/pages/index/index" });
+      common_vendor.index.switchTab({ url: "/pages/active/active" });
     };
     const navigateToCreate = () => {
       common_vendor.index.navigateTo({ url: "/pages/active-publish/active-publish" });
@@ -190,8 +199,8 @@ const _sfc_main = {
           return common_vendor.e({
             a: item.coverImageUrl,
             b: common_vendor.t(item.activityTitle),
-            c: common_vendor.t(item.statusStr),
-            d: common_vendor.n(getStatusClass(item.statusStr)),
+            c: common_vendor.t(item.memberActivityJoinResp.paymentStatusStr),
+            d: common_vendor.n(getStatusClass(item.memberActivityJoinResp.paymentStatusStr)),
             e: "37541c0b-1-" + i0,
             f: common_vendor.t(formatDateTime(item.startDatetime)),
             g: "37541c0b-2-" + i0,
@@ -199,13 +208,13 @@ const _sfc_main = {
             i: "37541c0b-3-" + i0,
             j: common_vendor.t(item.joinCount || 0),
             k: common_vendor.t(item.totalSlots || "不限"),
-            l: ["报名中", "即将开始", "进行中"].includes(item.statusStr)
-          }, ["报名中", "即将开始", "进行中"].includes(item.statusStr) ? {
+            l: ["报名中", "即将开始", "进行中"].includes(item.memberActivityJoinResp.paymentStatusStr)
+          }, ["报名中", "即将开始", "进行中"].includes(item.memberActivityJoinResp.paymentStatusStr) ? {
             m: common_vendor.o(($event) => cancelEnroll(item.id), item.id)
           } : {}, {
-            n: item.statusStr === "待退款"
-          }, item.statusStr === "待退款" ? {
-            o: common_vendor.o(($event) => applyForRefund(item.id), item.id)
+            n: item.memberActivityJoinResp.paymentStatusStr === "待退款"
+          }, item.memberActivityJoinResp.paymentStatusStr === "待退款" ? {
+            o: common_vendor.o(($event) => applyForRefund(item), item.id)
           } : {}, {
             p: common_vendor.o(($event) => viewDetail(item.id), item.id),
             q: item.id,
@@ -257,7 +266,7 @@ const _sfc_main = {
               text: item.paddingReturnCount,
               type: "error"
             }),
-            o: common_vendor.o(($event) => manageRefunds(item.id, "individual"), item.id)
+            o: common_vendor.o(($event) => manageRefunds(item, "individual"), item.id)
           } : {}, {
             p: ["未开始", "报名中", "即将开始", "进行中"].includes(item.statusStr)
           }, ["未开始", "报名中", "即将开始", "进行中"].includes(item.statusStr) ? {
@@ -265,7 +274,7 @@ const _sfc_main = {
           } : {}, {
             r: item.statusStr === "已取消"
           }, item.statusStr === "已取消" ? {
-            s: common_vendor.o(($event) => manageRefunds(item.id, "all"), item.id)
+            s: common_vendor.o(($event) => manageRefunds(item, "all"), item.id)
           } : {}, {
             t: common_vendor.o(($event) => viewDetail(item.id), item.id),
             v: item.id,

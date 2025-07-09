@@ -305,7 +305,7 @@
 	// --- 生命周期钩子 ---
 	onMounted(() => {
 		uni.onAccelerometerChange((res) => {
-			if (Math.abs(res.x) > 1.5 && Math.abs(res.y) > 1.5) {
+			if (Math.abs(res.x) > 1.0 && Math.abs(res.y) > 1.0) {
 				triggerShakeSequence();
 			}
 		});

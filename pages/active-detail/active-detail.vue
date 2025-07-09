@@ -77,11 +77,12 @@
 			<view class="organizer-title">活动组织者</view>
 			<view class="organizer-info">
 				<view class="organizer-avatar">
-					<uni-icons type="person-filled" size="24" color="#fff" />
+					<!-- <uni-icons type="person-filled" size="24" color="#fff" /> -->
+					<img :src="activityDetail.memberUser.avatar" alt="" class="organizer-avatar"/>
 				</view>
 				<view>
 					<!-- 【修改】动态绑定组织者单位 -->
-					<view class="organizer-name">{{ activityDetail.organizerUnitName }}</view>
+					<view class="organizer-name">{{ activityDetail.memberUser.nickname }}</view>
 					<!-- 【修改】动态绑定组织者联系电话 -->
 					<view class="organizer-company">联系电话: {{ activityDetail.organizerContactPhone }}</view>
 				</view>

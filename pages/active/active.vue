@@ -33,8 +33,10 @@
 								选择状态
 							</view>
 							<view class="uni-list-cell-db">
-								<picker @change="bindStatusPickerChange" :value="statusIndex" :range="statusArray">
-									<view class="uni-input">{{statusArray[statusIndex]}}</view>
+								<!-- 绑定到新的动态数据 statusPickerRange -->
+								<picker @change="bindStatusPickerChange" :value="statusIndex"
+									:range="statusPickerRange">
+									<view class="uni-input">{{ statusPickerRange[statusIndex] }}</view>
 								</picker>
 							</view>
 						</view>
@@ -78,7 +80,8 @@
 
 		<!-- 活动列表 -->
 		<view class="activity-list" scroll-y="true">
-			<ActivityCard v-for="(activity, index) in activitiesData" :key="activity.id" :activity="activity" @refreshList="getActiveList(false)"  />
+			<ActivityCard v-for="(activity, index) in activitiesData" :key="activity.id" :activity="activity"
+				@refreshList="getActiveList(false)" />
 		</view>
 
 		<!-- 【修改后】根据新的状态变量来显示提示 -->
@@ -123,6 +126,7 @@
 
 	// 页面挂载时，首先获取一次活动列表
 	onMounted(() => {
+		fetchActivityStatusList(); // 先获取筛选条件
 		getActiveList();
 	});
 
@@ -160,10 +164,37 @@
 	const date = ref(getDate({
 		format: true
 	}));
-	const statusArray = ref(['全部状态', '未开始', '报名中', '即将开始', '进行中', '已结束', '已取消']);
-	const statusIndex = ref(0);
+	const statusList = ref([]); // 用于存储从接口获取的原始状态列表 [{label, value}, ...]
+	const statusIndex = ref(0); // 依然用于 Picker 的 value
 	const selectedStatus = ref('全部状态');
 	const selectedLocationInfo = ref(null);
+
+	const statusPickerRange = computed(() => {
+		// 从原始列表提取 label，并在最前面添加 "全部状态"
+		const labels = statusList.value.map(item => item.label);
+		return ['全部状态', ...labels];
+	});
+
+	const fetchActivityStatusList = async () => {
+		// 使用您提供的 request 工具和接口文档信息
+		const {
+			data,
+			error
+		} = await request('/app-api/member/activity/status-list');
+
+		if (error) {
+			console.error('获取活动状态列表失败:', error);
+			uni.showToast({
+				title: '获取状态失败',
+				icon: 'none'
+			});
+			return;
+		}
+
+		// 将获取到的数据赋值给我们定义的 ref
+		statusList.value = data;
+		console.log('动态活动状态列表获取成功:', statusList.value);
+	};
 
 	// 计算属性
 	const startDate = computed(() => getDate('start'));
@@ -187,8 +218,6 @@
 	// 状态选择器改变
 	const bindStatusPickerChange = (e) => {
 		statusIndex.value = e.detail.value;
-		selectedStatus.value = statusArray.value[e.detail.value];
-		// 【修改】筛选条件变化后，不再手动调用，交由 watch 处理
 	};
 
 	// 位置选择
@@ -234,15 +263,15 @@
 		}
 
 		// 状态中文到数字的映射，后端通常使用数字
-		const statusMap = {
-			'全部状态': '', // 传空字符串表示查询全部
-			'未开始': 1,
-			'报名中': 2,
-			'即将开始': 3,
-			'进行中': 4,
-			'已结束': 5,
-			'已取消': 0
-		};
+		let statusValue = ''; // 默认为空，查询全部
+		if (statusIndex.value > 0) {
+			// 如果选择的不是 "全部状态"
+			// statusIndex.value - 1 是因为我们的 Picker Range 比原始数据多了一个 "全部状态"
+			const selectedItem = statusList.value[statusIndex.value - 1];
+			if (selectedItem) {
+				statusValue = selectedItem.value; // 获取对应的数字 value
+			}
+		}
 
 		// 构造请求参数
 		const params = {
@@ -250,7 +279,7 @@
 			pageSize: pageSize,
 			name: searchKeyword.value, // 搜索框内容
 			category: activeCategory.value === '全部类型' ? '' : activeCategory.value, // 活动类型
-			status: statusMap[selectedStatus.value], // 活动状态
+			status: statusValue, // 活动状态
 			longitude: selectedLocationInfo.value ? selectedLocationInfo.value.longitude : '', // 经度
 			latitude: selectedLocationInfo.value ? selectedLocationInfo.value.latitude : '' // 纬度
 		};
@@ -304,16 +333,12 @@
 
 	// 当任何一个筛选条件改变时，都触发一次新的搜索（不是加载更多）
 	watch(
-		[searchKeyword, activeCategory, selectedStatus, selectedLocationInfo],
-		() => {
-			// 为了防止短时间内快速输入触发多次请求，可以加入防抖
-			// 这里为了简单，直接调用
-			console.log('筛选条件变化，重新搜索...');
-			getActiveList(false);
-		}, {
-			deep: true
-		} // deep: true 确保能监听到 selectedLocationInfo 对象的内部变化
-	);
+			[searchKeyword, activeCategory, statusIndex, selectedLocationInfo],
+			() => {
+				console.log('筛选条件变化，重新搜索...');
+				getActiveList(false);
+			}, { deep: true }
+		);
 
 
 	// 发布活动

@@ -180,7 +180,7 @@ const _sfc_main = {
     };
     common_vendor.onMounted(() => {
       common_vendor.index.onAccelerometerChange((res) => {
-        if (Math.abs(res.x) > 1.5 && Math.abs(res.y) > 1.5) {
+        if (Math.abs(res.x) > 1 && Math.abs(res.y) > 1) {
           triggerShakeSequence();
         }
       });

@@ -309,7 +309,7 @@ const detailActivity = (activityId) => {
 
 /* 基础按钮样式 */
 .btn {
-  padding: 8rpx 36rpx;
+  padding: 4rpx 24rpx;
   border-radius: 12rpx;
   font-weight: 500;
   font-size: 28rpx;

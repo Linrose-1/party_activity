@@ -1,9 +1,8 @@
 <template>
 	<view class="login-container">
 		<view class="header">
-			<!-- 您可以替换成项目的真实Logo -->
 			<image class="logo" src="/static/logo.png" mode="aspectFit"></image>
-			<text class="welcome-text">欢迎来到聚一聚</text>
+			<text class="welcome-text">欢迎来到猩聚社</text>
 			<text class="slogan-text">链接商机，共创未来</text>
 		</view>
 
@@ -15,7 +14,7 @@
 				<!-- 使用 button 来触发微信手机号授权 -->
 				<button v-if="!phoneCode" class="get-phone-btn" open-type="getPhoneNumber"
 					@getphonenumber="getPhoneNumber">
-					点击获取微信手机号
+					点击授权微信手机号
 				</button>
 				<text v-else class="input-display">已授权</text>
 			</view>
@@ -33,13 +32,15 @@
 				</view>
 			</view>
 
-			<!-- 真实姓名 -->
+			<!-- 真实姓名 (暂时注释) -->
+			<!--
 			<view class="form-item">
 				<uni-icons type="staff-filled" size="22" color="#FF7600"></uni-icons>
 				<text class="label">真实姓名</text>
 				<input v-model="realName" class="input" type="text" placeholder="请输入您的真实姓名"
 					placeholder-class="placeholder" />
 			</view>
+			-->
 
 			<!-- 邀请码 -->
 			<view class="form-item">
@@ -61,8 +62,8 @@
 				</checkbox-group>
 			</view>
 
-			<!-- 登录按钮 -->
-			<button class="login-btn" :disabled="isLoginDisabled" @tap="handleLogin" @click="Login">
+			<!-- 【修改】登录按钮的点击事件统一为 handleLogin -->
+			<button class="login-btn" :disabled="isLoginDisabled" @tap="handleLogin">
 				立即登录
 			</button>
 		</view>
@@ -72,162 +73,152 @@
 <script setup>
 	import {
 		ref,
-		computed
+		computed,
+		onMounted
 	} from 'vue';
+	import { onLoad } from '@dcloudio/uni-app'; // 引入 onLoad
 	import request from '../../utils/request.js';
 
 	// --- 状态管理 ---
-	const phoneCode = ref('15819823202'); // 用于存储 getPhoneNumber 返回的 code
-	const userInfo = ref({}); // 存储微信用户信息
-	const realName = ref('buzhidao');
-	const inviteCode = ref('15819823202');
+	const loginCode = ref(''); // 【新增】用于存储 uni.login 返回的 code
+	const phoneCode = ref(''); // 用于存储 getPhoneNumber 返回的 code
+	const userInfo = ref({}); // 存储微信用户信息 (保持不变，用于UI显示)
+	// const realName = ref(''); // 【注释】真实姓名暂时不用
+	const inviteCode = ref(''); // 邀请码 (shardCode)
 	const agreed = ref(false); // 是否同意协议
 
 	// --- 计算属性 ---
-	// 控制登录按钮是否可用的计算属性
+	// 【修改】控制登录按钮是否可用的计算属性
 	const isLoginDisabled = computed(() => {
-		return !phoneCode.value || !userInfo.value.nickName || !realName.value || !agreed.value;
+		// 登录按钮的可用条件现在是：已获取手机号code，并同意了协议
+		return !phoneCode.value || !agreed.value;
+	});
+
+	// --- 【新增】页面加载时，预获取 loginCode ---
+	onLoad(() => {
+		getLoginCode();
 	});
 
 	// --- 方法 ---
 
 	/**
-	 * @description 获取用户微信绑定的手机号
-	 * @param {object} e - 事件对象，包含 code
+	 * @description 【新增】调用 uni.login 获取登录凭证
 	 */
-	const getPhoneNumber = (e) => {
-		if (e.detail.code) {
-			console.log('✅ 获取手机号凭证 (code) 成功:', e.detail.code);
-			phoneCode.value = e.detail.code;
-			uni.showToast({
-				title: '手机号授权成功',
-				icon: 'none'
-			});
-		} else {
-			console.error('❌ 用户拒绝了手机号授权:', e.detail.errMsg);
-			uni.showToast({
-				title: '您拒绝了授权',
-				icon: 'error'
-			});
+	const getLoginCode = async () => {
+		try {
+			const res = await uni.login({ provider: 'weixin' });
+			loginCode.value = res.code;
+			console.log('✅ 获取 loginCode 成功:', loginCode.value);
+		} catch (error) {
+			console.error('❌ 获取 loginCode 失败', error);
+			uni.showToast({ title: '登录准备失败，请重试', icon: 'none' });
 		}
 	};
 
 	/**
-	 * @description 获取用户微信昵称和头像
+	 * @description 获取用户微信绑定的手机号 (保持不变)
+	 */
+	const getPhoneNumber = (e) => {
+		if (e.detail.code) {
+			console.log('✅ 获取手机号凭证 (phoneCode) 成功:', e.detail.code);
+			phoneCode.value = e.detail.code;
+			uni.showToast({ title: '手机号授权成功', icon: 'none' });
+		} else {
+			console.error('❌ 用户拒绝了手机号授权:', e.detail.errMsg);
+			uni.showToast({ title: '您拒绝了授权', icon: 'error' });
+		}
+	};
+
+	/**
+	 * @description 获取用户微信昵称和头像 (保持不变)
 	 */
 	const getUserProfile = () => {
 		uni.getUserProfile({
-			desc: '用于完善会员资料', // 声明获取用户个人信息后的用途，必填
+			desc: '用于完善会员资料',
 			success: (res) => {
 				console.log('✅ 获取用户信息成功:', res.userInfo);
 				userInfo.value = res.userInfo;
-				uni.showToast({
-					title: '昵称授权成功',
-					icon: 'none'
-				});
+				uni.showToast({ title: '昵称授权成功', icon: 'none' });
 			},
 			fail: (err) => {
 				console.error('❌ 用户拒绝了信息授权:', err);
-				uni.showToast({
-					title: '您拒绝了授权',
-					icon: 'error'
-				});
 			}
 		});
 	};
 
 	/**
-	 * @description 处理同意协议的 checkbox 变化
+	 * @description 处理同意协议的 checkbox 变化 (保持不变)
 	 */
 	const agreeChange = (e) => {
 		agreed.value = e.detail.value.length > 0;
 	};
 
 	/**
-	 * @description 处理登录逻辑
+	 * @description 【核心重构】处理一键登录逻辑
 	 */
-	const handleLogin = () => {
+	const handleLogin = async () => {
 		if (isLoginDisabled.value) {
-			uni.showToast({
-				title: '请先完善信息并同意协议',
-				icon: 'none'
-			});
+			// 根据按钮状态给出更明确的提示
+			if (!agreed.value) {
+				uni.showToast({ title: '请先阅读并同意用户协议', icon: 'none' });
+			} else if (!phoneCode.value) {
+				uni.showToast({ title: '请先授权获取手机号', icon: 'none' });
+			}
 			return;
 		}
 
-		uni.showLoading({
-			title: '登录中...'
-		});
+		uni.showLoading({ title: '正在登录...' });
 
-		// 准备提交到后端的数据
-		const loginData = {
-			phone_code: phoneCode.value,
-			nickname: userInfo.value.nickName,
-			avatar: userInfo.value.avatarUrl,
-			real_name: realName.value,
-			invite_code: inviteCode.value
-		};
+		try {
+			// 构造请求体，完全匹配接口文档
+			const payload = {
+				loginCode: loginCode.value,
+				phoneCode: phoneCode.value,
+				state: 'default', // 按要求传入 'default'
+				shardCode: inviteCode.value // 传入用户填写的邀请码
+			};
 
-		console.log('🚀 准备提交的登录数据:', loginData);
+			console.log('🚀 准备提交的一键登录数据:', payload);
 
-		// 模拟网络请求
-		setTimeout(() => {
+			// 调用一键登录接口
+			const result = await request('/app-api/member/auth/weixin-mini-app-login', {
+				method: 'POST',
+				data: payload
+			});
+			
 			uni.hideLoading();
-			uni.showToast({
-				title: '登录成功',
-				icon: 'success'
-			});
-			// 登录成功后，跳转到“我的”页面，这里使用 switchTab，因为“我的”通常是 TabBar 页面
-			uni.switchTab({
-				url: '/pages/profile/profile' // 请确保这个路径是您“我的”页面的正确路径
-			});
-		}, 1500);
+
+			// 判断登录是否成功
+			if (!result.error && result.data && result.data.accessToken) {
+				// 登录成功，保存 token 和 userId
+				uni.setStorageSync('token', result.data.accessToken);
+				uni.setStorageSync('userId', result.data.userId);
+
+				uni.showToast({ title: '登录成功', icon: 'success' });
+
+				// 登录成功后，跳转到首页或“我的”页面
+				uni.switchTab({
+					url: '/pages/home/home' // 默认跳转到个人中心
+				});
+			} else {
+				// 登录失败处理
+				uni.showToast({ title: result.error || '登录失败，请重试', icon: 'none' });
+				// 登录失败后，loginCode会失效，需要重新获取
+				getLoginCode();
+			}
+		} catch (error) {
+			uni.hideLoading();
+			console.error('登录请求异常:', error);
+			uni.showToast({ title: '请求异常，请检查网络', icon: 'none' });
+		}
 	};
 
-
+	// 【注释】旧的 Login 函数不再需要
+	/*
 	const Login = async () => {
-	  try {
-	    // 调用封装的请求方法
-	    console.log("params", inviteCode.value, realName.value)
-	    const result = await request('/app-api/member/auth/login', {
-	      method: 'POST', // 请求方式
-	      data: {
-	        mobile: inviteCode.value,
-	        password: realName.value
-	      }
-	    });
-	    
-	    // 如果请求成功，打印返回的数据
-	    console.log('Login result:', result);
-	
-	    // 判断登录是否成功（根据你的返回数据结构，error为null且存在accessToken表示成功）
-	    if (!result.error && result.data && result.data.accessToken) {
-	      // 存储accessToken
-	      uni.setStorageSync('token', result.data.accessToken);
-		  uni.setStorageSync('userId',result.data.userId)
-	      
-	      // 跳转到首页
-	      uni.reLaunch({
-	        url: '/pages/home/home'
-	      });
-	    } else {
-	      // 登录失败处理
-	      console.log('登录失败:', result.error || '未知错误');
-	      // 这里可以添加失败提示，比如toast提示用户
-	      uni.showToast({
-	        title: '登录失败',
-	        icon: 'none'
-	      });
-	    }
-	  } catch (error) {
-	    // 捕获异常
-	    console.error('登录请求异常:', error);
-	    uni.showToast({
-	      title: '请求异常，请重试',
-	      icon: 'none'
-	    });
-	  }
+	  // ...
 	};
+	*/
 </script>
 
 <style lang="scss" scoped>

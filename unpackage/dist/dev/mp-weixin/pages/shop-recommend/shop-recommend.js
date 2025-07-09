@@ -1,5 +1,6 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
+const utils_request = require("../../utils/request.js");
 if (!Array) {
   const _component_uni_label = common_vendor.resolveComponent("uni-label");
   const _easycom_uni_easyinput2 = common_vendor.resolveComponent("uni-easyinput");
@@ -16,38 +17,74 @@ const _sfc_main = {
   setup(__props) {
     const form = common_vendor.ref({
       name: "",
-      address: "",
       reason: ""
     });
-    const handleSubmit = () => {
-      if (!form.value.name.trim() || !form.value.address.trim() || !form.value.reason.trim()) {
+    const selectedLocationInfo = common_vendor.ref(null);
+    const handleSubmit = async () => {
+      if (!form.value.name.trim()) {
         common_vendor.index.showToast({
-          title: "请填写完整信息",
+          title: "请输入聚店名称",
           icon: "none"
         });
         return;
       }
-      common_vendor.index.__f__("log", "at pages/shop-recommend/shop-recommend.vue:88", "提交数据:", form.value);
-      common_vendor.index.showModal({
-        title: "推荐提交成功",
-        content: `店铺：${form.value.name}
-地址：${form.value.address}
-理由：${form.value.reason}`,
-        showCancel: false,
-        success: () => {
-          form.value = {
-            name: "",
-            address: "",
-            reason: ""
-          };
+      if (!selectedLocationInfo.value) {
+        common_vendor.index.showToast({
+          title: "请选择聚店地址",
+          icon: "none"
+        });
+        return;
+      }
+      if (!form.value.reason.trim()) {
+        common_vendor.index.showToast({
+          title: "请输入推荐理由",
+          icon: "none"
+        });
+        return;
+      }
+      common_vendor.index.showLoading({
+        title: "正在提交..."
+      });
+      const result = await storeRecommend();
+      common_vendor.index.hideLoading();
+      if (result.error) {
+        common_vendor.index.showToast({
+          title: result.error,
+          icon: "none",
+          duration: 2e3
+        });
+      } else {
+        common_vendor.index.showToast({
+          title: "推荐成功，感谢您的分享！",
+          icon: "success"
+        });
+        form.value.name = "";
+        form.value.reason = "";
+        selectedLocationInfo.value = null;
+        setTimeout(() => {
+          common_vendor.index.navigateBack();
+        }, 1500);
+      }
+    };
+    const storeRecommend = async () => {
+      const result = await utils_request.request("/app-api/member/store-recommend/create", {
+        method: "POST",
+        // 请求方式
+        data: {
+          // 将页面数据映射到接口参数
+          storeName: form.value.name,
+          fullAddress: selectedLocationInfo.value.address,
+          recommendText: form.value.reason,
+          longitude: selectedLocationInfo.value.longitude,
+          latitude: selectedLocationInfo.value.latitude
         }
       });
+      return result;
     };
-    const selectedLocationInfo = common_vendor.ref(null);
     const openMapToChooseLocation = () => {
       common_vendor.index.chooseLocation({
         success: (res) => {
-          common_vendor.index.__f__("log", "at pages/shop-recommend/shop-recommend.vue:109", "选择位置成功:", res);
+          common_vendor.index.__f__("log", "at pages/shop-recommend/shop-recommend.vue:166", "选择位置成功:", res);
           selectedLocationInfo.value = {
             name: res.name,
             address: res.address,
@@ -56,10 +93,8 @@ const _sfc_main = {
           };
         },
         fail: (err) => {
-          common_vendor.index.__f__("log", "at pages/shop-recommend/shop-recommend.vue:118", "选择位置失败:", err);
-          if (err.errMsg.includes("cancel"))
-            ;
-          else {
+          common_vendor.index.__f__("log", "at pages/shop-recommend/shop-recommend.vue:177", "选择位置失败:", err);
+          if (!err.errMsg.includes("cancel")) {
             common_vendor.index.showToast({
               title: "选择位置失败",
               icon: "none"

@@ -19,7 +19,7 @@ const _sfc_main = {
         activityId.value = options.id;
         getActiveDetail();
       } else {
-        common_vendor.index.__f__("error", "at pages/active-detail/active-detail.vue:200", "未接收到活动ID！");
+        common_vendor.index.__f__("error", "at pages/active-detail/active-detail.vue:201", "未接收到活动ID！");
         common_vendor.index.showToast({
           title: "加载活动详情失败，缺少ID",
           icon: "none"
@@ -131,9 +131,9 @@ const _sfc_main = {
       });
       if (result && !result.error) {
         activityDetail.value = result.data;
-        common_vendor.index.__f__("log", "at pages/active-detail/active-detail.vue:324", "getActiveDetail result:", activityDetail.value);
+        common_vendor.index.__f__("log", "at pages/active-detail/active-detail.vue:325", "getActiveDetail result:", activityDetail.value);
       } else {
-        common_vendor.index.__f__("log", "at pages/active-detail/active-detail.vue:326", "请求失败:", result ? result.error : "无返回结果");
+        common_vendor.index.__f__("log", "at pages/active-detail/active-detail.vue:327", "请求失败:", result ? result.error : "无返回结果");
       }
     };
     function share() {
@@ -208,12 +208,8 @@ const _sfc_main = {
             c: item.id
           };
         }),
-        w: common_vendor.p({
-          type: "person-filled",
-          size: "24",
-          color: "#fff"
-        }),
-        x: common_vendor.t(activityDetail.value.organizerUnitName),
+        w: activityDetail.value.memberUser.avatar,
+        x: common_vendor.t(activityDetail.value.memberUser.nickname),
         y: common_vendor.t(activityDetail.value.organizerContactPhone),
         z: activityDetail.value.memberStoreRespVO
       }, activityDetail.value.memberStoreRespVO ? common_vendor.e({

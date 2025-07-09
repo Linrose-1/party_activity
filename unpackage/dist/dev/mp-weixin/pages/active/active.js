@@ -23,10 +23,11 @@ const _sfc_main = {
     const pageNo = common_vendor.ref(1);
     const activitiesData = common_vendor.ref([]);
     common_vendor.onMounted(() => {
+      fetchActivityStatusList();
       getActiveList();
     });
     common_vendor.onReachBottom(() => {
-      common_vendor.index.__f__("log", "at pages/active/active.vue:131", "滑动到底部，触发加载更多");
+      common_vendor.index.__f__("log", "at pages/active/active.vue:135", "滑动到底部，触发加载更多");
       if (hasMore.value && !loading.value) {
         getActiveList(true);
       }
@@ -52,10 +53,30 @@ const _sfc_main = {
     const date = common_vendor.ref(getDate({
       format: true
     }));
-    const statusArray = common_vendor.ref(["全部状态", "未开始", "报名中", "即将开始", "进行中", "已结束", "已取消"]);
+    const statusList = common_vendor.ref([]);
     const statusIndex = common_vendor.ref(0);
-    const selectedStatus = common_vendor.ref("全部状态");
+    common_vendor.ref("全部状态");
     const selectedLocationInfo = common_vendor.ref(null);
+    const statusPickerRange = common_vendor.computed(() => {
+      const labels = statusList.value.map((item) => item.label);
+      return ["全部状态", ...labels];
+    });
+    const fetchActivityStatusList = async () => {
+      const {
+        data,
+        error
+      } = await utils_request.request("/app-api/member/activity/status-list");
+      if (error) {
+        common_vendor.index.__f__("error", "at pages/active/active.vue:186", "获取活动状态列表失败:", error);
+        common_vendor.index.showToast({
+          title: "获取状态失败",
+          icon: "none"
+        });
+        return;
+      }
+      statusList.value = data;
+      common_vendor.index.__f__("log", "at pages/active/active.vue:196", "动态活动状态列表获取成功:", statusList.value);
+    };
     const startDate = common_vendor.computed(() => getDate("start"));
     const endDate = common_vendor.computed(() => getDate("end"));
     const bindPickerChange = (e) => {
@@ -67,12 +88,11 @@ const _sfc_main = {
     };
     const bindStatusPickerChange = (e) => {
       statusIndex.value = e.detail.value;
-      selectedStatus.value = statusArray.value[e.detail.value];
     };
     const openMapToChooseLocation = () => {
       common_vendor.index.chooseLocation({
         success: (res) => {
-          common_vendor.index.__f__("log", "at pages/active/active.vue:198", "选择位置成功:", res);
+          common_vendor.index.__f__("log", "at pages/active/active.vue:227", "选择位置成功:", res);
           selectedLocationInfo.value = {
             name: res.name,
             address: res.address,
@@ -81,7 +101,7 @@ const _sfc_main = {
           };
         },
         fail: (err) => {
-          common_vendor.index.__f__("log", "at pages/active/active.vue:208", "选择位置失败:", err);
+          common_vendor.index.__f__("log", "at pages/active/active.vue:237", "选择位置失败:", err);
         }
       });
     };
@@ -98,16 +118,13 @@ const _sfc_main = {
         activitiesData.value = [];
         hasMore.value = true;
       }
-      const statusMap = {
-        "全部状态": "",
-        // 传空字符串表示查询全部
-        "未开始": 1,
-        "报名中": 2,
-        "即将开始": 3,
-        "进行中": 4,
-        "已结束": 5,
-        "已取消": 0
-      };
+      let statusValue = "";
+      if (statusIndex.value > 0) {
+        const selectedItem = statusList.value[statusIndex.value - 1];
+        if (selectedItem) {
+          statusValue = selectedItem.value;
+        }
+      }
       const params = {
         pageNo: pageNo.value,
         pageSize,
@@ -115,7 +132,7 @@ const _sfc_main = {
         // 搜索框内容
         category: activeCategory.value === "全部类型" ? "" : activeCategory.value,
         // 活动类型
-        status: statusMap[selectedStatus.value],
+        status: statusValue,
         // 活动状态
         longitude: selectedLocationInfo.value ? selectedLocationInfo.value.longitude : "",
         // 经度
@@ -123,7 +140,7 @@ const _sfc_main = {
         // 纬度
       };
       try {
-        common_vendor.index.__f__("log", "at pages/active/active.vue:259", "发起活动列表请求, 参数:", params);
+        common_vendor.index.__f__("log", "at pages/active/active.vue:288", "发起活动列表请求, 参数:", params);
         const result = await utils_request.request("/app-api/member/activity/list", {
           method: "GET",
           data: params
@@ -141,28 +158,25 @@ const _sfc_main = {
             hasMore.value = true;
           }
           pageNo.value++;
-          common_vendor.index.__f__("log", "at pages/active/active.vue:291", "活动列表获取成功:", activitiesData.value);
+          common_vendor.index.__f__("log", "at pages/active/active.vue:320", "活动列表获取成功:", activitiesData.value);
         } else {
-          common_vendor.index.__f__("error", "at pages/active/active.vue:294", "获取活动列表失败:", result);
+          common_vendor.index.__f__("error", "at pages/active/active.vue:323", "获取活动列表失败:", result);
           hasMore.value = false;
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/active/active.vue:298", "请求异常:", error);
+        common_vendor.index.__f__("error", "at pages/active/active.vue:327", "请求异常:", error);
         hasMore.value = false;
       } finally {
         loading.value = false;
       }
     };
     common_vendor.watch(
-      [searchKeyword, activeCategory, selectedStatus, selectedLocationInfo],
+      [searchKeyword, activeCategory, statusIndex, selectedLocationInfo],
       () => {
-        common_vendor.index.__f__("log", "at pages/active/active.vue:311", "筛选条件变化，重新搜索...");
+        common_vendor.index.__f__("log", "at pages/active/active.vue:338", "筛选条件变化，重新搜索...");
         getActiveList(false);
       },
-      {
-        deep: true
-      }
-      // deep: true 确保能监听到 selectedLocationInfo 对象的内部变化
+      { deep: true }
     );
     const publishActivity = () => {
       common_vendor.index.navigateTo({
@@ -182,10 +196,10 @@ const _sfc_main = {
         e: common_vendor.o(bindPickerChange),
         f: index.value,
         g: array.value,
-        h: common_vendor.t(statusArray.value[statusIndex.value]),
+        h: common_vendor.t(statusPickerRange.value[statusIndex.value]),
         i: common_vendor.o(bindStatusPickerChange),
         j: statusIndex.value,
-        k: statusArray.value,
+        k: statusPickerRange.value,
         l: common_vendor.t(date.value),
         m: date.value,
         n: startDate.value,

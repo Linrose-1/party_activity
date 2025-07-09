@@ -3,8 +3,8 @@ import {
 } from 'vue';
 
 // 请求的基本配置
-// const baseURL = 'http://192.168.110.249:8080';
-const baseURL = 'http://8.163.18.207:48080';
+const baseURL = 'https://jyj.gofor.club';
+// const baseURL = 'http://8.163.18.207:48080';
 const timeout = 10000; // 请求超时
 
 // 封装请求方法

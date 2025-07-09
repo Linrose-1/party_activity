@@ -1,5 +1,7 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
+const utils_request = require("../../utils/request.js");
+const utils_upload = require("../../utils/upload.js");
 if (!Array) {
   const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
   _easycom_uni_icons2();
@@ -13,73 +15,118 @@ const _sfc_main = {
   setup(__props) {
     const currentTab = common_vendor.ref(0);
     const activityInfo = common_vendor.ref({});
+    const fullActivityData = common_vendor.ref(null);
     const participantList = common_vendor.ref([]);
     const bannerText = common_vendor.ref("");
+    const pageMode = common_vendor.ref("individual");
     const pendingUsers = common_vendor.computed(
-      () => participantList.value.filter((u) => u.refundStatus === "pending")
+      () => participantList.value.filter((u) => u.paymentStatus === "3")
     );
     const completedUsers = common_vendor.computed(
-      () => participantList.value.filter((u) => u.refundStatus === "completed")
+      () => participantList.value.filter((u) => u.paymentStatus === "6")
     );
     common_vendor.onLoad((options) => {
-      const activityId = options.id;
-      const mode = options.mode;
-      activityInfo.value = {
-        id: activityId,
-        title: "宠物爱好者交流聚会",
-        image: "../../static/abc.png",
-        date: "2023年12月2日 10:00-14:00",
-        location: "人民公园草坪区",
-        participants: { current: 23, total: 30 },
-        totalRefundAmount: "4,554.00"
-      };
-      if (mode === "individual") {
-        bannerText.value = "请为提交申请的用户办理退款";
-        participantList.value = [
-          { id: 201, name: "赵六", avatar: "../../static/avatar4.png", qrCodeUrl: "../../static/qrcode.png", refundProofUrl: null, refundStatus: "pending" },
-          { id: 202, name: "孙七", avatar: "../../static/avatar5.png", qrCodeUrl: "../../static/qrcode.png", refundProofUrl: null, refundStatus: "pending" },
-          // 注意：这里也可以包含已处理的申请，让组织者能在“已完成”tab里看到
-          { id: 203, name: "周八", avatar: "../../static/avatar6.png", qrCodeUrl: "../../static/qrcode.png", refundProofUrl: "../../static/proof.png", refundStatus: "completed" }
-        ];
-      } else {
-        bannerText.value = "活动已取消，请为报名用户办理退款";
-        participantList.value = [
-          { id: 101, name: "张三", avatar: "../../static/avatar1.png", qrCodeUrl: "../../static/qrcode.png", refundProofUrl: null, refundStatus: "pending" },
-          { id: 102, name: "李四", avatar: "../../static/avatar2.png", qrCodeUrl: "../../static/qrcode.png", refundProofUrl: "../../static/proof.png", refundStatus: "completed" },
-          { id: 103, name: "王五", avatar: "../../static/avatar3.png", qrCodeUrl: "../../static/qrcode.png", refundProofUrl: null, refundStatus: "pending" }
-        ];
+      if (options.item) {
+        try {
+          const decodedData = decodeURIComponent(options.item);
+          const parsedData = JSON.parse(decodedData);
+          fullActivityData.value = parsedData;
+          activityInfo.value = {
+            id: parsedData.id,
+            title: parsedData.activityTitle,
+            image: parsedData.coverImageUrl,
+            date: formatDateTime(parsedData.startDatetime),
+            location: parsedData.locationAddress || "线上活动",
+            participants: { current: parsedData.joinCount || 0 },
+            totalRefundAmount: null
+          };
+        } catch (e) {
+          common_vendor.index.__f__("error", "at pages/my-active-manage/my-active-manage.vue:156", "解析活动数据失败:", e);
+          return;
+        }
       }
+      pageMode.value = options.mode || "individual";
+      bannerText.value = pageMode.value === "individual" ? "请为提交申请的用户办理退款" : "活动已取消，请为所有报名用户办理退款";
+      fetchRefundList();
     });
-    const switchTab = (index) => {
-      currentTab.value = index;
-    };
-    const previewImage = (url) => {
-      if (!url)
+    const fetchRefundList = async () => {
+      if (!fullActivityData.value)
         return;
-      common_vendor.index.previewImage({
-        urls: [url]
-      });
+      common_vendor.index.showLoading({ title: "加载中..." });
+      const statusToFetch = currentTab.value === 0 ? "3" : "6";
+      const params = {
+        activityId: fullActivityData.value.id,
+        paymentStatus: statusToFetch,
+        pageNo: 1,
+        pageSize: 100
+      };
+      try {
+        const result = await utils_request.request("/app-api/member/activity-join/list", {
+          method: "GET",
+          data: params
+        });
+        participantList.value = result.data ? result.data.list || [] : [];
+      } catch (error) {
+        common_vendor.index.showToast({ title: "加载列表失败", icon: "none" });
+      } finally {
+        common_vendor.index.hideLoading();
+      }
     };
     const uploadProof = (user) => {
       common_vendor.index.chooseImage({
         count: 1,
-        success: (res) => {
+        success: async (res) => {
           const tempFilePath = res.tempFilePaths[0];
-          common_vendor.index.showLoading({ title: "正在上传" });
-          setTimeout(() => {
-            const targetUser = participantList.value.find((u) => u.id === user.id);
-            if (targetUser) {
-              targetUser.refundProofUrl = tempFilePath;
-              targetUser.refundStatus = "completed";
+          common_vendor.index.showLoading({ title: "正在上传并确认..." });
+          try {
+            const uploadResult = await utils_upload.uploadFile(tempFilePath, { directory: "refund_proof" });
+            if (uploadResult.error) {
+              throw new Error(`上传失败: ${uploadResult.error}`);
             }
-            common_vendor.index.hideLoading();
-            common_vendor.index.showToast({
-              title: "凭证上传成功",
-              icon: "success"
+            const proofUrl = uploadResult.data;
+            const payload = {
+              id: user.id,
+              // 报名记录的唯一标识符
+              refundConfirmScreenshotUrl: proofUrl
+              // 上传后的凭证URL
+            };
+            common_vendor.index.__f__("log", "at pages/my-active-manage/my-active-manage.vue:227", "确认退款接口请求体:", payload);
+            const confirmResult = await utils_request.request("/app-api/member/activity-join/confirm-join-user-refund", {
+              method: "POST",
+              data: payload
             });
-          }, 1e3);
+            if (confirmResult.error) {
+              throw new Error(`确认失败: ${confirmResult.error}`);
+            }
+            common_vendor.index.showToast({ title: "操作成功", icon: "success" });
+            fetchRefundList();
+          } catch (error) {
+            common_vendor.index.showToast({ title: error.message || "操作失败", icon: "none", duration: 2e3 });
+          } finally {
+            common_vendor.index.hideLoading();
+          }
         }
       });
+    };
+    const switchTab = (index) => {
+      if (currentTab.value === index)
+        return;
+      currentTab.value = index;
+      fetchRefundList();
+    };
+    const previewImage = (url) => {
+      if (!url)
+        return;
+      common_vendor.index.previewImage({ urls: [url] });
+    };
+    const formatDateTime = (dateTimeStr) => {
+      if (!dateTimeStr)
+        return "时间待定";
+      const date = new Date(dateTimeStr);
+      const Y = date.getFullYear();
+      const M = (date.getMonth() + 1).toString().padStart(2, "0");
+      const D = date.getDate().toString().padStart(2, "0");
+      return `${Y}-${M}-${D}`;
     };
     return (_ctx, _cache) => {
       return common_vendor.e({
@@ -121,54 +168,52 @@ const _sfc_main = {
       }, activityInfo.value.totalRefundAmount ? {
         o: common_vendor.t(activityInfo.value.totalRefundAmount)
       } : {}, {
-        p: common_vendor.n({
+        p: pendingUsers.value.length > 0
+      }, pendingUsers.value.length > 0 ? {
+        q: common_vendor.t(pendingUsers.value.length)
+      } : {}, {
+        r: common_vendor.n({
           "active": currentTab.value === 0
         }),
-        q: common_vendor.o(($event) => switchTab(0)),
-        r: common_vendor.n({
+        s: common_vendor.o(($event) => switchTab(0)),
+        t: completedUsers.value.length > 0
+      }, completedUsers.value.length > 0 ? {
+        v: common_vendor.t(completedUsers.value.length)
+      } : {}, {
+        w: common_vendor.n({
           "active": currentTab.value === 1
         }),
-        s: common_vendor.o(($event) => switchTab(1)),
-        t: common_vendor.p({
-          type: "person-filled",
-          color: "#FF6B00",
-          size: "20"
-        }),
-        v: common_vendor.t(pendingUsers.value.length),
-        w: pendingUsers.value.length > 0
+        x: common_vendor.o(($event) => switchTab(1)),
+        y: pendingUsers.value.length > 0
       }, pendingUsers.value.length > 0 ? {
-        x: common_vendor.f(pendingUsers.value, (user, k0, i0) => {
+        z: common_vendor.f(pendingUsers.value, (user, k0, i0) => {
+          var _a, _b;
           return {
-            a: user.avatar,
-            b: common_vendor.t(user.name),
-            c: user.qrCodeUrl,
-            d: common_vendor.o(($event) => previewImage(user.qrCodeUrl), user.id),
-            e: "c2678471-5-" + i0,
+            a: ((_a = user.memberUser) == null ? void 0 : _a.avatar) || "../../static/avatar-placeholder.png",
+            b: common_vendor.t(((_b = user.memberUser) == null ? void 0 : _b.nickname) || "未知用户"),
+            c: user.refundScreenshotUrl,
+            d: common_vendor.o(($event) => previewImage(user.refundScreenshotUrl), user.id),
+            e: "c2678471-4-" + i0,
             f: common_vendor.o(($event) => uploadProof(user), user.id),
             g: user.id
           };
         }),
-        y: common_vendor.p({
+        A: common_vendor.p({
           type: "plusempty",
           color: "#FF6B00",
           size: "16"
         })
       } : {}, {
-        z: currentTab.value === 0,
-        A: common_vendor.p({
-          type: "checkbox-filled",
-          color: "#4caf50",
-          size: "20"
-        }),
-        B: common_vendor.t(completedUsers.value.length),
+        B: currentTab.value === 0,
         C: completedUsers.value.length > 0
       }, completedUsers.value.length > 0 ? {
         D: common_vendor.f(completedUsers.value, (user, k0, i0) => {
+          var _a, _b;
           return {
-            a: user.avatar,
-            b: common_vendor.t(user.name),
-            c: user.refundProofUrl,
-            d: common_vendor.o(($event) => previewImage(user.refundProofUrl), user.id),
+            a: ((_a = user.memberUser) == null ? void 0 : _a.avatar) || "../../static/avatar-placeholder.png",
+            b: common_vendor.t(((_b = user.memberUser) == null ? void 0 : _b.nickname) || "未知用户"),
+            c: user.refundConfirmScreenshotUrl,
+            d: common_vendor.o(($event) => previewImage(user.refundConfirmScreenshotUrl), user.id),
             e: user.id
           };
         })

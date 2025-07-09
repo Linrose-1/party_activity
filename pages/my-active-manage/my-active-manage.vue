@@ -17,7 +17,6 @@
             <uni-icons type="calendar-filled" color="#999" size="16"></uni-icons>
             <text>{{ activityInfo.date }}</text>
           </view>
-          <!-- v-if 仍然保留，作为防止API数据缺失的最后防线 -->
           <view v-if="activityInfo.location" class="info-line">
             <uni-icons type="location-filled" color="#999" size="16"></uni-icons>
             <text>{{ activityInfo.location }}</text>
@@ -41,13 +40,13 @@
          :class="['tab-item', { 'active': currentTab === 0 }]"
          @click="switchTab(0)"
        >
-         待处理
+         待处理 <text v-if="pendingUsers.length > 0">({{ pendingUsers.length }})</text>
        </view>
        <view
          :class="['tab-item', { 'active': currentTab === 1 }]"
          @click="switchTab(1)"
        >
-         已完成
+         已完成 <text v-if="completedUsers.length > 0">({{ completedUsers.length }})</text>
        </view>
     </view>
 
@@ -55,23 +54,20 @@
     <scroll-view scroll-y class="list-scroll-view">
       <!-- 待处理列表 -->
       <view v-show="currentTab === 0">
-        <view class="list-header">
-          <uni-icons type="person-filled" color="#FF6B00" size="20"></uni-icons>
-          <text>待退款用户 ({{ pendingUsers.length }}人)</text>
-        </view>
         <view v-if="pendingUsers.length > 0" class="list-content">
            <view v-for="user in pendingUsers" :key="user.id" class="card item-card">
             <view class="user-info">
-              <image :src="user.avatar" class="avatar" mode="aspectFill" />
-              <text class="name">{{ user.name }}</text>
+              <!-- 容错处理: 优先用 memberUser 里的信息 -->
+              <image :src="user.memberUser?.avatar || '../../static/avatar-placeholder.png'" class="avatar" mode="aspectFill" />
+              <text class="name">{{ user.memberUser?.nickname || '未知用户' }}</text>
             </view>
             <view class="qr-code-section">
               <view class="section-title">用户收款码</view>
               <image 
-                :src="user.qrCodeUrl" 
+                :src="user.refundScreenshotUrl" 
                 class="qr-code-image" 
                 mode="aspectFit"
-                @click="previewImage(user.qrCodeUrl)"
+                @click="previewImage(user.refundScreenshotUrl)"
               />
             </view>
             <view class="proof-section">
@@ -89,24 +85,20 @@
 
       <!-- 已完成列表 -->
        <view v-show="currentTab === 1">
-        <view class="list-header">
-           <uni-icons type="checkbox-filled" color="#4caf50" size="20"></uni-icons>
-           <text>已完成退款 ({{ completedUsers.length }}人)</text>
-        </view>
          <view v-if="completedUsers.length > 0" class="list-content">
            <view v-for="user in completedUsers" :key="user.id" class="card item-card">
              <view class="user-info">
-              <image :src="user.avatar" class="avatar" mode="aspectFill" />
-              <text class="name">{{ user.name }}</text>
+              <image :src="user.memberUser?.avatar || '../../static/avatar-placeholder.png'" class="avatar" mode="aspectFill" />
+              <text class="name">{{ user.memberUser?.nickname || '未知用户' }}</text>
               <view class="status-badge completed">已完成</view>
             </view>
             <view class="proof-display">
               <view class="section-title">退款凭证</view>
               <image 
-                :src="user.refundProofUrl" 
+                :src="user.refundConfirmScreenshotUrl" 
                 class="proof-image" 
                 mode="aspectFit"
-                @click="previewImage(user.refundProofUrl)"
+                @click="previewImage(user.refundConfirmScreenshotUrl)"
               />
             </view>
           </view>
@@ -120,97 +112,168 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
-import { onLoad } from '@dcloudio/uni-app'
+import { ref, computed } from 'vue';
+import { onLoad } from '@dcloudio/uni-app';
+// 导入所有需要的工具
+import request from '../../utils/request.js';
+import uploadFile from '../../utils/upload.js';
 
+// --- 页面状态 (无修改) ---
 const currentTab = ref(0);
 const activityInfo = ref({});
+const fullActivityData = ref(null);
 const participantList = ref([]);
 const bannerText = ref('');
+const pageMode = ref('individual');
 
+// --- 计算属性 (无修改) ---
 const pendingUsers = computed(() => 
-  participantList.value.filter(u => u.refundStatus === 'pending')
+  participantList.value.filter(u => u.paymentStatus === '3')
 );
 const completedUsers = computed(() => 
-  participantList.value.filter(u => u.refundStatus === 'completed')
+  participantList.value.filter(u => u.paymentStatus === '6')
 );
 
+// --- 页面加载 (无修改) ---
 onLoad((options) => {
-  const activityId = options.id;
-  const mode = options.mode;
+  if (options.item) {
+    try {
+      const decodedData = decodeURIComponent(options.item);
+      const parsedData = JSON.parse(decodedData);
+      fullActivityData.value = parsedData;
 
-  // --- 核心修正点在这里 ---
-  // 1. 先加载通用的、完整的活动信息
-  // API 请求示例: fetchActivityDetails(activityId)
-  activityInfo.value = {
-      id: activityId,
-      title: '宠物爱好者交流聚会',
-      image: '../../static/abc.png',
-      date: '2023年12月2日 10:00-14:00',
-      location: '人民公园草坪区',
-      participants: { current: 23, total: 30 },
-      totalRefundAmount: '4,554.00'
-  };
+      activityInfo.value = {
+        id: parsedData.id,
+        title: parsedData.activityTitle,
+        image: parsedData.coverImageUrl,
+        date: formatDateTime(parsedData.startDatetime),
+        location: parsedData.locationAddress || '线上活动',
+        participants: { current: parsedData.joinCount || 0 },
+        totalRefundAmount: null 
+      };
 
-  // 2. 再根据 mode 加载不同的用户列表和提示文字
-  if (mode === 'individual') {
-    bannerText.value = '请为提交申请的用户办理退款';
-    
-    // API 请求示例: fetchRefundApplicants(activityId)
-    // 模拟数据：仅加载申请退款的用户
-    participantList.value = [
-      { id: 201, name: '赵六', avatar: '../../static/avatar4.png', qrCodeUrl: '../../static/qrcode.png', refundProofUrl: null, refundStatus: 'pending' },
-      { id: 202, name: '孙七', avatar: '../../static/avatar5.png', qrCodeUrl: '../../static/qrcode.png', refundProofUrl: null, refundStatus: 'pending' },
-      // 注意：这里也可以包含已处理的申请，让组织者能在“已完成”tab里看到
-      { id: 203, name: '周八', avatar: '../../static/avatar6.png', qrCodeUrl: '../../static/qrcode.png', refundProofUrl: '../../static/proof.png', refundStatus: 'completed' },
-    ];
-
-  } else { // mode === 'all'
-    bannerText.value = '活动已取消，请为报名用户办理退款';
-
-    // API 请求示例: fetchAllParticipants(activityId)
-    // 模拟数据：加载所有报名用户
-    participantList.value = [
-      { id: 101, name: '张三', avatar: '../../static/avatar1.png', qrCodeUrl: '../../static/qrcode.png', refundProofUrl: null, refundStatus: 'pending' },
-      { id: 102, name: '李四', avatar: '../../static/avatar2.png', qrCodeUrl: '../../static/qrcode.png', refundProofUrl: '../../static/proof.png', refundStatus: 'completed' },
-      { id: 103, name: '王五', avatar: '../../static/avatar3.png', qrCodeUrl: '../../static/qrcode.png', refundProofUrl: null, refundStatus: 'pending' },
-    ];
+    } catch (e) {
+      console.error("解析活动数据失败:", e);
+      return;
+    }
   }
+
+  pageMode.value = options.mode || 'individual';
+  bannerText.value = pageMode.value === 'individual' 
+    ? '请为提交申请的用户办理退款'
+    : '活动已取消，请为所有报名用户办理退款';
+
+  fetchRefundList();
 });
 
-const switchTab = (index) => {
-  currentTab.value = index;
-}
+// --- 核心方法：获取退款用户列表 (无修改) ---
+const fetchRefundList = async () => {
+  if (!fullActivityData.value) return;
+  uni.showLoading({ title: '加载中...' });
 
-const previewImage = (url) => {
-  if (!url) return;
-  uni.previewImage({
-    urls: [url],
+  const statusToFetch = currentTab.value === 0 ? '3' : '6';
+
+  const params = {
+    activityId: fullActivityData.value.id,
+    paymentStatus: statusToFetch,
+    pageNo: 1,
+    pageSize: 100
+  };
+
+  try {
+    const result = await request('/app-api/member/activity-join/list', {
+      method: 'GET',
+      data: params
+    });
+    participantList.value = result.data ? result.data.list || [] : [];
+  } catch (error) {
+     uni.showToast({ title: '加载列表失败', icon: 'none' });
+  } finally {
+    uni.hideLoading();
+  }
+};
+
+// --- 【核心修改】上传凭证并更新状态 ---
+/**
+ * 处理单个用户的退款凭证上传和状态确认
+ * @param {object} user - 当前操作的用户对象，包含 id 等信息
+ */
+const uploadProof = (user) => {
+  // 1. 让用户选择图片
+  uni.chooseImage({
+    count: 1,
+    success: async (res) => {
+      const tempFilePath = res.tempFilePaths[0];
+      
+      uni.showLoading({ title: '正在上传并确认...' });
+      
+      try {
+        // 2. 调用 uploadFile 工具上传凭证图片
+        const uploadResult = await uploadFile(tempFilePath, { directory: 'refund_proof' });
+        if (uploadResult.error) {
+          // 如果上传失败，直接抛出错误，终止流程
+          throw new Error(`上传失败: ${uploadResult.error}`);
+        }
+        
+        // 获取上传成功后的凭证 URL
+        const proofUrl = uploadResult.data;
+
+        // 3. 构造请求体，完全匹配新接口文档
+        const payload = {
+          id: user.id, // 报名记录的唯一标识符
+          refundConfirmScreenshotUrl: proofUrl // 上传后的凭证URL
+        };
+        
+        console.log('确认退款接口请求体:', payload);
+
+        // 4. 调用新的、专门的“确认退款”接口
+        const confirmResult = await request('/app-api/member/activity-join/confirm-join-user-refund', {
+            method: 'POST',
+            data: payload
+        });
+        
+        if (confirmResult.error) {
+            // 如果接口调用失败，抛出错误
+            throw new Error(`确认失败: ${confirmResult.error}`);
+        }
+
+        uni.showToast({ title: '操作成功', icon: 'success' });
+        
+        // 5. 实时刷新UI：重新请求当前tab的列表
+        fetchRefundList();
+
+      } catch (error) {
+        // 统一处理所有可能的错误（上传失败或接口调用失败）
+        uni.showToast({ title: error.message || '操作失败', icon: 'none', duration: 2000 });
+      } finally {
+        // 确保 loading 状态被关闭
+        uni.hideLoading();
+      }
+    }
   });
 };
 
-const uploadProof = (user) => {
-  uni.chooseImage({
-    count: 1,
-    success: (res) => {
-      const tempFilePath = res.tempFilePaths[0];
-      
-      uni.showLoading({ title: '正在上传' });
-      
-      setTimeout(() => {
-        const targetUser = participantList.value.find(u => u.id === user.id);
-        if (targetUser) {
-          targetUser.refundProofUrl = tempFilePath;
-          targetUser.refundStatus = 'completed';
-        }
-        uni.hideLoading();
-        uni.showToast({
-          title: '凭证上传成功',
-          icon: 'success'
-        });
-      }, 1000);
-    }
-  });
+
+// --- 事件处理 (无修改) ---
+const switchTab = (index) => {
+  if (currentTab.value === index) return;
+  currentTab.value = index;
+  fetchRefundList();
+};
+
+const previewImage = (url) => {
+  if (!url) return;
+  uni.previewImage({ urls: [url] });
+};
+
+// --- 辅助函数 (无修改) ---
+const formatDateTime = (dateTimeStr) => {
+  if (!dateTimeStr) return '时间待定';
+  const date = new Date(dateTimeStr);
+	const Y = date.getFullYear();
+	const M = (date.getMonth() + 1).toString().padStart(2, '0');
+	const D = date.getDate().toString().padStart(2, '0');
+	return `${Y}-${M}-${D}`;
 };
 </script>
 

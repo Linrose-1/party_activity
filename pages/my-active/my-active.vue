@@ -40,8 +40,8 @@
             <view class="activity-header">
               <text class="activity-title">{{ item.activityTitle }}</text>
               <!-- 【核心修改】直接使用 statusStr，并传入 getStatusClass -->
-              <view :class="['status-tag', getStatusClass(item.statusStr)]">
-                {{ item.statusStr }}
+              <view :class="['status-tag', getStatusClass(item.memberActivityJoinResp.paymentStatusStr)]">
+                {{ item.memberActivityJoinResp.paymentStatusStr }}
               </view>
             </view>
             
@@ -64,16 +64,16 @@
               <view class="action-buttons">
                 <!-- 【核心修改】v-if 条件使用字符串判断 -->
                 <button 
-                  v-if="['报名中', '即将开始', '进行中'].includes(item.statusStr)" 
+                  v-if="['报名中', '即将开始', '进行中'].includes(item.memberActivityJoinResp.paymentStatusStr)" 
                   class="btn btn-cancel" 
                   @click.stop="cancelEnroll(item.id)"
                 >
                   取消报名
                 </button>
                  <button 
-                  v-if="item.statusStr === '待退款'" 
+                  v-if="item.memberActivityJoinResp.paymentStatusStr === '待退款'" 
                   class="btn btn-refund-apply" 
-                  @click.stop="applyForRefund(item.id)"
+                  @click.stop="applyForRefund(item)"
                 >
                   申请退款
                 </button>
@@ -147,7 +147,7 @@
 				 <button 
 				    v-if="item.statusStr === '待退款' && item.paddingReturnCount > 0"
 				    class="btn btn-approval" 
-				    @click.stop="manageRefunds(item.id, 'individual')"
+				    @click.stop="manageRefunds(item, 'individual')"
 				  >
 				    处理申请 <uni-badge class="badge" :text="item.paddingReturnCount" type="error"></uni-badge>
 				  </button>
@@ -163,7 +163,7 @@
 				  <button 
 				    v-if="item.statusStr === '已取消'"
 				    class="btn btn-refund-manage" 
-				    @click.stop="manageRefunds(item.id, 'all')"
+				    @click.stop="manageRefunds(item, 'all')"
 				  >
 				    处理退款
 				  </button>
@@ -234,6 +234,8 @@ const getMyActivitiesList = async (isLoadMore = false) => {
       method: 'GET',
       data: params
     });
+	
+	console.log("我的活动",result)
 
     if (result && !result.error && result.data) {
       const list = result.data.list || [];
@@ -341,8 +343,16 @@ const cancelEnroll = (activityId) => {
   });
 };
 
-const applyForRefund = (activityId) => {
-  uni.navigateTo({ url: `/pages/my-active-apply/my-active-apply?id=${activityId}` });
+const applyForRefund = (activityItem) => {
+  // 1. 将复杂的活动对象转换为 JSON 字符串
+  const activityJson = JSON.stringify(activityItem);
+  // 2. 对 JSON 字符串进行编码，防止特殊字符干扰 URL
+  const encodedData = encodeURIComponent(activityJson);
+  
+  // 3. 将编码后的字符串作为参数传递
+  uni.navigateTo({
+    url: `/pages/my-active-apply/my-active-apply?item=${encodedData}`
+  });
 };
 
 const cancelActivity = (activityId) => {
@@ -370,12 +380,20 @@ const cancelActivity = (activityId) => {
   });
 };
 
-const manageRefunds = (activityId, mode) => {
-  uni.navigateTo({ url: `/pages/my-active-manage/my-active-manage?id=${activityId}&mode=${mode}` });
+const manageRefunds = (activityItem, mode) => {
+  // 1. 将复杂的活动对象转换为 JSON 字符串
+  const activityJson = JSON.stringify(activityItem);
+  // 2. 对 JSON 字符串进行编码
+  const encodedData = encodeURIComponent(activityJson);
+  
+  // 3. 将编码后的字符串作为参数传递
+  uni.navigateTo({
+    url: `/pages/my-active-manage/my-active-manage?item=${encodedData}&mode=${mode}`
+  });
 };
 
 const navigateToDiscover = () => {
-  uni.switchTab({ url: '/pages/index/index' });
+  uni.switchTab({ url: '/pages/active/active' });
 };
 
 const navigateToCreate = () => {
