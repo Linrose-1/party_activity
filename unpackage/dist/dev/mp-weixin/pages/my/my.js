@@ -7,6 +7,12 @@ const _sfc_main = {
     common_vendor.onMounted(() => {
       getUserInfo();
     });
+    common_vendor.onLoad(() => {
+      getUserInfo();
+    });
+    common_vendor.onShow(() => {
+      getUserInfo();
+    });
     const userInfo = common_vendor.ref({});
     const getUserInfo = async () => {
       try {
@@ -15,12 +21,12 @@ const _sfc_main = {
         });
         if (result) {
           userInfo.value = result.data;
-          common_vendor.index.__f__("log", "at pages/my/my.vue:133", "getUserInfo userInfo:", userInfo.value);
+          common_vendor.index.__f__("log", "at pages/my/my.vue:142", "getUserInfo userInfo:", userInfo.value);
         } else {
-          common_vendor.index.__f__("log", "at pages/my/my.vue:135", "请求业务失败:", result.msg);
+          common_vendor.index.__f__("log", "at pages/my/my.vue:144", "请求业务失败:", result.msg);
         }
       } catch (error) {
-        common_vendor.index.__f__("log", "at pages/my/my.vue:138", "请求失败:", error);
+        common_vendor.index.__f__("log", "at pages/my/my.vue:147", "请求失败:", error);
       }
     };
     const accountList = common_vendor.computed(() => {
@@ -115,18 +121,6 @@ const _sfc_main = {
         }
       });
     };
-    const saveQrcode = () => {
-      common_vendor.index.showToast({
-        title: "二维码已保存",
-        icon: "none"
-      });
-    };
-    const shareQrcode = () => {
-      common_vendor.index.showToast({
-        title: "二维码已分享",
-        icon: "none"
-      });
-    };
     const onViewDetail = () => {
       common_vendor.index.navigateTo({
         url: "/pages/my-businessCard/my-businessCard"
@@ -156,27 +150,25 @@ const _sfc_main = {
             c: item.label
           };
         }),
-        j: common_vendor.o(onViewDetail),
-        k: userInfo.value.avatar || "../../static/images/default-avatar.png",
-        l: common_vendor.t(userInfo.value.realName || userInfo.value.nickname),
-        m: userInfo.value.topUpLevel && userInfo.value.topUpLevel.name
+        j: userInfo.value.avatar || "../../static/images/default-avatar.png",
+        k: common_vendor.t(userInfo.value.realName || userInfo.value.nickname),
+        l: userInfo.value.topUpLevel && userInfo.value.topUpLevel.name
       }, userInfo.value.topUpLevel && userInfo.value.topUpLevel.name ? {
-        n: common_vendor.t(userInfo.value.topUpLevel.name)
+        m: common_vendor.t(userInfo.value.topUpLevel.name)
       } : {}, {
-        o: userInfo.value.professionalTitle
+        n: userInfo.value.professionalTitle
       }, userInfo.value.professionalTitle ? {
-        p: common_vendor.t(userInfo.value.professionalTitle)
+        o: common_vendor.t(userInfo.value.professionalTitle)
       } : {}, {
-        q: userInfo.value.companyName
+        p: userInfo.value.companyName
       }, userInfo.value.companyName ? {
-        r: common_vendor.t(userInfo.value.companyName)
+        q: common_vendor.t(userInfo.value.companyName)
       } : {}, {
-        s: common_vendor.t(userInfo.value.shardCode || "暂无"),
-        t: common_vendor.o(($event) => copyToClipboard(userInfo.value.shardCode)),
-        v: userInfo.value.wechatQrCodeUrl || "../../static/images/default-qrcode.png",
-        w: common_vendor.o(saveQrcode),
-        x: common_vendor.o(shareQrcode),
-        y: common_vendor.f(featureList.value, (item, k0, i0) => {
+        r: common_vendor.t(userInfo.value.shardCode || "暂无"),
+        s: common_vendor.o(($event) => copyToClipboard(userInfo.value.shardCode)),
+        t: userInfo.value.wechatQrCodeUrl || "../../static/images/default-qrcode.png",
+        v: common_vendor.o(onViewDetail),
+        w: common_vendor.f(featureList.value, (item, k0, i0) => {
           return {
             a: item.icon,
             b: common_vendor.t(item.name),
@@ -185,7 +177,7 @@ const _sfc_main = {
             e: common_vendor.o(($event) => navigateToFeature(item.path), item.name)
           };
         }),
-        z: common_vendor.o(skipToLogin)
+        x: common_vendor.o(skipToLogin)
       });
     };
   }

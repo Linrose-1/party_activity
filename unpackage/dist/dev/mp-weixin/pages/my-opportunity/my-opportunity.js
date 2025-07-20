@@ -55,7 +55,7 @@ const _sfc_main = {
         method: "GET",
         data: params
       });
-      common_vendor.index.__f__("log", "at pages/my-opportunity/my-opportunity.vue:140", "我的商机", data);
+      common_vendor.index.__f__("log", "at pages/my-opportunity/my-opportunity.vue:138", "我的商机", data);
       if (isRefresh) {
         common_vendor.index.stopPullDownRefresh();
       }
@@ -153,9 +153,9 @@ const _sfc_main = {
       return common_vendor.e({
         a: common_vendor.f(postList.value, (post, k0, i0) => {
           return common_vendor.e({
-            a: common_vendor.t(post.contactPerson ? post.contactPerson.charAt(0) : "商"),
+            a: post.memberUser.avatar,
             b: common_vendor.o(skipApplicationBusinessCard, post.id),
-            c: common_vendor.t(post.contactPerson || "匿名用户"),
+            c: common_vendor.t(post.memberUser.nickname || "匿名用户"),
             d: "481e0091-0-" + i0,
             e: common_vendor.t(formatTimestamp(post.createTime)),
             f: "481e0091-1-" + i0,

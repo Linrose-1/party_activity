@@ -35,6 +35,7 @@ const _sfc_main = {
       professionalTitle: "",
       companyName: "",
       mobile: "",
+      contactEmail: "",
       wechatQrCodeUrl: "",
       personalBio: "",
       latitude: null,
@@ -67,7 +68,7 @@ const _sfc_main = {
             form.value[field] = result.data;
             common_vendor.index.showToast({ title: "上传成功", icon: "none" });
           } else {
-            common_vendor.index.__f__("error", "at pages/my-edit/my-edit.vue:162", "上传失败:", result.error);
+            common_vendor.index.__f__("error", "at pages/my-edit/my-edit.vue:167", "上传失败:", result.error);
             common_vendor.index.showToast({ title: result.error || "上传失败", icon: "none" });
           }
         }
@@ -128,7 +129,7 @@ const _sfc_main = {
           common_vendor.index.showToast({ title: result.error || "保存失败", icon: "none" });
         }
       }).catch((err) => {
-        common_vendor.index.__f__("log", "at pages/my-edit/my-edit.vue:237", "表单验证失败：", err);
+        common_vendor.index.__f__("log", "at pages/my-edit/my-edit.vue:242", "表单验证失败：", err);
       });
     };
     return (_ctx, _cache) => {
@@ -218,35 +219,43 @@ const _sfc_main = {
           label: "手机号码",
           name: "mobile"
         }),
-        F: form.value.wechatQrCodeUrl
+        F: common_vendor.o(($event) => form.value.contactEmail = $event),
+        G: common_vendor.p({
+          modelValue: form.value.contactEmail
+        }),
+        H: common_vendor.p({
+          label: "邮箱",
+          name: "contactEmail"
+        }),
+        I: form.value.wechatQrCodeUrl
       }, form.value.wechatQrCodeUrl ? {
-        G: form.value.wechatQrCodeUrl,
-        H: common_vendor.o(($event) => previewImage(form.value.wechatQrCodeUrl))
+        J: form.value.wechatQrCodeUrl,
+        K: common_vendor.o(($event) => previewImage(form.value.wechatQrCodeUrl))
       } : {}, {
-        I: common_vendor.t(form.value.wechatQrCodeUrl ? "更换二维码" : "上传二维码"),
-        J: common_vendor.o(chooseWechatQr),
-        K: common_vendor.p({
+        L: common_vendor.t(form.value.wechatQrCodeUrl ? "更换二维码" : "上传二维码"),
+        M: common_vendor.o(chooseWechatQr),
+        N: common_vendor.p({
           label: "微信二维码",
           name: "wechatQrCodeUrl"
         }),
-        L: common_vendor.o(($event) => form.value.personalBio = $event),
-        M: common_vendor.p({
+        O: common_vendor.o(($event) => form.value.personalBio = $event),
+        P: common_vendor.p({
           type: "textarea",
           placeholder: "介绍一下自己...",
           modelValue: form.value.personalBio
         }),
-        N: common_vendor.p({
+        Q: common_vendor.p({
           label: "个人简介",
           name: "personalBio"
         }),
-        O: common_vendor.sr(formRef, "13622257-0", {
+        R: common_vendor.sr(formRef, "13622257-0", {
           "k": "formRef"
         }),
-        P: common_vendor.p({
+        S: common_vendor.p({
           modelValue: form.value,
           rules
         }),
-        Q: common_vendor.o(submitForm)
+        T: common_vendor.o(submitForm)
       });
     };
   }

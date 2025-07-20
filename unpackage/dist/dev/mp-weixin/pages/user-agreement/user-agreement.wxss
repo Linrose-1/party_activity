@@ -6,10 +6,39 @@
   height: 100vh;
   background-color: #f5f7fa;
 }
+.tabs-container.data-v-e6ae5d36 {
+  display: flex;
+  background-color: #ffffff;
+  border-bottom: 1rpx solid #e5e5e5;
+  box-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.05);
+}
+.tabs-container .tab-item.data-v-e6ae5d36 {
+  flex: 1;
+  padding: 24rpx 0;
+  font-size: 30rpx;
+  color: #666;
+  text-align: center;
+  position: relative;
+  transition: color 0.3s, font-weight 0.3s;
+}
+.tabs-container .tab-item.active.data-v-e6ae5d36 {
+  color: #007aff;
+  font-weight: bold;
+}
+.tabs-container .tab-item.active.data-v-e6ae5d36::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80rpx;
+  height: 6rpx;
+  background-color: #007aff;
+  border-radius: 3rpx;
+}
 .content-scroll.data-v-e6ae5d36 {
   flex: 1;
-  height: 1px;
-  /* 解决 flex 子项在某些情况下不正确计算高度的问题 */
+  height: 0;
   padding: 30rpx;
   box-sizing: border-box;
 }
@@ -17,36 +46,4 @@
   color: #333;
   font-size: 28rpx;
   line-height: 1.8;
-}
-.agreement-content h1.data-v-e6ae5d36 {
-  font-size: 38rpx;
-  font-weight: bold;
-  text-align: center;
-  margin-bottom: 40rpx;
-  color: #222;
-}
-.agreement-content h2.data-v-e6ae5d36 {
-  font-size: 32rpx;
-  font-weight: bold;
-  margin-top: 50rpx;
-  margin-bottom: 24rpx;
-  color: #333;
-}
-.agreement-content p.data-v-e6ae5d36 {
-  margin-bottom: 24rpx;
-  text-align: justify;
-}
-.agreement-content ul.data-v-e6ae5d36 {
-  list-style-type: disc;
-  margin-left: 40rpx;
-  margin-bottom: 24rpx;
-  padding-left: 0;
-}
-.agreement-content ul li.data-v-e6ae5d36 {
-  margin-bottom: 12rpx;
-  line-height: 1.6;
-}
-.agreement-content strong.data-v-e6ae5d36 {
-  font-weight: bold;
-  color: #000;
 }

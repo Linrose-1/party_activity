@@ -102,14 +102,25 @@
   justify-content: center;
   align-items: center;
   margin-bottom: 40rpx;
+  /* 【新增】为 checkbox 创建一个稍大的点击区域，提升体验 */
+}
+.agreement-section .checkbox-wrapper.data-v-1cf27b2a {
+  display: flex;
+  align-items: center;
+  padding-right: 10rpx;
+  /* 与右侧文字的间距 */
 }
 .agreement-section .agreement-text.data-v-1cf27b2a {
   font-size: 24rpx;
   color: #999;
+  line-height: 1.5;
+  /* 增加行高，避免文字太挤 */
 }
 .agreement-section .link.data-v-1cf27b2a {
   color: #FF7600;
   text-decoration: underline;
+  /* 在链接之间添加一点点空间，视觉上更好看 */
+  margin: 0 4rpx;
 }
 .login-btn.data-v-1cf27b2a {
   width: 100%;

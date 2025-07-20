@@ -45,7 +45,7 @@
       <view class="organizer">
         <uni-icons type="person" size="16" color="#FF6B00" />
         <!-- 绑定正确的组织者字段 (organizerUnitName) -->
-        <text>{{ activity.organizerUnitName || '主办方' }}</text>
+        <text>{{ activity.memberUser.nickname || '主办方' }}</text>
       </view>
       <view class="action-buttons">
         <!-- 添加 :disabled="loading" 防止重复点击 -->
@@ -102,6 +102,8 @@ const getStatusClass = (statusStr) => {
   return classMap[statusStr] || '';
 };
 
+// 在 ActivityCard.vue 的 <script setup> 中
+
 const toggleFavorite = async () => {
   if (loading.value) {
     return;
@@ -115,9 +117,12 @@ const toggleFavorite = async () => {
     return;
   }
   
-  const isCurrentlyFavorite = isFavorite.value;
-  const endpoint = isCurrentlyFavorite ? '/app-api/member/follow/del' : '/app-api/member/follow/add';
-  const successMessage = isCurrentlyFavorite ? '已取消收藏' : '收藏成功';
+  // 1. 先进行“乐观更新”，让UI立即响应
+  const originalFavoriteStatus = isFavorite.value;
+  isFavorite.value = !isFavorite.value; // 立即切换本地状态
+
+  const endpoint = isFavorite.value ? '/app-api/member/follow/add' : '/app-api/member/follow/del';
+  const successMessage = isFavorite.value ? '收藏成功' : '已取消收藏';
 
   const payload = {
     userId: userId,
@@ -136,14 +141,23 @@ const toggleFavorite = async () => {
         title: successMessage,
         icon: 'success'
       });
-      emit('refreshList');
+      // 2. 【核心修改】操作成功后，发出一个带具体数据的新事件
+      //    我们不再使用 emit('refreshList')
+      emit('updateFavoriteStatus', { 
+          id: props.activity.id, 
+          newFollowFlag: isFavorite.value ? 1 : 0 // 传递新的关注状态 (1 或 0)
+      });
     } else {
+      // 3. 如果API请求失败，把UI状态回滚到操作之前的状态
+      isFavorite.value = originalFavoriteStatus; 
       uni.showToast({
         title: result.error || '操作失败，请重试',
         icon: 'none'
       });
     }
   } catch (error) {
+    // 4. 如果网络等异常，同样回滚UI状态
+    isFavorite.value = originalFavoriteStatus;
     uni.showToast({
       title: '网络错误，请稍后重试',
       icon: 'none'

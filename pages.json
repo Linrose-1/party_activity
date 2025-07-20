@@ -1,24 +1,26 @@
 {
 	"pages": [
 		
-		{
-			"path": "pages/index/index",
-			"style": {
-				"navigationBarTitleText": "聚一聚"
-			}
-		},
+		
 		{
 			"path": "pages/home/home",
 			"style": {
-				"navigationBarTitleText": "首页"
+				"navigationBarTitleText": "首页",
+				"enablePullDownRefresh": true 
 			}
 		},
-		
+		{
+			"path": "pages/index/index",
+			"style": {
+				"navigationBarTitleText": "猩聚社"
+			}
+		},
 		{
 			"path" : "pages/active/active",
 			"style" : 
 			{
-				"navigationBarTitleText" : "活动"
+				"navigationBarTitleText" : "活动",
+				"enablePullDownRefresh": true 
 			}
 		},
 		{
@@ -137,7 +139,7 @@
 			"path" : "pages/user-agreement/user-agreement",
 			"style" : 
 			{
-				"navigationBarTitleText" : "用户协议"
+				"navigationBarTitleText" : "协议"
 			}
 		},
 		{

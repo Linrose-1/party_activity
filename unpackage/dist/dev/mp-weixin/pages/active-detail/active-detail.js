@@ -1,30 +1,41 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
+const common_assets = require("../../common/assets.js");
 const utils_request = require("../../utils/request.js");
 if (!Array) {
   const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
-  _easycom_uni_icons2();
+  const _easycom_uni_popup2 = common_vendor.resolveComponent("uni-popup");
+  (_easycom_uni_icons2 + _easycom_uni_popup2)();
 }
 const _easycom_uni_icons = () => "../../uni_modules/uni-icons/components/uni-icons/uni-icons.js";
+const _easycom_uni_popup = () => "../../uni_modules/uni-popup/components/uni-popup/uni-popup.js";
 if (!Math) {
-  _easycom_uni_icons();
+  (_easycom_uni_icons + _easycom_uni_popup)();
 }
 const _sfc_main = {
   __name: "active-detail",
   setup(__props) {
     const activityId = common_vendor.ref(null);
     const activityDetail = common_vendor.ref(null);
+    const sharePopup = common_vendor.ref(null);
+    const customShareTitle = common_vendor.ref("");
+    const showTimelineGuide = common_vendor.ref(false);
+    const isActionBarHidden = common_vendor.ref(false);
     common_vendor.onLoad((options) => {
       if (options.id) {
         activityId.value = options.id;
         getActiveDetail();
       } else {
-        common_vendor.index.__f__("error", "at pages/active-detail/active-detail.vue:201", "未接收到活动ID！");
+        common_vendor.index.__f__("error", "at pages/active-detail/active-detail.vue:245", "未接收到活动ID！");
         common_vendor.index.showToast({
           title: "加载活动详情失败，缺少ID",
           icon: "none"
         });
       }
+      common_vendor.index.showShareMenu({
+        withShareTicket: true,
+        menus: ["shareAppMessage", "shareTimeline"]
+      });
     });
     const isRegistrationActive = common_vendor.computed(() => {
       if (!activityDetail.value) {
@@ -48,6 +59,9 @@ const _sfc_main = {
       const h = date.getHours().toString().padStart(2, "0");
       const m = date.getMinutes().toString().padStart(2, "0");
       return `${Y}-${M}-${D} ${h}:${m}`;
+    };
+    const onPopupChange = (e) => {
+      isActionBarHidden.value = e.show;
     };
     const formattedActivityTime = common_vendor.computed(() => {
       if (!activityDetail.value)
@@ -131,17 +145,44 @@ const _sfc_main = {
       });
       if (result && !result.error) {
         activityDetail.value = result.data;
-        common_vendor.index.__f__("log", "at pages/active-detail/active-detail.vue:325", "getActiveDetail result:", activityDetail.value);
+        common_vendor.index.__f__("log", "at pages/active-detail/active-detail.vue:380", "getActiveDetail result:", activityDetail.value);
       } else {
-        common_vendor.index.__f__("log", "at pages/active-detail/active-detail.vue:327", "请求失败:", result ? result.error : "无返回结果");
+        common_vendor.index.__f__("log", "at pages/active-detail/active-detail.vue:382", "请求失败:", result ? result.error : "无返回结果");
       }
     };
-    function share() {
-      common_vendor.index.showToast({
-        title: "已分享到微信朋友圈",
-        icon: "none"
-      });
-    }
+    const openSharePopup = () => {
+      customShareTitle.value = activityDetail.value.activityTitle || "发现一个很棒的活动，快来看看吧！";
+      sharePopup.value.open();
+    };
+    const closeSharePopup = () => {
+      sharePopup.value.close();
+    };
+    const guideShareTimeline = () => {
+      closeSharePopup();
+      showTimelineGuide.value = true;
+    };
+    const hideTimelineGuide = () => {
+      showTimelineGuide.value = false;
+    };
+    common_vendor.onShareAppMessage((res) => {
+      common_vendor.index.__f__("log", "at pages/active-detail/active-detail.vue:411", "触发分享给好友", res);
+      closeSharePopup();
+      const finalTitle = customShareTitle.value || activityDetail.value.activityTitle || "发现一个很棒的活动，快来看看吧！";
+      return {
+        title: finalTitle,
+        path: `/pages/active-detail/active-detail?id=${activityDetail.value.id}`,
+        imageUrl: activityDetail.value.coverImageUrl || "/static/default-share-image.png"
+      };
+    });
+    common_vendor.onShareTimeline(() => {
+      common_vendor.index.__f__("log", "at pages/active-detail/active-detail.vue:427", "触发分享到朋友圈");
+      const finalTitle = customShareTitle.value || activityDetail.value.activityTitle || "发现一个很棒的活动，快来看看吧！";
+      return {
+        title: finalTitle,
+        query: `id=${activityDetail.value.id}&from=timeline`,
+        imageUrl: activityDetail.value.coverImageUrl || "/static/default-share-image.png"
+      };
+    });
     function register() {
       if (!isRegistrationActive.value) {
         common_vendor.index.showToast({
@@ -243,14 +284,44 @@ const _sfc_main = {
       } : {}, {
         N: common_vendor.t(formattedRegistrationTimes.value.start),
         O: common_vendor.t(formattedRegistrationTimes.value.end),
-        P: common_vendor.o(share),
-        Q: !isRegistrationActive.value ? 1 : "",
-        R: !isRegistrationActive.value,
-        S: common_vendor.o(register)
-      }) : {});
+        P: !isActionBarHidden.value
+      }, !isActionBarHidden.value ? {
+        Q: common_vendor.o(openSharePopup),
+        R: !isRegistrationActive.value ? 1 : "",
+        S: !isRegistrationActive.value,
+        T: common_vendor.o(register)
+      } : {}, {
+        U: customShareTitle.value,
+        V: common_vendor.o(($event) => customShareTitle.value = $event.detail.value),
+        W: common_vendor.p({
+          type: "weixin",
+          size: "30",
+          color: "#07c160"
+        }),
+        X: common_vendor.p({
+          type: "pyq",
+          size: "30",
+          color: "#53a046"
+        }),
+        Y: common_vendor.o(guideShareTimeline),
+        Z: common_vendor.o(closeSharePopup),
+        aa: common_vendor.sr(sharePopup, "de6b8eea-4", {
+          "k": "sharePopup"
+        }),
+        ab: common_vendor.o(onPopupChange),
+        ac: common_vendor.p({
+          type: "bottom",
+          ["background-color"]: "#fff"
+        }),
+        ad: showTimelineGuide.value
+      }, showTimelineGuide.value ? {
+        ae: common_assets._imports_0,
+        af: common_vendor.o(hideTimelineGuide)
+      } : {}) : {});
     };
   }
 };
 const MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["__scopeId", "data-v-de6b8eea"]]);
+_sfc_main.__runtimeHooks = 6;
 wx.createPage(MiniProgramPage);
 //# sourceMappingURL=../../../.sourcemap/mp-weixin/pages/active-detail/active-detail.js.map

@@ -10,7 +10,7 @@ if (!Math) {
   (_easycom_uni_icons + StoreCard)();
 }
 const StoreCard = () => "../../components/StoreCard.js";
-const pageSize = 5;
+const pageSize = 10;
 const _sfc_main = {
   __name: "shop",
   setup(__props) {
@@ -20,37 +20,44 @@ const _sfc_main = {
     const loadingMore = common_vendor.ref(false);
     const hasMore = common_vendor.ref(true);
     const pageNo = common_vendor.ref(1);
+    const isRefreshing = common_vendor.ref(false);
     const userLocation = common_vendor.ref(null);
+    const filters = common_vendor.ref([{
+      name: "全部",
+      value: "all"
+    }]);
+    const isLocationLoaded = common_vendor.ref(false);
     const getStoreList = async () => {
       if (loadingMore.value || !hasMore.value) {
         return;
       }
       if (!userLocation.value) {
-        common_vendor.index.__f__("log", "at pages/shop/shop.vue:95", "等待位置信息获取...");
-        allStores.value = [];
-        hasMore.value = false;
+        common_vendor.index.__f__("log", "at pages/shop/shop.vue:103", "getStoreList 被调用，但位置信息依然为空，已中断。");
+        isRefreshing.value = false;
         return;
       }
       loadingMore.value = true;
       const params = {
         pageNo: pageNo.value,
         pageSize,
-        storeName: searchTerm.value.trim()
-        // longitude: userLocation.value.longitude, 
-        // latitude: userLocation.value.latitude,
+        storeName: searchTerm.value.trim(),
+        longitude: userLocation.value.longitude,
+        latitude: userLocation.value.latitude
       };
+      if (activeFilter.value !== "all") {
+        params.category = activeFilter.value;
+      }
       const {
         data: result,
-        // 将 newList 重命名为 result，因为它现在是 { list: [], total: 6 }
         error
       } = await utils_request.request("/app-api/member/store/list", {
         method: "GET",
         data: params
       });
-      common_vendor.index.__f__("log", "at pages/shop/shop.vue:122", "API Response:", result);
       loadingMore.value = false;
+      isRefreshing.value = false;
       if (error) {
-        common_vendor.index.__f__("error", "at pages/shop/shop.vue:127", "获取店铺列表失败:", error);
+        common_vendor.index.__f__("error", "at pages/shop/shop.vue:134", "获取店铺列表失败:", error);
         common_vendor.index.showToast({
           title: error,
           icon: "none"
@@ -70,64 +77,87 @@ const _sfc_main = {
         hasMore.value = false;
       }
     };
-    common_vendor.onMounted(() => {
+    const initData = () => {
       const storedLocation = common_vendor.index.getStorageSync("userLocation");
       if (storedLocation) {
-        common_vendor.index.__f__("log", "at pages/shop/shop.vue:162", "从缓存加载位置信息:", storedLocation);
+        common_vendor.index.__f__("log", "at pages/shop/shop.vue:163", "从缓存加载位置信息");
         userLocation.value = storedLocation;
-        getStoreList();
+        isLocationLoaded.value = true;
+        handleRefresh();
       } else {
-        common_vendor.index.__f__("log", "at pages/shop/shop.vue:168", "缓存中无位置信息，开始请求授权...");
+        common_vendor.index.__f__("log", "at pages/shop/shop.vue:169", "缓存中无位置，开始请求...");
         common_vendor.index.getLocation({
           type: "gcj02",
-          // 国测局坐标，适用于大多数国内地图服务
           success: (res) => {
-            common_vendor.index.__f__("log", "at pages/shop/shop.vue:172", "成功获取位置信息:", res);
+            common_vendor.index.__f__("log", "at pages/shop/shop.vue:173", "成功获取新位置信息");
             const location = {
               latitude: res.latitude,
               longitude: res.longitude
             };
             userLocation.value = location;
             common_vendor.index.setStorageSync("userLocation", location);
-            getStoreList();
+            isLocationLoaded.value = true;
+            handleRefresh();
           },
           fail: (err) => {
             common_vendor.index.__f__("error", "at pages/shop/shop.vue:185", "获取位置信息失败:", err);
+            isLocationLoaded.value = true;
             common_vendor.index.showModal({
               title: "定位失败",
-              content: "无法获取您的位置信息，将无法为您推荐附近的聚店。请检查系统定位服务是否开启，并允许应用获取位置权限。",
+              content: "无法获取您的位置信息，将无法为您推荐附近的聚店。",
               showCancel: false,
               success: () => {
-                allStores.value = [];
-                hasMore.value = false;
+                handleRefresh();
               }
             });
           }
         });
       }
-    });
-    const loadMore = () => {
-      if (userLocation.value) {
-        getStoreList();
+    };
+    const getShopType = async () => {
+      const { data, error } = await utils_request.request("/app-api/system/dict-data/type", {
+        method: "GET",
+        data: { type: "member_store_category" }
+      });
+      if (error) {
+        return;
+      }
+      if (data && data.length > 0) {
+        const dynamicFilters = data.map((item) => ({ name: item.label, value: item.value }));
+        filters.value = [{ name: "全部", value: "all" }, ...dynamicFilters];
       }
     };
+    common_vendor.onMounted(() => {
+      getShopType();
+    });
+    common_vendor.onShow(() => {
+      if (!isLocationLoaded.value) {
+        initData();
+      }
+    });
     const handleRefresh = () => {
       pageNo.value = 1;
       allStores.value = [];
       hasMore.value = true;
-      if (userLocation.value) {
-        getStoreList();
-      }
+      getStoreList();
     };
-    common_vendor.watch(activeFilter, () => {
+    const loadMore = () => {
+      getStoreList();
+    };
+    const onPullDownRefresh = () => {
+      isRefreshing.value = true;
       handleRefresh();
+    };
+    common_vendor.watch(activeFilter, (newValue, oldValue) => {
+      if (newValue !== oldValue) {
+        handleRefresh();
+      }
     });
     const filteredStores = common_vendor.computed(() => allStores.value);
     let searchTimer = null;
     const onSearchInput = () => {
       clearTimeout(searchTimer);
       searchTimer = setTimeout(() => {
-        common_vendor.index.__f__("log", "at pages/shop/shop.vue:231", `搜索关键词: ${searchTerm.value}`);
         handleRefresh();
       }, 500);
     };
@@ -135,49 +165,17 @@ const _sfc_main = {
       clearTimeout(searchTimer);
       handleRefresh();
     };
-    const filters = common_vendor.ref([
-      {
-        name: "全部",
-        value: "all"
-      },
-      {
-        name: "咖啡",
-        value: "coffee"
-      },
-      {
-        name: "茶馆",
-        value: "tea-house"
-      },
-      {
-        name: "美食",
-        value: "food"
-      },
-      {
-        name: "酒吧",
-        value: "bar"
-      },
-      {
-        name: "其他",
-        value: "other"
-      }
-    ]);
     const selectFilter = (filterValue) => {
       activeFilter.value = filterValue;
     };
     const goToStoreDetail = (store) => {
       common_vendor.index.navigateTo({
-        url: `/pages/store/detail?id=${store.id}`
+        url: `/pages/shop-detail/shop-detail?id=${store.id}`
       });
     };
     const shareStore = () => {
       common_vendor.index.navigateTo({
         url: "/pages/shop-recommend/shop-recommend"
-      });
-    };
-    const applyToList = () => {
-      common_vendor.index.showToast({
-        title: "申请上榜",
-        icon: "none"
       });
     };
     return (_ctx, _cache) => {
@@ -201,7 +199,7 @@ const _sfc_main = {
         f: common_vendor.f(filteredStores.value, (store, k0, i0) => {
           return {
             a: store.id,
-            b: common_vendor.o(($event) => goToStoreDetail(store), store.id),
+            b: common_vendor.o(goToStoreDetail, store.id),
             c: "6d1ef275-1-" + i0,
             d: common_vendor.p({
               store
@@ -224,8 +222,8 @@ const _sfc_main = {
           color: "#999"
         })
       } : {}, {
-        k: allStores.value.length === 0 && !loadingMore.value
-      }, allStores.value.length === 0 && !loadingMore.value ? {
+        k: allStores.value.length === 0 && !loadingMore.value && !isRefreshing.value
+      }, allStores.value.length === 0 && !loadingMore.value && !isRefreshing.value ? {
         l: common_vendor.p({
           type: "info",
           size: "60",
@@ -233,18 +231,19 @@ const _sfc_main = {
         })
       } : {}, {
         m: common_vendor.o(loadMore),
-        n: common_vendor.p({
-          type: "redo",
-          size: "20",
-          color: "#333"
-        }),
-        o: common_vendor.o(shareStore),
+        n: isRefreshing.value,
+        o: common_vendor.o(onPullDownRefresh),
         p: common_vendor.p({
-          type: "plus-filled",
+          type: "redo",
           size: "20",
           color: "#fff"
         }),
-        q: common_vendor.o(applyToList)
+        q: common_vendor.o(shareStore),
+        r: common_vendor.p({
+          type: "plus-filled",
+          size: "20",
+          color: "#fff"
+        })
       });
     };
   }

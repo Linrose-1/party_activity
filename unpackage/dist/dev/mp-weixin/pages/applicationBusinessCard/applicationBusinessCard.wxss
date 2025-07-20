@@ -1,4 +1,18 @@
 
+/* 在原有样式基础上，新增和修改以下样式 */
+.target-avatar-image.data-v-f0843d79 {
+    width: 180rpx;
+    height: 180rpx;
+    border-radius: 50%;
+    margin-bottom: 30rpx;
+    border: 6rpx solid white;
+    box-shadow: 0 10rpx 30rpx rgba(0,0,0,0.2);
+}
+.loading-placeholder.data-v-f0843d79 {
+    padding: 100rpx 0;
+}
+
+/* 其他样式保持不变... */
 /* 页面根容器样式，模拟 body 的布局和最大宽度 */
 .business-card-apply-page.data-v-f0843d79 {
     background: linear-gradient(135deg, #f8f9fa, #e9ecef);

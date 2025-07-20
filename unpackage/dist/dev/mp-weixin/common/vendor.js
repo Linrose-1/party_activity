@@ -7226,7 +7226,7 @@ function initOnError() {
 function initRuntimeSocketService() {
   const hosts = "172.20.10.4,127.0.0.1";
   const port = "8090";
-  const id = "mp-weixin_PMSeZY";
+  const id = "mp-weixin_izCPg7";
   const lazy = typeof swan !== "undefined";
   let restoreError = lazy ? () => {
   } : initOnError();
@@ -8168,27 +8168,32 @@ const createSubpackageApp = initCreateSubpackageApp();
 const createHook = (lifecycle) => (hook, target = getCurrentInstance()) => {
   !isInSSRComponentSetup && injectHook(lifecycle, hook, target);
 };
+const onShow = /* @__PURE__ */ createHook(ON_SHOW);
 const onLoad = /* @__PURE__ */ createHook(ON_LOAD);
 const onUnload = /* @__PURE__ */ createHook(ON_UNLOAD);
 const onReachBottom = /* @__PURE__ */ createHook(ON_REACH_BOTTOM);
 const onPullDownRefresh = /* @__PURE__ */ createHook(ON_PULL_DOWN_REFRESH);
+const onShareTimeline = /* @__PURE__ */ createHook(ON_SHARE_TIMELINE);
+const onShareAppMessage = /* @__PURE__ */ createHook(ON_SHARE_APP_MESSAGE);
 const pages = [
-  {
-    path: "pages/index/index",
-    style: {
-      navigationBarTitleText: "聚一聚"
-    }
-  },
   {
     path: "pages/home/home",
     style: {
-      navigationBarTitleText: "首页"
+      navigationBarTitleText: "首页",
+      enablePullDownRefresh: true
+    }
+  },
+  {
+    path: "pages/index/index",
+    style: {
+      navigationBarTitleText: "猩聚社"
     }
   },
   {
     path: "pages/active/active",
     style: {
-      navigationBarTitleText: "活动"
+      navigationBarTitleText: "活动",
+      enablePullDownRefresh: true
     }
   },
   {
@@ -8290,7 +8295,7 @@ const pages = [
   {
     path: "pages/user-agreement/user-agreement",
     style: {
-      navigationBarTitleText: "用户协议"
+      navigationBarTitleText: "协议"
     }
   },
   {
@@ -11240,6 +11245,9 @@ exports.onLoad = onLoad;
 exports.onMounted = onMounted;
 exports.onPullDownRefresh = onPullDownRefresh;
 exports.onReachBottom = onReachBottom;
+exports.onShareAppMessage = onShareAppMessage;
+exports.onShareTimeline = onShareTimeline;
+exports.onShow = onShow;
 exports.onUnload = onUnload;
 exports.onUnmounted = onUnmounted;
 exports.p = p$1;

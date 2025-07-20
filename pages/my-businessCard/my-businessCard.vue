@@ -1,57 +1,73 @@
 <template>
   <view class="container">
+    <!-- 修正点 1: 新增的悬浮分享按钮 -->
+    <view class="share-fab" @click="openSharePopup">
+      <uni-icons type="undo-filled" size="24" color="#fff"></uni-icons>
+    </view>
+
     <view class="card-header">
       <view class="header-title">我的个人名片</view>
       <view class="header-subtitle">专业形象，随时分享</view>
     </view>
     
-    <!-- 
-      - 使用 v-if="userInfo" 确保在数据加载完成后再渲染名片组件
-      - 动态绑定从 API 获取的数据到 MyCard 组件的 props
-    -->
-    <MyCard 
+    <MyCard
       v-if="userInfo"
       :avatar="userInfo.avatar"
       :name="userInfo.realName || userInfo.nickname"
-      :title="userInfo.professionalTitle"
-      :location="userInfo.locationAddress"
-      :infoItems="formattedInfoItems"
-      :inviteCode="userInfo.shardCode"
-      :qrCodeUrl="userInfo.wechatQrCodeUrl"
-      :showQrCode="!!userInfo.wechatQrCodeUrl"
+      :pinyin-name="userInfo.topUpLevel?.name"
+      :title="userInfo.level?.name"
+      :company-name="userInfo.companyName"
+      department=""
+      :full-company-name="userInfo.professionalTitle"
+      :contact-info="formattedContactInfo"
+      :show-user-qr-code="!!userInfo.wechatQrCodeUrl"
+      :user-we-chat-qr-code-url="userInfo.wechatQrCodeUrl"
+      platform-qr-code-url="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=platform-info"
+      logo-url="https://gitee.com/image_store/repo_1/raw/master/go-for-planet-logo.png"
     />
 	
 	  <view class="edit-hint" v-if="userInfo">
 		  名片信息可在 <text @click="goToEdit" class="edit-link">个人资料</text> 中编辑
 	  </view>
     
-    <view class="action-buttons">
-      <button class="action-btn share-btn" @click="shareCard">
-        <uni-icons type="share" size="20" color="#fff" />
-        <text>分享名片</text>
-      </button>
-    </view>
+    <!-- 修正点 1: 移除了底部的旧分享按钮 -->
+    <!-- <view class="action-buttons">...</view> -->
+
+    <!-- 修正点 3: 新增的分享引导弹出层 -->
+    <uni-popup ref="sharePopup" type="bottom" background-color="#fff">
+      <view class="share-popup-content">
+        <view class="share-title">分享至</view>
+        <view class="share-options">
+          <button class="share-option" open-type="share">
+            <!-- <image src="/static/images/wechat-friend.png" class="share-icon" /> -->
+            <text>微信好友</text>
+          </button>
+          <view class="share-option" @click="guideShareToMoments">
+            <!-- <image src="/static/images/wechat-moments.png" class="share-icon" /> -->
+            <text>朋友圈</text>
+          </view>
+        </view>
+        <view class="share-cancel" @click="closeSharePopup">取消</view>
+      </view>
+    </uni-popup>
+
   </view>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-// 导入名片组件
-import MyCard from '../../components/MyCard.vue'; // ‼️ 请确保此路径正确
-// 导入您的请求方法
-import request from '../../utils/request.js'; // ‼️ 请确保此路径正确
+import { onShareAppMessage, onShareTimeline } from '@dcloudio/uni-app'; // 修正点 2: 导入分享钩子
+import MyCard from '../../components/MyCard.vue';
+import request from '../../utils/request.js';
 
-// --- 1. 定义状态来存储用户信息 ---
-const userInfo = ref(null); // 初始化为 null，表示数据还未加载
+const userInfo = ref(null);
+const sharePopup = ref(null); // 修正点 3: 用于控制分享弹窗
 
-// --- 2. 使用 onMounted 生命周期钩子来获取数据 ---
 onMounted(() => {
   fetchUserInfo();
 });
 
-// --- 3. 封装获取用户信息的函数 ---
 const fetchUserInfo = async () => {
-  // 添加加载提示，提升用户体验
   uni.showLoading({ title: '加载中...' });
   const { data, error } = await request('/app-api/member/user/get', { method: 'GET' });
   uni.hideLoading();
@@ -61,84 +77,85 @@ const fetchUserInfo = async () => {
     return;
   }
   
-  // 将获取到的数据赋值给 userInfo
   userInfo.value = data;
 };
 
-// --- 4. 使用 computed 属性将 API 数据格式化为组件需要的格式 ---
-const formattedInfoItems = computed(() => {
-  // 如果 userInfo 还未加载，返回空数组，防止报错
-  if (!userInfo.value) {
-    return [];
-  }
-  
-  // 将 API 数据映射到 infoItems 数组结构
+const formattedContactInfo = computed(() => {
+  if (!userInfo.value) return [];
   return [
-    {
-      icon: 'staff',
-      label: '职业',
-      value: userInfo.value.professionalTitle || '未设置'
-    },
-    {
-      icon: 'shop',
-      label: '公司/机构',
-      value: userInfo.value.companyName || '未设置'
-    },
-    {
-      icon: 'phone',
-      label: '联系方式',
-      value: userInfo.value.mobile || '未设置'
-    },
-    {
-      icon: 'email',
-      label: '邮箱',
-      value: userInfo.value.contactEmail || '未设置'
-    },
-    {
-      icon: 'info',
-      label: '个人简介',
-      value: userInfo.value.personalBio || '暂无简介'
-    }
+    { icon: 'phone-filled', value: userInfo.value.mobile || '未设置手机' },
+    { icon: 'email-filled', value: userInfo.value.contactEmail || '未设置邮箱' },
+    { icon: 'location-filled', value: userInfo.value.locationAddress || '未设置地址' }
   ];
 });
 
+const goToEdit = () => {
+  uni.navigateTo({ url: '/pages/my-edit/my-edit' });
+};
 
-// 分享名片功能
-const shareCard = () => {
+// --- 修正点 2: 使用小程序原生分享 ---
+
+// 1. 监听用户点击右上角菜单“转发”按钮，或<button open-type="share">
+onShareAppMessage((res) => {
+  console.log('触发了分享给好友', res);
   if (!userInfo.value) {
-    uni.showToast({ title: '请等待信息加载完成', icon: 'none' });
+    return {
+      title: '快来看看我的专业电子名片！',
+    };
+  }
+  // 返回自定义分享内容
+  return {
+    title: `这是 ${userInfo.value.realName || userInfo.value.nickname} 的名片`,
+    path: `/pages/my-businessCard/my-businessCard?id=${userInfo.value.id}`, // 必须是小程序内的页面路径，带上参数
+    imageUrl: userInfo.value.avatar, // 自定义分享图片
+  };
+});
+
+// 2. 监听用户点击右上角菜单“分享到朋友圈”按钮
+onShareTimeline(() => {
+  console.log('触发了分享到朋友圈');
+  if (!userInfo.value) {
+    return {
+      title: '快来看看我的专业电子名片！',
+    };
+  }
+  // 返回自定义分享内容
+  return {
+    title: `这是 ${userInfo.value.realName || userInfo.value.nickname} 的名片`,
+    query: `id=${userInfo.value.id}`, // 分享到朋友圈的参数
+    imageUrl: userInfo.value.avatar,
+  };
+});
+
+// --- 修正点 3: 分享弹窗和引导逻辑 ---
+
+// 打开分享弹窗
+const openSharePopup = () => {
+  if (!userInfo.value) {
+    uni.showToast({ title: '信息加载中，请稍候', icon: 'none' });
     return;
   }
-  // TODO: 后续可以实现更复杂的分享逻辑，如生成海报
-  uni.share({
-    provider: 'weixin',
-    scene: 'WXSceneSession', // 分享到微信好友
-    type: 0, // 分享图文
-    href: 'https://example.com/card/' + userInfo.value.id, // 分享的链接，最好替换成真实地址
-    title: `这是 ${userInfo.value.realName || userInfo.value.nickname} 的名片`,
-    summary: `我正在使用XXX，这是我的名片，请惠存。`,
-    imageUrl: userInfo.value.avatar, // 分享的缩略图
-    success: function (res) {
-      uni.showToast({ title: '分享成功', icon: 'success' });
-    },
-    fail: function (err) {
-      console.error('分享失败:', JSON.stringify(err));
-      uni.showToast({ title: '分享失败', icon: 'none' });
-    }
-  });
+  sharePopup.value.open();
 };
 
-// 跳转到编辑页
-const goToEdit = () => {
-  uni.navigateTo({
-    url: '/pages/my-edit/my-edit' // 请确保这个路径是您的编辑资料页面路径
-  });
+// 关闭分享弹窗
+const closeSharePopup = () => {
+  sharePopup.value.close();
 };
 
+// 引导用户分享到朋友圈
+const guideShareToMoments = () => {
+  closeSharePopup(); // 先关闭弹窗
+  uni.showToast({
+    title: '请点击右上角「...」，然后选择「分享到朋友圈」',
+    icon: 'none',
+    duration: 3000,
+  });
+};
 </script>
 
 <style lang="scss" scoped>
-/* 单位转换：1px = 2rpx */
+/* 样式部分保持不变 */
 .container {
   background: linear-gradient(135deg, #f8f9fa, #e9ecef);
   color: #333;
@@ -148,8 +165,8 @@ const goToEdit = () => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start; /* 改为从顶部开始，而不是居中 */
-  padding-top: 80rpx; /* 增加顶部内边距给标题留出空间 */
+  justify-content: flex-start;
+  padding-top: 80rpx;
 }
 
 .card-header {
@@ -164,8 +181,8 @@ const goToEdit = () => {
   }
   
   .header-subtitle {
-    color: #777;
     font-size: 32rpx;
+    color: #777;
   }
 }
 
@@ -181,7 +198,6 @@ const goToEdit = () => {
   }
 }
 
-/* 操作按钮 */
 .action-buttons {
   display: flex;
   gap: 30rpx;
@@ -205,7 +221,6 @@ const goToEdit = () => {
   border: none;
   color: white;
   
-  /* 解决小程序button默认样式问题 */
   &::after {
     border: none;
   }
@@ -223,5 +238,82 @@ const goToEdit = () => {
 .action-btn:active {
   transform: translateY(-6rpx);
   box-shadow: 0 16rpx 40rpx rgba(0, 0, 0, 0.2);
+}
+
+.share-fab {
+  position: fixed;
+  top: 180rpx; /* 可根据需要调整，避开导航栏 */
+  right: 30rpx;
+  width: 90rpx;
+  height: 90rpx;
+  background: linear-gradient(135deg, #3a7bd5, #00d2ff);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8rpx 20rpx rgba(0, 0, 0, 0.2);
+  z-index: 99;
+  transition: transform 0.2s ease;
+
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
+/* --- 新增样式：分享弹窗内容 --- */
+.share-popup-content {
+  padding: 30rpx;
+  background-color: #fff;
+  border-top-left-radius: 20rpx;
+  border-top-right-radius: 20rpx;
+}
+
+.share-title {
+  font-size: 28rpx;
+  color: #999;
+  text-align: center;
+  margin-bottom: 40rpx;
+}
+
+.share-options {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 40rpx;
+}
+
+.share-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* 去除button默认样式 */
+  background-color: transparent;
+  border: none;
+  padding: 0;
+  margin: 0;
+  line-height: 1.5;
+  &::after {
+    border: none;
+  }
+
+  .share-icon {
+    width: 100rpx;
+    height: 100rpx;
+    margin-bottom: 20rpx;
+  }
+
+  text {
+    font-size: 26rpx;
+    color: #333;
+  }
+}
+
+.share-cancel {
+  width: 100%;
+  padding: 25rpx 0;
+  text-align: center;
+  font-size: 32rpx;
+  color: #666;
+  background-color: #f7f7f7;
+  border-radius: 12rpx;
 }
 </style>

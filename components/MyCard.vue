@@ -1,328 +1,330 @@
 <template>
-  <view class="name-card">
-    <view class="card-top">
-      <view class="avatar">
-        <image :src="avatar" mode="aspectFill" />
-      </view>
-      <view class="user-name">{{ name }}</view>
-      <view class="user-title">{{ title }}</view>
-      <view class="user-company">
-        <uni-icons type="location" size="18" color="rgba(255, 255, 255, 0.85)" />
-        <text>{{ location }}</text>
-      </view>
-    </view>
-    
-    <view class="card-content">
-      <view class="info-item" v-for="(item, index) in infoItems" :key="index">
-        <view class="info-icon">
-          <uni-icons :type="item.icon" size="22" color="#FF7B00" />
+  <view class="business-card-container">
+    <!-- 名片正面 - 个人及联系信息 -->
+    <view class="card-front">
+      <!-- 1. 顶部：头像、姓名、职位 -->
+      <view class="header-section">
+        <view class="avatar">
+          <image :src="avatar" mode="aspectFill" />
         </view>
-        <view class="info-content">
-          <view class="info-label">{{ item.label }}</view>
-          <view class="info-value">{{ item.value }}</view>
+        <view class="identity">
+          <view class="name-line">
+            <text class="name">{{ name }}</text>
+            <text class="pinyin">{{ pinyinName }}</text>
+          </view>
+          <view class="title-line">
+            <text class="title">{{ title }}</text>
+          </view>
         </view>
       </view>
-      
-      <!-- 新增邀请码部分 -->
-      <view class="invite-code" v-if="inviteCode">
-        <view class="invite-icon">
-          <uni-icons type="compose" size="22" color="#FF7B00" />
-        </view>
-        <view class="invite-content">
-          <view class="info-label">邀请码</view>
-          <view class="info-value">{{ inviteCode }}</view>
+
+      <!-- 2. 中部：公司信息 -->
+      <view class="company-section">
+        <view class="company-main">{{ companyName }} <text v-if="department">{{ department }}</text></view>
+        <view class="company-full">{{ fullCompanyName }}</view>
+      </view>
+
+      <!-- 3. 底部：联系方式列表 -->
+      <view class="info-list">
+        <view class="info-item" v-for="(item, index) in contactInfo" :key="index">
+          <uni-icons :type="item.icon" size="18" color="#FF7B00" />
+          <text class="info-text">{{ item.value }}</text>
         </view>
       </view>
-      
-      <view class="qr-section" v-if="showQrCode">
+
+      <!-- 4. 用户个人微信二维码 -->
+      <view class="user-qr-section" v-if="showUserQrCode">
         <view class="qr-title">我的微信二维码</view>
-        <view class="qr-code">
-          <image :src="qrCodeUrl" mode="aspectFill" />
+        <view class="qr-code-box">
+          <image :src="userWeChatQrCodeUrl" mode="aspectFit" />
         </view>
         <view class="qr-hint">扫码添加我的微信</view>
+      </view>
+
+      <!-- 5. 底部 Slogan -->
+      <view class="value-slogan">
+        <view class="line"></view>
+        <text>价值连接·生态共创</text>
+      </view>
+    </view>
+
+    <!-- 名片背面 - 品牌/平台信息 -->
+    <view class="card-back">
+      <view class="slogan-primary">连接全球精英商友</view>
+      <view class="slogan-secondary">GO FOR PARTNERS • GO FOR FUTURE</view>
+      <!-- 平台二维码 -->
+      <view class="platform-qr-code">
+        <image :src="platformQrCodeUrl" mode="aspectFit" />
+      </view>
+      <view class="logo">
+        <image :src="logoUrl" mode="aspectFit" />
       </view>
     </view>
   </view>
 </template>
 
 <script setup>
-const props = defineProps({
+defineProps({
+  // --- 顶部个人信息 ---
   avatar: {
     type: String,
     default: 'https://randomuser.me/api/portraits/men/41.jpg'
   },
   name: {
     type: String,
-    default: '张明'
+    default: '张三'
+  },
+  pinyinName: {
+    type: String,
+    default: 'ZHANG SAN'
+  },
+  groupName: {
+    type: String,
+    default: '伙猩人'
   },
   title: {
     type: String,
-    default: '市场总监'
+    default: '首席运营官'
   },
-  location: {
+  // --- 公司与联系方式 ---
+  companyName: {
     type: String,
-    default: '北京市朝阳区'
+    default: '高伙猩球'
   },
-  infoItems: {
+  department: {
+    type: String,
+    default: '数字化运营中心'
+  },
+  fullCompanyName: {
+    type: String,
+    default: '广东智米云科技有限公司'
+  },
+  contactInfo: {
     type: Array,
     default: () => [
-      {
-        icon: 'contact',
-        label: '职业',
-        value: '市场总监'
-      },
-      {
-        icon: 'shop',
-        label: '公司/机构',
-        value: '创新科技有限公司'
-      },
-      {
-        icon: 'phone',
-        label: '联系方式',
-        value: '+86 138 0013 8000'
-      },
-      {
-        icon: 'info',
-        label: '个人简介',
-        value: '拥有10年市场营销经验，专注于品牌策略与数字营销，曾服务多家世界500强企业。'
-      }
+      { icon: 'phone-filled', value: '18888888888' },
+      { icon: 'email-filled', value: 'ZHANGSAN@foxmail.com' },
+      { icon: 'location-filled', value: '广东省广州市天河区珠江新城潭村路328号二楼' }
     ]
   },
-  showQrCode: {
+  // --- 用户个人二维码 ---
+  showUserQrCode: {
     type: Boolean,
     default: true
   },
-  qrCodeUrl: {
+  userWeChatQrCodeUrl: {
     type: String,
-    default: 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=weixin://dl/business/?t=abcdefghijk'
+    default: 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=user-wechat'
   },
-  inviteCode: {
+  // --- 底部平台信息 ---
+  platformQrCodeUrl: {
     type: String,
-    default: 'INV2023'  // 新增邀请码属性
+    default: 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=platform-info'
+  },
+  logoUrl: {
+    type: String,
+    default: 'https://gitee.com/image_store/repo_1/raw/master/go-for-planet-logo.png'
   }
 });
 </script>
 
 <style lang="scss" scoped>
-/* 名片卡片 */
-.name-card {
-  background: white;
-  border-radius: 50rpx;
-  overflow: hidden;
-  box-shadow: 0 30rpx 70rpx rgba(0, 0, 0, 0.15);
-  position: relative;
-  margin-bottom: 60rpx;
+.business-card-container {
   width: 100%;
-  max-width: 1000rpx;
-  animation: fadeInUp 0.6s ease-out;
+  max-width: 90vw;
+  margin: 30rpx auto;
+  box-shadow: 0 10rpx 40rpx rgba(0, 0, 0, 0.1);
+  border-radius: 20rpx;
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
 
-.card-top {
-  background: linear-gradient(135deg, #FF7B00, #FF5E00);
-  padding: 80rpx 60rpx 200rpx;
-  position: relative;
-  text-align: center;
+// ===================================
+// 名片正面样式 (白色区域)
+// ===================================
+.card-front {
+  background-color: #ffffff;
+  padding: 40rpx;
+}
+
+.header-section {
+  display: flex;
+  align-items: center;
+  margin-bottom: 40rpx;
 }
 
 .avatar {
-  width: 220rpx;
-  height: 220rpx;
+  width: 140rpx;
+  height: 140rpx;
   border-radius: 50%;
-  background: linear-gradient(45deg, #ffb347, #ffcc33);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto 40rpx;
-  border: 8rpx solid rgba(255, 255, 255, 0.4);
   overflow: hidden;
-  box-shadow: 0 16rpx 40rpx rgba(0, 0, 0, 0.2);
-  
+  margin-right: 30rpx;
+  flex-shrink: 0;
+  border: 4rpx solid #f0f0f0;
+
   image {
     width: 100%;
     height: 100%;
-    object-fit: cover;
   }
 }
 
-.user-name {
-  font-size: 52rpx;
-  font-weight: bold;
-  color: white;
-  margin-bottom: 16rpx;
-  text-shadow: 0 4rpx 8rpx rgba(0,0,0,0.2);
+.identity {
+  .name-line {
+    display: flex;
+    align-items: baseline;
+    margin-bottom: 10rpx;
+  }
+  .name {
+    font-size: 48rpx;
+    font-weight: bold;
+    color: #333;
+    margin-right: 20rpx;
+  }
+  .pinyin {
+    font-size: 26rpx;
+    color: #888;
+    font-weight: 300;
+  }
+  .title-line {
+    font-size: 28rpx;
+    color: #555;
+  }
+  .group {
+    margin-right: 16rpx;
+  }
 }
 
-.user-title {
-  font-size: 36rpx;
-  color: rgba(255, 255, 255, 0.9);
-  margin-bottom: 10rpx;
+.company-section {
+  margin-bottom: 40rpx;
+  .company-main {
+    font-size: 32rpx;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 8rpx;
+  }
+  .company-full {
+    font-size: 26rpx;
+    color: #666;
+  }
 }
 
-.user-company {
-  font-size: 32rpx;
-  color: rgba(255, 255, 255, 0.85);
+.info-list {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  
-  text {
-    margin-left: 10rpx;
-  }
-}
-
-.card-content {
-  background: white;
-  padding: 160rpx 60rpx 80rpx;
-  margin-top: -140rpx;
-  border-radius: 50rpx 50rpx 0 0;
-  position: relative;
-  z-index: 2;
+  flex-direction: column;
+  gap: 25rpx;
+  padding-bottom: 40rpx;
 }
 
 .info-item {
   display: flex;
-  padding: 30rpx 0;
-  border-bottom: 2rpx solid #f0f0f0;
-  animation: fadeInUp 0.5s ease-out;
-  animation-fill-mode: both;
-  
-  &:last-child {
-    border-bottom: none;
-  }
-}
-
-/* 新增邀请码样式 */
-.invite-code {
-  display: flex;
-  padding: 30rpx 0;
-  border-bottom: 2rpx solid #f0f0f0;
-  animation: fadeInUp 0.5s ease-out;
-  animation-fill-mode: both;
-  animation-delay: 0.5s;
-  
-  .invite-icon {
-    width: 100rpx;
-    height: 100rpx;
-    background: rgba(255, 123, 0, 0.1);
-    border-radius: 24rpx;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-right: 30rpx;
-  }
-  
-  .invite-content {
-    flex: 1;
-    
-    .info-label {
-      font-size: 28rpx;
-      color: #999;
-      margin-bottom: 10rpx;
-    }
-    
-    .info-value {
-      font-size: 34rpx;
-      font-weight: 500;
-      color: #333;
-    }
-  }
-}
-
-.info-icon {
-  width: 100rpx;
-  height: 100rpx;
-  background: rgba(255, 123, 0, 0.1);
-  border-radius: 24rpx;
-  display: flex;
   align-items: center;
-  justify-content: center;
-  margin-right: 30rpx;
+  .info-text {
+    margin-left: 20rpx;
+    font-size: 28rpx;
+    color: #333;
+  }
 }
 
-.info-content {
-  flex: 1;
-}
-
-.info-label {
-  font-size: 28rpx;
-  color: #999;
-  margin-bottom: 10rpx;
-}
-
-.info-value {
-  font-size: 34rpx;
-  font-weight: 500;
-  color: #333;
-}
-
-.qr-section {
+.user-qr-section {
   text-align: center;
-  padding: 60rpx 0 40rpx;
-  border-top: 2rpx solid #f0f0f0;
-  margin-top: 40rpx;
+  padding: 40rpx 0;
+  border-top: 1rpx solid #f0f0f0;
+  border-bottom: 1rpx solid #f0f0f0;
+
+  .qr-title {
+    font-size: 32rpx;
+    font-weight: 600;
+    color: #444;
+    margin-bottom: 30rpx;
+  }
+
+  .qr-code-box {
+    width: 280rpx;
+    height: 280rpx;
+    margin: 0 auto;
+    image {
+      width: 100%;
+      height: 100%;
+    }
+  }
+
+  .qr-hint {
+    font-size: 26rpx;
+    color: #777;
+    margin-top: 30rpx;
+  }
 }
 
-.qr-title {
-  font-size: 36rpx;
-  font-weight: 600;
-  color: #444;
-  margin-bottom: 30rpx;
-}
-
-.qr-code {
-  width: 320rpx;
-  height: 320rpx;
-  background: #f8f8f8;
-  border-radius: 30rpx;
-  margin: 0 auto;
+.value-slogan {
   display: flex;
   align-items: center;
-  justify-content: center;
-  font-size: 28rpx;
-  color: #999;
-  overflow: hidden;
-  border: 2rpx solid #eee;
+  margin-top: 40rpx;
   
+  .line {
+    width: 60rpx;
+    height: 4rpx;
+    background-color: #FF7B00;
+    margin-right: 20rpx;
+  }
+  
+  text {
+    font-size: 30rpx;
+    font-weight: 500;
+    color: #FF7B00;
+  }
+}
+
+// ===================================
+// 名片背面样式 (橙色区域)
+// ===================================
+.card-back {
+  background-color: #F78C2F;
+  background-image: 
+    radial-gradient(circle at center, rgba(255, 255, 255, 0.05) 5%, transparent 5.5%),
+    radial-gradient(circle at center, rgba(255, 255, 255, 0.05) 15%, transparent 15.5%),
+    radial-gradient(circle at center, rgba(255, 255, 255, 0.05) 25%, transparent 25.5%);
+  color: white;
+  padding: 60rpx 40rpx;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 30rpx;
+}
+
+.slogan-primary {
+  font-size: 44rpx;
+  font-weight: bold;
+  letter-spacing: 2rpx;
+}
+
+.slogan-secondary {
+  font-size: 24rpx;
+  opacity: 0.9;
+  letter-spacing: 1rpx;
+  margin-top: -15rpx;
+}
+
+.platform-qr-code {
+  width: 280rpx;
+  height: 280rpx;
+  background-color: white;
+  padding: 20rpx;
+  border-radius: 20rpx;
+  margin-top: 20rpx;
+  margin-bottom: 20rpx;
   image {
-    max-width: 100%;
-    max-height: 100%;
+    width: 100%;
+    height: 100%;
   }
 }
 
-.qr-hint {
-  font-size: 28rpx;
-  color: #777;
-  margin-top: 30rpx;
-}
-
-/* 动画效果 */
-@keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(40rpx); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.info-item:nth-child(1) { animation-delay: 0.1s; }
-.info-item:nth-child(2) { animation-delay: 0.2s; }
-.info-item:nth-child(3) { animation-delay: 0.3s; }
-.info-item:nth-child(4) { animation-delay: 0.4s; }
-
-/* 响应式设计 */
-@media (max-width: 480px) {
-  .card-top {
-    padding: 60rpx 40rpx 160rpx;
-  }
-  
-  .avatar {
-    width: 180rpx;
-    height: 180rpx;
-  }
-  
-  .user-name {
-    font-size: 44rpx;
-  }
-  
-  .card-content {
-    padding: 140rpx 40rpx 60rpx;
+.logo {
+  width: 250rpx;
+  height: 80rpx;
+  image {
+    width: 100%;
+    height: 100%;
   }
 }
 </style>

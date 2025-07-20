@@ -58,9 +58,10 @@ const _sfc_main = {
         loading.value = false;
         return;
       }
-      const isCurrentlyFavorite = isFavorite.value;
-      const endpoint = isCurrentlyFavorite ? "/app-api/member/follow/del" : "/app-api/member/follow/add";
-      const successMessage = isCurrentlyFavorite ? "已取消收藏" : "收藏成功";
+      const originalFavoriteStatus = isFavorite.value;
+      isFavorite.value = !isFavorite.value;
+      const endpoint = isFavorite.value ? "/app-api/member/follow/add" : "/app-api/member/follow/del";
+      const successMessage = isFavorite.value ? "收藏成功" : "已取消收藏";
       const payload = {
         userId,
         targetId: props.activity.id,
@@ -76,14 +77,20 @@ const _sfc_main = {
             title: successMessage,
             icon: "success"
           });
-          emit("refreshList");
+          emit("updateFavoriteStatus", {
+            id: props.activity.id,
+            newFollowFlag: isFavorite.value ? 1 : 0
+            // 传递新的关注状态 (1 或 0)
+          });
         } else {
+          isFavorite.value = originalFavoriteStatus;
           common_vendor.index.showToast({
             title: result.error || "操作失败，请重试",
             icon: "none"
           });
         }
       } catch (error) {
+        isFavorite.value = originalFavoriteStatus;
         common_vendor.index.showToast({
           title: "网络错误，请稍后重试",
           icon: "none"
@@ -137,7 +144,7 @@ const _sfc_main = {
           size: "16",
           color: "#FF6B00"
         }),
-        o: common_vendor.t(__props.activity.organizerUnitName || "主办方"),
+        o: common_vendor.t(__props.activity.memberUser.nickname || "主办方"),
         p: common_vendor.p({
           type: isFavorite.value ? "heart-filled" : "heart",
           size: "16",

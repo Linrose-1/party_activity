@@ -19,7 +19,7 @@
 .form-group .uni-easyinput {
   border: 1rpx solid #eee;
   border-radius: 8rpx;
-  padding: 10rpx 0;
+  padding: 10rpx;
   margin: 10rpx 0;
 }
 .form-group .uni-easyinput.is-input-border {
@@ -38,6 +38,7 @@
 }
 .uni-list-cell-db .uni-input .placeholder {
   color: #939393;
+  font-size: 24rpx;
 }
 .submit-btn {
   display: flex;

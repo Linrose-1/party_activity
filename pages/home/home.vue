@@ -1,11 +1,11 @@
 <template>
-	<div class="business-opportunity-app">
+	<view class="business-opportunity-app">
 		<!-- 顶部区域 -->
-		<div class="header wechat-style">
+		<view class="header wechat-style">
 			<!-- ... header部分内容保持不变 ... -->
-			<div class="app-title">猩聚社</div>
-			<div class="app-subtitle">商友连接·商机分享</div>
-			<div class="app-description">连接全球精英商友</div>
+			<view class="app-title">猩聚社</view>
+			<view class="app-subtitle">商友连接·商机分享</view>
+			<view class="app-description">连接全球精英商友</view>
 
 			<view class="search-section">
 				<view class="search-container">
@@ -16,121 +16,126 @@
 					<button class="search-button" @click="handleSearch">搜索</button>
 				</view>
 			</view>
-		</div>
+		</view>
 
 		<!-- 商机发现标题 -->
-		<div class="section-title">商机发现</div>
+		<view class="section-title">商机发现</view>
 
 		<!-- 导航标签栏 -->
-		<div class="tabs">
+		<view class="tabs">
 			<!-- activeTab的key值与后端tabIndex对应，方便管理 -->
-			<div class="tab" :class="{ active: activeTab === 1 }" @click="handleTabClick(1)">
+			<view class="tab" :class="{ active: activeTab === 1 }" @click="handleTabClick(1)">
 				推荐
-			</div>
-			<div class="tab" :class="{ active: activeTab === 2 }" @click="handleTabClick(2)">
+			</view>
+			<view class="tab" :class="{ active: activeTab === 2 }" @click="handleTabClick(2)">
 				附近
-			</div>
-			<div class="tab" :class="{ active: activeTab === 3 }" @click="handleTabClick(3)">
+			</view>
+			<view class="tab" :class="{ active: activeTab === 3 }" @click="handleTabClick(3)">
 				关注
-			</div>
-			<div class="tab" :class="{ active: activeTab === 4 }" @click="handleTabClick(4)">
+			</view>
+			<view class="tab" :class="{ active: activeTab === 4 }" @click="handleTabClick(4)">
 				创业猎伙
-			</div>
+			</view>
 			<button class="post-button" @click="postNew">
 				<uni-icons type="compose" size="18" color="#FFFFFF"></uni-icons>
 				发帖
 			</button>
-		</div>
+		</view>
 
 		<!-- 帖子列表 -->
-		<div class="post-list">
+		<view class="post-list">
 			<!-- 帖子卡片 - 循环改为 postList -->
-			<div v-for="post in postList" :key="post.id" class="post-card" @click="handlePostClick(post)">
-				<div class="post-header">
+			<view v-for="post in postList" :key="post.id" class="post-card" @click="handlePostClick(post)">
+				<view class="post-header">
 					<!-- 使用 contactPerson 的第一个字作为头像 -->
-					<div class="avatar" @click.stop="skipApplicationBusinessCard">{{ post.user.name.charAt(0) }}</div>
-					<div class="user-info">
+					<!-- <view class="avatar" @click.stop="skipApplicationBusinessCard">{{ post.user.name.charAt(0) }}</view> -->
+					<image :src="post.user.avatar" mode="" class="avatar" @click.stop="skipApplicationBusinessCard(post.user.id)">
+					</image>
+					<view class="user-info">
 						<!-- 显示 contactPerson 和 createTime -->
-						<div class="user-name">{{ post.user.name }}</div>
-						<div class="post-time">{{ post.time }}</div>
-					</div>
+						<view class="user-name">{{ post.user.name }}</view>
+						<view class="post-time">{{ post.time }}</view>
+					</view>
 					<!-- 关注用户状态绑定到 post.isFollowedUser -->
-					<button v-if="loggedInUserId !== post.user.id" class="follow-button" :class="{ 'followed': post.isFollowedUser }" @click.stop="toggleFollow(post)">
-											{{ post.isFollowedUser ? '已关注' : '关注' }}
-										</button>
-				</div>
+					<button v-if="loggedInUserId !== post.user.id" class="follow-button"
+						:class="{ 'followed': post.isFollowedUser }" @click.stop="toggleFollow(post)">
+						{{ post.isFollowedUser ? '已关注' : '关注' }}
+					</button>
+				</view>
 
 				<!-- ==================== 内容权限控制逻辑 ==================== -->
 				<template v-if="isLogin && hasPaidMembership">
 					<!-- 显示 postContent -->
-					<div class="post-content">
-						{{ post.content }}
-					</div>
+					<!-- <view style="font-weight: 700;font-size: 36rpx;">{{post.title}}</view> -->
+					<view class="post-content">
+						{{post.title}}
+					</view>
 					<!-- 图片渲染 -->
-					<div class="post-images" v-if="post.images && post.images.length">
-						<div v-for="(image, imgIndex) in post.images" :key="imgIndex" class="image-wrapper">
+					<view class="post-images" v-if="post.images && post.images.length">
+						<view v-for="(image, imgIndex) in post.images" :key="imgIndex" class="image-wrapper">
 							<img :src="image" alt="商机图片" class="post-image" />
-						</div>
-					</div>
+						</view>
+					</view>
 					<!-- 标签渲染 -->
-					<div class="tags" v-if="post.tags && post.tags.length">
-						<div v-for="(tag, tagIndex) in post.tags" :key="tagIndex" class="tag">
+					<view class="tags" v-if="post.tags && post.tags.length">
+						<view v-for="(tag, tagIndex) in post.tags" :key="tagIndex" class="tag">
 							{{ tag }}
-						</div>
-					</div>
+						</view>
+					</view>
 					<!-- 点赞/踩数量渲染 -->
-					<div class="feedback-stats">
-						<div class="like-count">
+					<view class="feedback-stats">
+						<view class="like-count">
 							<uni-icons type="hand-up-filled" size="18" color="#e74c3c"></uni-icons>
 							<span>{{ post.likes }}</span>
-						</div>
-						<div class="dislike-count">
+						</view>
+						<view class="dislike-count">
 							<uni-icons type="hand-down-filled" size="18" color="#3498db"></uni-icons>
 							<span>{{ post.dislikes }}</span>
-						</div>
-					</div>
-					<div class="post-actions">
-						<div class="action-group">
+						</view>
+					</view>
+					<view class="post-actions">
+						<view class="action-group">
 							<!-- 点赞/踩状态绑定 -->
-							<div class="action like" :class="{ active: post.userAction === 'like' }"
+							<view class="action like" :class="{ active: post.userAction === 'like' }"
 								@click.stop="toggleAction(post, 'like')">
 								<uni-icons :type="post.userAction === 'like' ? 'hand-up-filled' : 'hand-up'" size="20"
 									:color="post.userAction === 'like' ? '#e74c3c' : '#666'"></uni-icons>
 								<span>赞</span>
-							</div>
-							<div class="action dislike" :class="{ active: post.userAction === 'dislike' }"
+							</view>
+							<view class="action dislike" :class="{ active: post.userAction === 'dislike' }"
 								@click.stop="toggleAction(post, 'dislike')">
 								<uni-icons :type="post.userAction === 'dislike' ? 'hand-down-filled' : 'hand-down'"
 									size="20" :color="post.userAction === 'dislike' ? '#3498db' : '#666'"></uni-icons>
 								<span>踩</span>
-							</div>
-						</div>
-						<div class="action-group">
+							</view>
+						</view>
+						<view class="action-group">
 							<!-- ==================== 修改点：动态显示收藏状态文本 ==================== -->
-							<div class="action comment" :class="{ active: post.isSaved }" @click.stop="toggleSave(post)">
+							<view class="action comment" :class="{ active: post.isSaved }"
+								@click.stop="toggleSave(post)">
 								<uni-icons :type="post.isSaved ? 'star-filled' : 'star'" size="20"
 									:color="post.isSaved ? '#FF6A00' : '#666'"></uni-icons>
 								<span>{{ post.isSaved ? '已收藏' : '收藏' }}</span>
-							</div>
-							<div class="action share" @click.stop="sharePost(post)">
+							</view>
+							<!-- <view class="action share" @click.stop="sharePost(post)">
 								<uni-icons type="redo" size="20" color="#666"></uni-icons>
 								<span>分享</span>
-							</div>
-						</div>
-					</div>
+							</view> -->
+						</view>
+					</view>
 				</template>
-				
+
 				<!-- ... 权限控制部分保持不变 ... -->
-				<div v-else-if="isLogin && !hasPaidMembership" class="content-placeholder">
-					<div class="placeholder-text">升级为会员，解锁全部商机信息</div>
+				<view v-else-if="isLogin && !hasPaidMembership" class="content-placeholder">
+					<view class="placeholder-text">升级为会员，解锁全部商机信息</view>
 					<button class="placeholder-button" @click.stop="goToMembership">立即升级</button>
-				</div>
-				<div v-else class="content-placeholder">
-					<div class="placeholder-text">登录后查看更多精彩内容</div>
+				</view>
+				<view v-else class="content-placeholder">
+					<view class="placeholder-text">登录后查看更多精彩内容</view>
 					<button class="placeholder-button" @click.stop="goToLogin">立即登录</button>
-				</div>
-			</div>
-			
+				</view>
+			</view>
+
 			<!-- 加载状态提示 -->
 			<view class="loading-status">
 				<view v-if="postList.length === 0 && loadingStatus === 'noMore'" class="no-posts-message">
@@ -143,15 +148,23 @@
 					<uni-load-more status="noMore" contentText.noMore="暂无更多内容"></uni-load-more>
 				</view>
 			</view>
-		</div>
-	</div>
+		</view>
+	</view>
 </template>
 
 <script setup>
-	import { ref, reactive, computed, onMounted } from 'vue';
-	import { onReachBottom, onPullDownRefresh } from '@dcloudio/uni-app';
+	import {
+		ref,
+		reactive,
+		computed,
+		onMounted
+	} from 'vue';
+	import {
+		onReachBottom,
+		onPullDownRefresh,
+	} from '@dcloudio/uni-app';
 	import request from '../../utils/request.js';
-	
+
 	const loggedInUserId = ref(null);
 	const isLogin = ref(true);
 	const member = ref('白银');
@@ -161,21 +174,21 @@
 	});
 
 	const postList = ref([]);
-	const activeTab = ref(1); 
+	const activeTab = ref(1);
 	const searchQuery = ref('');
-	
+
 	const pageNo = ref(1);
 	const pageSize = ref(10);
 	const loadingStatus = ref('more');
-	
+
 	// ==================== 新增：状态锁，防止用户快速重复点击 ====================
 	const isActionInProgress = ref(false);
-	
+
 	const location = reactive({
 		longitude: '',
 		latitude: ''
 	});
-	
+
 	onMounted(() => {
 		loggedInUserId.value = uni.getStorageSync('userId');
 		console.log('当前列表页登录用户ID:', loggedInUserId.value);
@@ -189,9 +202,11 @@
 	});
 
 	onPullDownRefresh(() => {
+		console.log('用户触发了下拉刷新');
 		getBusinessOpportunitiesList(true);
 	});
 	
+
 	function formatTimestamp(timestamp) {
 		if (!timestamp) return '';
 		const date = new Date(timestamp);
@@ -202,60 +217,83 @@
 		const m = date.getMinutes().toString().padStart(2, '0');
 		return `${Y}-${M}-${D} ${h}:${m}`;
 	}
-	
+
 	const getBusinessOpportunitiesList = async (isRefresh = false) => {
 		if (loadingStatus.value === 'loading') return;
 		loadingStatus.value = 'loading';
-		
+
 		if (isRefresh) {
 			pageNo.value = 1;
 			postList.value = [];
 			loadingStatus.value = 'more';
 		}
-	
+
 		const params = {
 			pageNo: pageNo.value,
 			pageSize: pageSize.value,
 			tabIndex: activeTab.value,
 		};
-		
+
 		if (searchQuery.value) {
 			params.searchKey = searchQuery.value;
 		}
-	
+
 		if (activeTab.value === 2 && location.longitude && location.latitude) {
 			params.longitude = location.longitude;
 			params.latitude = location.latitude;
 		}
-		
+
 		try {
 			const result = await request('/app-api/member/business-opportunities/list', {
 				method: 'GET',
 				data: params
 			});
-			
+
+			if (result && result.error && result.error.includes('未登录')) {
+				uni.showToast({
+					title: '请先登录',
+					icon: 'none',
+					duration: 1500
+				});
+
+				// 如果是通过下拉刷新触发的，需要手动停止刷新动画
+				uni.stopPullDownRefresh();
+
+				// 延迟 1.5 秒后跳转到登录页
+				setTimeout(() => {
+					uni.navigateTo({
+						url: '/pages/index/index'
+					});
+				}, 1500);
+
+				// 终止当前函数，不再执行后续的数据处理逻辑
+				return;
+			}
+
 			if (result && !result.error && result.data && result.data.list) {
 				const apiData = result.data;
 				const mappedData = apiData.list.map(item => ({
 					id: item.id,
 					content: item.postContent,
+					title: item.postTitle,
 					images: item.postImg ? String(item.postImg).split(',').filter(img => img) : [],
-					tags: item.tags ? (Array.isArray(item.tags) ? item.tags : String(item.tags).split(',').filter(tag => tag)) : [],
+					tags: item.tags ? (Array.isArray(item.tags) ? item.tags : String(item.tags).split(
+						',').filter(tag => tag)) : [],
 					likes: item.likesCount || 0, // 确保是数字
 					dislikes: item.dislikesCount || 0, // 确保是数字
 					userAction: item.userLikeStr || null,
 					isSaved: item.followFlag === 1,
 					isFollowedUser: item.followUserFlag === 1,
-					time: formatTimestamp(item.createTime), 
+					time: formatTimestamp(item.createTime),
 					user: {
-						id: item.userId,
-						name: item.contactPerson || '匿名用户',
-						avatar: '' 
+						id: item.memberUser.id,
+						name: item.memberUser.nickname || '匿名用户',
+						avatar: item.memberUser.avatar
 					}
 				}));
-	
+
 				postList.value = [...postList.value, ...mappedData];
-	
+
 				if (postList.value.length >= apiData.total) {
 					loadingStatus.value = 'noMore';
 				} else {
@@ -265,12 +303,18 @@
 			} else {
 				loadingStatus.value = 'noMore'; // 如果出错，也标记为noMore，防止无限加载
 				const errorMsg = result && result.error ? result.error.message : '加载失败';
-				uni.showToast({ title: errorMsg, icon: 'none' });
+				uni.showToast({
+					title: errorMsg,
+					icon: 'none'
+				});
 			}
 		} catch (error) {
 			console.error('getBusinessOpportunitiesList error:', error);
 			loadingStatus.value = 'more';
-			uni.showToast({ title: '网络请求异常', icon: 'none' });
+			uni.showToast({
+				title: '网络请求异常',
+				icon: 'none'
+			});
 		} finally {
 			uni.stopPullDownRefresh();
 		}
@@ -279,7 +323,7 @@
 	const handleSearch = () => {
 		getBusinessOpportunitiesList(true);
 	};
-	
+
 	const handleTabClick = (tabIndex) => {
 		if (activeTab.value === tabIndex) return;
 		activeTab.value = tabIndex;
@@ -310,7 +354,9 @@
 	};
 
 	const getLocationAndFetchData = () => {
-		uni.showLoading({ title: '正在定位...' });
+		uni.showLoading({
+			title: '正在定位...'
+		});
 		uni.getLocation({
 			type: 'wgs84',
 			success: (res) => {
@@ -319,26 +365,28 @@
 				getBusinessOpportunitiesList(true);
 			},
 			fail: (err) => {
-				getBusinessOpportunitiesList(true); 
+				getBusinessOpportunitiesList(true);
 			},
 			complete: () => uni.hideLoading()
 		});
 	};
-	
-	// ==================== 以下为修改后的交互方法 ====================
-	
+
+
 	/**
 	 * 切换点赞/踩状态
 	 */
 	const toggleAction = async (post, clickedAction) => {
 		if (isActionInProgress.value) return;
 		if (!loggedInUserId.value) {
-			uni.showToast({ title: '请先登录', icon: 'none' });
+			uni.showToast({
+				title: '请先登录',
+				icon: 'none'
+			});
 			return;
 		}
-		
+
 		isActionInProgress.value = true;
-		
+
 		const originalAction = post.userAction;
 		const originalLikes = post.likes;
 		const originalDislikes = post.dislikes;
@@ -377,15 +425,21 @@
 				post.userAction = originalAction;
 				post.likes = originalLikes;
 				post.dislikes = originalDislikes;
-				uni.showToast({ title: '操作失败', icon: 'none' });
+				uni.showToast({
+					title: '操作失败',
+					icon: 'none'
+				});
 			}
-			
+
 		} catch (error) {
 			// 网络异常，回滚UI
 			post.userAction = originalAction;
 			post.likes = originalLikes;
 			post.dislikes = originalDislikes;
-			uni.showToast({ title: '操作失败，请重试', icon: 'none' });
+			uni.showToast({
+				title: '操作失败，请重试',
+				icon: 'none'
+			});
 		} finally {
 			isActionInProgress.value = false;
 		}
@@ -397,37 +451,52 @@
 	const toggleSave = async (post) => {
 		if (isActionInProgress.value) return;
 		if (!loggedInUserId.value) {
-			uni.showToast({ title: '请先登录', icon: 'none' });
+			uni.showToast({
+				title: '请先登录',
+				icon: 'none'
+			});
 			return;
 		}
 
 		isActionInProgress.value = true;
 		const originalStatus = post.isSaved;
-		
+
 		// 乐观更新
 		post.isSaved = !originalStatus;
 
 		const apiUrl = post.isSaved ? '/app-api/member/follow/add' : '/app-api/member/follow/del';
-		
+
 		try {
 			const requestData = {
 				userId: loggedInUserId.value,
 				targetId: post.id,
 				targetType: 'post'
 			};
-			const result = await request(apiUrl, { method: 'POST', data: requestData });
-			
+			const result = await request(apiUrl, {
+				method: 'POST',
+				data: requestData
+			});
+
 			if (result && result.error) {
 				// 失败回滚
 				post.isSaved = originalStatus;
-				uni.showToast({ title: '操作失败', icon: 'none' });
+				uni.showToast({
+					title: '操作失败',
+					icon: 'none'
+				});
 			} else {
-				uni.showToast({ title: post.isSaved ? '已收藏' : '已取消收藏', icon: 'none' });
+				uni.showToast({
+					title: post.isSaved ? '已收藏' : '已取消收藏',
+					icon: 'none'
+				});
 			}
 		} catch (error) {
 			// 失败回滚
 			post.isSaved = originalStatus;
-			uni.showToast({ title: '操作失败，请重试', icon: 'none' });
+			uni.showToast({
+				title: '操作失败，请重试',
+				icon: 'none'
+			});
 		} finally {
 			isActionInProgress.value = false;
 		}
@@ -439,7 +508,10 @@
 	const toggleFollow = async (post) => {
 		if (isActionInProgress.value) return;
 		if (!loggedInUserId.value) {
-			uni.showToast({ title: '请先登录', icon: 'none' });
+			uni.showToast({
+				title: '请先登录',
+				icon: 'none'
+			});
 			return;
 		}
 
@@ -450,45 +522,68 @@
 		post.isFollowedUser = !originalStatus;
 
 		const apiUrl = post.isFollowedUser ? '/app-api/member/follow/add' : '/app-api/member/follow/del';
-		
+
 		try {
 			const requestData = {
 				userId: loggedInUserId.value,
 				targetId: post.user.id,
 				targetType: 'post_user'
 			};
-			const result = await request(apiUrl, { method: 'POST', data: requestData });
+			const result = await request(apiUrl, {
+				method: 'POST',
+				data: requestData
+			});
 
 			if (result && result.error) {
 				// 失败回滚
 				post.isFollowedUser = originalStatus;
-				uni.showToast({ title: '操作失败', icon: 'none' });
+				uni.showToast({
+					title: '操作失败',
+					icon: 'none'
+				});
 			} else {
-				uni.showToast({ title: post.isFollowedUser ? '已关注' : '已取消关注', icon: 'none' });
+				uni.showToast({
+					title: post.isFollowedUser ? '已关注' : '已取消关注',
+					icon: 'none'
+				});
 			}
 		} catch (error) {
 			// 失败回滚
 			post.isFollowedUser = originalStatus;
-			uni.showToast({ title: '操作失败，请重试', icon: 'none' });
+			uni.showToast({
+				title: '操作失败，请重试',
+				icon: 'none'
+			});
 		} finally {
 			isActionInProgress.value = false;
 		}
 	};
 
 	const sharePost = (post) => {
-		uni.showToast({ title: '分享功能即将上线', icon: 'none' });
+		uni.showToast({
+			title: '分享功能即将上线',
+			icon: 'none'
+		});
 	};
 
 	const postNew = () => {
-		uni.navigateTo({ url: '/pages/home-opportunitiesPublish/home-opportunitiesPublish' });
+		uni.navigateTo({
+			url: '/pages/home-opportunitiesPublish/home-opportunitiesPublish'
+		});
 	};
 
 	const goToLogin = () => {
-		uni.showToast({ title: '正在前往登录页...', icon: 'none' });
+		uni.showToast({
+			title: '正在前往登录页...',
+			icon: 'none'
+		});
 	};
 
 	const goToMembership = () => {
-		uni.showToast({ title: '正在前往会员中心...', icon: 'none' });
+		uni.showToast({
+			title: '正在前往会员中心...',
+			icon: 'none'
+		});
 	};
 
 	const handlePostClick = (post) => {
@@ -501,19 +596,22 @@
 		}
 	};
 
-	const skipApplicationBusinessCard = () => {
-		uni.navigateTo({ url: '/pages/applicationBusinessCard/applicationBusinessCard' });
+	const skipApplicationBusinessCard = (userId) => {
+		uni.navigateTo({
+			url: `/pages/applicationBusinessCard/applicationBusinessCard?id=${userId}`
+		});
 	}
 
 	const skipCommercialDetail = (postId) => {
-		uni.navigateTo({ url: `/pages/home-commercialDetail/home-commercialDetail?id=${postId}` });
+		uni.navigateTo({
+			url: `/pages/home-commercialDetail/home-commercialDetail?id=${postId}`
+		});
 	}
-	
+
 	const getLogin = () => {}
 </script>
 
 <style scoped>
-
 	.header {
 		background: linear-gradient(135deg, #FF6A00, #FF8C37);
 		color: white;
@@ -789,6 +887,7 @@
 		margin-top: 30rpx;
 		margin-bottom: 30rpx;
 		color: #444;
+		font-weight: 700;
 	}
 
 	.post-images {
@@ -924,17 +1023,17 @@
 	}
 
 	/* 新增或修改的样式 */
-		.loading-status {
-			width: 100%;
-			padding: 20rpx 0;
-		}
-	
-		.no-posts-message {
-			text-align: center;
-			padding: 60rpx;
-			color: #999;
-			font-size: 32rpx;
-		}
+	.loading-status {
+		width: 100%;
+		padding: 20rpx 0;
+	}
+
+	.no-posts-message {
+		text-align: center;
+		padding: 60rpx;
+		color: #999;
+		font-size: 32rpx;
+	}
 
 	.no-more-content-message {
 		text-align: center;
@@ -943,5 +1042,4 @@
 		font-size: 28rpx;
 		margin-top: 20rpx;
 	}
-	
 </style>

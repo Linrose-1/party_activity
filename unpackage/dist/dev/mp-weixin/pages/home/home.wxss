@@ -242,6 +242,7 @@
 		margin-top: 30rpx;
 		margin-bottom: 30rpx;
 		color: #444;
+		font-weight: 700;
 }
 .post-images.data-v-07e72d3c {
 		display: flex;
@@ -359,14 +360,14 @@
 
 	/* 新增或修改的样式 */
 .loading-status.data-v-07e72d3c {
-			width: 100%;
-			padding: 20rpx 0;
+		width: 100%;
+		padding: 20rpx 0;
 }
 .no-posts-message.data-v-07e72d3c {
-			text-align: center;
-			padding: 60rpx;
-			color: #999;
-			font-size: 32rpx;
+		text-align: center;
+		padding: 60rpx;
+		color: #999;
+		font-size: 32rpx;
 }
 .no-more-content-message.data-v-07e72d3c {
 		text-align: center;
@@ -375,4 +376,3 @@
 		font-size: 28rpx;
 		margin-top: 20rpx;
 }
-	

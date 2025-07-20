@@ -161,19 +161,6 @@ const _sfc_main = {
         }
       });
     };
-    const handleRechargeSmartRice = () => {
-      common_vendor.index.showModal({
-        title: "充值智米",
-        content: "如需充值智米，请联系平台客服获取充值方式。",
-        showCancel: false,
-        confirmText: "联系客服",
-        success: (res) => {
-          if (res.confirm) {
-            contactCustomerService();
-          }
-        }
-      });
-    };
     const contactCustomerService = () => {
       common_vendor.index.showToast({ title: "正在为您跳转客服联系方式...", icon: "none", duration: 2e3 });
     };
@@ -247,19 +234,18 @@ const _sfc_main = {
           size: "20",
           color: "#fff"
         }),
-        E: common_vendor.o(handleRechargeSmartRice),
-        F: common_vendor.p({
+        E: common_vendor.p({
           type: "info-filled",
           size: "18",
           color: "#FF6B00"
         }),
-        G: common_vendor.p({
+        F: common_vendor.p({
           type: "compose",
           size: "24",
           color: "#FF6B00"
         }),
-        H: common_vendor.t(userInfo.value.currExperience),
-        I: common_vendor.f(tasks.value, (task, index, i0) => {
+        G: common_vendor.t(userInfo.value.currExperience),
+        H: common_vendor.f(tasks.value, (task, index, i0) => {
           return {
             a: "04e670bd-10-" + i0,
             b: common_vendor.p({
@@ -275,25 +261,25 @@ const _sfc_main = {
             h: index
           };
         }),
-        J: common_vendor.p({
+        I: common_vendor.p({
           type: "plus",
           size: "20",
           color: "#fff"
         }),
-        K: common_vendor.p({
+        J: common_vendor.p({
           type: "bars",
           size: "24",
           color: "#FF6B00"
         }),
-        L: historyList.value.length === 0 && historyLoadStatus.value === "noMore"
+        K: historyList.value.length === 0 && historyLoadStatus.value === "noMore"
       }, historyList.value.length === 0 && historyLoadStatus.value === "noMore" ? {
-        M: common_vendor.p({
+        L: common_vendor.p({
           type: "info-filled",
           size: "40",
           color: "#ccc"
         })
       } : {
-        N: common_vendor.f(historyList.value, (record, index, i0) => {
+        M: common_vendor.f(historyList.value, (record, index, i0) => {
           return {
             a: "04e670bd-14-" + i0,
             b: common_vendor.p({
@@ -313,9 +299,9 @@ const _sfc_main = {
           };
         })
       }, {
-        O: historyList.value.length > 0
+        N: historyList.value.length > 0
       }, historyList.value.length > 0 ? {
-        P: common_vendor.p({
+        O: common_vendor.p({
           status: historyLoadStatus.value
         })
       } : {}) : {});

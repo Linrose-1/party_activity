@@ -81,7 +81,7 @@
 		<!-- 活动列表 -->
 		<view class="activity-list" scroll-y="true">
 			<ActivityCard v-for="(activity, index) in activitiesData" :key="activity.id" :activity="activity"
-				@refreshList="getActiveList(false)" />
+			    @updateFavoriteStatus="handleFavoriteChange" />
 		</view>
 
 		<!-- 【修改后】根据新的状态变量来显示提示 -->
@@ -112,7 +112,8 @@
 		watch
 	} from 'vue';
 	import {
-		onReachBottom
+		onReachBottom,
+		onPullDownRefresh
 	} from '@dcloudio/uni-app';
 	import ActivityCard from '@/components/ActivityCard.vue';
 	import request from '../../utils/request.js';
@@ -137,6 +138,12 @@
 			getActiveList(true); // 调用 getActiveList 并传入 true 表示是加载更多
 		}
 	});
+	
+	onPullDownRefresh(() => {
+			console.log('用户触发了下拉刷新');
+			// 刷新操作，应该传入 false
+			getActiveList(false);
+		});
 
 
 	const getDate = (type) => {
@@ -328,7 +335,23 @@
 			hasMore.value = false; // 异常时也认为没有更多数据了
 		} finally {
 			loading.value = false; // 结束加载状态
+			uni.stopPullDownRefresh(); 
 		}
+	};
+	
+	// 在 活动列表页 的 <script setup> 中
+	
+	const handleFavoriteChange = (event) => {
+	  // event 就是子组件emit过来的对象, e.g., { id: ..., newFollowFlag: ... }
+	  
+	  // 1. 在当前的活动列表数据(activitiesData)中找到需要更新的那一项
+	  const activityToUpdate = activitiesData.value.find(activity => activity.id === event.id);
+	
+	  // 2. 如果找到了，就直接修改它的 followFlag 属性
+	  if (activityToUpdate) {
+	    activityToUpdate.followFlag = event.newFollowFlag;
+	    console.log(`已更新活动ID ${event.id} 的收藏状态为: ${event.newFollowFlag}`);
+	  }
 	};
 
 	// 当任何一个筛选条件改变时，都触发一次新的搜索（不是加载更多）

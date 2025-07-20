@@ -17,7 +17,7 @@
 				</view>
 				<text class="shake-hint">点击按钮或晃动手机，发现附近的活动和商友</text>
 			</view>
-			
+
 			<!-- 加载中界面 -->
 			<view v-else-if="loading" class="loading-container">
 				<view class="loading-spinner"></view>
@@ -48,7 +48,7 @@
 						<uni-icons type="staff-filled" size="20" color="#FF6B00" />
 						<text>附近商友</text>
 					</view>
-					
+
 					<view v-for="business in businesses" :key="business.id" class="business-card">
 						<image :src="business.avatar || '/static/images/default-avatar.png'" mode="aspectFill"
 							class="business-avatar" />
@@ -56,7 +56,7 @@
 							<view class="business-name">
 								{{ business.nickname }}
 							</view>
-							
+
 							<!-- 【核心修改】显示真实的职位和公司 -->
 							<view class="card-position" v-if="business.professionalTitle">
 								<text class="iconfont">👤</text> {{ business.professionalTitle }}
@@ -65,13 +65,13 @@
 								<text class="iconfont">🏢</text> {{ business.companyName }}
 							</view>
 						</view>
-						
+
 						<button class="connect-btn" @click="handleConnect(business)" :disabled="business.loading"
 							:class="{ 'connected': business.isFollowed }">
 							{{ business.isFollowed ? '已关注' : '关注' }}
 						</button>
 					</view>
-					
+
 					<view v-if="!businessHasMore && businesses.length > 0" class="no-more-content">
 						暂无更多商友
 					</view>
@@ -95,6 +95,8 @@
 	} from '@dcloudio/uni-app';
 	import ActivityCard from '@/components/ActivityCard.vue';
 	import request from '../../utils/request.js';
+
+	// let shakeAudioContext = null;
 
 	// --- 状态管理 ---
 	const currentTab = ref(0);
@@ -123,86 +125,91 @@
 
 	const triggerShakeSequence = () => {
 		if (!shakeDebounce.value) return;
+
+		// if (shakeAudioContext) {
+		// 	shakeAudioContext.play();
+		// }
+
 		shakeDebounce.value = false;
 		getLocationAndProceed();
 	};
 
 	const getLocationAndProceed = () => {
-	    uni.getLocation({
-	        type: 'gcj02',
-	        success: async (res) => { // 【修改】将此回调函数改为 async
-	            console.log('✅ 获取用户位置成功:', res);
-	            userLocation.value = {
-	                latitude: res.latitude,
-	                longitude: res.longitude,
-	            };
-	            shaken.value = true;
-	            
-	            // 【核心修改】使用 Promise.all 并行执行两个请求
-	            loading.value = true; // 开始加载
-	            uni.vibrateShort();   // 震动一次即可
-	
-	            try {
-	                // 等待两个请求都完成
-	                await Promise.all([
-	                    getNearbyActivities(false),
-	                    getNearbyBusinesses(false)
-	                ]);
-	                console.log('✅ 附近活动和商友数据均已加载完毕');
-	            } catch (error) {
-	                console.error('❌ 加载初始数据时发生错误:', error);
-	            } finally {
-	                // 无论成功或失败，最后都结束加载状态
-	                loading.value = false;
-	                // 允许用户再次摇一摇
-	                setTimeout(() => {
-	                    shakeDebounce.value = true;
-	                }, 1000);
-	            }
-	        },
-	        fail: (err) => {
-	            console.error('❌ 获取位置失败:', err);
-	            // ... 错误处理逻辑保持不变 ...
-	            shakeDebounce.value = true;
-	        }
-	    });
+		uni.getLocation({
+			type: 'gcj02',
+			success: async (res) => { // 【修改】将此回调函数改为 async
+				console.log('✅ 获取用户位置成功:', res);
+				userLocation.value = {
+					latitude: res.latitude,
+					longitude: res.longitude,
+				};
+				shaken.value = true;
+
+				// 【核心修改】使用 Promise.all 并行执行两个请求
+				loading.value = true; // 开始加载
+				uni.vibrateShort(); // 震动一次即可
+
+				try {
+					// 等待两个请求都完成
+					await Promise.all([
+						getNearbyActivities(false),
+						getNearbyBusinesses(false)
+					]);
+					console.log('✅ 附近活动和商友数据均已加载完毕');
+				} catch (error) {
+					console.error('❌ 加载初始数据时发生错误:', error);
+				} finally {
+					// 无论成功或失败，最后都结束加载状态
+					loading.value = false;
+					// 允许用户再次摇一摇
+					setTimeout(() => {
+						shakeDebounce.value = true;
+					}, 1000);
+				}
+			},
+			fail: (err) => {
+				console.error('❌ 获取位置失败:', err);
+				// ... 错误处理逻辑保持不变 ...
+				shakeDebounce.value = true;
+			}
+		});
 	};
 
 	// 获取附近活动列表的方法 (保持不变)
 	const getNearbyActivities = async (isLoadMore = false) => {
-	    // 【修改】简化入口判断，只判断是否在加载更多
-	    if (isLoadMore && (!activityHasMore.value || loading.value)) return;
-	
-	    if(isLoadMore) loading.value = true; // 加载更多时，单独控制loading
-	
-	    if (!isLoadMore) {
-	        activityPageNo.value = 1;
-	        activities.value = [];
-	        activityHasMore.value = true;
-	    }
-	    const params = {
-	        pageNo: activityPageNo.value,
-	        pageSize: 10,
-	        longitude: userLocation.value.longitude,
-	        latitude: userLocation.value.latitude,
-	    };
-	    
-	    // 【修改】请求逻辑保持不变，但移除 try...catch 和 finally
-	    const result = await request('/app-api/member/activity/list', {
-	        method: 'GET',
-	        data: params
-	    });
-	    
-	    if (result && !result.error && result.data) {
-	        const list = result.data.list || [];
-	        activities.value = isLoadMore ? [...activities.value, ...list] : list;
-	        if (activities.value.length >= result.data.total) activityHasMore.value = false;
-	        activityPageNo.value++;
-	    } else {
-	        activityHasMore.value = false;
-	    }
-	
-	    if(isLoadMore) loading.value = false; // 加载更多结束
+		// 【修改】简化入口判断，只判断是否在加载更多
+		if (isLoadMore && (!activityHasMore.value || loading.value)) return;
+
+		if (isLoadMore) loading.value = true; // 加载更多时，单独控制loading
+
+		if (!isLoadMore) {
+			activityPageNo.value = 1;
+			activities.value = [];
+			activityHasMore.value = true;
+		}
+		const params = {
+			pageNo: activityPageNo.value,
+			pageSize: 10,
+			longitude: userLocation.value.longitude,
+			latitude: userLocation.value.latitude,
+		};
+
+		// 【修改】请求逻辑保持不变，但移除 try...catch 和 finally
+		const result = await request('/app-api/member/activity/list', {
+			method: 'GET',
+			data: params
+		});
+
+		if (result && !result.error && result.data) {
+			const list = result.data.list || [];
+			activities.value = isLoadMore ? [...activities.value, ...list] : list;
+			if (activities.value.length >= result.data.total) activityHasMore.value = false;
+			activityPageNo.value++;
+		} else {
+			activityHasMore.value = false;
+		}
+
+		if (isLoadMore) loading.value = false; // 加载更多结束
 	};
 
 	/**
@@ -210,48 +217,48 @@
 	 * @param {boolean} isLoadMore - 是否为加载更多操作
 	 */
 	const getNearbyBusinesses = async (isLoadMore = false) => {
-	    // 【修改】简化入口判断
-	    if (isLoadMore && (!businessHasMore.value || loading.value)) return;
-	    
-	    if(isLoadMore) loading.value = true; // 加载更多时，单独控制loading
-	
-	    if (!isLoadMore) {
-	        businessPageNo.value = 1;
-	        businesses.value = [];
-	        businessHasMore.value = true;
-	    }
-	
-	    const params = {
-	        pageNo: businessPageNo.value,
-	        pageSize: 10,
-	        longitude: userLocation.value.longitude,
-	        latitude: userLocation.value.latitude,
-	    };
-	
-	    console.log('发起附近商友列表请求, 参数:', params); // 现在这个log能正常打印了
-	    const result = await request('/app-api/member/user/list', {
-	        method: 'GET',
-	        data: params
-	    });
-		console.log('发起附近商友列表result:', result); 
-	
-	    if (result && !result.error && result.data) {
-	        const list = result.data.list || [];
-	        list.forEach(item => {
-	            item.isFollowed = false; 
-	            item.loading = false;
-	        });
-	        businesses.value = isLoadMore ? [...businesses.value, ...list] : list;
-	        if (businesses.value.length >= result.data.total) {
-	            businessHasMore.value = false;
-	        }
-	        businessPageNo.value++;
-	    } else {
-	        console.error('获取附近商友列表失败:', result.error);
-	        businessHasMore.value = false;
-	    }
-	
-	    if(isLoadMore) loading.value = false; // 加载更多结束
+		// 【修改】简化入口判断
+		if (isLoadMore && (!businessHasMore.value || loading.value)) return;
+
+		if (isLoadMore) loading.value = true; // 加载更多时，单独控制loading
+
+		if (!isLoadMore) {
+			businessPageNo.value = 1;
+			businesses.value = [];
+			businessHasMore.value = true;
+		}
+
+		const params = {
+			pageNo: businessPageNo.value,
+			pageSize: 10,
+			longitude: userLocation.value.longitude,
+			latitude: userLocation.value.latitude,
+		};
+
+		console.log('发起附近商友列表请求, 参数:', params); // 现在这个log能正常打印了
+		const result = await request('/app-api/member/user/list', {
+			method: 'GET',
+			data: params
+		});
+		console.log('发起附近商友列表result:', result);
+
+		if (result && !result.error && result.data) {
+			const list = result.data.list || [];
+			list.forEach(item => {
+				item.isFollowed = false;
+				item.loading = false;
+			});
+			businesses.value = isLoadMore ? [...businesses.value, ...list] : list;
+			if (businesses.value.length >= result.data.total) {
+				businessHasMore.value = false;
+			}
+			businessPageNo.value++;
+		} else {
+			console.error('获取附近商友列表失败:', result.error);
+			businessHasMore.value = false;
+		}
+
+		if (isLoadMore) loading.value = false; // 加载更多结束
 	};
 
 
@@ -573,8 +580,8 @@
 			transform: translateY(0);
 		}
 	}
-	
+
 	.iconfont {
-			margin-right: 10rpx;
-		}
+		margin-right: 10rpx;
+	}
 </style>

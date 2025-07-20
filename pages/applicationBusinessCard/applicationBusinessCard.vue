@@ -1,212 +1,252 @@
 <template>
-    <view class="business-card-apply-page">
-        
-        <view class="container">
-            <!-- 申请卡片 -->
-            <view class="application-card">
-                <view class="target-user">
-                    <view class="target-avatar">{{ contactName.charAt(0) }}</view>
-                    <view class="target-name">{{ contactName }}</view>
-                    <view class="target-title">{{ contactCompany }}</view>
-                </view>
-                
-                <view class="description">
-                    您正在申请查看<span class="highlight">{{ contactName }}</span>的联系方式。请选择一种方式支付查看费用：
-                </view>
-                
-                <view class="cost-section">
-                    <view class="cost-title">选择支付方式</view>
-                    
-                    <view class="cost-options">
-                        <!-- 贡分支付选项已移除 -->
-                        <view 
-                            class="cost-option" 
-                            :class="{selected: selectedOption === 'wisdom'}" 
-                            @click="selectOption('wisdom')"
-                        >
-                            <view class="currency-icon">
-                                <i class="fas fa-gem"></i>
-                            </view>
-                            <view class="cost-amount">1</view>
-                            <view class="cost-label">智米</view>
-                        </view>
-                    </view>
-                    
-                    <view class="user-balance">
-                        <!-- 贡分余额显示已移除 -->
-                        <view class="balance-item">
-                            <view>我的智米</view>
-                            <view 
-                                class="balance-value" 
-                                :class="{ 'insufficient-value': userPoints.wisdom < 1 }"
-                            >
-                                {{ userPoints.wisdom }}
-                            </view>
-                        </view>
-                    </view>
-                    
-                    <view class="insufficient" v-if="showInsufficient">
-                        <i class="fas fa-exclamation-circle"></i> 您的智米不足，请先获取更多积分
-                    </view>
-                </view>
-                
-                <view class="action-buttons">
-                    <button class="btn btn-primary" @click="exchangePoints">
-                        确认兑换
-                    </button>
-                    
-                    <button class="btn btn-secondary" @click="goToEarnPoints">
-                        获取更多积分
-                    </button>
-                </view>
-                
-                <view class="success-message" v-if="showSuccess">
-                    <i class="fas fa-check-circle"></i> 兑换成功！即将为您展示对方名片...
-                </view>
-            </view>
-
-            <!-- 格式化申请好友语卡片 -->
-            <view class="friend-request-card">
-                <h1 class="friend-request-title">
-                    <i class="fas fa-comment-dots"></i> 申请好友语
-                </h1>
-                <p class="friend-request-desc">复制以下文字，方便快速添加对方微信：</p>
-                <view class="message-box">
-                    <text selectable class="formatted-message">{{ formattedFriendRequestMessage }}</text>
-                    <button class="copy-btn" @click="copyFriendRequestMessage">
-                        ⧉复制
-                    </button>
-                </view>
-            </view>
-            
-            <!-- 提示信息 -->
-            <view class="info-card">
-                <h1 class="info-card-title">
-                    <i class="fas fa-info-circle"></i> 为什么需要支付积分？
-                </h1>
-                <p>为了维护平台的商业环境和用户隐私，查看他人联系方式需要消耗积分。这有助于：</p>
-                <ul>
-                    <li>确保联系请求的严肃性</li>
-                    <li>保护用户免受骚扰</li>
-                    <li>维护高质量商业环境</li>
-                    <li>激励用户贡献高质量内容</li>
-                </ul>
-            </view>
+  <view class="business-card-apply-page">
+    <view class="container">
+      <!-- 申请卡片 -->
+      <!-- 使用 v-if 确保在目标用户信息加载后再显示 -->
+      <view class="application-card" v-if="targetUserInfo">
+        <view class="target-user">
+          <!-- 优先显示头像，如果没有则显示姓氏首字母 -->
+          <image v-if="targetUserInfo.avatar" :src="targetUserInfo.avatar" class="target-avatar-image"></image>
+          <view v-else class="target-avatar">{{ (targetUserInfo.realName || targetUserInfo.nickname || '?').charAt(0) }}</view>
+          
+          <view class="target-name">{{ targetUserInfo.realName || targetUserInfo.nickname }}</view>
+          <view class="target-title">{{ targetUserInfo.companyName || '公司信息未设置' }}</view>
         </view>
         
+        <view class="description">
+          您正在申请查看<span class="highlight">{{ targetUserInfo.realName || targetUserInfo.nickname }}</span>的联系方式。请选择一种方式支付查看费用：
+        </view>
+        
+        <view class="cost-section">
+          <view class="cost-title">选择支付方式</view>
+          
+          <view class="cost-options">
+            <view class="cost-option selected"> <!-- 只有一个选项，直接设为选中 -->
+              <view class="currency-icon">
+                <i class="fas fa-gem"></i> <!-- 建议替换为 uni-icons 或图片 -->
+              </view>
+              <view class="cost-amount">1</view>
+              <view class="cost-label">智米</view>
+            </view>
+          </view>
+          
+          <view class="user-balance" v-if="currentUserInfo">
+            <view class="balance-item">
+              <view>我的智米</view>
+              <view class="balance-value" :class="{ 'insufficient-value': currentUserInfo.point < 1 }">
+                {{ currentUserInfo.point }}
+              </view>
+            </view>
+          </view>
+          
+          <view class="insufficient" v-if="showInsufficient">
+            <i class="fas fa-exclamation-circle"></i> 您的智米不足，请先获取更多积分
+          </view>
+        </view>
+        
+        <view class="action-buttons">
+          <button class="btn btn-primary" @click="handlePayToReadCard" :loading="isPaying" :disabled="isPaying">
+            {{ isPaying ? '支付中...' : '确认支付' }}
+          </button>
+          
+          <button class="btn btn-secondary" @click="goToEarnPoints">
+            获取更多智米
+          </button>
+        </view>
+        
+      </view>
+      <!-- 加载中的占位符 -->
+      <view v-else class="loading-placeholder">
+        <uni-load-more status="loading" contentText="正在加载用户信息..."></uni-load-more>
+      </view>
+
+      <!-- 格式化申请好友语卡片 -->
+      <view class="friend-request-card" v-if="currentUserInfo && targetUserInfo">
+        <h1 class="friend-request-title">
+          <i class="fas fa-comment-dots"></i> 申请好友语
+        </h1>
+        <p class="friend-request-desc">复制以下文字，方便快速添加对方微信：</p>
+        <view class="message-box">
+          <text selectable class="formatted-message">{{ formattedFriendRequestMessage }}</text>
+          <button class="copy-btn" @click="copyFriendRequestMessage">
+            ⧉复制
+          </button>
+        </view>
+      </view>
+      
+      <!-- 提示信息 -->
+      <view class="info-card">
+        <h1 class="info-card-title">
+          <i class="fas fa-info-circle"></i> 为什么需要支付积分？
+        </h1>
+        <p>为了维护平台的商业环境和用户隐私，查看他人联系方式需要消耗积分。这有助于：</p>
+        <ul>
+          <li>确保联系请求的严肃性</li>
+          <li>保护用户免受骚扰</li>
+          <li>维护高质量商业环境</li>
+          <li>激励用户贡献高质量内容</li>
+        </ul>
+      </view>
     </view>
+  </view>
 </template>
 
 <script setup>
 import { ref, reactive, computed } from 'vue'; 
 import { onLoad } from '@dcloudio/uni-app';
-// Uni-app环境通常全局有uni对象，无需额外导入
+import request from '../../utils/request.js'; // 导入您的请求方法
 
-// 模拟当前用户信息（请根据实际业务从全局状态或API获取）
-const myName = ref('张明');
-const myCompany = ref('未来科技');
-const myWork = ref('人工智能项目管理'); // 模拟用户从事的工作
+// --- 状态管理 ---
+// 当前登录用户的信息
+const currentUserInfo = ref(null);
+// 目标用户（需要查看名片的用户）的信息
+const targetUserInfo = ref(null);
+// 目标用户的ID，从上个页面接收
+const targetUserId = ref(null);
 
-// 当前用户积分数据
-const userPoints = reactive({
-    // contribution: 11,  // 贡分已移除
-    wisdom: 0         // 智米
+// UI状态
+const isPaying = ref(false); // 是否正在支付中
+const showInsufficient = ref(false); // 是否显示余额不足
+
+// --- 页面生命周期 ---
+onLoad((options) => {
+  // 1. 从页面参数中获取目标用户的ID
+  if (options.id) {
+    targetUserId.value = parseInt(options.id, 10);
+    // 同时获取当前登录用户和目标用户的信息
+    fetchInitialData();
+  } else {
+    uni.showToast({ title: '缺少目标用户ID', icon: 'error' });
+    // 1秒后返回上一页
+    setTimeout(() => uni.navigateBack(), 1000);
+  }
 });
 
-// 目标联系人信息 
-const contactName = ref('陈总');
-const contactCompany = ref('创新科技有限公司');
+// --- 数据获取 ---
+const fetchInitialData = async () => {
+  uni.showLoading({ title: '加载中...' });
+  try {
+    // 并行获取两个接口的数据，提升速度
+    const [currentUserRes, targetUserRes] = await Promise.all([
+      request('/app-api/member/user/get', { method: 'GET' }), // 获取当前用户信息
+      request(`/app-api/member/user/get?id=${targetUserId.value}`, { method: 'GET' }) // 获取目标用户信息
+    ]);
 
-// 状态管理
-const selectedOption = ref('wisdom'); // 默认选中智米
-const showInsufficient = ref(false);
-const showSuccess = ref(false);
-
-// 选择支付方式 (现在只有一个选项，但保留函数以防未来扩展)
-const selectOption = (option) => {
-    selectedOption.value = option;
-    showInsufficient.value = false; // 切换选项时隐藏积分不足提示
-};
-
-// 兑换积分
-const exchangePoints = () => {
-    let sufficient = false;
-    // 智米兑换逻辑
-    if (selectedOption.value === 'wisdom') {
-        if (userPoints.wisdom >= 1) {
-            userPoints.wisdom -= 1;
-            sufficient = true;
-        }
-    }
-
-    if (sufficient) {
-        showSuccess.value = true;
-        showInsufficient.value = false;
-        uni.showToast({
-            title: '兑换成功！',
-            icon: 'success',
-            duration: 2000
-        });
-        
-        // 2秒后跳转到我的名片页面
-        setTimeout(() => {
-            showSuccess.value = false;
-            uni.navigateTo({
-                url: '/pages/my-businessCard/my-businessCard' // 兑换成功后跳转到的页面
-            });
-        }, 2000);
+    // 处理当前用户信息
+    if (currentUserRes.data) {
+      currentUserInfo.value = currentUserRes.data;
     } else {
-        showInsufficient.value = true;
-        uni.showToast({
-            title: '智米不足，请先获取更多积分',
-            icon: 'error', // 可以在uni-app中使用'none'并自定义图标
-            duration: 2000
-        });
+      console.error('获取当前用户信息失败:', currentUserRes.error);
     }
+
+    // 处理目标用户信息
+    if (targetUserRes.data) {
+      targetUserInfo.value = targetUserRes.data;
+    } else {
+      console.error('获取目标用户信息失败:', targetUserRes.error);
+      uni.showToast({ title: '获取对方信息失败', icon: 'none' });
+    }
+  } catch (e) {
+    console.error('初始化数据时发生错误:', e);
+    uni.showToast({ title: '网络错误，请重试', icon: 'none' });
+  } finally {
+    uni.hideLoading();
+  }
 };
 
+// --- 核心业务逻辑 ---
+const handlePayToReadCard = async () => {
+  if (isPaying.value) return; // 防止重复点击
+  if (!targetUserId.value) {
+    uni.showToast({ title: '目标用户ID无效', icon: 'none' });
+    return;
+  }
+  
+  // 检查余额
+  if (currentUserInfo.value && currentUserInfo.value.point < 1) {
+      showInsufficient.value = true;
+      uni.showToast({ title: '智米不足', icon: 'none' });
+      return;
+  }
+  
+  isPaying.value = true;
+  showInsufficient.value = false;
+
+  // 调用支付接口
+  const { data, error, ...fullResponse } = await request('/app-api/member/user/pay-read-card', {
+    method: 'POST',
+    data: {
+      readUserId: targetUserId.value
+    }
+  });
+
+  // **将完整的请求结果打印到控制台**
+  console.log('支付接口响应:', { data, error, fullResponse });
+
+  isPaying.value = false;
+
+  if (error) {
+    // 请求失败（网络错误、业务错误如余额不足等）
+    uni.showToast({ title: `支付失败: ${error}`, icon: 'none', duration: 2000 });
+  } else if (data === true) {
+    // 支付成功
+    uni.showToast({ title: '支付成功！', icon: 'success', duration: 2000 });
+    // 支付成功后，可以刷新当前用户信息（更新余额），然后跳转
+    fetchInitialData(); // 重新获取数据以更新智米余额
+    setTimeout(() => {
+      // 跳转到对方的名片详情页
+      uni.redirectTo({ // 使用 redirectTo 避免用户返回此支付页
+        url: `/pages/my-businessCard/my-businessCard?id=${targetUserId.value}`
+      });
+    }, 2000);
+  } else {
+    // 其他未知情况
+    uni.showToast({ title: '支付遇到未知问题', icon: 'none', duration: 2000 });
+  }
+};
+
+
+// --- 辅助功能 ---
 // 前往赚取积分页面
 const goToEarnPoints = () => {
-    uni.navigateTo({
-        url: '/pages/my-account/my-account' // 假设赚取积分页面路径为 /pages/my-account/my-account
-    });
+  uni.navigateTo({ url: '/pages/my-account/my-account' });
 };
 
 // 计算属性：格式化申请好友语
 const formattedFriendRequestMessage = computed(() => {
-    return `您好！我是${myCompany.value}${myName.value}，目前在从事与您项目关联的${myWork.value}工作。我从聚一聚获得您的微信。请通过。`;
+  if (!currentUserInfo.value || !targetUserInfo.value) return '正在生成中...';
+  const myName = currentUserInfo.value.realName || currentUserInfo.value.nickname;
+  const myCompany = currentUserInfo.value.companyName || '我的公司';
+  const myWork = currentUserInfo.value.professionalTitle || '我的职位';
+  return `您好！我是${myCompany}的${myName}，目前在从事${myWork}工作。我从高伙猩球平台获得您的联系方式，希望可以认识一下。`;
 });
 
 // 复制申请好友语
 const copyFriendRequestMessage = () => {
-    uni.setClipboardData({
-        data: formattedFriendRequestMessage.value,
-        success: () => {
-            uni.showToast({
-                title: '复制成功！',
-                icon: 'success',
-                duration: 1500
-            });
-        },
-        fail: (err) => {
-            uni.showToast({
-                title: '复制失败，请重试',
-                icon: 'none',
-                duration: 1500
-            });
-            console.error('复制到剪贴板失败', err);
-        }
-    });
+  uni.setClipboardData({
+    data: formattedFriendRequestMessage.value,
+    success: () => uni.showToast({ title: '复制成功！', icon: 'success' }),
+    fail: () => uni.showToast({ title: '复制失败', icon: 'none' })
+  });
 };
-
-// 页面加载时可以模拟获取用户积分（实际项目中会从API获取）
-onLoad(() => {
-    // 模拟数据加载，实际应从后端获取
-    userPoints.wisdom = 5; // 假设用户有5个智米
-});
 </script>
 
 <style scoped>
+/* 在原有样式基础上，新增和修改以下样式 */
+.target-avatar-image {
+    width: 180rpx;
+    height: 180rpx;
+    border-radius: 50%;
+    margin-bottom: 30rpx;
+    border: 6rpx solid white;
+    box-shadow: 0 10rpx 30rpx rgba(0,0,0,0.2);
+}
+
+.loading-placeholder {
+    padding: 100rpx 0;
+}
+
+/* 其他样式保持不变... */
 /* 页面根容器样式，模拟 body 的布局和最大宽度 */
 .business-card-apply-page {
     background: linear-gradient(135deg, #f8f9fa, #e9ecef);

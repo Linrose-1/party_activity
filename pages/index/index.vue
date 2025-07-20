@@ -1,7 +1,8 @@
 <template>
 	<view class="login-container">
 		<view class="header">
-			<image class="logo" src="/static/logo.png" mode="aspectFit"></image>
+			<image class="logo" src="https://img.gofor.club/logo.png" mode="aspectFit"></image>
+			<!-- <image class="logo" src="/static/logo.png" mode="aspectFit"></image> -->
 			<text class="welcome-text">欢迎来到猩聚社</text>
 			<text class="slogan-text">链接商机，共创未来</text>
 		</view>
@@ -53,13 +54,16 @@
 
 		<view class="actions-wrapper">
 			<view class="agreement-section">
-				<checkbox-group @change="agreeChange">
-					<label>
-						<checkbox :checked="agreed" color="#FF7600" style="transform:scale(0.7)" />
-						<text class="agreement-text">我已阅读并同意<text class="link">《用户协议》</text>和<text
-								class="link">《隐私政策》</text></text>
-					</label>
-				</checkbox-group>
+				<!-- 1. Checkbox 本身，点击它自己来切换勾选状态 -->
+				<view @click="toggleAgreement" class="checkbox-wrapper">
+					<checkbox :checked="agreed" color="#FF7600" style="transform:scale(0.7)" />
+				</view>
+
+				<!-- 2. 文本和链接，现在与 Checkbox 分离，点击链接不会触发勾选 -->
+				<view class="agreement-text">
+					我已阅读并同意<text class="link" @click="skipToAgreement(0)">《用户协议》</text>和<text class="link"
+						@click="skipToAgreement(1)">《隐私政策》</text>
+				</view>
 			</view>
 
 			<!-- 【修改】登录按钮的点击事件统一为 handleLogin -->
@@ -76,7 +80,9 @@
 		computed,
 		onMounted
 	} from 'vue';
-	import { onLoad } from '@dcloudio/uni-app'; // 引入 onLoad
+	import {
+		onLoad
+	} from '@dcloudio/uni-app'; // 引入 onLoad
 	import request from '../../utils/request.js';
 
 	// --- 状态管理 ---
@@ -106,12 +112,17 @@
 	 */
 	const getLoginCode = async () => {
 		try {
-			const res = await uni.login({ provider: 'weixin' });
+			const res = await uni.login({
+				provider: 'weixin'
+			});
 			loginCode.value = res.code;
 			console.log('✅ 获取 loginCode 成功:', loginCode.value);
 		} catch (error) {
 			console.error('❌ 获取 loginCode 失败', error);
-			uni.showToast({ title: '登录准备失败，请重试', icon: 'none' });
+			uni.showToast({
+				title: '登录准备失败，请重试',
+				icon: 'none'
+			});
 		}
 	};
 
@@ -122,10 +133,16 @@
 		if (e.detail.code) {
 			console.log('✅ 获取手机号凭证 (phoneCode) 成功:', e.detail.code);
 			phoneCode.value = e.detail.code;
-			uni.showToast({ title: '手机号授权成功', icon: 'none' });
+			uni.showToast({
+				title: '手机号授权成功',
+				icon: 'none'
+			});
 		} else {
 			console.error('❌ 用户拒绝了手机号授权:', e.detail.errMsg);
-			uni.showToast({ title: '您拒绝了授权', icon: 'error' });
+			uni.showToast({
+				title: '您拒绝了授权',
+				icon: 'error'
+			});
 		}
 	};
 
@@ -138,7 +155,10 @@
 			success: (res) => {
 				console.log('✅ 获取用户信息成功:', res.userInfo);
 				userInfo.value = res.userInfo;
-				uni.showToast({ title: '昵称授权成功', icon: 'none' });
+				uni.showToast({
+					title: '昵称授权成功',
+					icon: 'none'
+				});
 			},
 			fail: (err) => {
 				console.error('❌ 用户拒绝了信息授权:', err);
@@ -146,11 +166,8 @@
 		});
 	};
 
-	/**
-	 * @description 处理同意协议的 checkbox 变化 (保持不变)
-	 */
-	const agreeChange = (e) => {
-		agreed.value = e.detail.value.length > 0;
+	const toggleAgreement = () => {
+		agreed.value = !agreed.value;
 	};
 
 	/**
@@ -160,14 +177,22 @@
 		if (isLoginDisabled.value) {
 			// 根据按钮状态给出更明确的提示
 			if (!agreed.value) {
-				uni.showToast({ title: '请先阅读并同意用户协议', icon: 'none' });
+				uni.showToast({
+					title: '请先阅读并同意用户协议',
+					icon: 'none'
+				});
 			} else if (!phoneCode.value) {
-				uni.showToast({ title: '请先授权获取手机号', icon: 'none' });
+				uni.showToast({
+					title: '请先授权获取手机号',
+					icon: 'none'
+				});
 			}
 			return;
 		}
 
-		uni.showLoading({ title: '正在登录...' });
+		uni.showLoading({
+			title: '正在登录...'
+		});
 
 		try {
 			// 构造请求体，完全匹配接口文档
@@ -185,7 +210,7 @@
 				method: 'POST',
 				data: payload
 			});
-			
+
 			uni.hideLoading();
 
 			// 判断登录是否成功
@@ -194,7 +219,10 @@
 				uni.setStorageSync('token', result.data.accessToken);
 				uni.setStorageSync('userId', result.data.userId);
 
-				uni.showToast({ title: '登录成功', icon: 'success' });
+				uni.showToast({
+					title: '登录成功',
+					icon: 'success'
+				});
 
 				// 登录成功后，跳转到首页或“我的”页面
 				uni.switchTab({
@@ -202,14 +230,20 @@
 				});
 			} else {
 				// 登录失败处理
-				uni.showToast({ title: result.error || '登录失败，请重试', icon: 'none' });
+				uni.showToast({
+					title: result.error || '登录失败，请重试',
+					icon: 'none'
+				});
 				// 登录失败后，loginCode会失效，需要重新获取
 				getLoginCode();
 			}
 		} catch (error) {
 			uni.hideLoading();
 			console.error('登录请求异常:', error);
-			uni.showToast({ title: '请求异常，请检查网络', icon: 'none' });
+			uni.showToast({
+				title: '请求异常，请检查网络',
+				icon: 'none'
+			});
 		}
 	};
 
@@ -219,6 +253,13 @@
 	  // ...
 	};
 	*/
+
+	const skipToAgreement = (type) => {
+		// 通过 url query 参数将要显示的 tab 索引传递过去
+		uni.navigateTo({
+			url: `/pages/user-agreement/user-agreement?tab=${type}`
+		});
+	};
 </script>
 
 <style lang="scss" scoped>
@@ -342,14 +383,26 @@
 		align-items: center;
 		margin-bottom: 40rpx;
 
+		/* 【新增】为 checkbox 创建一个稍大的点击区域，提升体验 */
+		.checkbox-wrapper {
+			display: flex;
+			align-items: center;
+			padding-right: 10rpx;
+			/* 与右侧文字的间距 */
+		}
+
 		.agreement-text {
 			font-size: 24rpx;
 			color: #999;
+			line-height: 1.5;
+			/* 增加行高，避免文字太挤 */
 		}
 
 		.link {
 			color: #FF7600;
 			text-decoration: underline;
+			/* 在链接之间添加一点点空间，视觉上更好看 */
+			margin: 0 4rpx;
 		}
 	}
 

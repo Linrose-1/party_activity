@@ -4,7 +4,7 @@
 		<view class="form-section">
 			<view class="section-title">基本信息</view>
 
-			<uni-forms>
+			<uni-forms :label-width="80">
 				<!-- activityTitle -->
 				<uni-forms-item label="活动标题" required>
 					<uni-easyinput v-model="form.activityTitle" placeholder="请输入活动标题" />
@@ -91,7 +91,7 @@
 		<view class="form-section">
 			<view class="section-title">活动详情</view>
 			<!-- activityDescription -->
-			<uni-forms-item label="活动介绍" required>
+			<uni-forms-item label="活动介绍" required :label-width="80">
 				<uni-easyinput type="textarea" autoHeight v-model="form.activityDescription" placeholder="请输入活动详细介绍" />
 			</uni-forms-item>
 
@@ -112,7 +112,7 @@
 		<view class="form-section">
 			<view class="section-title">组织者信息</view>
 
-			<uni-forms>
+			<uni-forms :label-width="80">
 				<!-- organizerUnitName -->
 				<uni-forms-item label="组织单位" required>
 					<uni-easyinput v-model="form.organizerUnitName" placeholder="请输入组织单位名称" />
@@ -124,7 +124,7 @@
 				</uni-forms-item>
 
 				<!-- organizerPaymentQrCodeUrl -->
-				<uni-forms-item label="收款码上传">
+				<uni-forms-item label="收款码上传" required>
 					<view class="cover-upload" @click="uploadCode">
 						<image v-if="form.organizerPaymentQrCodeUrl" :src="form.organizerPaymentQrCodeUrl"
 							mode="aspectFit"></image>
@@ -137,7 +137,7 @@
 		<view class="form-section">
 			<view class="section-title">商圈信息</view>
 			<!-- associatedStoreId -->
-			<uni-forms-item label="合作店铺" required>
+			<uni-forms-item label="合作店铺" required :label-width="80">
 				<view class="uni-list-cell-db">
 					<view @click="goToSelectShop" class="uni-input">
 						<text v-if="associatedStoreName">{{ associatedStoreName }}</text>

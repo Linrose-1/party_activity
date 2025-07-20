@@ -154,8 +154,8 @@
   margin-right: 5rpx;
 }
 .share-btn {
-  background: #f0f0f0;
-  color: #333;
+  background: #00A0E9;
+  color: #fff;
   margin-right: 10rpx;
 }
 .register-btn {

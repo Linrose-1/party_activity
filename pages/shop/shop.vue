@@ -7,12 +7,12 @@
 				<uni-icons type="search" size="20" color="#999"></uni-icons>
 				<input class="search-input" type="text" placeholder="搜索聚店名称或关键词" v-model="searchTerm"
 					@input="onSearchInput" />
-				<!-- 新增：搜索按钮 -->
 				<button class="search-btn" @click="handleSearchClick">搜索</button>
 			</view>
 
 			<scroll-view scroll-x class="filters-scroll">
 				<view class="filters">
+					<!-- v-for 动态渲染从接口获取的 filters -->
 					<button v-for="filter in filters" :key="filter.value" class="filter-btn"
 						:class="{ active: activeFilter === filter.value }" @click="selectFilter(filter.value)">
 						{{ filter.name }}
@@ -22,10 +22,11 @@
 		</view>
 
 		<!-- 2. 店铺列表区域 -->
-		<scroll-view class="store-list" scroll-y="true" @scrolltolower="loadMore">
+		<scroll-view class="store-list" scroll-y="true" @scrolltolower="loadMore" refresher-enabled="true"
+			:refresher-triggered="isRefreshing" @refresherrefresh="onPullDownRefresh">
 			<!-- 卡片列表 -->
-			<StoreCard v-for="store in filteredStores" :key="store.id" :store="store" @click="goToStoreDetail(store)" />
-
+			<!-- 修复：之前这里缺少了 @click-card 事件来处理跳转 -->
+			<StoreCard v-for="store in filteredStores" :key="store.id" :store="store" @click-card="goToStoreDetail" />
 
 			<!-- 加载状态提示 -->
 			<view v-if="loadingMore" class="load-more">
@@ -38,7 +39,7 @@
 			</view>
 
 			<!-- 空状态提示 -->
-			<view v-if="allStores.length === 0 && !loadingMore" class="empty-state">
+			<view v-if="allStores.length === 0 && !loadingMore && !isRefreshing" class="empty-state">
 				<uni-icons type="info" size="60" color="#ffd8c1"></uni-icons>
 				<text>暂无相关聚店</text>
 				<text>请尝试其他关键词或筛选条件</text>
@@ -47,14 +48,14 @@
 
 		<!-- 3. 底部操作栏 -->
 		<view class="action-bar">
-			<view class="action-btn share-btn" @click="shareStore">
-				<uni-icons type="redo" size="20" color="#333"></uni-icons>
+			<button class="action-btn share-btn" @click="shareStore">
+				<uni-icons type="redo" size="20" color="#fff"></uni-icons>
 				<text>聚店推荐</text>
-			</view>
-			<view class="action-btn register-btn" @click="applyToList">
+			</button>
+			<button class="action-btn register-btn" open-type="contact">
 				<uni-icons type="plus-filled" size="20" color="#fff"></uni-icons>
 				<text>申请上榜</text>
-			</view>
+			</button>
 		</view>
 	</view>
 </template>
@@ -66,35 +67,41 @@
 		onMounted,
 		watch
 	} from 'vue';
+	import {
+		onShow
+	} from '@dcloudio/uni-app';
 	import StoreCard from '../../components/StoreCard.vue';
 	import request from '../../utils/request.js';
 
 	const searchTerm = ref('');
 	const activeFilter = ref('all');
 
-	// 分页和列表状态
+	// --- 状态变量 ---
 	const allStores = ref([]);
 	const loadingMore = ref(false);
 	const hasMore = ref(true);
 	const pageNo = ref(1);
-	const pageSize = 5;
-
-	// 新增：用于存储用户位置信息的响应式变量
+	const pageSize = 10;
+	const isRefreshing = ref(false);
 	const userLocation = ref(null);
+	const filters = ref([{
+		name: '全部',
+		value: 'all'
+	}]);
+	// [新增] 一个标志位，防止 onShow 和 onMounted 中的位置获取逻辑冲突
+	const isLocationLoaded = ref(false);
 
-	// 修改：getStoreList 方法
-	// 修改后的 getStoreList 函数
+	/**
+	 * 获取店铺列表
+	 */
 	const getStoreList = async () => {
-		// 如果正在加载或没有更多数据了，则直接返回
 		if (loadingMore.value || !hasMore.value) {
 			return;
 		}
-
-		// 如果还没有获取到位置信息，则不发起请求
+		// [核心修改] 这里的判断依然保留，作为最后一道防线
 		if (!userLocation.value) {
-			console.log('等待位置信息获取...');
-			allStores.value = [];
-			hasMore.value = false; // 避免触发loadMore
+			console.log('getStoreList 被调用，但位置信息依然为空，已中断。');
+			isRefreshing.value = false;
 			return;
 		}
 
@@ -104,24 +111,24 @@
 			pageNo: pageNo.value,
 			pageSize: pageSize,
 			storeName: searchTerm.value.trim(),
-			// longitude: userLocation.value.longitude, 
-			// latitude: userLocation.value.latitude,
+			longitude: userLocation.value.longitude,
+			latitude: userLocation.value.latitude,
 		};
 
-		// --- 修改开始 ---
+		if (activeFilter.value !== 'all') {
+			params.category = activeFilter.value;
+		}
 
-		// 1. 修改变量名，因为返回的不再是列表，而是一个包含列表的对象
 		const {
-			data: result, // 将 newList 重命名为 result，因为它现在是 { list: [], total: 6 }
+			data: result,
 			error
 		} = await request('/app-api/member/store/list', {
 			method: 'GET',
 			data: params
 		});
 
-		console.log("API Response:", result) // 打印完整的响应对象
-
 		loadingMore.value = false;
+		isRefreshing.value = false;
 
 		if (error) {
 			console.error('获取店铺列表失败:', error);
@@ -132,16 +139,12 @@
 			return;
 		}
 
-		// 2. 从 result 对象中获取真正的列表数组
-		//    并进行安全检查，防止 result 或 result.list 为 null 或 undefined
 		const newList = result ? result.list : [];
 		const total = result ? result.total : 0;
 
 		if (newList && newList.length > 0) {
-			// 3. 使用 newList (即 result.list) 来更新 allStores
 			allStores.value = pageNo.value === 1 ? newList : [...allStores.value, ...newList];
 			pageNo.value++;
-			// 4. (推荐) 使用 total 来判断是否还有更多数据，这比判断当前页数量更准确
 			hasMore.value = allStores.value.length < total;
 		} else {
 			if (pageNo.value === 1) {
@@ -149,86 +152,115 @@
 			}
 			hasMore.value = false;
 		}
-		// --- 修改结束 ---
 	};
 
-	// 修改：页面挂载时的逻辑
-	onMounted(() => {
-		// 1. 尝试从本地缓存中获取位置信息
+	/**
+	 * [核心修改] 封装一个获取位置并加载数据的主函数
+	 */
+	const initData = () => {
 		const storedLocation = uni.getStorageSync('userLocation');
-
 		if (storedLocation) {
-			// 2. 如果缓存中存在，则直接使用
-			console.log('从缓存加载位置信息:', storedLocation);
+			console.log('从缓存加载位置信息');
 			userLocation.value = storedLocation;
-			// 直接获取店铺列表
-			getStoreList();
+			isLocationLoaded.value = true;
+			// 有缓存位置，直接刷新列表
+			handleRefresh();
 		} else {
-			// 3. 如果缓存中不存在，则调用API获取
-			console.log('缓存中无位置信息，开始请求授权...');
+			console.log('缓存中无位置，开始请求...');
 			uni.getLocation({
-				type: 'gcj02', // 国测局坐标，适用于大多数国内地图服务
+				type: 'gcj02',
 				success: (res) => {
-					console.log('成功获取位置信息:', res);
+					console.log('成功获取新位置信息');
 					const location = {
 						latitude: res.latitude,
 						longitude: res.longitude
 					};
-					// 将获取到的位置信息存入响应式变量
 					userLocation.value = location;
-					// 将位置信息存入本地缓存，下次使用
 					uni.setStorageSync('userLocation', location);
-					// 获取店铺列表
-					getStoreList();
+					isLocationLoaded.value = true;
+					// [关键] 在获取位置成功的回调里，才去刷新列表
+					handleRefresh();
 				},
 				fail: (err) => {
 					console.error('获取位置信息失败:', err);
+					isLocationLoaded.value = true; // 标记为已处理，防止 onShow 重复调用
 					uni.showModal({
 						title: '定位失败',
-						content: '无法获取您的位置信息，将无法为您推荐附近的聚店。请检查系统定位服务是否开启，并允许应用获取位置权限。',
+						content: '无法获取您的位置信息，将无法为您推荐附近的聚店。',
 						showCancel: false,
 						success: () => {
-							// 用户拒绝后，虽然没有位置，但还是可以尝试加载一个不依赖位置的列表
-							// 这里我们选择显示空状态，因为API需要经纬度
-							// 如果你的API支持无经纬度查询，可以在这里再次调用getStoreList
-							allStores.value = [];
-							hasMore.value = false;
+							// 定位失败，列表将显示为空状态
+							handleRefresh();
 						}
 					});
 				}
 			});
 		}
-	});
-
-	const loadMore = () => {
-		// 确保有位置信息才加载更多
-		if (userLocation.value) {
-			getStoreList();
+	};
+	
+	/**
+	 * 获取店铺分类
+	 */
+	const getShopType = async () => {
+		const { data, error } = await request('/app-api/system/dict-data/type', {
+			method: 'GET',
+			data: { type: "member_store_category" }
+		});
+		if (error) { return; }
+		if (data && data.length > 0) {
+			const dynamicFilters = data.map(item => ({ name: item.label, value: item.value }));
+			filters.value = [{ name: '全部', value: 'all' }, ...dynamicFilters];
 		}
 	};
+	
+	/**
+	 * onMounted: 仅执行一次性的初始化，比如获取分类
+	 */
+	onMounted(() => {
+		getShopType();
+	});
+
+	/**
+	 * onShow: 每次页面显示时检查数据是否需要加载
+	 */
+	onShow(() => {
+		// 如果位置信息还未加载过（首次进入或权限被重置后），则启动初始化流程
+		if (!isLocationLoaded.value) {
+			initData();
+		}
+	});
+
+	// --- 以下为辅助函数和监听器，逻辑基本不变 ---
 
 	const handleRefresh = () => {
 		pageNo.value = 1;
 		allStores.value = [];
 		hasMore.value = true;
-		// 确保有位置信息才刷新
-		if (userLocation.value) {
-			getStoreList();
-		}
+		getStoreList();
+	};
+	
+	const loadMore = () => {
+		getStoreList();
+	};
+	
+	const onPullDownRefresh = () => {
+		isRefreshing.value = true;
+		handleRefresh();
 	};
 
-	watch(activeFilter, () => {
-		handleRefresh();
+	watch(activeFilter, (newValue, oldValue) => {
+		// 只有在值真正改变时才刷新，避免 onShow 触发不必要的刷新
+		if(newValue !== oldValue) {
+			handleRefresh();
+		}
 	});
 
 	const filteredStores = computed(() => allStores.value);
 
 	let searchTimer = null;
-
 	const onSearchInput = () => {
 		clearTimeout(searchTimer);
 		searchTimer = setTimeout(() => {
-			console.log(`搜索关键词: ${searchTerm.value}`);
 			handleRefresh();
 		}, 500);
 	};
@@ -238,55 +270,19 @@
 		handleRefresh();
 	};
 
-
-	// --- 以下为其余辅助函数，保持不变 ---
-
-	const filters = ref([{
-			name: '全部',
-			value: 'all'
-		},
-		{
-			name: '咖啡',
-			value: 'coffee'
-		},
-		{
-			name: '茶馆',
-			value: 'tea-house'
-		},
-		{
-			name: '美食',
-			value: 'food'
-		},
-		{
-			name: '酒吧',
-			value: 'bar'
-		},
-		{
-			name: '其他',
-			value: 'other'
-		},
-	]);
-
 	const selectFilter = (filterValue) => {
 		activeFilter.value = filterValue;
 	};
 
 	const goToStoreDetail = (store) => {
 		uni.navigateTo({
-			url: `/pages/store/detail?id=${store.id}`
+			url: `/pages/shop-detail/shop-detail?id=${store.id}`
 		});
 	};
 
 	const shareStore = () => {
 		uni.navigateTo({
 			url: '/pages/shop-recommend/shop-recommend'
-		})
-	};
-
-	const applyToList = () => {
-		uni.showToast({
-			title: '申请上榜',
-			icon: 'none'
 		});
 	};
 </script>
@@ -465,13 +461,14 @@
 	}
 
 	.share-btn {
-		background: #f0f0f0;
-		color: #333;
+		background: #00A0E9;
+		color: #fff;
 		margin-right: 10rpx;
 	}
 
 	.register-btn {
 		background: linear-gradient(to right, #FF8C00, #FF6B00);
 		color: white;
+		// font-size: 32rpx
 	}
 </style>

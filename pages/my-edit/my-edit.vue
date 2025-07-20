@@ -61,6 +61,10 @@
 					<uni-forms-item label="手机号码" name="mobile">
 						<uni-easyinput class="phone-text" v-model="form.mobile" :disabled="true" />
 					</uni-forms-item>
+					
+					<uni-forms-item label="邮箱" name="contactEmail">
+						<uni-easyinput class="phone-text" v-model="form.contactEmail"/>
+					</uni-forms-item>
 
 					<!-- 微信二维码 -->
 					<uni-forms-item label="微信二维码" name="wechatQrCodeUrl">
@@ -109,6 +113,7 @@
 		professionalTitle: '',
 		companyName: '',
 		mobile: '',
+		contactEmail:'',
 		wechatQrCodeUrl: '',
 		personalBio: '',
 		latitude: null,

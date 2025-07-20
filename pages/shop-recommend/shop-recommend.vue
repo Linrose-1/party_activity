@@ -221,7 +221,7 @@
 		:deep(.uni-easyinput) {
 			border: 1rpx solid $border;
 			border-radius: 8rpx;
-			padding: 10rpx 0;
+			padding: 10rpx;
 			margin: 10rpx 0;
 
 			&.is-input-border {
@@ -244,6 +244,7 @@
 
 			.placeholder {
 				color: #939393;
+				font-size: 24rpx;
 			}
 		}
 	}

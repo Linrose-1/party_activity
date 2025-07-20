@@ -43,7 +43,7 @@
 		<view class="card-section">
 			<view class="section-header">
 				<text class="section-title-main">我的名片</text>
-				<text class="view-all" @tap="onViewDetail">查看 ›</text>
+				<!-- <text class="view-all" @tap="onViewDetail">查看 ›</text> -->
 			</view>
 
 			<view class="ai-card">
@@ -79,8 +79,8 @@
 						<image class="qrcode-img" :src="userInfo.wechatQrCodeUrl || '../../static/images/default-qrcode.png'" />
 					</view>
 					<view class="qrcode-actions">
-						<button class="qrcode-btn" @tap="saveQrcode">保存</button>
-						<button class="qrcode-btn" @tap="shareQrcode">分享</button>
+						<!-- <button class="qrcode-btn" @tap="saveQrcode">保存</button> -->
+						<button class="qrcode-btn" @tap="onViewDetail">分享名片</button>
 					</view>
 				</view>
 			</view>
@@ -114,9 +114,18 @@
 		onMounted,
 		computed // 引入 computed
 	} from 'vue'
+	import { onLoad,onShow } from '@dcloudio/uni-app'; // 引入 onLoad
 	import request from '../../utils/request.js';
 
 	onMounted(() => {
+		getUserInfo();
+	});
+	
+	onLoad(() => {
+		getUserInfo();
+	});
+	
+	onShow(() => {
 		getUserInfo();
 	});
 
@@ -527,14 +536,14 @@
 	.qrcode-actions {
 		display: flex;
 		justify-content: center;
-		gap: 50rpx;
+		/* gap: 50rpx; */
 		margin: 20rpx 0;
 	}
 
 	.qrcode-btn {
 		background-color: #FF8F3D;
 		color: white;
-		padding: 10rpx 100rpx;
+		padding: 10rpx 150rpx;
 		border-radius: 30rpx;
 		font-size: 24rpx;
 		cursor: pointer;

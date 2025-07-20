@@ -3,17 +3,20 @@ const common_vendor = require("../../common/vendor.js");
 const utils_request = require("../../utils/request.js");
 if (!Array) {
   const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
-  _easycom_uni_icons2();
+  const _easycom_uni_popup2 = common_vendor.resolveComponent("uni-popup");
+  (_easycom_uni_icons2 + _easycom_uni_popup2)();
 }
 const _easycom_uni_icons = () => "../../uni_modules/uni-icons/components/uni-icons/uni-icons.js";
+const _easycom_uni_popup = () => "../../uni_modules/uni-popup/components/uni-popup/uni-popup.js";
 if (!Math) {
-  (MyCard + _easycom_uni_icons)();
+  (_easycom_uni_icons + MyCard + _easycom_uni_popup)();
 }
 const MyCard = () => "../../components/MyCard.js";
 const _sfc_main = {
   __name: "my-businessCard",
   setup(__props) {
     const userInfo = common_vendor.ref(null);
+    const sharePopup = common_vendor.ref(null);
     common_vendor.onMounted(() => {
       fetchUserInfo();
     });
@@ -27,99 +30,109 @@ const _sfc_main = {
       }
       userInfo.value = data;
     };
-    const formattedInfoItems = common_vendor.computed(() => {
-      if (!userInfo.value) {
+    const formattedContactInfo = common_vendor.computed(() => {
+      if (!userInfo.value)
         return [];
-      }
       return [
-        {
-          icon: "staff",
-          label: "职业",
-          value: userInfo.value.professionalTitle || "未设置"
-        },
-        {
-          icon: "shop",
-          label: "公司/机构",
-          value: userInfo.value.companyName || "未设置"
-        },
-        {
-          icon: "phone",
-          label: "联系方式",
-          value: userInfo.value.mobile || "未设置"
-        },
-        {
-          icon: "email",
-          label: "邮箱",
-          value: userInfo.value.contactEmail || "未设置"
-        },
-        {
-          icon: "info",
-          label: "个人简介",
-          value: userInfo.value.personalBio || "暂无简介"
-        }
+        { icon: "phone-filled", value: userInfo.value.mobile || "未设置手机" },
+        { icon: "email-filled", value: userInfo.value.contactEmail || "未设置邮箱" },
+        { icon: "location-filled", value: userInfo.value.locationAddress || "未设置地址" }
       ];
     });
-    const shareCard = () => {
+    const goToEdit = () => {
+      common_vendor.index.navigateTo({ url: "/pages/my-edit/my-edit" });
+    };
+    common_vendor.onShareAppMessage((res) => {
+      common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:100", "触发了分享给好友", res);
       if (!userInfo.value) {
-        common_vendor.index.showToast({ title: "请等待信息加载完成", icon: "none" });
+        return {
+          title: "快来看看我的专业电子名片！"
+        };
+      }
+      return {
+        title: `这是 ${userInfo.value.realName || userInfo.value.nickname} 的名片`,
+        path: `/pages/my-businessCard/my-businessCard?id=${userInfo.value.id}`,
+        // 必须是小程序内的页面路径，带上参数
+        imageUrl: userInfo.value.avatar
+        // 自定义分享图片
+      };
+    });
+    common_vendor.onShareTimeline(() => {
+      common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:116", "触发了分享到朋友圈");
+      if (!userInfo.value) {
+        return {
+          title: "快来看看我的专业电子名片！"
+        };
+      }
+      return {
+        title: `这是 ${userInfo.value.realName || userInfo.value.nickname} 的名片`,
+        query: `id=${userInfo.value.id}`,
+        // 分享到朋友圈的参数
+        imageUrl: userInfo.value.avatar
+      };
+    });
+    const openSharePopup = () => {
+      if (!userInfo.value) {
+        common_vendor.index.showToast({ title: "信息加载中，请稍候", icon: "none" });
         return;
       }
-      common_vendor.index.share({
-        provider: "weixin",
-        scene: "WXSceneSession",
-        // 分享到微信好友
-        type: 0,
-        // 分享图文
-        href: "https://example.com/card/" + userInfo.value.id,
-        // 分享的链接，最好替换成真实地址
-        title: `这是 ${userInfo.value.realName || userInfo.value.nickname} 的名片`,
-        summary: `我正在使用XXX，这是我的名片，请惠存。`,
-        imageUrl: userInfo.value.avatar,
-        // 分享的缩略图
-        success: function(res) {
-          common_vendor.index.showToast({ title: "分享成功", icon: "success" });
-        },
-        fail: function(err) {
-          common_vendor.index.__f__("error", "at pages/my-businessCard/my-businessCard.vue:125", "分享失败:", JSON.stringify(err));
-          common_vendor.index.showToast({ title: "分享失败", icon: "none" });
-        }
-      });
+      sharePopup.value.open();
     };
-    const goToEdit = () => {
-      common_vendor.index.navigateTo({
-        url: "/pages/my-edit/my-edit"
-        // 请确保这个路径是您的编辑资料页面路径
+    const closeSharePopup = () => {
+      sharePopup.value.close();
+    };
+    const guideShareToMoments = () => {
+      closeSharePopup();
+      common_vendor.index.showToast({
+        title: "请点击右上角「...」，然后选择「分享到朋友圈」",
+        icon: "none",
+        duration: 3e3
       });
     };
     return (_ctx, _cache) => {
+      var _a, _b;
       return common_vendor.e({
-        a: userInfo.value
-      }, userInfo.value ? {
-        b: common_vendor.p({
-          avatar: userInfo.value.avatar,
-          name: userInfo.value.realName || userInfo.value.nickname,
-          title: userInfo.value.professionalTitle,
-          location: userInfo.value.locationAddress,
-          infoItems: formattedInfoItems.value,
-          inviteCode: userInfo.value.shardCode,
-          qrCodeUrl: userInfo.value.wechatQrCodeUrl,
-          showQrCode: !!userInfo.value.wechatQrCodeUrl
-        })
-      } : {}, {
-        c: userInfo.value
-      }, userInfo.value ? {
-        d: common_vendor.o(goToEdit)
-      } : {}, {
-        e: common_vendor.p({
-          type: "share",
-          size: "20",
+        a: common_vendor.p({
+          type: "undo-filled",
+          size: "24",
           color: "#fff"
         }),
-        f: common_vendor.o(shareCard)
+        b: common_vendor.o(openSharePopup),
+        c: userInfo.value
+      }, userInfo.value ? {
+        d: common_vendor.p({
+          avatar: userInfo.value.avatar,
+          name: userInfo.value.realName || userInfo.value.nickname,
+          ["pinyin-name"]: (_a = userInfo.value.topUpLevel) == null ? void 0 : _a.name,
+          title: (_b = userInfo.value.level) == null ? void 0 : _b.name,
+          ["company-name"]: userInfo.value.companyName,
+          department: "",
+          ["full-company-name"]: userInfo.value.professionalTitle,
+          ["contact-info"]: formattedContactInfo.value,
+          ["show-user-qr-code"]: !!userInfo.value.wechatQrCodeUrl,
+          ["user-we-chat-qr-code-url"]: userInfo.value.wechatQrCodeUrl,
+          ["platform-qr-code-url"]: "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=platform-info",
+          ["logo-url"]: "https://gitee.com/image_store/repo_1/raw/master/go-for-planet-logo.png"
+        })
+      } : {}, {
+        e: userInfo.value
+      }, userInfo.value ? {
+        f: common_vendor.o(goToEdit)
+      } : {}, {
+        g: common_vendor.o(guideShareToMoments),
+        h: common_vendor.o(closeSharePopup),
+        i: common_vendor.sr(sharePopup, "30894501-2", {
+          "k": "sharePopup"
+        }),
+        j: common_vendor.p({
+          type: "bottom",
+          ["background-color"]: "#fff"
+        })
       });
     };
   }
 };
 const MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["__scopeId", "data-v-30894501"]]);
+_sfc_main.__runtimeHooks = 6;
 wx.createPage(MiniProgramPage);
 //# sourceMappingURL=../../../.sourcemap/mp-weixin/pages/my-businessCard/my-businessCard.js.map

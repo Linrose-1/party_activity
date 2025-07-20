@@ -18,47 +18,51 @@ const _sfc_main = {
   },
   setup(__props) {
     const props = __props;
+    const formattedDistance = common_vendor.computed(() => {
+      if (typeof props.store.distance !== "number") {
+        return null;
+      }
+      const distanceAsInteger = Math.floor(props.store.distance);
+      return `${distanceAsInteger}km`;
+    });
     const navigateToStoreDetail = () => {
       common_vendor.index.navigateTo({
-        url: "/pages/shop-detail/shop-detail"
+        // 从 props.store.id 获取 ID，并拼接到 URL 中
+        url: `/pages/shop-detail/shop-detail?id=${props.store.id}`
       });
-    };
-    const navigateToMap = () => {
-      common_vendor.index.showToast({
-        title: `即将打开地图导航到 ${props.store.name}`,
-        icon: "none"
-      });
-      common_vendor.index.__f__("log", "at components/StoreCard.vue:51", `即将打开地图导航到 ${props.store.name}`);
     };
     return (_ctx, _cache) => {
-      return {
+      return common_vendor.e({
         a: common_vendor.p({
           type: __props.store.icon,
           size: "20",
           color: "#FF6B00"
         }),
         b: common_vendor.t(__props.store.storeName),
-        c: common_vendor.p({
+        c: formattedDistance.value
+      }, formattedDistance.value ? {
+        d: common_vendor.p({
           type: "location-filled",
           size: "16",
           color: "#FF6B00"
         }),
-        d: common_vendor.t(__props.store.distance),
-        e: common_vendor.t(__props.store.storeDescription),
-        f: common_vendor.f(__props.store.tags, (tag, k0, i0) => {
+        e: common_vendor.t(formattedDistance.value)
+      } : {}, {
+        f: common_vendor.t(__props.store.storeDescription),
+        g: common_vendor.f(__props.store.tags, (tag, k0, i0) => {
           return {
             a: common_vendor.t(tag),
             b: tag
           };
         }),
-        g: common_vendor.p({
+        h: common_vendor.p({
           type: "map-filled",
           size: "16",
           color: "#fff"
         }),
-        h: common_vendor.o(navigateToMap),
-        i: common_vendor.o(navigateToStoreDetail)
-      };
+        i: common_vendor.o(navigateToStoreDetail),
+        j: common_vendor.o(navigateToStoreDetail)
+      });
     };
   }
 };

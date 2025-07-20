@@ -1,14 +1,7 @@
 
-	/* ... 此处省略所有<style>内容，保持原样即可 ... */
-	
-	/* ==================== Style修改点 1: 为子评论增加缩进样式 ==================== */
-.comment.is-reply.data-v-361e9b2c {
-		margin-left: 80rpx; /* 根据头像大小和间距调整，实现视觉上的缩进 */
-		width: calc(100% - 80rpx);
-}
-
-
-	/* 以下为原有的样式 */
+	/* ==================================================================
+	 * 页面主体与全局样式
+	 * ================================================================== */
 .business-opportunity-detail-app.data-v-361e9b2c {
 		background-color: #f8f9fa;
 		color: #333;
@@ -18,12 +11,22 @@
 		min-height: 100vh;
 		display: flex;
 		flex-direction: column;
-		padding-bottom: 120rpx;
 }
 .container.data-v-361e9b2c {
-		/* 为了让页面内容不被底部评论框遮挡 */
+		/* 为了让页面内容不被底部评论框遮挡，可以根据 add-comment 的高度动态调整 */
 		padding-bottom: 140rpx;
 }
+.comments-disabled-message.data-v-361e9b2c {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		padding: 40rpx 0;
+		color: #999;
+}
+
+	/* ==================================================================
+	 * 商机卡片 (.opportunity-card)
+	 * ================================================================== */
 .opportunity-card.data-v-361e9b2c {
 		background: white;
 		border-radius: 36rpx;
@@ -45,17 +48,16 @@
 		border-top-left-radius: 36rpx;
 		border-bottom-left-radius: 36rpx;
 }
+
+	/* --- 作者信息 --- */
 .author-info.data-v-361e9b2c {
 		display: flex;
 		align-items: center;
 		margin-bottom: 36rpx;
 }
-
-	/* ==================== Style修改点 1: 调整作者信息布局 ==================== */
 .author-avatar-wrapper.data-v-361e9b2c {
 		position: relative;
 		flex-shrink: 0;
-		/* 防止被挤压 */
 }
 .author-avatar.data-v-361e9b2c {
 		width: 112rpx;
@@ -93,7 +95,6 @@
 .author-details.data-v-361e9b2c {
 		margin-left: 30rpx;
 		flex: 1;
-		/* 占据剩余空间，将关注按钮推到最右侧 */
 }
 .author-name.data-v-361e9b2c {
 		font-weight: 700;
@@ -110,8 +111,6 @@
 .post-time uni-icons.data-v-361e9b2c {
 		margin-right: 10rpx;
 }
-
-	/* ==================== Style修改点 2: 增加关注按钮样式 (与列表页保持一致) ==================== */
 .follow-button.data-v-361e9b2c {
 		background-color: #FF6A00;
 		color: white;
@@ -124,7 +123,6 @@
 		white-space: nowrap;
 		-webkit-appearance: none;
 		line-height: 1.5;
-		/* 调整行高保证文字居中 */
 		height: auto;
 		display: flex;
 		align-items: center;
@@ -132,7 +130,6 @@
 		transition: all 0.2s ease;
 		box-shadow: 0 2rpx 8rpx rgba(255, 106, 0, 0.2);
 		flex-shrink: 0;
-		/* 防止按钮被挤压变形 */
 }
 .follow-button.data-v-361e9b2c::after {
 		border: none;
@@ -146,8 +143,10 @@
 		color: #666;
 		box-shadow: none;
 }
+
+	/* --- 商机内容、图片、标签 --- */
 .opportunity-content.data-v-361e9b2c {
-		margin: 40rpx 0;
+		margin: 20rpx 0;
 		font-size: 32rpx;
 		color: #444;
 		line-height: 1.7;
@@ -188,10 +187,11 @@
 		font-weight: 500;
 		border: 2rpx solid rgba(255, 106, 0, 0.2);
 }
+
+	/* --- 交互按钮区 --- */
 .interactions.data-v-361e9b2c {
 		display: flex;
 		justify-content: space-around;
-		/* 改为 space-around 使其分布更均匀 */
 		border-top: 2rpx solid #f0f0f0;
 		padding-top: 36rpx;
 		margin-top: 30rpx;
@@ -215,7 +215,9 @@
 		color: #FF6A00;
 }
 
-	/* 评论区样式 (保持不变) */
+	/* ==================================================================
+	 * 评论区 (.comments-section)
+	 * ================================================================== */
 .comments-section.data-v-361e9b2c {
 		background: white;
 		border-radius: 36rpx;
@@ -258,6 +260,12 @@
 		border-bottom: none;
 		margin-bottom: 0;
 		padding-bottom: 0;
+}
+	
+	/* 子评论的缩进样式 */
+.comment.is-reply.data-v-361e9b2c {
+		margin-left: 20rpx;
+		width: calc(100% - 20rpx);
 }
 .comment-avatar.data-v-361e9b2c {
 		width: 92rpx;
@@ -324,9 +332,6 @@
 .comment-action.data-v-361e9b2c:active {
 		color: #FF6A00;
 }
-.comment-action.active.data-v-361e9b2c {
-		color: #e74c3c;
-}
 .no-comments-message.data-v-361e9b2c {
 		text-align: center;
 		padding: 40rpx 0;
@@ -334,7 +339,11 @@
 		font-size: 28rpx;
 }
 
-	/* 底部评论框样式 (保持不变) */
+	/* ==================================================================
+	 * 浮动与弹窗元素 (底部评论框, 分享弹窗, 引导蒙层)
+	 * ================================================================== */
+
+	/* --- 底部固定评论框 --- */
 .add-comment.data-v-361e9b2c {
 		position: fixed;
 		bottom: 0;
@@ -343,12 +352,12 @@
 		display: flex;
 		align-items: center;
 		background: white;
-		padding: 20rpx 30rpx; /* 调整左右边距 */
+		padding: 20rpx 30rpx;
 		padding-bottom: calc(20rpx + env(safe-area-inset-bottom));
 		box-shadow: 0 -10rpx 30rpx rgba(0, 0, 0, 0.05);
 		border-top: 2rpx solid #e0e0e0;
 		z-index: 99;
-		box-sizing: border-box; /* 确保 padding 不会撑大宽度 */
+		box-sizing: border-box;
 }
 .add-comment input.data-v-361e9b2c {
 		flex-grow: 1;
@@ -359,7 +368,7 @@
 		font-size: 30rpx;
 		outline: none;
 		transition: all 0.3s;
-		margin-right: 24rpx; /* 增加与按钮的间距 */
+		margin-right: 24rpx;
 }
 .add-comment input.data-v-361e9b2c:focus {
 		border-color: #FF6A00;
@@ -377,7 +386,7 @@
 		transition: background 0.3s;
 		box-shadow: 0 6rpx 20rpx rgba(255, 106, 0, 0.3);
 		-webkit-appearance: none;
-		flex-shrink: 0; /* 防止按钮被压缩 */
+		flex-shrink: 0;
 }
 .add-comment button.data-v-361e9b2c::after {
 		border: none;
@@ -385,3 +394,109 @@
 .add-comment button.data-v-361e9b2c:active {
 		background: #e05a00;
 }
+
+	/* --- 自定义分享弹窗 --- */
+.share-popup-content.data-v-361e9b2c {
+		padding: 30rpx;
+		padding-bottom: calc(30rpx + env(safe-area-inset-bottom));
+		background-color: #fff;
+		border-top-left-radius: 24rpx;
+		border-top-right-radius: 24rpx;
+}
+.share-popup-title.data-v-361e9b2c {
+		text-align: center;
+		font-size: 32rpx;
+		font-weight: bold;
+		color: #333;
+		margin-bottom: 40rpx;
+}
+.share-title-editor.data-v-361e9b2c {
+		display: flex;
+		align-items: center;
+		background-color: #f7f7f7;
+		border-radius: 16rpx;
+		padding: 20rpx;
+		margin-bottom: 40rpx;
+}
+.editor-label.data-v-361e9b2c {
+		font-size: 28rpx;
+		color: #666;
+		margin-right: 20rpx;
+}
+.editor-input.data-v-361e9b2c {
+		flex: 1;
+		font-size: 28rpx;
+		color: #333;
+}
+.share-channels.data-v-361e9b2c {
+		display: flex;
+		justify-content: space-around;
+		padding: 20rpx 0;
+		margin-bottom: 40rpx;
+}
+.share-channel-btn.data-v-361e9b2c {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		background-color: transparent;
+		padding: 0;
+		margin: 0;
+		border: none;
+		line-height: 1.5;
+}
+.share-channel-btn.data-v-361e9b2c::after {
+		border: none;
+}
+.channel-icon-image.data-v-361e9b2c {
+		width: 60rpx;
+		height: 60rpx;
+}
+.share-channel-btn text.data-v-361e9b2c {
+		font-size: 24rpx;
+		color: #666;
+		margin-top: 10rpx;
+}
+.share-popup-cancel.data-v-361e9b2c {
+		width: 100%;
+		height: 90rpx;
+		line-height: 90rpx;
+		text-align: center;
+		background-color: #f0f0f0;
+		border-radius: 45rpx;
+		font-size: 30rpx;
+		color: #333;
+}
+	
+	/* --- 朋友圈引导蒙层 --- */
+.timeline-guide-mask.data-v-361e9b2c {
+		position: fixed;
+		top: 0;
+		left: 0;
+		width: 100vw;
+		height: 100vh;
+		background-color: rgba(0, 0, 0, 0.7);
+		z-index: 1000;
+		display: flex;
+		flex-direction: column;
+		align-items: flex-end;
+		padding-right: 20rpx;
+		box-sizing: border-box;
+}
+.guide-arrow.data-v-361e9b2c {
+		width: 150rpx;
+		height: 150rpx;
+		margin-top: 10rpx;
+		margin-right: 20rpx;
+}
+.guide-text.data-v-361e9b2c {
+		color: #fff;
+		font-size: 32rpx;
+		font-weight: bold;
+		text-align: center;
+		margin-top: 20rpx;
+}
+.guide-text text.data-v-361e9b2c {
+		display: block;
+		margin-bottom: 10rpx;
+}
+

@@ -1,52 +1,34 @@
 <template>
   <view class="page-container">
-    
+    <!-- 顶部分页 Tab -->
+    <view class="tabs-container">
+      <view
+        class="tab-item"
+        :class="{ active: currentTab === 0 }"
+        @click="switchTab(0)"
+      >
+        用户协议
+      </view>
+      <view
+        class="tab-item"
+        :class="{ active: currentTab === 1 }"
+        @click="switchTab(1)"
+      >
+        隐私政策
+      </view>
+    </view>
+
     <!-- 协议内容滚动区域 -->
     <scroll-view scroll-y class="content-scroll">
-      <view class="agreement-content">
-        <h1>用户协议</h1>
-        <p>欢迎您使用 [您的应用/公司名称]（以下简称“我们”或“本平台”）的服务！在使用我们的服务前，请您务必仔细阅读并理解本《用户协议》（以下简称“本协议”）中规定的所有条款和条件。一旦您访问、浏览或使用我们的服务，即表示您已阅读、理解并同意接受本协议的全部内容。</p>
-
-        <h2>一、服务概述</h2>
-        <p>本平台致力于为您提供一个便捷的商机信息发布、浏览与交流平台。具体服务内容可能包括但不限于商机信息的发布、浏览、搜索、收藏，以及用户间的私信沟通等功能。您理解并同意，本服务仅提供信息平台，您在使用过程中产生的任何纠纷、责任均由您与第三方自行承担。</p>
-
-        <h2>二、用户账号</h2>
-        <p>1. 注册：您在使用本服务前可能需要注册一个账号。您承诺提供真实、准确、完整及最新的注册信息（包括但不限于手机号、姓名等），并对您所提供的信息的真实性、合法性、有效性承担全部责任。</p>
-        <p>2. 保管：您应对您的账号和密码负有妥善保管的责任。您同意在任何情况下不向他人透露您的账号或密码，并对使用该账号所进行的所有活动和事件负全部责任。</p>
-        <p>3. 违规处理：若发现您的账号存在异常活动或违反本协议的情况，我们有权采取限制、暂停或终止使用该账号的措施。</p>
-
-        <h2>三、用户行为规范</h2>
-        <p>在使用本服务过程中，您必须遵守国家相关法律法规、本协议以及所有与服务有关的规则。您不得利用本服务从事以下活动：</p>
-        <ul>
-          <li>发布、传播含有违反国家法律法规、社会公德、公序良俗等内容的信息，包括但不限于色情、暴力、赌博、欺诈等。</li>
-          <li>侵犯他人合法权益，如肖像权、名誉权、知识产权、商业秘密等。</li>
-          <li>进行任何损害本平台或本服务声誉、利益的行为，包括但不限于恶意攻击、散布谣言、不正当竞争等。</li>
-          <li>干扰或破坏本服务及相关网络的正常运行，如病毒、木马、网络攻击等。</li>
-          <li>冒充他人、发布虚假信息或进行其他欺诈行为。</li>
-        </ul>
-        <p>您发布的所有信息内容均应真实、合法、有效，并对您发布的内容承担一切法律责任。</p>
-
-        <h2>四、隐私保护</h2>
-        <p>我们非常重视您的个人信息保护。我们将按照《隐私政策》的规定收集、使用、存储和保护您的个人信息。请您仔细阅读我们的《隐私政策》，了解我们如何处理您的信息。本协议与《隐私政策》构成一个不可分割的整体，共同规范您的使用行为。</p>
-
-        <h2>五、免责声明</h2>
-        <p>1. 本平台不保证服务一定会满足您的所有要求，也不保证服务不会中断，对服务的及时性、安全性、准确性也不作任何保证。</p>
-        <p>2. 对于因不可抗力（如自然灾害、战争、政府行为等）或我们不能控制的原因（如网络故障、电信部门技术调整等）造成的服务中断或停滞，我们不承担任何责任。</p>
-        <p>3. 对于您通过本服务发布的任何信息，包括但不限于商机内容、留言评论等，我们不承担任何法律责任。信息的真实性、准确性、合法性由信息发布者自行负责。</p>
-        <p>4. 鉴于互联网服务的特殊性，我们无法保证所有信息、内容的完全准确性、完整性、及时性或安全性。对于因依赖本平台信息所导致的任何损失，我们不承担责任。</p>
-
-        <h2>六、协议的修改与终止</h2>
-        <p>本平台有权随时修改本协议的任何条款，并通过网站、应用内公告、消息通知或其他合理方式通知您。修改后的协议一经公布即生效。如果您不接受修改后的条款，应立即停止使用本服务。</p>
-        <p>如您违反本协议，我们有权随时暂停或终止向您提供全部或部分服务，并保留追究您的法律责任的权利。</p>
-
-        <h2>七、法律适用与争议解决</h2>
-        <p>本协议的订立、执行、解释及争议的解决均适用中华人民共和国法律。</p>
-        <p>因本协议引起的或与本协议有关的任何争议，双方应首先通过友好协商解决。协商不成的，任何一方均可向本公司所在地人民法院提起诉讼。</p>
-
-        <h2>八、其他</h2>
-        <p>本协议的最终解释权归 [您的公司名称] 所有。</p>
-        <p>生效日期：2023年12月15日</p>
+      <!-- 用户协议内容 -->
+      <view class="agreement-content" v-show="currentTab === 0">
+        <rich-text :nodes="userAgreement"></rich-text>
       </view>
+	  
+      <!-- 隐私政策内容 -->
+	  <view class="agreement-content" v-show="currentTab === 1">
+	    <rich-text :nodes="privacyPolicy"></rich-text>
+	  </view>
     </scroll-view>
   </view>
 </template>
@@ -54,15 +36,54 @@
 <script setup>
 import { ref } from 'vue'
 import { onLoad } from '@dcloudio/uni-app'
+import request from '../../utils/request.js';
 
-// 返回上一页
-const handleBack = () => {
-  uni.navigateBack()
+// 当前激活的 tab 索引，0: 用户协议, 1: 隐私政策
+const currentTab = ref(0)
+const userAgreement = ref('') // 初始化为空字符串，避免 rich-text 报错
+const privacyPolicy = ref('') // 初始化为空字符串
+
+// 切换 Tab 的方法
+const switchTab = (index) => {
+  currentTab.value = index
 }
 
-onLoad(() => {
-  // 页面加载时的逻辑，这里可以留空或者添加其他初始化操作
+onLoad((options) => {
+	if (options && options.tab) {
+	    // 将字符串参数转为数字，并设置为当前 tab 的初始值
+	    // 使用 parseInt 确保得到的是数字类型
+	    const initialTab = parseInt(options.tab, 10);
+	    // 做个简单的校验，防止传入无效值
+	    if (!isNaN(initialTab) && (initialTab === 0 || initialTab === 1)) {
+	        currentTab.value = initialTab;
+	    }
+	  }
+  // 页面加载时同时获取两个协议的内容
+  getUserAgreement()
+  getPrivacyPolicy()
 })
+
+const getUserAgreement = async () => {
+  const result = await request('/app-api/member/config/userAgreement', {
+    method: 'GET',
+  });
+  if (result && result.data) {
+    userAgreement.value = result.data
+  } else {
+    console.log('获取用户协议失败:', result?.error || '返回数据格式不正确');
+  }
+};
+
+const getPrivacyPolicy = async () => {
+  const result = await request('/app-api/member/config/privacyPolicy', {
+    method: 'GET',
+  });
+  if (result && result.data) {
+    privacyPolicy.value = result.data
+  } else {
+    console.log('获取隐私政策失败:', result?.error || '返回数据格式不正确');
+  }
+};
 </script>
 
 <style lang="scss" scoped>
@@ -70,58 +91,65 @@ onLoad(() => {
   display: flex;
   flex-direction: column;
   height: 100vh;
-  background-color: #f5f7fa; // 页面背景色，与列表页保持一致
+  background-color: #f5f7fa;
+}
+
+// Tab 容器样式
+.tabs-container {
+  display: flex;
+  background-color: #ffffff;
+  border-bottom: 1rpx solid #e5e5e5; // 添加一个底部分割线
+  box-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.05);
+  
+  .tab-item {
+    flex: 1;
+    padding: 24rpx 0;
+    font-size: 30rpx;
+    color: #666;
+    text-align: center;
+    position: relative;
+    transition: color 0.3s, font-weight 0.3s;
+    
+    // 激活状态的 Tab
+    &.active {
+      color: #007aff; // 主题色
+      font-weight: bold;
+      
+      // 激活状态的下划线指示器
+      &::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 80rpx;
+        height: 6rpx;
+        background-color: #007aff;
+        border-radius: 3rpx;
+      }
+    }
+  }
 }
 
 .content-scroll {
   flex: 1;
-  height: 1px; /* 解决 flex 子项在某些情况下不正确计算高度的问题 */
-  padding: 30rpx; // 内容区域内边距
-  box-sizing: border-box; // 确保内边距不撑大盒子
+  // 修复在某些安卓机型上的高度计算问题
+  height: 0; 
+  padding: 30rpx;
+  box-sizing: border-box;
 }
 
+// 协议内容的样式保持不变，因为样式本身写得很好
 .agreement-content {
-  color: #333; // 主体文本颜色
-  font-size: 28rpx; // 基础字体大小
-  line-height: 1.8; // 行高，增加阅读舒适度
+  color: #333;
+  font-size: 28rpx;
+  line-height: 1.8;
 
-  h1 {
-    font-size: 38rpx; // 页面主标题
-    font-weight: bold;
-    text-align: center; // 居中显示
-    margin-bottom: 40rpx; // 底部间距
-    color: #222; // 标题颜色略深
-  }
-
-  h2 {
-    font-size: 32rpx; // 二级标题
-    font-weight: bold;
-    margin-top: 50rpx; // 顶部间距
-    margin-bottom: 24rpx; // 底部间距
-    color: #333;
-  }
-
-  p {
-    margin-bottom: 24rpx; // 段落底部间距
-    text-align: justify; // 文本两端对齐，使排版更整齐
-  }
-
-  ul {
-    list-style-type: disc; // 圆点列表
-    margin-left: 40rpx; // 左侧缩进
-    margin-bottom: 24rpx; // 底部间距
-    padding-left: 0; // 确保没有额外的内边距
-
-    li {
-      margin-bottom: 12rpx; // 列表项底部间距
-      line-height: 1.6; // 列表项行高
-    }
-  }
-
-  // 可以为重点内容添加样式，例如加粗
-  strong {
-    font-weight: bold;
-    color: #000;
-  }
+  // ... (您原来的 h1, h2, p, ul, strong 样式可以原封不动地放在这里)
+  // 为了简洁，这里省略，请将您原来的样式复制到此处
+  
+  // rich-text 内部的标签在小程序中无法直接通过组件样式渗透
+  // 如果需要修改 h1, p 等标签样式，需要在 rich-text 的 string 类型的 nodes 中内联 style
+  // 或者使用插件 https://uniapp.dcloud.net.cn/component/rich-text.html#%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9
 }
 </style>

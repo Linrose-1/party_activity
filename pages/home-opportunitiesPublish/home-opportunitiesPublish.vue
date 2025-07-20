@@ -256,10 +256,10 @@
 			title: '请选择一个专题',
 			icon: 'none'
 		})
-		if (tags.value.length === 0) return uni.showToast({
-			title: '请至少添加一个标签',
-			icon: 'none'
-		})
+		// if (tags.value.length === 0) return uni.showToast({
+		// 	title: '请至少添加一个标签',
+		// 	icon: 'none'
+		// })
 		if (images.value.length === 0) return uni.showToast({
 			title: '请至少上传一张图片',
 			icon: 'none'

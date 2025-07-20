@@ -1,9 +1,41 @@
 /* 水平间距 */
 /* 水平间距 */
+/* ==================================================================
+ * 页面主体与全局样式
+ * ================================================================== */
 .page.data-v-de6b8eea {
   padding-bottom: 120rpx;
   background-color: #f8f8f8;
 }
+.section-title.data-v-de6b8eea {
+  font-size: 32rpx;
+  font-weight: bold;
+  margin: 30rpx 0 20rpx;
+  border-left: 10rpx solid #FF6B00;
+  padding-left: 20rpx;
+}
+
+/* ==================================================================
+ * 页面内容模块
+ * ================================================================== */
+/* --- 活动封面 --- */
+.event-cover.data-v-de6b8eea {
+  height: 400rpx;
+  background: linear-gradient(45deg, #ff9a9e, #fad0c4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 36rpx;
+  font-weight: bold;
+  text-align: center;
+  padding: 20rpx;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+/* --- 状态与提示横幅 --- */
 .status-banner.data-v-de6b8eea {
   color: #fff;
   padding: 10rpx 30rpx;
@@ -19,63 +51,22 @@
   display: flex;
   align-items: center;
 }
-.store-logo-image.data-v-de6b8eea {
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-}
-.top-nav.data-v-de6b8eea {
-  background: linear-gradient(135deg, #FF8C00, #FF6B00);
-  color: white;
-  display: flex;
-  align-items: center;
-  padding: 30rpx 20rpx;
-  font-size: 32rpx;
-  position: -webkit-sticky;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-}
-.page-title.data-v-de6b8eea {
-  flex: 1;
-  text-align: center;
-  font-weight: bold;
-}
-.event-cover.data-v-de6b8eea {
-  height: 400rpx;
-  background: linear-gradient(45deg, #ff9a9e, #fad0c4);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-size: 36rpx;
-  font-weight: bold;
-  text-align: center;
-  padding: 20rpx;
-}
+
+/* --- 通用内容卡片样式 --- */
 .event-header.data-v-de6b8eea,
 .event-content.data-v-de6b8eea,
 .organizer-section.data-v-de6b8eea,
 .business-section.data-v-de6b8eea,
 .participants-section.data-v-de6b8eea,
 .sponsor-section.data-v-de6b8eea {
-  /* 添加 sponsor-section */
   background: #fff;
   margin: 30rpx;
   padding: 30rpx;
   border-radius: 20rpx;
   box-shadow: 0 10rpx 20rpx rgba(0, 0, 0, 0.05);
 }
-.participants-header.data-v-de6b8eea {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 10rpx;
-}
-.participants-header .view-all-link.data-v-de6b8eea {
-  font-size: 24rpx;
-  color: #3a7bd5;
-  cursor: pointer;
-}
+
+/* --- 活动头部信息 (Header Card) --- */
 .event-title.data-v-de6b8eea {
   font-size: 36rpx;
   font-weight: bold;
@@ -107,19 +98,8 @@
   font-size: 24rpx;
   color: #888;
 }
-.section-title.data-v-de6b8eea {
-  font-size: 32rpx;
-  font-weight: bold;
-  margin: 30rpx 0 20rpx;
-  /* 可以根据需要调整 */
-  border-left: 10rpx solid #FF6B00;
-  padding-left: 20rpx;
-}
 
-/* 新增：如果 section-title 在新区块内，去除顶部 margin */
-.sponsor-section .section-title.data-v-de6b8eea {
-  margin-top: 0;
-}
+/* --- 活动介绍 (Content Card) --- */
 .event-description.data-v-de6b8eea {
   font-size: 28rpx;
   color: #555;
@@ -138,16 +118,6 @@
   padding: 30rpx;
   text-align: center;
 }
-.activity-icon.data-v-de6b8eea {
-  width: 80rpx;
-  height: 80rpx;
-  background: #FF6B00;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto 20rpx;
-}
 .activity-title.data-v-de6b8eea {
   color: #FF6B00;
   font-weight: bold;
@@ -158,19 +128,18 @@
   font-size: 24rpx;
   color: #666;
 }
+
+/* --- 组织者、商圈、赞助商通用样式 --- */
 .organizer-title.data-v-de6b8eea,
 .business-title.data-v-de6b8eea,
 .participants-title.data-v-de6b8eea,
 .sponsor-title.data-v-de6b8eea {
-  /* 添加 sponsor-title */
   font-weight: bold;
   margin-bottom: 20rpx;
 }
 .organizer-info.data-v-de6b8eea,
 .business-info.data-v-de6b8eea,
-.participants-body.data-v-de6b8eea,
 .sponsor-info.data-v-de6b8eea {
-  /* 添加 sponsor-info */
   display: flex;
   align-items: center;
   gap: 20rpx;
@@ -185,32 +154,47 @@
   align-items: center;
   justify-content: center;
 }
-
-/* 新增：赞助商Logo样式 */
+.store-logo-image.data-v-de6b8eea {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+}
 .sponsor-logo.data-v-de6b8eea {
   width: 120rpx;
-  /* 根据实际Logo大小调整 */
   height: 120rpx;
   border-radius: 10rpx;
-  /* 方形或圆角矩形，更适合公司Logo */
   object-fit: contain;
-  /* 保持图片比例并完整显示 */
   background-color: #f0f0f0;
   border: 1rpx solid #eee;
 }
 .organizer-name.data-v-de6b8eea,
 .business-name.data-v-de6b8eea,
 .sponsor-name.data-v-de6b8eea {
-  /* 添加 sponsor-name */
   font-weight: bold;
   font-size: 28rpx;
 }
 .organizer-company.data-v-de6b8eea,
 .business-meta text.data-v-de6b8eea,
 .sponsor-description.data-v-de6b8eea {
-  /* 添加 sponsor-description */
   font-size: 24rpx;
   color: #666;
+}
+
+/* --- 参与用户 --- */
+.participants-header.data-v-de6b8eea {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10rpx;
+}
+.participants-body.data-v-de6b8eea {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+}
+.view-all-link.data-v-de6b8eea {
+  font-size: 24rpx;
+  color: #3a7bd5;
+  cursor: pointer;
 }
 .avatar-group.data-v-de6b8eea {
   display: flex;
@@ -242,6 +226,11 @@
   color: #FF6B00;
   font-weight: bold;
 }
+
+/* ==================================================================
+ * 浮动与弹窗元素 (最高层级)
+ * ================================================================== */
+/* --- 底部固定操作栏 --- */
 .action-bar.data-v-de6b8eea {
   position: fixed;
   bottom: 0;
@@ -250,6 +239,7 @@
   background: #fff;
   display: flex;
   padding: 20rpx;
+  padding-bottom: calc(20rpx + env(safe-area-inset-bottom));
   box-shadow: 0 -5rpx 10rpx rgba(0, 0, 0, 0.05);
   z-index: 100;
 }
@@ -260,19 +250,126 @@
   text-align: center;
   border-radius: 16rpx;
   font-weight: bold;
+  font-size: 32rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
-.share-btn.data-v-de6b8eea {
+.action-btn.share-btn.data-v-de6b8eea {
   background: #f0f0f0;
   color: #333;
 }
-.register-btn.data-v-de6b8eea {
+.action-btn.register-btn.data-v-de6b8eea {
   background: linear-gradient(to right, #FF8C00, #FF6B00);
   color: #fff;
 }
-.register-btn.disabled.data-v-de6b8eea {
+.action-btn.register-btn.disabled.data-v-de6b8eea {
   background: #c8c9cc;
-  /* 灰色背景 */
   color: #fff;
   pointer-events: none;
-  /* 禁用所有鼠标事件 */
+}
+
+/* --- 自定义分享弹窗 --- */
+.share-popup-content.data-v-de6b8eea {
+  padding: 30rpx;
+  padding-bottom: calc(30rpx + env(safe-area-inset-bottom));
+  background-color: #fff;
+  border-top-left-radius: 24rpx;
+  border-top-right-radius: 24rpx;
+}
+.share-popup-title.data-v-de6b8eea {
+  text-align: center;
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 40rpx;
+}
+.share-title-editor.data-v-de6b8eea {
+  display: flex;
+  align-items: center;
+  background-color: #f7f7f7;
+  border-radius: 16rpx;
+  padding: 20rpx;
+  margin-bottom: 40rpx;
+}
+.editor-label.data-v-de6b8eea {
+  font-size: 28rpx;
+  color: #666;
+  margin-right: 20rpx;
+}
+.editor-input.data-v-de6b8eea {
+  flex: 1;
+  font-size: 28rpx;
+  color: #333;
+}
+.share-channels.data-v-de6b8eea {
+  display: flex;
+  justify-content: space-around;
+  padding: 20rpx 0;
+  margin-bottom: 40rpx;
+}
+.share-channel-btn.data-v-de6b8eea {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: transparent;
+  padding: 0;
+  margin: 0;
+  border: none;
+  line-height: 1.5;
+}
+.share-channel-btn.data-v-de6b8eea::after {
+  border: none;
+}
+.channel-icon-image.data-v-de6b8eea {
+  width: 60rpx;
+  height: 60rpx;
+}
+.share-channel-btn text.data-v-de6b8eea {
+  font-size: 24rpx;
+  color: #666;
+  margin-top: 10rpx;
+}
+.share-popup-cancel.data-v-de6b8eea {
+  width: 100%;
+  height: 90rpx;
+  line-height: 90rpx;
+  text-align: center;
+  background-color: #f0f0f0;
+  border-radius: 45rpx;
+  font-size: 30rpx;
+  color: #333;
+}
+
+/* --- 朋友圈引导蒙层 --- */
+.timeline-guide-mask.data-v-de6b8eea {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.7);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  padding-right: 20rpx;
+  box-sizing: border-box;
+}
+.guide-arrow.data-v-de6b8eea {
+  width: 150rpx;
+  height: 150rpx;
+  margin-top: 10rpx;
+  margin-right: 20rpx;
+}
+.guide-text.data-v-de6b8eea {
+  color: #fff;
+  font-size: 32rpx;
+  font-weight: bold;
+  text-align: center;
+  margin-top: 20rpx;
+}
+.guide-text text.data-v-de6b8eea {
+  display: block;
+  margin-bottom: 10rpx;
 }

@@ -13,11 +13,9 @@
 			<view v-for="post in postList" :key="post.id" class="post-card" @click="skipCommercialDetail(post.id)">
 				<view class="post-header">
 					<view class="user-info">
-						<view class="avatar" @click.stop="skipApplicationBusinessCard">
-							{{ post.contactPerson ? post.contactPerson.charAt(0) : '商' }}
-						</view>
+						<image :src="post.memberUser.avatar" mode="" class="avatar" @click.stop="skipApplicationBusinessCard"></image>
 						<view class="user-details-wrapper">
-							<view class="user-name">{{ post.contactPerson || '匿名用户' }}</view>
+							<view class="user-name">{{ post.memberUser.nickname || '匿名用户' }}</view>
 							<view class="post-time">
 								<!-- 1. 数据显示优化：使用 formatTimestamp 函数转换时间 -->
 								<uni-icons type="redo" size="14" color="#888"></uni-icons>

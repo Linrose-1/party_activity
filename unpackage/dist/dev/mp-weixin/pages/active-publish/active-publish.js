@@ -487,18 +487,22 @@ const _sfc_main = {
           required: true
         })
       }) : {}, {
-        W: common_vendor.o(($event) => form.value.activityDescription = $event),
-        X: common_vendor.p({
+        W: common_vendor.p({
+          ["label-width"]: 80
+        }),
+        X: common_vendor.o(($event) => form.value.activityDescription = $event),
+        Y: common_vendor.p({
           type: "textarea",
           autoHeight: true,
           placeholder: "请输入活动详细介绍",
           modelValue: form.value.activityDescription
         }),
-        Y: common_vendor.p({
+        Z: common_vendor.p({
           label: "活动介绍",
-          required: true
+          required: true,
+          ["label-width"]: 80
         }),
-        Z: common_vendor.f(form.value.activitySessions, (item, index, i0) => {
+        aa: common_vendor.f(form.value.activitySessions, (item, index, i0) => {
           return {
             a: "d21abf49-24-" + i0,
             b: common_vendor.o(($event) => item.sessionTitle = $event, index),
@@ -517,52 +521,57 @@ const _sfc_main = {
             i: index
           };
         }),
-        aa: common_vendor.p({
+        ab: common_vendor.p({
           type: "close"
         }),
-        ab: common_vendor.p({
+        ac: common_vendor.p({
           type: "plusempty"
         }),
-        ac: common_vendor.o(addAgenda),
-        ad: common_vendor.o(($event) => form.value.organizerUnitName = $event),
-        ae: common_vendor.p({
+        ad: common_vendor.o(addAgenda),
+        ae: common_vendor.o(($event) => form.value.organizerUnitName = $event),
+        af: common_vendor.p({
           placeholder: "请输入组织单位名称",
           modelValue: form.value.organizerUnitName
         }),
-        af: common_vendor.p({
+        ag: common_vendor.p({
           label: "组织单位",
           required: true
         }),
-        ag: common_vendor.o(($event) => form.value.organizerContactPhone = $event),
-        ah: common_vendor.p({
+        ah: common_vendor.o(($event) => form.value.organizerContactPhone = $event),
+        ai: common_vendor.p({
           type: "number",
           placeholder: "请输入联系电话",
           modelValue: form.value.organizerContactPhone
         }),
-        ai: common_vendor.p({
+        aj: common_vendor.p({
           label: "联系电话",
           required: true
         }),
-        aj: form.value.organizerPaymentQrCodeUrl
-      }, form.value.organizerPaymentQrCodeUrl ? {
         ak: form.value.organizerPaymentQrCodeUrl
+      }, form.value.organizerPaymentQrCodeUrl ? {
+        al: form.value.organizerPaymentQrCodeUrl
       } : {}, {
-        al: common_vendor.o(uploadCode),
-        am: common_vendor.p({
-          label: "收款码上传"
-        }),
-        an: associatedStoreName.value
-      }, associatedStoreName.value ? {
-        ao: common_vendor.t(associatedStoreName.value)
-      } : {}, {
-        ap: common_vendor.o(goToSelectShop),
-        aq: common_vendor.p({
-          label: "合作店铺",
+        am: common_vendor.o(uploadCode),
+        an: common_vendor.p({
+          label: "收款码上传",
           required: true
         }),
-        ar: common_vendor.o(saveDraft),
-        as: common_vendor.o(publish),
-        at: isPickerOpen.value ? 1 : ""
+        ao: common_vendor.p({
+          ["label-width"]: 80
+        }),
+        ap: associatedStoreName.value
+      }, associatedStoreName.value ? {
+        aq: common_vendor.t(associatedStoreName.value)
+      } : {}, {
+        ar: common_vendor.o(goToSelectShop),
+        as: common_vendor.p({
+          label: "合作店铺",
+          required: true,
+          ["label-width"]: 80
+        }),
+        at: common_vendor.o(saveDraft),
+        av: common_vendor.o(publish),
+        aw: isPickerOpen.value ? 1 : ""
       });
     };
   }

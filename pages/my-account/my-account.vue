@@ -152,7 +152,7 @@
 					<button class="action-button exchange-button" @click="handleExchangeSmartRice">
 						<uni-icons type="forward" size="20" color="#fff"></uni-icons> 申请兑换
 					</button>
-					<button class="action-button recharge-button" @click="handleRechargeSmartRice">
+					<button class="action-button recharge-button" open-type="contact" session-from="我的页面">
 						<uni-icons type="redo" size="20" color="#fff"></uni-icons> 充值智米
 					</button>
 				</view>

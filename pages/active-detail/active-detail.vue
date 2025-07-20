@@ -78,7 +78,7 @@
 			<view class="organizer-info">
 				<view class="organizer-avatar">
 					<!-- <uni-icons type="person-filled" size="24" color="#fff" /> -->
-					<img :src="activityDetail.memberUser.avatar" alt="" class="organizer-avatar"/>
+					<img :src="activityDetail.memberUser.avatar" alt="" class="organizer-avatar" />
 				</view>
 				<view>
 					<!-- 【修改】动态绑定组织者单位 -->
@@ -158,21 +158,55 @@
 
 		<!-- 【修改】动态绑定报名截止时间 -->
 		<view style="margin: 20rpx auto; flex: 1; text-align: center;">
-		  报名时间：
-		  <span style="color: #ff1a3c;">
-		    {{ formattedRegistrationTimes.start }} - {{ formattedRegistrationTimes.end }}
-		  </span>
+			报名时间：
+			<span style="color: #ff1a3c;">
+				{{ formattedRegistrationTimes.start }} - {{ formattedRegistrationTimes.end }}
+			</span>
 		</view>
 
 
 		<!-- 操作栏 -->
-		<view class="action-bar">
-			<view class="action-btn share-btn" @click="share">
-				<text> 🔗分享</text>
+		<view class="action-bar" v-if="!isActionBarHidden">
+			<view class="action-btn share-btn" @click="openSharePopup">
+				<text>🔗分享</text>
 			</view>
+
 			<view class="action-btn register-btn" :class="{ 'disabled': !isRegistrationActive }"
 				:disabled="!isRegistrationActive" @click="register">
 				<text> ➕立即报名</text>
+			</view>
+		</view>
+
+		<!-- 【新增】自定义分享弹窗 (与商机页完全一致) -->
+		<uni-popup ref="sharePopup" type="bottom" background-color="#fff" @change="onPopupChange">
+			<view class="share-popup-content">
+				<view class="share-popup-title">自定义分享内容</view>
+				<view class="share-title-editor">
+					<text class="editor-label">标题:</text>
+					<input class="editor-input" v-model="customShareTitle" placeholder="请输入分享标题" />
+				</view>
+				<view class="share-channels">
+					<!-- 分享到好友的按钮，现在带上了 open-type="share" -->
+					<button class="share-channel-btn" open-type="share">
+						<uni-icons type="weixin" size="30" color="#07c160"></uni-icons>
+						<text>微信好友</text>
+					</button>
+					<!-- 分享到朋友圈的引导按钮 -->
+					<button class="share-channel-btn" @click="guideShareTimeline">
+						<uni-icons type="pyq" size="30" color="#53a046"></uni-icons>
+						<text>朋友圈</text>
+					</button>
+				</view>
+				<view class="share-popup-cancel" @click="closeSharePopup">取消</view>
+			</view>
+		</uni-popup>
+
+		<!-- 【新增】分享到朋友圈的引导遮罩层 (与商机页完全一致) -->
+		<view v-if="showTimelineGuide" class="timeline-guide-mask" @click="hideTimelineGuide">
+			<image src="/static/icons/share-guide-arrow.png" class="guide-arrow"></image>
+			<view class="guide-text">
+				<text>点击右上角</text>
+				<text>分享到朋友圈</text>
 			</view>
 		</view>
 	</view>
@@ -184,13 +218,23 @@
 		computed // 【新增】导入 computed
 	} from 'vue'
 	import {
-		onLoad
+		onLoad,
+		onShareAppMessage,
+		onShareTimeline
 	} from '@dcloudio/uni-app'
 	import request from '../../utils/request.js';
 
 	const activityId = ref(null);
 	// 【新增】创建一个 ref 来存储整个活动详情对象
 	const activityDetail = ref(null);
+
+	// 【新增】分享弹窗和引导蒙层的状态变量
+	const sharePopup = ref(null);
+	const customShareTitle = ref('');
+	const showTimelineGuide = ref(false);
+	
+	// 【新增】用于控制底部操作栏显示/隐藏的状态变量
+	const isActionBarHidden = ref(false);
 
 	onLoad((options) => {
 		if (options.id) {
@@ -204,6 +248,11 @@
 				icon: 'none'
 			});
 		}
+		// 允许从右上角菜单发起分享
+		uni.showShareMenu({
+			withShareTicket: true,
+			menus: ["shareAppMessage", "shareTimeline"]
+		});
 	});
 	const isRegistrationActive = computed(() => {
 		// 如果活动详情还没加载出来，则默认不可报名
@@ -233,6 +282,12 @@
 		const m = date.getMinutes().toString().padStart(2, '0');
 		return `${Y}-${M}-${D} ${h}:${m}`;
 	};
+	
+	// 【新增】uni-popup 状态变化时的事件处理函数
+	const onPopupChange = (e) => {
+	  // e.show 是 uni-popup 派发出来的值，true 表示弹窗打开，false 表示弹窗关闭
+	  isActionBarHidden.value = e.show;
+	};
 
 	// 【新增】用于活动时间的计算属性
 	const formattedActivityTime = computed(() => {
@@ -252,7 +307,7 @@
 			start: '',
 			end: ''
 		};
-	
+
 		return {
 			start: formatDateTime(activityDetail.value.registrationStartDatetime),
 			end: formatDateTime(activityDetail.value.registrationEndDatetime)
@@ -328,6 +383,59 @@
 		}
 	};
 
+	// 【新增】打开分享弹窗的方法
+	const openSharePopup = () => {
+		// 设置输入框的默认值为活动标题
+		customShareTitle.value = activityDetail.value.activityTitle || '发现一个很棒的活动，快来看看吧！';
+		sharePopup.value.open();
+	};
+
+	// 【新增】关闭分享弹窗的方法
+	const closeSharePopup = () => {
+		sharePopup.value.close();
+	};
+
+	// 【新增】引导用户分享到朋友圈的方法
+	const guideShareTimeline = () => {
+		closeSharePopup();
+		showTimelineGuide.value = true;
+	};
+
+	// 【新增】隐藏引导遮罩的方法
+	const hideTimelineGuide = () => {
+		showTimelineGuide.value = false;
+	};
+
+	// 【重大修改】升级 onShareAppMessage 逻辑
+	onShareAppMessage((res) => {
+		console.log("触发分享给好友", res);
+		// 分享时自动关闭弹窗
+		closeSharePopup();
+
+		// 核心逻辑：优先使用用户自定义的标题
+		const finalTitle = customShareTitle.value || activityDetail.value.activityTitle || '发现一个很棒的活动，快来看看吧！';
+
+		return {
+			title: finalTitle,
+			path: `/pages/active-detail/active-detail?id=${activityDetail.value.id}`,
+			imageUrl: activityDetail.value.coverImageUrl || '/static/default-share-image.png'
+		};
+	});
+
+	// 【重大修改】升级 onShareTimeline 逻辑
+	onShareTimeline(() => {
+		console.log("触发分享到朋友圈");
+
+		// 核心逻辑：同样使用用户自定义的标题
+		const finalTitle = customShareTitle.value || activityDetail.value.activityTitle || '发现一个很棒的活动，快来看看吧！';
+
+		return {
+			title: finalTitle,
+			query: `id=${activityDetail.value.id}&from=timeline`,
+			imageUrl: activityDetail.value.coverImageUrl || '/static/default-share-image.png'
+		}
+	});
+
 	function share() {
 		uni.showToast({
 			title: '已分享到微信朋友圈',
@@ -357,12 +465,44 @@
 </script>
 
 <style lang="scss" scoped>
+	/* ==================================================================
+	 * 页面主体与全局样式
+	 * ================================================================== */
 	.page {
 		padding-bottom: 120rpx;
 		background-color: #f8f8f8;
 	}
 
-	// 【新增】活动状态和提示的样式
+	.section-title {
+		font-size: 32rpx;
+		font-weight: bold;
+		margin: 30rpx 0 20rpx;
+		border-left: 10rpx solid #FF6B00;
+		padding-left: 20rpx;
+	}
+
+	/* ==================================================================
+	 * 页面内容模块
+	 * ================================================================== */
+
+	/* --- 活动封面 --- */
+	.event-cover {
+		height: 400rpx;
+		background: linear-gradient(45deg, #ff9a9e, #fad0c4);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		color: white;
+		font-size: 36rpx;
+		font-weight: bold;
+		text-align: center;
+		padding: 20rpx;
+		background-size: cover;
+		background-position: center;
+		background-repeat: no-repeat;
+	}
+
+	/* --- 状态与提示横幅 --- */
 	.status-banner {
 		color: #fff;
 		padding: 10rpx 30rpx;
@@ -380,50 +520,13 @@
 		align-items: center;
 	}
 
-	.store-logo-image {
-		width: 100%;
-		height: 100%;
-		border-radius: 50%;
-	}
-
-	.top-nav {
-		background: linear-gradient(135deg, #FF8C00, #FF6B00);
-		color: white;
-		display: flex;
-		align-items: center;
-		padding: 30rpx 20rpx;
-		font-size: 32rpx;
-		position: sticky;
-		top: 0;
-		z-index: 100;
-	}
-
-	.page-title {
-		flex: 1;
-		text-align: center;
-		font-weight: bold;
-	}
-
-	.event-cover {
-		height: 400rpx;
-		background: linear-gradient(45deg, #ff9a9e, #fad0c4);
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		color: white;
-		font-size: 36rpx;
-		font-weight: bold;
-		text-align: center;
-		padding: 20rpx;
-	}
-
+	/* --- 通用内容卡片样式 --- */
 	.event-header,
 	.event-content,
 	.organizer-section,
 	.business-section,
 	.participants-section,
 	.sponsor-section {
-		/* 添加 sponsor-section */
 		background: #fff;
 		margin: 30rpx;
 		padding: 30rpx;
@@ -431,18 +534,7 @@
 		box-shadow: 0 10rpx 20rpx rgba(0, 0, 0, 0.05);
 	}
 
-	.participants-header {
-		display: flex;
-		justify-content: space-between;
-		margin-bottom: 10rpx;
-
-		.view-all-link {
-			font-size: 24rpx;
-			color: #3a7bd5;
-			cursor: pointer;
-		}
-	}
-
+	/* --- 活动头部信息 (Header Card) --- */
 	.event-title {
 		font-size: 36rpx;
 		font-weight: bold;
@@ -480,21 +572,7 @@
 		color: #888;
 	}
 
-	.section-title {
-		font-size: 32rpx;
-		font-weight: bold;
-		margin: 30rpx 0 20rpx;
-		/* 可以根据需要调整 */
-		border-left: 10rpx solid #FF6B00;
-		padding-left: 20rpx;
-	}
-
-	/* 新增：如果 section-title 在新区块内，去除顶部 margin */
-	.sponsor-section .section-title {
-		margin-top: 0;
-	}
-
-
+	/* --- 活动介绍 (Content Card) --- */
 	.event-description {
 		font-size: 28rpx;
 		color: #555;
@@ -516,17 +594,6 @@
 		text-align: center;
 	}
 
-	.activity-icon {
-		width: 80rpx;
-		height: 80rpx;
-		background: #FF6B00;
-		border-radius: 50%;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		margin: 0 auto 20rpx;
-	}
-
 	.activity-title {
 		color: #FF6B00;
 		font-weight: bold;
@@ -539,20 +606,18 @@
 		color: #666;
 	}
 
+	/* --- 组织者、商圈、赞助商通用样式 --- */
 	.organizer-title,
 	.business-title,
 	.participants-title,
 	.sponsor-title {
-		/* 添加 sponsor-title */
 		font-weight: bold;
 		margin-bottom: 20rpx;
 	}
 
 	.organizer-info,
 	.business-info,
-	.participants-body,
 	.sponsor-info {
-		/* 添加 sponsor-info */
 		display: flex;
 		align-items: center;
 		gap: 20rpx;
@@ -569,15 +634,17 @@
 		justify-content: center;
 	}
 
-	/* 新增：赞助商Logo样式 */
+	.store-logo-image {
+		width: 100%;
+		height: 100%;
+		border-radius: 50%;
+	}
+
 	.sponsor-logo {
 		width: 120rpx;
-		/* 根据实际Logo大小调整 */
 		height: 120rpx;
 		border-radius: 10rpx;
-		/* 方形或圆角矩形，更适合公司Logo */
 		object-fit: contain;
-		/* 保持图片比例并完整显示 */
 		background-color: #f0f0f0;
 		border: 1rpx solid #eee;
 	}
@@ -585,7 +652,6 @@
 	.organizer-name,
 	.business-name,
 	.sponsor-name {
-		/* 添加 sponsor-name */
 		font-weight: bold;
 		font-size: 28rpx;
 	}
@@ -593,9 +659,27 @@
 	.organizer-company,
 	.business-meta text,
 	.sponsor-description {
-		/* 添加 sponsor-description */
 		font-size: 24rpx;
 		color: #666;
+	}
+
+	/* --- 参与用户 --- */
+	.participants-header {
+		display: flex;
+		justify-content: space-between;
+		margin-bottom: 10rpx;
+	}
+
+	.participants-body {
+		display: flex;
+		align-items: center;
+		gap: 20rpx;
+	}
+
+	.view-all-link {
+		font-size: 24rpx;
+		color: #3a7bd5;
+		cursor: pointer;
 	}
 
 	.avatar-group {
@@ -633,6 +717,11 @@
 		font-weight: bold;
 	}
 
+	/* ==================================================================
+	 * 浮动与弹窗元素 (最高层级)
+	 * ================================================================== */
+
+	/* --- 底部固定操作栏 --- */
 	.action-bar {
 		position: fixed;
 		bottom: 0;
@@ -641,6 +730,7 @@
 		background: #fff;
 		display: flex;
 		padding: 20rpx;
+		padding-bottom: calc(20rpx + env(safe-area-inset-bottom));
 		box-shadow: 0 -5rpx 10rpx rgba(0, 0, 0, 0.05);
 		z-index: 100;
 	}
@@ -652,23 +742,143 @@
 		text-align: center;
 		border-radius: 16rpx;
 		font-weight: bold;
+		font-size: 32rpx;
+		display: flex;
+		align-items: center;
+		justify-content: center;
 	}
 
-	.share-btn {
+	.action-btn.share-btn {
 		background: #f0f0f0;
 		color: #333;
 	}
 
-	.register-btn {
+	.action-btn.register-btn {
 		background: linear-gradient(to right, #FF8C00, #FF6B00);
 		color: #fff;
 	}
 
-	.register-btn.disabled {
+	.action-btn.register-btn.disabled {
 		background: #c8c9cc;
-		/* 灰色背景 */
 		color: #fff;
 		pointer-events: none;
-		/* 禁用所有鼠标事件 */
+	}
+
+	/* --- 自定义分享弹窗 --- */
+	.share-popup-content {
+		padding: 30rpx;
+		padding-bottom: calc(30rpx + env(safe-area-inset-bottom));
+		background-color: #fff;
+		border-top-left-radius: 24rpx;
+		border-top-right-radius: 24rpx;
+	}
+
+	.share-popup-title {
+		text-align: center;
+		font-size: 32rpx;
+		font-weight: bold;
+		color: #333;
+		margin-bottom: 40rpx;
+	}
+
+	.share-title-editor {
+		display: flex;
+		align-items: center;
+		background-color: #f7f7f7;
+		border-radius: 16rpx;
+		padding: 20rpx;
+		margin-bottom: 40rpx;
+	}
+
+	.editor-label {
+		font-size: 28rpx;
+		color: #666;
+		margin-right: 20rpx;
+	}
+
+	.editor-input {
+		flex: 1;
+		font-size: 28rpx;
+		color: #333;
+	}
+
+	.share-channels {
+		display: flex;
+		justify-content: space-around;
+		padding: 20rpx 0;
+		margin-bottom: 40rpx;
+	}
+
+	.share-channel-btn {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		background-color: transparent;
+		padding: 0;
+		margin: 0;
+		border: none;
+		line-height: 1.5;
+	}
+
+	.share-channel-btn::after {
+		border: none;
+	}
+
+	.channel-icon-image {
+		width: 60rpx;
+		height: 60rpx;
+	}
+
+	.share-channel-btn text {
+		font-size: 24rpx;
+		color: #666;
+		margin-top: 10rpx;
+	}
+
+	.share-popup-cancel {
+		width: 100%;
+		height: 90rpx;
+		line-height: 90rpx;
+		text-align: center;
+		background-color: #f0f0f0;
+		border-radius: 45rpx;
+		font-size: 30rpx;
+		color: #333;
+	}
+
+	/* --- 朋友圈引导蒙层 --- */
+	.timeline-guide-mask {
+		position: fixed;
+		top: 0;
+		left: 0;
+		width: 100vw;
+		height: 100vh;
+		background-color: rgba(0, 0, 0, 0.7);
+		z-index: 1000;
+		display: flex;
+		flex-direction: column;
+		align-items: flex-end;
+		padding-right: 20rpx;
+		box-sizing: border-box;
+	}
+
+	.guide-arrow {
+		width: 150rpx;
+		height: 150rpx;
+		margin-top: 10rpx;
+		margin-right: 20rpx;
+	}
+
+	.guide-text {
+		color: #fff;
+		font-size: 32rpx;
+		font-weight: bold;
+		text-align: center;
+		margin-top: 20rpx;
+	}
+
+	.guide-text text {
+		display: block;
+		margin-bottom: 10rpx;
 	}
 </style>
