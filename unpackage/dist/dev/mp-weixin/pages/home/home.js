@@ -34,7 +34,7 @@ const _sfc_main = {
     });
     common_vendor.onMounted(() => {
       loggedInUserId.value = common_vendor.index.getStorageSync("userId");
-      common_vendor.index.__f__("log", "at pages/home/home.vue:194", "当前列表页登录用户ID:", loggedInUserId.value);
+      common_vendor.index.__f__("log", "at pages/home/home.vue:197", "当前列表页登录用户ID:", loggedInUserId.value);
       getBusinessOpportunitiesList(true);
     });
     common_vendor.onReachBottom(() => {
@@ -43,7 +43,7 @@ const _sfc_main = {
       }
     });
     common_vendor.onPullDownRefresh(() => {
-      common_vendor.index.__f__("log", "at pages/home/home.vue:205", "用户触发了下拉刷新");
+      common_vendor.index.__f__("log", "at pages/home/home.vue:208", "用户触发了下拉刷新");
       getBusinessOpportunitiesList(true);
     });
     function formatTimestamp(timestamp) {
@@ -83,6 +83,7 @@ const _sfc_main = {
           method: "GET",
           data: params
         });
+        common_vendor.index.__f__("log", "at pages/home/home.vue:255", "商机列表", result);
         if (result && result.error && result.error.includes("未登录")) {
           common_vendor.index.showToast({
             title: "请先登录",
@@ -137,7 +138,7 @@ const _sfc_main = {
           });
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/home/home.vue:312", "getBusinessOpportunitiesList error:", error);
+        common_vendor.index.__f__("error", "at pages/home/home.vue:317", "getBusinessOpportunitiesList error:", error);
         loadingStatus.value = "more";
         common_vendor.index.showToast({
           title: "网络请求异常",
@@ -285,6 +286,7 @@ const _sfc_main = {
           method: "POST",
           data: requestData
         });
+        common_vendor.index.__f__("log", "at pages/home/home.vue:484", "触发收藏", result);
         if (result && result.error) {
           post.isSaved = originalStatus;
           common_vendor.index.showToast({
@@ -379,9 +381,17 @@ const _sfc_main = {
         goToLogin();
       }
     };
-    const skipApplicationBusinessCard = (userId) => {
+    const navigateToBusinessCard = (user) => {
+      if (!user || !user.id) {
+        common_vendor.index.showToast({ title: "无法查看该用户主页", icon: "none" });
+        return;
+      }
+      const defaultAvatar = "/static/images/default-avatar.png";
+      const avatarUrl = user.avatar || defaultAvatar;
+      const url = `/pages/applicationBusinessCard/applicationBusinessCard?id=${user.id}&name=${encodeURIComponent(user.name)}&avatar=${encodeURIComponent(avatarUrl)}`;
+      common_vendor.index.__f__("log", "at pages/home/home.vue:631", "从商机列表页跳转，URL:", url);
       common_vendor.index.navigateTo({
-        url: `/pages/applicationBusinessCard/applicationBusinessCard?id=${userId}`
+        url
       });
     };
     const skipCommercialDetail = (postId) => {
@@ -417,7 +427,11 @@ const _sfc_main = {
         p: common_vendor.f(postList.value, (post, k0, i0) => {
           return common_vendor.e({
             a: post.user.avatar,
-            b: common_vendor.o(($event) => skipApplicationBusinessCard(post.user.id), post.id),
+            b: common_vendor.o(($event) => navigateToBusinessCard({
+              id: post.user.userId,
+              name: post.user.user,
+              avatar: post.user.avatar
+            }), post.id),
             c: common_vendor.t(post.user.name),
             d: common_vendor.t(post.time),
             e: loggedInUserId.value !== post.user.id

@@ -1,784 +1,901 @@
 <template>
-  <view class="business-card-apply-page">
-    <view class="container">
-      <!-- 申请卡片 -->
-      <!-- 使用 v-if 确保在目标用户信息加载后再显示 -->
-      <view class="application-card" v-if="targetUserInfo">
-        <view class="target-user">
-          <!-- 优先显示头像，如果没有则显示姓氏首字母 -->
-          <image v-if="targetUserInfo.avatar" :src="targetUserInfo.avatar" class="target-avatar-image"></image>
-          <view v-else class="target-avatar">{{ (targetUserInfo.realName || targetUserInfo.nickname || '?').charAt(0) }}</view>
-          
-          <view class="target-name">{{ targetUserInfo.realName || targetUserInfo.nickname }}</view>
-          <view class="target-title">{{ targetUserInfo.companyName || '公司信息未设置' }}</view>
-        </view>
-        
-        <view class="description">
-          您正在申请查看<span class="highlight">{{ targetUserInfo.realName || targetUserInfo.nickname }}</span>的联系方式。请选择一种方式支付查看费用：
-        </view>
-        
-        <view class="cost-section">
-          <view class="cost-title">选择支付方式</view>
-          
-          <view class="cost-options">
-            <view class="cost-option selected"> <!-- 只有一个选项，直接设为选中 -->
-              <view class="currency-icon">
-                <i class="fas fa-gem"></i> <!-- 建议替换为 uni-icons 或图片 -->
-              </view>
-              <view class="cost-amount">1</view>
-              <view class="cost-label">智米</view>
-            </view>
-          </view>
-          
-          <view class="user-balance" v-if="currentUserInfo">
-            <view class="balance-item">
-              <view>我的智米</view>
-              <view class="balance-value" :class="{ 'insufficient-value': currentUserInfo.point < 1 }">
-                {{ currentUserInfo.point }}
-              </view>
-            </view>
-          </view>
-          
-          <view class="insufficient" v-if="showInsufficient">
-            <i class="fas fa-exclamation-circle"></i> 您的智米不足，请先获取更多积分
-          </view>
-        </view>
-        
-        <view class="action-buttons">
-          <button class="btn btn-primary" @click="handlePayToReadCard" :loading="isPaying" :disabled="isPaying">
-            {{ isPaying ? '支付中...' : '确认支付' }}
-          </button>
-          
-          <button class="btn btn-secondary" @click="goToEarnPoints">
-            获取更多智米
-          </button>
-        </view>
-        
-      </view>
-      <!-- 加载中的占位符 -->
-      <view v-else class="loading-placeholder">
-        <uni-load-more status="loading" contentText="正在加载用户信息..."></uni-load-more>
-      </view>
+	<view class="business-card-apply-page">
+		<view class="container">
+			<!-- 申请卡片 -->
+			<!-- 使用 v-if 确保在目标用户信息加载后再显示 -->
+			<view class="application-card" v-if="targetUserInfo">
+				<view class="target-user">
+					<!-- 优先显示头像，如果没有则显示姓氏首字母 -->
+					<image v-if="targetUserInfo.avatar" :src="targetUserInfo.avatar" class="target-avatar-image">
+					</image>
+					<view v-else class="target-avatar">
+						{{ (targetUserInfo.realName || targetUserInfo.nickname || '?').charAt(0) }}</view>
 
-      <!-- 格式化申请好友语卡片 -->
-      <view class="friend-request-card" v-if="currentUserInfo && targetUserInfo">
-        <h1 class="friend-request-title">
-          <i class="fas fa-comment-dots"></i> 申请好友语
-        </h1>
-        <p class="friend-request-desc">复制以下文字，方便快速添加对方微信：</p>
-        <view class="message-box">
-          <text selectable class="formatted-message">{{ formattedFriendRequestMessage }}</text>
-          <button class="copy-btn" @click="copyFriendRequestMessage">
-            ⧉复制
-          </button>
-        </view>
-      </view>
-      
-      <!-- 提示信息 -->
-      <view class="info-card">
-        <h1 class="info-card-title">
-          <i class="fas fa-info-circle"></i> 为什么需要支付积分？
-        </h1>
-        <p>为了维护平台的商业环境和用户隐私，查看他人联系方式需要消耗积分。这有助于：</p>
-        <ul>
-          <li>确保联系请求的严肃性</li>
-          <li>保护用户免受骚扰</li>
-          <li>维护高质量商业环境</li>
-          <li>激励用户贡献高质量内容</li>
-        </ul>
-      </view>
-    </view>
-  </view>
+					<view class="target-name">{{ targetUserInfo.realName || targetUserInfo.nickname }}</view>
+					<!-- <view class="target-title">{{ targetUserInfo.companyName || '公司信息未设置' }}</view> -->
+				</view>
+
+				<view class="description">
+					您正在申请查看<span
+						class="highlight">{{ targetUserInfo.realName || targetUserInfo.nickname }}</span>的联系方式。请选择一种方式支付查看费用：
+				</view>
+
+				<view class="cost-section">
+					<view class="cost-title">选择支付方式</view>
+
+					<view class="cost-options">
+						<view class="cost-option selected"> <!-- 只有一个选项，直接设为选中 -->
+							<view class="currency-icon">
+								<i class="fas fa-gem"></i> <!-- 建议替换为 uni-icons 或图片 -->
+							</view>
+							<view class="cost-amount">1</view>
+							<view class="cost-label">智米</view>
+						</view>
+					</view>
+
+					<view class="user-balance" v-if="currentUserInfo">
+						<view class="balance-item">
+							<view>我的智米</view>
+							<view class="balance-value" :class="{ 'insufficient-value': currentUserInfo.point < 1 }">
+								{{ currentUserInfo.point }}
+							</view>
+						</view>
+					</view>
+
+					<view class="insufficient" v-if="showInsufficient">
+						<i class="fas fa-exclamation-circle"></i> 您的智米不足，请先获取更多积分
+					</view>
+				</view>
+
+				<view class="action-buttons">
+					<button class="btn btn-primary" @click="handlePayToReadCard" :loading="isPaying"
+						:disabled="isPaying">
+						{{ isPaying ? '支付中...' : '确认支付' }}
+					</button>
+
+					<button class="btn btn-secondary" @click="goToEarnPoints">
+						获取更多智米
+					</button>
+				</view>
+
+			</view>
+			<!-- 加载中的占位符 -->
+			<view v-else class="loading-placeholder">
+				<uni-load-more status="loading" contentText="正在加载用户信息..."></uni-load-more>
+			</view>
+
+			<!-- 格式化申请好友语卡片 -->
+			<view class="friend-request-card" v-if="currentUserInfo && targetUserInfo">
+				<h1 class="friend-request-title">
+					<i class="fas fa-comment-dots"></i> 申请好友语
+				</h1>
+				<p class="friend-request-desc">复制以下文字，方便快速添加对方微信：</p>
+				<view class="message-box">
+					<text selectable class="formatted-message">{{ formattedFriendRequestMessage }}</text>
+					<button class="copy-btn" @click="copyFriendRequestMessage">
+						⧉复制
+					</button>
+				</view>
+			</view>
+
+			<!-- 提示信息 -->
+			<view class="info-card">
+				<h1 class="info-card-title">
+					<i class="fas fa-info-circle"></i> 为什么需要支付积分？
+				</h1>
+				<p>为了维护平台的商业环境和用户隐私，查看他人联系方式需要消耗积分。这有助于：</p>
+				<ul>
+					<li>确保联系请求的严肃性</li>
+					<li>保护用户免受骚扰</li>
+					<li>维护高质量商业环境</li>
+					<li>激励用户贡献高质量内容</li>
+				</ul>
+			</view>
+		</view>
+	</view>
 </template>
 
 <script setup>
-import { ref, reactive, computed } from 'vue'; 
-import { onLoad } from '@dcloudio/uni-app';
-import request from '../../utils/request.js'; // 导入您的请求方法
+	import {
+		ref,
+		computed
+	} from 'vue';
+	import {
+		onLoad
+	} from '@dcloudio/uni-app';
+	import request from '../../utils/request.js';
 
-// --- 状态管理 ---
-// 当前登录用户的信息
-const currentUserInfo = ref(null);
-// 目标用户（需要查看名片的用户）的信息
-const targetUserInfo = ref(null);
-// 目标用户的ID，从上个页面接收
-const targetUserId = ref(null);
+	// --- 状态管理 ---
+	const currentUserInfo = ref(null); // 存储【当前登录用户】的信息
+	const targetUserInfo = ref(null);  // 存储【目标用户】的信息
+	const targetUserId = ref(null);
+	const isPaying = ref(false);
+	const showInsufficient = ref(false);
 
-// UI状态
-const isPaying = ref(false); // 是否正在支付中
-const showInsufficient = ref(false); // 是否显示余额不足
+	// --- 页面生命周期 ---
+	onLoad((options) => {
+		if (options.id && options.name) {
+			targetUserId.value = parseInt(options.id, 10);
+			// 1. 立即使用URL参数填充目标用户信息，实现UI即时响应
+			targetUserInfo.value = {
+				id: targetUserId.value,
+				nickname: decodeURIComponent(options.name),
+				realName: decodeURIComponent(options.name), // 预填充，后续可能被API覆盖
+				avatar: options.avatar ? decodeURIComponent(options.avatar) : '/static/images/default-avatar.png'
+			};
+			console.log('已预填充目标用户信息:', targetUserInfo.value);
 
-// --- 页面生命周期 ---
-onLoad((options) => {
-  // 1. 从页面参数中获取目标用户的ID
-  if (options.id) {
-    targetUserId.value = parseInt(options.id, 10);
-    // 同时获取当前登录用户和目标用户的信息
-    fetchInitialData();
-  } else {
-    uni.showToast({ title: '缺少目标用户ID', icon: 'error' });
-    // 1秒后返回上一页
-    setTimeout(() => uni.navigateBack(), 1000);
-  }
-});
+			// 2. 开始页面初始化流程
+			initializePage();
+		} else {
+			uni.showToast({ title: '缺少必要的用户信息', icon: 'error' });
+			setTimeout(() => uni.navigateBack(), 1000);
+		}
+	});
 
-// --- 数据获取 ---
-const fetchInitialData = async () => {
-  uni.showLoading({ title: '加载中...' });
-  try {
-    // 并行获取两个接口的数据，提升速度
-    const [currentUserRes, targetUserRes] = await Promise.all([
-      request('/app-api/member/user/get', { method: 'GET' }), // 获取当前用户信息
-      request(`/app-api/member/user/get?id=${targetUserId.value}`, { method: 'GET' }) // 获取目标用户信息
-    ]);
+	// --- 初始化与数据获取 ---
 
-    // 处理当前用户信息
-    if (currentUserRes.data) {
-      currentUserInfo.value = currentUserRes.data;
-    } else {
-      console.error('获取当前用户信息失败:', currentUserRes.error);
-    }
+	// 页面初始化总函数
+	const initializePage = async () => {
+		// 【核心修正】并行执行两个独立的任务：检查权限 和 获取当前用户信息
+		// 因为无论权限如何，好友申请语和余额都需要当前用户信息。
+		await Promise.all([
+			checkAccessPermission(),
+			fetchCurrentUserInfo()
+		]);
+	};
 
-    // 处理目标用户信息
-    if (targetUserRes.data) {
-      targetUserInfo.value = targetUserRes.data;
-    } else {
-      console.error('获取目标用户信息失败:', targetUserRes.error);
-      uni.showToast({ title: '获取对方信息失败', icon: 'none' });
-    }
-  } catch (e) {
-    console.error('初始化数据时发生错误:', e);
-    uni.showToast({ title: '网络错误，请重试', icon: 'none' });
-  } finally {
-    uni.hideLoading();
-  }
-};
+	// 任务一：检查权限，如果成功则直接跳转
+	const checkAccessPermission = async () => {
+		const checkResult = await request('/app-api/member/user/read-card', {
+			method: 'POST',
+			data: { readUserId: targetUserId.value }
+		});
 
-// --- 核心业务逻辑 ---
-const handlePayToReadCard = async () => {
-  if (isPaying.value) return; // 防止重复点击
-  if (!targetUserId.value) {
-    uni.showToast({ title: '目标用户ID无效', icon: 'none' });
-    return;
-  }
-  
-  // 检查余额
-  if (currentUserInfo.value && currentUserInfo.value.point < 1) {
-      showInsufficient.value = true;
-      uni.showToast({ title: '智米不足', icon: 'none' });
-      return;
-  }
-  
-  isPaying.value = true;
-  showInsufficient.value = false;
+		if (checkResult && checkResult.data && !checkResult.error) {
+			console.log("权限检查成功，直接跳转到名片页。");
+			uni.redirectTo({
+				url: `/pages/my-businessCard/my-businessCard?id=${targetUserId.value}`
+			});
+		} else {
+			// 权限检查失败，什么都不做，让页面停留在支付流程
+			console.log("权限检查失败，显示支付页面。", checkResult.error);
+		}
+	};
 
-  // 调用支付接口
-  const { data, error, ...fullResponse } = await request('/app-api/member/user/pay-read-card', {
-    method: 'POST',
-    data: {
-      readUserId: targetUserId.value
-    }
-  });
+	// 任务二：获取当前登录用户的信息（为了余额和好友申请语）
+	const fetchCurrentUserInfo = async () => {
+		const { data, error } = await request('/app-api/member/user/get', { method: 'GET' });
+		if (data) {
+			currentUserInfo.value = data;
+			console.log('已获取当前登录用户信息:', currentUserInfo.value);
+		} else {
+			console.error('获取当前用户信息失败:', error);
+			uni.showToast({ title: '获取您的账户信息失败', icon: 'none' });
+		}
+	};
 
-  // **将完整的请求结果打印到控制台**
-  console.log('支付接口响应:', { data, error, fullResponse });
+	// --- 核心业务逻辑 ---
+	const handlePayToReadCard = async () => {
+		if (isPaying.value) return;
+		if (!targetUserId.value) {
+			uni.showToast({ title: '目标用户ID无效', icon: 'none' });
+			return;
+		}
+		if (currentUserInfo.value && currentUserInfo.value.point < 1) {
+			showInsufficient.value = true;
+			uni.showToast({ title: '智米不足', icon: 'none' });
+			return;
+		}
+		isPaying.value = true;
+		showInsufficient.value = false;
 
-  isPaying.value = false;
+		const { data, error } = await request('/app-api/member/user/pay-read-card', {
+			method: 'POST',
+			data: { readUserId: targetUserId.value }
+		});
 
-  if (error) {
-    // 请求失败（网络错误、业务错误如余额不足等）
-    uni.showToast({ title: `支付失败: ${error}`, icon: 'none', duration: 2000 });
-  } else if (data === true) {
-    // 支付成功
-    uni.showToast({ title: '支付成功！', icon: 'success', duration: 2000 });
-    // 支付成功后，可以刷新当前用户信息（更新余额），然后跳转
-    fetchInitialData(); // 重新获取数据以更新智米余额
-    setTimeout(() => {
-      // 跳转到对方的名片详情页
-      uni.redirectTo({ // 使用 redirectTo 避免用户返回此支付页
-        url: `/pages/my-businessCard/my-businessCard?id=${targetUserId.value}`
-      });
-    }, 2000);
-  } else {
-    // 其他未知情况
-    uni.showToast({ title: '支付遇到未知问题', icon: 'none', duration: 2000 });
-  }
-};
+		isPaying.value = false;
 
+		if (error) {
+			uni.showToast({ title: `支付失败: ${error}`, icon: 'none', duration: 2000 });
+		} else if (data === true) {
+			uni.showToast({ title: '支付成功！', icon: 'success', duration: 2000 });
+			
+			// 【修正】支付成功后，只需刷新当前用户的余额信息即可
+			fetchCurrentUserInfo();
+			
+			setTimeout(() => {
+				uni.redirectTo({
+					url: `/pages/my-businessCard/my-businessCard?id=${targetUserId.value}`
+				});
+			}, 2000);
+		} else {
+			uni.showToast({ title: '支付遇到未知问题', icon: 'none', duration: 2000 });
+		}
+	};
 
-// --- 辅助功能 ---
-// 前往赚取积分页面
-const goToEarnPoints = () => {
-  uni.navigateTo({ url: '/pages/my-account/my-account' });
-};
+	// --- 辅助功能 ---
+	const goToEarnPoints = () => {
+		uni.navigateTo({ url: '/pages/my-account/my-account' });
+	};
 
-// 计算属性：格式化申请好友语
-const formattedFriendRequestMessage = computed(() => {
-  if (!currentUserInfo.value || !targetUserInfo.value) return '正在生成中...';
-  const myName = currentUserInfo.value.realName || currentUserInfo.value.nickname;
-  const myCompany = currentUserInfo.value.companyName || '我的公司';
-  const myWork = currentUserInfo.value.professionalTitle || '我的职位';
-  return `您好！我是${myCompany}的${myName}，目前在从事${myWork}工作。我从高伙猩球平台获得您的联系方式，希望可以认识一下。`;
-});
+	// 计算属性现在可以正确地从两个独立的数据源取值
+	const formattedFriendRequestMessage = computed(() => {
+		if (!currentUserInfo.value || !targetUserInfo.value) return '正在生成中...';
+        
+		const targetName = targetUserInfo.value.realName; // 来自URL参数
+		const myName = currentUserInfo.value.realName || currentUserInfo.value.nickname; // 来自API
+		const myCompany = currentUserInfo.value.companyName || '我的公司'; // 来自API
+		const myWork = currentUserInfo.value.professionalTitle || '我的职位'; // 来自API
+        
+		return `您好 ${targetName}！我是${myCompany}的${myName}，目前在从事${myWork}工作。我从高伙猩球平台获得您的联系方式，希望可以认识一下。`;
+	});
 
-// 复制申请好友语
-const copyFriendRequestMessage = () => {
-  uni.setClipboardData({
-    data: formattedFriendRequestMessage.value,
-    success: () => uni.showToast({ title: '复制成功！', icon: 'success' }),
-    fail: () => uni.showToast({ title: '复制失败', icon: 'none' })
-  });
-};
+	const copyFriendRequestMessage = () => {
+		uni.setClipboardData({
+			data: formattedFriendRequestMessage.value,
+			success: () => uni.showToast({ title: '复制成功！', icon: 'success' }),
+			fail: () => uni.showToast({ title: '复制失败', icon: 'none' })
+		});
+	};
 </script>
 
 <style scoped>
-/* 在原有样式基础上，新增和修改以下样式 */
-.target-avatar-image {
-    width: 180rpx;
-    height: 180rpx;
-    border-radius: 50%;
-    margin-bottom: 30rpx;
-    border: 6rpx solid white;
-    box-shadow: 0 10rpx 30rpx rgba(0,0,0,0.2);
-}
+	/* 在原有样式基础上，新增和修改以下样式 */
+	.target-avatar-image {
+		width: 180rpx;
+		height: 180rpx;
+		border-radius: 50%;
+		margin-bottom: 30rpx;
+		border: 6rpx solid white;
+		box-shadow: 0 10rpx 30rpx rgba(0, 0, 0, 0.2);
+	}
 
-.loading-placeholder {
-    padding: 100rpx 0;
-}
+	.loading-placeholder {
+		padding: 100rpx 0;
+	}
 
-/* 其他样式保持不变... */
-/* 页面根容器样式，模拟 body 的布局和最大宽度 */
-.business-card-apply-page {
-    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-    color: #333;
-    line-height: 1.6;
-    max-width: 750rpx; /* uni-app 推荐使用 rpx */
-    margin: 0 auto; /* 页面内容居中 */
-    position: relative;
-    min-height: 100vh; /* 确保页面至少占满视口高度 */
-    display: flex; /* 使用 flex 布局，使顶部导航和内容可以分开管理 */
-    flex-direction: column;
-}
+	/* 其他样式保持不变... */
+	/* 页面根容器样式，模拟 body 的布局和最大宽度 */
+	.business-card-apply-page {
+		background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+		color: #333;
+		line-height: 1.6;
+		max-width: 750rpx;
+		/* uni-app 推荐使用 rpx */
+		margin: 0 auto;
+		/* 页面内容居中 */
+		position: relative;
+		min-height: 100vh;
+		/* 确保页面至少占满视口高度 */
+		display: flex;
+		/* 使用 flex 布局，使顶部导航和内容可以分开管理 */
+		flex-direction: column;
+	}
 
-.container {
-    padding: 40rpx; /* 转换为 rpx */
-    padding-bottom: 160rpx; /* 为底部导航栏留出空间，转换为 rpx */
-    flex: 1; /* 容器占据剩余垂直空间 */
-    overflow-y: auto; /* 允许内容垂直滚动 */
-    -webkit-overflow-scrolling: touch; /* 提升 iOS 滚动流畅度 */
-}
+	.container {
+		padding: 40rpx;
+		/* 转换为 rpx */
+		padding-bottom: 160rpx;
+		/* 为底部导航栏留出空间，转换为 rpx */
+		flex: 1;
+		/* 容器占据剩余垂直空间 */
+		overflow-y: auto;
+		/* 允许内容垂直滚动 */
+		-webkit-overflow-scrolling: touch;
+		/* 提升 iOS 滚动流畅度 */
+	}
 
-/* 顶部导航 (此处模板中已移除，保留样式以防需要) */
-.header {
-    background: linear-gradient(135deg, #FF6A00, #FF8C00);
-    color: white;
-    padding: 36rpx 40rpx; /* 转换为 rpx */
-    position: sticky; /* 吸顶效果 */
-    top: 0;
-    z-index: 100;
-    box-shadow: 0 6rpx 24rpx rgba(255, 106, 0, 0.3); /* 转换为 rpx */
-    display: flex;
-    align-items: center;
-    border-bottom-left-radius: 30rpx; /* 转换为 rpx */
-    border-bottom-right-radius: 30rpx; /* 转换为 rpx */
-}
+	/* 顶部导航 (此处模板中已移除，保留样式以防需要) */
+	.header {
+		background: linear-gradient(135deg, #FF6A00, #FF8C00);
+		color: white;
+		padding: 36rpx 40rpx;
+		/* 转换为 rpx */
+		position: sticky;
+		/* 吸顶效果 */
+		top: 0;
+		z-index: 100;
+		box-shadow: 0 6rpx 24rpx rgba(255, 106, 0, 0.3);
+		/* 转换为 rpx */
+		display: flex;
+		align-items: center;
+		border-bottom-left-radius: 30rpx;
+		/* 转换为 rpx */
+		border-bottom-right-radius: 30rpx;
+		/* 转换为 rpx */
+	}
 
-.header .back-btn {
-    font-size: 44rpx; /* 转换为 rpx */
-    margin-right: 30rpx; /* 转换为 rpx */
-    width: 72rpx; /* 转换为 rpx */
-    height: 72rpx; /* 转换为 rpx */
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background 0.3s;
-}
+	.header .back-btn {
+		font-size: 44rpx;
+		/* 转换为 rpx */
+		margin-right: 30rpx;
+		/* 转换为 rpx */
+		width: 72rpx;
+		/* 转换为 rpx */
+		height: 72rpx;
+		/* 转换为 rpx */
+		border-radius: 50%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		transition: background 0.3s;
+	}
 
-.header .back-btn:active {
-    background: rgba(255, 255, 255, 0.2);
-}
+	.header .back-btn:active {
+		background: rgba(255, 255, 255, 0.2);
+	}
 
-.header h1 {
-    font-size: 40rpx; /* 转换为 rpx */
-    font-weight: 600;
-    flex-grow: 1;
-    text-shadow: 0 2rpx 4rpx rgba(0,0,0,0.2); /* 转换为 rpx */
-}
+	.header h1 {
+		font-size: 40rpx;
+		/* 转换为 rpx */
+		font-weight: 600;
+		flex-grow: 1;
+		text-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.2);
+		/* 转换为 rpx */
+	}
 
-/* 申请卡片 */
-.application-card {
-    background: white;
-    border-radius: 40rpx; /* 转换为 rpx */
-    margin: 50rpx 0; /* 转换为 rpx */
-    padding: 60rpx; /* 转换为 rpx */
-    box-shadow: 0 20rpx 60rpx rgba(0,0,0,0.1); /* 转换为 rpx */
-    border: 2rpx solid #eee; /* 转换为 rpx */
-    position: relative;
-    overflow: hidden;
-    text-align: center;
-}
+	/* 申请卡片 */
+	.application-card {
+		background: white;
+		border-radius: 40rpx;
+		/* 转换为 rpx */
+		margin: 50rpx 0;
+		/* 转换为 rpx */
+		padding: 60rpx;
+		/* 转换为 rpx */
+		box-shadow: 0 20rpx 60rpx rgba(0, 0, 0, 0.1);
+		/* 转换为 rpx */
+		border: 2rpx solid #eee;
+		/* 转换为 rpx */
+		position: relative;
+		overflow: hidden;
+		text-align: center;
+	}
 
-.application-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 10rpx; /* 转换为 rpx */
-    background: linear-gradient(to right, #FF6A00, #FF8C00);
-}
+	.application-card::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 10rpx;
+		/* 转换为 rpx */
+		background: linear-gradient(to right, #FF6A00, #FF8C00);
+	}
 
-.target-user {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-bottom: 60rpx; /* 转换为 rpx */
-}
+	.target-user {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		margin-bottom: 60rpx;
+		/* 转换为 rpx */
+	}
 
-.target-avatar {
-    width: 180rpx; /* 转换为 rpx */
-    height: 180rpx; /* 转换为 rpx */
-    border-radius: 50%;
-    background: linear-gradient(135deg, #FF6A00, #FF8C00);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-weight: bold;
-    font-size: 72rpx; /* 转换为 rpx */
-    margin-bottom: 30rpx; /* 转换为 rpx */
-    border: 6rpx solid white; /* 转换为 rpx */
-    box-shadow: 0 10rpx 30rpx rgba(0,0,0,0.2); /* 转换为 rpx */
-}
+	.target-avatar {
+		width: 180rpx;
+		/* 转换为 rpx */
+		height: 180rpx;
+		/* 转换为 rpx */
+		border-radius: 50%;
+		background: linear-gradient(135deg, #FF6A00, #FF8C00);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		color: white;
+		font-weight: bold;
+		font-size: 72rpx;
+		/* 转换为 rpx */
+		margin-bottom: 30rpx;
+		/* 转换为 rpx */
+		border: 6rpx solid white;
+		/* 转换为 rpx */
+		box-shadow: 0 10rpx 30rpx rgba(0, 0, 0, 0.2);
+		/* 转换为 rpx */
+	}
 
-.target-name {
-    font-size: 48rpx; /* 转换为 rpx */
-    font-weight: 700;
-    color: #333;
-}
+	.target-name {
+		font-size: 48rpx;
+		/* 转换为 rpx */
+		font-weight: 700;
+		color: #333;
+	}
 
-.target-title {
-    font-size: 32rpx; /* 转换为 rpx */
-    color: #666;
-    margin-top: 10rpx; /* 转换为 rpx */
-}
+	.target-title {
+		font-size: 32rpx;
+		/* 转换为 rpx */
+		color: #666;
+		margin-top: 10rpx;
+		/* 转换为 rpx */
+	}
 
-.description {
-    font-size: 32rpx; /* 转换为 rpx */
-    color: #555;
-    margin: 40rpx 0; /* 转换为 rpx */
-    line-height: 1.7;
-    padding: 0 20rpx; /* 转换为 rpx */
-}
+	.description {
+		font-size: 32rpx;
+		/* 转换为 rpx */
+		color: #555;
+		margin: 40rpx 0;
+		/* 转换为 rpx */
+		line-height: 1.7;
+		padding: 0 20rpx;
+		/* 转换为 rpx */
+	}
 
-.highlight {
-    color: #FF6A00;
-    font-weight: bold;
-}
+	.highlight {
+		color: #FF6A00;
+		font-weight: bold;
+	}
 
-.cost-section {
-    background: #fff8f3;
-    border-radius: 30rpx; /* 转换为 rpx */
-    padding: 40rpx; /* 转换为 rpx */
-    margin: 50rpx 0; /* 转换为 rpx */
-    border: 2rpx solid #ffe8d9; /* 转换为 rpx */
-}
+	.cost-section {
+		background: #fff8f3;
+		border-radius: 30rpx;
+		/* 转换为 rpx */
+		padding: 40rpx;
+		/* 转换为 rpx */
+		margin: 50rpx 0;
+		/* 转换为 rpx */
+		border: 2rpx solid #ffe8d9;
+		/* 转换为 rpx */
+	}
 
-.cost-title {
-    font-size: 36rpx; /* 转换为 rpx */
-    font-weight: 600;
-    color: #FF6A00;
-    margin-bottom: 40rpx; /* 转换为 rpx */
-    text-align: center;
-}
+	.cost-title {
+		font-size: 36rpx;
+		/* 转换为 rpx */
+		font-weight: 600;
+		color: #FF6A00;
+		margin-bottom: 40rpx;
+		/* 转换为 rpx */
+		text-align: center;
+	}
 
-.cost-options {
-    display: flex;
-    justify-content: center; /* 确保单个选项也能居中 */
-    gap: 40rpx; /* 转换为 rpx */
-    margin-bottom: 20rpx; /* 转换为 rpx */
-}
+	.cost-options {
+		display: flex;
+		justify-content: center;
+		/* 确保单个选项也能居中 */
+		gap: 40rpx;
+		/* 转换为 rpx */
+		margin-bottom: 20rpx;
+		/* 转换为 rpx */
+	}
 
-.cost-option {
-    /* 移除 flex: 1; 因为现在只有一个选项，flex:1 会使其占据所有空间 */
-    max-width: 300rpx; /* 转换为 rpx */
-    min-width: 280rpx; /* 确保有最小宽度，避免内容过少时太窄 */
-    border: 4rpx solid #e0e0e0; /* 转换为 rpx */
-    border-radius: 30rpx; /* 转换为 rpx */
-    padding: 30rpx; /* 转换为 rpx */
-    text-align: center;
-    transition: all 0.3s;
-    position: relative;
-    background: white;
-}
+	.cost-option {
+		/* 移除 flex: 1; 因为现在只有一个选项，flex:1 会使其占据所有空间 */
+		max-width: 300rpx;
+		/* 转换为 rpx */
+		min-width: 280rpx;
+		/* 确保有最小宽度，避免内容过少时太窄 */
+		border: 4rpx solid #e0e0e0;
+		/* 转换为 rpx */
+		border-radius: 30rpx;
+		/* 转换为 rpx */
+		padding: 30rpx;
+		/* 转换为 rpx */
+		text-align: center;
+		transition: all 0.3s;
+		position: relative;
+		background: white;
+	}
 
-.cost-option.selected {
-    border-color: #FF6A00;
-    background: #fff8f3;
-    box-shadow: 0 10rpx 30rpx rgba(255, 106, 0, 0.15); /* 转换为 rpx */
-}
+	.cost-option.selected {
+		border-color: #FF6A00;
+		background: #fff8f3;
+		box-shadow: 0 10rpx 30rpx rgba(255, 106, 0, 0.15);
+		/* 转换为 rpx */
+	}
 
-.cost-option.selected::after {
-    content: '✓';
-    position: absolute;
-    top: -20rpx; /* 转换为 rpx */
-    right: -20rpx; /* 转换为 rpx */
-    width: 50rpx; /* 转换为 rpx */
-    height: 50rpx; /* 转换为 rpx */
-    background: #FF6A00;
-    color: white;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-    font-size: 32rpx; /* 转换为 rpx */
-}
+	.cost-option.selected::after {
+		content: '✓';
+		position: absolute;
+		top: -20rpx;
+		/* 转换为 rpx */
+		right: -20rpx;
+		/* 转换为 rpx */
+		width: 50rpx;
+		/* 转换为 rpx */
+		height: 50rpx;
+		/* 转换为 rpx */
+		background: #FF6A00;
+		color: white;
+		border-radius: 50%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-weight: bold;
+		font-size: 32rpx;
+		/* 转换为 rpx */
+	}
 
-.currency-icon {
-    font-size: 56rpx; /* 转换为 rpx */
-    color: #FF8C00;
-    margin-bottom: 20rpx; /* 转换为 rpx */
-}
+	.currency-icon {
+		font-size: 56rpx;
+		/* 转换为 rpx */
+		color: #FF8C00;
+		margin-bottom: 20rpx;
+		/* 转换为 rpx */
+	}
 
-.cost-amount {
-    font-size: 40rpx; /* 转换为 rpx */
-    font-weight: 700;
-    color: #333;
-    margin-bottom: 10rpx; /* 转换为 rpx */
-}
+	.cost-amount {
+		font-size: 40rpx;
+		/* 转换为 rpx */
+		font-weight: 700;
+		color: #333;
+		margin-bottom: 10rpx;
+		/* 转换为 rpx */
+	}
 
-.cost-label {
-    font-size: 28rpx; /* 转换为 rpx */
-    color: #777;
-}
+	.cost-label {
+		font-size: 28rpx;
+		/* 转换为 rpx */
+		color: #777;
+	}
 
-.user-balance {
-    display: flex;
-    justify-content: center; /* 单个项目时也能居中 */
-    gap: 60rpx; /* 转换为 rpx */
-    margin: 40rpx 0; /* 转换为 rpx */
-    padding: 30rpx; /* 转换为 rpx */
-    background: #f8f9fa;
-    border-radius: 24rpx; /* 转换为 rpx */
-    font-size: 30rpx; /* 转换为 rpx */
-}
+	.user-balance {
+		display: flex;
+		justify-content: center;
+		/* 单个项目时也能居中 */
+		gap: 60rpx;
+		/* 转换为 rpx */
+		margin: 40rpx 0;
+		/* 转换为 rpx */
+		padding: 30rpx;
+		/* 转换为 rpx */
+		background: #f8f9fa;
+		border-radius: 24rpx;
+		/* 转换为 rpx */
+		font-size: 30rpx;
+		/* 转换为 rpx */
+	}
 
-.balance-item {
-    text-align: center;
-}
+	.balance-item {
+		text-align: center;
+	}
 
-.balance-value {
-    font-weight: 700;
-    font-size: 36rpx; /* 转换为 rpx */
-    color: #FF6A00;
-    margin-top: 10rpx; /* 转换为 rpx */
-}
+	.balance-value {
+		font-weight: 700;
+		font-size: 36rpx;
+		/* 转换为 rpx */
+		color: #FF6A00;
+		margin-top: 10rpx;
+		/* 转换为 rpx */
+	}
 
-.insufficient-value {
-    color: #e53935;
-}
+	.insufficient-value {
+		color: #e53935;
+	}
 
-.action-buttons {
-    display: flex;
-    flex-direction: column;
-    gap: 30rpx; /* 转换为 rpx */
-    margin-top: 40rpx; /* 转换为 rpx */
-}
+	.action-buttons {
+		display: flex;
+		flex-direction: column;
+		gap: 30rpx;
+		/* 转换为 rpx */
+		margin-top: 40rpx;
+		/* 转换为 rpx */
+	}
 
-.btn {
-    padding: 32rpx; /* 转换为 rpx */
-    border-radius: 24rpx; /* 转换为 rpx */
-    font-size: 34rpx; /* 转换为 rpx */
-    font-weight: 600;
-    transition: all 0.3s;
-    text-align: center;
-    border: none;
-    -webkit-appearance: none;
-    background-color: transparent;
-    line-height: 1;
-}
+	.btn {
+		padding: 32rpx;
+		/* 转换为 rpx */
+		border-radius: 24rpx;
+		/* 转换为 rpx */
+		font-size: 34rpx;
+		/* 转换为 rpx */
+		font-weight: 600;
+		transition: all 0.3s;
+		text-align: center;
+		border: none;
+		-webkit-appearance: none;
+		background-color: transparent;
+		line-height: 1;
+	}
 
-.btn::after {
-    border: none;
-}
+	.btn::after {
+		border: none;
+	}
 
-.btn-primary {
-    background: linear-gradient(135deg, #FF6A00, #FF8C00);
-    color: white;
-    box-shadow: 0 10rpx 30rpx rgba(255, 106, 0, 0.3); /* 转换为 rpx */
-}
+	.btn-primary {
+		background: linear-gradient(135deg, #FF6A00, #FF8C00);
+		color: white;
+		box-shadow: 0 10rpx 30rpx rgba(255, 106, 0, 0.3);
+		/* 转换为 rpx */
+	}
 
-.btn-primary:active {
-    background: linear-gradient(135deg, #e05a00, #e07a00);
-    transform: translateY(-4rpx); /* 转换为 rpx */
-    box-shadow: 0 14rpx 36rpx rgba(255, 106, 0, 0.4); /* 转换为 rpx */
-}
+	.btn-primary:active {
+		background: linear-gradient(135deg, #e05a00, #e07a00);
+		transform: translateY(-4rpx);
+		/* 转换为 rpx */
+		box-shadow: 0 14rpx 36rpx rgba(255, 106, 0, 0.4);
+		/* 转换为 rpx */
+	}
 
-.btn-secondary {
-    background: #f0f0f0;
-    color: #666;
-}
+	.btn-secondary {
+		background: #f0f0f0;
+		color: #666;
+	}
 
-.btn-secondary:active {
-    background: #e0e0e0;
-}
+	.btn-secondary:active {
+		background: #e0e0e0;
+	}
 
-.insufficient {
-    color: #e53935;
-    font-size: 28rpx; /* 转换为 rpx */
-    margin-top: 20rpx; /* 转换为 rpx */
-    text-align: center;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10rpx; /* 转换为 rpx */
-}
+	.insufficient {
+		color: #e53935;
+		font-size: 28rpx;
+		/* 转换为 rpx */
+		margin-top: 20rpx;
+		/* 转换为 rpx */
+		text-align: center;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 10rpx;
+		/* 转换为 rpx */
+	}
 
-.success-message {
-    background: #4caf50;
-    color: white;
-    padding: 30rpx; /* 转换为 rpx */
-    border-radius: 24rpx; /* 转换为 rpx */
-    margin-top: 40rpx; /* 转换为 rpx */
-    text-align: center;
-    animation: fadeIn 0.5s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10rpx; /* 转换为 rpx */
-    font-size: 32rpx; /* 转换为 rpx */
-}
+	.success-message {
+		background: #4caf50;
+		color: white;
+		padding: 30rpx;
+		/* 转换为 rpx */
+		border-radius: 24rpx;
+		/* 转换为 rpx */
+		margin-top: 40rpx;
+		/* 转换为 rpx */
+		text-align: center;
+		animation: fadeIn 0.5s;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 10rpx;
+		/* 转换为 rpx */
+		font-size: 32rpx;
+		/* 转换为 rpx */
+	}
 
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20rpx); } /* 转换为 rpx */
-    to { opacity: 1; transform: translateY(0); }
-}
+	@keyframes fadeIn {
+		from {
+			opacity: 0;
+			transform: translateY(20rpx);
+		}
 
-/* 新增的格式化申请好友语卡片样式 */
-.friend-request-card {
-    background: white;
-    border-radius: 40rpx;
-    margin-top: 50rpx; /* 与上一个卡片保持间距 */
-    padding: 50rpx;
-    box-shadow: 0 15rpx 50rpx rgba(0,0,0,0.08);
-    border: 2rpx solid #f0f0f0;
-    position: relative;
-    overflow: hidden;
-}
+		/* 转换为 rpx */
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
 
-.friend-request-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 8rpx;
-    background: linear-gradient(to right, #007bff, #0056b3); /* 蓝色渐变 */
-    border-top-left-radius: 40rpx;
-    border-top-right-radius: 40rpx;
-}
+	/* 新增的格式化申请好友语卡片样式 */
+	.friend-request-card {
+		background: white;
+		border-radius: 40rpx;
+		margin-top: 50rpx;
+		/* 与上一个卡片保持间距 */
+		padding: 50rpx;
+		box-shadow: 0 15rpx 50rpx rgba(0, 0, 0, 0.08);
+		border: 2rpx solid #f0f0f0;
+		position: relative;
+		overflow: hidden;
+	}
 
-.friend-request-title {
-    font-size: 42rpx;
-    font-weight: 700;
-    color: #333;
-    margin-bottom: 20rpx; /* 调整标题下方间距 */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-}
+	.friend-request-card::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 8rpx;
+		background: linear-gradient(to right, #007bff, #0056b3);
+		/* 蓝色渐变 */
+		border-top-left-radius: 40rpx;
+		border-top-right-radius: 40rpx;
+	}
 
-.friend-request-title i {
-    margin-right: 20rpx;
-    font-size: 48rpx;
-    color: #007bff; /* 图标颜色 */
-    text-shadow: 0 2rpx 4rpx rgba(0,0,0,0.1);
-}
+	.friend-request-title {
+		font-size: 42rpx;
+		font-weight: 700;
+		color: #333;
+		margin-bottom: 20rpx;
+		/* 调整标题下方间距 */
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		text-align: center;
+	}
 
-.friend-request-desc {
-    font-size: 28rpx;
-    color: #777;
-    text-align: center;
-    margin-bottom: 30rpx;
-}
+	.friend-request-title i {
+		margin-right: 20rpx;
+		font-size: 48rpx;
+		color: #007bff;
+		/* 图标颜色 */
+		text-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.1);
+	}
 
-.message-box {
-    background: #f8f9fa;
-    border: 2rpx solid #e9ecef;
-    border-radius: 20rpx;
-    padding: 30rpx;
-    display: flex;
-    flex-direction: column;
-    align-items: center; /* 文本和按钮居中 */
-    gap: 20rpx; /* 文本和按钮间距 */
-}
+	.friend-request-desc {
+		font-size: 28rpx;
+		color: #777;
+		text-align: center;
+		margin-bottom: 30rpx;
+	}
 
-.formatted-message {
-    width: 100%;
-    font-size: 30rpx;
-    color: #555;
-    line-height: 1.6;
-    text-align: left; /* 文本左对齐 */
-    word-break: break-all; /* 确保长文本换行 */
-}
+	.message-box {
+		background: #f8f9fa;
+		border: 2rpx solid #e9ecef;
+		border-radius: 20rpx;
+		padding: 30rpx;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		/* 文本和按钮居中 */
+		gap: 20rpx;
+		/* 文本和按钮间距 */
+	}
 
-.copy-btn {
-    background: #007bff;
-    color: black;
-    border: none;
-    border-radius: 24rpx;
-    padding: 20rpx 40rpx;
-    font-size: 30rpx;
-    font-weight: 600;
-    box-shadow: 0 8rpx 20rpx rgba(0, 123, 255, 0.3);
-    transition: background 0.3s;
-    width: auto; /* 按钮宽度自适应内容 */
-    /* uni-app 按钮默认样式重置 */
-    -webkit-appearance: none;
-    background-color: transparent;
-    line-height: 1;
-    display: flex; /* 让图标和文字在按钮内水平居中 */
-    align-items: center;
-    justify-content: center;
-    gap: 10rpx; /* 图标和文字间距 */
-}
+	.formatted-message {
+		width: 100%;
+		font-size: 30rpx;
+		color: #555;
+		line-height: 1.6;
+		text-align: left;
+		/* 文本左对齐 */
+		word-break: break-all;
+		/* 确保长文本换行 */
+	}
 
-.copy-btn::after {
-    border: none;
-}
+	.copy-btn {
+		background: #007bff;
+		color: black;
+		border: none;
+		border-radius: 24rpx;
+		padding: 20rpx 40rpx;
+		font-size: 30rpx;
+		font-weight: 600;
+		box-shadow: 0 8rpx 20rpx rgba(0, 123, 255, 0.3);
+		transition: background 0.3s;
+		width: auto;
+		/* 按钮宽度自适应内容 */
+		/* uni-app 按钮默认样式重置 */
+		-webkit-appearance: none;
+		background-color: transparent;
+		line-height: 1;
+		display: flex;
+		/* 让图标和文字在按钮内水平居中 */
+		align-items: center;
+		justify-content: center;
+		gap: 10rpx;
+		/* 图标和文字间距 */
+	}
 
-.copy-btn:active {
-    background: #0056b3;
-    transform: translateY(-2rpx);
-    box-shadow: 0 10rpx 24rpx rgba(0, 123, 255, 0.4);
-}
+	.copy-btn::after {
+		border: none;
+	}
 
-.copy-btn i {
-    font-size: 32rpx;
-}
+	.copy-btn:active {
+		background: #0056b3;
+		transform: translateY(-2rpx);
+		box-shadow: 0 10rpx 24rpx rgba(0, 123, 255, 0.4);
+	}
+
+	.copy-btn i {
+		font-size: 32rpx;
+	}
 
 
-/* 提示卡片 */
-.info-card {
-    background: white;
-    border-radius: 40rpx;
-    padding: 50rpx;
-    margin-top: 50rpx;
-    box-shadow: 0 15rpx 50rpx rgba(0,0,0,0.08);
-    border: 2rpx solid #f0f0f0;
-    position: relative;
-    overflow: hidden;
-}
+	/* 提示卡片 */
+	.info-card {
+		background: white;
+		border-radius: 40rpx;
+		padding: 50rpx;
+		margin-top: 50rpx;
+		box-shadow: 0 15rpx 50rpx rgba(0, 0, 0, 0.08);
+		border: 2rpx solid #f0f0f0;
+		position: relative;
+		overflow: hidden;
+	}
 
-.info-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 8rpx;
-    background: linear-gradient(to right, #4CAF50, #8BC34A);
-    border-top-left-radius: 40rpx;
-    border-top-right-radius: 40rpx;
-}
+	.info-card::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 8rpx;
+		background: linear-gradient(to right, #4CAF50, #8BC34A);
+		border-top-left-radius: 40rpx;
+		border-top-right-radius: 40rpx;
+	}
 
-.info-card-title {
-    font-size: 42rpx;
-    font-weight: 700;
-    color: #333;
-    margin-bottom: 40rpx;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-}
+	.info-card-title {
+		font-size: 42rpx;
+		font-weight: 700;
+		color: #333;
+		margin-bottom: 40rpx;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		text-align: center;
+	}
 
-.info-card-title i {
-    margin-right: 20rpx;
-    font-size: 48rpx;
-    color: #4CAF50;
-    text-shadow: 0 2rpx 4rpx rgba(0,0,0,0.1);
-}
+	.info-card-title i {
+		margin-right: 20rpx;
+		font-size: 48rpx;
+		color: #4CAF50;
+		text-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.1);
+	}
 
-.info-card p {
-    font-size: 30rpx;
-    color: #666;
-    margin-bottom: 25rpx;
-    line-height: 1.7;
-    text-align: justify;
-}
+	.info-card p {
+		font-size: 30rpx;
+		color: #666;
+		margin-bottom: 25rpx;
+		line-height: 1.7;
+		text-align: justify;
+	}
 
-.info-card ul {
-    padding-left: 60rpx;
-    margin-top: 30rpx;
-    list-style: none;
-}
+	.info-card ul {
+		padding-left: 60rpx;
+		margin-top: 30rpx;
+		list-style: none;
+	}
 
-.info-card li {
-    position: relative;
-    font-size: 30rpx;
-    color: #666;
-    margin-bottom: 20rpx;
-    line-height: 1.6;
-    padding-left: 40rpx;
-}
+	.info-card li {
+		position: relative;
+		font-size: 30rpx;
+		color: #666;
+		margin-bottom: 20rpx;
+		line-height: 1.6;
+		padding-left: 40rpx;
+	}
 
-.info-card li::before {
-    content: '\2022';
-    font-size: 36rpx;
-    color: #4CAF50;
-    position: absolute;
-    left: 0;
-    top: 0rpx;
-    line-height: 1.6;
-    font-weight: bold;
-}
+	.info-card li::before {
+		content: '\2022';
+		font-size: 36rpx;
+		color: #4CAF50;
+		position: absolute;
+		left: 0;
+		top: 0rpx;
+		line-height: 1.6;
+		font-weight: bold;
+	}
 
-/* 底部导航 (此处模板中已移除，保留样式以防需要) */
-.bottom-nav {
-    position: fixed;
-    bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 100%;
-    background: white;
-    display: flex;
-    justify-content: space-around;
-    padding: 24rpx 0;
-    padding-bottom: calc(24rpx + env(safe-area-inset-bottom));
-    border-top: 2rpx solid #e0e0e0;
-    box-shadow: 0 -10rpx 30rpx rgba(0,0,0,0.05);
-    max-width: 750rpx;
-    z-index: 100;
-    border-top-left-radius: 40rpx;
-    border-top-right-radius: 40rpx;
-}
+	/* 底部导航 (此处模板中已移除，保留样式以防需要) */
+	.bottom-nav {
+		position: fixed;
+		bottom: 0;
+		left: 50%;
+		transform: translateX(-50%);
+		width: 100%;
+		background: white;
+		display: flex;
+		justify-content: space-around;
+		padding: 24rpx 0;
+		padding-bottom: calc(24rpx + env(safe-area-inset-bottom));
+		border-top: 2rpx solid #e0e0e0;
+		box-shadow: 0 -10rpx 30rpx rgba(0, 0, 0, 0.05);
+		max-width: 750rpx;
+		z-index: 100;
+		border-top-left-radius: 40rpx;
+		border-top-right-radius: 40rpx;
+	}
 
-.nav-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    font-size: 24rpx;
-    color: #888;
-    padding: 10rpx 30rpx;
-    border-radius: 30rpx;
-    transition: all 0.3s;
-}
+	.nav-item {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		font-size: 24rpx;
+		color: #888;
+		padding: 10rpx 30rpx;
+		border-radius: 30rpx;
+		transition: all 0.3s;
+	}
 
-.nav-item.active {
-    color: #FF6A00;
-    background: rgba(255, 106, 0, 0.08);
-}
+	.nav-item.active {
+		color: #FF6A00;
+		background: rgba(255, 106, 0, 0.08);
+	}
 
-.nav-item i {
-    font-size: 44rpx;
-    margin-bottom: 10rpx;
-}
+	.nav-item i {
+		font-size: 44rpx;
+		margin-bottom: 10rpx;
+	}
 
-.nav-item span {
-    font-weight: 500;
-}
+	.nav-item span {
+		font-weight: 500;
+	}
 </style>

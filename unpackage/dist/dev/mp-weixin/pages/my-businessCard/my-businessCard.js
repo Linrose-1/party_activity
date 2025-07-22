@@ -1,5 +1,6 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
+const common_assets = require("../../common/assets.js");
 const utils_request = require("../../utils/request.js");
 if (!Array) {
   const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
@@ -17,15 +18,58 @@ const _sfc_main = {
   setup(__props) {
     const userInfo = common_vendor.ref(null);
     const sharePopup = common_vendor.ref(null);
-    common_vendor.onMounted(() => {
-      fetchUserInfo();
+    const targetUserId = common_vendor.ref(null);
+    const loggedInUserId = common_vendor.ref(null);
+    const customShareTitle = common_vendor.ref("");
+    const showTimelineGuide = common_vendor.ref(false);
+    common_vendor.onLoad((options) => {
+      if (options && options.id) {
+        targetUserId.value = options.id;
+        fetchTargetUserInfo(options.id);
+      } else {
+        fetchOwnUserInfo();
+      }
+      if (options && options.sharerId) {
+        const sharerId = options.sharerId;
+        const bizId = options.id;
+        if (sharerId && loggedInUserId.value && sharerId === loggedInUserId.value) {
+          common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:105", "用户点击了自己的名片分享链接，不计分。");
+        } else if (sharerId && loggedInUserId.value && bizId) {
+          common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:109", "其他用户点击了名片分享链接，且已登录，准备为分享者加分。");
+          triggerShareHitApi(sharerId, bizId);
+        } else if (sharerId && bizId) {
+          common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:114", "用户点击了名片分享链接，但尚未登录。暂存分享信息。");
+          common_vendor.index.setStorageSync("pendingShareReward", {
+            sharerId,
+            bizId,
+            type: 30
+            // 30 代表 "分享名片奖励"
+          });
+        }
+      }
     });
-    const fetchUserInfo = async () => {
+    const fetchOwnUserInfo = async () => {
       common_vendor.index.showLoading({ title: "加载中..." });
       const { data, error } = await utils_request.request("/app-api/member/user/get", { method: "GET" });
       common_vendor.index.hideLoading();
       if (error) {
         common_vendor.index.showToast({ title: `加载失败: ${error}`, icon: "none" });
+        return;
+      }
+      userInfo.value = data;
+    };
+    const fetchTargetUserInfo = async (userId) => {
+      common_vendor.index.showLoading({ title: "加载中..." });
+      const { data, error } = await utils_request.request("/app-api/member/user/read-card", {
+        method: "POST",
+        data: {
+          readUserId: userId
+        }
+      });
+      common_vendor.index.hideLoading();
+      if (error) {
+        common_vendor.index.showToast({ title: `获取名片失败: ${error}`, icon: "none" });
+        setTimeout(() => common_vendor.index.navigateBack(), 2e3);
         return;
       }
       userInfo.value = data;
@@ -42,52 +86,78 @@ const _sfc_main = {
     const goToEdit = () => {
       common_vendor.index.navigateTo({ url: "/pages/my-edit/my-edit" });
     };
-    common_vendor.onShareAppMessage((res) => {
-      common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:100", "触发了分享给好友", res);
-      if (!userInfo.value) {
-        return {
-          title: "快来看看我的专业电子名片！"
-        };
+    const triggerShareHitApi = async (sharerId, bizId) => {
+      if (!sharerId || !bizId)
+        return;
+      common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:177", `准备为分享者 (ID: ${sharerId}) 增加贡分, 关联名片ID (bizId): ${bizId}`);
+      const { error } = await utils_request.request("/app-api/member/experience-record/share-experience-hit", {
+        method: "POST",
+        data: {
+          type: 30,
+          // 30 代表 "分享名片奖励"
+          shareUserId: sharerId,
+          bizId
+        }
+      });
+      if (error) {
+        common_vendor.index.__f__("error", "at pages/my-businessCard/my-businessCard.vue:189", "调用分享名片加分接口失败:", error);
+      } else {
+        common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:191", `成功为分享者 (ID: ${sharerId}) 触发贡分增加`);
       }
-      return {
-        title: `这是 ${userInfo.value.realName || userInfo.value.nickname} 的名片`,
-        path: `/pages/my-businessCard/my-businessCard?id=${userInfo.value.id}`,
-        // 必须是小程序内的页面路径，带上参数
-        imageUrl: userInfo.value.avatar
-        // 自定义分享图片
-      };
-    });
-    common_vendor.onShareTimeline(() => {
-      common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:116", "触发了分享到朋友圈");
-      if (!userInfo.value) {
-        return {
-          title: "快来看看我的专业电子名片！"
-        };
-      }
-      return {
-        title: `这是 ${userInfo.value.realName || userInfo.value.nickname} 的名片`,
-        query: `id=${userInfo.value.id}`,
-        // 分享到朋友圈的参数
-        imageUrl: userInfo.value.avatar
-      };
-    });
+    };
     const openSharePopup = () => {
       if (!userInfo.value) {
         common_vendor.index.showToast({ title: "信息加载中，请稍候", icon: "none" });
         return;
       }
+      customShareTitle.value = `这是 ${userInfo.value.realName || userInfo.value.nickname} 的名片`;
       sharePopup.value.open();
     };
     const closeSharePopup = () => {
       sharePopup.value.close();
     };
-    const guideShareToMoments = () => {
+    common_vendor.onShareAppMessage((res) => {
+      common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:214", "触发了分享给好友", res);
       closeSharePopup();
-      common_vendor.index.showToast({
-        title: "请点击右上角「...」，然后选择「分享到朋友圈」",
-        icon: "none",
-        duration: 3e3
-      });
+      if (!userInfo.value) {
+        return { title: "快来看看我的专业电子名片！" };
+      }
+      const sharerId = common_vendor.index.getStorageSync("userId");
+      let sharePath = `/pages/my-businessCard/my-businessCard?id=${userInfo.value.id}`;
+      if (sharerId) {
+        sharePath += `&sharerId=${sharerId}`;
+      }
+      const finalTitle = customShareTitle.value || `这是 ${userInfo.value.realName || userInfo.value.nickname} 的名片`;
+      return {
+        title: finalTitle,
+        path: sharePath,
+        imageUrl: userInfo.value.avatar
+      };
+    });
+    common_vendor.onShareTimeline(() => {
+      common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:240", "触发了分享到朋友圈");
+      hideTimelineGuide();
+      if (!userInfo.value) {
+        return { title: "快来看看我的专业电子名片！" };
+      }
+      const sharerId = common_vendor.index.getStorageSync("userId");
+      let queryString = `id=${userInfo.value.id}`;
+      if (sharerId) {
+        queryString += `&sharerId=${sharerId}`;
+      }
+      const finalTitle = customShareTitle.value || `这是 ${userInfo.value.realName || userInfo.value.nickname} 的名片`;
+      return {
+        title: finalTitle,
+        query: queryString,
+        imageUrl: userInfo.value.avatar
+      };
+    });
+    const guideShareTimeline = () => {
+      closeSharePopup();
+      showTimelineGuide.value = true;
+    };
+    const hideTimelineGuide = () => {
+      showTimelineGuide.value = false;
     };
     return (_ctx, _cache) => {
       var _a, _b;
@@ -119,16 +189,32 @@ const _sfc_main = {
       }, userInfo.value ? {
         f: common_vendor.o(goToEdit)
       } : {}, {
-        g: common_vendor.o(guideShareToMoments),
-        h: common_vendor.o(closeSharePopup),
-        i: common_vendor.sr(sharePopup, "30894501-2", {
-          "k": "sharePopup"
+        g: customShareTitle.value,
+        h: common_vendor.o(($event) => customShareTitle.value = $event.detail.value),
+        i: common_vendor.p({
+          type: "weixin",
+          size: "30",
+          color: "#07c160"
         }),
         j: common_vendor.p({
+          type: "pyq",
+          size: "30",
+          color: "#53a046"
+        }),
+        k: common_vendor.o(guideShareTimeline),
+        l: common_vendor.o(closeSharePopup),
+        m: common_vendor.sr(sharePopup, "30894501-2", {
+          "k": "sharePopup"
+        }),
+        n: common_vendor.p({
           type: "bottom",
           ["background-color"]: "#fff"
-        })
-      });
+        }),
+        o: showTimelineGuide.value
+      }, showTimelineGuide.value ? {
+        p: common_assets._imports_0,
+        q: common_vendor.o(hideTimelineGuide)
+      } : {});
     };
   }
 };

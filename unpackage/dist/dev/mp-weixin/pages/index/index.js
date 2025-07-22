@@ -96,28 +96,51 @@ const _sfc_main = {
           loginCode: loginCode.value,
           phoneCode: phoneCode.value,
           state: "default",
-          // 按要求传入 'default'
           shardCode: inviteCode.value
-          // 传入用户填写的邀请码
         };
         common_vendor.index.__f__("log", "at pages/index/index.vue:206", "🚀 准备提交的一键登录数据:", payload);
         const result = await utils_request.request("/app-api/member/auth/weixin-mini-app-login", {
           method: "POST",
           data: payload
         });
-        common_vendor.index.hideLoading();
         if (!result.error && result.data && result.data.accessToken) {
           common_vendor.index.setStorageSync("token", result.data.accessToken);
           common_vendor.index.setStorageSync("userId", result.data.userId);
+          await (async () => {
+            const pendingReward = common_vendor.index.getStorageSync("pendingShareReward");
+            const currentUserId = result.data.userId;
+            if (pendingReward && pendingReward.sharerId && pendingReward.bizId && pendingReward.type && pendingReward.sharerId !== currentUserId) {
+              common_vendor.index.__f__("log", "at pages/index/index.vue:230", `✅ [登录后] 检测到待处理的分享奖励，类型: ${pendingReward.type}`, pendingReward);
+              const {
+                error
+              } = await utils_request.request("/app-api/member/experience-record/share-experience-hit", {
+                method: "POST",
+                data: {
+                  type: pendingReward.type,
+                  // 【升级】动态读取 type
+                  shareUserId: pendingReward.sharerId,
+                  bizId: pendingReward.bizId
+                }
+              });
+              if (error) {
+                common_vendor.index.__f__("error", "at pages/index/index.vue:245", "❌ [登录后] 调用分享加分接口失败:", error);
+              } else {
+                common_vendor.index.__f__("log", "at pages/index/index.vue:247", `✅ [登录后] 成功为分享者 (ID: ${pendingReward.sharerId}) 触发贡分增加`);
+              }
+              common_vendor.index.removeStorageSync("pendingShareReward");
+              common_vendor.index.__f__("log", "at pages/index/index.vue:251", "🗑️ [登录后] 已清除 pendingShareReward 缓存。");
+            }
+          })();
+          common_vendor.index.hideLoading();
           common_vendor.index.showToast({
             title: "登录成功",
             icon: "success"
           });
           common_vendor.index.switchTab({
             url: "/pages/home/home"
-            // 默认跳转到个人中心
           });
         } else {
+          common_vendor.index.hideLoading();
           common_vendor.index.showToast({
             title: result.error || "登录失败，请重试",
             icon: "none"
@@ -126,7 +149,7 @@ const _sfc_main = {
         }
       } catch (error) {
         common_vendor.index.hideLoading();
-        common_vendor.index.__f__("error", "at pages/index/index.vue:242", "登录请求异常:", error);
+        common_vendor.index.__f__("error", "at pages/index/index.vue:277", "登录请求异常:", error);
         common_vendor.index.showToast({
           title: "请求异常，请检查网络",
           icon: "none"

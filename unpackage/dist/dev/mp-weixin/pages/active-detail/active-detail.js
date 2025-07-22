@@ -21,16 +21,36 @@ const _sfc_main = {
     const customShareTitle = common_vendor.ref("");
     const showTimelineGuide = common_vendor.ref(false);
     const isActionBarHidden = common_vendor.ref(false);
+    const loggedInUserId = common_vendor.ref(null);
     common_vendor.onLoad((options) => {
+      loggedInUserId.value = common_vendor.index.getStorageSync("userId");
       if (options.id) {
         activityId.value = options.id;
         getActiveDetail();
       } else {
-        common_vendor.index.__f__("error", "at pages/active-detail/active-detail.vue:245", "未接收到活动ID！");
+        common_vendor.index.__f__("error", "at pages/active-detail/active-detail.vue:250", "未接收到活动ID！");
         common_vendor.index.showToast({
           title: "加载活动详情失败，缺少ID",
           icon: "none"
         });
+      }
+      if (options && options.sharerId) {
+        const sharerId = options.sharerId;
+        const bizId = options.id;
+        if (sharerId && loggedInUserId.value && sharerId === loggedInUserId.value) {
+          common_vendor.index.__f__("log", "at pages/active-detail/active-detail.vue:264", "用户点击了自己的活动分享链接，不计分。");
+        } else if (sharerId && loggedInUserId.value && bizId) {
+          common_vendor.index.__f__("log", "at pages/active-detail/active-detail.vue:268", "其他用户点击了活动分享链接，且已登录，准备为分享者加分。");
+          triggerShareHitApi(sharerId, bizId);
+        } else if (sharerId && bizId) {
+          common_vendor.index.__f__("log", "at pages/active-detail/active-detail.vue:273", "用户点击了活动分享链接，但尚未登录。暂存分享信息。");
+          common_vendor.index.setStorageSync("pendingShareReward", {
+            sharerId,
+            bizId,
+            type: 31
+            // 明确是分享活动
+          });
+        }
       }
       common_vendor.index.showShareMenu({
         withShareTicket: true,
@@ -145,9 +165,9 @@ const _sfc_main = {
       });
       if (result && !result.error) {
         activityDetail.value = result.data;
-        common_vendor.index.__f__("log", "at pages/active-detail/active-detail.vue:380", "getActiveDetail result:", activityDetail.value);
+        common_vendor.index.__f__("log", "at pages/active-detail/active-detail.vue:413", "getActiveDetail result:", activityDetail.value);
       } else {
-        common_vendor.index.__f__("log", "at pages/active-detail/active-detail.vue:382", "请求失败:", result ? result.error : "无返回结果");
+        common_vendor.index.__f__("log", "at pages/active-detail/active-detail.vue:415", "请求失败:", result ? result.error : "无返回结果");
       }
     };
     const openSharePopup = () => {
@@ -164,22 +184,55 @@ const _sfc_main = {
     const hideTimelineGuide = () => {
       showTimelineGuide.value = false;
     };
+    const triggerShareHitApi = async (sharerId, bizId) => {
+      if (!sharerId || !bizId)
+        return;
+      common_vendor.index.__f__("log", "at pages/active-detail/active-detail.vue:446", `准备为分享者 (ID: ${sharerId}) 增加贡分, 关联活动ID: ${bizId}`);
+      const {
+        error
+      } = await utils_request.request("/app-api/member/experience-record/share-experience-hit", {
+        method: "POST",
+        data: {
+          type: 31,
+          // 31 代表 "分享活动奖励"
+          shareUserId: sharerId,
+          bizId
+        }
+      });
+      if (error) {
+        common_vendor.index.__f__("error", "at pages/active-detail/active-detail.vue:460", "调用分享加分接口失败:", error);
+      } else {
+        common_vendor.index.__f__("log", "at pages/active-detail/active-detail.vue:462", `成功为分享者 (ID: ${sharerId}) 触发贡分增加`);
+      }
+    };
     common_vendor.onShareAppMessage((res) => {
-      common_vendor.index.__f__("log", "at pages/active-detail/active-detail.vue:411", "触发分享给好友", res);
+      common_vendor.index.__f__("log", "at pages/active-detail/active-detail.vue:468", "触发分享给好友", res);
       closeSharePopup();
+      const sharerId = common_vendor.index.getStorageSync("userId");
       const finalTitle = customShareTitle.value || activityDetail.value.activityTitle || "发现一个很棒的活动，快来看看吧！";
+      let sharePath = `/pages/active-detail/active-detail?id=${activityDetail.value.id}`;
+      if (sharerId) {
+        sharePath += `&sharerId=${sharerId}`;
+      }
       return {
         title: finalTitle,
-        path: `/pages/active-detail/active-detail?id=${activityDetail.value.id}`,
+        path: sharePath,
+        // 使用拼接后的路径
         imageUrl: activityDetail.value.coverImageUrl || "/static/default-share-image.png"
       };
     });
     common_vendor.onShareTimeline(() => {
-      common_vendor.index.__f__("log", "at pages/active-detail/active-detail.vue:427", "触发分享到朋友圈");
+      common_vendor.index.__f__("log", "at pages/active-detail/active-detail.vue:490", "触发分享到朋友圈");
+      const sharerId = common_vendor.index.getStorageSync("userId");
       const finalTitle = customShareTitle.value || activityDetail.value.activityTitle || "发现一个很棒的活动，快来看看吧！";
+      let queryString = `id=${activityDetail.value.id}&from=timeline`;
+      if (sharerId) {
+        queryString += `&sharerId=${sharerId}`;
+      }
       return {
         title: finalTitle,
-        query: `id=${activityDetail.value.id}&from=timeline`,
+        query: queryString,
+        // 使用拼接后的 query
         imageUrl: activityDetail.value.coverImageUrl || "/static/default-share-image.png"
       };
     });

@@ -1,9 +1,9 @@
 "use strict";
 const common_vendor = require("../common/vendor.js");
-const baseURL = "http://8.163.18.207:48080";
+const baseURL = "https://jyj.gofor.club";
 const uploadFile = async (filePath, options = {}) => {
   if (!filePath) {
-    common_vendor.index.__f__("error", "at utils/upload.js:15", "uploadFile Error: filePath is required.");
+    common_vendor.index.__f__("error", "at utils/upload.js:16", "uploadFile Error: filePath is required.");
     return { data: null, error: "未提供文件路径" };
   }
   const { directory = "", name = "file" } = options;

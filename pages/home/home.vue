@@ -49,7 +49,10 @@
 				<view class="post-header">
 					<!-- 使用 contactPerson 的第一个字作为头像 -->
 					<!-- <view class="avatar" @click.stop="skipApplicationBusinessCard">{{ post.user.name.charAt(0) }}</view> -->
-					<image :src="post.user.avatar" mode="" class="avatar" @click.stop="skipApplicationBusinessCard(post.user.id)">
+					<!-- <image :src="post.user.avatar" mode="" class="avatar" @click.stop="skipApplicationBusinessCard(post.user.id)">
+					</image> -->
+					<image :src="post.user.avatar" mode="" class="avatar"
+						@click="navigateToBusinessCard({ id: post.user.userId, name: post.user.user, avatar: post.user.avatar })">
 					</image>
 					<view class="user-info">
 						<!-- 显示 contactPerson 和 createTime -->
@@ -248,6 +251,8 @@
 				method: 'GET',
 				data: params
 			});
+			
+			console.log("商机列表",result)
 
 			if (result && result.error && result.error.includes('未登录')) {
 				uni.showToast({
@@ -476,6 +481,7 @@
 				method: 'POST',
 				data: requestData
 			});
+			console.log("触发收藏",result)
 
 			if (result && result.error) {
 				// 失败回滚
@@ -601,6 +607,34 @@
 			url: `/pages/applicationBusinessCard/applicationBusinessCard?id=${userId}`
 		});
 	}
+	
+	const navigateToBusinessCard = (user) => {
+	    // 1. 【修正】移除对 `postDetail` 的引用，因为它在列表页不存在。
+	    //    在列表页，我们通常假设名片都是可以尝试查看的。
+	    //    真正的权限检查（如 cardFlag）应该在详情页或由后端接口处理。
+	
+	    // 2. 检查传入的 user 对象和 user.id 是否有效
+	    if (!user || !user.id) {
+	        uni.showToast({ title: '无法查看该用户主页', icon: 'none' });
+	        return;
+	    }
+	    
+	    // 3. 【核心】为 avatar 提供一个默认值，防止空字符串导致的问题
+	    const defaultAvatar = '/static/images/default-avatar.png'; // 请确保这个默认头像图片存在
+	    const avatarUrl = user.avatar || defaultAvatar;
+	
+	    // 4. 构建带有多参数的URL，并使用 encodeURIComponent 编码
+	    const url = `/pages/applicationBusinessCard/applicationBusinessCard?id=${user.id}` +
+	                `&name=${encodeURIComponent(user.name)}` +
+	                `&avatar=${encodeURIComponent(avatarUrl)}`;
+	
+	    console.log('从商机列表页跳转，URL:', url);
+	
+	    // 5. 执行跳转
+	    uni.navigateTo({
+	        url: url
+	    });
+	};
 
 	const skipCommercialDetail = (postId) => {
 		uni.navigateTo({

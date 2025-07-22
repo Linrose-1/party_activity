@@ -96,7 +96,8 @@
 	import ActivityCard from '@/components/ActivityCard.vue';
 	import request from '../../utils/request.js';
 
-	// let shakeAudioContext = null;
+	// 【修改】1. 声明一个变量来持有音频播放器实例
+	let shakeAudioContext = null;
 
 	// --- 状态管理 ---
 	const currentTab = ref(0);
@@ -106,7 +107,6 @@
 	const shakeDebounce = ref(true);
 	const userLocation = ref(null);
 
-	// 【修改】为活动和商友分别创建分页状态
 	const activityPageNo = ref(1);
 	const activityHasMore = ref(true);
 	const businessPageNo = ref(1);
@@ -126,9 +126,12 @@
 	const triggerShakeSequence = () => {
 		if (!shakeDebounce.value) return;
 
-		// if (shakeAudioContext) {
-		// 	shakeAudioContext.play();
-		// }
+		// 【修改】3. 在触发摇一摇时播放音效
+		if (shakeAudioContext) {
+			// 先停止，再播放，可以处理快速连续触发的情况
+			shakeAudioContext.stop();
+			shakeAudioContext.play();
+		}
 
 		shakeDebounce.value = false;
 		getLocationAndProceed();
@@ -137,7 +140,7 @@
 	const getLocationAndProceed = () => {
 		uni.getLocation({
 			type: 'gcj02',
-			success: async (res) => { // 【修改】将此回调函数改为 async
+			success: async (res) => {
 				console.log('✅ 获取用户位置成功:', res);
 				userLocation.value = {
 					latitude: res.latitude,
@@ -145,12 +148,10 @@
 				};
 				shaken.value = true;
 
-				// 【核心修改】使用 Promise.all 并行执行两个请求
-				loading.value = true; // 开始加载
-				uni.vibrateShort(); // 震动一次即可
+				loading.value = true;
+				uni.vibrateShort();
 
 				try {
-					// 等待两个请求都完成
 					await Promise.all([
 						getNearbyActivities(false),
 						getNearbyBusinesses(false)
@@ -159,9 +160,7 @@
 				} catch (error) {
 					console.error('❌ 加载初始数据时发生错误:', error);
 				} finally {
-					// 无论成功或失败，最后都结束加载状态
 					loading.value = false;
-					// 允许用户再次摇一摇
 					setTimeout(() => {
 						shakeDebounce.value = true;
 					}, 1000);
@@ -169,19 +168,14 @@
 			},
 			fail: (err) => {
 				console.error('❌ 获取位置失败:', err);
-				// ... 错误处理逻辑保持不变 ...
 				shakeDebounce.value = true;
 			}
 		});
 	};
 
-	// 获取附近活动列表的方法 (保持不变)
 	const getNearbyActivities = async (isLoadMore = false) => {
-		// 【修改】简化入口判断，只判断是否在加载更多
 		if (isLoadMore && (!activityHasMore.value || loading.value)) return;
-
-		if (isLoadMore) loading.value = true; // 加载更多时，单独控制loading
-
+		if (isLoadMore) loading.value = true;
 		if (!isLoadMore) {
 			activityPageNo.value = 1;
 			activities.value = [];
@@ -194,7 +188,6 @@
 			latitude: userLocation.value.latitude,
 		};
 
-		// 【修改】请求逻辑保持不变，但移除 try...catch 和 finally
 		const result = await request('/app-api/member/activity/list', {
 			method: 'GET',
 			data: params
@@ -208,34 +201,24 @@
 		} else {
 			activityHasMore.value = false;
 		}
-
-		if (isLoadMore) loading.value = false; // 加载更多结束
+		if (isLoadMore) loading.value = false;
 	};
 
-	/**
-	 * 【核心新增】获取附近商友列表的方法
-	 * @param {boolean} isLoadMore - 是否为加载更多操作
-	 */
 	const getNearbyBusinesses = async (isLoadMore = false) => {
-		// 【修改】简化入口判断
 		if (isLoadMore && (!businessHasMore.value || loading.value)) return;
-
-		if (isLoadMore) loading.value = true; // 加载更多时，单独控制loading
-
+		if (isLoadMore) loading.value = true;
 		if (!isLoadMore) {
 			businessPageNo.value = 1;
 			businesses.value = [];
 			businessHasMore.value = true;
 		}
-
 		const params = {
 			pageNo: businessPageNo.value,
 			pageSize: 10,
 			longitude: userLocation.value.longitude,
 			latitude: userLocation.value.latitude,
 		};
-
-		console.log('发起附近商友列表请求, 参数:', params); // 现在这个log能正常打印了
+		console.log('发起附近商友列表请求, 参数:', params);
 		const result = await request('/app-api/member/user/list', {
 			method: 'GET',
 			data: params
@@ -257,15 +240,9 @@
 			console.error('获取附近商友列表失败:', result.error);
 			businessHasMore.value = false;
 		}
-
-		if (isLoadMore) loading.value = false; // 加载更多结束
+		if (isLoadMore) loading.value = false;
 	};
 
-
-	/**
-	 * 【核心新增】处理关注/取消关注商友的逻辑
-	 * @param {object} business - 被点击的商友对象
-	 */
 	const handleConnect = async (business) => {
 		business.loading = true;
 		const userId = uni.getStorageSync('userId');
@@ -278,16 +255,13 @@
 			return;
 		}
 
-		// 假设关注/取关接口与活动收藏类似
 		const endpoint = business.isFollowed ? '/app-api/member/follow/del' : '/app-api/member/follow/add';
 		const successMessage = business.isFollowed ? '已取消关注' : '关注成功';
-
 		const payload = {
 			userId: userId,
 			targetId: business.id,
-			targetType: "post_user" // 【关键】目标类型为用户
+			targetType: "post_user"
 		};
-
 		const result = await request(endpoint, {
 			method: 'POST',
 			data: payload
@@ -298,7 +272,6 @@
 				title: successMessage,
 				icon: 'success'
 			});
-			// 操作成功后，直接更新UI状态
 			business.isFollowed = !business.isFollowed;
 		} else {
 			uni.showToast({
@@ -311,6 +284,17 @@
 
 	// --- 生命周期钩子 ---
 	onMounted(() => {
+		// 【修改】2. 在页面加载时，创建并初始化音频播放器
+		// 使用 uni.createInnerAudioContext() 创建实例
+		shakeAudioContext = uni.createInnerAudioContext();
+		// 设置音频源
+		shakeAudioContext.src = 'https://img.gofor.club/wechat_shake.mp3';
+		// 监听错误事件（可选，但推荐）
+		shakeAudioContext.onError((res) => {
+			console.error('音频播放错误:', res.errMsg);
+		});
+		
+		// 监听手机晃动
 		uni.onAccelerometerChange((res) => {
 			if (Math.abs(res.x) > 1.0 && Math.abs(res.y) > 1.0) {
 				triggerShakeSequence();
@@ -318,12 +302,16 @@
 		});
 	});
 
-	onUnmounted(() => uni.stopAccelerometer());
+	onUnmounted(() => {
+		uni.stopAccelerometer();
+		// 【修改】4. 在页面卸载时，销毁音频实例以释放资源
+		if (shakeAudioContext) {
+			shakeAudioContext.destroy();
+		}
+	});
 
-	// 【修改】页面触底，根据当前Tab加载更多
 	onReachBottom(() => {
 		if (loading.value) return;
-
 		if (currentTab.value === 0 && activityHasMore.value) {
 			console.log('滑动到底部，加载更多附近活动...');
 			getNearbyActivities(true);

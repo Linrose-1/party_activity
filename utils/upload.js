@@ -1,5 +1,6 @@
 // 1. 定义项目的基础URL，与 request.js 保持一致或集中管理
-const baseURL = 'http://8.163.18.207:48080';
+// const baseURL = 'http://8.163.18.207:48080';
+const baseURL = 'https://jyj.gofor.club';
 
 /**
  * 封装 uni.uploadFile 用于文件上传

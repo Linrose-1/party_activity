@@ -18,39 +18,50 @@ const _sfc_main = {
     const isPaying = common_vendor.ref(false);
     const showInsufficient = common_vendor.ref(false);
     common_vendor.onLoad((options) => {
-      if (options.id) {
+      if (options.id && options.name) {
         targetUserId.value = parseInt(options.id, 10);
-        fetchInitialData();
+        targetUserInfo.value = {
+          id: targetUserId.value,
+          nickname: decodeURIComponent(options.name),
+          realName: decodeURIComponent(options.name),
+          // 预填充，后续可能被API覆盖
+          avatar: options.avatar ? decodeURIComponent(options.avatar) : "/static/images/default-avatar.png"
+        };
+        common_vendor.index.__f__("log", "at pages/applicationBusinessCard/applicationBusinessCard.vue:126", "已预填充目标用户信息:", targetUserInfo.value);
+        initializePage();
       } else {
-        common_vendor.index.showToast({ title: "缺少目标用户ID", icon: "error" });
+        common_vendor.index.showToast({ title: "缺少必要的用户信息", icon: "error" });
         setTimeout(() => common_vendor.index.navigateBack(), 1e3);
       }
     });
-    const fetchInitialData = async () => {
-      common_vendor.index.showLoading({ title: "加载中..." });
-      try {
-        const [currentUserRes, targetUserRes] = await Promise.all([
-          utils_request.request("/app-api/member/user/get", { method: "GET" }),
-          // 获取当前用户信息
-          utils_request.request(`/app-api/member/user/get?id=${targetUserId.value}`, { method: "GET" })
-          // 获取目标用户信息
-        ]);
-        if (currentUserRes.data) {
-          currentUserInfo.value = currentUserRes.data;
-        } else {
-          common_vendor.index.__f__("error", "at pages/applicationBusinessCard/applicationBusinessCard.vue:139", "获取当前用户信息失败:", currentUserRes.error);
-        }
-        if (targetUserRes.data) {
-          targetUserInfo.value = targetUserRes.data;
-        } else {
-          common_vendor.index.__f__("error", "at pages/applicationBusinessCard/applicationBusinessCard.vue:146", "获取目标用户信息失败:", targetUserRes.error);
-          common_vendor.index.showToast({ title: "获取对方信息失败", icon: "none" });
-        }
-      } catch (e) {
-        common_vendor.index.__f__("error", "at pages/applicationBusinessCard/applicationBusinessCard.vue:150", "初始化数据时发生错误:", e);
-        common_vendor.index.showToast({ title: "网络错误，请重试", icon: "none" });
-      } finally {
-        common_vendor.index.hideLoading();
+    const initializePage = async () => {
+      await Promise.all([
+        checkAccessPermission(),
+        fetchCurrentUserInfo()
+      ]);
+    };
+    const checkAccessPermission = async () => {
+      const checkResult = await utils_request.request("/app-api/member/user/read-card", {
+        method: "POST",
+        data: { readUserId: targetUserId.value }
+      });
+      if (checkResult && checkResult.data && !checkResult.error) {
+        common_vendor.index.__f__("log", "at pages/applicationBusinessCard/applicationBusinessCard.vue:156", "权限检查成功，直接跳转到名片页。");
+        common_vendor.index.redirectTo({
+          url: `/pages/my-businessCard/my-businessCard?id=${targetUserId.value}`
+        });
+      } else {
+        common_vendor.index.__f__("log", "at pages/applicationBusinessCard/applicationBusinessCard.vue:162", "权限检查失败，显示支付页面。", checkResult.error);
+      }
+    };
+    const fetchCurrentUserInfo = async () => {
+      const { data, error } = await utils_request.request("/app-api/member/user/get", { method: "GET" });
+      if (data) {
+        currentUserInfo.value = data;
+        common_vendor.index.__f__("log", "at pages/applicationBusinessCard/applicationBusinessCard.vue:171", "已获取当前登录用户信息:", currentUserInfo.value);
+      } else {
+        common_vendor.index.__f__("error", "at pages/applicationBusinessCard/applicationBusinessCard.vue:173", "获取当前用户信息失败:", error);
+        common_vendor.index.showToast({ title: "获取您的账户信息失败", icon: "none" });
       }
     };
     const handlePayToReadCard = async () => {
@@ -67,22 +78,18 @@ const _sfc_main = {
       }
       isPaying.value = true;
       showInsufficient.value = false;
-      const { data, error, ...fullResponse } = await utils_request.request("/app-api/member/user/pay-read-card", {
+      const { data, error } = await utils_request.request("/app-api/member/user/pay-read-card", {
         method: "POST",
-        data: {
-          readUserId: targetUserId.value
-        }
+        data: { readUserId: targetUserId.value }
       });
-      common_vendor.index.__f__("log", "at pages/applicationBusinessCard/applicationBusinessCard.vue:184", "支付接口响应:", { data, error, fullResponse });
       isPaying.value = false;
       if (error) {
         common_vendor.index.showToast({ title: `支付失败: ${error}`, icon: "none", duration: 2e3 });
       } else if (data === true) {
         common_vendor.index.showToast({ title: "支付成功！", icon: "success", duration: 2e3 });
-        fetchInitialData();
+        fetchCurrentUserInfo();
         setTimeout(() => {
           common_vendor.index.redirectTo({
-            // 使用 redirectTo 避免用户返回此支付页
             url: `/pages/my-businessCard/my-businessCard?id=${targetUserId.value}`
           });
         }, 2e3);
@@ -96,10 +103,11 @@ const _sfc_main = {
     const formattedFriendRequestMessage = common_vendor.computed(() => {
       if (!currentUserInfo.value || !targetUserInfo.value)
         return "正在生成中...";
+      const targetName = targetUserInfo.value.realName;
       const myName = currentUserInfo.value.realName || currentUserInfo.value.nickname;
       const myCompany = currentUserInfo.value.companyName || "我的公司";
       const myWork = currentUserInfo.value.professionalTitle || "我的职位";
-      return `您好！我是${myCompany}的${myName}，目前在从事${myWork}工作。我从高伙猩球平台获得您的联系方式，希望可以认识一下。`;
+      return `您好 ${targetName}！我是${myCompany}的${myName}，目前在从事${myWork}工作。我从高伙猩球平台获得您的联系方式，希望可以认识一下。`;
     });
     const copyFriendRequestMessage = () => {
       common_vendor.index.setClipboardData({
@@ -119,30 +127,29 @@ const _sfc_main = {
         d: common_vendor.t((targetUserInfo.value.realName || targetUserInfo.value.nickname || "?").charAt(0))
       }, {
         e: common_vendor.t(targetUserInfo.value.realName || targetUserInfo.value.nickname),
-        f: common_vendor.t(targetUserInfo.value.companyName || "公司信息未设置"),
-        g: common_vendor.t(targetUserInfo.value.realName || targetUserInfo.value.nickname),
-        h: currentUserInfo.value
+        f: common_vendor.t(targetUserInfo.value.realName || targetUserInfo.value.nickname),
+        g: currentUserInfo.value
       }, currentUserInfo.value ? {
-        i: common_vendor.t(currentUserInfo.value.point),
-        j: currentUserInfo.value.point < 1 ? 1 : ""
+        h: common_vendor.t(currentUserInfo.value.point),
+        i: currentUserInfo.value.point < 1 ? 1 : ""
       } : {}, {
-        k: showInsufficient.value
+        j: showInsufficient.value
       }, showInsufficient.value ? {} : {}, {
-        l: common_vendor.t(isPaying.value ? "支付中..." : "确认支付"),
-        m: common_vendor.o(handlePayToReadCard),
+        k: common_vendor.t(isPaying.value ? "支付中..." : "确认支付"),
+        l: common_vendor.o(handlePayToReadCard),
+        m: isPaying.value,
         n: isPaying.value,
-        o: isPaying.value,
-        p: common_vendor.o(goToEarnPoints)
+        o: common_vendor.o(goToEarnPoints)
       }) : {
-        q: common_vendor.p({
+        p: common_vendor.p({
           status: "loading",
           contentText: "正在加载用户信息..."
         })
       }, {
-        r: currentUserInfo.value && targetUserInfo.value
+        q: currentUserInfo.value && targetUserInfo.value
       }, currentUserInfo.value && targetUserInfo.value ? {
-        s: common_vendor.t(formattedFriendRequestMessage.value),
-        t: common_vendor.o(copyFriendRequestMessage)
+        r: common_vendor.t(formattedFriendRequestMessage.value),
+        s: common_vendor.o(copyFriendRequestMessage)
       } : {});
     };
   }

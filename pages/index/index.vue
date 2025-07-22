@@ -170,12 +170,13 @@
 		agreed.value = !agreed.value;
 	};
 
+
 	/**
 	 * @description 【核心重构】处理一键登录逻辑
 	 */
 	const handleLogin = async () => {
 		if (isLoginDisabled.value) {
-			// 根据按钮状态给出更明确的提示
+			// ... 省略原有的禁用提示逻辑 ...
 			if (!agreed.value) {
 				uni.showToast({
 					title: '请先阅读并同意用户协议',
@@ -195,46 +196,80 @@
 		});
 
 		try {
-			// 构造请求体，完全匹配接口文档
 			const payload = {
 				loginCode: loginCode.value,
 				phoneCode: phoneCode.value,
-				state: 'default', // 按要求传入 'default'
-				shardCode: inviteCode.value // 传入用户填写的邀请码
+				state: 'default',
+				shardCode: inviteCode.value
 			};
 
 			console.log('🚀 准备提交的一键登录数据:', payload);
 
-			// 调用一键登录接口
 			const result = await request('/app-api/member/auth/weixin-mini-app-login', {
 				method: 'POST',
 				data: payload
 			});
 
-			uni.hideLoading();
+			// 注意：这里的 hideLoading 移到了更合适的位置
+			// uni.hideLoading(); // 不在这里 hide，等待所有登录后逻辑完成
 
-			// 判断登录是否成功
 			if (!result.error && result.data && result.data.accessToken) {
-				// 登录成功，保存 token 和 userId
+				// 登录成功
 				uni.setStorageSync('token', result.data.accessToken);
 				uni.setStorageSync('userId', result.data.userId);
 
+				// ==================== 新增：检查并处理分享奖励 ====================
+				// 这里我们定义一个立即执行的异步函数来处理，这样可以让代码块更清晰
+				await (async () => {
+					const pendingReward = uni.getStorageSync('pendingShareReward');
+					const currentUserId = result.data.userId;
+
+					// 检查对象是否存在，并且包含所有必要信息
+					if (pendingReward && pendingReward.sharerId && pendingReward.bizId && pendingReward
+						.type && pendingReward.sharerId !== currentUserId) {
+						console.log(`✅ [登录后] 检测到待处理的分享奖励，类型: ${pendingReward.type}`, pendingReward);
+
+						// 调用分享命中接口，所有参数都从缓存对象中动态获取
+						const {
+							error
+						} = await request('/app-api/member/experience-record/share-experience-hit', {
+							method: 'POST',
+							data: {
+								type: pendingReward.type, // 【升级】动态读取 type
+								shareUserId: pendingReward.sharerId,
+								bizId: pendingReward.bizId
+							}
+						});
+
+						if (error) {
+							console.error('❌ [登录后] 调用分享加分接口失败:', error);
+						} else {
+							console.log(`✅ [登录后] 成功为分享者 (ID: ${pendingReward.sharerId}) 触发贡分增加`);
+						}
+
+						uni.removeStorageSync('pendingShareReward');
+						console.log('🗑️ [登录后] 已清除 pendingShareReward 缓存。');
+					}
+				})();
+				// =============================================================
+
+				uni.hideLoading(); // 在所有登录后操作完成后隐藏 loading
 				uni.showToast({
 					title: '登录成功',
 					icon: 'success'
 				});
 
-				// 登录成功后，跳转到首页或“我的”页面
+				// 跳转到首页
 				uni.switchTab({
-					url: '/pages/home/home' // 默认跳转到个人中心
+					url: '/pages/home/home'
 				});
+
 			} else {
-				// 登录失败处理
+				uni.hideLoading();
 				uni.showToast({
 					title: result.error || '登录失败，请重试',
 					icon: 'none'
 				});
-				// 登录失败后，loginCode会失效，需要重新获取
 				getLoginCode();
 			}
 		} catch (error) {
@@ -247,12 +282,6 @@
 		}
 	};
 
-	// 【注释】旧的 Login 函数不再需要
-	/*
-	const Login = async () => {
-	  // ...
-	};
-	*/
 
 	const skipToAgreement = (type) => {
 		// 通过 url query 参数将要显示的 tab 索引传递过去

@@ -232,11 +232,16 @@
 	const sharePopup = ref(null);
 	const customShareTitle = ref('');
 	const showTimelineGuide = ref(false);
-	
+
 	// 【新增】用于控制底部操作栏显示/隐藏的状态变量
 	const isActionBarHidden = ref(false);
 
+	//获取当前登录用户的ID
+	const loggedInUserId = ref(null);
+
 	onLoad((options) => {
+		loggedInUserId.value = uni.getStorageSync('userId');
+
 		if (options.id) {
 			activityId.value = options.id;
 			// 【修改】在拿到 ID 后直接调用数据获取函数
@@ -248,6 +253,34 @@
 				icon: 'none'
 			});
 		}
+
+		// ==================== 【新增】处理分享点击加分逻辑 ====================
+		if (options && options.sharerId) {
+			const sharerId = options.sharerId;
+			const bizId = options.id; // 活动ID就是 bizId
+
+			// 1. 如果是本人点击，不处理
+			if (sharerId && loggedInUserId.value && sharerId === loggedInUserId.value) {
+				console.log('用户点击了自己的活动分享链接，不计分。');
+			}
+			// 2. 如果是其他已登录用户点击，直接调用接口加分
+			else if (sharerId && loggedInUserId.value && bizId) {
+				console.log('其他用户点击了活动分享链接，且已登录，准备为分享者加分。');
+				triggerShareHitApi(sharerId, bizId);
+			}
+			// 3. 如果是未登录用户点击，暂存信息
+			else if (sharerId && bizId) {
+				console.log('用户点击了活动分享链接，但尚未登录。暂存分享信息。');
+				// 将分享者ID、活动ID和类型作为一个对象进行缓存
+				uni.setStorageSync('pendingShareReward', {
+					sharerId: sharerId,
+					bizId: bizId,
+					type: 31 // 明确是分享活动
+				});
+			}
+		}
+		// =======================================================================
+
 		// 允许从右上角菜单发起分享
 		uni.showShareMenu({
 			withShareTicket: true,
@@ -282,11 +315,11 @@
 		const m = date.getMinutes().toString().padStart(2, '0');
 		return `${Y}-${M}-${D} ${h}:${m}`;
 	};
-	
+
 	// 【新增】uni-popup 状态变化时的事件处理函数
 	const onPopupChange = (e) => {
-	  // e.show 是 uni-popup 派发出来的值，true 表示弹窗打开，false 表示弹窗关闭
-	  isActionBarHidden.value = e.show;
+		// e.show 是 uni-popup 派发出来的值，true 表示弹窗打开，false 表示弹窗关闭
+		isActionBarHidden.value = e.show;
 	};
 
 	// 【新增】用于活动时间的计算属性
@@ -406,18 +439,48 @@
 		showTimelineGuide.value = false;
 	};
 
+	// 【新增】调用分享命中接口的函数
+	const triggerShareHitApi = async (sharerId, bizId) => {
+		if (!sharerId || !bizId) return;
+
+		console.log(`准备为分享者 (ID: ${sharerId}) 增加贡分, 关联活动ID: ${bizId}`);
+
+		const {
+			error
+		} = await request('/app-api/member/experience-record/share-experience-hit', {
+			method: 'POST',
+			data: {
+				type: 31, // 31 代表 "分享活动奖励"
+				shareUserId: sharerId,
+				bizId: bizId
+			}
+		});
+
+		if (error) {
+			console.error('调用分享加分接口失败:', error);
+		} else {
+			console.log(`成功为分享者 (ID: ${sharerId}) 触发贡分增加`);
+		}
+	};
+
 	// 【重大修改】升级 onShareAppMessage 逻辑
 	onShareAppMessage((res) => {
 		console.log("触发分享给好友", res);
-		// 分享时自动关闭弹窗
 		closeSharePopup();
 
-		// 核心逻辑：优先使用用户自定义的标题
+		// 【新增】获取分享者自己的用户ID
+		const sharerId = uni.getStorageSync('userId');
 		const finalTitle = customShareTitle.value || activityDetail.value.activityTitle || '发现一个很棒的活动，快来看看吧！';
+
+		// 【修改】在路径中添加 sharerId 参数
+		let sharePath = `/pages/active-detail/active-detail?id=${activityDetail.value.id}`;
+		if (sharerId) {
+			sharePath += `&sharerId=${sharerId}`;
+		}
 
 		return {
 			title: finalTitle,
-			path: `/pages/active-detail/active-detail?id=${activityDetail.value.id}`,
+			path: sharePath, // 使用拼接后的路径
 			imageUrl: activityDetail.value.coverImageUrl || '/static/default-share-image.png'
 		};
 	});
@@ -426,12 +489,19 @@
 	onShareTimeline(() => {
 		console.log("触发分享到朋友圈");
 
-		// 核心逻辑：同样使用用户自定义的标题
+		// 【新增】获取分享者自己的用户ID
+		const sharerId = uni.getStorageSync('userId');
 		const finalTitle = customShareTitle.value || activityDetail.value.activityTitle || '发现一个很棒的活动，快来看看吧！';
+
+		// 【修改】在 query 中添加 sharerId 参数
+		let queryString = `id=${activityDetail.value.id}&from=timeline`;
+		if (sharerId) {
+			queryString += `&sharerId=${sharerId}`;
+		}
 
 		return {
 			title: finalTitle,
-			query: `id=${activityDetail.value.id}&from=timeline`,
+			query: queryString, // 使用拼接后的 query
 			imageUrl: activityDetail.value.coverImageUrl || '/static/default-share-image.png'
 		}
 	});

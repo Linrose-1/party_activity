@@ -10,7 +10,8 @@
 							{{ postDetail.user.charAt(0) }}
 						</view> -->
 						<image :src="postDetail.avatar" mode="" class="author-avatar"
-							@click="navigateToBusinessCard(postDetail.userId)"></image>
+							@click="navigateToBusinessCard({ id: postDetail.userId, name: postDetail.user, avatar: postDetail.avatar })">
+						</image>
 						<view class="avatar-tooltip">点击获取联系方式</view>
 					</view>
 					<view class="author-details">
@@ -79,7 +80,7 @@
 						<view class="comment" v-for="comment in comments" :key="comment.id"
 							:class="{ 'is-reply': comment.parentId !== 0 }">
 							<image :src="comment.avatar" mode="" class="comment-avatar"
-								@click="navigateToBusinessCard(comment.userId)"></image>
+							    @click="navigateToBusinessCard({ id: comment.userId, name: comment.user, avatar: comment.avatar })"></image>
 							<view class="comment-content">
 								<view class="comment-header">
 									<view class="commenter-name">{{ comment.user || '匿名用户' }}</view>
@@ -137,14 +138,14 @@
 				<view class="share-popup-cancel" @click="closeSharePopup">取消</view>
 			</view>
 		</uni-popup>
-		
+
 		<view v-if="showTimelineGuide" class="timeline-guide-mask" @click="hideTimelineGuide">
-					<image src="/static/icons/share-guide-arrow.png" class="guide-arrow"></image>
-					<view class="guide-text">
-						<text>点击右上角</text>
-						<text>分享到朋友圈</text>
-					</view>
-				</view>
+			<image src="/static/icons/share-guide-arrow.png" class="guide-arrow"></image>
+			<view class="guide-text">
+				<text>点击右上角</text>
+				<text>分享到朋友圈</text>
+			</view>
+		</view>
 	</view>
 </template>
 
@@ -224,6 +225,33 @@
 			setTimeout(() => uni.navigateBack(), 1500);
 		}
 
+		// ==================== 新增：处理分享点击逻辑 ====================
+		if (options && options.sharerId) {
+			const sharerId = options.sharerId;
+			const bizId = options.id; // 商机ID就是从options.id获取
+
+			// 1. 检查点击者是否是分享者本人
+			if (sharerId && loggedInUserId.value && sharerId === loggedInUserId.value) {
+				console.log('用户点击了自己的分享链接，不计分。');
+			}
+			// 2. 如果点击者不是分享者本人，并且已登录
+			else if (sharerId && loggedInUserId.value && bizId) {
+				console.log('其他用户点击了分享链接，且已登录，准备加分。');
+				// 调用时传入 sharerId 和 bizId
+				triggerShareHitApi(sharerId, bizId);
+			}
+			// 3. 如果点击者未登录
+			else if (sharerId && bizId) {
+				console.log('用户点击了分享链接，但尚未登录。暂存 sharerId 和 bizId。');
+				// 将分享者ID和商机ID作为一个对象进行缓存
+				uni.setStorageSync('pendingShareReward', {
+					sharerId: sharerId,
+					bizId: bizId
+				});
+			}
+		}
+		// =============================================================
+
 		// 允许从右上角菜单发起分享
 		uni.showShareMenu({
 			withShareTicket: true,
@@ -245,20 +273,20 @@
 	const closeSharePopup = () => {
 		sharePopup.value.close();
 	};
-	
+
 	// 【新增】引导用户分享到朋友圈的方法
 	const guideShareTimeline = () => {
-	  // 1. 先关闭底部的分享弹窗
-	  closeSharePopup();
-	  
-	  // 2. 显示右上角的引导遮罩
-	  showTimelineGuide.value = true;
-	
-	  // 重要：确保此时 onShareTimeline 返回的内容是用户刚刚编辑好的
-	  // 因为 onShareTimeline 是一个生命周期钩子，它会自己读取我们设置好的 customShareTitle 等变量
-	  // 所以我们在这里不需要做什么特殊处理，只需要显示引导即可
+		// 1. 先关闭底部的分享弹窗
+		closeSharePopup();
+
+		// 2. 显示右上角的引导遮罩
+		showTimelineGuide.value = true;
+
+		// 重要：确保此时 onShareTimeline 返回的内容是用户刚刚编辑好的
+		// 因为 onShareTimeline 是一个生命周期钩子，它会自己读取我们设置好的 customShareTitle 等变量
+		// 所以我们在这里不需要做什么特殊处理，只需要显示引导即可
 	};
-	
+
 	// 【新增】隐藏引导遮罩的方法
 	const hideTimelineGuide = () => {
 		showTimelineGuide.value = false;
@@ -267,15 +295,24 @@
 	// ==================== 定义分享给好友的内容 ====================
 	onShareAppMessage((res) => {
 		console.log("触发分享给好友", res);
-		// 分享时，关闭弹窗，体验更好
+		// 分享时，关闭弹窗
 		closeSharePopup();
 
-		// 核心逻辑：优先使用用户自定义的标题，如果为空，则使用商机标题作为备选
+		// 新增：获取分享者自己的用户ID
+		const sharerId = uni.getStorageSync('userId');
+
+		// 优先使用用户自定义的标题，如果为空，则使用商机标题作为备选
 		const finalTitle = customShareTitle.value || postDetail.postTitle || '发现一个商机，快来看看吧！';
+
+		// 修改：在路径中添加 sharerId 参数
+		let sharePath = `/pages/home-commercialDetail/home-commercialDetail?id=${postDetail.id}`;
+		if (sharerId) {
+			sharePath += `&sharerId=${sharerId}`;
+		}
 
 		return {
 			title: finalTitle,
-			path: `/pages/home-commercialDetail/home-commercialDetail?id=${postDetail.id}`,
+			path: sharePath, // 使用拼接后的路径
 			imageUrl: postDetail.images.length > 0 ? postDetail.images[0] : '/static/logo.png'
 		};
 	});
@@ -283,24 +320,54 @@
 	// ==================== 定义分享到朋友圈的内容 ====================
 	onShareTimeline(() => {
 		console.log("触发分享到朋友圈");
-	
+
+		// 新增：获取分享者自己的用户ID
+		const sharerId = uni.getStorageSync('userId');
+
 		// 1. 优先使用用户在弹窗中编辑的自定义标题
-		//    如果用户没编辑（或弹窗没打开），则使用商机的原始标题
-		//    如果商机标题也没有，则使用一个通用的默认标题
 		const finalTitle = customShareTitle.value || postDetail.postTitle || '发现一个商机，快来看看吧！';
-	
-		// 2. 封面图片逻辑保持简单：
-		//    优先用商机的第一张图，如果没有则用一个默认的logo
-		const finalImageUrl = postDetail.images.length > 0 ? postDetail.images[0] : '/static/logo.png'; // 请确保/static/logo.png存在
-	
-		// 3. 返回最终的分享对象
+
+		// 2. 封面图片逻辑
+		const finalImageUrl = postDetail.images.length > 0 ? postDetail.images[0] : '/static/logo.png';
+
+		// 3. 修改：在 query 中添加 sharerId 参数
+		let queryString = `id=${postDetail.id}&from=timeline`;
+		if (sharerId) {
+			queryString += `&sharerId=${sharerId}`;
+		}
+
+		// 4. 返回最终的分享对象
 		return {
 			title: finalTitle,
-			// query参数会附加到当前页面路径后面
-			query: `id=${postDetail.id}&from=timeline`,
+			query: queryString, // 使用拼接后的 query
 			imageUrl: finalImageUrl
 		}
 	});
+
+	// 调用“分享命中”接口为分享者加贡分
+	const triggerShareHitApi = async (sharerId, bizId) => {
+		// sharerId 是分享者的ID, bizId 是商机的ID
+		if (!sharerId || !bizId) return;
+
+		console.log(`准备为分享者 (ID: ${sharerId}) 增加贡分, 关联商机ID: ${bizId}`);
+
+		const {
+			error
+		} = await request('/app-api/member/experience-record/share-experience-hit', {
+			method: 'POST',
+			data: {
+				type: 32, // 32 代表 "分享商机奖励"
+				shareUserId: sharerId,
+				bizId: bizId // 新增：传递关联的商机ID
+			}
+		});
+
+		if (error) {
+			console.error('调用分享加分接口失败:', error);
+		} else {
+			console.log(`成功为分享者 (ID: ${sharerId}) 触发贡分增加`);
+		}
+	};
 
 	const getBusinessOpportunitiesDetail = async () => {
 		isLoading.value = true;
@@ -464,54 +531,7 @@
 		}
 	};
 
-	const toggleFollow = async (post) => {
-		if (isActionInProgress.value) return;
-		if (!loggedInUserId.value) {
-			uni.showToast({
-				title: '请先登录',
-				icon: 'none'
-			});
-			return;
-		}
 
-		isActionInProgress.value = true;
-		const isAdding = !post.isFollowedUser;
-		const apiUrl = isAdding ? '/app-api/member/follow/add' : '/app-api/member/follow/del';
-
-		uni.showLoading({
-			title: '请稍候...'
-		});
-
-		try {
-			const requestData = {
-				userId: loggedInUserId.value,
-				targetId: post.userId,
-				targetType: 'post_user'
-			};
-
-			const result = await request(apiUrl, {
-				method: 'POST',
-				data: requestData
-			});
-
-			if (result && result.error) {
-				uni.showToast({
-					title: '操作失败',
-					icon: 'none'
-				});
-			}
-		} catch (error) {
-			console.error("关注/取关用户异常:", error);
-			uni.showToast({
-				title: '操作失败，请重试',
-				icon: 'none'
-			});
-		} finally {
-			uni.hideLoading();
-			await getBusinessOpportunitiesDetail();
-			isActionInProgress.value = false;
-		}
-	};
 
 	// ==================== 核心修改点: 完善 toggleAction (点赞/点踩) 方法 ====================
 	const toggleAction = async (item, clickedAction) => {
@@ -570,6 +590,75 @@
 		}
 	};
 
+	// ==================== 关注/取消关注用户 ====================
+	// ==================== 关注/取消关注用户 (已修正为乐观UI更新) ====================
+	const toggleFollow = async (post) => {
+		if (isActionInProgress.value) return;
+		if (!loggedInUserId.value) {
+			uni.showToast({
+				title: '请先登录',
+				icon: 'none'
+			});
+			return;
+		}
+
+		isActionInProgress.value = true;
+
+		// 1. 保存原始状态，用于请求失败时回滚
+		const originalFollowState = post.isFollowedUser;
+
+		// 2.【核心】立即修改本地数据，UI瞬间响应
+		post.isFollowedUser = !post.isFollowedUser;
+
+		const isAdding = post.isFollowedUser;
+		const apiUrl = isAdding ? '/app-api/member/follow/add' : '/app-api/member/follow/del';
+		const successMessage = isAdding ? '关注成功' : '已取消关注';
+
+		try {
+			const requestData = {
+				userId: loggedInUserId.value,
+				targetId: post.userId,
+				targetType: 'post_user'
+			};
+
+			// 3. 在后台发送API请求
+			const result = await request(apiUrl, {
+				method: 'POST',
+				data: requestData
+			});
+
+			// 4. 处理API返回结果
+			if (result && result.error) {
+				// 如果API返回失败，将UI状态回滚到原始状态
+				post.isFollowedUser = originalFollowState;
+				uni.showToast({
+					title: result.error || '操作失败',
+					icon: 'none'
+				});
+			} else {
+				// API成功，给出成功提示，UI已是最新，无需任何操作
+				uni.showToast({
+					title: successMessage,
+					icon: 'success'
+				});
+			}
+		} catch (error) {
+			console.error("关注/取关用户异常:", error);
+			// 如果网络请求异常，同样回滚UI状态
+			post.isFollowedUser = originalFollowState;
+			uni.showToast({
+				title: '操作失败，请重试',
+				icon: 'none'
+			});
+		} finally {
+			// 5. 无论成功失败，最后都解锁
+			isActionInProgress.value = false;
+		}
+	};
+
+
+	// ==================== 收藏/取消收藏商机 ====================
+	// ==================== 收藏/取消收藏商机 (已修正为乐观UI更新) ====================
 	const toggleBookmark = async (post) => {
 		if (isActionInProgress.value) return;
 		if (!loggedInUserId.value) {
@@ -581,12 +670,16 @@
 		}
 
 		isActionInProgress.value = true;
-		const isAdding = !post.saved;
-		const apiUrl = isAdding ? '/app-api/member/follow/add' : '/app-api/member/follow/del';
 
-		uni.showLoading({
-			title: '请稍候...'
-		});
+		// 1. 保存原始状态
+		const originalSavedState = post.saved;
+
+		// 2.【核心】立即修改本地数据，UI瞬间响应
+		post.saved = !post.saved;
+
+		const isAdding = post.saved;
+		const apiUrl = isAdding ? '/app-api/member/follow/add' : '/app-api/member/follow/del';
+		const successMessage = isAdding ? '收藏成功' : '已取消收藏';
 
 		try {
 			const requestData = {
@@ -595,27 +688,38 @@
 				targetType: 'post'
 			};
 
+			// 3. 在后台发送API请求
 			const result = await request(apiUrl, {
 				method: 'POST',
 				data: requestData
 			});
+			console.log("触发收藏", result)
 
+			// 4. 处理API返回结果
 			if (result && result.error) {
+				// API失败，回滚UI
+				post.saved = originalSavedState;
 				uni.showToast({
-					title: '操作失败',
+					title: result.error || '操作失败',
 					icon: 'none'
 				});
+			} else {
+				// API成功，给出成功提示
+				uni.showToast({
+					title: successMessage,
+					icon: 'success'
+				});
 			}
-
 		} catch (error) {
 			console.error("收藏/取消收藏商机异常:", error);
+			// 网络异常，回滚UI
+			post.saved = originalSavedState;
 			uni.showToast({
 				title: '操作失败，请重试',
 				icon: 'none'
 			});
 		} finally {
-			uni.hideLoading();
-			await getBusinessOpportunitiesDetail();
+			// 5. 解锁
 			isActionInProgress.value = false;
 		}
 	};
@@ -632,28 +736,28 @@
 			current: urls[current]
 		});
 	};
-	const navigateToBusinessCard = (userId) => {
-		// 首先检查 cardFlag 是否为 false
-		if (!postDetail.cardFlag) {
-			uni.showToast({
-				title: '作者已关闭名片查看',
-				icon: 'none'
-			});
-			return;
-		}
-
-		// 然后检查 userId 是否有效
-		if (!userId) {
-			uni.showToast({
-				title: '无法查看该用户主页',
-				icon: 'none'
-			});
-			return;
-		}
-
-		uni.navigateTo({
-			url: `/pages/applicationBusinessCard/applicationBusinessCard?userId=${userId}`
-		});
+	const navigateToBusinessCard = (user) => {
+	    // 首先检查 cardFlag 是否为 false (这个逻辑保持不变)
+	    if (!postDetail.cardFlag) {
+	        uni.showToast({ title: '作者已关闭名片查看', icon: 'none' });
+	        return;
+	    }
+	
+	    // 然后检查 userId 是否有效
+	    if (!user || !user.id) {
+	        uni.showToast({ title: '无法查看该用户主页', icon: 'none' });
+	        return;
+	    }
+	    
+	    // 【核心修改】构建带有多参数的URL
+	    // 使用 encodeURIComponent 确保名字和URL中的特殊字符不会导致问题
+	    const url = `/pages/applicationBusinessCard/applicationBusinessCard?id=${user.id}` +
+	                `&name=${encodeURIComponent(user.name)}` +
+	                `&avatar=${encodeURIComponent(user.avatar)}`;
+	
+	    uni.navigateTo({
+	        url: url
+	    });
 	};
 </script>
 
@@ -676,7 +780,7 @@
 		/* 为了让页面内容不被底部评论框遮挡，可以根据 add-comment 的高度动态调整 */
 		padding-bottom: 140rpx;
 	}
-	
+
 	.comments-disabled-message {
 		display: flex;
 		justify-content: center;
@@ -949,7 +1053,7 @@
 		margin-bottom: 0;
 		padding-bottom: 0;
 	}
-	
+
 	/* 子评论的缩进样式 */
 	.comment.is-reply {
 		margin-left: 20rpx;
@@ -1159,7 +1263,7 @@
 	.share-channel-btn::after {
 		border: none;
 	}
-	
+
 	.channel-icon-image {
 		width: 60rpx;
 		height: 60rpx;
@@ -1181,7 +1285,7 @@
 		font-size: 30rpx;
 		color: #333;
 	}
-	
+
 	/* --- 朋友圈引导蒙层 --- */
 	.timeline-guide-mask {
 		position: fixed;
@@ -1197,14 +1301,14 @@
 		padding-right: 20rpx;
 		box-sizing: border-box;
 	}
-	
+
 	.guide-arrow {
 		width: 150rpx;
 		height: 150rpx;
 		margin-top: 10rpx;
 		margin-right: 20rpx;
 	}
-	
+
 	.guide-text {
 		color: #fff;
 		font-size: 32rpx;
@@ -1212,10 +1316,9 @@
 		text-align: center;
 		margin-top: 20rpx;
 	}
-	
+
 	.guide-text text {
 		display: block;
 		margin-bottom: 10rpx;
 	}
-
 </style>
