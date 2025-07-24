@@ -26,7 +26,10 @@
     "pages/my-follow/my-follow",
     "pages/my-active-apply/my-active-apply",
     "pages/my-active-manage/my-active-manage",
-    "pages/my-active-approval/my-active-approval"
+    "pages/my-active-approval/my-active-approval",
+    "pages/my-shop/my-shop",
+    "pages/my-shopRecommend/my-shopRecommend",
+    "pages/myStore-edit/myStore-edit"
   ],
   "window": {
     "navigationBarTextStyle": "black",

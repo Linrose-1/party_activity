@@ -29,6 +29,9 @@ if (!Math) {
   "./pages/my-active-apply/my-active-apply.js";
   "./pages/my-active-manage/my-active-manage.js";
   "./pages/my-active-approval/my-active-approval.js";
+  "./pages/my-shop/my-shop.js";
+  "./pages/my-shopRecommend/my-shopRecommend.js";
+  "./pages/myStore-edit/myStore-edit.js";
 }
 const _sfc_main = {
   onLaunch: function() {

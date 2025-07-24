@@ -11,6 +11,7 @@ const _easycom_uni_load_more = () => "../../uni_modules/uni-load-more/components
 if (!Math) {
   (_easycom_uni_icons + _easycom_uni_load_more)();
 }
+const defaultAvatarUrl = "/static/icon/default-avatar.png";
 const _sfc_main = {
   __name: "home",
   setup(__props) {
@@ -34,7 +35,7 @@ const _sfc_main = {
     });
     common_vendor.onMounted(() => {
       loggedInUserId.value = common_vendor.index.getStorageSync("userId");
-      common_vendor.index.__f__("log", "at pages/home/home.vue:197", "当前列表页登录用户ID:", loggedInUserId.value);
+      common_vendor.index.__f__("log", "at pages/home/home.vue:196", "当前列表页登录用户ID:", loggedInUserId.value);
       getBusinessOpportunitiesList(true);
     });
     common_vendor.onReachBottom(() => {
@@ -43,7 +44,7 @@ const _sfc_main = {
       }
     });
     common_vendor.onPullDownRefresh(() => {
-      common_vendor.index.__f__("log", "at pages/home/home.vue:208", "用户触发了下拉刷新");
+      common_vendor.index.__f__("log", "at pages/home/home.vue:207", "用户触发了下拉刷新");
       getBusinessOpportunitiesList(true);
     });
     function formatTimestamp(timestamp) {
@@ -83,7 +84,7 @@ const _sfc_main = {
           method: "GET",
           data: params
         });
-        common_vendor.index.__f__("log", "at pages/home/home.vue:255", "商机列表", result);
+        common_vendor.index.__f__("log", "at pages/home/home.vue:254", "商机列表", result);
         if (result && result.error && result.error.includes("未登录")) {
           common_vendor.index.showToast({
             title: "请先登录",
@@ -100,28 +101,34 @@ const _sfc_main = {
         }
         if (result && !result.error && result.data && result.data.list) {
           const apiData = result.data;
-          const mappedData = apiData.list.map((item) => ({
-            id: item.id,
-            content: item.postContent,
-            title: item.postTitle,
-            images: item.postImg ? String(item.postImg).split(",").filter((img) => img) : [],
-            tags: item.tags ? Array.isArray(item.tags) ? item.tags : String(item.tags).split(
-              ","
-            ).filter((tag) => tag) : [],
-            likes: item.likesCount || 0,
-            // 确保是数字
-            dislikes: item.dislikesCount || 0,
-            // 确保是数字
-            userAction: item.userLikeStr || null,
-            isSaved: item.followFlag === 1,
-            isFollowedUser: item.followUserFlag === 1,
-            time: formatTimestamp(item.createTime),
-            user: {
-              id: item.memberUser.id,
-              name: item.memberUser.nickname || "匿名用户",
-              avatar: item.memberUser.avatar
-            }
-          }));
+          const mappedData = apiData.list.map((item) => {
+            var _a, _b, _c;
+            return {
+              id: item.id,
+              content: item.postContent,
+              title: item.postTitle,
+              images: item.postImg ? String(item.postImg).split(",").filter((img) => img) : [],
+              tags: item.tags ? Array.isArray(item.tags) ? item.tags : String(item.tags).split(
+                ","
+              ).filter((tag) => tag) : [],
+              likes: item.likesCount || 0,
+              // 确保是数字
+              dislikes: item.dislikesCount || 0,
+              // 确保是数字
+              userAction: item.userLikeStr || null,
+              isSaved: item.followFlag === 1,
+              isFollowedUser: item.followUserFlag === 1,
+              time: formatTimestamp(item.createTime),
+              user: {
+                // 优先使用 memberUser.id，如果 memberUser 为 null，则使用顶层的 userId 作为后备
+                id: ((_a = item.memberUser) == null ? void 0 : _a.id) || item.userId,
+                // 优先使用 memberUser.nickname，如果不存在或为空，则显示 '匿名用户'
+                name: ((_b = item.memberUser) == null ? void 0 : _b.nickname) || "匿名用户",
+                // 优先使用 memberUser.avatar，如果不存在或为空，则使用本地的默认头像
+                avatar: ((_c = item.memberUser) == null ? void 0 : _c.avatar) || defaultAvatarUrl
+              }
+            };
+          });
           postList.value = [...postList.value, ...mappedData];
           if (postList.value.length >= apiData.total) {
             loadingStatus.value = "noMore";
@@ -138,7 +145,7 @@ const _sfc_main = {
           });
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/home/home.vue:317", "getBusinessOpportunitiesList error:", error);
+        common_vendor.index.__f__("error", "at pages/home/home.vue:321", "getBusinessOpportunitiesList error:", error);
         loadingStatus.value = "more";
         common_vendor.index.showToast({
           title: "网络请求异常",
@@ -286,7 +293,7 @@ const _sfc_main = {
           method: "POST",
           data: requestData
         });
-        common_vendor.index.__f__("log", "at pages/home/home.vue:484", "触发收藏", result);
+        common_vendor.index.__f__("log", "at pages/home/home.vue:488", "触发收藏", result);
         if (result && result.error) {
           post.isSaved = originalStatus;
           common_vendor.index.showToast({
@@ -383,13 +390,16 @@ const _sfc_main = {
     };
     const navigateToBusinessCard = (user) => {
       if (!user || !user.id) {
-        common_vendor.index.showToast({ title: "无法查看该用户主页", icon: "none" });
+        common_vendor.index.showToast({
+          title: "无法查看该用户主页",
+          icon: "none"
+        });
         return;
       }
       const defaultAvatar = "/static/images/default-avatar.png";
       const avatarUrl = user.avatar || defaultAvatar;
       const url = `/pages/applicationBusinessCard/applicationBusinessCard?id=${user.id}&name=${encodeURIComponent(user.name)}&avatar=${encodeURIComponent(avatarUrl)}`;
-      common_vendor.index.__f__("log", "at pages/home/home.vue:631", "从商机列表页跳转，URL:", url);
+      common_vendor.index.__f__("log", "at pages/home/home.vue:638", "从商机列表页跳转，URL:", url);
       common_vendor.index.navigateTo({
         url
       });
@@ -439,7 +449,7 @@ const _sfc_main = {
             f: common_vendor.t(post.isFollowedUser ? "已关注" : "关注"),
             g: post.isFollowedUser ? 1 : "",
             h: common_vendor.o(($event) => toggleFollow(post), post.id)
-          } : {}, isLogin.value && hasPaidMembership.value ? common_vendor.e({
+          } : {}, isLogin.value ? common_vendor.e({
             i: common_vendor.t(post.title),
             j: post.images && post.images.length
           }, post.images && post.images.length ? {
@@ -498,31 +508,28 @@ const _sfc_main = {
             E: common_vendor.t(post.isSaved ? "已收藏" : "收藏"),
             F: post.isSaved ? 1 : "",
             G: common_vendor.o(($event) => toggleSave(post), post.id)
-          }) : isLogin.value && !hasPaidMembership.value ? {
-            H: common_vendor.o(goToMembership, post.id)
-          } : {
-            I: common_vendor.o(goToLogin, post.id)
+          }) : {
+            H: common_vendor.o(goToLogin, post.id)
           }, {
-            J: post.id,
-            K: common_vendor.o(($event) => handlePostClick(post), post.id)
+            I: post.id,
+            J: common_vendor.o(($event) => handlePostClick(post), post.id)
           });
         }),
-        q: isLogin.value && hasPaidMembership.value,
-        r: isLogin.value && !hasPaidMembership.value,
-        s: postList.value.length === 0 && loadingStatus.value === "noMore"
+        q: isLogin.value,
+        r: postList.value.length === 0 && loadingStatus.value === "noMore"
       }, postList.value.length === 0 && loadingStatus.value === "noMore" ? {} : loadingStatus.value === "loading" ? {
-        v: common_vendor.p({
+        t: common_vendor.p({
           status: "loading",
           ["contentText.loading"]: "正在加载..."
         })
       } : loadingStatus.value === "noMore" ? {
-        x: common_vendor.p({
+        w: common_vendor.p({
           status: "noMore",
           ["contentText.noMore"]: "暂无更多内容"
         })
       } : {}, {
-        t: loadingStatus.value === "loading",
-        w: loadingStatus.value === "noMore"
+        s: loadingStatus.value === "loading",
+        v: loadingStatus.value === "noMore"
       });
     };
   }

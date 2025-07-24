@@ -80,7 +80,8 @@
 						<view class="comment" v-for="comment in comments" :key="comment.id"
 							:class="{ 'is-reply': comment.parentId !== 0 }">
 							<image :src="comment.avatar" mode="" class="comment-avatar"
-							    @click="navigateToBusinessCard({ id: comment.userId, name: comment.user, avatar: comment.avatar })"></image>
+								@click="navigateToBusinessCard({ id: comment.userId, name: comment.user, avatar: comment.avatar })">
+							</image>
 							<view class="comment-content">
 								<view class="comment-header">
 									<view class="commenter-name">{{ comment.user || '匿名用户' }}</view>
@@ -169,6 +170,8 @@
 	const showFollowButton = ref(false);
 
 	const isActionInProgress = ref(false);
+
+	const defaultAvatarUrl = '/static/icon/default-avatar.png';
 
 	const postDetail = reactive({
 		id: null,
@@ -389,8 +392,8 @@
 				postDetail.likes = item.likesCount || 0;
 				postDetail.dislikes = item.dislikesCount || 0;
 				postDetail.time = formatTimestamp(item.createTime);
-				postDetail.user = item.memberUser.nickname || '匿名用户';
-				postDetail.avatar = item.memberUser.avatar;
+				postDetail.user = item.memberUser?.nickname || '匿名用户';
+				postDetail.avatar = item.memberUser?.avatar || defaultAvatarUrl;
 				postDetail.userId = item.userId;
 				postDetail.saved = item.followFlag === 1;
 				postDetail.isFollowedUser = item.followUserFlag === 1;
@@ -737,27 +740,33 @@
 		});
 	};
 	const navigateToBusinessCard = (user) => {
-	    // 首先检查 cardFlag 是否为 false (这个逻辑保持不变)
-	    if (!postDetail.cardFlag) {
-	        uni.showToast({ title: '作者已关闭名片查看', icon: 'none' });
-	        return;
-	    }
-	
-	    // 然后检查 userId 是否有效
-	    if (!user || !user.id) {
-	        uni.showToast({ title: '无法查看该用户主页', icon: 'none' });
-	        return;
-	    }
-	    
-	    // 【核心修改】构建带有多参数的URL
-	    // 使用 encodeURIComponent 确保名字和URL中的特殊字符不会导致问题
-	    const url = `/pages/applicationBusinessCard/applicationBusinessCard?id=${user.id}` +
-	                `&name=${encodeURIComponent(user.name)}` +
-	                `&avatar=${encodeURIComponent(user.avatar)}`;
-	
-	    uni.navigateTo({
-	        url: url
-	    });
+		// 首先检查 cardFlag 是否为 false (这个逻辑保持不变)
+		if (!postDetail.cardFlag) {
+			uni.showToast({
+				title: '作者已关闭名片查看',
+				icon: 'none'
+			});
+			return;
+		}
+
+		// 然后检查 userId 是否有效
+		if (!user || !user.id) {
+			uni.showToast({
+				title: '无法查看该用户主页',
+				icon: 'none'
+			});
+			return;
+		}
+
+		// 【核心修改】构建带有多参数的URL
+		// 使用 encodeURIComponent 确保名字和URL中的特殊字符不会导致问题
+		const url = `/pages/applicationBusinessCard/applicationBusinessCard?id=${user.id}` +
+			`&name=${encodeURIComponent(user.name)}` +
+			`&avatar=${encodeURIComponent(user.avatar)}`;
+
+		uni.navigateTo({
+			url: url
+		});
 	};
 </script>
 

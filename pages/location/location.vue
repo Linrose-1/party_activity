@@ -75,8 +75,17 @@
 					<view v-if="!businessHasMore && businesses.length > 0" class="no-more-content">
 						暂无更多商友
 					</view>
-					<view v-if="businesses.length === 0" class="no-more-content">
-						附近暂无商友
+					<view v-if="businesses.length === 0 && !loading" class="empty-state-container">
+						<!-- 如果是3km模式且无结果，显示推荐按钮 -->
+						<view v-if="businessSearchMode === '3km'">
+							<view class="no-more-content">附近3公里内暂无商友</view>
+							<button class="recommend-btn" @click="switchToAllBusinesses">查看推荐商友</button>
+						</view>
+
+						<!-- 如果是all模式且无结果，显示最终提示 -->
+						<view v-else class="no-more-content">
+							附近暂无商友，去别处看看吧
+						</view>
 					</view>
 				</view>
 			</view>
@@ -116,6 +125,16 @@
 	const activities = ref([]);
 	const businesses = ref([]);
 
+	const businessSearchMode = ref('3km'); // '3km' 或 'all'
+
+	const switchToAllBusinesses = async () => {
+		console.log('切换到查看全部推荐商友模式');
+		businessSearchMode.value = 'all'; // 切换模式
+		// 注意：这里我们不是加载更多，而是从头开始获取新列表
+		// getNearbyBusinesses 内部的 loading 状态处理已经足够，这里可以不用手动设置
+		await getNearbyBusinesses(false);
+	};
+
 	// --- 方法 ---
 	const handleTabClick = (e) => {
 		currentTab.value = e.currentIndex;
@@ -147,6 +166,8 @@
 					longitude: res.longitude,
 				};
 				shaken.value = true;
+
+				businessSearchMode.value = '3km';
 
 				loading.value = true;
 				uni.vibrateShort();
@@ -187,6 +208,12 @@
 			longitude: userLocation.value.longitude,
 			latitude: userLocation.value.latitude,
 		};
+
+		if (businessSearchMode.value === '3km') {
+			params.checkDistance = 1;
+		}
+
+		console.log('发起附近商友列表请求, 模式:', businessSearchMode.value, '参数:', params);
 
 		const result = await request('/app-api/member/activity/list', {
 			method: 'GET',
@@ -293,7 +320,7 @@
 		shakeAudioContext.onError((res) => {
 			console.error('音频播放错误:', res.errMsg);
 		});
-		
+
 		// 监听手机晃动
 		uni.onAccelerometerChange((res) => {
 			if (Math.abs(res.x) > 1.0 && Math.abs(res.y) > 1.0) {
@@ -571,5 +598,33 @@
 
 	.iconfont {
 		margin-right: 10rpx;
+	}
+
+
+	.empty-state-container {
+		text-align: center;
+		padding: 40rpx 0;
+	}
+
+	.recommend-btn {
+		display: inline-block;
+		margin-top: 20rpx;
+		background: linear-gradient(135deg, #ff6b00 0%, #ff8c00 100%);
+		color: white;
+		border: none;
+		padding: 18rpx 60rpx;
+		border-radius: 50rpx;
+		font-size: 30rpx;
+		font-weight: 500;
+		box-shadow: 0 8rpx 20rpx rgba(255, 107, 0, 0.3);
+
+		&::after {
+			border: none;
+		}
+
+		&:active {
+			opacity: 0.9;
+			transform: scale(0.98);
+		}
 	}
 </style>

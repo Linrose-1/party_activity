@@ -67,9 +67,8 @@
 				</view>
 
 				<!-- ==================== 内容权限控制逻辑 ==================== -->
-				<template v-if="isLogin && hasPaidMembership">
+				<template v-if="isLogin">
 					<!-- 显示 postContent -->
-					<!-- <view style="font-weight: 700;font-size: 36rpx;">{{post.title}}</view> -->
 					<view class="post-content">
 						{{post.title}}
 					</view>
@@ -113,7 +112,6 @@
 							</view>
 						</view>
 						<view class="action-group">
-							<!-- ==================== 修改点：动态显示收藏状态文本 ==================== -->
 							<view class="action comment" :class="{ active: post.isSaved }"
 								@click.stop="toggleSave(post)">
 								<uni-icons :type="post.isSaved ? 'star-filled' : 'star'" size="20"
@@ -129,10 +127,10 @@
 				</template>
 
 				<!-- ... 权限控制部分保持不变 ... -->
-				<view v-else-if="isLogin && !hasPaidMembership" class="content-placeholder">
+				<!-- <view v-else-if="isLogin && !hasPaidMembership" class="content-placeholder">
 					<view class="placeholder-text">升级为会员，解锁全部商机信息</view>
 					<button class="placeholder-button" @click.stop="goToMembership">立即升级</button>
-				</view>
+				</view> -->
 				<view v-else class="content-placeholder">
 					<view class="placeholder-text">登录后查看更多精彩内容</view>
 					<button class="placeholder-button" @click.stop="goToLogin">立即登录</button>
@@ -175,6 +173,7 @@
 		const paidLevels = ['青铜', '白银', '黄金', '黑钻'];
 		return paidLevels.includes(member.value);
 	});
+	const defaultAvatarUrl = '/static/icon/default-avatar.png';
 
 	const postList = ref([]);
 	const activeTab = ref(1);
@@ -208,7 +207,7 @@
 		console.log('用户触发了下拉刷新');
 		getBusinessOpportunitiesList(true);
 	});
-	
+
 
 	function formatTimestamp(timestamp) {
 		if (!timestamp) return '';
@@ -251,8 +250,8 @@
 				method: 'GET',
 				data: params
 			});
-			
-			console.log("商机列表",result)
+
+			console.log("商机列表", result)
 
 			if (result && result.error && result.error.includes('未登录')) {
 				uni.showToast({
@@ -291,9 +290,14 @@
 					isFollowedUser: item.followUserFlag === 1,
 					time: formatTimestamp(item.createTime),
 					user: {
-						id: item.memberUser.id,
-						name: item.memberUser.nickname || '匿名用户',
-						avatar: item.memberUser.avatar
+						// 优先使用 memberUser.id，如果 memberUser 为 null，则使用顶层的 userId 作为后备
+						id: item.memberUser?.id || item.userId,
+
+						// 优先使用 memberUser.nickname，如果不存在或为空，则显示 '匿名用户'
+						name: item.memberUser?.nickname || '匿名用户',
+
+						// 优先使用 memberUser.avatar，如果不存在或为空，则使用本地的默认头像
+						avatar: item.memberUser?.avatar || defaultAvatarUrl
 					}
 				}));
 
@@ -481,7 +485,7 @@
 				method: 'POST',
 				data: requestData
 			});
-			console.log("触发收藏",result)
+			console.log("触发收藏", result)
 
 			if (result && result.error) {
 				// 失败回滚
@@ -607,33 +611,36 @@
 			url: `/pages/applicationBusinessCard/applicationBusinessCard?id=${userId}`
 		});
 	}
-	
+
 	const navigateToBusinessCard = (user) => {
-	    // 1. 【修正】移除对 `postDetail` 的引用，因为它在列表页不存在。
-	    //    在列表页，我们通常假设名片都是可以尝试查看的。
-	    //    真正的权限检查（如 cardFlag）应该在详情页或由后端接口处理。
-	
-	    // 2. 检查传入的 user 对象和 user.id 是否有效
-	    if (!user || !user.id) {
-	        uni.showToast({ title: '无法查看该用户主页', icon: 'none' });
-	        return;
-	    }
-	    
-	    // 3. 【核心】为 avatar 提供一个默认值，防止空字符串导致的问题
-	    const defaultAvatar = '/static/images/default-avatar.png'; // 请确保这个默认头像图片存在
-	    const avatarUrl = user.avatar || defaultAvatar;
-	
-	    // 4. 构建带有多参数的URL，并使用 encodeURIComponent 编码
-	    const url = `/pages/applicationBusinessCard/applicationBusinessCard?id=${user.id}` +
-	                `&name=${encodeURIComponent(user.name)}` +
-	                `&avatar=${encodeURIComponent(avatarUrl)}`;
-	
-	    console.log('从商机列表页跳转，URL:', url);
-	
-	    // 5. 执行跳转
-	    uni.navigateTo({
-	        url: url
-	    });
+		// 1. 【修正】移除对 `postDetail` 的引用，因为它在列表页不存在。
+		//    在列表页，我们通常假设名片都是可以尝试查看的。
+		//    真正的权限检查（如 cardFlag）应该在详情页或由后端接口处理。
+
+		// 2. 检查传入的 user 对象和 user.id 是否有效
+		if (!user || !user.id) {
+			uni.showToast({
+				title: '无法查看该用户主页',
+				icon: 'none'
+			});
+			return;
+		}
+
+		// 3. 【核心】为 avatar 提供一个默认值，防止空字符串导致的问题
+		const defaultAvatar = '/static/images/default-avatar.png'; // 请确保这个默认头像图片存在
+		const avatarUrl = user.avatar || defaultAvatar;
+
+		// 4. 构建带有多参数的URL，并使用 encodeURIComponent 编码
+		const url = `/pages/applicationBusinessCard/applicationBusinessCard?id=${user.id}` +
+			`&name=${encodeURIComponent(user.name)}` +
+			`&avatar=${encodeURIComponent(avatarUrl)}`;
+
+		console.log('从商机列表页跳转，URL:', url);
+
+		// 5. 执行跳转
+		uni.navigateTo({
+			url: url
+		});
 	};
 
 	const skipCommercialDetail = (postId) => {

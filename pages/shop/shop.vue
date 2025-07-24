@@ -26,7 +26,7 @@
 			:refresher-triggered="isRefreshing" @refresherrefresh="onPullDownRefresh">
 			<!-- 卡片列表 -->
 			<!-- 修复：之前这里缺少了 @click-card 事件来处理跳转 -->
-			<StoreCard v-for="store in filteredStores" :key="store.id" :store="store" @click-card="goToStoreDetail" />
+			<StoreCard v-for="store in filteredStores" :key="store.id" :store="store"  @click-card="goToStoreDetail" />
 
 			<!-- 加载状态提示 -->
 			<view v-if="loadingMore" class="load-more">

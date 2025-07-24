@@ -220,3 +220,26 @@ to {
 .iconfont.data-v-4d9b4fcb {
   margin-right: 10rpx;
 }
+.empty-state-container.data-v-4d9b4fcb {
+  text-align: center;
+  padding: 40rpx 0;
+}
+.recommend-btn.data-v-4d9b4fcb {
+  display: inline-block;
+  margin-top: 20rpx;
+  background: linear-gradient(135deg, #ff6b00 0%, #ff8c00 100%);
+  color: white;
+  border: none;
+  padding: 18rpx 60rpx;
+  border-radius: 50rpx;
+  font-size: 30rpx;
+  font-weight: 500;
+  box-shadow: 0 8rpx 20rpx rgba(255, 107, 0, 0.3);
+}
+.recommend-btn.data-v-4d9b4fcb::after {
+  border: none;
+}
+.recommend-btn.data-v-4d9b4fcb:active {
+  opacity: 0.9;
+  transform: scale(0.98);
+}

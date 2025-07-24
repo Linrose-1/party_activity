@@ -16,8 +16,10 @@ const _sfc_main = {
       required: true
     }
   },
-  setup(__props) {
+  emits: ["click-card"],
+  setup(__props, { emit: __emit }) {
     const props = __props;
+    const emit = __emit;
     const formattedDistance = common_vendor.computed(() => {
       if (typeof props.store.distance !== "number") {
         return null;
@@ -25,11 +27,8 @@ const _sfc_main = {
       const distanceAsInteger = Math.floor(props.store.distance);
       return `${distanceAsInteger}km`;
     });
-    const navigateToStoreDetail = () => {
-      common_vendor.index.navigateTo({
-        // 从 props.store.id 获取 ID，并拼接到 URL 中
-        url: `/pages/shop-detail/shop-detail?id=${props.store.id}`
-      });
+    const handleCardClick = () => {
+      emit("click-card", props.store);
     };
     return (_ctx, _cache) => {
       return common_vendor.e({
@@ -60,8 +59,7 @@ const _sfc_main = {
           size: "16",
           color: "#fff"
         }),
-        i: common_vendor.o(navigateToStoreDetail),
-        j: common_vendor.o(navigateToStoreDetail)
+        i: common_vendor.o(handleCardClick)
       });
     };
   }

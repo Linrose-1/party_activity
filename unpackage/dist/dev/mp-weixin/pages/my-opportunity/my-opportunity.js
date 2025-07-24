@@ -4,22 +4,27 @@ const utils_request = require("../../utils/request.js");
 if (!Array) {
   const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
   const _easycom_uni_load_more2 = common_vendor.resolveComponent("uni-load-more");
-  (_easycom_uni_icons2 + _easycom_uni_load_more2)();
+  const _easycom_uni_popup_dialog2 = common_vendor.resolveComponent("uni-popup-dialog");
+  const _easycom_uni_popup2 = common_vendor.resolveComponent("uni-popup");
+  (_easycom_uni_icons2 + _easycom_uni_load_more2 + _easycom_uni_popup_dialog2 + _easycom_uni_popup2)();
 }
 const _easycom_uni_icons = () => "../../uni_modules/uni-icons/components/uni-icons/uni-icons.js";
 const _easycom_uni_load_more = () => "../../uni_modules/uni-load-more/components/uni-load-more/uni-load-more.js";
+const _easycom_uni_popup_dialog = () => "../../uni_modules/uni-popup/components/uni-popup-dialog/uni-popup-dialog.js";
+const _easycom_uni_popup = () => "../../uni_modules/uni-popup/components/uni-popup/uni-popup.js";
 if (!Math) {
-  (_easycom_uni_icons + _easycom_uni_load_more)();
+  (_easycom_uni_icons + _easycom_uni_load_more + _easycom_uni_popup_dialog + _easycom_uni_popup)();
 }
 const _sfc_main = {
   __name: "my-opportunity",
   setup(__props) {
     const postList = common_vendor.ref([]);
-    common_vendor.ref("");
     const pageNo = common_vendor.ref(1);
     const pageSize = common_vendor.ref(10);
     const total = common_vendor.ref(0);
     const loadStatus = common_vendor.ref("more");
+    const appealPopup = common_vendor.ref(null);
+    const currentAppealPost = common_vendor.ref(null);
     const formatTimestamp = (timestamp) => {
       if (!timestamp)
         return "";
@@ -29,56 +34,53 @@ const _sfc_main = {
       const D = date.getDate().toString().padStart(2, "0");
       const h = date.getHours().toString().padStart(2, "0");
       const m = date.getMinutes().toString().padStart(2, "0");
-      const s = date.getSeconds().toString().padStart(2, "0");
-      return `${Y}-${M}-${D} ${h}:${m}:${s}`;
+      return `${Y}-${M}-${D} ${h}:${m}`;
+    };
+    const getStatusInfo = (post) => {
+      switch (post.status) {
+        case "active":
+        case "reactive":
+          return { text: "正常", class: "status-active" };
+        case "hidden":
+          return { text: "待申诉", class: "status-hidden" };
+        case "reject":
+          return { text: "申诉失败", class: "status-rejected" };
+        case "completed":
+          return { text: "已完成", class: "status-completed" };
+        case "closed":
+          return { text: "已关闭", class: "status-closed" };
+        default:
+          return { text: "未知", class: "status-unknown" };
+      }
     };
     const getMyOpportunitiesList = async (isRefresh = false) => {
-      if (loadStatus.value === "loading" || loadStatus.value === "noMore" && !isRefresh) {
+      if (loadStatus.value === "loading" || loadStatus.value === "noMore" && !isRefresh)
         return;
-      }
       if (isRefresh) {
         pageNo.value = 1;
         postList.value = [];
         loadStatus.value = "more";
       }
       loadStatus.value = "loading";
-      const params = {
-        pageNo: pageNo.value,
-        pageSize: pageSize.value,
-        // searchKey: searchKey.value.trim(),
-        userId: 247
-      };
-      const {
-        data,
-        error
-      } = await utils_request.request("/app-api/member/business-opportunities/my-list", {
+      const userId = common_vendor.index.getStorageSync("userId");
+      const { data, error } = await utils_request.request("/app-api/member/business-opportunities/my-list", {
         method: "GET",
-        data: params
+        data: { pageNo: pageNo.value, pageSize: pageSize.value, userId }
       });
-      common_vendor.index.__f__("log", "at pages/my-opportunity/my-opportunity.vue:138", "我的商机", data);
-      if (isRefresh) {
+      if (isRefresh)
         common_vendor.index.stopPullDownRefresh();
-      }
       if (error) {
-        common_vendor.index.showToast({
-          title: error,
-          icon: "none"
-        });
         loadStatus.value = "more";
         return;
       }
       if (data && data.list && data.list.length > 0) {
         postList.value = [...postList.value, ...data.list];
         total.value = data.total;
-        if (postList.value.length >= total.value) {
-          loadStatus.value = "noMore";
-        } else {
-          loadStatus.value = "more";
+        loadStatus.value = postList.value.length >= total.value ? "noMore" : "more";
+        if (loadStatus.value === "more")
           pageNo.value++;
-        }
       } else {
         if (pageNo.value === 1) {
-          total.value = 0;
           postList.value = [];
         }
         loadStatus.value = "noMore";
@@ -90,102 +92,93 @@ const _sfc_main = {
         content: "您确定要删除这条商机吗？删除后将无法恢复。",
         success: async (res) => {
           if (res.confirm) {
-            common_vendor.index.showLoading({
-              title: "删除中..."
-            });
-            const {
-              error
-            } = await utils_request.request("/app-api/member/business-opportunities/delete", {
+            common_vendor.index.showLoading({ title: "删除中..." });
+            const { error } = await utils_request.request("/app-api/member/business-opportunities/delete", {
               method: "POST",
-              data: {
-                id
-              }
-              // 符合接口文档的请求体
+              data: { id }
             });
             common_vendor.index.hideLoading();
             if (error) {
-              common_vendor.index.showToast({
-                title: "删除失败: " + error,
-                icon: "none"
-              });
+              common_vendor.index.showToast({ title: "删除失败: " + error, icon: "none" });
               return;
             }
-            common_vendor.index.showToast({
-              title: "删除成功",
-              icon: "success"
-            });
+            common_vendor.index.showToast({ title: "删除成功", icon: "success" });
             getMyOpportunitiesList(true);
           }
         }
       });
     };
-    const postNew = () => {
-      common_vendor.index.navigateTo({
-        url: "/pages/home-opportunitiesPublish/home-opportunitiesPublish"
-      });
+    const openAppealModal = (post) => {
+      currentAppealPost.value = post;
+      appealPopup.value.open();
     };
-    const skipApplicationBusinessCard = () => {
-      common_vendor.index.navigateTo({
-        url: "/pages/applicationBusinessCard/applicationBusinessCard"
+    const confirmAppeal = async (appealContent) => {
+      if (!appealContent || !appealContent.trim()) {
+        common_vendor.index.showToast({ title: "申诉内容不能为空", icon: "none" });
+        return;
+      }
+      common_vendor.index.showLoading({ title: "提交中..." });
+      const { error } = await utils_request.request("/app-api/member/business-opportunities/appeal", {
+        method: "POST",
+        data: {
+          id: currentAppealPost.value.id,
+          appealContent
+        }
       });
+      common_vendor.index.hideLoading();
+      if (error) {
+        common_vendor.index.showToast({ title: "申诉失败: " + error, icon: "none" });
+      } else {
+        common_vendor.index.showToast({ title: "申诉已提交，请等待审核", icon: "success" });
+        appealPopup.value.close();
+        getMyOpportunitiesList(true);
+      }
     };
     const skipCommercialDetail = (id) => {
       common_vendor.index.navigateTo({
         url: `/pages/home-commercialDetail/home-commercialDetail?id=${id}`
       });
     };
-    const previewImage = (urls, current) => {
-      common_vendor.index.previewImage({
-        urls,
-        current: urls[current]
-      });
-    };
-    common_vendor.onLoad(() => {
-      getMyOpportunitiesList(true);
-    });
-    common_vendor.onReachBottom(() => {
-      getMyOpportunitiesList();
-    });
-    common_vendor.onPullDownRefresh(() => {
-      getMyOpportunitiesList(true);
-    });
+    common_vendor.onLoad(() => getMyOpportunitiesList(true));
+    common_vendor.onReachBottom(() => getMyOpportunitiesList());
+    common_vendor.onPullDownRefresh(() => getMyOpportunitiesList(true));
     return (_ctx, _cache) => {
       return common_vendor.e({
         a: common_vendor.f(postList.value, (post, k0, i0) => {
           return common_vendor.e({
             a: post.memberUser.avatar,
-            b: common_vendor.o(skipApplicationBusinessCard, post.id),
+            b: common_vendor.o((...args) => _ctx.skipApplicationBusinessCard && _ctx.skipApplicationBusinessCard(...args), post.id),
             c: common_vendor.t(post.memberUser.nickname || "匿名用户"),
             d: "481e0091-0-" + i0,
             e: common_vendor.t(formatTimestamp(post.createTime)),
-            f: "481e0091-1-" + i0,
-            g: common_vendor.o(($event) => deleteOpportunity(post.id), post.id),
+            f: common_vendor.t(getStatusInfo(post).text),
+            g: common_vendor.n(getStatusInfo(post).class),
             h: common_vendor.t(post.postContent),
             i: post.postImg
           }, post.postImg ? {
             j: common_vendor.f(post.postImg.split(","), (image, imgIndex, i1) => {
               return {
                 a: image,
-                b: common_vendor.o(($event) => previewImage(post.postImg.split(","), imgIndex), imgIndex),
+                b: common_vendor.o(($event) => _ctx.previewImage(post.postImg.split(","), imgIndex), imgIndex),
                 c: imgIndex
               };
             })
           } : {}, {
             k: post.tags && post.tags.length > 0
-          }, post.tags && post.tags.length > 0 ? {
-            l: common_vendor.f(post.tags, (tag, tagIndex, i1) => {
-              return {
-                a: common_vendor.t(tag),
-                b: tagIndex
-              };
-            })
-          } : {}, {
-            m: "481e0091-2-" + i0,
-            n: common_vendor.t(post.likesCount),
-            o: "481e0091-3-" + i0,
-            p: common_vendor.t(post.dislikesCount),
-            q: post.id,
-            r: common_vendor.o(($event) => skipCommercialDetail(post.id), post.id)
+          }, post.tags && post.tags.length > 0 ? {} : {}, {
+            l: "481e0091-1-" + i0,
+            m: common_vendor.o(($event) => deleteOpportunity(post.id), post.id),
+            n: "481e0091-2-" + i0,
+            o: common_vendor.p({
+              type: "chat-filled",
+              size: "16",
+              color: post.status === "hidden" ? "#3498db" : "#ccc"
+            }),
+            p: post.status !== "hidden" ? 1 : "",
+            q: post.status !== "hidden",
+            r: common_vendor.o(($event) => openAppealModal(post), post.id),
+            s: post.id,
+            t: common_vendor.o(($event) => skipCommercialDetail(post.id), post.id)
           });
         }),
         b: common_vendor.p({
@@ -194,40 +187,31 @@ const _sfc_main = {
           color: "#888"
         }),
         c: common_vendor.p({
-          type: "close",
-          size: "15",
-          color: "#FF6A00"
-        }),
-        d: common_vendor.p({
-          type: "hand-up-filled",
-          size: "18",
+          type: "trash",
+          size: "16",
           color: "#e74c3c"
         }),
-        e: common_vendor.p({
-          type: "hand-down-filled",
-          size: "18",
-          color: "#3498db"
-        }),
-        f: postList.value.length > 0
+        d: postList.value.length > 0
       }, postList.value.length > 0 ? {
-        g: common_vendor.p({
+        e: common_vendor.p({
           status: loadStatus.value
         })
       } : {}, {
-        h: postList.value.length === 0 && loadStatus.value === "noMore"
-      }, postList.value.length === 0 && loadStatus.value === "noMore" ? {
-        i: common_vendor.p({
-          type: "info",
-          size: "60",
-          color: "#ccc"
+        f: postList.value.length === 0 && loadStatus.value === "noMore"
+      }, postList.value.length === 0 && loadStatus.value === "noMore" ? {} : {}, {
+        g: common_vendor.o(confirmAppeal),
+        h: common_vendor.p({
+          mode: "input",
+          title: "提交申诉",
+          placeholder: "请输入申诉理由..."
+        }),
+        i: common_vendor.sr(appealPopup, "481e0091-4", {
+          "k": "appealPopup"
         }),
         j: common_vendor.p({
-          type: "compose",
-          size: "20",
-          color: "#FFFFFF"
-        }),
-        k: common_vendor.o(postNew)
-      } : {});
+          type: "dialog"
+        })
+      });
     };
   }
 };

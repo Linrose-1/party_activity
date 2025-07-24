@@ -190,6 +190,27 @@
 			{
 				"navigationBarTitleText" : "退款审批"
 			}
+		},
+		{
+			"path" : "pages/my-shop/my-shop",
+			"style" : 
+			{
+				"navigationBarTitleText" : "我的聚店"
+			}
+		},
+		{
+			"path" : "pages/my-shopRecommend/my-shopRecommend",
+			"style" : 
+			{
+				"navigationBarTitleText" : "我的推荐聚店"
+			}
+		},
+		{
+			"path" : "pages/myStore-edit/myStore-edit",
+			"style" : 
+			{
+				"navigationBarTitleText" : "修改聚店信息"
+			}
 		}
 	],
 	

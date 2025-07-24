@@ -149,11 +149,6 @@ const _sfc_main = {
           title: "请选择一个专题",
           icon: "none"
         });
-      if (images.value.length === 0)
-        return common_vendor.index.showToast({
-          title: "请至少上传一张图片",
-          icon: "none"
-        });
       const postData = {
         userId: 247,
         postTitle: title.value,

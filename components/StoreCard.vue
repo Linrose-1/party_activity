@@ -1,5 +1,5 @@
 <template>
-	<view class="store-item" @click="navigateToStoreDetail">
+	<view class="store-item">
 		<view class="store-content">
 			<view class="store-header">
 				<view class="store-name">
@@ -18,8 +18,9 @@
 				<view class="store-tags">
 					<view class="store-tag" v-for="tag in store.tags" :key="tag">{{ tag }}</view>
 				</view>
-				<button class="nav-btn" @click.stop="navigateToStoreDetail">
+				<button class="nav-btn" @click.stop="handleCardClick">
 					<uni-icons type="map-filled" size="16" color="#fff"></uni-icons>
+					<!-- 【可选建议】您也可以通过 props 让按钮的文字可配置，比如 '查看' 或 '修改' -->
 					<text>查看</text>
 				</button>
 			</view>
@@ -40,6 +41,8 @@
 			required: true,
 		},
 	});
+	
+	const emit = defineEmits(['click-card']);
 
 	const formattedDistance = computed(() => {
 		// 1. 检查API返回的 distance 是否是一个有效的数字
@@ -55,35 +58,12 @@
 		return `${distanceAsInteger}km`;
 	});
 
-	const navigateToStoreDetail = () => {
-		uni.navigateTo({
-			// 从 props.store.id 获取 ID，并拼接到 URL 中
-			url: `/pages/shop-detail/shop-detail?id=${props.store.id}`
-		})
-	};
+	const handleCardClick = () => {
+			// 不再执行 uni.navigateTo，而是触发 click-card 事件
+			// 并将 store 对象作为参数传递给父组件
+			emit('click-card', props.store);
+		};
 
-	const navigateToMap = () => {
-		uni.showToast({
-			title: `即将打开地图导航到 ${props.store.name}`,
-			icon: 'none',
-		});
-		console.log(`即将打开地图导航到 ${props.store.name}`);
-		// 在实际应用中，你将在此处使用 uni.openLocation API
-		/*
-		uni.openLocation({
-		  latitude: 23.123, // 替换为实际的聚店坐标
-		  longitude: 113.333, // 替换为实际的聚店坐标
-		  name: props.store.name,
-		  address: '聚店地址', // 替换为实际的聚店地址
-		  success: function () {
-		    console.log('success');
-		  },
-		  fail: function () {
-		    console.log('fail');
-		  }
-		});
-		*/
-	};
 </script>
 
 <style lang="scss" scoped>

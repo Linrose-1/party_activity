@@ -150,9 +150,9 @@
 
 		<!-- 底部操作栏 -->
 		<view class="action-bar" :class="{ 'z-index-low': isPickerOpen }">
-					<view class="action-btn save-btn" @click="saveDraft">保存草稿</view>
-					<view class="action-btn publish-btn" @click="publish">发布活动</view>
-				</view>
+			<view class="action-btn save-btn" @click="saveDraft">保存草稿</view>
+			<view class="action-btn publish-btn" @click="publish">发布活动</view>
+		</view>
 	</view>
 </template>
 
@@ -172,45 +172,48 @@
 		getActiveType();
 	});
 
+	// 【新增】定义一个用于本地存储草稿的唯一键
+	const DRAFT_STORAGE_KEY = 'activity_draft';
+
 	const isPickerOpen = ref(false);
 
 	// 用于UI组件绑定的时间范围数组
-	const timeRange = ref(['2025-07-19 14:00:00', '2025-07-19 17:00:00']);
-	const enrollTimeRange = ref(['2025-07-1 14:00:00', '2025-07-18 17:00:00']);
+	const timeRange = ref([]);
+	const enrollTimeRange = ref([]);
 
 	// 用于显示合作店铺名称，不提交给后端
 	const associatedStoreName = ref('');
 
 	// 表单数据模型，字段名与后端API完全对应
 	const form = ref({
-		activityTitle: '互联网创业者交流会',
-		activityDescription: '本次互联网创业者交流会旨在为行业内的创业者提供一个交流思想、分享经验的平台。...',
-		totalSlots: 50,
-		limitSlots: 10,
+		activityTitle: '',
+		activityDescription: '',
+		totalSlots: null,
+		limitSlots: null,
 		activityFunds: 1, // 1: AA, 2: 赞助
-		registrationFee: 100,
+		registrationFee: null,
 		companyName: '',
 		companyLogo: '',
 		locationAddress: '', // 由地图选择填充
 		latitude: null, // 由地图选择填充
 		longitude: null, // 由地图选择填充
 		coverImageUrl: '',
-		organizerUnitName: '创新科技活动策划部',
-		organizerContactPhone: '021-68881234',
+		organizerUnitName: '',
+		organizerContactPhone: '',
 		organizerPaymentQrCodeUrl: '',
 		associatedStoreId: null, // 由店铺选择页面填充
-		tag: '交流会', // 这是UI选择的单值，提交时会放入`tags`数组
+		tag: '', // 这是UI选择的单值，提交时会放入`tags`数组
 		activitySessions: [{
-				sessionTitle: '主题演讲',
-				sessionDescription: '行业大咖分享创业经验'
+				sessionTitle: '',
+				sessionDescription: ''
 			},
 			{
-				sessionTitle: '圆桌论坛',
-				sessionDescription: '创业者互动讨论'
+				sessionTitle: '',
+				sessionDescription: ''
 			},
 			{
-				sessionTitle: '自由交流',
-				sessionDescription: '拓展人脉资源'
+				sessionTitle: '',
+				sessionDescription: ''
 			}
 		],
 	});
@@ -349,8 +352,35 @@
 
 	// 监听店铺选择结果
 	onLoad(() => {
+		// 1. 尝试从本地存储加载草稿数据
+		try {
+			const draftDataString = uni.getStorageSync(DRAFT_STORAGE_KEY);
+			if (draftDataString) {
+				const parsedDraft = JSON.parse(draftDataString);
+
+				// 2. 将草稿数据赋值给页面的 ref 变量
+				form.value = parsedDraft.form;
+				timeRange.value = parsedDraft.timeRange;
+				enrollTimeRange.value = parsedDraft.enrollTimeRange;
+				associatedStoreName.value = parsedDraft.associatedStoreName;
+
+				uni.showToast({
+					title: '已成功加载草稿',
+					icon: 'none'
+				});
+				console.log('草稿已加载:', parsedDraft);
+			} else {
+				// 如果没有草稿，设置一些默认值
+				timeRange.value = ['2025-07-19 14:00:00', '2025-07-19 17:00:00'];
+				enrollTimeRange.value = ['2025-07-01 14:00:00', '2025-07-18 17:00:00'];
+			}
+		} catch (error) {
+			console.error("加载草稿失败:", error);
+			uni.removeStorageSync(DRAFT_STORAGE_KEY); // 如果解析失败，清除损坏的草稿
+		}
+
+		// 3. 监听店铺选择结果 (保持不变)
 		uni.$on('shopSelected', (shop) => {
-			// **重要**: shop-list 页面需要返回一个包含 id 和 storeName 的对象
 			console.log('接收到选择的店铺信息:', shop);
 			form.value.associatedStoreId = shop.id;
 			associatedStoreName.value = shop.storeName;
@@ -362,13 +392,32 @@
 	});
 
 	function saveDraft() {
-		uni.showToast({
-			title: '活动已保存为草稿',
-			icon: 'none'
-		});
-		createActive()
-		console.log('保存草稿:', form.value);
+		// 1. 将所有需要保存的数据打包成一个对象
+		const draftData = {
+			form: form.value,
+			timeRange: timeRange.value,
+			enrollTimeRange: enrollTimeRange.value,
+			associatedStoreName: associatedStoreName.value
+		};
 
+		try {
+			// 2. 将对象转换为 JSON 字符串并存入本地存储
+			uni.setStorageSync(DRAFT_STORAGE_KEY, JSON.stringify(draftData));
+			uni.showToast({
+				title: '活动已保存为草稿',
+				icon: 'success' // 使用成功图标
+			});
+			console.log('草稿已保存:', draftData);
+		} catch (e) {
+			uni.showToast({
+				title: '草稿保存失败',
+				icon: 'none'
+			});
+			console.error("保存草稿到本地存储失败:", e);
+		}
+
+		// 注意：保存草稿通常不应该调用创建接口，所以注释或移除了 createActive()
+		// createActive() 
 	}
 
 	function publish() {
@@ -530,10 +579,7 @@
 			delete payload.registrationFee;
 		}
 
-		uni.showToast({
-			title: '活动发布成功！',
-			icon: 'success'
-		});
+		
 
 		// 最终打印完全符合后端接口要求的 payload
 		console.log('发布活动 - 最终Payload:', payload);
@@ -552,9 +598,17 @@
 		});
 		// 如果请求成功，打印返回的数据
 		console.log('createActive result:', result);
+		uni.showToast({
+			title: '活动发布成功！',
+			icon: 'success'
+		});
 		// 如果请求失败，打印错误信息
 		if (result.error) {
 			console.log('请求失败:', result.error);
+			uni.showToast({
+				title: result.error,
+				icon: 'none'
+			});
 		}
 	};
 </script>
@@ -784,9 +838,10 @@
 	::v-deep .uni-select__input-placeholder {
 		color: #939393;
 	}
-	
+
 	/* 【新增】这个类用于在 picker 打开时降低操作栏的层级 */
 	.action-bar.z-index-low {
-		z-index: 1; /* 或者 z-index: auto; */
+		z-index: 1;
+		/* 或者 z-index: auto; */
 	}
 </style>

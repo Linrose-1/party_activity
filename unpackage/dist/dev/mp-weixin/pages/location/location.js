@@ -28,6 +28,12 @@ const _sfc_main = {
     const businessHasMore = common_vendor.ref(true);
     const activities = common_vendor.ref([]);
     const businesses = common_vendor.ref([]);
+    const businessSearchMode = common_vendor.ref("3km");
+    const switchToAllBusinesses = async () => {
+      common_vendor.index.__f__("log", "at pages/location/location.vue:131", "切换到查看全部推荐商友模式");
+      businessSearchMode.value = "all";
+      await getNearbyBusinesses(false);
+    };
     const handleTabClick = (e) => {
       currentTab.value = e.currentIndex;
     };
@@ -45,12 +51,13 @@ const _sfc_main = {
       common_vendor.index.getLocation({
         type: "gcj02",
         success: async (res) => {
-          common_vendor.index.__f__("log", "at pages/location/location.vue:144", "✅ 获取用户位置成功:", res);
+          common_vendor.index.__f__("log", "at pages/location/location.vue:163", "✅ 获取用户位置成功:", res);
           userLocation.value = {
             latitude: res.latitude,
             longitude: res.longitude
           };
           shaken.value = true;
+          businessSearchMode.value = "3km";
           loading.value = true;
           common_vendor.index.vibrateShort();
           try {
@@ -58,9 +65,9 @@ const _sfc_main = {
               getNearbyActivities(false),
               getNearbyBusinesses(false)
             ]);
-            common_vendor.index.__f__("log", "at pages/location/location.vue:159", "✅ 附近活动和商友数据均已加载完毕");
+            common_vendor.index.__f__("log", "at pages/location/location.vue:180", "✅ 附近活动和商友数据均已加载完毕");
           } catch (error) {
-            common_vendor.index.__f__("error", "at pages/location/location.vue:161", "❌ 加载初始数据时发生错误:", error);
+            common_vendor.index.__f__("error", "at pages/location/location.vue:182", "❌ 加载初始数据时发生错误:", error);
           } finally {
             loading.value = false;
             setTimeout(() => {
@@ -69,7 +76,7 @@ const _sfc_main = {
           }
         },
         fail: (err) => {
-          common_vendor.index.__f__("error", "at pages/location/location.vue:170", "❌ 获取位置失败:", err);
+          common_vendor.index.__f__("error", "at pages/location/location.vue:191", "❌ 获取位置失败:", err);
           shakeDebounce.value = true;
         }
       });
@@ -90,6 +97,10 @@ const _sfc_main = {
         longitude: userLocation.value.longitude,
         latitude: userLocation.value.latitude
       };
+      if (businessSearchMode.value === "3km") {
+        params.checkDistance = 1;
+      }
+      common_vendor.index.__f__("log", "at pages/location/location.vue:216", "发起附近商友列表请求, 模式:", businessSearchMode.value, "参数:", params);
       const result = await utils_request.request("/app-api/member/activity/list", {
         method: "GET",
         data: params
@@ -122,12 +133,12 @@ const _sfc_main = {
         longitude: userLocation.value.longitude,
         latitude: userLocation.value.latitude
       };
-      common_vendor.index.__f__("log", "at pages/location/location.vue:221", "发起附近商友列表请求, 参数:", params);
+      common_vendor.index.__f__("log", "at pages/location/location.vue:248", "发起附近商友列表请求, 参数:", params);
       const result = await utils_request.request("/app-api/member/user/list", {
         method: "GET",
         data: params
       });
-      common_vendor.index.__f__("log", "at pages/location/location.vue:226", "发起附近商友列表result:", result);
+      common_vendor.index.__f__("log", "at pages/location/location.vue:253", "发起附近商友列表result:", result);
       if (result && !result.error && result.data) {
         const list = result.data.list || [];
         list.forEach((item) => {
@@ -140,7 +151,7 @@ const _sfc_main = {
         }
         businessPageNo.value++;
       } else {
-        common_vendor.index.__f__("error", "at pages/location/location.vue:240", "获取附近商友列表失败:", result.error);
+        common_vendor.index.__f__("error", "at pages/location/location.vue:267", "获取附近商友列表失败:", result.error);
         businessHasMore.value = false;
       }
       if (isLoadMore)
@@ -186,7 +197,7 @@ const _sfc_main = {
       shakeAudioContext = common_vendor.index.createInnerAudioContext();
       shakeAudioContext.src = "https://img.gofor.club/wechat_shake.mp3";
       shakeAudioContext.onError((res) => {
-        common_vendor.index.__f__("error", "at pages/location/location.vue:294", "音频播放错误:", res.errMsg);
+        common_vendor.index.__f__("error", "at pages/location/location.vue:321", "音频播放错误:", res.errMsg);
       });
       common_vendor.index.onAccelerometerChange((res) => {
         if (Math.abs(res.x) > 1 && Math.abs(res.y) > 1) {
@@ -204,10 +215,10 @@ const _sfc_main = {
       if (loading.value)
         return;
       if (currentTab.value === 0 && activityHasMore.value) {
-        common_vendor.index.__f__("log", "at pages/location/location.vue:316", "滑动到底部，加载更多附近活动...");
+        common_vendor.index.__f__("log", "at pages/location/location.vue:343", "滑动到底部，加载更多附近活动...");
         getNearbyActivities(true);
       } else if (currentTab.value === 1 && businessHasMore.value) {
-        common_vendor.index.__f__("log", "at pages/location/location.vue:319", "滑动到底部，加载更多附近商友...");
+        common_vendor.index.__f__("log", "at pages/location/location.vue:346", "滑动到底部，加载更多附近商友...");
         getNearbyBusinesses(true);
       }
     });
@@ -275,9 +286,13 @@ const _sfc_main = {
         }),
         n: !businessHasMore.value && businesses.value.length > 0
       }, !businessHasMore.value && businesses.value.length > 0 ? {} : {}, {
-        o: businesses.value.length === 0
-      }, businesses.value.length === 0 ? {} : {}, {
-        p: currentTab.value === 1
+        o: businesses.value.length === 0 && !loading.value
+      }, businesses.value.length === 0 && !loading.value ? common_vendor.e({
+        p: businessSearchMode.value === "3km"
+      }, businessSearchMode.value === "3km" ? {
+        q: common_vendor.o(switchToAllBusinesses)
+      } : {}) : {}, {
+        r: currentTab.value === 1
       }), {
         f: loading.value
       });

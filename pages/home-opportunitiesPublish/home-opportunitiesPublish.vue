@@ -260,10 +260,10 @@
 		// 	title: '请至少添加一个标签',
 		// 	icon: 'none'
 		// })
-		if (images.value.length === 0) return uni.showToast({
-			title: '请至少上传一张图片',
-			icon: 'none'
-		})
+		// if (images.value.length === 0) return uni.showToast({
+		// 	title: '请至少上传一张图片',
+		// 	icon: 'none'
+		// })
 
 		const postData = {
 			userId: 247,

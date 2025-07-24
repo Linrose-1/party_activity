@@ -208,6 +208,18 @@
 			path: '/pages/my-collection/my-collection'
 		},
 		{
+			name: '我的推荐',
+			desc: '查看您的推荐店铺',
+			icon: '../../static/icon/推荐.png',
+			path: '/pages/my-shopRecommend/my-shopRecommend'
+		},
+		{
+			name: '我的聚店',
+			desc: '查看您的聚店信息',
+			icon: '../../static/icon/店铺.png',
+			path: '/pages/my-shop/my-shop'
+		},
+		{
 			name: '用户协议',
 			desc: '查看用户协议、隐私协议等',
 			icon: '../../static/icon/protocols.png',

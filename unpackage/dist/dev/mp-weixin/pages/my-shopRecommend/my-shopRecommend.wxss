@@ -1,0 +1,121 @@
+/* 水平间距 */
+/* 水平间距 */
+/* 页面整体样式 */
+.recommendations-page {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background-color: #f8f8f8;
+}
+.list-scroll {
+  flex: 1;
+  padding-top: 30rpx;
+  box-sizing: border-box;
+  overflow-y: hidden;
+}
+
+/* 卡片样式 (直接从组件合并过来) */
+.card {
+  background-color: #fff;
+  border-radius: 16rpx;
+  margin: 0 30rpx 30rpx;
+  padding: 30rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.05);
+}
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 20rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+.store-name {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #333;
+}
+.status {
+  font-size: 24rpx;
+  padding: 6rpx 16rpx;
+  border-radius: 30rpx;
+  font-weight: 500;
+}
+.status.status-pending {
+  background-color: #fff5ec;
+  color: #fa8c16;
+}
+.status.status-approved {
+  background-color: #f6ffed;
+  color: #52c41a;
+}
+.status.status-unknown {
+  background-color: #f0f0f0;
+  color: #999;
+}
+.card-body {
+  padding: 20rpx 0;
+}
+.info-item {
+  display: flex;
+  align-items: flex-start;
+  font-size: 28rpx;
+  color: #666;
+  margin-bottom: 16rpx;
+}
+.info-item:last-child {
+  margin-bottom: 0;
+}
+.info-item .uni-icons {
+  margin-right: 10rpx;
+  position: relative;
+  top: 4rpx;
+}
+.info-item .info-text {
+  flex: 1;
+  line-height: 1.5;
+}
+.card-footer {
+  display: flex;
+  align-items: center;
+  padding-top: 20rpx;
+  border-top: 1rpx solid #f0f0f0;
+  font-size: 24rpx;
+  color: #999;
+}
+.card-footer .uni-icons {
+  margin-right: 10rpx;
+}
+
+/* 加载和空状态样式 */
+.empty-state {
+  text-align: center;
+  padding-top: 200rpx;
+  color: #999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.empty-state .uni-icons {
+  margin-bottom: 20rpx;
+}
+.empty-state text {
+  font-size: 28rpx;
+  line-height: 1.5;
+}
+.empty-state .tip {
+  font-size: 24rpx;
+  color: #ccc;
+}
+.load-more {
+  text-align: center;
+  padding: 20rpx;
+  color: #999;
+  font-size: 28rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.load-more .uni-icons {
+  margin-right: 10rpx;
+}

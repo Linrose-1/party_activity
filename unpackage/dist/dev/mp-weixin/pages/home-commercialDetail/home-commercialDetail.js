@@ -12,6 +12,7 @@ const _easycom_uni_popup = () => "../../uni_modules/uni-popup/components/uni-pop
 if (!Math) {
   (_easycom_uni_icons + _easycom_uni_popup)();
 }
+const defaultAvatarUrl = "/static/icon/default-avatar.png";
 const _sfc_main = {
   __name: "home-commercialDetail",
   setup(__props) {
@@ -63,7 +64,7 @@ const _sfc_main = {
         postId.value = options.id;
         getBusinessOpportunitiesDetail();
       } else {
-        common_vendor.index.__f__("error", "at pages/home-commercialDetail/home-commercialDetail.vue:220", "未接收到商机ID");
+        common_vendor.index.__f__("error", "at pages/home-commercialDetail/home-commercialDetail.vue:223", "未接收到商机ID");
         common_vendor.index.showToast({
           title: "加载失败，无效的商机",
           icon: "none"
@@ -74,12 +75,12 @@ const _sfc_main = {
         const sharerId = options.sharerId;
         const bizId = options.id;
         if (sharerId && loggedInUserId.value && sharerId === loggedInUserId.value) {
-          common_vendor.index.__f__("log", "at pages/home-commercialDetail/home-commercialDetail.vue:235", "用户点击了自己的分享链接，不计分。");
+          common_vendor.index.__f__("log", "at pages/home-commercialDetail/home-commercialDetail.vue:238", "用户点击了自己的分享链接，不计分。");
         } else if (sharerId && loggedInUserId.value && bizId) {
-          common_vendor.index.__f__("log", "at pages/home-commercialDetail/home-commercialDetail.vue:239", "其他用户点击了分享链接，且已登录，准备加分。");
+          common_vendor.index.__f__("log", "at pages/home-commercialDetail/home-commercialDetail.vue:242", "其他用户点击了分享链接，且已登录，准备加分。");
           triggerShareHitApi(sharerId, bizId);
         } else if (sharerId && bizId) {
-          common_vendor.index.__f__("log", "at pages/home-commercialDetail/home-commercialDetail.vue:245", "用户点击了分享链接，但尚未登录。暂存 sharerId 和 bizId。");
+          common_vendor.index.__f__("log", "at pages/home-commercialDetail/home-commercialDetail.vue:248", "用户点击了分享链接，但尚未登录。暂存 sharerId 和 bizId。");
           common_vendor.index.setStorageSync("pendingShareReward", {
             sharerId,
             bizId
@@ -108,7 +109,7 @@ const _sfc_main = {
       showTimelineGuide.value = false;
     };
     common_vendor.onShareAppMessage((res) => {
-      common_vendor.index.__f__("log", "at pages/home-commercialDetail/home-commercialDetail.vue:297", "触发分享给好友", res);
+      common_vendor.index.__f__("log", "at pages/home-commercialDetail/home-commercialDetail.vue:300", "触发分享给好友", res);
       closeSharePopup();
       const sharerId = common_vendor.index.getStorageSync("userId");
       const finalTitle = customShareTitle.value || postDetail.postTitle || "发现一个商机，快来看看吧！";
@@ -124,7 +125,7 @@ const _sfc_main = {
       };
     });
     common_vendor.onShareTimeline(() => {
-      common_vendor.index.__f__("log", "at pages/home-commercialDetail/home-commercialDetail.vue:322", "触发分享到朋友圈");
+      common_vendor.index.__f__("log", "at pages/home-commercialDetail/home-commercialDetail.vue:325", "触发分享到朋友圈");
       const sharerId = common_vendor.index.getStorageSync("userId");
       const finalTitle = customShareTitle.value || postDetail.postTitle || "发现一个商机，快来看看吧！";
       const finalImageUrl = postDetail.images.length > 0 ? postDetail.images[0] : "/static/logo.png";
@@ -142,7 +143,7 @@ const _sfc_main = {
     const triggerShareHitApi = async (sharerId, bizId) => {
       if (!sharerId || !bizId)
         return;
-      common_vendor.index.__f__("log", "at pages/home-commercialDetail/home-commercialDetail.vue:352", `准备为分享者 (ID: ${sharerId}) 增加贡分, 关联商机ID: ${bizId}`);
+      common_vendor.index.__f__("log", "at pages/home-commercialDetail/home-commercialDetail.vue:355", `准备为分享者 (ID: ${sharerId}) 增加贡分, 关联商机ID: ${bizId}`);
       const {
         error
       } = await utils_request.request("/app-api/member/experience-record/share-experience-hit", {
@@ -156,12 +157,13 @@ const _sfc_main = {
         }
       });
       if (error) {
-        common_vendor.index.__f__("error", "at pages/home-commercialDetail/home-commercialDetail.vue:366", "调用分享加分接口失败:", error);
+        common_vendor.index.__f__("error", "at pages/home-commercialDetail/home-commercialDetail.vue:369", "调用分享加分接口失败:", error);
       } else {
-        common_vendor.index.__f__("log", "at pages/home-commercialDetail/home-commercialDetail.vue:368", `成功为分享者 (ID: ${sharerId}) 触发贡分增加`);
+        common_vendor.index.__f__("log", "at pages/home-commercialDetail/home-commercialDetail.vue:371", `成功为分享者 (ID: ${sharerId}) 触发贡分增加`);
       }
     };
     const getBusinessOpportunitiesDetail = async () => {
+      var _a, _b;
       isLoading.value = true;
       showFollowButton.value = false;
       try {
@@ -171,7 +173,7 @@ const _sfc_main = {
             id: postId.value
           }
         });
-        common_vendor.index.__f__("log", "at pages/home-commercialDetail/home-commercialDetail.vue:382", "商机详情", result);
+        common_vendor.index.__f__("log", "at pages/home-commercialDetail/home-commercialDetail.vue:385", "商机详情", result);
         if (result && !result.error && result.data) {
           const item = result.data;
           postDetail.id = item.id;
@@ -181,8 +183,8 @@ const _sfc_main = {
           postDetail.likes = item.likesCount || 0;
           postDetail.dislikes = item.dislikesCount || 0;
           postDetail.time = formatTimestamp(item.createTime);
-          postDetail.user = item.memberUser.nickname || "匿名用户";
-          postDetail.avatar = item.memberUser.avatar;
+          postDetail.user = ((_a = item.memberUser) == null ? void 0 : _a.nickname) || "匿名用户";
+          postDetail.avatar = ((_b = item.memberUser) == null ? void 0 : _b.avatar) || defaultAvatarUrl;
           postDetail.userId = item.userId;
           postDetail.saved = item.followFlag === 1;
           postDetail.isFollowedUser = item.followUserFlag === 1;
@@ -200,7 +202,7 @@ const _sfc_main = {
           });
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/home-commercialDetail/home-commercialDetail.vue:413", "获取商机详情失败:", error);
+        common_vendor.index.__f__("error", "at pages/home-commercialDetail/home-commercialDetail.vue:416", "获取商机详情失败:", error);
         common_vendor.index.showToast({
           title: "网络请求异常",
           icon: "none"
@@ -250,7 +252,7 @@ const _sfc_main = {
           comments.value = [];
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/home-commercialDetail/home-commercialDetail.vue:464", "请求评论列表异常:", error);
+        common_vendor.index.__f__("error", "at pages/home-commercialDetail/home-commercialDetail.vue:467", "请求评论列表异常:", error);
       }
     };
     const replyComment = (comment) => {
@@ -309,7 +311,7 @@ const _sfc_main = {
           });
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/home-commercialDetail/home-commercialDetail.vue:524", "创建评论异常:", error);
+        common_vendor.index.__f__("error", "at pages/home-commercialDetail/home-commercialDetail.vue:527", "创建评论异常:", error);
         common_vendor.index.showToast({
           title: "评论失败，请稍后重试",
           icon: "none"
@@ -343,7 +345,7 @@ const _sfc_main = {
           action: apiActionToSend
           // 发送 'like', 'dislike', 或 ''
         };
-        common_vendor.index.__f__("log", "at pages/home-commercialDetail/home-commercialDetail.vue:565", "点赞/踩/取消 操作, 请求:", requestData);
+        common_vendor.index.__f__("log", "at pages/home-commercialDetail/home-commercialDetail.vue:568", "点赞/踩/取消 操作, 请求:", requestData);
         const result = await utils_request.request("/app-api/member/like-action/add", {
           method: "POST",
           data: requestData
@@ -355,7 +357,7 @@ const _sfc_main = {
           });
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/home-commercialDetail/home-commercialDetail.vue:580", "点赞/踩操作异常:", error);
+        common_vendor.index.__f__("error", "at pages/home-commercialDetail/home-commercialDetail.vue:583", "点赞/踩操作异常:", error);
         common_vendor.index.showToast({
           title: "操作失败，请重试",
           icon: "none"
@@ -405,7 +407,7 @@ const _sfc_main = {
           });
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/home-commercialDetail/home-commercialDetail.vue:646", "关注/取关用户异常:", error);
+        common_vendor.index.__f__("error", "at pages/home-commercialDetail/home-commercialDetail.vue:649", "关注/取关用户异常:", error);
         post.isFollowedUser = originalFollowState;
         common_vendor.index.showToast({
           title: "操作失败，请重试",
@@ -441,7 +443,7 @@ const _sfc_main = {
           method: "POST",
           data: requestData
         });
-        common_vendor.index.__f__("log", "at pages/home-commercialDetail/home-commercialDetail.vue:696", "触发收藏", result);
+        common_vendor.index.__f__("log", "at pages/home-commercialDetail/home-commercialDetail.vue:699", "触发收藏", result);
         if (result && result.error) {
           post.saved = originalSavedState;
           common_vendor.index.showToast({
@@ -455,7 +457,7 @@ const _sfc_main = {
           });
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/home-commercialDetail/home-commercialDetail.vue:714", "收藏/取消收藏商机异常:", error);
+        common_vendor.index.__f__("error", "at pages/home-commercialDetail/home-commercialDetail.vue:717", "收藏/取消收藏商机异常:", error);
         post.saved = originalSavedState;
         common_vendor.index.showToast({
           title: "操作失败，请重试",
@@ -473,11 +475,17 @@ const _sfc_main = {
     };
     const navigateToBusinessCard = (user) => {
       if (!postDetail.cardFlag) {
-        common_vendor.index.showToast({ title: "作者已关闭名片查看", icon: "none" });
+        common_vendor.index.showToast({
+          title: "作者已关闭名片查看",
+          icon: "none"
+        });
         return;
       }
       if (!user || !user.id) {
-        common_vendor.index.showToast({ title: "无法查看该用户主页", icon: "none" });
+        common_vendor.index.showToast({
+          title: "无法查看该用户主页",
+          icon: "none"
+        });
         return;
       }
       const url = `/pages/applicationBusinessCard/applicationBusinessCard?id=${user.id}&name=${encodeURIComponent(user.name)}&avatar=${encodeURIComponent(user.avatar)}`;

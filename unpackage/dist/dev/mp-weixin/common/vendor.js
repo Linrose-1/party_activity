@@ -7226,7 +7226,7 @@ function initOnError() {
 function initRuntimeSocketService() {
   const hosts = "172.20.10.4,127.0.0.1";
   const port = "8090";
-  const id = "mp-weixin_sadRw2";
+  const id = "mp-weixin_7NMjRe";
   const lazy = typeof swan !== "undefined";
   let restoreError = lazy ? () => {
   } : initOnError();
@@ -8338,6 +8338,24 @@ const pages = [
     path: "pages/my-active-approval/my-active-approval",
     style: {
       navigationBarTitleText: "退款审批"
+    }
+  },
+  {
+    path: "pages/my-shop/my-shop",
+    style: {
+      navigationBarTitleText: "我的聚店"
+    }
+  },
+  {
+    path: "pages/my-shopRecommend/my-shopRecommend",
+    style: {
+      navigationBarTitleText: "我的推荐聚店"
+    }
+  },
+  {
+    path: "pages/myStore-edit/myStore-edit",
+    style: {
+      navigationBarTitleText: "修改聚店信息"
     }
   }
 ];

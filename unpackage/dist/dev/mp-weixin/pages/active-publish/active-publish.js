@@ -22,6 +22,7 @@ const _easycom_uni_icons = () => "../../uni_modules/uni-icons/components/uni-ico
 if (!Math) {
   (_easycom_uni_easyinput + _easycom_uni_forms_item + _easycom_uni_data_select + _easycom_uni_datetime_picker + _easycom_uni_data_checkbox + _easycom_uni_forms + _easycom_uni_icons)();
 }
+const DRAFT_STORAGE_KEY = "activity_draft";
 const _sfc_main = {
   __name: "active-publish",
   setup(__props) {
@@ -29,17 +30,17 @@ const _sfc_main = {
       getActiveType();
     });
     const isPickerOpen = common_vendor.ref(false);
-    const timeRange = common_vendor.ref(["2025-07-19 14:00:00", "2025-07-19 17:00:00"]);
-    const enrollTimeRange = common_vendor.ref(["2025-07-1 14:00:00", "2025-07-18 17:00:00"]);
+    const timeRange = common_vendor.ref([]);
+    const enrollTimeRange = common_vendor.ref([]);
     const associatedStoreName = common_vendor.ref("");
     const form = common_vendor.ref({
-      activityTitle: "互联网创业者交流会",
-      activityDescription: "本次互联网创业者交流会旨在为行业内的创业者提供一个交流思想、分享经验的平台。...",
-      totalSlots: 50,
-      limitSlots: 10,
+      activityTitle: "",
+      activityDescription: "",
+      totalSlots: null,
+      limitSlots: null,
       activityFunds: 1,
       // 1: AA, 2: 赞助
-      registrationFee: 100,
+      registrationFee: null,
       companyName: "",
       companyLogo: "",
       locationAddress: "",
@@ -49,25 +50,25 @@ const _sfc_main = {
       longitude: null,
       // 由地图选择填充
       coverImageUrl: "",
-      organizerUnitName: "创新科技活动策划部",
-      organizerContactPhone: "021-68881234",
+      organizerUnitName: "",
+      organizerContactPhone: "",
       organizerPaymentQrCodeUrl: "",
       associatedStoreId: null,
       // 由店铺选择页面填充
-      tag: "交流会",
+      tag: "",
       // 这是UI选择的单值，提交时会放入`tags`数组
       activitySessions: [
         {
-          sessionTitle: "主题演讲",
-          sessionDescription: "行业大咖分享创业经验"
+          sessionTitle: "",
+          sessionDescription: ""
         },
         {
-          sessionTitle: "圆桌论坛",
-          sessionDescription: "创业者互动讨论"
+          sessionTitle: "",
+          sessionDescription: ""
         },
         {
-          sessionTitle: "自由交流",
-          sessionDescription: "拓展人脉资源"
+          sessionTitle: "",
+          sessionDescription: ""
         }
       ]
     });
@@ -80,16 +81,16 @@ const _sfc_main = {
           type: "member_activity_category "
         }
       });
-      common_vendor.index.__f__("log", "at pages/active-publish/active-publish.vue:230", "getActiveType result:", result);
+      common_vendor.index.__f__("log", "at pages/active-publish/active-publish.vue:233", "getActiveType result:", result);
       tagOptions.value = result.data.map((item) => ({
         value: item.value,
         // 使用后端返回的value
         text: item.label
         // 使用后端返回的label
       }));
-      common_vendor.index.__f__("log", "at pages/active-publish/active-publish.vue:235", "tagOptions updated:", tagOptions.value);
+      common_vendor.index.__f__("log", "at pages/active-publish/active-publish.vue:238", "tagOptions updated:", tagOptions.value);
       if (result.error) {
-        common_vendor.index.__f__("log", "at pages/active-publish/active-publish.vue:238", "请求失败:", result.error);
+        common_vendor.index.__f__("log", "at pages/active-publish/active-publish.vue:241", "请求失败:", result.error);
       }
     };
     const enrollmentOptions = common_vendor.ref([
@@ -148,7 +149,7 @@ const _sfc_main = {
               icon: "none"
             });
           } else {
-            common_vendor.index.__f__("error", "at pages/active-publish/active-publish.vue:308", "上传失败:", result.error);
+            common_vendor.index.__f__("error", "at pages/active-publish/active-publish.vue:311", "上传失败:", result.error);
             common_vendor.index.showToast({
               title: result.error || "上传失败",
               icon: "none"
@@ -181,8 +182,29 @@ const _sfc_main = {
       });
     }
     common_vendor.onLoad(() => {
+      try {
+        const draftDataString = common_vendor.index.getStorageSync(DRAFT_STORAGE_KEY);
+        if (draftDataString) {
+          const parsedDraft = JSON.parse(draftDataString);
+          form.value = parsedDraft.form;
+          timeRange.value = parsedDraft.timeRange;
+          enrollTimeRange.value = parsedDraft.enrollTimeRange;
+          associatedStoreName.value = parsedDraft.associatedStoreName;
+          common_vendor.index.showToast({
+            title: "已成功加载草稿",
+            icon: "none"
+          });
+          common_vendor.index.__f__("log", "at pages/active-publish/active-publish.vue:371", "草稿已加载:", parsedDraft);
+        } else {
+          timeRange.value = ["2025-07-19 14:00:00", "2025-07-19 17:00:00"];
+          enrollTimeRange.value = ["2025-07-01 14:00:00", "2025-07-18 17:00:00"];
+        }
+      } catch (error) {
+        common_vendor.index.__f__("error", "at pages/active-publish/active-publish.vue:378", "加载草稿失败:", error);
+        common_vendor.index.removeStorageSync(DRAFT_STORAGE_KEY);
+      }
       common_vendor.index.$on("shopSelected", (shop) => {
-        common_vendor.index.__f__("log", "at pages/active-publish/active-publish.vue:354", "接收到选择的店铺信息:", shop);
+        common_vendor.index.__f__("log", "at pages/active-publish/active-publish.vue:384", "接收到选择的店铺信息:", shop);
         form.value.associatedStoreId = shop.id;
         associatedStoreName.value = shop.storeName;
       });
@@ -191,12 +213,27 @@ const _sfc_main = {
       common_vendor.index.$off("shopSelected");
     });
     function saveDraft() {
-      common_vendor.index.showToast({
-        title: "活动已保存为草稿",
-        icon: "none"
-      });
-      createActive();
-      common_vendor.index.__f__("log", "at pages/active-publish/active-publish.vue:370", "保存草稿:", form.value);
+      const draftData = {
+        form: form.value,
+        timeRange: timeRange.value,
+        enrollTimeRange: enrollTimeRange.value,
+        associatedStoreName: associatedStoreName.value
+      };
+      try {
+        common_vendor.index.setStorageSync(DRAFT_STORAGE_KEY, JSON.stringify(draftData));
+        common_vendor.index.showToast({
+          title: "活动已保存为草稿",
+          icon: "success"
+          // 使用成功图标
+        });
+        common_vendor.index.__f__("log", "at pages/active-publish/active-publish.vue:410", "草稿已保存:", draftData);
+      } catch (e) {
+        common_vendor.index.showToast({
+          title: "草稿保存失败",
+          icon: "none"
+        });
+        common_vendor.index.__f__("error", "at pages/active-publish/active-publish.vue:416", "保存草稿到本地存储失败:", e);
+      }
     }
     function publish() {
       if (!form.value.activityTitle) {
@@ -339,23 +376,27 @@ const _sfc_main = {
       } else {
         delete payload.registrationFee;
       }
-      common_vendor.index.showToast({
-        title: "活动发布成功！",
-        icon: "success"
-      });
-      common_vendor.index.__f__("log", "at pages/active-publish/active-publish.vue:539", "发布活动 - 最终Payload:", payload);
+      common_vendor.index.__f__("log", "at pages/active-publish/active-publish.vue:585", "发布活动 - 最终Payload:", payload);
       createActive(payload);
     }
     const createActive = async (payload) => {
-      common_vendor.index.__f__("log", "at pages/active-publish/active-publish.vue:547", "payload", payload);
+      common_vendor.index.__f__("log", "at pages/active-publish/active-publish.vue:593", "payload", payload);
       const result = await utils_request.request("/app-api/member/activity/create", {
         method: "POST",
         // 请求方式
         data: payload
       });
-      common_vendor.index.__f__("log", "at pages/active-publish/active-publish.vue:554", "createActive result:", result);
+      common_vendor.index.__f__("log", "at pages/active-publish/active-publish.vue:600", "createActive result:", result);
+      common_vendor.index.showToast({
+        title: "活动发布成功！",
+        icon: "success"
+      });
       if (result.error) {
-        common_vendor.index.__f__("log", "at pages/active-publish/active-publish.vue:557", "请求失败:", result.error);
+        common_vendor.index.__f__("log", "at pages/active-publish/active-publish.vue:607", "请求失败:", result.error);
+        common_vendor.index.showToast({
+          title: result.error,
+          icon: "none"
+        });
       }
     };
     return (_ctx, _cache) => {
