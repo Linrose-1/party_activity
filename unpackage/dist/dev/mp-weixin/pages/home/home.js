@@ -16,7 +16,7 @@ const _sfc_main = {
   __name: "home",
   setup(__props) {
     const loggedInUserId = common_vendor.ref(null);
-    const isLogin = common_vendor.ref(true);
+    const isLogin = common_vendor.ref(false);
     const member = common_vendor.ref("白银");
     const hasPaidMembership = common_vendor.computed(() => {
       const paidLevels = ["青铜", "白银", "黄金", "黑钻"];
@@ -33,9 +33,11 @@ const _sfc_main = {
       longitude: "",
       latitude: ""
     });
-    common_vendor.onMounted(() => {
+    common_vendor.onShow(() => {
+      common_vendor.index.__f__("log", "at pages/home/home.vue:204", "页面显示，执行 onShow 钩子");
       loggedInUserId.value = common_vendor.index.getStorageSync("userId");
-      common_vendor.index.__f__("log", "at pages/home/home.vue:196", "当前列表页登录用户ID:", loggedInUserId.value);
+      isLogin.value = !!loggedInUserId.value;
+      common_vendor.index.__f__("log", "at pages/home/home.vue:208", "当前登录状态 isLogin:", isLogin.value);
       getBusinessOpportunitiesList(true);
     });
     common_vendor.onReachBottom(() => {
@@ -44,7 +46,7 @@ const _sfc_main = {
       }
     });
     common_vendor.onPullDownRefresh(() => {
-      common_vendor.index.__f__("log", "at pages/home/home.vue:207", "用户触发了下拉刷新");
+      common_vendor.index.__f__("log", "at pages/home/home.vue:221", "用户触发了下拉刷新");
       getBusinessOpportunitiesList(true);
     });
     function formatTimestamp(timestamp) {
@@ -84,19 +86,17 @@ const _sfc_main = {
           method: "GET",
           data: params
         });
-        common_vendor.index.__f__("log", "at pages/home/home.vue:254", "商机列表", result);
+        common_vendor.index.__f__("log", "at pages/home/home.vue:277", "商机列表", result);
         if (result && result.error && result.error.includes("未登录")) {
           common_vendor.index.showToast({
             title: "请先登录",
             icon: "none",
             duration: 1500
           });
+          isLogin.value = false;
+          postList.value = [];
+          loadingStatus.value = "noMore";
           common_vendor.index.stopPullDownRefresh();
-          setTimeout(() => {
-            common_vendor.index.navigateTo({
-              url: "/pages/index/index"
-            });
-          }, 1500);
           return;
         }
         if (result && !result.error && result.data && result.data.list) {
@@ -145,7 +145,7 @@ const _sfc_main = {
           });
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/home/home.vue:321", "getBusinessOpportunitiesList error:", error);
+        common_vendor.index.__f__("error", "at pages/home/home.vue:338", "getBusinessOpportunitiesList error:", error);
         loadingStatus.value = "more";
         common_vendor.index.showToast({
           title: "网络请求异常",
@@ -293,7 +293,7 @@ const _sfc_main = {
           method: "POST",
           data: requestData
         });
-        common_vendor.index.__f__("log", "at pages/home/home.vue:488", "触发收藏", result);
+        common_vendor.index.__f__("log", "at pages/home/home.vue:505", "触发收藏", result);
         if (result && result.error) {
           post.isSaved = originalStatus;
           common_vendor.index.showToast({
@@ -368,9 +368,9 @@ const _sfc_main = {
       });
     };
     const goToLogin = () => {
-      common_vendor.index.showToast({
-        title: "正在前往登录页...",
-        icon: "none"
+      common_vendor.index.navigateTo({
+        url: "/pages/index/index"
+        // 假设登录页是/pages/index/index，请根据你的项目调整
       });
     };
     const goToMembership = () => {
@@ -399,7 +399,7 @@ const _sfc_main = {
       const defaultAvatar = "/static/images/default-avatar.png";
       const avatarUrl = user.avatar || defaultAvatar;
       const url = `/pages/applicationBusinessCard/applicationBusinessCard?id=${user.id}&name=${encodeURIComponent(user.name)}&avatar=${encodeURIComponent(avatarUrl)}`;
-      common_vendor.index.__f__("log", "at pages/home/home.vue:638", "从商机列表页跳转，URL:", url);
+      common_vendor.index.__f__("log", "at pages/home/home.vue:655", "从商机列表页跳转，URL:", url);
       common_vendor.index.navigateTo({
         url
       });
@@ -508,28 +508,29 @@ const _sfc_main = {
             E: common_vendor.t(post.isSaved ? "已收藏" : "收藏"),
             F: post.isSaved ? 1 : "",
             G: common_vendor.o(($event) => toggleSave(post), post.id)
-          }) : {
-            H: common_vendor.o(goToLogin, post.id)
-          }, {
-            I: post.id,
-            J: common_vendor.o(($event) => handlePostClick(post), post.id)
+          }) : {}, {
+            H: post.id,
+            I: common_vendor.o(($event) => handlePostClick(post), post.id)
           });
         }),
         q: isLogin.value,
-        r: postList.value.length === 0 && loadingStatus.value === "noMore"
-      }, postList.value.length === 0 && loadingStatus.value === "noMore" ? {} : loadingStatus.value === "loading" ? {
-        t: common_vendor.p({
+        r: !isLogin.value && postList.value.length === 0
+      }, !isLogin.value && postList.value.length === 0 ? {
+        s: common_vendor.o(goToLogin)
+      } : isLogin.value && postList.value.length === 0 && loadingStatus.value === "noMore" ? {} : loadingStatus.value === "loading" ? {
+        w: common_vendor.p({
           status: "loading",
           ["contentText.loading"]: "正在加载..."
         })
       } : loadingStatus.value === "noMore" ? {
-        w: common_vendor.p({
+        y: common_vendor.p({
           status: "noMore",
           ["contentText.noMore"]: "暂无更多内容"
         })
       } : {}, {
-        s: loadingStatus.value === "loading",
-        v: loadingStatus.value === "noMore"
+        t: isLogin.value && postList.value.length === 0 && loadingStatus.value === "noMore",
+        v: loadingStatus.value === "loading",
+        x: loadingStatus.value === "noMore"
       });
     };
   }

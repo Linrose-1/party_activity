@@ -131,17 +131,25 @@
 					<view class="placeholder-text">升级为会员，解锁全部商机信息</view>
 					<button class="placeholder-button" @click.stop="goToMembership">立即升级</button>
 				</view> -->
-				<view v-else class="content-placeholder">
+				<!-- <view v-else class="content-placeholder">
 					<view class="placeholder-text">登录后查看更多精彩内容</view>
 					<button class="placeholder-button" @click.stop="goToLogin">立即登录</button>
-				</view>
+				</view> -->
 			</view>
 
 			<!-- 加载状态提示 -->
 			<view class="loading-status">
-				<view v-if="postList.length === 0 && loadingStatus === 'noMore'" class="no-posts-message">
+				<view v-if="!isLogin && postList.length === 0" class="content-placeholder"
+					style="margin-top: 40rpx; border: none; background: transparent;">
+					<view class="placeholder-text">登录后查看更多精彩内容</view>
+					<button class="placeholder-button" @click.stop="goToLogin">立即登录</button>
+				</view>
+
+				<view v-else-if="isLogin && postList.length === 0 && loadingStatus === 'noMore'"
+					class="no-posts-message">
 					暂无相关商机！
 				</view>
+
 				<view v-else-if="loadingStatus === 'loading'">
 					<uni-load-more status="loading" contentText.loading="正在加载..."></uni-load-more>
 				</view>
@@ -158,16 +166,17 @@
 		ref,
 		reactive,
 		computed,
-		onMounted
+		onMounted,
 	} from 'vue';
 	import {
 		onReachBottom,
 		onPullDownRefresh,
+		onShow
 	} from '@dcloudio/uni-app';
 	import request from '../../utils/request.js';
 
 	const loggedInUserId = ref(null);
-	const isLogin = ref(true);
+	const isLogin = ref(false);
 	const member = ref('白银');
 	const hasPaidMembership = computed(() => {
 		const paidLevels = ['青铜', '白银', '黄金', '黑钻'];
@@ -191,9 +200,14 @@
 		latitude: ''
 	});
 
-	onMounted(() => {
+	onShow(() => {
+		console.log('页面显示，执行 onShow 钩子');
+		// 每次页面显示时，都重新检查登录状态
 		loggedInUserId.value = uni.getStorageSync('userId');
-		console.log('当前列表页登录用户ID:', loggedInUserId.value);
+		isLogin.value = !!loggedInUserId.value;
+		console.log('当前登录状态 isLogin:', isLogin.value);
+
+		// 刷新列表数据
 		getBusinessOpportunitiesList(true);
 	});
 
@@ -230,6 +244,15 @@
 			loadingStatus.value = 'more';
 		}
 
+		// if (!isLogin.value) {
+		// 	console.log("检测到未登录，直接清空列表并显示登录提示");
+		// 	postList.value = [];
+		// 	loadingStatus.value = 'noMore'; // 设为noMore以显示提示
+		// 	uni.stopPullDownRefresh();
+		// 	return;
+		// }
+
+
 		const params = {
 			pageNo: pageNo.value,
 			pageSize: pageSize.value,
@@ -260,18 +283,12 @@
 					duration: 1500
 				});
 
-				// 如果是通过下拉刷新触发的，需要手动停止刷新动画
-				uni.stopPullDownRefresh();
-
-				// 延迟 1.5 秒后跳转到登录页
-				setTimeout(() => {
-					uni.navigateTo({
-						url: '/pages/index/index'
-					});
-				}, 1500);
-
-				// 终止当前函数，不再执行后续的数据处理逻辑
-				return;
+				// 更新状态，而不是跳转
+				isLogin.value = false;
+				postList.value = []; // 清空列表
+				loadingStatus.value = 'noMore'; // 停止加载
+				uni.stopPullDownRefresh(); // 停止下拉刷新动画
+				return; // 终止函数
 			}
 
 			if (result && !result.error && result.data && result.data.list) {
@@ -583,9 +600,9 @@
 	};
 
 	const goToLogin = () => {
-		uni.showToast({
-			title: '正在前往登录页...',
-			icon: 'none'
+		// 4. 【修改】实现真正的跳转逻辑
+		uni.navigateTo({
+			url: '/pages/index/index' // 假设登录页是/pages/index/index，请根据你的项目调整
 		});
 	};
 
