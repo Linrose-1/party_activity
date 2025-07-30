@@ -206,3 +206,16 @@
   color: #999;
   padding: 20rpx 0;
 }
+.btn-approval.data-v-37541c0b {
+  background-color: #e3f2fd;
+  color: #2196f3;
+  display: flex;
+  align-items: center;
+}
+.btn-approval .badge.data-v-37541c0b {
+  margin-left: 8rpx;
+}
+.btn-refund-manage.data-v-37541c0b {
+  background: linear-gradient(135deg, #ff9a44 0%, #ff5e3a 100%);
+  color: white;
+}

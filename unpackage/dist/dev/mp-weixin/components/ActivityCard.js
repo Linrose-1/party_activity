@@ -15,9 +15,13 @@ const _sfc_main = {
     activity: {
       type: Object,
       required: true
+    },
+    isLogin: {
+      type: Boolean,
+      default: false
     }
   },
-  emits: ["refreshList"],
+  emits: ["updateFavoriteStatus"],
   setup(__props, { emit: __emit }) {
     const props = __props;
     const emit = __emit;
@@ -47,67 +51,67 @@ const _sfc_main = {
       };
       return classMap[statusStr] || "";
     };
+    const requireLogin = (actionCallback, message) => {
+      if (props.isLogin) {
+        actionCallback();
+      } else {
+        common_vendor.index.showModal({
+          title: "温馨提示",
+          content: message || "您还未登录，登录后才能进行此操作哦！",
+          confirmText: "去登录",
+          cancelText: "再看看",
+          success: (res) => {
+            if (res.confirm) {
+              common_vendor.index.navigateTo({
+                url: "/pages/login/login"
+              });
+            }
+          }
+        });
+      }
+    };
+    const handleCardClick = () => {
+      requireLogin(() => {
+        common_vendor.index.navigateTo({
+          url: `/pages/active-detail/active-detail?id=${props.activity.id}`
+        });
+      }, "登录后才能查看活动详情，是否立即登录？");
+    };
+    const handleRegisterClick = () => {
+      requireLogin(() => {
+        common_vendor.index.navigateTo({
+          url: `/pages/active-enroll/active-enroll?id=${props.activity.id}`
+        });
+      }, "登录后才能报名活动，是否立即登录？");
+    };
     const toggleFavorite = async () => {
       if (loading.value) {
         return;
       }
-      loading.value = true;
-      const userId = common_vendor.index.getStorageSync("userId");
-      if (!userId) {
-        common_vendor.index.showToast({ title: "请先登录", icon: "none" });
-        loading.value = false;
-        return;
-      }
-      const originalFavoriteStatus = isFavorite.value;
-      isFavorite.value = !isFavorite.value;
-      const endpoint = isFavorite.value ? "/app-api/member/follow/add" : "/app-api/member/follow/del";
-      const successMessage = isFavorite.value ? "收藏成功" : "已取消收藏";
-      const payload = {
-        userId,
-        targetId: props.activity.id,
-        targetType: "activity"
-      };
-      try {
-        const result = await utils_request.request(endpoint, {
-          method: "POST",
-          data: payload
-        });
-        if (result && !result.error) {
-          common_vendor.index.showToast({
-            title: successMessage,
-            icon: "success"
-          });
-          emit("updateFavoriteStatus", {
-            id: props.activity.id,
-            newFollowFlag: isFavorite.value ? 1 : 0
-            // 传递新的关注状态 (1 或 0)
-          });
-        } else {
+      requireLogin(async () => {
+        loading.value = true;
+        const userId = common_vendor.index.getStorageSync("userId");
+        const originalFavoriteStatus = isFavorite.value;
+        isFavorite.value = !isFavorite.value;
+        const endpoint = isFavorite.value ? "/app-api/member/follow/add" : "/app-api/member/follow/del";
+        const successMessage = isFavorite.value ? "收藏成功" : "已取消收藏";
+        const payload = { userId, targetId: props.activity.id, targetType: "activity" };
+        try {
+          const { error } = await utils_request.request(endpoint, { method: "POST", data: payload });
+          if (!error) {
+            common_vendor.index.showToast({ title: successMessage, icon: "success" });
+            emit("updateFavoriteStatus", { id: props.activity.id, newFollowFlag: isFavorite.value ? 1 : 0 });
+          } else {
+            isFavorite.value = originalFavoriteStatus;
+            common_vendor.index.showToast({ title: error || "操作失败", icon: "none" });
+          }
+        } catch (err) {
           isFavorite.value = originalFavoriteStatus;
-          common_vendor.index.showToast({
-            title: result.error || "操作失败，请重试",
-            icon: "none"
-          });
+          common_vendor.index.showToast({ title: "网络错误", icon: "none" });
+        } finally {
+          loading.value = false;
         }
-      } catch (error) {
-        isFavorite.value = originalFavoriteStatus;
-        common_vendor.index.showToast({
-          title: "网络错误，请稍后重试",
-          icon: "none"
-        });
-      } finally {
-        loading.value = false;
-      }
-    };
-    const registerActivity = (activityId) => {
-      common_vendor.index.navigateTo({
-        url: `/pages/active-enroll/active-enroll?id=${activityId}`
-      });
-    };
-    const detailActivity = (activityId) => {
-      common_vendor.index.navigateTo({
-        url: `/pages/active-detail/active-detail?id=${activityId}`
-      });
+      }, "登录后才能收藏活动，是否立即登录？");
     };
     return (_ctx, _cache) => {
       return common_vendor.e({
@@ -138,7 +142,7 @@ const _sfc_main = {
             b: index
           };
         }),
-        m: common_vendor.o(($event) => detailActivity(__props.activity.id)),
+        m: common_vendor.o(handleCardClick),
         n: common_vendor.p({
           type: "person",
           size: "16",
@@ -153,7 +157,7 @@ const _sfc_main = {
         q: common_vendor.t(isFavorite.value ? "已收藏" : "收藏"),
         r: common_vendor.o(toggleFavorite),
         s: loading.value,
-        t: common_vendor.o(($event) => registerActivity(__props.activity.id))
+        t: common_vendor.o(handleRegisterClick)
       });
     };
   }

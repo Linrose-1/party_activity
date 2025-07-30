@@ -2,26 +2,41 @@
 	<view class="container">
 		<!-- 用户信息 -->
 		<view class="user-header">
-			<view class="user-info">
-				<view class="avatar">
-					<!-- 动态绑定头像，提供一个默认头像以防链接为空 -->
-					<image class="avatar-img" :src="userInfo.avatar || '../../static/images/default-avatar.png'" />
-				</view>
-				<view class="user-details">
-					<view class="user-name">
-						<!-- 动态绑定昵称和会员等级 -->
-						{{ userInfo.nickname }}
-						<text class="badge" v-if="userInfo.topUpLevel && userInfo.topUpLevel.name">{{ userInfo.topUpLevel.name }}</text>
+			<!-- 如果已登录，显示用户信息 -->
+			<template v-if="isLogin">
+				<view class="user-info">
+					<view class="avatar">
+						<image class="avatar-img" :src="userInfo.avatar || '../../static/images/default-avatar.png'" />
 					</view>
-					<!-- 使用计算属性动态显示职位和公司 -->
-					<view class="user-title">{{ userTitleAndCompany }}</view>
-					<view class="user-company">
-						<!-- 动态绑定邀请人 -->
-						我的邀请人：<span style="font-weight: bold;">{{ userInfo.parentName || '无' }}</span>
+					<view class="user-details">
+						<view class="user-name">
+							{{ userInfo.nickname || '未设置昵称' }}
+							<text class="badge"
+								v-if="userInfo.topUpLevel && userInfo.topUpLevel.name">{{ userInfo.topUpLevel.name }}</text>
+						</view>
+						<view class="user-title">{{ userTitleAndCompany }}</view>
+						<view class="user-company">
+							我的邀请人：<span style="font-weight: bold;">{{ userInfo.parentName || '无' }}</span>
+						</view>
 					</view>
 				</view>
-			</view>
-			<view class="edit-btn" @tap="onEdit">编辑</view>
+				<view class="edit-btn" @tap="onEdit">编辑</view>
+			</template>
+
+			<!-- 如果未登录，显示 "去登录" -->
+			<template v-else>
+				<view class="login-prompt" @click="skipToLogin">
+					<view class="login-prompt-avatar">
+						<uni-icons type="person-filled" size="30" color="#FF8C00"></uni-icons>
+					</view>
+					<view class="login-prompt-text">
+						点击去登录
+					</view>
+					<view class="login-prompt-arrow">
+						›
+					</view>
+				</view>
+			</template>
 		</view>
 
 		<!-- 账户信息 -->
@@ -54,12 +69,17 @@
 					<view class="card-details">
 						<view class="card-name">
 							<!-- 优先显示真实姓名，否则显示昵称 -->
-							{{ userInfo.realName || userInfo.nickname }} 
-							<text class="vip-badge" v-if="userInfo.topUpLevel && userInfo.topUpLevel.name">{{ userInfo.topUpLevel.name }}</text>
+							{{ userInfo.realName || userInfo.nickname }}
+							<text class="vip-badge"
+								v-if="userInfo.topUpLevel && userInfo.topUpLevel.name">{{ userInfo.topUpLevel.name }}</text>
 						</view>
 						<!-- 动态绑定职位和公司 -->
-						<view class="card-position" v-if="userInfo.professionalTitle"><text class="iconfont">👤</text> {{ userInfo.professionalTitle }}</view>
-						<view class="card-company" v-if="userInfo.companyName"><text class="iconfont">🏢</text> {{ userInfo.companyName }}</view>
+						<view class="card-position" v-if="userInfo.professionalTitle"><text class="iconfont">👤</text>
+							{{ userInfo.professionalTitle }}
+						</view>
+						<view class="card-company" v-if="userInfo.companyName"><text class="iconfont">🏢</text>
+							{{ userInfo.companyName }}
+						</view>
 					</view>
 				</view>
 
@@ -76,7 +96,8 @@
 					<text class="qrcode-title">微信二维码 - 扫码添加好友</text>
 					<view class="qrcode-container">
 						<!-- 动态绑定微信二维码，提供一个默认图 -->
-						<image class="qrcode-img" :src="userInfo.wechatQrCodeUrl || '../../static/images/default-qrcode.png'" />
+						<image class="qrcode-img"
+							:src="userInfo.wechatQrCodeUrl || '../../static/images/default-qrcode.png'" />
 					</view>
 					<view class="qrcode-actions">
 						<!-- <button class="qrcode-btn" @tap="saveQrcode">保存</button> -->
@@ -114,45 +135,74 @@
 		onMounted,
 		computed // 引入 computed
 	} from 'vue'
-	import { onLoad,onShow } from '@dcloudio/uni-app'; // 引入 onLoad
+	import {
+		onLoad,
+		onShow
+	} from '@dcloudio/uni-app'; // 引入 onLoad
 	import request from '../../utils/request.js';
 
 	onMounted(() => {
 		getUserInfo();
 	});
-	
+
 	onLoad(() => {
 		getUserInfo();
 	});
-	
+
 	onShow(() => {
-		getUserInfo();
+		checkLoginStatusAndFetchData();
+
 	});
 
 	const userInfo = ref({})
+	const isLogin = ref(false);
+
+	// 【新增】一个整合的函数，用于检查登录状态并获取数据
+	const checkLoginStatusAndFetchData = () => {
+		const token = uni.getStorageSync('token'); // 或者检查 userId
+		if (token) {
+			isLogin.value = true;
+			// 只有登录了才去获取用户信息
+			getUserInfo();
+		} else {
+			isLogin.value = false;
+			// 未登录时，清空旧的用户信息，防止显示上个用户的数据
+			userInfo.value = {};
+		}
+	};
 
 	//获取用户的基本信息
 	const getUserInfo = async () => {
 		try {
-			const result = await request('/app-api/member/user/get', {
+			// 【优化】只有在 isLogin 为 true 时才发请求，双重保险
+			if (!isLogin.value) return;
+
+			const {
+				data,
+				error
+			} = await request('/app-api/member/user/get', {
 				method: 'GET',
 			});
-			if (result) {
-				userInfo.value = result.data;
+			if (!error && data) {
+				userInfo.value = data;
 				console.log('getUserInfo userInfo:', userInfo.value);
 			} else {
-				console.log('请求业务失败:', result.msg);
+				console.log('获取用户信息失败:', error);
+				// 如果获取用户信息失败（比如token过期），也应该更新为未登录状态
+				isLogin.value = false;
+				userInfo.value = {};
 			}
-		} catch (error) {
-			console.log('请求失败:', error);
+		} catch (err) {
+			console.log('请求异常:', err);
+			isLogin.value = false;
+			userInfo.value = {};
 		}
 	};
-	
+
 	// 使用 computed 创建动态的账户信息列表
 	const accountList = computed(() => {
 		const user = userInfo.value;
 		return [{
-				// API返回的是 currExperience，代表当前贡分
 				value: user.currExperience || 0,
 				label: '我的贡分'
 			},
@@ -170,15 +220,18 @@
 			}
 		]
 	})
-	
+
 	// 使用 computed 优雅地处理职位和公司的显示逻辑
+	// 【优化】处理未登录时的情况
 	const userTitleAndCompany = computed(() => {
+		// 【新增】如果未登录，直接返回提示
+		if (!isLogin.value) return '登录后查看';
+
 		const title = userInfo.value.professionalTitle;
 		const company = userInfo.value.companyName;
 		if (title && company) {
 			return `${title} | ${company}`;
 		}
-		// 如果只有一个，或者都没有，则只显示有的那一个，或显示默认文本
 		return title || company || '暂未设置职位和公司';
 	});
 
@@ -247,7 +300,10 @@
 
 	const copyToClipboard = (text) => {
 		if (!text) {
-			uni.showToast({ title: '没有可复制的内容', icon: 'none' });
+			uni.showToast({
+				title: '没有可复制的内容',
+				icon: 'none'
+			});
 			return;
 		}
 		uni.setClipboardData({
@@ -284,6 +340,7 @@
 	const skipToLogin = () => {
 		uni.navigateTo({
 			url: '/pages/index/index'
+			// url: '/pages/login/login'
 		})
 	}
 </script>
@@ -559,5 +616,36 @@
 		border-radius: 30rpx;
 		font-size: 24rpx;
 		cursor: pointer;
+	}
+
+	.login-prompt {
+		display: flex;
+		align-items: center;
+		padding: 20rpx 0;
+		/* 调整内边距以匹配原始布局 */
+		cursor: pointer;
+	}
+
+	.login-prompt-avatar {
+		width: 140rpx;
+		height: 140rpx;
+		border-radius: 50%;
+		background-color: rgba(255, 255, 255, 0.9);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		margin-right: 20rpx;
+	}
+
+	.login-prompt-text {
+		font-size: 36rpx;
+		font-weight: bold;
+		color: white;
+	}
+
+	.login-prompt-arrow {
+		margin-left: auto;
+		font-size: 40rpx;
+		color: rgba(255, 255, 255, 0.7);
 	}
 </style>

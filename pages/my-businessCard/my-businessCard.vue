@@ -14,8 +14,8 @@
       v-if="userInfo"
       :avatar="userInfo.avatar"
       :name="userInfo.realName || userInfo.nickname"
-      :pinyin-name="userInfo.topUpLevel?.name"
-      :title="userInfo.level?.name"
+      :pinyin-name="userInfo.pinyinName" 
+      :title="userInfo.titleName"
       :company-name="userInfo.companyName"
       department=""
       :full-company-name="userInfo.professionalTitle"
@@ -122,6 +122,36 @@ onLoad((options) => {
 	    // =======================================================================
 });
 
+const adaptUserInfo = (rawUserData) => {
+    if (!rawUserData) return null;
+
+    return {
+        // --- 通用字段直接映射 ---
+        id: rawUserData.id,
+        mobile: rawUserData.mobile,
+        nickname: rawUserData.nickname,
+        avatar: rawUserData.avatar,
+        realName: rawUserData.realName,
+        locationAddress: rawUserData.locationAddress,
+        professionalTitle: rawUserData.professionalTitle,
+        companyName: rawUserData.companyName,
+        contactEmail: rawUserData.contactEmail,
+        wechatQrCodeUrl: rawUserData.wechatQrCodeUrl,
+        // ... 其他你需要的通用字段
+
+        // --- 差异字段适配 ---
+        // 目标：统一为 pinyinName 和 titleName
+        
+        // 会员等级 (目标字段：pinyinName)
+        // 检查 /get 接口的嵌套结构，如果不存在，则使用 /read-card 接口的平铺结构
+        pinyinName: rawUserData.topUpLevel?.name || rawUserData.topUpLevelName || '',
+
+        // 用户头衔/等级 (目标字段：titleName)
+        // 检查 /get 接口的嵌套结构，如果不存在，则使用 /read-card 接口的平铺结构
+        titleName: rawUserData.level?.name || rawUserData.levelName || ''
+    };
+};
+
 const fetchOwnUserInfo = async () => {
   uni.showLoading({ title: '加载中...' });
   const { data, error } = await request('/app-api/member/user/get', { method: 'GET' });
@@ -132,7 +162,7 @@ const fetchOwnUserInfo = async () => {
     return;
   }
   
-  userInfo.value = data;
+  userInfo.value = adaptUserInfo(data);
 };
 
 // 新增：获取他人名片信息的函数
@@ -154,7 +184,7 @@ const fetchTargetUserInfo = async (userId) => {
         return;
     }
     
-    userInfo.value = data;
+    userInfo.value = adaptUserInfo(data);
 };
 
 const formattedContactInfo = computed(() => {

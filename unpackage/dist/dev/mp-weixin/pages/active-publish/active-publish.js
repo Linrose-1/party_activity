@@ -606,7 +606,7 @@ const _sfc_main = {
       } : {}, {
         ar: common_vendor.o(goToSelectShop),
         as: common_vendor.p({
-          label: "合作店铺",
+          label: "合作聚店",
           required: true,
           ["label-width"]: 80
         }),

@@ -1,0 +1,121 @@
+
+.login-page.data-v-e4e4508d {
+		display: flex;
+		flex-direction: column;
+		height: 100vh;
+		background-color: #f7f8fa;
+}
+
+	/* 头部样式 - 复用并微调 */
+.header.data-v-e4e4508d {
+		background: linear-gradient(135deg, #FF6A00, #FF8C37);
+		color: white;
+		padding: 80rpx 40rpx 120rpx;
+		border-radius: 0 0 60rpx 60rpx;
+		text-align: center;
+		position: relative;
+}
+.header.data-v-e4e4508d::before {
+		content: "";
+		position: absolute;
+		top: -60rpx;
+		left: -80rpx;
+		width: 240rpx;
+		height: 240rpx;
+		background: rgba(255, 255, 255, 0.08);
+		border-radius: 50%;
+}
+.header.data-v-e4e4508d::after {
+		content: "";
+		position: absolute;
+		bottom: 20rpx;
+		right: -50rpx;
+		width: 180rpx;
+		height: 180rpx;
+		background: rgba(255, 255, 255, 0.1);
+		border-radius: 50%;
+}
+.app-title.data-v-e4e4508d {
+		font-size: 56rpx;
+		font-weight: 700;
+		margin-bottom: 16rpx;
+}
+.app-subtitle.data-v-e4e4508d {
+		font-size: 32rpx;
+		opacity: 0.9;
+}
+
+	/* 表单容器 */
+.login-form-container.data-v-e4e4508d {
+		background-color: #ffffff;
+		margin: -60rpx 40rpx 0;
+		padding: 50rpx 40rpx;
+		border-radius: 30rpx;
+		box-shadow: 0 10rpx 40rpx rgba(0, 0, 0, 0.08);
+		position: relative;
+		z-index: 10;
+}
+.form-title.data-v-e4e4508d {
+		font-size: 40rpx;
+		font-weight: 600;
+		color: #333;
+		text-align: center;
+		margin-bottom: 60rpx;
+}
+
+	/* 输入框组 */
+.input-group.data-v-e4e4508d {
+		display: flex;
+		align-items: center;
+		border-bottom: 2rpx solid #eee;
+		padding: 20rpx 0;
+		margin-bottom: 40rpx;
+}
+.input-group uni-icons.data-v-e4e4508d {
+		margin-right: 20rpx;
+}
+.input-field.data-v-e4e4508d {
+		flex: 1;
+		font-size: 32rpx;
+		color: #333;
+		border: none;
+		outline: none;
+		padding: 10rpx 0;
+}
+
+	/* 登录按钮 */
+.login-button.data-v-e4e4508d {
+		width: 100%;
+		background: linear-gradient(135deg, #FF6A00, #FF8C37);
+		color: white;
+		border-radius: 50rpx;
+		font-size: 34rpx;
+		font-weight: 600;
+		padding: 24rpx 0;
+		margin-top: 40rpx;
+		box-shadow: 0 8rpx 20rpx rgba(255, 106, 0, 0.3);
+		transition: all 0.2s ease;
+}
+.login-button.data-v-e4e4508d::after {
+		border: none;
+}
+.login-button[disabled].data-v-e4e4508d {
+		background: #fabca1;
+		box-shadow: none;
+}
+.login-button.data-v-e4e4508d:active {
+		opacity: 0.9;
+		transform: scale(0.98);
+}
+
+	/* 其他链接 */
+.form-links.data-v-e4e4508d {
+		display: flex;
+		justify-content: space-between;
+		margin-top: 40rpx;
+		font-size: 28rpx;
+		color: #999;
+}
+.link-item.data-v-e4e4508d {
+		padding: 10rpx;
+}

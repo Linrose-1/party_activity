@@ -32,6 +32,8 @@ if (!Math) {
   "./pages/my-shop/my-shop.js";
   "./pages/my-shopRecommend/my-shopRecommend.js";
   "./pages/myStore-edit/myStore-edit.js";
+  "./pages/login/login.js";
+  "./pages/activity-participants/activity-participants.js";
 }
 const _sfc_main = {
   onLaunch: function() {

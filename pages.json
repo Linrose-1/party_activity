@@ -211,6 +211,20 @@
 			{
 				"navigationBarTitleText" : "修改聚店信息"
 			}
+		},
+		{
+			"path" : "pages/login/login",
+			"style" : 
+			{
+				"navigationBarTitleText" : "登录"
+			}
+		},
+		{
+			"path" : "pages/activity-participants/activity-participants",
+			"style" : 
+			{
+				"navigationBarTitleText" : "报名用户"
+			}
 		}
 	],
 	

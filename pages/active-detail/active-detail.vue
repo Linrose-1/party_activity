@@ -110,9 +110,11 @@
 						<view style="font-size: 25rpx;margin: 10rpx 0;">📞
 							{{ activityDetail.memberStoreRespVO.contactPhone }}
 						</view>
-						<view style="font-size: 25rpx;margin: 10rpx 0;">🕒
-							{{ activityDetail.memberStoreRespVO.operatingHours || '暂无营业时间' }}
-						</view>
+						<!-- <view style="font-size: 25rpx;margin: 10rpx 0;">🕒
+							<view v-for="(line, index) in formattedOperatingHours" :key="index" style="display: block;">
+								{{ line }}
+							</view>
+						</view> -->
 					</view>
 				</view>
 			</view>
@@ -130,16 +132,30 @@
 		<view class="participants-section">
 			<view class="participants-header">
 				<view class="participants-title">参与用户</view>
-				<view class="view-all-link" @click="viewAllUsers">查看全部 ></view>
+				<!-- 只有当有用户报名时才显示 "查看全部" -->
+				<view v-if="participantTotal > 0" class="view-all-link" @click="viewAllUsers">查看全部 ></view>
 			</view>
-			<view class="participants-body">
+
+			<!-- 如果有报名用户，则显示头像列表 -->
+			<view v-if="participantList.length > 0" class="participants-body">
 				<view class="avatar-group">
-					<image v-for="(avatar, index) in avatars" :key="index" :src="avatar" class="avatar-item" />
-					<view class="avatar-item more-avatars">+28</view>
+					<!-- 循环展示报名用户的头像 -->
+					<image v-for="participant in participantList" :key="participant.id"
+						:src="participant.memberUser.avatar" class="avatar-item" />
+					<!-- 如果总人数超过了当前显示的头像数，显示一个省略提示 -->
+					<view v-if="participantTotal > participantList.length" class="avatar-item more-avatars">
+						...
+					</view>
 				</view>
 				<text class="total-registered-info">
-					<text class="registered-count">32</text> 人已报名
+					<!-- 使用动态的总人数 -->
+					<text class="registered-count">{{ participantTotal }}</text> 人已报名
 				</text>
+			</view>
+
+			<!-- 如果没有报名用户，则显示提示信息 -->
+			<view v-else class="no-participants">
+				<text>暂无用户报名，快来成为第一个参与者吧！</text>
 			</view>
 		</view>
 
@@ -239,13 +255,19 @@
 	//获取当前登录用户的ID
 	const loggedInUserId = ref(null);
 
+	// 创建 ref 存储报名用户列表和总数
+	const participantList = ref([]);
+	const participantTotal = ref(0);
+
 	onLoad((options) => {
 		loggedInUserId.value = uni.getStorageSync('userId');
 
 		if (options.id) {
 			activityId.value = options.id;
-			// 【修改】在拿到 ID 后直接调用数据获取函数
+			// 在拿到 ID 后直接调用数据获取函数
 			getActiveDetail();
+			// 在获取活动详情后，接着获取报名用户列表
+			getParticipantList();
 		} else {
 			console.error('未接收到活动ID！');
 			uni.showToast({
@@ -416,6 +438,118 @@
 		}
 	};
 
+	// 【新增】获取报名用户列表的方法
+	const getParticipantList = async () => {
+		if (!activityId.value) return;
+
+		// 为了在详情页只显示部分头像，我们只请求少量数据，比如前 8 个
+		const {
+			data,
+			error
+		} = await request('/app-api/member/activity-join/list', {
+			method: 'GET',
+			data: {
+				activityId: activityId.value,
+				pageNo: 1,
+				pageSize: 8 // 只获取少量用于预览
+			}
+		});
+
+		if (error) {
+			console.error('获取报名用户列表失败:', error);
+			return;
+		}
+
+		if (data && data.list) {
+			participantList.value = data.list;
+			participantTotal.value = data.total;
+			console.log('获取到的报名用户列表:', participantList.value);
+			console.log('总报名人数:', participantTotal.value);
+		}
+	};
+
+	// 【新增】用于格式化聚店营业时间的计算属性
+	// 【请使用这个最终修正版的函数】
+	const formattedOperatingHours = computed(() => {
+		const operatingHoursStr = activityDetail.value?.memberStoreRespVO?.operatingHours;
+		if (!operatingHoursStr) {
+			return ['暂无营业时间'];
+		}
+	
+		try {
+			const data = JSON.parse(operatingHoursStr);
+			const regularHours = data?.business_hours?.regular;
+			const specialDates = data?.business_hours?.special_dates;
+	
+			if (!regularHours && (!specialDates || specialDates.length === 0)) {
+				return ['暂无营业时间'];
+			}
+	
+			const resultLines = [];
+	
+			// 1. 处理常规营业时间
+			if (regularHours) {
+				const dayMap = {
+					monday: '周一',
+					tuesday: '周二',
+					wednesday: '周三',
+					thursday: '周四',
+					friday: '周五',
+					saturday: '周六',
+					sunday: '周日',
+				};
+				const dayOrder = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+	
+				dayOrder.forEach(dayKey => {
+					const dayInfo = regularHours[dayKey];
+					if (dayInfo && dayInfo.is_open) {
+						const chineseDay = dayMap[dayKey];
+						const isNextDay = dayInfo.close < dayInfo.open;
+						const timeString = `${dayInfo.open} - ${isNextDay ? '次日' : ''}${dayInfo.close}`;
+						resultLines.push(`${chineseDay}: ${timeString}`);
+					}
+				});
+			}
+			
+			// 2. 处理特殊营业日期
+			if (specialDates && specialDates.length > 0) {
+				if (resultLines.length > 0) {
+					resultLines.push(''); 
+				}
+				resultLines.push('【特殊营业时间】');
+				
+				specialDates.forEach(special => {
+					let line = special.date;
+					if(special.description) {
+						line += ` (${special.description})`;
+					}
+	
+					if (special.is_open) {
+	                    // 【修正点】在这里定义 isNextDay 变量
+						const isNextDay = special.close < special.open;
+	                    // 【修正点】在这里正确使用 isNextDay 变量
+						line += `: ${special.open} - ${isNextDay ? '次日' : ''}${special.close}`;
+					} else {
+						line += `: 休息`;
+					}
+					resultLines.push(line);
+				});
+			}
+	
+			if (resultLines.length === 0) {
+				return ['商家未设置营业时间'];
+			}
+	
+			return resultLines;
+	
+		} catch (e) {
+			console.error('解析营业时间JSON失败:', e);
+			console.error('原始字符串:', operatingHoursStr);
+			return ['营业时间格式有误'];
+		}
+	});
+
+
 	// 【新增】打开分享弹窗的方法
 	const openSharePopup = () => {
 		// 设置输入框的默认值为活动标题
@@ -527,9 +661,15 @@
 	}
 
 	function viewAllUsers() {
-		uni.showToast({
-			title: '查看全部参与用户',
-			icon: 'none'
+		if (participantTotal.value === 0) {
+			uni.showToast({
+				title: '暂无用户报名',
+				icon: 'none'
+			});
+			return;
+		}
+		uni.navigateTo({
+			url: `/pages/activity-participants/activity-participants?id=${activityId.value}`
 		})
 	}
 </script>
@@ -950,5 +1090,13 @@
 	.guide-text text {
 		display: block;
 		margin-bottom: 10rpx;
+	}
+	
+	/* --- 参与用户 --- */
+	.no-participants {
+	    padding: 20rpx 0;
+	    text-align: center;
+	    color: #999;
+	    font-size: 26rpx;
 	}
 </style>

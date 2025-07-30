@@ -137,7 +137,7 @@
 		<view class="form-section">
 			<view class="section-title">商圈信息</view>
 			<!-- associatedStoreId -->
-			<uni-forms-item label="合作店铺" required :label-width="80">
+			<uni-forms-item label="合作聚店" required :label-width="80">
 				<view class="uni-list-cell-db">
 					<view @click="goToSelectShop" class="uni-input">
 						<text v-if="associatedStoreName">{{ associatedStoreName }}</text>
@@ -659,8 +659,9 @@
 		margin-left: 10rpx;
 		padding: 20rpx;
 		margin: 10rpx 0;
-		border: #ffe1d2 solid 1rpx;
-		min-width: 500rpx;
+		border: #e2e2e2 solid 1rpx;
+		min-width: 400rpx;
+		border-radius: 10rpx;
 
 		.uni-input {
 			margin-left: 10rpx;

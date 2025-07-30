@@ -42,7 +42,7 @@ const _sfc_main = {
         isRefreshing.value = false;
       }
       if (error) {
-        common_vendor.index.__f__("error", "at pages/my-shop/my-shop.vue:91", "获取我的聚店列表失败:", error);
+        common_vendor.index.__f__("error", "at pages/my-shop/my-shop.vue:90", "获取我的聚店列表失败:", error);
         common_vendor.index.showToast({
           title: error,
           icon: "none"

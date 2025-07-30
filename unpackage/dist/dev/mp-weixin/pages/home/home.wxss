@@ -160,7 +160,7 @@
 		margin-right: 10rpx;
 }
 .post-list.data-v-07e72d3c {
-		padding: 0 30rpx;
+		padding: 20rpx 30rpx;
 		flex: 1;
 		overflow-y: auto;
 }

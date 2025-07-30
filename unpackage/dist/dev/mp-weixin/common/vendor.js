@@ -7224,9 +7224,9 @@ function initOnError() {
   };
 }
 function initRuntimeSocketService() {
-  const hosts = "172.20.10.4,127.0.0.1";
+  const hosts = "192.168.100.38,127.0.0.1";
   const port = "8090";
-  const id = "mp-weixin_SygRY-";
+  const id = "mp-weixin_mGw7ON";
   const lazy = typeof swan !== "undefined";
   let restoreError = lazy ? () => {
   } : initOnError();
@@ -8356,6 +8356,18 @@ const pages = [
     path: "pages/myStore-edit/myStore-edit",
     style: {
       navigationBarTitleText: "修改聚店信息"
+    }
+  },
+  {
+    path: "pages/login/login",
+    style: {
+      navigationBarTitleText: "登录"
+    }
+  },
+  {
+    path: "pages/activity-participants/activity-participants",
+    style: {
+      navigationBarTitleText: "报名用户"
     }
   }
 ];

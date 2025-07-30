@@ -29,7 +29,9 @@
     "pages/my-active-approval/my-active-approval",
     "pages/my-shop/my-shop",
     "pages/my-shopRecommend/my-shopRecommend",
-    "pages/myStore-edit/myStore-edit"
+    "pages/myStore-edit/myStore-edit",
+    "pages/login/login",
+    "pages/activity-participants/activity-participants"
   ],
   "window": {
     "navigationBarTextStyle": "black",

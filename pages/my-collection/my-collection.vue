@@ -377,13 +377,13 @@
 		url: `/pages/active-detail/active-detail?id=${id}`
 	});
 	const navigateToDiscoverActivities = () => uni.switchTab({
-		url: '/pages/activity/index'
+		url: '/pages/active/active'
 	});
 	const skipCommercialDetail = (id) => uni.navigateTo({
 		url: `/pages/home-commercialDetail/home-commercialDetail?id=${id}`
 	});
 	const navigateToDiscoverOpportunities = () => uni.switchTab({
-		url: '/pages/home/index'
+		url: '/pages/home/home'
 	});
 	const skipApplicationBusinessCard = () => uni.navigateTo({
 		url: '/pages/applicationBusinessCard/applicationBusinessCard'

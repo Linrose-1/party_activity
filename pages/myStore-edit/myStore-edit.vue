@@ -55,6 +55,57 @@
 							</view>
 						</view>
 					</view>
+					
+					<!-- ================== 【新增】特殊营业时间编辑模块 ================== -->
+						<view class="hours-editor special-hours-section">
+							<view class="hours-section-title">
+								<text>特殊营业时间</text>
+								<button class="add-btn" size="mini" @click="addSpecialHour">+ 添加</button>
+							</view>
+							
+							<view v-if="editableHours.special.length === 0" class="no-special-hours">
+								<text>暂无特殊营业安排</text>
+							</view>
+					
+							<view v-for="(specialDay, index) in editableHours.special" :key="index" class="special-day-item">
+								<!-- 第一行：日期、开关、删除按钮 -->
+								<view class="special-day-row">
+									<picker mode="date" :value="specialDay.date" @change="e => specialDay.date = e.detail.value">
+										<view class="date-picker">
+											<uni-icons type="calendar-filled" size="16" color="#666"></uni-icons>
+											<text>{{ specialDay.date || '选择日期' }}</text>
+										</view>
+									</picker>
+									<view class="special-controls">
+										<text class="switch-label">营业</text>
+										<switch :checked="specialDay.is_open" @change="e => specialDay.is_open = e.detail.value" color="#FF6B00" style="transform:scale(0.7)" />
+										<uni-icons type="trash-filled" size="22" color="#e43d33" @click="removeSpecialHour(index)"></uni-icons>
+									</view>
+								</view>
+								
+								<!-- 第二行：时间选择器 (如果营业) -->
+								<view v-if="specialDay.is_open" class="special-day-row">
+									<picker mode="time" :value="specialDay.open" @change="e => specialDay.open = e.detail.value">
+										<view class="time-picker special-time-picker">{{ specialDay.open }}</view>
+									</picker>
+									<text class="time-separator">-</text>
+									<picker mode="time" :value="specialDay.close" @change="e => specialDay.close = e.detail.value">
+										<view class="time-picker special-time-picker">{{ specialDay.close }}</view>
+									</picker>
+								</view>
+								
+								<!-- 第三行：备注说明 -->
+								<view class="special-day-row">
+									<uni-easyinput
+										v-model="specialDay.description"
+										placeholder="备注说明 (如：跨年夜延长)"
+										:inputBorder="false"
+										class="description-input"
+									/>
+								</view>
+							</view>
+						</view>
+						<!-- ============================================================= -->
 				</view>
 
 				<!-- 聚店电话 -->
@@ -197,10 +248,18 @@
 				};
 			});
 			
-			editableHours.special = data.special_dates || [];
+			// 【优化】确保 special_dates 数组中的每个对象都包含所有必要的字段
+			editableHours.special = (data.special_dates || []).map(d => ({
+				date: d.date || '',
+				is_open: d.is_open ?? true, // 如果后端没给，默认是营业
+				open: d.open || '10:00',
+				close: d.close || '22:00',
+				description: d.description || ''
+			}));
 			
 		} catch (e) {
 			console.error("解析营业时间失败，将使用默认值:", e);
+			// 初始化常规时间 (保持不变)
 			editableHours.regular = weekdays.map(dayInfo => ({
 				key: dayInfo.key,
 				label: dayInfo.label,
@@ -208,8 +267,35 @@
 				openTime: '09:00',
 				closeTime: '22:00',
 			}));
+			// 初始化特殊时间为空数组
 			editableHours.special = [];
 		}
+	};
+	
+	// 【新增】添加一条特殊营业时间记录
+	const addSpecialHour = () => {
+	    // 获取 YYYY-MM-DD 格式的今天日期作为默认值
+		const today = new Date().toISOString().split('T')[0];
+		editableHours.special.push({
+			date: today,
+			is_open: true,
+			open: '10:00',
+			close: '22:00',
+			description: ''
+		});
+	};
+	
+	// 【新增】根据索引删除一条特殊营业时间记录
+	const removeSpecialHour = (index) => {
+		uni.showModal({
+			title: '确认删除',
+			content: '您确定要删除这条特殊营业时间吗？',
+			success: (res) => {
+				if (res.confirm) {
+					editableHours.special.splice(index, 1);
+				}
+			}
+		});
 	};
 	
 	/**
@@ -477,6 +563,90 @@
 		font-size: 28rpx;
 		text {
 			margin-top: 10rpx;
+		}
+	}
+	
+	.special-hours-section {
+		margin-top: 40rpx;
+		border-top: 1rpx solid #f0f0f0;
+		padding-top: 20rpx;
+	}
+	
+	.hours-section-title {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+	
+		.add-btn {
+			background-color: #FF6B00;
+			color: white;
+			border-radius: 8rpx;
+			font-weight: normal;
+			line-height: 1.8;
+			padding: 0 20rpx;
+			margin: 0;
+		}
+	}
+	
+	.no-special-hours {
+		text-align: center;
+		color: #999;
+		font-size: 26rpx;
+		padding: 40rpx 0;
+	}
+	
+	.special-day-item {
+		padding: 24rpx 0;
+		border-bottom: 1rpx dashed #e0e0e0;
+		&:last-child {
+			border-bottom: none;
+		}
+	}
+	
+	.special-day-row {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		margin-bottom: 20rpx;
+		&:last-child {
+			margin-bottom: 0;
+		}
+	}
+	
+	.date-picker {
+		display: flex;
+		align-items: center;
+		gap: 10rpx;
+		background-color: #f7f7f7;
+		padding: 12rpx 20rpx;
+		border-radius: 8rpx;
+		font-size: 28rpx;
+		color: #333;
+	}
+	
+	.special-controls {
+		display: flex;
+		align-items: center;
+		gap: 20rpx;
+		.switch-label {
+			font-size: 26rpx;
+			color: #666;
+		}
+	}
+	
+	.time-picker.special-time-picker {
+		background-color: #f7f7f7;
+		border: none;
+		flex: 1;
+		text-align: center;
+	}
+	
+	.description-input {
+		width: 100%;
+		background-color: #f7f7f7;
+		border-radius: 8rpx;
+		:deep(.uni-easyinput__content-input) {
+			padding: 16rpx !important;
 		}
 	}
 </style>

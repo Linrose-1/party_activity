@@ -84,9 +84,16 @@ const _sfc_main = {
             closeTime: (dayData == null ? void 0 : dayData.close) ?? "22:00"
           };
         });
-        editableHours.special = data.special_dates || [];
+        editableHours.special = (data.special_dates || []).map((d) => ({
+          date: d.date || "",
+          is_open: d.is_open ?? true,
+          // 如果后端没给，默认是营业
+          open: d.open || "10:00",
+          close: d.close || "22:00",
+          description: d.description || ""
+        }));
       } catch (e) {
-        common_vendor.index.__f__("error", "at pages/myStore-edit/myStore-edit.vue:203", "解析营业时间失败，将使用默认值:", e);
+        common_vendor.index.__f__("error", "at pages/myStore-edit/myStore-edit.vue:261", "解析营业时间失败，将使用默认值:", e);
         editableHours.regular = weekdays.map((dayInfo) => ({
           key: dayInfo.key,
           label: dayInfo.label,
@@ -96,6 +103,27 @@ const _sfc_main = {
         }));
         editableHours.special = [];
       }
+    };
+    const addSpecialHour = () => {
+      const today = (/* @__PURE__ */ new Date()).toISOString().split("T")[0];
+      editableHours.special.push({
+        date: today,
+        is_open: true,
+        open: "10:00",
+        close: "22:00",
+        description: ""
+      });
+    };
+    const removeSpecialHour = (index) => {
+      common_vendor.index.showModal({
+        title: "确认删除",
+        content: "您确定要删除这条特殊营业时间吗？",
+        success: (res) => {
+          if (res.confirm) {
+            editableHours.special.splice(index, 1);
+          }
+        }
+      });
     };
     const serializeOperatingHours = () => {
       const regularData = editableHours.regular.reduce((acc, day) => {
@@ -189,7 +217,7 @@ const _sfc_main = {
     return (_ctx, _cache) => {
       return common_vendor.e({
         a: !isLoading.value
-      }, !isLoading.value ? {
+      }, !isLoading.value ? common_vendor.e({
         b: common_vendor.o(($event) => form.value.storeName = $event),
         c: common_vendor.p({
           placeholder: "请输入聚店名称",
@@ -234,28 +262,70 @@ const _sfc_main = {
             m: index
           });
         }),
-        l: common_vendor.o(($event) => form.value.contactPhone = $event),
-        m: common_vendor.p({
+        l: common_vendor.o(addSpecialHour),
+        m: editableHours.special.length === 0
+      }, editableHours.special.length === 0 ? {} : {}, {
+        n: common_vendor.f(editableHours.special, (specialDay, index, i0) => {
+          return common_vendor.e({
+            a: "1bd087ec-3-" + i0,
+            b: common_vendor.t(specialDay.date || "选择日期"),
+            c: specialDay.date,
+            d: common_vendor.o((e) => specialDay.date = e.detail.value, index),
+            e: specialDay.is_open,
+            f: common_vendor.o((e) => specialDay.is_open = e.detail.value, index),
+            g: common_vendor.o(($event) => removeSpecialHour(index), index),
+            h: "1bd087ec-4-" + i0,
+            i: specialDay.is_open
+          }, specialDay.is_open ? {
+            j: common_vendor.t(specialDay.open),
+            k: specialDay.open,
+            l: common_vendor.o((e) => specialDay.open = e.detail.value, index),
+            m: common_vendor.t(specialDay.close),
+            n: specialDay.close,
+            o: common_vendor.o((e) => specialDay.close = e.detail.value, index)
+          } : {}, {
+            p: "1bd087ec-5-" + i0,
+            q: common_vendor.o(($event) => specialDay.description = $event, index),
+            r: common_vendor.p({
+              placeholder: "备注说明 (如：跨年夜延长)",
+              inputBorder: false,
+              modelValue: specialDay.description
+            }),
+            s: index
+          });
+        }),
+        o: common_vendor.p({
+          type: "calendar-filled",
+          size: "16",
+          color: "#666"
+        }),
+        p: common_vendor.p({
+          type: "trash-filled",
+          size: "22",
+          color: "#e43d33"
+        }),
+        q: common_vendor.o(($event) => form.value.contactPhone = $event),
+        r: common_vendor.p({
           type: "text",
           placeholder: "请输入联系电话",
           inputBorder: false,
           modelValue: form.value.contactPhone
         }),
-        n: common_vendor.o(($event) => form.value.averageConsumptionRange = $event),
-        o: common_vendor.p({
+        s: common_vendor.o(($event) => form.value.averageConsumptionRange = $event),
+        t: common_vendor.p({
           type: "text",
           placeholder: "例如：100-200",
           inputBorder: false,
           modelValue: form.value.averageConsumptionRange
         }),
-        p: form.value.contactWechatQrCodeUrl || "/static/images/placeholder-qr.png",
-        q: common_vendor.o(($event) => handleImageUpload("wechat")),
-        r: common_vendor.t(isSubmitting.value ? "提交中..." : "提交审核"),
-        s: common_vendor.o(handleSubmit),
-        t: isSubmitting.value,
-        v: isSubmitting.value
-      } : {
-        w: common_vendor.p({
+        v: form.value.contactWechatQrCodeUrl || "/static/images/placeholder-qr.png",
+        w: common_vendor.o(($event) => handleImageUpload("wechat")),
+        x: common_vendor.t(isSubmitting.value ? "提交中..." : "提交审核"),
+        y: common_vendor.o(handleSubmit),
+        z: isSubmitting.value,
+        A: isSubmitting.value
+      }) : {
+        B: common_vendor.p({
           type: "spinner-cycle",
           size: "30",
           color: "#999"

@@ -41,8 +41,9 @@
   margin-left: 10rpx;
   padding: 20rpx;
   margin: 10rpx 0;
-  border: #ffe1d2 solid 1rpx;
-  min-width: 500rpx;
+  border: #e2e2e2 solid 1rpx;
+  min-width: 400rpx;
+  border-radius: 10rpx;
 }
 .uni-list-cell-db .uni-input.data-v-d21abf49 {
   margin-left: 10rpx;

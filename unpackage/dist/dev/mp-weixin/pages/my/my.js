@@ -1,6 +1,14 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
 const utils_request = require("../../utils/request.js");
+if (!Array) {
+  const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
+  _easycom_uni_icons2();
+}
+const _easycom_uni_icons = () => "../../uni_modules/uni-icons/components/uni-icons/uni-icons.js";
+if (!Math) {
+  _easycom_uni_icons();
+}
 const _sfc_main = {
   __name: "my",
   setup(__props) {
@@ -11,29 +19,48 @@ const _sfc_main = {
       getUserInfo();
     });
     common_vendor.onShow(() => {
-      getUserInfo();
+      checkLoginStatusAndFetchData();
     });
     const userInfo = common_vendor.ref({});
+    const isLogin = common_vendor.ref(false);
+    const checkLoginStatusAndFetchData = () => {
+      const token = common_vendor.index.getStorageSync("token");
+      if (token) {
+        isLogin.value = true;
+        getUserInfo();
+      } else {
+        isLogin.value = false;
+        userInfo.value = {};
+      }
+    };
     const getUserInfo = async () => {
       try {
-        const result = await utils_request.request("/app-api/member/user/get", {
+        if (!isLogin.value)
+          return;
+        const {
+          data,
+          error
+        } = await utils_request.request("/app-api/member/user/get", {
           method: "GET"
         });
-        if (result) {
-          userInfo.value = result.data;
-          common_vendor.index.__f__("log", "at pages/my/my.vue:142", "getUserInfo userInfo:", userInfo.value);
+        if (!error && data) {
+          userInfo.value = data;
+          common_vendor.index.__f__("log", "at pages/my/my.vue:188", "getUserInfo userInfo:", userInfo.value);
         } else {
-          common_vendor.index.__f__("log", "at pages/my/my.vue:144", "请求业务失败:", result.msg);
+          common_vendor.index.__f__("log", "at pages/my/my.vue:190", "获取用户信息失败:", error);
+          isLogin.value = false;
+          userInfo.value = {};
         }
-      } catch (error) {
-        common_vendor.index.__f__("log", "at pages/my/my.vue:147", "请求失败:", error);
+      } catch (err) {
+        common_vendor.index.__f__("log", "at pages/my/my.vue:196", "请求异常:", err);
+        isLogin.value = false;
+        userInfo.value = {};
       }
     };
     const accountList = common_vendor.computed(() => {
       const user = userInfo.value;
       return [
         {
-          // API返回的是 currExperience，代表当前贡分
           value: user.currExperience || 0,
           label: "我的贡分"
         },
@@ -52,6 +79,8 @@ const _sfc_main = {
       ];
     });
     const userTitleAndCompany = common_vendor.computed(() => {
+      if (!isLogin.value)
+        return "登录后查看";
       const title = userInfo.value.professionalTitle;
       const company = userInfo.value.companyName;
       if (title && company) {
@@ -120,7 +149,10 @@ const _sfc_main = {
     };
     const copyToClipboard = (text) => {
       if (!text) {
-        common_vendor.index.showToast({ title: "没有可复制的内容", icon: "none" });
+        common_vendor.index.showToast({
+          title: "没有可复制的内容",
+          icon: "none"
+        });
         return;
       }
       common_vendor.index.setClipboardData({
@@ -141,46 +173,57 @@ const _sfc_main = {
     const skipToLogin = () => {
       common_vendor.index.navigateTo({
         url: "/pages/index/index"
+        // url: '/pages/login/login'
       });
     };
     return (_ctx, _cache) => {
       return common_vendor.e({
-        a: userInfo.value.avatar || "../../static/images/default-avatar.png",
-        b: common_vendor.t(userInfo.value.nickname),
-        c: userInfo.value.topUpLevel && userInfo.value.topUpLevel.name
+        a: isLogin.value
+      }, isLogin.value ? common_vendor.e({
+        b: userInfo.value.avatar || "../../static/images/default-avatar.png",
+        c: common_vendor.t(userInfo.value.nickname || "未设置昵称"),
+        d: userInfo.value.topUpLevel && userInfo.value.topUpLevel.name
       }, userInfo.value.topUpLevel && userInfo.value.topUpLevel.name ? {
-        d: common_vendor.t(userInfo.value.topUpLevel.name)
+        e: common_vendor.t(userInfo.value.topUpLevel.name)
       } : {}, {
-        e: common_vendor.t(userTitleAndCompany.value),
-        f: common_vendor.t(userInfo.value.parentName || "无"),
-        g: common_vendor.o(onEdit),
-        h: common_vendor.o(onViewAll),
-        i: common_vendor.f(accountList.value, (item, k0, i0) => {
+        f: common_vendor.t(userTitleAndCompany.value),
+        g: common_vendor.t(userInfo.value.parentName || "无"),
+        h: common_vendor.o(onEdit)
+      }) : {
+        i: common_vendor.p({
+          type: "person-filled",
+          size: "30",
+          color: "#FF8C00"
+        }),
+        j: common_vendor.o(skipToLogin)
+      }, {
+        k: common_vendor.o(onViewAll),
+        l: common_vendor.f(accountList.value, (item, k0, i0) => {
           return {
             a: common_vendor.t(item.value),
             b: common_vendor.t(item.label),
             c: item.label
           };
         }),
-        j: userInfo.value.avatar || "../../static/images/default-avatar.png",
-        k: common_vendor.t(userInfo.value.realName || userInfo.value.nickname),
-        l: userInfo.value.topUpLevel && userInfo.value.topUpLevel.name
+        m: userInfo.value.avatar || "../../static/images/default-avatar.png",
+        n: common_vendor.t(userInfo.value.realName || userInfo.value.nickname),
+        o: userInfo.value.topUpLevel && userInfo.value.topUpLevel.name
       }, userInfo.value.topUpLevel && userInfo.value.topUpLevel.name ? {
-        m: common_vendor.t(userInfo.value.topUpLevel.name)
+        p: common_vendor.t(userInfo.value.topUpLevel.name)
       } : {}, {
-        n: userInfo.value.professionalTitle
+        q: userInfo.value.professionalTitle
       }, userInfo.value.professionalTitle ? {
-        o: common_vendor.t(userInfo.value.professionalTitle)
+        r: common_vendor.t(userInfo.value.professionalTitle)
       } : {}, {
-        p: userInfo.value.companyName
+        s: userInfo.value.companyName
       }, userInfo.value.companyName ? {
-        q: common_vendor.t(userInfo.value.companyName)
+        t: common_vendor.t(userInfo.value.companyName)
       } : {}, {
-        r: common_vendor.t(userInfo.value.shardCode || "暂无"),
-        s: common_vendor.o(($event) => copyToClipboard(userInfo.value.shardCode)),
-        t: userInfo.value.wechatQrCodeUrl || "../../static/images/default-qrcode.png",
-        v: common_vendor.o(onViewDetail),
-        w: common_vendor.f(featureList.value, (item, k0, i0) => {
+        v: common_vendor.t(userInfo.value.shardCode || "暂无"),
+        w: common_vendor.o(($event) => copyToClipboard(userInfo.value.shardCode)),
+        x: userInfo.value.wechatQrCodeUrl || "../../static/images/default-qrcode.png",
+        y: common_vendor.o(onViewDetail),
+        z: common_vendor.f(featureList.value, (item, k0, i0) => {
           return {
             a: item.icon,
             b: common_vendor.t(item.name),
@@ -189,7 +232,7 @@ const _sfc_main = {
             e: common_vendor.o(($event) => navigateToFeature(item.path), item.name)
           };
         }),
-        x: common_vendor.o(skipToLogin)
+        A: common_vendor.o(skipToLogin)
       });
     };
   }

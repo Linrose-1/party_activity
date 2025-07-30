@@ -31,7 +31,6 @@
 			<view v-if="stores.length === 0 && !loadingMore && !isRefreshing" class="empty-state">
 				<uni-icons type="shop" size="60" color="#ffd8c1"></uni-icons>
 				<text>您还没有自己的聚店</text>
-				<text>快去创建一个吧！</text>
 			</view>
 		</scroll-view>
 	</view>

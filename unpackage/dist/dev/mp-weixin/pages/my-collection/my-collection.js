@@ -202,13 +202,13 @@ const _sfc_main = {
       url: `/pages/active-detail/active-detail?id=${id}`
     });
     const navigateToDiscoverActivities = () => common_vendor.index.switchTab({
-      url: "/pages/activity/index"
+      url: "/pages/active/active"
     });
     const skipCommercialDetail = (id) => common_vendor.index.navigateTo({
       url: `/pages/home-commercialDetail/home-commercialDetail?id=${id}`
     });
     const navigateToDiscoverOpportunities = () => common_vendor.index.switchTab({
-      url: "/pages/home/index"
+      url: "/pages/home/home"
     });
     const skipApplicationBusinessCard = () => common_vendor.index.navigateTo({
       url: "/pages/applicationBusinessCard/applicationBusinessCard"

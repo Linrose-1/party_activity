@@ -19,8 +19,9 @@
 								选择类型
 							</view>
 							<view class="uni-list-cell-db">
-								<picker @change="bindPickerChange" :value="index" :range="array">
-									<view class="uni-input">{{array[index]}}</view>
+								<!-- 修改这里的绑定 -->
+								<picker @change="bindTypePickerChange" :value="typeIndex" :range="typePickerRange">
+									<view class="uni-input">{{ typePickerRange[typeIndex] }}</view>
 								</picker>
 							</view>
 						</view>
@@ -42,20 +43,6 @@
 						</view>
 					</view>
 
-					<!-- 选择日期 -->
-					<view class="uni-list">
-						<view class="uni-list-cell">
-							<view class="uni-list-cell-left register-btn">
-								选择日期
-							</view>
-							<view class="uni-list-cell-db">
-								<picker mode="date" :value="date" :start="startDate" :end="endDate"
-									@change="bindDateChange">
-									<view class="uni-input">{{date}}</view>
-								</picker>
-							</view>
-						</view>
-					</view>
 
 					<!-- 选择位置 -->
 					<view class="uni-list">
@@ -81,7 +68,7 @@
 		<!-- 活动列表 -->
 		<view class="activity-list" scroll-y="true">
 			<ActivityCard v-for="(activity, index) in activitiesData" :key="activity.id" :activity="activity"
-			    @updateFavoriteStatus="handleFavoriteChange" />
+				:is-login="isLogin" @updateFavoriteStatus="handleFavoriteChange" />
 		</view>
 
 		<!-- 【修改后】根据新的状态变量来显示提示 -->
@@ -113,115 +100,208 @@
 	} from 'vue';
 	import {
 		onReachBottom,
-		onPullDownRefresh
+		onPullDownRefresh,
+		onShow
 	} from '@dcloudio/uni-app';
 	import ActivityCard from '@/components/ActivityCard.vue';
 	import request from '../../utils/request.js';
 
+	// --- 核心状态 ---
 	const loading = ref(false); // 是否正在加载中
 	const hasMore = ref(true); // 是否还有更多数据
 	const pageNo = ref(1); // 当前页码
 	const pageSize = 10; // 每页加载10条
-
 	const activitiesData = ref([]);
+	const isLogin = ref(false);
 
-	// 页面挂载时，首先获取一次活动列表
-	onMounted(() => {
-		fetchActivityStatusList(); // 先获取筛选条件
-		getActiveList();
-	});
-
-	// 滑动到底部时触发，用于分页加载
-	onReachBottom(() => {
-		console.log('滑动到底部，触发加载更多');
-		if (hasMore.value && !loading.value) {
-			getActiveList(true); // 调用 getActiveList 并传入 true 表示是加载更多
-		}
-	});
-	
-	onPullDownRefresh(() => {
-			console.log('用户触发了下拉刷新');
-			// 刷新操作，应该传入 false
-			getActiveList(false);
-		});
-
-
-	const getDate = (type) => {
-		const date = new Date();
-		let year = date.getFullYear();
-		let month = date.getMonth() + 1;
-		let day = date.getDate();
-
-		if (type === 'start') {
-			year = year - 10;
-		} else if (type === 'end') {
-			year = year + 10;
-		}
-
-		month = month > 9 ? month : '0' + month;
-		day = day > 9 ? day : '0' + day;
-		return `${year}-${month}-${day}`;
-	};
-
-	// --- 筛选条件 ---
+	// --- 筛选条件状态 ---
 	const searchKeyword = ref('');
-	const array = ref(['全部类型', '交流会', '沙龙', '峰会', '分享会', '创业猎伙', '其他']);
-	const index = ref(0);
-	const activeCategory = ref('全部类型');
-	const date = ref(getDate({
-		format: true
-	}));
-	const statusList = ref([]); // 用于存储从接口获取的原始状态列表 [{label, value}, ...]
-	const statusIndex = ref(0); // 依然用于 Picker 的 value
-	const selectedStatus = ref('全部状态');
+	// 活动类型
+	const typeList = ref([]); // 从后端获取的类型列表
+	const typeIndex = ref(0); // Picker 使用的索引
+	const selectedCategory = ref(''); // 发送给后端的类型值
+	// 活动状态
+	const statusList = ref([]); // 从后端获取的状态列表
+	const statusIndex = ref(0); // Picker 使用的索引
+	// 位置信息
 	const selectedLocationInfo = ref(null);
 
+	// --- 计算属性 (用于 Picker 的显示) ---
+	const typePickerRange = computed(() => {
+		const labels = typeList.value.map(item => item.label);
+		return ['全部类型', ...labels];
+	});
+
 	const statusPickerRange = computed(() => {
-		// 从原始列表提取 label，并在最前面添加 "全部状态"
 		const labels = statusList.value.map(item => item.label);
 		return ['全部状态', ...labels];
 	});
 
-	const fetchActivityStatusList = async () => {
-		// 使用您提供的 request 工具和接口文档信息
-		const {
-			data,
-			error
-		} = await request('/app-api/member/activity/status-list');
+	// --- 生命周期函数 ---
 
+	/**
+	 * 【核心修改 3】使用 onShow 刷新所有数据
+	 * 每次进入页面时都会触发，确保数据是最新的
+	 */
+	onShow(() => {
+		// 1. 检查登录状态
+		const token = uni.getStorageSync('token');
+		isLogin.value = !!token;
+		console.log('页面显示，当前登录状态:', isLogin.value);
+
+		// 2. 初始化页面数据
+		initializePage();
+	});
+
+	// 下拉刷新
+	onPullDownRefresh(async () => {
+		console.log('用户触发了下拉刷新');
+		await initializePage(); // 下拉刷新也调用完整初始化流程
+		uni.stopPullDownRefresh();
+	});
+
+	// 上拉加载更多
+	onReachBottom(() => {
+		console.log('滑动到底部，触发加载更多');
+		if (hasMore.value && !loading.value) {
+			getActiveList(true); // 加载更多
+		}
+	});
+
+	// --- 核心逻辑方法 ---
+
+	/**
+	 * 页面初始化函数
+	 * - 重置状态
+	 * - 并行获取所有筛选条件
+	 * - 获取第一页活动列表
+	 */
+	const initializePage = async () => {
+		uni.showLoading({ title: '加载中...' });
+		try {
+			// 重置列表状态，但不重置筛选条件
+			pageNo.value = 1;
+			hasMore.value = true;
+			activitiesData.value = [];
+			
+			// 并行获取类型和状态列表，提高效率
+			await Promise.all([
+				fetchActivityTypeList(),
+				fetchActivityStatusList()
+			]);
+			
+			// 筛选条件加载完毕后，获取第一页的活动列表
+			await getActiveList(false);
+			
+		} catch (error) {
+			console.error("页面初始化失败:", error);
+			uni.showToast({ title: '数据加载失败', icon: 'none' });
+		} finally {
+			uni.hideLoading();
+		}
+	};
+	
+	/**
+	 * 获取活动类型列表
+	 */
+	const fetchActivityTypeList = async () => {
+		const { data, error } = await request('/app-api/system/dict-data/type', {
+			data: { type: "member_activity_category" }
+		});
+		if (error) {
+			console.error('获取活动类型列表失败:', error);
+			throw new Error('获取类型失败'); // 抛出错误，让 Promise.all 捕获
+		}
+		// 将获取到的数据赋值给我们定义的 ref
+		typeList.value = data || [];
+		console.log('动态活动类型列表获取成功:', typeList.value);
+	};
+	
+	const fetchActivityStatusList = async () => {
+		const { data, error } = await request('/app-api/member/activity/status-list');
 		if (error) {
 			console.error('获取活动状态列表失败:', error);
-			uni.showToast({
-				title: '获取状态失败',
-				icon: 'none'
-			});
-			return;
+			throw new Error('获取状态失败');
 		}
-
-		// 将获取到的数据赋值给我们定义的 ref
-		statusList.value = data;
+		statusList.value = data || [];
 		console.log('动态活动状态列表获取成功:', statusList.value);
 	};
 
-	// 计算属性
-	const startDate = computed(() => getDate('start'));
-	const endDate = computed(() => getDate('end'));
+	/**
+	 * 获取活动列表的核心方法
+	 * @param {boolean} isLoadMore - 是否为加载更多
+	 */
+	const getActiveList = async (isLoadMore = false) => {
+		if (loading.value) return;
+		if (isLoadMore && !hasMore.value) return;
 
+		loading.value = true;
+		
+		// 如果是刷新，确保页码是1
+		if (!isLoadMore) {
+			pageNo.value = 1;
+		}
 
-	// --- 方法 ---
+		// 处理状态参数
+		const selectedStatusItem = statusIndex.value > 0 ? statusList.value[statusIndex.value - 1] : null;
+
+		const params = {
+			pageNo: pageNo.value,
+			pageSize: pageSize,
+			name: searchKeyword.value,
+			category: selectedCategory.value, // 使用动态选择的类型值
+			status: selectedStatusItem ? selectedStatusItem.value : '', // 使用动态选择的状态值
+			longitude: selectedLocationInfo.value ? selectedLocationInfo.value.longitude : '',
+			latitude: selectedLocationInfo.value ? selectedLocationInfo.value.latitude : ''
+		};
+
+		try {
+			console.log('发起活动列表请求, 参数:', params);
+			const result = await request('/app-api/member/activity/list', {
+				method: 'GET',
+				data: params
+			});
+
+			if (result && !result.error && result.data) {
+				const { list = [], total = 0 } = result.data;
+
+				if (isLoadMore) {
+					activitiesData.value.push(...list);
+				} else {
+					activitiesData.value = list;
+				}
+
+				// 更新分页状态
+				hasMore.value = activitiesData.value.length < total;
+				// 成功后页码+1
+				pageNo.value++;
+				
+			} else {
+				console.error('获取活动列表失败:', result ? result.error : '无有效返回');
+				hasMore.value = false;
+			}
+		} catch (error) {
+			console.error('请求异常:', error);
+			hasMore.value = false;
+		} finally {
+			loading.value = false;
+		}
+	};
+	
+	// --- 事件处理器 ---
 
 	// 类型选择器改变
-	const bindPickerChange = (e) => {
-		index.value = e.detail.value;
-		activeCategory.value = array.value[e.detail.value];
-		// 【修改】筛选条件变化后，不再手动调用，交由 watch 处理
+	const bindTypePickerChange = (e) => {
+		const newIndex = Number(e.detail.value);
+		typeIndex.value = newIndex;
+		if (newIndex === 0) {
+			selectedCategory.value = ''; // "全部类型"
+		} else {
+			// newIndex-1 对应 typeList 里的索引
+			selectedCategory.value = typeList.value[newIndex - 1].value;
+		}
 	};
-
-	// 日期选择器改变 (注意：日期筛选暂未加入 getActiveList 的 params，如需使用请参照其他筛选条件添加)
-	const bindDateChange = (e) => {
-		date.value = e.detail.value;
-	};
-
+	
 	// 状态选择器改变
 	const bindStatusPickerChange = (e) => {
 		statusIndex.value = e.detail.value;
@@ -231,145 +311,59 @@
 	const openMapToChooseLocation = () => {
 		uni.chooseLocation({
 			success: (res) => {
-				console.log('选择位置成功:', res);
 				selectedLocationInfo.value = {
 					name: res.name,
 					address: res.address,
 					latitude: res.latitude,
 					longitude: res.longitude
 				};
-				// 【修改】筛选条件变化后，不再手动调用，交由 watch 处理
 			},
 			fail: (err) => {
 				console.log('选择位置失败:', err);
 			}
 		});
-	}
-
-	/**
-	 * 【核心修改】重构 getActiveList 方法
-	 * @param {boolean} isLoadMore - 是否为加载更多操作。true: 追加数据; false: 刷新列表
-	 */
-	const getActiveList = async (isLoadMore = false) => {
-		// 如果正在加载中，则直接返回，防止重复请求
-		if (loading.value) {
-			return;
-		}
-		// 如果是加载更多，但已经没有更多数据了，也直接返回
-		if (isLoadMore && !hasMore.value) {
-			return;
-		}
-
-		loading.value = true;
-
-		// 如果不是加载更多（即是刷新或新搜索），则重置分页和数据
-		if (!isLoadMore) {
-			pageNo.value = 1;
-			activitiesData.value = [];
-			hasMore.value = true;
-		}
-
-		// 状态中文到数字的映射，后端通常使用数字
-		let statusValue = ''; // 默认为空，查询全部
-		if (statusIndex.value > 0) {
-			// 如果选择的不是 "全部状态"
-			// statusIndex.value - 1 是因为我们的 Picker Range 比原始数据多了一个 "全部状态"
-			const selectedItem = statusList.value[statusIndex.value - 1];
-			if (selectedItem) {
-				statusValue = selectedItem.value; // 获取对应的数字 value
-			}
-		}
-
-		// 构造请求参数
-		const params = {
-			pageNo: pageNo.value,
-			pageSize: pageSize,
-			name: searchKeyword.value, // 搜索框内容
-			category: activeCategory.value === '全部类型' ? '' : activeCategory.value, // 活动类型
-			status: statusValue, // 活动状态
-			longitude: selectedLocationInfo.value ? selectedLocationInfo.value.longitude : '', // 经度
-			latitude: selectedLocationInfo.value ? selectedLocationInfo.value.latitude : '' // 纬度
-		};
-
-		try {
-			console.log('发起活动列表请求, 参数:', params);
-			// 调用封装的请求方法
-			const result = await request('/app-api/member/activity/list', {
-				method: 'GET',
-				data: params
-			});
-
-			// 【关键修改】修正成功条件的判断逻辑
-			if (result && !result.error && result.data) {
-				// 从 result.data 中解构出列表数据，并提供一个空数组作为默认值
-				const list = result.data.list || [];
-
-				if (isLoadMore) {
-					// 加载更多：追加数据
-					activitiesData.value = [...activitiesData.value, ...list];
-				} else {
-					// 刷新/搜索：直接替换数据
-					activitiesData.value = list;
-				}
-
-				// 判断是否还有更多数据
-				// 后端返回的 total 是总条数，我们可以用当前已加载的数量和总数比较
-				// result.data.total 是后端返回的总条目数
-				if (activitiesData.value.length >= result.data.total) {
-					hasMore.value = false;
-				} else {
-					hasMore.value = true;
-				}
-
-				// 如果成功获取到数据，页码 +1，为下一次加载做准备
-				pageNo.value++;
-
-				console.log('活动列表获取成功:', activitiesData.value);
-			} else {
-				// 请求失败或 code 不为 0
-				console.error('获取活动列表失败:', result);
-				hasMore.value = false; // 出错时也认为没有更多数据了
-			}
-		} catch (error) {
-			console.error('请求异常:', error);
-			hasMore.value = false; // 异常时也认为没有更多数据了
-		} finally {
-			loading.value = false; // 结束加载状态
-			uni.stopPullDownRefresh(); 
-		}
 	};
 	
-	// 在 活动列表页 的 <script setup> 中
-	
+	// 子组件收藏状态变更
 	const handleFavoriteChange = (event) => {
-	  // event 就是子组件emit过来的对象, e.g., { id: ..., newFollowFlag: ... }
-	  
-	  // 1. 在当前的活动列表数据(activitiesData)中找到需要更新的那一项
-	  const activityToUpdate = activitiesData.value.find(activity => activity.id === event.id);
-	
-	  // 2. 如果找到了，就直接修改它的 followFlag 属性
-	  if (activityToUpdate) {
-	    activityToUpdate.followFlag = event.newFollowFlag;
-	    console.log(`已更新活动ID ${event.id} 的收藏状态为: ${event.newFollowFlag}`);
-	  }
+		const activityToUpdate = activitiesData.value.find(activity => activity.id === event.id);
+		if (activityToUpdate) {
+			activityToUpdate.followFlag = event.newFollowFlag;
+		}
 	};
-
-	// 当任何一个筛选条件改变时，都触发一次新的搜索（不是加载更多）
-	watch(
-			[searchKeyword, activeCategory, statusIndex, selectedLocationInfo],
-			() => {
-				console.log('筛选条件变化，重新搜索...');
-				getActiveList(false);
-			}, { deep: true }
-		);
-
 
 	// 发布活动
 	const publishActivity = () => {
-		uni.navigateTo({
-			url: '/pages/active-publish/active-publish'
-		})
+		if (!isLogin.value) {
+			uni.showModal({
+				title: '温馨提示',
+				content: '登录后才能发布活动，是否立即登录？',
+				confirmText: '去登录',
+				cancelText: '再看看',
+				success: (res) => {
+					if (res.confirm) {
+						uni.navigateTo({ url: '/pages/login/login' });
+					}
+				}
+			});
+			return;
+		}
+		uni.navigateTo({ url: '/pages/active-publish/active-publish' });
 	};
+
+	// --- 监听器 ---
+
+	// 监听所有筛选条件的变化，自动重新搜索
+	watch(
+		[searchKeyword, selectedCategory, statusIndex, selectedLocationInfo],
+		(newValue, oldValue) => {
+			console.log('筛选条件变化，重新搜索...');
+			// 调用 getActiveList(false) 来刷新列表，而不是追加
+			getActiveList(false);
+		}, {
+			deep: true // deep: true 对监听 selectedLocationInfo 对象变化是必需的
+		}
+	);
 </script>
 
 <style lang="scss" scoped>

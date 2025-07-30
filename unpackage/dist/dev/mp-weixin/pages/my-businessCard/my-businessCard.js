@@ -48,6 +48,33 @@ const _sfc_main = {
         }
       }
     });
+    const adaptUserInfo = (rawUserData) => {
+      var _a, _b;
+      if (!rawUserData)
+        return null;
+      return {
+        // --- 通用字段直接映射 ---
+        id: rawUserData.id,
+        mobile: rawUserData.mobile,
+        nickname: rawUserData.nickname,
+        avatar: rawUserData.avatar,
+        realName: rawUserData.realName,
+        locationAddress: rawUserData.locationAddress,
+        professionalTitle: rawUserData.professionalTitle,
+        companyName: rawUserData.companyName,
+        contactEmail: rawUserData.contactEmail,
+        wechatQrCodeUrl: rawUserData.wechatQrCodeUrl,
+        // ... 其他你需要的通用字段
+        // --- 差异字段适配 ---
+        // 目标：统一为 pinyinName 和 titleName
+        // 会员等级 (目标字段：pinyinName)
+        // 检查 /get 接口的嵌套结构，如果不存在，则使用 /read-card 接口的平铺结构
+        pinyinName: ((_a = rawUserData.topUpLevel) == null ? void 0 : _a.name) || rawUserData.topUpLevelName || "",
+        // 用户头衔/等级 (目标字段：titleName)
+        // 检查 /get 接口的嵌套结构，如果不存在，则使用 /read-card 接口的平铺结构
+        titleName: ((_b = rawUserData.level) == null ? void 0 : _b.name) || rawUserData.levelName || ""
+      };
+    };
     const fetchOwnUserInfo = async () => {
       common_vendor.index.showLoading({ title: "加载中..." });
       const { data, error } = await utils_request.request("/app-api/member/user/get", { method: "GET" });
@@ -56,7 +83,7 @@ const _sfc_main = {
         common_vendor.index.showToast({ title: `加载失败: ${error}`, icon: "none" });
         return;
       }
-      userInfo.value = data;
+      userInfo.value = adaptUserInfo(data);
     };
     const fetchTargetUserInfo = async (userId) => {
       common_vendor.index.showLoading({ title: "加载中..." });
@@ -72,7 +99,7 @@ const _sfc_main = {
         setTimeout(() => common_vendor.index.navigateBack(), 2e3);
         return;
       }
-      userInfo.value = data;
+      userInfo.value = adaptUserInfo(data);
     };
     const formattedContactInfo = common_vendor.computed(() => {
       if (!userInfo.value)
@@ -89,7 +116,7 @@ const _sfc_main = {
     const triggerShareHitApi = async (sharerId, bizId) => {
       if (!sharerId || !bizId)
         return;
-      common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:177", `准备为分享者 (ID: ${sharerId}) 增加贡分, 关联名片ID (bizId): ${bizId}`);
+      common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:207", `准备为分享者 (ID: ${sharerId}) 增加贡分, 关联名片ID (bizId): ${bizId}`);
       const { error } = await utils_request.request("/app-api/member/experience-record/share-experience-hit", {
         method: "POST",
         data: {
@@ -100,9 +127,9 @@ const _sfc_main = {
         }
       });
       if (error) {
-        common_vendor.index.__f__("error", "at pages/my-businessCard/my-businessCard.vue:189", "调用分享名片加分接口失败:", error);
+        common_vendor.index.__f__("error", "at pages/my-businessCard/my-businessCard.vue:219", "调用分享名片加分接口失败:", error);
       } else {
-        common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:191", `成功为分享者 (ID: ${sharerId}) 触发贡分增加`);
+        common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:221", `成功为分享者 (ID: ${sharerId}) 触发贡分增加`);
       }
     };
     const openSharePopup = () => {
@@ -117,7 +144,7 @@ const _sfc_main = {
       sharePopup.value.close();
     };
     common_vendor.onShareAppMessage((res) => {
-      common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:214", "触发了分享给好友", res);
+      common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:244", "触发了分享给好友", res);
       closeSharePopup();
       if (!userInfo.value) {
         return { title: "快来看看我的专业电子名片！" };
@@ -135,7 +162,7 @@ const _sfc_main = {
       };
     });
     common_vendor.onShareTimeline(() => {
-      common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:240", "触发了分享到朋友圈");
+      common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:270", "触发了分享到朋友圈");
       hideTimelineGuide();
       if (!userInfo.value) {
         return { title: "快来看看我的专业电子名片！" };
@@ -160,7 +187,6 @@ const _sfc_main = {
       showTimelineGuide.value = false;
     };
     return (_ctx, _cache) => {
-      var _a, _b;
       return common_vendor.e({
         a: common_vendor.p({
           type: "undo-filled",
@@ -173,8 +199,8 @@ const _sfc_main = {
         d: common_vendor.p({
           avatar: userInfo.value.avatar,
           name: userInfo.value.realName || userInfo.value.nickname,
-          ["pinyin-name"]: (_a = userInfo.value.topUpLevel) == null ? void 0 : _a.name,
-          title: (_b = userInfo.value.level) == null ? void 0 : _b.name,
+          ["pinyin-name"]: userInfo.value.pinyinName,
+          title: userInfo.value.titleName,
           ["company-name"]: userInfo.value.companyName,
           department: "",
           ["full-company-name"]: userInfo.value.professionalTitle,
