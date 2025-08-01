@@ -34,7 +34,7 @@
 				关注
 			</view>
 			<view class="tab" :class="{ active: activeTab === 4 }" @click="handleTabClick(4)">
-				创业猎伙
+				🔥猎伙
 			</view>
 			<button class="post-button" @click="postNew">
 				<uni-icons type="compose" size="18" color="#FFFFFF"></uni-icons>

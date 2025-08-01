@@ -138,7 +138,7 @@ const _sfc_main = {
             title: "上传中...",
             mask: true
           });
-          const result = await utils_upload.uploadFile(file.path, {
+          const result = await utils_upload.uploadFile(file, {
             directory
           });
           common_vendor.index.hideLoading();

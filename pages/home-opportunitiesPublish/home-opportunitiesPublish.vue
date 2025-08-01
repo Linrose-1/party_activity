@@ -158,7 +158,7 @@
 				});
 
 				// 【关键】使用 Promise.all 并发上传，调用的是导入的 uploadFile 工具
-				const uploadPromises = validFiles.map(file => uploadFile(file.path, {
+				const uploadPromises = validFiles.map(file => uploadFile(file, {
 					directory: 'post'
 				}));
 				const results = await Promise.all(uploadPromises);
@@ -207,7 +207,7 @@
 				});
 
 				// 【关键】调用导入的 uploadFile 工具
-				const result = await uploadFile(file.path, {
+				const result = await uploadFile(file, {
 					directory: 'post'
 				});
 				uni.hideLoading();

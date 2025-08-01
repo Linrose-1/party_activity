@@ -63,7 +63,7 @@ const _sfc_main = {
             title: `正在上传 ${validFiles.length} 张图片...`,
             mask: true
           });
-          const uploadPromises = validFiles.map((file) => utils_upload.uploadFile(file.path, {
+          const uploadPromises = validFiles.map((file) => utils_upload.uploadFile(file, {
             directory: "post"
           }));
           const results = await Promise.all(uploadPromises);
@@ -103,7 +103,7 @@ const _sfc_main = {
             title: "正在替换...",
             mask: true
           });
-          const result = await utils_upload.uploadFile(file.path, {
+          const result = await utils_upload.uploadFile(file, {
             directory: "post"
           });
           common_vendor.index.hideLoading();

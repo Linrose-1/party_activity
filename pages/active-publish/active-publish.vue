@@ -294,7 +294,7 @@
 				});
 
 				// 【关键】直接调用导入的 uploadFile 工具函数
-				const result = await uploadFile(file.path, {
+				const result = await uploadFile(file, {
 					directory: directory
 				});
 

@@ -62,7 +62,7 @@ const _sfc_main = {
             return common_vendor.index.showToast({ title: "文件大小不能超过5MB", icon: "none" });
           }
           common_vendor.index.showLoading({ title: "上传中...", mask: true });
-          const result = await utils_upload.uploadFile(file.path, { directory });
+          const result = await utils_upload.uploadFile(file, { directory });
           common_vendor.index.hideLoading();
           if (result.data) {
             form.value[field] = result.data;

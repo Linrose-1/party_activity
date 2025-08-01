@@ -150,7 +150,7 @@ const formatDateTime = (dateTimeStr) => {
 
 // --- 图片处理逻辑 (无修改) ---
 const handleImageSelect = async (e) => {
-  const tempFilePath = e.tempFiles[0].path;
+  const tempFilePath = e.tempFiles[0];
   uni.showLoading({ title: '上传中...', mask: true });
   
   const result = await uploadFile(tempFilePath, { directory: 'refund_qrcode' });

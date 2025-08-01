@@ -98,7 +98,7 @@ const _sfc_main = {
             return common_vendor.index.showToast({ title: "文件大小不能超过5MB", icon: "none" });
           }
           common_vendor.index.showLoading({ title: "上传中...", mask: true });
-          const result = await utils_upload.uploadFile(file.path, { directory: "payment-proof" });
+          const result = await utils_upload.uploadFile(file, { directory: "payment-proof" });
           common_vendor.index.hideLoading();
           if (result.data) {
             formData.paymentScreenshotUrl = result.data;

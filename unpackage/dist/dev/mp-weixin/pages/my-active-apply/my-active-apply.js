@@ -84,7 +84,7 @@ const _sfc_main = {
       return `${Y}-${M}-${D} ${h}:${m}`;
     };
     const handleImageSelect = async (e) => {
-      const tempFilePath = e.tempFiles[0].path;
+      const tempFilePath = e.tempFiles[0];
       common_vendor.index.showLoading({ title: "上传中...", mask: true });
       const result = await utils_upload.uploadFile(tempFilePath, { directory: "refund_qrcode" });
       common_vendor.index.hideLoading();

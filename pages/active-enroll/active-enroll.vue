@@ -244,7 +244,7 @@
 	
 					// 【关键】直接调用导入的 uploadFile 工具函数
 					// 为付款凭证指定一个清晰的目录名，方便后端管理
-					const result = await uploadFile(file.path, { directory: 'payment-proof' });
+					const result = await uploadFile(file, { directory: 'payment-proof' });
 	
 					uni.hideLoading();
 	

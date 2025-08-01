@@ -155,7 +155,7 @@
 					uni.showLoading({ title: '上传中...', mask: true });
 					
 					// 【关键】直接调用导入的 uploadFile 工具函数
-					const result = await uploadFile(file.path, { directory: directory });
+					const result = await uploadFile(file, { directory: directory });
 					
 					uni.hideLoading();
 					
