@@ -587,6 +587,12 @@
 		// 在这里可以发起网络请求，将 payload 发送给后端
 		// uni.request({ url: 'YOUR_API_ENDPOINT', method: 'POST', data: payload, ... })
 		createActive(payload)
+		
+		uni.switchTab({
+			url:'/pages/active/active'
+		})
+		
+		
 	}
 
 	const createActive = async (payload) => {

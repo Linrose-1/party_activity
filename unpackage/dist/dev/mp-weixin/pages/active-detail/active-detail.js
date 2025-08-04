@@ -31,7 +31,7 @@ const _sfc_main = {
         getActiveDetail();
         getParticipantList();
       } else {
-        common_vendor.index.__f__("error", "at pages/active-detail/active-detail.vue:272", "未接收到活动ID！");
+        common_vendor.index.__f__("error", "at pages/active-detail/active-detail.vue:275", "未接收到活动ID！");
         common_vendor.index.showToast({
           title: "加载活动详情失败，缺少ID",
           icon: "none"
@@ -41,12 +41,12 @@ const _sfc_main = {
         const sharerId = options.sharerId;
         const bizId = options.id;
         if (sharerId && loggedInUserId.value && sharerId === loggedInUserId.value) {
-          common_vendor.index.__f__("log", "at pages/active-detail/active-detail.vue:286", "用户点击了自己的活动分享链接，不计分。");
+          common_vendor.index.__f__("log", "at pages/active-detail/active-detail.vue:289", "用户点击了自己的活动分享链接，不计分。");
         } else if (sharerId && loggedInUserId.value && bizId) {
-          common_vendor.index.__f__("log", "at pages/active-detail/active-detail.vue:290", "其他用户点击了活动分享链接，且已登录，准备为分享者加分。");
+          common_vendor.index.__f__("log", "at pages/active-detail/active-detail.vue:293", "其他用户点击了活动分享链接，且已登录，准备为分享者加分。");
           triggerShareHitApi(sharerId, bizId);
         } else if (sharerId && bizId) {
-          common_vendor.index.__f__("log", "at pages/active-detail/active-detail.vue:295", "用户点击了活动分享链接，但尚未登录。暂存分享信息。");
+          common_vendor.index.__f__("log", "at pages/active-detail/active-detail.vue:298", "用户点击了活动分享链接，但尚未登录。暂存分享信息。");
           common_vendor.index.setStorageSync("pendingShareReward", {
             sharerId,
             bizId,
@@ -162,9 +162,9 @@ const _sfc_main = {
       });
       if (result && !result.error) {
         activityDetail.value = result.data;
-        common_vendor.index.__f__("log", "at pages/active-detail/active-detail.vue:435", "getActiveDetail result:", activityDetail.value);
+        common_vendor.index.__f__("log", "at pages/active-detail/active-detail.vue:438", "getActiveDetail result:", activityDetail.value);
       } else {
-        common_vendor.index.__f__("log", "at pages/active-detail/active-detail.vue:437", "请求失败:", result ? result.error : "无返回结果");
+        common_vendor.index.__f__("log", "at pages/active-detail/active-detail.vue:440", "请求失败:", result ? result.error : "无返回结果");
       }
     };
     const getParticipantList = async () => {
@@ -183,14 +183,14 @@ const _sfc_main = {
         }
       });
       if (error) {
-        common_vendor.index.__f__("error", "at pages/active-detail/active-detail.vue:459", "获取报名用户列表失败:", error);
+        common_vendor.index.__f__("error", "at pages/active-detail/active-detail.vue:462", "获取报名用户列表失败:", error);
         return;
       }
       if (data && data.list) {
         participantList.value = data.list;
         participantTotal.value = data.total;
-        common_vendor.index.__f__("log", "at pages/active-detail/active-detail.vue:466", "获取到的报名用户列表:", participantList.value);
-        common_vendor.index.__f__("log", "at pages/active-detail/active-detail.vue:467", "总报名人数:", participantTotal.value);
+        common_vendor.index.__f__("log", "at pages/active-detail/active-detail.vue:469", "获取到的报名用户列表:", participantList.value);
+        common_vendor.index.__f__("log", "at pages/active-detail/active-detail.vue:470", "总报名人数:", participantTotal.value);
       }
     };
     common_vendor.computed(() => {
@@ -252,8 +252,8 @@ const _sfc_main = {
         }
         return resultLines;
       } catch (e) {
-        common_vendor.index.__f__("error", "at pages/active-detail/active-detail.vue:546", "解析营业时间JSON失败:", e);
-        common_vendor.index.__f__("error", "at pages/active-detail/active-detail.vue:547", "原始字符串:", operatingHoursStr);
+        common_vendor.index.__f__("error", "at pages/active-detail/active-detail.vue:549", "解析营业时间JSON失败:", e);
+        common_vendor.index.__f__("error", "at pages/active-detail/active-detail.vue:550", "原始字符串:", operatingHoursStr);
         return ["营业时间格式有误"];
       }
     });
@@ -274,7 +274,7 @@ const _sfc_main = {
     const triggerShareHitApi = async (sharerId, bizId) => {
       if (!sharerId || !bizId)
         return;
-      common_vendor.index.__f__("log", "at pages/active-detail/active-detail.vue:580", `准备为分享者 (ID: ${sharerId}) 增加贡分, 关联活动ID: ${bizId}`);
+      common_vendor.index.__f__("log", "at pages/active-detail/active-detail.vue:583", `准备为分享者 (ID: ${sharerId}) 增加贡分, 关联活动ID: ${bizId}`);
       const {
         error
       } = await utils_request.request("/app-api/member/experience-record/share-experience-hit", {
@@ -287,13 +287,13 @@ const _sfc_main = {
         }
       });
       if (error) {
-        common_vendor.index.__f__("error", "at pages/active-detail/active-detail.vue:594", "调用分享加分接口失败:", error);
+        common_vendor.index.__f__("error", "at pages/active-detail/active-detail.vue:597", "调用分享加分接口失败:", error);
       } else {
-        common_vendor.index.__f__("log", "at pages/active-detail/active-detail.vue:596", `成功为分享者 (ID: ${sharerId}) 触发贡分增加`);
+        common_vendor.index.__f__("log", "at pages/active-detail/active-detail.vue:599", `成功为分享者 (ID: ${sharerId}) 触发贡分增加`);
       }
     };
     common_vendor.onShareAppMessage((res) => {
-      common_vendor.index.__f__("log", "at pages/active-detail/active-detail.vue:602", "触发分享给好友", res);
+      common_vendor.index.__f__("log", "at pages/active-detail/active-detail.vue:605", "触发分享给好友", res);
       closeSharePopup();
       const sharerId = common_vendor.index.getStorageSync("userId");
       const finalTitle = customShareTitle.value || activityDetail.value.activityTitle || "发现一个很棒的活动，快来看看吧！";
@@ -309,7 +309,7 @@ const _sfc_main = {
       };
     });
     common_vendor.onShareTimeline(() => {
-      common_vendor.index.__f__("log", "at pages/active-detail/active-detail.vue:624", "触发分享到朋友圈");
+      common_vendor.index.__f__("log", "at pages/active-detail/active-detail.vue:627", "触发分享到朋友圈");
       const sharerId = common_vendor.index.getStorageSync("userId");
       const finalTitle = customShareTitle.value || activityDetail.value.activityTitle || "发现一个很棒的活动，快来看看吧！";
       let queryString = `id=${activityDetail.value.id}&from=timeline`;

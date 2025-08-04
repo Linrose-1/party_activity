@@ -45,14 +45,14 @@ const _sfc_main = {
         });
         if (!error && data) {
           userInfo.value = data;
-          common_vendor.index.__f__("log", "at pages/my/my.vue:188", "getUserInfo userInfo:", userInfo.value);
+          common_vendor.index.__f__("log", "at pages/my/my.vue:190", "getUserInfo userInfo:", userInfo.value);
         } else {
-          common_vendor.index.__f__("log", "at pages/my/my.vue:190", "获取用户信息失败:", error);
+          common_vendor.index.__f__("log", "at pages/my/my.vue:192", "获取用户信息失败:", error);
           isLogin.value = false;
           userInfo.value = {};
         }
       } catch (err) {
-        common_vendor.index.__f__("log", "at pages/my/my.vue:196", "请求异常:", err);
+        common_vendor.index.__f__("log", "at pages/my/my.vue:198", "请求异常:", err);
         isLogin.value = false;
         userInfo.value = {};
       }
@@ -172,8 +172,8 @@ const _sfc_main = {
     };
     const skipToLogin = () => {
       common_vendor.index.navigateTo({
-        url: "/pages/index/index"
-        // url: '/pages/login/login'
+        // url: '/pages/index/index'
+        url: "/pages/login/login"
       });
     };
     return (_ctx, _cache) => {
@@ -188,42 +188,45 @@ const _sfc_main = {
       } : {}, {
         f: common_vendor.t(userTitleAndCompany.value),
         g: common_vendor.t(userInfo.value.parentName || "无"),
-        h: common_vendor.o(onEdit)
-      }) : {
-        i: common_vendor.p({
+        h: common_vendor.o(onEdit),
+        i: userInfo.value.id
+      }, userInfo.value.id ? {
+        j: common_vendor.t(userInfo.value.id)
+      } : {}) : {
+        k: common_vendor.p({
           type: "person-filled",
           size: "30",
           color: "#FF8C00"
         }),
-        j: common_vendor.o(skipToLogin)
+        l: common_vendor.o(skipToLogin)
       }, {
-        k: common_vendor.o(onViewAll),
-        l: common_vendor.f(accountList.value, (item, k0, i0) => {
+        m: common_vendor.o(onViewAll),
+        n: common_vendor.f(accountList.value, (item, k0, i0) => {
           return {
             a: common_vendor.t(item.value),
             b: common_vendor.t(item.label),
             c: item.label
           };
         }),
-        m: userInfo.value.avatar || "../../static/images/default-avatar.png",
-        n: common_vendor.t(userInfo.value.realName || userInfo.value.nickname),
-        o: userInfo.value.topUpLevel && userInfo.value.topUpLevel.name
+        o: common_vendor.o(onViewDetail),
+        p: userInfo.value.avatar || "../../static/images/default-avatar.png",
+        q: common_vendor.t(userInfo.value.realName || userInfo.value.nickname),
+        r: userInfo.value.topUpLevel && userInfo.value.topUpLevel.name
       }, userInfo.value.topUpLevel && userInfo.value.topUpLevel.name ? {
-        p: common_vendor.t(userInfo.value.topUpLevel.name)
+        s: common_vendor.t(userInfo.value.topUpLevel.name)
       } : {}, {
-        q: userInfo.value.professionalTitle
+        t: userInfo.value.professionalTitle
       }, userInfo.value.professionalTitle ? {
-        r: common_vendor.t(userInfo.value.professionalTitle)
+        v: common_vendor.t(userInfo.value.professionalTitle)
       } : {}, {
-        s: userInfo.value.companyName
+        w: userInfo.value.companyName
       }, userInfo.value.companyName ? {
-        t: common_vendor.t(userInfo.value.companyName)
+        x: common_vendor.t(userInfo.value.companyName)
       } : {}, {
-        v: common_vendor.t(userInfo.value.shardCode || "暂无"),
-        w: common_vendor.o(($event) => copyToClipboard(userInfo.value.shardCode)),
-        x: userInfo.value.wechatQrCodeUrl || "../../static/images/default-qrcode.png",
-        y: common_vendor.o(onViewDetail),
-        z: common_vendor.f(featureList.value, (item, k0, i0) => {
+        y: common_vendor.t(userInfo.value.shardCode || "暂无"),
+        z: common_vendor.o(($event) => copyToClipboard(userInfo.value.shardCode)),
+        A: userInfo.value.wechatQrCodeUrl || "../../static/images/default-qrcode.png",
+        B: common_vendor.f(featureList.value, (item, k0, i0) => {
           return {
             a: item.icon,
             b: common_vendor.t(item.name),
@@ -232,7 +235,7 @@ const _sfc_main = {
             e: common_vendor.o(($event) => navigateToFeature(item.path), item.name)
           };
         }),
-        A: common_vendor.o(skipToLogin)
+        C: common_vendor.o(skipToLogin)
       });
     };
   }

@@ -31,7 +31,7 @@ const _sfc_main = {
         activityId.value = options.id;
         getActiveDetail();
       } else {
-        common_vendor.index.__f__("error", "at pages/active-enroll/active-enroll.vue:181", "未接收到活动ID！");
+        common_vendor.index.__f__("error", "at pages/active-enroll/active-enroll.vue:184", "未接收到活动ID！");
         common_vendor.index.showToast({ title: "加载活动详情失败，缺少ID", icon: "none" });
       }
     });
@@ -104,7 +104,7 @@ const _sfc_main = {
             formData.paymentScreenshotUrl = result.data;
             common_vendor.index.showToast({ title: "上传成功", icon: "success" });
           } else {
-            common_vendor.index.__f__("error", "at pages/active-enroll/active-enroll.vue:255", "上传失败:", result.error);
+            common_vendor.index.__f__("error", "at pages/active-enroll/active-enroll.vue:258", "上传失败:", result.error);
             common_vendor.index.showToast({ title: result.error || "上传失败", icon: "none" });
           }
         }
@@ -120,7 +120,7 @@ const _sfc_main = {
       if (result && !result.error) {
         activityDetail.value = result.data;
       } else {
-        common_vendor.index.__f__("log", "at pages/active-enroll/active-enroll.vue:272", "请求失败:", result ? result.error : "无返回结果");
+        common_vendor.index.__f__("log", "at pages/active-enroll/active-enroll.vue:275", "请求失败:", result ? result.error : "无返回结果");
       }
     };
     const joinActivity = async () => {
@@ -154,7 +154,7 @@ const _sfc_main = {
         common_vendor.index.showToast({ title: "报名成功！", icon: "success" });
         currentStep.value = 3;
       } else {
-        common_vendor.index.__f__("log", "at pages/active-enroll/active-enroll.vue:313", "报名失败:", result ? result.error : "无返回结果");
+        common_vendor.index.__f__("log", "at pages/active-enroll/active-enroll.vue:316", "报名失败:", result ? result.error : "无返回结果");
         common_vendor.index.showToast({ title: result.error || "报名失败，请重试", icon: "none" });
       }
     };
@@ -270,14 +270,13 @@ const _sfc_main = {
       }) : {}, {
         K: currentStep.value === 3
       }, currentStep.value === 3 ? common_vendor.e({
-        L: common_vendor.t(formData.userPhone),
-        M: activityDetail.value
+        L: activityDetail.value
       }, activityDetail.value ? {
-        N: common_vendor.t(activityDetail.value.activityTitle),
-        O: common_vendor.t(generateTicketNumber()),
-        P: common_vendor.t(common_vendor.unref(currentDate))
+        M: common_vendor.t(activityDetail.value.activityTitle),
+        N: common_vendor.t(generateTicketNumber()),
+        O: common_vendor.t(common_vendor.unref(currentDate))
       } : {}, {
-        Q: common_vendor.o(backToHome)
+        P: common_vendor.o(backToHome)
       }) : {});
     };
   }

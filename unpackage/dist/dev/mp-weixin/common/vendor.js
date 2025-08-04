@@ -8404,6 +8404,24 @@ const pages = [
     style: {
       navigationBarTitleText: "数字标签"
     }
+  },
+  {
+    path: "pages/my-active-registeredUser/my-active-registeredUser",
+    style: {
+      navigationBarTitleText: "报名用户"
+    }
+  },
+  {
+    path: "pages/my-active-secondRegistration/my-active-secondRegistration",
+    style: {
+      navigationBarTitleText: "重新确认"
+    }
+  },
+  {
+    path: "pages/my-account-informationDetails/my-account-informationDetails",
+    style: {
+      navigationBarTitleText: "个人信息详情"
+    }
   }
 ];
 const tabBar = {
@@ -11304,6 +11322,7 @@ exports.f = f$1;
 exports.index = index;
 exports.initVueI18n = initVueI18n;
 exports.n = n$1;
+exports.nextTick$1 = nextTick$1;
 exports.nr = nr;
 exports.o = o$1;
 exports.onLoad = onLoad;

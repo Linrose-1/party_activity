@@ -378,21 +378,24 @@ const _sfc_main = {
       }
       common_vendor.index.__f__("log", "at pages/active-publish/active-publish.vue:585", "发布活动 - 最终Payload:", payload);
       createActive(payload);
+      common_vendor.index.switchTab({
+        url: "/pages/active/active"
+      });
     }
     const createActive = async (payload) => {
-      common_vendor.index.__f__("log", "at pages/active-publish/active-publish.vue:593", "payload", payload);
+      common_vendor.index.__f__("log", "at pages/active-publish/active-publish.vue:599", "payload", payload);
       const result = await utils_request.request("/app-api/member/activity/create", {
         method: "POST",
         // 请求方式
         data: payload
       });
-      common_vendor.index.__f__("log", "at pages/active-publish/active-publish.vue:600", "createActive result:", result);
+      common_vendor.index.__f__("log", "at pages/active-publish/active-publish.vue:606", "createActive result:", result);
       common_vendor.index.showToast({
         title: "活动发布成功！",
         icon: "success"
       });
       if (result.error) {
-        common_vendor.index.__f__("log", "at pages/active-publish/active-publish.vue:607", "请求失败:", result.error);
+        common_vendor.index.__f__("log", "at pages/active-publish/active-publish.vue:613", "请求失败:", result.error);
         common_vendor.index.showToast({
           title: result.error,
           icon: "none"

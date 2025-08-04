@@ -1,9 +1,27 @@
 <template>
 	<view class="container">
-		<!-- 使用 v-if="userInfo" 确保在数据加载完成后再渲染，防止错误 -->
+
 		<view class="account-detail-section" v-if="userInfo">
 			<view class="section-header">
 				<h2 class="section-title-main">账户信息详情</h2>
+			</view>
+
+			<!-- 个人信息详情模块 -->
+			<view class="personal-info-section">
+				<view class="section-title">
+					<uni-icons type="person-filled" size="24" color="#FF6B00"></uni-icons>个人信息详情
+				</view>
+				<view class="personal-info-card">
+					<image class="info-avatar" :src="userInfo.avatar || '/static/default-avatar.png'" mode="aspectFill">
+					</image>
+					<view class="info-details">
+						<view class="info-name">{{ userInfo.nickname || '未设置昵称' }}</view>
+						<view class="info-id">ID: {{ userInfo.id }}</view>
+					</view>
+					<button class="details-button" @click="navigateToInfoDetails">
+						查看 <uni-icons type="right" size="14" color="#fff"></uni-icons>
+					</button>
+				</view>
 			</view>
 
 			<!-- 邀请人模块 -->
@@ -41,14 +59,16 @@
 
 					<view class="level-info">
 						<h3>当前等级: <span style="color: #ff7707;font-weight: 600;">{{ userInfo.level.name }}</span></h3>
-						<view style="font-size: 26rpx;">您当前拥有<span style="color: #ff0000;">{{ userInfo.currExperience }}</span>贡分</view>
-						<view style="font-size: 26rpx;">距离下一等级还需 <span style="color: #ff7707;">{{ pointsToNextLevel }}</span> 贡分
+						<view style="font-size: 26rpx;">您当前拥有<span
+								style="color: #ff0000;">{{ userInfo.currExperience }}</span>贡分</view>
+						<view style="font-size: 26rpx;">距离下一等级还需 <span
+								style="color: #ff7707;">{{ pointsToNextLevel }}</span> 贡分
 						</view>
 					</view>
 				</view>
 
 				<view class="level-steps">
-                    <!-- 等级阶梯保持静态展示 -->
+					<!-- 等级阶梯保持静态展示 -->
 					<view class="level-step">
 						<view class="step-icon" style="background: #E0E0E0;">☆</view>
 						<view class="step-name">联合流猩人</view>
@@ -88,11 +108,11 @@
 					<view class="status-text">
 						当前等级: <span class="status-highlight">{{ currentMembershipLevel.name }}</span>
 					</view>
-                    <!-- 新增：显示累计充值金额 -->
+					<!-- 新增：显示累计充值金额 -->
 					<view class="status-text">
 						已累计充值: <span class="status-highlight">{{ userInfo.topUpExperience || 0 }} 元</span>
 					</view>
-                    <!-- 恢复：显示距离下一等级还需金额 -->
+					<!-- 恢复：显示距离下一等级还需金额 -->
 					<view class="status-text next-level-progress" v-if="amountToNextLevel > 0 && nextMembershipLevel">
 						距离 <span class="next-level-name">{{ nextMembershipLevel.name }}</span> 还需
 						<span class="amount-needed">{{ amountToNextLevel }} 元</span>
@@ -106,36 +126,41 @@
 				<p class="membership-description">
 					会员等级根据累计充值金额进行晋升
 				</p>
-				
+
 				<view class="membership-levels">
-					<view class="membership-level-item visitor" :class="{'current-member-highlight': userInfo.topUpLevel.name === '游客会员'}">
+					<view class="membership-level-item visitor"
+						:class="{'current-member-highlight': userInfo.topUpLevel.name === '游客会员'}">
 						<view class="level-icon">👤</view>
 						<view class="level-name">游客会员</view>
 						<view class="level-price">充值 0 元</view>
 					</view>
-					<view class="membership-level-item bronze-member" :class="{'current-member-highlight': userInfo.topUpLevel.name === '青铜会员'}">
+					<view class="membership-level-item bronze-member"
+						:class="{'current-member-highlight': userInfo.topUpLevel.name === '青铜会员'}">
 						<view class="level-icon">🪙</view>
 						<view class="level-name">青铜会员</view>
 						<view class="level-price">充值 100 元</view>
 					</view>
-					<view class="membership-level-item silver-member" :class="{'current-member-highlight': userInfo.topUpLevel.name === '白银会员'}">
+					<view class="membership-level-item silver-member"
+						:class="{'current-member-highlight': userInfo.topUpLevel.name === '白银会员'}">
 						<view class="level-icon">🔶</view>
 						<view class="level-name">白银会员</view>
 						<view class="level-price">充值 365 元</view>
 					</view>
-					<view class="membership-level-item gold-member" :class="{'current-member-highlight': userInfo.topUpLevel.name === '黄金会员'}">
+					<view class="membership-level-item gold-member"
+						:class="{'current-member-highlight': userInfo.topUpLevel.name === '黄金会员'}">
 						<view class="level-icon">🌟</view>
 						<view class="level-name">黄金会员</view>
 						<view class="level-price">充值 3,650 元</view>
 					</view>
-					<view class="membership-level-item diamond-member" :class="{'current-member-highlight': userInfo.topUpLevel.name === '黑钻会员'}">
+					<view class="membership-level-item diamond-member"
+						:class="{'current-member-highlight': userInfo.topUpLevel.name === '黑钻会员'}">
 						<view class="level-icon">💎</view>
 						<view class="level-name">黑钻会员</view>
 						<view class="level-price">充值 36,500 元</view>
 					</view>
 				</view>
 			</view>
-            <!-- ================= 会员等级系统修改结束 ================= -->
+			<!-- ================= 会员等级系统修改结束 ================= -->
 
 			<!-- 我的智米模块 -->
 			<view class="smart-rice-section">
@@ -164,7 +189,8 @@
 			<!-- 贡分获取区域 -->
 			<view class="points-section">
 				<view class="points-header">
-					<view class="points-title"> <uni-icons type="compose" size="24" color="#FF6B00"></uni-icons> 获取贡分</view>
+					<view class="points-title"> <uni-icons type="compose" size="24" color="#FF6B00"></uni-icons> 获取贡分
+					</view>
 					<view class="points-value">{{ userInfo.currExperience }}</view>
 				</view>
 				<p style="font-size: 28rpx; color: #666; margin-bottom: 40rpx;">
@@ -201,11 +227,11 @@
 				</view>
 
 				<view v-else class="history-list">
-					<view class="history-item" v-for="(record, index) in historyList" :key="record.createTime + '-' + index">
-						<view class="history-icon" :class="{ 'positive-bg': record.experience >= 0, 'negative-bg': record.experience < 0 }">
-							<uni-icons 
-								:type="record.experience >= 0 ? 'arrow-up' : 'arrow-down'" 
-								size="20" 
+					<view class="history-item" v-for="(record, index) in historyList"
+						:key="record.createTime + '-' + index">
+						<view class="history-icon"
+							:class="{ 'positive-bg': record.experience >= 0, 'negative-bg': record.experience < 0 }">
+							<uni-icons :type="record.experience >= 0 ? 'arrow-up' : 'arrow-down'" size="20"
 								:color="record.experience >= 0 ? '#28a745' : '#dc3545'">
 							</uni-icons>
 						</view>
@@ -213,7 +239,8 @@
 							<view class="history-task">{{ record.title }}</view>
 							<view class="history-date">{{ formatTimestamp(record.createTime) }}</view>
 						</view>
-						<view class="history-points" :class="{ 'positive': record.experience >= 0, 'negative': record.experience < 0 }">
+						<view class="history-points"
+							:class="{ 'positive': record.experience >= 0, 'negative': record.experience < 0 }">
 							{{ record.experience > 0 ? '+' : '' }}{{ record.experience }}
 						</view>
 					</view>
@@ -226,13 +253,19 @@
 </template>
 
 <script setup>
-	import { ref, computed, onMounted } from 'vue';
-	import { onReachBottom } from '@dcloudio/uni-app';
+	import {
+		ref,
+		computed,
+		onMounted
+	} from 'vue';
+	import {
+		onReachBottom
+	} from '@dcloudio/uni-app';
 	import request from '../../utils/request.js'; // ‼️ 请确保此路径正确
 
 	// ======================= 用户基本信息模块 =======================
 	const userInfo = ref(null);
-	
+
 	onMounted(() => {
 		fetchUserInfo().then(() => {
 			if (userInfo.value) {
@@ -240,24 +273,55 @@
 			}
 		});
 	});
-	
+
 	const fetchUserInfo = async () => {
-		uni.showLoading({ title: '加载中...' });
-		const { data, error } = await request('/app-api/member/user/get', { method: 'GET' });
+		uni.showLoading({
+			title: '加载中...'
+		});
+		const {
+			data,
+			error
+		} = await request('/app-api/member/user/get', {
+			method: 'GET'
+		});
 		uni.hideLoading();
 
 		if (error) {
-			uni.showToast({ title: `加载失败: ${error}`, icon: 'none' });
+			uni.showToast({
+				title: `加载失败: ${error}`,
+				icon: 'none'
+			});
 			return;
 		}
 		userInfo.value = data;
+	};
+
+	/**
+	 * 跳转到个人信息详情页
+	 */
+	const navigateToInfoDetails = () => {
+		if (!userInfo.value) {
+			uni.showToast({
+				title: '用户信息加载中',
+				icon: 'none'
+			});
+			return;
+		}
+		// 将用户信息对象转换为JSON字符串并编码，以便通过URL传递
+		const userJson = JSON.stringify(userInfo.value);
+		const encodedData = encodeURIComponent(userJson);
+
+		uni.navigateTo({
+			// 假设详情页也需要user信息
+			url: `/pages/my-account-informationDetails/my-account-informationDetails?user=${encodedData}`
+		});
 	};
 
 	// 计算属性 - 距离下一社交等级所需贡分
 	const pointsToNextLevel = computed(() => {
 		if (!userInfo.value) return 0;
 		const currentPoints = userInfo.value.currExperience;
-		
+
 		if (currentPoints < 100) return 100 - currentPoints;
 		if (currentPoints < 500) return 500 - currentPoints;
 		if (currentPoints < 1000) return 1000 - currentPoints;
@@ -267,14 +331,31 @@
 
 	// ======================= 会员等级模块 (已修改) =======================
 	// 定义会员等级及其门槛
-	const membershipLevels = ref([
-		{ name: '游客会员', threshold: 0 },
-		{ name: '青铜会员', threshold: 100 },
-		{ name: '白银会员', threshold: 365 },
-		{ name: '黄金会员', threshold: 3650 },
-		{ name: '黑钻会员', threshold: 36500 },
+	const membershipLevels = ref([{
+			name: '游客会员',
+			threshold: 0
+		},
+		{
+			name: '青铜会员',
+			threshold: 100
+		},
+		{
+			name: '白银会员',
+			threshold: 365
+		},
+		{
+			name: '黄金会员',
+			threshold: 3650
+		},
+		{
+			name: '黑钻会员',
+			threshold: 36500
+		},
 		// 添加一个无限大的“顶层”，方便计算，用户不会看到
-		{ name: '至尊', threshold: Infinity } 
+		{
+			name: '至尊',
+			threshold: Infinity
+		}
 	]);
 
 	// 计算当前会员等级
@@ -295,7 +376,8 @@
 
 	// 计算下一会员等级
 	const nextMembershipLevel = computed(() => {
-		const currentIndex = membershipLevels.value.findIndex(level => level.name === currentMembershipLevel.value.name);
+		const currentIndex = membershipLevels.value.findIndex(level => level.name === currentMembershipLevel.value
+			.name);
 		// 确保不是最后一个有效等级（-2 是因为我们加了一个无限大的顶层）
 		if (currentIndex < membershipLevels.value.length - 2) {
 			return membershipLevels.value[currentIndex + 1];
@@ -333,13 +415,19 @@
 			pageNo: historyPageNo.value,
 			pageSize: historyPageSize.value,
 		};
-		const { data, error } = await request('/app-api/member/experience-record/page', {
+		const {
+			data,
+			error
+		} = await request('/app-api/member/experience-record/page', {
 			method: 'GET',
 			data: params,
 		});
 		if (error) {
 			historyLoadStatus.value = 'more';
-			uni.showToast({ title: `历史记录加载失败: ${error}`, icon: 'none' });
+			uni.showToast({
+				title: `历史记录加载失败: ${error}`,
+				icon: 'none'
+			});
 			return;
 		}
 		if (data && data.list) {
@@ -355,7 +443,7 @@
 			historyLoadStatus.value = 'noMore';
 		}
 	};
-	
+
 	onReachBottom(() => {
 		getHistoryList();
 	});
@@ -374,19 +462,51 @@
 	};
 
 	// ======================= 静态数据和方法 (保持不变) =======================
-	const tasks = ref([
-		{ icon: 'calendar', name: '参与活动', desc: '参加平台组织的线上/线下活动', points: '+5分/次' },
-		{ icon: 'flag', name: '组织活动', desc: '成功组织并举办一次活动', points: '+30分/次' },
-		{ icon: 'sound', name: '分享商机', desc: '分享有价值的商业机会', points: '+10分/次' },
-		{ icon: 'personadd', name: '邀请好友', desc: '成功邀请好友注册并认证', points: '+20分/人' },
-		{ icon: 'chat', name: '每日签到', desc: '每日登录并签到', points: '+1分/天' },
-		{ icon: 'star', name: '完善资料', desc: '完善个人和企业资料', points: '+50分' },
+	const tasks = ref([{
+			icon: 'calendar',
+			name: '参与活动',
+			desc: '参加平台组织的线上/线下活动',
+			points: '+5分/次'
+		},
+		{
+			icon: 'flag',
+			name: '组织活动',
+			desc: '成功组织并举办一次活动',
+			points: '+30分/次'
+		},
+		{
+			icon: 'sound',
+			name: '分享商机',
+			desc: '分享有价值的商业机会',
+			points: '+10分/次'
+		},
+		{
+			icon: 'personadd',
+			name: '邀请好友',
+			desc: '成功邀请好友注册并认证',
+			points: '+20分/人'
+		},
+		{
+			icon: 'chat',
+			name: '每日签到',
+			desc: '每日登录并签到',
+			points: '+1分/天'
+		},
+		{
+			icon: 'star',
+			name: '完善资料',
+			desc: '完善个人和企业资料',
+			points: '+50分'
+		},
 	]);
-	
+
 	const handleTaskClick = (taskName, event) => {
-		uni.showToast({ title: `点击了任务：${taskName}`, icon: 'none' });
+		uni.showToast({
+			title: `点击了任务：${taskName}`,
+			icon: 'none'
+		});
 	};
-	
+
 	const handleExchangeSmartRice = () => {
 		uni.showModal({
 			title: '兑换智米',
@@ -416,45 +536,58 @@
 	};
 
 	const contactCustomerService = () => {
-		uni.showToast({ title: '正在为您跳转客服联系方式...', icon: 'none', duration: 2000 });
+		uni.showToast({
+			title: '正在为您跳转客服联系方式...',
+			icon: 'none',
+			duration: 2000
+		});
 	};
 </script>
 
 <style scoped>
-/* ================== 历史记录模块新增/修改样式 ================== */
-.history-empty {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	justify-content: center;
-	padding: 80rpx 40rpx;
-	color: #999;
-	font-size: 28rpx;
-}
-.history-empty text {
-	margin-top: 20rpx;
-}
-.history-icon.positive-bg {
-	background-color: #e8f5e9; /* 绿色背景 */
-}
-.history-icon.negative-bg {
-	background-color: #fce4e4; /* 红色背景 */
-}
-.history-points.positive {
-	color: #28a745; /* 绿色 */
-}
-.history-points.negative {
-	color: #dc3545; /* 红色 */
-}
+	/* ================== 历史记录模块新增/修改样式 ================== */
+	.history-empty {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		padding: 80rpx 40rpx;
+		color: #999;
+		font-size: 28rpx;
+	}
 
-/* 新增：当前会员等级高亮样式 */
-.current-member-highlight {
-	transform: translateY(-8rpx);
-	box-shadow: 0 12rpx 30rpx rgba(0, 0, 0, 0.15) !important;
-	border: 4rpx solid #FF6B00 !important;
-}
+	.history-empty text {
+		margin-top: 20rpx;
+	}
 
-/* ================== 以下为页面原有全部样式 (保持不变) ================== */
+	.history-icon.positive-bg {
+		background-color: #e8f5e9;
+		/* 绿色背景 */
+	}
+
+	.history-icon.negative-bg {
+		background-color: #fce4e4;
+		/* 红色背景 */
+	}
+
+	.history-points.positive {
+		color: #28a745;
+		/* 绿色 */
+	}
+
+	.history-points.negative {
+		color: #dc3545;
+		/* 红色 */
+	}
+
+	/* 新增：当前会员等级高亮样式 */
+	.current-member-highlight {
+		transform: translateY(-8rpx);
+		box-shadow: 0 12rpx 30rpx rgba(0, 0, 0, 0.15) !important;
+		border: 4rpx solid #FF6B00 !important;
+	}
+
+	/* ================== 以下为页面原有全部样式 (保持不变) ================== */
 	body {
 		background: linear-gradient(135deg, #f8f9fa, #e9ecef);
 		color: #333;
@@ -819,39 +952,39 @@
 		margin-bottom: 40rpx;
 		border: 2rpx solid #ffe8cc;
 	}
-	
+
 	.status-text {
 		font-size: 30rpx;
 		color: #664d03;
 		margin-bottom: 20rpx;
 		line-height: 1.5;
 	}
-	
+
 	.status-text:last-child {
 		margin-bottom: 0;
 	}
-	
+
 	.status-highlight {
 		font-weight: 700;
 		color: #e67e22;
 	}
-	
+
 	.next-level-progress {
 		font-size: 32rpx;
 	}
-	
+
 	.next-level-name {
 		font-weight: bold;
 		color: #d35400;
 	}
-	
+
 	.amount-needed {
 		font-size: 36rpx;
 		font-weight: bold;
 		color: #ff0000;
 		margin: 0 8rpx;
 	}
-	
+
 	.status-max-level {
 		font-size: 32rpx;
 		font-weight: bold;
@@ -859,11 +992,11 @@
 		display: flex;
 		align-items: center;
 	}
-	
+
 	.status-max-level uni-icons {
 		margin-right: 12rpx;
 	}
-	
+
 	.membership-description {
 		font-size: 28rpx;
 		color: #666;
@@ -1462,5 +1595,75 @@
 
 	.smart-rice-note uni-icons {
 		margin-right: 10rpx;
+	}
+
+
+	/* 【新增】个人信息详情模块样式 */
+	.personal-info-section {
+		background: white;
+		border-radius: 40rpx;
+		padding: 40rpx;
+		margin-bottom: 40rpx;
+		box-shadow: 0 10rpx 30rpx rgba(0, 0, 0, 0.05);
+	}
+
+	.personal-info-card {
+		display: flex;
+		align-items: center;
+		padding: 20rpx;
+		background: #f9f9f9;
+		border-radius: 30rpx;
+	}
+
+	.info-avatar {
+		width: 100rpx;
+		height: 100rpx;
+		border-radius: 50%;
+		margin-right: 24rpx;
+		flex-shrink: 0;
+	}
+
+	.info-details {
+		flex: 1;
+		min-width: 0;
+	}
+
+	.info-name {
+		font-size: 32rpx;
+		font-weight: 600;
+		color: #333;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+	.info-id {
+		font-size: 24rpx;
+		color: #999;
+		margin-top: 8rpx;
+	}
+
+	.details-button {
+		margin-left: auto;
+		flex-shrink: 0;
+		height: 68rpx;
+		line-height: 68rpx;
+		padding: 0 30rpx;
+		background: linear-gradient(to right, #FF8C00, #FF6B00);
+		color: white;
+		border-radius: 34rpx;
+		font-size: 26rpx;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		border: none;
+	}
+
+	.details-button::after {
+		border: none;
+	}
+
+	.details-button uni-icons {
+		margin-left: 8rpx;
 	}
 </style>

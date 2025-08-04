@@ -1,5 +1,6 @@
 /* 水平间距 */
 /* 水平间距 */
+/* 样式无变化，保持原样 */
 .container.data-v-03f92355 {
   background-color: #f9f9f9;
   min-height: 100vh;
@@ -69,6 +70,9 @@
   border-radius: 44rpx;
   font-size: 32rpx;
   border: none;
+}
+.submit-btn[disabled].data-v-03f92355 {
+  opacity: 0.6;
 }
 .submit-btn.data-v-03f92355::after {
   border: none;

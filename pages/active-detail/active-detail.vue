@@ -179,6 +179,9 @@
 				{{ formattedRegistrationTimes.start }} - {{ formattedRegistrationTimes.end }}
 			</span>
 		</view>
+		
+		<view style="width: 100%;height: 100rpx;"></view>
+		
 
 
 		<!-- 操作栏 -->

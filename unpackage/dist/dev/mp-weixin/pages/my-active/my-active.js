@@ -27,7 +27,7 @@ const _sfc_main = {
     const publishedPageNo = common_vendor.ref(1);
     const publishedHasMore = common_vendor.ref(true);
     common_vendor.onShow(() => {
-      common_vendor.index.__f__("log", "at pages/my-active/my-active.vue:186", "页面显示，刷新当前 Tab 数据");
+      common_vendor.index.__f__("log", "at pages/my-active/my-active.vue:205", "页面显示，刷新当前 Tab 数据");
       handleRefresh();
     });
     const getMyActivitiesList = async (isLoadMore = false) => {
@@ -49,7 +49,7 @@ const _sfc_main = {
           method: "GET",
           data: params
         });
-        common_vendor.index.__f__("log", "at pages/my-active/my-active.vue:217", `获取Tab ${currentTab.value} 的活动`, result);
+        common_vendor.index.__f__("log", "at pages/my-active/my-active.vue:236", `获取Tab ${currentTab.value} 的活动`, result);
         if (result && !result.error && result.data) {
           const list = result.data.list || [];
           const total = result.data.total || 0;
@@ -64,7 +64,7 @@ const _sfc_main = {
           }
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/my-active/my-active.vue:236", "请求我的活动列表失败:", error);
+        common_vendor.index.__f__("error", "at pages/my-active/my-active.vue:255", "请求我的活动列表失败:", error);
       } finally {
         loading.value = false;
         refreshing.value = false;
@@ -110,6 +110,7 @@ const _sfc_main = {
         // 假设用 ended 样式
         "替补": "upcoming",
         // 假设用 upcoming 样式
+        "已驳回": "status-rejected",
         // 我的发布状态 (保持不变)
         "已取消": "canceled",
         "未开始": "upcoming",
@@ -220,6 +221,20 @@ const _sfc_main = {
         url: `/pages/my-active-manage/my-active-manage?item=${encodedData}&mode=${mode}`
       });
     };
+    const navigateToReUpload = (activityItem) => {
+      const activityJson = JSON.stringify(activityItem);
+      const encodedData = encodeURIComponent(activityJson);
+      common_vendor.index.navigateTo({
+        url: `/pages/my-active-secondRegistration/my-active-secondRegistration?item=${encodedData}`
+      });
+    };
+    const navigateToRegisteredUsers = (activityItem) => {
+      const activityJson = JSON.stringify(activityItem);
+      const encodedData = encodeURIComponent(activityJson);
+      common_vendor.index.navigateTo({
+        url: `/pages/my-active-registeredUser/my-active-registeredUser?item=${encodedData}`
+      });
+    };
     const navigateToDiscover = () => {
       common_vendor.index.switchTab({
         url: "/pages/active/active"
@@ -245,26 +260,43 @@ const _sfc_main = {
           return common_vendor.e({
             a: item.coverImageUrl,
             b: common_vendor.t(item.activityTitle),
-            c: common_vendor.t(item.memberActivityJoinResp.paymentStatusStr),
-            d: common_vendor.n(getStatusClass(item.memberActivityJoinResp.paymentStatusStr)),
-            e: "37541c0b-1-" + i0,
-            f: common_vendor.t(formatDateTime(item.startDatetime)),
-            g: "37541c0b-2-" + i0,
-            h: common_vendor.t(item.locationAddress || "线上活动"),
-            i: "37541c0b-3-" + i0,
-            j: common_vendor.t(item.joinCount || 0),
-            k: common_vendor.t(item.totalSlots || "不限"),
-            l: ["待支付", "已支付", "替补"].includes(item.memberActivityJoinResp.paymentStatusStr)
-          }, ["待支付", "已支付", "替补"].includes(item.memberActivityJoinResp.paymentStatusStr) ? {
-            m: common_vendor.o(($event) => cancelEnroll(item.id), item.id)
+            c: item.memberActivityJoinResp.rejectMsg
+          }, item.memberActivityJoinResp.rejectMsg ? {} : {
+            d: common_vendor.t(item.memberActivityJoinResp.paymentStatusStr),
+            e: common_vendor.n(getStatusClass(item.memberActivityJoinResp.paymentStatusStr))
+          }, {
+            f: "37541c0b-1-" + i0,
+            g: common_vendor.t(formatDateTime(item.startDatetime)),
+            h: "37541c0b-2-" + i0,
+            i: common_vendor.t(item.locationAddress || "线上活动"),
+            j: item.memberActivityJoinResp.rejectMsg
+          }, item.memberActivityJoinResp.rejectMsg ? {
+            k: "37541c0b-3-" + i0,
+            l: common_vendor.p({
+              type: "info-filled",
+              color: "#f56c6c",
+              size: "16"
+            }),
+            m: common_vendor.t(item.memberActivityJoinResp.rejectMsg)
           } : {}, {
-            n: item.memberActivityJoinResp.paymentStatusStr === "待退款"
+            n: "37541c0b-4-" + i0,
+            o: common_vendor.t(item.joinCount || 0),
+            p: common_vendor.t(item.totalSlots || "不限"),
+            q: ["待支付", "已支付", "替补"].includes(item.memberActivityJoinResp.paymentStatusStr) && !item.memberActivityJoinResp.rejectMsg
+          }, ["待支付", "已支付", "替补"].includes(item.memberActivityJoinResp.paymentStatusStr) && !item.memberActivityJoinResp.rejectMsg ? {
+            r: common_vendor.o(($event) => cancelEnroll(item.id), item.id)
+          } : {}, {
+            s: item.memberActivityJoinResp.paymentStatusStr === "待退款"
           }, item.memberActivityJoinResp.paymentStatusStr === "待退款" ? {
-            o: common_vendor.o(($event) => applyForRefund(item), item.id)
+            t: common_vendor.o(($event) => applyForRefund(item), item.id)
           } : {}, {
-            p: common_vendor.o(($event) => viewDetail(item.id), item.id),
-            q: item.id,
-            r: common_vendor.o(($event) => handleActivityClick(item.id), item.id)
+            v: item.memberActivityJoinResp.rejectMsg
+          }, item.memberActivityJoinResp.rejectMsg ? {
+            w: common_vendor.o(($event) => navigateToReUpload(item), item.id)
+          } : {}, {
+            x: common_vendor.o(($event) => viewDetail(item.id), item.id),
+            y: item.id,
+            z: common_vendor.o(($event) => handleActivityClick(item.id), item.id)
           });
         }),
         e: common_vendor.p({
@@ -298,16 +330,16 @@ const _sfc_main = {
             b: common_vendor.t(item.activityTitle),
             c: common_vendor.t(item.statusStr),
             d: common_vendor.n(getStatusClass(item.statusStr)),
-            e: "37541c0b-4-" + i0,
+            e: "37541c0b-5-" + i0,
             f: common_vendor.t(formatDateTime(item.startDatetime)),
-            g: "37541c0b-5-" + i0,
+            g: "37541c0b-6-" + i0,
             h: common_vendor.t(item.locationAddress || "线上活动"),
-            i: "37541c0b-6-" + i0,
+            i: "37541c0b-7-" + i0,
             j: common_vendor.t(item.joinCount || 0),
             k: common_vendor.t(item.totalSlots || "不限"),
             l: item.paddingReturnCount > 0
           }, item.paddingReturnCount > 0 ? {
-            m: "37541c0b-7-" + i0,
+            m: "37541c0b-8-" + i0,
             n: common_vendor.p({
               text: item.paddingReturnCount,
               type: "error"
@@ -322,9 +354,13 @@ const _sfc_main = {
           }, item.statusStr === "活动取消" ? {
             s: common_vendor.o(($event) => manageRefunds(item, "all"), item.id)
           } : {}, {
-            t: common_vendor.o(($event) => viewDetail(item.id), item.id),
-            v: item.id,
-            w: common_vendor.o(($event) => handleActivityClick(item.id), item.id)
+            t: item.statusStr !== "活动取消"
+          }, item.statusStr !== "活动取消" ? {
+            v: common_vendor.o(($event) => navigateToRegisteredUsers(item), item.id)
+          } : {}, {
+            w: common_vendor.o(($event) => viewDetail(item.id), item.id),
+            x: item.id,
+            y: common_vendor.o(($event) => handleActivityClick(item.id), item.id)
           });
         }),
         p: common_vendor.p({

@@ -24,21 +24,18 @@ const _sfc_main = {
   __name: "my-edit",
   setup(__props) {
     const AreaApi = {
-      /**
-       * 获取地区树
-       */
-      getAreaTree: () => {
-        return utils_request.request("/app-api/system/area/tree", {
-          method: "GET"
-        });
-      }
+      getAreaTree: () => utils_request.request("/app-api/system/area/tree", { method: "GET" })
+    };
+    const IndustryApi = {
+      getIndustryTree: () => utils_request.request("/app-api/member/national-industry/tree", { method: "POST" })
     };
     common_vendor.onMounted(async () => {
       common_vendor.index.showLoading({ title: "加载中..." });
       await Promise.all([
         getUserInfo(),
-        getAreaTreeData()
-        // 【新增】调用获取地区数据的方法
+        getAreaTreeData(),
+        getIndustryTreeData()
+        // 新增
       ]);
       common_vendor.index.hideLoading();
     });
@@ -49,28 +46,26 @@ const _sfc_main = {
       realName: "",
       sex: null,
       birthday: "",
-      locationAddress: "",
-      // 用于【常住地】, 存储最终的地区ID
-      residence: "",
-      // 【新增】用于【出生地】, 存储最终的地区ID
+      locationAddress: null,
+      // 【修正】存储常住地ID，初始为null
+      residence: null,
+      // 【修正】存储出生地ID，初始为null
       nativePlace: "",
-      // 【新增】籍贯
       professionalTitle: "",
-      industry: "",
-      // 【新增】行业
+      industry: null,
+      // 【核心修改】新增行业ID字段
       companyName: "",
       school: "",
-      // 【新增】毕业学校
       mobile: "",
       contactEmail: "",
       wechatQrCodeUrl: "",
       hobby: "",
-      // 【新增】爱好
       personalBio: ""
-      // 【移除】latitude 和 longitude 字段
     });
+    const industryTree = common_vendor.ref([]);
     const areaTree = common_vendor.ref([]);
     const rules = {
+      // 校验规则无变化
       nickname: { rules: [{ required: true, errorMessage: "请输入用户昵称" }] },
       avatar: { rules: [{ required: true, errorMessage: "请上传头像" }] },
       sex: { rules: [{ type: "number", required: true, errorMessage: "请选择性别" }] }
@@ -83,41 +78,21 @@ const _sfc_main = {
     const getAreaTreeData = async () => {
       const { data, error } = await AreaApi.getAreaTree();
       if (error) {
-        common_vendor.index.__f__("error", "at pages/my-edit/my-edit.vue:212", "获取地区树失败:", error);
+        common_vendor.index.__f__("error", "at pages/my-edit/my-edit.vue:193", "获取地区树失败:", error);
         common_vendor.index.showToast({ title: "地区数据加载失败", icon: "none" });
-        return;
+      } else {
+        areaTree.value = data;
       }
-      areaTree.value = data;
     };
-    const handleImageUpload = (field, directory) => {
-      common_vendor.index.chooseImage({
-        count: 1,
-        sourceType: ["album", "camera"],
-        success: async (res) => {
-          const file = res.tempFiles[0];
-          const maxSize = 5 * 1024 * 1024;
-          if (file.size > maxSize) {
-            return common_vendor.index.showToast({ title: "文件大小不能超过5MB", icon: "none" });
-          }
-          common_vendor.index.showLoading({ title: "上传中...", mask: true });
-          const result = await utils_upload.uploadFile(file, { directory });
-          common_vendor.index.hideLoading();
-          if (result.data) {
-            form.value[field] = result.data;
-            common_vendor.index.showToast({ title: "上传成功", icon: "none" });
-          } else {
-            common_vendor.index.__f__("error", "at pages/my-edit/my-edit.vue:243", "上传失败:", result.error);
-            common_vendor.index.showToast({ title: result.error || "上传失败", icon: "none" });
-          }
-        }
-      });
+    const getIndustryTreeData = async () => {
+      const { data, error } = await IndustryApi.getIndustryTree();
+      if (error) {
+        common_vendor.index.__f__("error", "at pages/my-edit/my-edit.vue:204", "获取行业树失败:", error);
+        common_vendor.index.showToast({ title: "行业数据加载失败", icon: "none" });
+      } else {
+        industryTree.value = data;
+      }
     };
-    function chooseAvatar() {
-      handleImageUpload("avatar", "avatar");
-    }
-    function chooseWechatQr() {
-      handleImageUpload("wechatQrCodeUrl", "qrcode");
-    }
     const getUserInfo = async () => {
       const { data: userInfo, error } = await utils_request.request("/app-api/member/user/get", { method: "GET" });
       if (userInfo) {
@@ -130,6 +105,32 @@ const _sfc_main = {
         common_vendor.index.showToast({ title: error || "获取用户信息失败", icon: "none" });
       }
     };
+    const handleImageUpload = (field, directory) => {
+      common_vendor.index.chooseImage({
+        count: 1,
+        sourceType: ["album", "camera"],
+        success: async (res) => {
+          const file = res.tempFiles[0];
+          if (file.size > 5 * 1024 * 1024) {
+            return common_vendor.index.showToast({ title: "文件大小不能超过5MB", icon: "none" });
+          }
+          common_vendor.index.showLoading({ title: "上传中...", mask: true });
+          const result = await utils_upload.uploadFile(file, { directory });
+          common_vendor.index.hideLoading();
+          if (result.data) {
+            form.value[field] = result.data;
+          } else {
+            common_vendor.index.showToast({ title: result.error || "上传失败", icon: "none" });
+          }
+        }
+      });
+    };
+    function chooseAvatar() {
+      handleImageUpload("avatar", "avatar");
+    }
+    function chooseWechatQr() {
+      handleImageUpload("wechatQrCodeUrl", "qrcode");
+    }
     const previewImage = (url) => {
       common_vendor.index.previewImage({ urls: [url] });
     };
@@ -143,20 +144,17 @@ const _sfc_main = {
         common_vendor.index.hideLoading();
         if (result.data !== null) {
           common_vendor.index.showToast({ title: "保存成功", icon: "success" });
-          setTimeout(() => {
-            common_vendor.index.navigateBack();
-          }, 1500);
+          setTimeout(() => common_vendor.index.navigateBack(), 1500);
         } else {
           common_vendor.index.showToast({ title: result.error || "保存失败", icon: "none" });
         }
       }).catch((err) => {
-        common_vendor.index.__f__("log", "at pages/my-edit/my-edit.vue:300", "表单验证失败：", err);
+        common_vendor.index.__f__("log", "at pages/my-edit/my-edit.vue:269", "表单验证失败：", err);
       });
     };
     const goToLabelEditPage = () => {
       common_vendor.index.navigateTo({
         url: "/pages/my-edit-label/my-edit-label"
-        // 请确保这个路径是您项目中正确的路径
       });
     };
     return (_ctx, _cache) => {
@@ -260,12 +258,18 @@ const _sfc_main = {
         }),
         E: common_vendor.o(($event) => form.value.industry = $event),
         F: common_vendor.p({
-          placeholder: "请输入行业",
+          placeholder: "请选择所在行业",
+          ["popup-title"]: "请选择行业",
+          localdata: industryTree.value,
+          map: {
+            text: "name",
+            value: "id"
+          },
           modelValue: form.value.industry
         }),
         G: common_vendor.p({
           label: "行业",
-          name: "industry"
+          name: "industryId"
         }),
         H: common_vendor.o(($event) => form.value.companyName = $event),
         I: common_vendor.p({

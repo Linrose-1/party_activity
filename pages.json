@@ -232,6 +232,27 @@
 			{
 				"navigationBarTitleText" : "数字标签"
 			}
+		},
+		{
+			"path" : "pages/my-active-registeredUser/my-active-registeredUser",
+			"style" : 
+			{
+				"navigationBarTitleText" : "报名用户"
+			}
+		},
+		{
+			"path" : "pages/my-active-secondRegistration/my-active-secondRegistration",
+			"style" : 
+			{
+				"navigationBarTitleText" : "重新确认"
+			}
+		},
+		{
+			"path" : "pages/my-account-informationDetails/my-account-informationDetails",
+			"style" : 
+			{
+				"navigationBarTitleText" : "个人信息详情"
+			}
 		}
 	],
 	

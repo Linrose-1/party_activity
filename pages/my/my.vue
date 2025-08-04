@@ -21,6 +21,8 @@
 					</view>
 				</view>
 				<view class="edit-btn" @tap="onEdit">编辑</view>
+				
+				<text v-if="userInfo.id" class="user-id-display">ID: {{ userInfo.id }}</text>
 			</template>
 
 			<!-- 如果未登录，显示 "去登录" -->
@@ -58,7 +60,7 @@
 		<view class="card-section">
 			<view class="section-header">
 				<text class="section-title-main">我的名片</text>
-				<!-- <text class="view-all" @tap="onViewDetail">查看 ›</text> -->
+				<text class="view-all" @tap="onViewDetail">分享名片 ›</text>
 			</view>
 
 			<view class="ai-card">
@@ -99,10 +101,10 @@
 						<image class="qrcode-img"
 							:src="userInfo.wechatQrCodeUrl || '../../static/images/default-qrcode.png'" />
 					</view>
-					<view class="qrcode-actions">
-						<!-- <button class="qrcode-btn" @tap="saveQrcode">保存</button> -->
+					<!-- <view class="qrcode-actions">
+						<button class="qrcode-btn" @tap="saveQrcode">保存</button>
 						<button class="qrcode-btn" @tap="onViewDetail">分享名片</button>
-					</view>
+					</view> -->
 				</view>
 			</view>
 		</view>
@@ -339,8 +341,8 @@
 
 	const skipToLogin = () => {
 		uni.navigateTo({
-			url: '/pages/index/index'
-			// url: '/pages/login/login'
+			// url: '/pages/index/index'
+			url: '/pages/login/login'
 		})
 	}
 </script>
@@ -359,6 +361,17 @@
 		color: white;
 		position: relative;
 	}
+	
+	.user-id-display {
+			position: absolute;
+			bottom: 20rpx;
+			right: 30rpx;
+			font-size: 22rpx;
+			color: rgba(255, 255, 255, 0.7);
+			background-color: rgba(0, 0, 0, 0.1);
+			padding: 4rpx 12rpx;
+			border-radius: 10rpx;
+		}
 
 	.avatar {
 		width: 140rpx;
@@ -602,10 +615,9 @@
 		object-fit: contain;
 	}
 
-	.qrcode-actions {
+	/* .qrcode-actions {
 		display: flex;
 		justify-content: center;
-		/* gap: 50rpx; */
 		margin: 20rpx 0;
 	}
 
@@ -616,7 +628,7 @@
 		border-radius: 30rpx;
 		font-size: 24rpx;
 		cursor: pointer;
-	}
+	} */
 
 	.login-prompt {
 		display: flex;

@@ -15,17 +15,24 @@ const _sfc_main = {
     const ScoreApi = {
       /**
        * 保存或更新用户评分
-       * @param {object} scoreData - 包含评分信息的对象
+       * @param {object} scoreData
        */
       saveOrUpdate: (scoreData) => {
-        return utils_request.request("/app-api/member-user-scores/saveOrUpdate", {
+        return utils_request.request("/app-api/member/user-scores/saveOrUpdate", {
           method: "POST",
           data: scoreData
-          // request 工具会自动处理 JSON 格式
+        });
+      },
+      /**
+       * 获取用户评分
+       * @param {string|number} userId
+       */
+      getMyScores: (userId) => {
+        return utils_request.request("/app-api/member/user-scores/getInfo", {
+          method: "GET",
+          data: { userId }
         });
       }
-      // TODO: 后续可以增加一个获取已有评分的接口
-      // getMyScores: (userId) => { ... }
     };
     const scoreCategories = common_vendor.ref([
       {
@@ -84,39 +91,63 @@ const _sfc_main = {
       mission: 0
     });
     const scoreRecordId = common_vendor.ref(null);
-    common_vendor.onMounted(() => {
-      common_vendor.index.__f__("log", "at pages/my-edit-label/my-edit-label.vue:126", "评分页面已加载，等待用户操作。");
-    });
-    const submitScores = async () => {
+    const isSubmitting = common_vendor.ref(false);
+    common_vendor.onMounted(async () => {
+      common_vendor.index.getStorageSync("userInfo");
       const userId = common_vendor.index.getStorageSync("userId");
-      common_vendor.index.__f__("log", "at pages/my-edit-label/my-edit-label.vue:133", userId);
       if (!userId) {
-        common_vendor.index.showToast({
-          title: "无法获取用户信息，请重新登录",
-          icon: "none"
-        });
+        common_vendor.index.showToast({ title: "无法获取用户信息，请重新登录", icon: "none" });
         return;
       }
+      common_vendor.index.showLoading({ title: "正在加载评分..." });
+      const { data: userScores, error } = await ScoreApi.getMyScores(userId);
+      common_vendor.index.hideLoading();
+      if (error) {
+        common_vendor.index.__f__("warn", "at pages/my-edit-label/my-edit-label.vue:138", "获取已有评分失败:", error);
+        return;
+      }
+      if (userScores) {
+        common_vendor.index.__f__("log", "at pages/my-edit-label/my-edit-label.vue:144", "成功获取到已有评分:", userScores);
+        scoreRecordId.value = userScores.id;
+        Object.keys(scores.value).forEach((key) => {
+          if (userScores[key] !== void 0 && userScores[key] !== null) {
+            scores.value[key] = userScores[key];
+          }
+        });
+      } else {
+        common_vendor.index.__f__("log", "at pages/my-edit-label/my-edit-label.vue:154", "用户尚未评分，将使用默认值。");
+      }
+    });
+    const submitScores = async () => {
+      if (isSubmitting.value)
+        return;
+      common_vendor.index.getStorageSync("userInfo");
+      const userId = common_vendor.index.getStorageSync("userId");
+      if (!userId) {
+        common_vendor.index.showToast({ title: "无法获取用户信息，请重新登录", icon: "none" });
+        return;
+      }
+      isSubmitting.value = true;
       common_vendor.index.showLoading({ title: "正在保存..." });
       const payload = {
         ...scores.value,
-        // 包含所有16个评分项的分数
         id: scoreRecordId.value,
-        // 如果是修改，则传入记录ID；如果是新增，则为 null
+        // 如果是首次评分，id为null
         userId,
-        // 被评分者ID，这里是自己
         scorerId: userId
-        // 评分者ID，也是自己
       };
-      const { data: newRecordId, error } = await ScoreApi.saveOrUpdate(payload);
+      const { data: newRecord, error } = await ScoreApi.saveOrUpdate(payload);
       common_vendor.index.hideLoading();
+      isSubmitting.value = false;
       if (error) {
-        common_vendor.index.__f__("error", "at pages/my-edit-label/my-edit-label.vue:158", "评分保存失败:", error);
+        common_vendor.index.__f__("error", "at pages/my-edit-label/my-edit-label.vue:189", "评分保存失败:", error);
         common_vendor.index.showToast({ title: `保存失败: ${error}`, icon: "none" });
         return;
       }
       common_vendor.index.showToast({ title: "保存成功！", icon: "success" });
-      scoreRecordId.value = newRecordId;
+      if (newRecord && newRecord.id) {
+        scoreRecordId.value = newRecord.id;
+      }
       setTimeout(() => {
         common_vendor.index.navigateBack();
       }, 1500);
@@ -145,7 +176,9 @@ const _sfc_main = {
             c: category.title
           };
         }),
-        b: common_vendor.o(submitScores)
+        b: common_vendor.t(isSubmitting.value ? "保存中..." : "保存评分"),
+        c: isSubmitting.value,
+        d: common_vendor.o(submitScores)
       };
     };
   }

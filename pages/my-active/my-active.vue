@@ -23,8 +23,11 @@
 					<view class="activity-content">
 						<view class="activity-header">
 							<text class="activity-title">{{ item.activityTitle }}</text>
-							<!-- 【核心修改】直接使用 statusStr，并传入 getStatusClass -->
-							<view :class="['status-tag', getStatusClass(item.memberActivityJoinResp.paymentStatusStr)]">
+							<view v-if="item.memberActivityJoinResp.rejectMsg" class="status-tag status-rejected">
+								已驳回
+							</view>
+							<view v-else
+								:class="['status-tag', getStatusClass(item.memberActivityJoinResp.paymentStatusStr)]">
 								{{ item.memberActivityJoinResp.paymentStatusStr }}
 							</view>
 						</view>
@@ -39,6 +42,11 @@
 							<text class="info-text">{{ item.locationAddress || '线上活动' }}</text>
 						</view>
 
+						<view v-if="item.memberActivityJoinResp.rejectMsg" class="rejection-reason-box">
+							<uni-icons type="info-filled" color="#f56c6c" size="16"></uni-icons>
+							<text>原因: {{ item.memberActivityJoinResp.rejectMsg }}</text>
+						</view>
+
 						<view class="activity-footer">
 							<view class="participants">
 								<uni-icons type="people" size="16" color="#999" />
@@ -48,7 +56,7 @@
 							<view class="action-buttons">
 								<!-- 【核心修改】v-if 条件使用字符串判断 -->
 								<button
-									v-if="['待支付', '已支付', '替补'].includes(item.memberActivityJoinResp.paymentStatusStr)"
+									v-if="['待支付', '已支付', '替补'].includes(item.memberActivityJoinResp.paymentStatusStr) && !item.memberActivityJoinResp.rejectMsg"
 									class="btn btn-cancel" @click.stop="cancelEnroll(item.id)">
 									取消报名
 								</button>
@@ -56,6 +64,12 @@
 									class="btn btn-refund-apply" @click.stop="applyForRefund(item)">
 									申请退款
 								</button>
+
+								<button v-if="item.memberActivityJoinResp.rejectMsg" class="btn btn-re-upload"
+									@click.stop="navigateToReUpload(item)">
+									重新上传
+								</button>
+
 								<button class="btn btn-detail" @click.stop="viewDetail(item.id)">
 									查看详情
 								</button>
@@ -126,6 +140,11 @@
 								<button v-if="item.statusStr === '活动取消'" class="btn btn-refund-manage"
 									@click.stop="manageRefunds(item, 'all')">
 									处理退款
+								</button>
+
+								<button v-if="item.statusStr !== '活动取消'" class="btn btn-view-users"
+									@click.stop="navigateToRegisteredUsers(item)">
+									报名用户
 								</button>
 
 								<button class="btn btn-detail" @click.stop="viewDetail(item.id)">
@@ -299,6 +318,7 @@
 			'待退款': 'refund_pending',
 			'已退款': 'ended', // 假设用 ended 样式
 			'替补': 'upcoming', // 假设用 upcoming 样式
+			'已驳回': 'status-rejected',
 
 			// 我的发布状态 (保持不变)
 			'已取消': 'canceled',
@@ -420,6 +440,30 @@
 		const encodedData = encodeURIComponent(activityJson);
 		uni.navigateTo({
 			url: `/pages/my-active-manage/my-active-manage?item=${encodedData}&mode=${mode}`
+		});
+	};
+
+	/**
+	 * 【新增】跳转到重新上传凭证页面
+	 * @param {object} activityItem - 当前活动对象
+	 */
+	const navigateToReUpload = (activityItem) => {
+		const activityJson = JSON.stringify(activityItem);
+		const encodedData = encodeURIComponent(activityJson);
+		uni.navigateTo({
+			url: `/pages/my-active-secondRegistration/my-active-secondRegistration?item=${encodedData}`
+		});
+	};
+
+	/**
+	 * 跳转到报名用户页面
+	 * @param {object} activityItem - 当前活动对象
+	 */
+	const navigateToRegisteredUsers = (activityItem) => {
+		const activityJson = JSON.stringify(activityItem);
+		const encodedData = encodeURIComponent(activityJson);
+		uni.navigateTo({
+			url: `/pages/my-active-registeredUser/my-active-registeredUser?item=${encodedData}`
 		});
 	};
 
@@ -589,6 +633,32 @@
 		gap: 16rpx;
 	}
 
+	.status-tag {
+
+		// ...
+		&.status-rejected {
+			// 【新增】驳回状态的样式
+			background-color: #fef0f0;
+			color: #f56c6c;
+		}
+	}
+
+	.rejection-reason-box {
+		// 【新增】驳回原因容器的样式
+		background-color: #fef0f0;
+		color: #f56c6c;
+		font-size: 24rpx;
+		padding: 12rpx 20rpx;
+		border-radius: 8rpx;
+		margin-top: 20rpx;
+		display: flex;
+		align-items: center;
+
+		text {
+			margin-left: 8rpx;
+		}
+	}
+
 	.btn {
 		margin: 0;
 		padding: 0 24rpx;
@@ -610,6 +680,16 @@
 			color: #606770;
 		}
 
+		&-view-users {
+			background-color: #e8f5e9;
+			color: #4caf50;
+		}
+
+		&-cancel {
+			background-color: #ffebee;
+			color: #f44336;
+		}
+
 		&-manage {
 			background-color: #e3f2fd;
 			color: #2196f3;
@@ -629,6 +709,12 @@
 		&-refund-manage {
 			background: linear-gradient(135deg, #FF6B00 0%, #FF8C00 100%);
 			color: white;
+		}
+
+		&-re-upload {
+			// 【新增】重新上传按钮样式
+			background: linear-gradient(135deg, #FF9500, #FF7900);
+			color: #fff;
 		}
 	}
 
@@ -687,21 +773,21 @@
 		color: #999;
 		padding: 20rpx 0;
 	}
-	
+
 	.btn-approval {
-	  background-color: #e3f2fd; // 使用淡蓝色以示区分
-	  color: #2196f3;
-	  display: flex; // 必须设置为 flex 才能让徽标垂直居中
-	  align-items: center;
-	
-	  .badge {
-	    margin-left: 8rpx; // 给徽标和文字之间一点间距
-	  }
+		background-color: #e3f2fd; // 使用淡蓝色以示区分
+		color: #2196f3;
+		display: flex; // 必须设置为 flex 才能让徽标垂直居中
+		align-items: center;
+
+		.badge {
+			margin-left: 8rpx; // 给徽标和文字之间一点间距
+		}
 	}
-	
+
 	// 确保你的 .btn-refund-manage 样式是这样的
 	.btn-refund-manage {
-	  background: linear-gradient(135deg, #ff9a44 0%, #ff5e3a 100%);
-	  color: white;
+		background: linear-gradient(135deg, #ff9a44 0%, #ff5e3a 100%);
+		color: white;
 	}
 </style>

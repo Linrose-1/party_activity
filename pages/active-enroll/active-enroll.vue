@@ -106,6 +106,9 @@
 				</view>
 				<img v-else :src="formData.paymentScreenshotUrl" class="preview-image" alt="付款截图" />
 			</view>
+			<view class="prompt">
+				ⓘ请上传带支付订单号的付款凭证截图
+			</view>
 
 			<!-- 【修改】绑定真实的提交方法 -->
 			<button class="btn" :class="{ 'btn-disabled': !formData.paymentScreenshotUrl }" @click="joinActivity">
@@ -118,12 +121,12 @@
 			<view class="success-message">
 				<view class="success-icon">🎉</view>
 				<view>恭喜您报名成功！</view>
-				<view style="font-size: 28rpx; color: #666; margin-top: 30rpx">
+				<!-- <view style="font-size: 28rpx; color: #666; margin-top: 30rpx">
 					我们已发送确认短信至您的手机
 				</view>
 				<view style="font-size: 28rpx; color: #FF6E00; margin-top: 10rpx">
 					{{ formData.userPhone }}
-				</view>
+				</view> -->
 			</view>
 
 			<view class="section" v-if="activityDetail">
@@ -491,6 +494,11 @@
 		margin: 30rpx 0;
 		transition: all 0.3s;
 		cursor: pointer;
+	}
+	
+	.prompt{
+		color: #999;
+		font-size: 28rpx;
 	}
 
 	.upload-box.active {

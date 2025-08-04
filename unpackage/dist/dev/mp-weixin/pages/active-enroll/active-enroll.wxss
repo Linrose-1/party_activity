@@ -143,6 +143,10 @@ label.data-v-d315542e {
 		transition: all 0.3s;
 		cursor: pointer;
 }
+.prompt.data-v-d315542e{
+		color: #999;
+		font-size: 28rpx;
+}
 .upload-box.active.data-v-d315542e {
 		border-color: #ff6e00;
 		background: #fff8f2;
