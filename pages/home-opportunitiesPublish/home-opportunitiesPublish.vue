@@ -69,10 +69,10 @@
 					<text class="setting-label">允许他人查看我的名片</text>
 					<switch :checked="showProfile" @change="e => showProfile = e.detail.value" color="#FF6A00" />
 				</view>
-				<view class="setting-item">
+				<!-- <view class="setting-item">
 					<text class="setting-label">允许他人评论</text>
 					<switch :checked="allowComments" @change="e => allowComments = e.detail.value" color="#FF6A00" />
-				</view>
+				</view> -->
 			</view>
 
 			<button class="submit-btn" @click="submitPost">发布帖子</button>
@@ -96,7 +96,7 @@
 	const tagInput = ref('')
 	const images = ref([]) // 这个数组将存储上传成功后返回的【URL】
 	const showProfile = ref(true)
-	const allowComments = ref(true)
+	// const allowComments = ref(true)
 
 	// --- 【删除】这里不再需要本地的 uploadFile 函数了！---
 	// const uploadFile = async (...) => { ... } // <= 这段代码被删除
@@ -272,7 +272,7 @@
 			postContent: content.value,
 			postImg: images.value.join(','),
 			postedAt: new Date().toISOString(),
-			commentFlag: allowComments.value,
+			commentFlag: 1,
 			cardFlag: showProfile.value,
 			tags: tags.value,
 			status: 'active'

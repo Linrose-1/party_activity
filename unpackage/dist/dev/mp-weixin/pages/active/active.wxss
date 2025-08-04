@@ -45,7 +45,7 @@
   height: 50rpx;
 }
 .search-bar .placeholder.data-v-12e513cf {
-  color: rgba(255, 255, 255, 0.7);
+  color: white !important;
 }
 
 /* 筛选区域 */

@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "数字标签",
+  "usingComponents": {
+    "uni-rate": "../../uni_modules/uni-rate/components/uni-rate/uni-rate"
+  }
+}

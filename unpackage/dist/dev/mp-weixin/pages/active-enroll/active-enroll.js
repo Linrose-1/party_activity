@@ -104,7 +104,7 @@ const _sfc_main = {
             formData.paymentScreenshotUrl = result.data;
             common_vendor.index.showToast({ title: "上传成功", icon: "success" });
           } else {
-            common_vendor.index.__f__("error", "at pages/active-enroll/active-enroll.vue:256", "上传失败:", result.error);
+            common_vendor.index.__f__("error", "at pages/active-enroll/active-enroll.vue:255", "上传失败:", result.error);
             common_vendor.index.showToast({ title: result.error || "上传失败", icon: "none" });
           }
         }
@@ -120,7 +120,7 @@ const _sfc_main = {
       if (result && !result.error) {
         activityDetail.value = result.data;
       } else {
-        common_vendor.index.__f__("log", "at pages/active-enroll/active-enroll.vue:274", "请求失败:", result ? result.error : "无返回结果");
+        common_vendor.index.__f__("log", "at pages/active-enroll/active-enroll.vue:272", "请求失败:", result ? result.error : "无返回结果");
       }
     };
     const joinActivity = async () => {
@@ -154,7 +154,7 @@ const _sfc_main = {
         common_vendor.index.showToast({ title: "报名成功！", icon: "success" });
         currentStep.value = 3;
       } else {
-        common_vendor.index.__f__("log", "at pages/active-enroll/active-enroll.vue:315", "报名失败:", result ? result.error : "无返回结果");
+        common_vendor.index.__f__("log", "at pages/active-enroll/active-enroll.vue:313", "报名失败:", result ? result.error : "无返回结果");
         common_vendor.index.showToast({ title: result.error || "报名失败，请重试", icon: "none" });
       }
     };

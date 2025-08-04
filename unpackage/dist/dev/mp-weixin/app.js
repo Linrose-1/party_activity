@@ -34,6 +34,7 @@ if (!Math) {
   "./pages/myStore-edit/myStore-edit.js";
   "./pages/login/login.js";
   "./pages/activity-participants/activity-participants.js";
+  "./pages/my-edit-label/my-edit-label.js";
 }
 const _sfc_main = {
   onLaunch: function() {

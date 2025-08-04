@@ -461,7 +461,7 @@
 	}
 
 	.share-btn {
-		background: #00A0E9;
+		background: linear-gradient(to right, #007bff, #0056b3);
 		color: #fff;
 		margin-right: 10rpx;
 	}

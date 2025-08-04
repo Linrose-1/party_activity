@@ -12,7 +12,6 @@ const _sfc_main = {
     const tagInput = common_vendor.ref("");
     const images = common_vendor.ref([]);
     const showProfile = common_vendor.ref(true);
-    const allowComments = common_vendor.ref(true);
     function topicChange(e) {
       topic.value = e.detail.value;
     }
@@ -156,7 +155,7 @@ const _sfc_main = {
         postContent: content.value,
         postImg: images.value.join(","),
         postedAt: (/* @__PURE__ */ new Date()).toISOString(),
-        commentFlag: allowComments.value,
+        commentFlag: 1,
         cardFlag: showProfile.value,
         tags: tags.value,
         status: "active"
@@ -220,9 +219,7 @@ const _sfc_main = {
       } : {}, {
         o: showProfile.value,
         p: common_vendor.o((e) => showProfile.value = e.detail.value),
-        q: allowComments.value,
-        r: common_vendor.o((e) => allowComments.value = e.detail.value),
-        s: common_vendor.o(submitPost)
+        q: common_vendor.o(submitPost)
       });
     };
   }

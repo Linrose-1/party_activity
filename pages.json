@@ -225,6 +225,13 @@
 			{
 				"navigationBarTitleText" : "报名用户"
 			}
+		},
+		{
+			"path" : "pages/my-edit-label/my-edit-label",
+			"style" : 
+			{
+				"navigationBarTitleText" : "数字标签"
+			}
 		}
 	],
 	

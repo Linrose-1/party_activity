@@ -4,7 +4,7 @@
 		<view class="header">
 			<view class="search-bar">
 				<uni-icons type="search" size="18" color="rgba(255, 255, 255, 0.7)" />
-				<input type="text" placeholder="搜索活动" placeholder-class="placeholder" v-model="searchKeyword" />
+				<input type="text" placeholder="搜索活动" placeholder-class="placeholder" v-model="searchKeyword" :placeholder-style="'color: white; opacity: 0.7;'"/>
 			</view>
 		</view>
 
@@ -415,7 +415,8 @@
 		}
 
 		.placeholder {
-			color: rgba(255, 255, 255, 0.7);
+			// color: rgba(255, 255, 255, 0.7);
+			 color: white !important;
 		}
 	}
 

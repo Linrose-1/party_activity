@@ -225,7 +225,6 @@
 		currentStep.value = 2;
 	};
 	
-	// 【核心修改】将上传逻辑替换为真实的 uni.uploadFile 调用
 	const chooseImage = () => {
 			uni.chooseImage({
 				count: 1,
@@ -260,7 +259,6 @@
 			});
 		};
 
-	// 【移除】onDrop 函数，因为它在小程序中无效
 
 	const getActiveDetail = async () => {
 		if (!activityId.value) return;

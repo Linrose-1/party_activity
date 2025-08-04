@@ -31,7 +31,8 @@
     "pages/my-shopRecommend/my-shopRecommend",
     "pages/myStore-edit/myStore-edit",
     "pages/login/login",
-    "pages/activity-participants/activity-participants"
+    "pages/activity-participants/activity-participants",
+    "pages/my-edit-label/my-edit-label"
   ],
   "window": {
     "navigationBarTextStyle": "black",
