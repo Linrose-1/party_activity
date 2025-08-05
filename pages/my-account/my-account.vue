@@ -43,7 +43,18 @@
 					<uni-icons type="info" size="24" color="#999"></uni-icons>
 					<p>您尚未被邀请或未填写邀请人</p>
 				</view>
+
+				<!-- ================= 我的推荐商友模块 ================= -->
+				<view class="recommend-friends-section">
+					<button class="recommend-friends-button" @click="navigateToRecommendFriends">
+						<uni-icons type="staff-filled" size="22" color="#fff" style="margin-right: 16rpx;"></uni-icons>
+						查看我的推荐商友
+						<uni-icons type="right" size="16" color="#fff" style="margin-left: auto;"></uni-icons>
+					</button>
+				</view>
 			</view>
+
+
 
 			<!-- 社交等级晋升系统 -->
 			<view class="level-system">
@@ -112,15 +123,14 @@
 					<view class="status-text">
 						已累计充值: <span class="status-highlight">{{ userInfo.topUpExperience || 0 }} 元</span>
 					</view>
-					<!-- 恢复：显示距离下一等级还需金额 -->
-					<view class="status-text next-level-progress" v-if="amountToNextLevel > 0 && nextMembershipLevel">
+					<!-- <view class="status-text next-level-progress" v-if="amountToNextLevel > 0 && nextMembershipLevel">
 						距离 <span class="next-level-name">{{ nextMembershipLevel.name }}</span> 还需
 						<span class="amount-needed">{{ amountToNextLevel }} 元</span>
 					</view>
 					<view class="status-text status-max-level" v-else>
 						<uni-icons type="cloud-upload" size="18" color="#28a745"></uni-icons>
 						恭喜您，已达到最高会员等级！
-					</view>
+					</view> -->
 				</view>
 
 				<p class="membership-description">
@@ -177,7 +187,7 @@
 					<button class="action-button exchange-button" @click="handleExchangeSmartRice">
 						<uni-icons type="forward" size="20" color="#fff"></uni-icons> 申请兑换
 					</button>
-					<button class="action-button recharge-button" open-type="contact" session-from="我的页面">
+					<button class="action-button recharge-button" @click="handleRechargeSmartRice">
 						<uni-icons type="redo" size="20" color="#fff"></uni-icons> 充值智米
 					</button>
 				</view>
@@ -508,30 +518,25 @@
 	};
 
 	const handleExchangeSmartRice = () => {
-		uni.showModal({
-			title: '兑换智米',
-			content: `请联系平台客服进行兑换操作。`,
-			showCancel: false,
-			confirmText: '联系客服',
-			success: (res) => {
-				if (res.confirm) {
-					contactCustomerService();
-				}
-			}
+		console.log('用户点击了申请兑换，准备跳转到兑换页面...');
+		uni.showToast({
+			title: '兑换页面开发中...',
+			icon: 'none'
 		});
+		// uni.navigateTo({ url: '/pages/exchange/exchange' });
 	};
 
 	const handleRechargeSmartRice = () => {
-		uni.showModal({
-			title: '充值智米',
-			content: '如需充值智米，请联系平台客服获取充值方式。',
-			showCancel: false,
-			confirmText: '联系客服',
-			success: (res) => {
-				if (res.confirm) {
-					contactCustomerService();
-				}
-			}
+		console.log('用户点击了充值智米，跳转到充值页面...');
+		uni.navigateTo({
+			url: '/pages/recharge/recharge' // 跳转到充值页面
+		});
+	};
+
+	// 跳转到“我的推荐商友”页面 ---
+	const navigateToRecommendFriends = () => {
+		uni.navigateTo({
+			url: '/pages/my-recommendFriends/my-recommendFriends'
 		});
 	};
 
@@ -1665,5 +1670,37 @@
 
 	.details-button uni-icons {
 		margin-left: 8rpx;
+	}
+
+	/* ================== 新增推荐商友按钮样式 ================== */
+	.recommend-friends-section {
+		/* padding: 0 0 40rpx; */
+		/* 与其他模块保持间距 */
+		margin-top: 20rpx;
+	}
+
+	.recommend-friends-button {
+		display: flex;
+		align-items: center;
+		width: 100%;
+		height: 100rpx;
+		padding: 0 40rpx;
+		background: linear-gradient(135deg, #2c3e50, #46627f);
+		color: white;
+		border-radius: 50rpx;
+		font-size: 32rpx;
+		font-weight: bold;
+		border: none;
+		box-shadow: 0 8rpx 20rpx rgba(44, 62, 80, 0.2);
+		transition: all 0.3s ease;
+	}
+
+	.recommend-friends-button::after {
+		border: none;
+	}
+
+	.recommend-friends-button:hover {
+		transform: translateY(-4rpx);
+		box-shadow: 0 12rpx 25rpx rgba(44, 62, 80, 0.3);
 	}
 </style>

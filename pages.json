@@ -253,6 +253,20 @@
 			{
 				"navigationBarTitleText" : "个人信息详情"
 			}
+		},
+		{
+			"path" : "pages/my-recommendFriends/my-recommendFriends",
+			"style" : 
+			{
+				"navigationBarTitleText" : "我的推荐商友"
+			}
+		},
+		{
+			"path" : "pages/recharge/recharge",
+			"style" : 
+			{
+				"navigationBarTitleText" : "充值"
+			}
 		}
 	],
 	

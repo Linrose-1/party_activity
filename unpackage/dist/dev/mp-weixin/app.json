@@ -35,7 +35,9 @@
     "pages/my-edit-label/my-edit-label",
     "pages/my-active-registeredUser/my-active-registeredUser",
     "pages/my-active-secondRegistration/my-active-secondRegistration",
-    "pages/my-account-informationDetails/my-account-informationDetails"
+    "pages/my-account-informationDetails/my-account-informationDetails",
+    "pages/my-recommendFriends/my-recommendFriends",
+    "pages/recharge/recharge"
   ],
   "window": {
     "navigationBarTextStyle": "black",

@@ -117,7 +117,7 @@ const _sfc_main = {
       }
       return null;
     });
-    const amountToNextLevel = common_vendor.computed(() => {
+    common_vendor.computed(() => {
       if (nextMembershipLevel.value && userInfo.value) {
         const needed = nextMembershipLevel.value.threshold - userInfo.value.topUpExperience;
         return Math.max(0, needed);
@@ -231,23 +231,22 @@ const _sfc_main = {
       });
     };
     const handleExchangeSmartRice = () => {
-      common_vendor.index.showModal({
-        title: "兑换智米",
-        content: `请联系平台客服进行兑换操作。`,
-        showCancel: false,
-        confirmText: "联系客服",
-        success: (res) => {
-          if (res.confirm) {
-            contactCustomerService();
-          }
-        }
+      common_vendor.index.__f__("log", "at pages/my-account/my-account.vue:521", "用户点击了申请兑换，准备跳转到兑换页面...");
+      common_vendor.index.showToast({
+        title: "兑换页面开发中...",
+        icon: "none"
       });
     };
-    const contactCustomerService = () => {
-      common_vendor.index.showToast({
-        title: "正在为您跳转客服联系方式...",
-        icon: "none",
-        duration: 2e3
+    const handleRechargeSmartRice = () => {
+      common_vendor.index.__f__("log", "at pages/my-account/my-account.vue:530", "用户点击了充值智米，跳转到充值页面...");
+      common_vendor.index.navigateTo({
+        url: "/pages/recharge/recharge"
+        // 跳转到充值页面
+      });
+    };
+    const navigateToRecommendFriends = () => {
+      common_vendor.index.navigateTo({
+        url: "/pages/my-recommendFriends/my-recommendFriends"
       });
     };
     return (_ctx, _cache) => {
@@ -285,55 +284,56 @@ const _sfc_main = {
         })
       }, {
         m: common_vendor.p({
+          type: "staff-filled",
+          size: "22",
+          color: "#fff"
+        }),
+        n: common_vendor.p({
+          type: "right",
+          size: "16",
+          color: "#fff"
+        }),
+        o: common_vendor.o(navigateToRecommendFriends),
+        p: common_vendor.p({
           type: "medal",
           size: "24",
           color: "#FF6B00"
         }),
-        n: common_vendor.t(userInfo.value.level.name),
-        o: common_vendor.t(userInfo.value.level.icon),
-        p: common_vendor.t(userInfo.value.level.name),
-        q: common_vendor.t(userInfo.value.currExperience),
-        r: common_vendor.t(pointsToNextLevel.value),
-        s: common_vendor.p({
+        q: common_vendor.t(userInfo.value.level.name),
+        r: common_vendor.t(userInfo.value.level.icon),
+        s: common_vendor.t(userInfo.value.level.name),
+        t: common_vendor.t(userInfo.value.currExperience),
+        v: common_vendor.t(pointsToNextLevel.value),
+        w: common_vendor.p({
           type: "vip",
           size: "24",
           color: "#FFD700"
         }),
-        t: common_vendor.t(currentMembershipLevel.value.name),
-        v: common_vendor.t(userInfo.value.topUpExperience || 0),
-        w: amountToNextLevel.value > 0 && nextMembershipLevel.value
-      }, amountToNextLevel.value > 0 && nextMembershipLevel.value ? {
-        x: common_vendor.t(nextMembershipLevel.value.name),
-        y: common_vendor.t(amountToNextLevel.value)
-      } : {
-        z: common_vendor.p({
-          type: "cloud-upload",
-          size: "18",
-          color: "#28a745"
-        })
-      }, {
-        A: userInfo.value.topUpLevel.name === "游客会员" ? 1 : "",
-        B: userInfo.value.topUpLevel.name === "青铜会员" ? 1 : "",
-        C: userInfo.value.topUpLevel.name === "白银会员" ? 1 : "",
-        D: userInfo.value.topUpLevel.name === "黄金会员" ? 1 : "",
-        E: userInfo.value.topUpLevel.name === "黑钻会员" ? 1 : "",
-        F: common_vendor.p({
+        x: common_vendor.t(currentMembershipLevel.value.name),
+        y: common_vendor.t(userInfo.value.topUpExperience || 0),
+        z: userInfo.value.topUpLevel.name === "游客会员" ? 1 : "",
+        A: userInfo.value.topUpLevel.name === "青铜会员" ? 1 : "",
+        B: userInfo.value.topUpLevel.name === "白银会员" ? 1 : "",
+        C: userInfo.value.topUpLevel.name === "黄金会员" ? 1 : "",
+        D: userInfo.value.topUpLevel.name === "黑钻会员" ? 1 : "",
+        E: common_vendor.p({
           type: "wallet",
           size: "24",
           color: "#FF6B00"
         }),
-        G: common_vendor.t(userInfo.value.point),
-        H: common_vendor.p({
+        F: common_vendor.t(userInfo.value.point),
+        G: common_vendor.p({
           type: "forward",
           size: "20",
           color: "#fff"
         }),
-        I: common_vendor.o(handleExchangeSmartRice),
-        J: common_vendor.p({
+        H: common_vendor.o(handleExchangeSmartRice),
+        I: common_vendor.p({
           type: "redo",
           size: "20",
           color: "#fff"
         }),
+        J: common_vendor.o(handleRechargeSmartRice),
         K: common_vendor.p({
           type: "info-filled",
           size: "18",
@@ -347,7 +347,7 @@ const _sfc_main = {
         M: common_vendor.t(userInfo.value.currExperience),
         N: common_vendor.f(tasks.value, (task, index, i0) => {
           return {
-            a: "04e670bd-12-" + i0,
+            a: "04e670bd-13-" + i0,
             b: common_vendor.p({
               type: task.icon,
               size: "24",
@@ -356,7 +356,7 @@ const _sfc_main = {
             c: common_vendor.t(task.name),
             d: common_vendor.t(task.desc),
             e: common_vendor.t(task.points),
-            f: "04e670bd-13-" + i0,
+            f: "04e670bd-14-" + i0,
             g: common_vendor.o(($event) => handleTaskClick(task.name), index),
             h: index
           };
@@ -381,7 +381,7 @@ const _sfc_main = {
       } : {
         S: common_vendor.f(historyList.value, (record, index, i0) => {
           return {
-            a: "04e670bd-16-" + i0,
+            a: "04e670bd-17-" + i0,
             b: common_vendor.p({
               type: record.experience >= 0 ? "arrow-up" : "arrow-down",
               size: "20",
