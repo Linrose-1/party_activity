@@ -1,21 +1,18 @@
 /* 水平间距 */
 /* 水平间距 */
-/* 样式部分保持不变，仅新增 loading-container 和 no-more-content */
+/* 您的样式完全不用修改，这里省略以保持简洁 */
 .nearby-container.data-v-4d9b4fcb {
   background-color: #f8f9fa;
   min-height: 100vh;
 }
-
-/* 顶部导航 */
 .header.data-v-4d9b4fcb {
   background-color: #fff;
-  color: white;
   padding: 20rpx 30rpx;
   position: -webkit-sticky;
   position: sticky;
   top: 0;
   z-index: 100;
-  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
   padding-top: var(--status-bar-height);
 }
 .header .tabs-wrapper.data-v-4d9b4fcb {
@@ -24,8 +21,6 @@
 .content-area.data-v-4d9b4fcb {
   padding: 0 32rpx;
 }
-
-/* 摇一摇区域 */
 .shake-container.data-v-4d9b4fcb {
   display: flex;
   flex-direction: column;
@@ -35,8 +30,8 @@
   text-align: center;
 }
 .shake-btn.data-v-4d9b4fcb {
-  width: 360rpx;
-  height: 360rpx;
+  width: 320rpx;
+  height: 320rpx;
   border-radius: 50%;
   background: linear-gradient(135deg, #ff6b00 0%, #ff8c00 100%);
   display: flex;
@@ -44,34 +39,31 @@
   align-items: center;
   justify-content: center;
   color: white;
-  font-size: 44rpx;
+  font-size: 40rpx;
   font-weight: bold;
-  box-shadow: 0 20rpx 50rpx rgba(255, 107, 0, 0.4);
+  box-shadow: 0 20rpx 50rpx rgba(255, 107, 0, 0.3);
   transition: all 0.2s ease;
 }
 .shake-btn.data-v-4d9b4fcb:active {
   transform: scale(0.95);
-  box-shadow: 0 10rpx 30rpx rgba(255, 107, 0, 0.5);
+  box-shadow: 0 10rpx 30rpx rgba(255, 107, 0, 0.4);
 }
 .shake-icon.data-v-4d9b4fcb {
   animation: pulse-4d9b4fcb 2s infinite;
 }
 .shake-hint.data-v-4d9b4fcb {
-  margin-top: 60rpx;
+  margin-top: 40rpx;
   font-size: 28rpx;
   color: #666;
   max-width: 600rpx;
   line-height: 1.6;
 }
-
-/* 【修改】将原 loading-container 样式用于列表加载中 */
 .loading-container.data-v-4d9b4fcb {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 40rpx 0;
-  /* 调整为列表内的间距 */
+  padding: 80rpx 0;
   color: #666;
 }
 .loading-spinner.data-v-4d9b4fcb {
@@ -86,21 +78,17 @@
 .loading-text.data-v-4d9b4fcb {
   font-size: 28rpx;
 }
-
-/* 【新增】暂无更多提示 */
 .no-more-content.data-v-4d9b4fcb {
   text-align: center;
   color: #999;
   padding: 30rpx 0;
   font-size: 28rpx;
 }
-
-/* 列表区域 */
 .list-container.data-v-4d9b4fcb {
   padding-top: 30rpx;
 }
 .list-title.data-v-4d9b4fcb {
-  font-size: 40rpx;
+  font-size: 36rpx;
   font-weight: 600;
   margin-bottom: 30rpx;
   display: flex;
@@ -109,72 +97,52 @@
 .list-title text.data-v-4d9b4fcb {
   margin-left: 16rpx;
 }
-
-/* 商友卡片样式 (活动卡片样式由组件自身决定) */
 .business-card.data-v-4d9b4fcb {
   background: white;
   border-radius: 24rpx;
   padding: 30rpx;
   display: flex;
+  align-items: center;
   margin-bottom: 30rpx;
   box-shadow: 0 4rpx 24rpx rgba(0, 0, 0, 0.05);
-  /* 【新增】已关注按钮的样式 */
 }
 .business-card .business-avatar.data-v-4d9b4fcb {
-  width: 140rpx;
-  height: 140rpx;
+  width: 120rpx;
+  height: 120rpx;
   border-radius: 50%;
   margin-right: 30rpx;
-  border: 4rpx solid #ff8c00;
+  flex-shrink: 0;
 }
-.business-card .card-position.data-v-4d9b4fcb,
-.business-card .card-company.data-v-4d9b4fcb {
+.business-card .card-position.data-v-4d9b4fcb, .business-card .card-company.data-v-4d9b4fcb {
   font-size: 26rpx;
-  margin-bottom: 5rpx;
-  opacity: 0.95;
+  color: #666;
+  margin-top: 8rpx;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .business-card .business-info.data-v-4d9b4fcb {
   flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
+  min-width: 0;
 }
 .business-card .business-name.data-v-4d9b4fcb {
-  font-size: 34rpx;
+  font-size: 32rpx;
   font-weight: 600;
   margin-bottom: 10rpx;
-}
-.business-card .distance.data-v-4d9b4fcb {
-  color: #ff6b00;
-  font-weight: normal;
-}
-.business-card .business-position.data-v-4d9b4fcb {
-  color: #666;
-  margin-bottom: 16rpx;
-  font-size: 26rpx;
-}
-.business-card .business-tags.data-v-4d9b4fcb {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16rpx;
-}
-.business-card .business-tag.data-v-4d9b4fcb {
-  background: #f0f2f5;
-  color: #666;
-  padding: 6rpx 20rpx;
-  border-radius: 40rpx;
-  font-size: 24rpx;
 }
 .business-card .connect-btn.data-v-4d9b4fcb {
   background: linear-gradient(135deg, #ff6b00 0%, #ff8c00 100%);
   color: white;
   border: none;
   padding: 0 30rpx;
+  height: 60rpx;
+  line-height: 60rpx;
   border-radius: 40rpx;
   font-weight: 500;
   align-self: center;
   font-size: 26rpx;
   margin-left: 20rpx;
+  white-space: nowrap;
 }
 .business-card .connect-btn.data-v-4d9b4fcb::after {
   border: none;
@@ -183,8 +151,6 @@
   background: #f0f2f5;
   color: #999;
 }
-
-/* 动画 */
 @keyframes pulse-4d9b4fcb {
 0% {
     transform: scale(1);
@@ -219,27 +185,4 @@ to {
 }
 .iconfont.data-v-4d9b4fcb {
   margin-right: 10rpx;
-}
-.empty-state-container.data-v-4d9b4fcb {
-  text-align: center;
-  padding: 40rpx 0;
-}
-.recommend-btn.data-v-4d9b4fcb {
-  display: inline-block;
-  margin-top: 20rpx;
-  background: linear-gradient(135deg, #ff6b00 0%, #ff8c00 100%);
-  color: white;
-  border: none;
-  padding: 18rpx 60rpx;
-  border-radius: 50rpx;
-  font-size: 30rpx;
-  font-weight: 500;
-  box-shadow: 0 8rpx 20rpx rgba(255, 107, 0, 0.3);
-}
-.recommend-btn.data-v-4d9b4fcb::after {
-  border: none;
-}
-.recommend-btn.data-v-4d9b4fcb:active {
-  opacity: 0.9;
-  transform: scale(0.98);
 }

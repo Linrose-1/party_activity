@@ -21,6 +21,12 @@ const _sfc_main = {
         return [];
       }
     },
+    value: {
+      type: [Array, Object],
+      default() {
+        return [];
+      }
+    },
     disabled: {
       type: Boolean,
       default: false
@@ -119,6 +125,12 @@ const _sfc_main = {
     };
   },
   watch: {
+    value: {
+      handler(newVal, oldVal) {
+        this.setValue(newVal, oldVal);
+      },
+      immediate: true
+    },
     modelValue: {
       handler(newVal, oldVal) {
         this.setValue(newVal, oldVal);
@@ -272,7 +284,7 @@ const _sfc_main = {
       }).then((result) => {
         this.setSuccessAndError(result.tempFiles);
       }).catch((err) => {
-        common_vendor.index.__f__("log", "at uni_modules/uni-file-picker/components/uni-file-picker/uni-file-picker.vue:374", "选择失败", err);
+        common_vendor.index.__f__("log", "at uni_modules/uni-file-picker/components/uni-file-picker/uni-file-picker.vue:362", "选择失败", err);
       });
     },
     /**
@@ -335,7 +347,7 @@ const _sfc_main = {
         this.setSuccessAndError(result);
         return result;
       }).catch((err) => {
-        common_vendor.index.__f__("log", "at uni_modules/uni-file-picker/components/uni-file-picker/uni-file-picker.vue:447", err);
+        common_vendor.index.__f__("log", "at uni_modules/uni-file-picker/components/uni-file-picker/uni-file-picker.vue:435", err);
       });
     },
     /**

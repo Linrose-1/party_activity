@@ -4,8 +4,24 @@
 		<view class="header">
 			<view class="search-bar">
 				<uni-icons type="search" size="18" color="rgba(255, 255, 255, 0.7)" />
-				<input type="text" placeholder="搜索活动" placeholder-class="placeholder" v-model="searchKeyword" :placeholder-style="'color: white; opacity: 0.7;'"/>
+				<input type="text" placeholder="搜索活动" placeholder-class="placeholder" v-model="searchKeyword"
+					:placeholder-style="'color: white; opacity: 0.7;'" />
 			</view>
+		</view>
+
+		<!-- 【新增】轮播图区域 -->
+		<view v-if="bannerList.length > 0" class="swiper-section">
+			<swiper class="swiper" circular :indicator-dots="true" :autoplay="true" :interval="3000"
+				:duration="500">
+				<swiper-item v-for="banner in bannerList" :key="banner.id">
+					<view class="swiper-item">
+						<!-- 轮播图图片 -->
+						<image :src="banner.imageUrl" mode="aspectFill" class="swiper-image"></image>
+						<!-- 轮播图标题 (如果存在) -->
+						<view v-if="banner.title" class="swiper-title">{{ banner.title }}</view>
+					</view>
+				</swiper-item>
+			</swiper>
 		</view>
 
 		<!-- 筛选区域 -->
@@ -27,7 +43,7 @@
 						</view>
 					</view>
 
-					<!-- 【新增】选择状态 -->
+					<!-- 选择状态 -->
 					<view class="uni-list">
 						<view class="uni-list-cell">
 							<view class="uni-list-cell-left register-btn">
@@ -71,12 +87,12 @@
 				:is-login="isLogin" @updateFavoriteStatus="handleFavoriteChange" />
 		</view>
 
-		<!-- 【修改后】根据新的状态变量来显示提示 -->
+		<!-- 根据新的状态变量来显示提示 -->
 		<view v-if="!hasMore && activitiesData.length > 0" class="no-more-content">
 			暂无更多活动
 		</view>
 
-		<!-- 【可选新增】如果希望在列表为空时也显示提示，可以添加一个空状态 -->
+		<!-- 如果希望在列表为空时也显示提示，可以添加一个空状态 -->
 		<view v-if="!loading && activitiesData.length === 0" class="no-more-content">
 			暂无活动，快去发布一个吧！
 		</view>
@@ -113,6 +129,7 @@
 	const pageSize = 10; // 每页加载10条
 	const activitiesData = ref([]);
 	const isLogin = ref(false);
+	const bannerList = ref([]);
 
 	// --- 筛选条件状态 ---
 	const searchKeyword = ref('');
@@ -177,36 +194,78 @@
 	 * - 获取第一页活动列表
 	 */
 	const initializePage = async () => {
-		uni.showLoading({ title: '加载中...' });
+		uni.showLoading({
+			title: '加载中...'
+		});
 		try {
 			// 重置列表状态，但不重置筛选条件
 			pageNo.value = 1;
 			hasMore.value = true;
 			activitiesData.value = [];
-			
+
 			// 并行获取类型和状态列表，提高效率
 			await Promise.all([
+				fetchBanners(), 
 				fetchActivityTypeList(),
 				fetchActivityStatusList()
 			]);
-			
+
 			// 筛选条件加载完毕后，获取第一页的活动列表
 			await getActiveList(false);
-			
+
 		} catch (error) {
 			console.error("页面初始化失败:", error);
-			uni.showToast({ title: '数据加载失败', icon: 'none' });
+			uni.showToast({
+				title: '数据加载失败',
+				icon: 'none'
+			});
 		} finally {
 			uni.hideLoading();
 		}
 	};
-	
+
+	/**
+	 * 获取轮播图数据
+	 */
+	const fetchBanners = async () => {
+		const {
+			data,
+			error
+		} = await request('/app-api/member/banner-rec/list', {
+			method: 'GET',
+			data: {
+				positionCode: '0', // 固定参数
+				pageNo: 1,
+				pageSize: 50
+			}
+		});
+
+		if (error) {
+			console.error('获取轮播图失败:', error);
+			bannerList.value = []; // 即使失败也保证页面能继续加载
+			return; // 不抛出错误，避免中断 Promise.all
+		}
+
+		if (data && data.list) {
+			// 根据 sort 字段排序，确保显示顺序正确
+			bannerList.value = data.list.sort((a, b) => a.sort - b.sort);
+			console.log('轮播图数据获取成功:', bannerList.value);
+		} else {
+			bannerList.value = [];
+		}
+	};
+
 	/**
 	 * 获取活动类型列表
 	 */
 	const fetchActivityTypeList = async () => {
-		const { data, error } = await request('/app-api/system/dict-data/type', {
-			data: { type: "member_activity_category" }
+		const {
+			data,
+			error
+		} = await request('/app-api/system/dict-data/type', {
+			data: {
+				type: "member_activity_category"
+			}
 		});
 		if (error) {
 			console.error('获取活动类型列表失败:', error);
@@ -216,9 +275,12 @@
 		typeList.value = data || [];
 		console.log('动态活动类型列表获取成功:', typeList.value);
 	};
-	
+
 	const fetchActivityStatusList = async () => {
-		const { data, error } = await request('/app-api/member/activity/status-list');
+		const {
+			data,
+			error
+		} = await request('/app-api/member/activity/status-list');
 		if (error) {
 			console.error('获取活动状态列表失败:', error);
 			throw new Error('获取状态失败');
@@ -236,7 +298,7 @@
 		if (isLoadMore && !hasMore.value) return;
 
 		loading.value = true;
-		
+
 		// 如果是刷新，确保页码是1
 		if (!isLoadMore) {
 			pageNo.value = 1;
@@ -263,7 +325,9 @@
 			});
 
 			if (result && !result.error && result.data) {
-				const { list = [], total = 0 } = result.data;
+				const {
+					list = [], total = 0
+				} = result.data;
 
 				if (isLoadMore) {
 					activitiesData.value.push(...list);
@@ -275,7 +339,7 @@
 				hasMore.value = activitiesData.value.length < total;
 				// 成功后页码+1
 				pageNo.value++;
-				
+
 			} else {
 				console.error('获取活动列表失败:', result ? result.error : '无有效返回');
 				hasMore.value = false;
@@ -287,7 +351,7 @@
 			loading.value = false;
 		}
 	};
-	
+
 	// --- 事件处理器 ---
 
 	// 类型选择器改变
@@ -301,7 +365,7 @@
 			selectedCategory.value = typeList.value[newIndex - 1].value;
 		}
 	};
-	
+
 	// 状态选择器改变
 	const bindStatusPickerChange = (e) => {
 		statusIndex.value = e.detail.value;
@@ -323,7 +387,7 @@
 			}
 		});
 	};
-	
+
 	// 子组件收藏状态变更
 	const handleFavoriteChange = (event) => {
 		const activityToUpdate = activitiesData.value.find(activity => activity.id === event.id);
@@ -342,13 +406,17 @@
 				cancelText: '再看看',
 				success: (res) => {
 					if (res.confirm) {
-						uni.navigateTo({ url: '/pages/login/login' });
+						uni.navigateTo({
+							url: '/pages/login/login'
+						});
 					}
 				}
 			});
 			return;
 		}
-		uni.navigateTo({ url: '/pages/active-publish/active-publish' });
+		uni.navigateTo({
+			url: '/pages/active-publish/active-publish'
+		});
 	};
 
 	// --- 监听器 ---
@@ -416,8 +484,47 @@
 
 		.placeholder {
 			// color: rgba(255, 255, 255, 0.7);
-			 color: white !important;
+			color: white !important;
 		}
+	}
+
+	/* 轮播图样式 */
+	.swiper-section {
+		margin: 20rpx 32rpx;
+		border-radius: 16rpx;
+		overflow: hidden; // 确保圆角对内部图片生效
+		box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.05);
+	}
+
+	.swiper {
+		height: 300rpx; // 您可以根据需要调整高度
+	}
+
+	.swiper-item {
+		position: relative; // 作为标题定位的父容器
+		width: 100%;
+		height: 100%;
+	}
+
+	.swiper-image {
+		width: 100%;
+		height: 100%;
+	}
+
+	.swiper-title {
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		color: white;
+		font-size: 36rpx;
+		font-weight: bold;
+		text-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.5); // 增加文字描边，提高可读性
+		pointer-events: none; // 让点击事件可以穿透标题
 	}
 
 	/* 筛选区域 */

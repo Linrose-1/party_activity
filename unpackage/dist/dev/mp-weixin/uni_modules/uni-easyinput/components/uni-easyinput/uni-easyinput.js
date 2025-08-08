@@ -203,9 +203,17 @@ const _sfc_main = {
   },
   watch: {
     value(newVal) {
+      if (newVal === null) {
+        this.val = "";
+        return;
+      }
       this.val = newVal;
     },
     modelValue(newVal) {
+      if (newVal === null) {
+        this.val = "";
+        return;
+      }
       this.val = newVal;
     },
     focus(newVal) {
@@ -239,7 +247,7 @@ const _sfc_main = {
       } else if (this.modelValue || this.modelValue === 0 || this.modelValue === "") {
         this.val = this.modelValue;
       } else {
-        this.val = null;
+        this.val = "";
       }
     },
     /**

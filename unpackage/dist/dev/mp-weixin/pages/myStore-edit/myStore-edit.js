@@ -22,6 +22,7 @@ const _sfc_main = {
       storeName: "",
       storeCoverImageUrl: "",
       category: "",
+      // 默认为空
       fullAddress: "",
       longitude: null,
       latitude: null,
@@ -32,42 +33,85 @@ const _sfc_main = {
       averageConsumptionRange: "",
       tags: []
     });
+    const categoryOptions = ["bar", "food", "ktv", "billiards", "other"];
+    const categoryMap = {
+      "bar": "酒吧",
+      "food": "美食",
+      "ktv": "KTV",
+      "billiards": "台球",
+      "other": "其他"
+    };
     const editableHours = common_vendor.reactive({
       regular: [],
       special: []
     });
     const weekdays = [
-      { key: "monday", label: "周一" },
-      { key: "tuesday", label: "周二" },
-      { key: "wednesday", label: "周三" },
-      { key: "thursday", label: "周四" },
-      { key: "friday", label: "周五" },
-      { key: "saturday", label: "周六" },
-      { key: "sunday", label: "周日" }
+      {
+        key: "monday",
+        label: "周一"
+      },
+      {
+        key: "tuesday",
+        label: "周二"
+      },
+      {
+        key: "wednesday",
+        label: "周三"
+      },
+      {
+        key: "thursday",
+        label: "周四"
+      },
+      {
+        key: "friday",
+        label: "周五"
+      },
+      {
+        key: "saturday",
+        label: "周六"
+      },
+      {
+        key: "sunday",
+        label: "周日"
+      }
     ];
+    common_vendor.onLoad(async (options) => {
+      const storeId = options.id;
+      if (storeId) {
+        common_vendor.index.setNavigationBarTitle({
+          title: "修改聚店信息"
+        });
+        await getStoreDetails(storeId);
+      } else {
+        common_vendor.index.setNavigationBarTitle({
+          title: "申请聚店上榜"
+        });
+        parseOperatingHours(null);
+        isLoading.value = false;
+      }
+    });
     const getStoreDetails = async (storeId) => {
       isLoading.value = true;
-      const { data, error } = await utils_request.request("/app-api/member/store/findStore", {
+      const {
+        data,
+        error
+      } = await utils_request.request("/app-api/member/store/findStore", {
         method: "GET",
-        data: { id: storeId }
+        data: {
+          id: storeId
+        }
       });
       isLoading.value = false;
       if (error) {
-        common_vendor.index.showToast({ title: `加载失败: ${error}`, icon: "none" });
+        common_vendor.index.showToast({
+          title: `加载失败: ${error}`,
+          icon: "none"
+        });
         return;
       }
       Object.assign(form.value, data);
       parseOperatingHours(data.operatingHours);
     };
-    common_vendor.onLoad(async (options) => {
-      const storeId = options.id;
-      if (!storeId) {
-        common_vendor.index.showToast({ title: "无效的聚店ID", icon: "error" });
-        common_vendor.index.navigateBack();
-        return;
-      }
-      await getStoreDetails(storeId);
-    });
     const parseOperatingHours = (jsonString) => {
       var _a;
       try {
@@ -87,13 +131,12 @@ const _sfc_main = {
         editableHours.special = (data.special_dates || []).map((d) => ({
           date: d.date || "",
           is_open: d.is_open ?? true,
-          // 如果后端没给，默认是营业
           open: d.open || "10:00",
           close: d.close || "22:00",
           description: d.description || ""
         }));
       } catch (e) {
-        common_vendor.index.__f__("error", "at pages/myStore-edit/myStore-edit.vue:261", "解析营业时间失败，将使用默认值:", e);
+        common_vendor.index.__f__("warn", "at pages/myStore-edit/myStore-edit.vue:289", "解析营业时间失败或为新建状态，将使用默认值:", e.message);
         editableHours.regular = weekdays.map((dayInfo) => ({
           key: dayInfo.key,
           label: dayInfo.label,
@@ -147,12 +190,27 @@ const _sfc_main = {
       common_vendor.index.chooseImage({
         count: 1,
         success: async (res) => {
-          const tempFilePath = res.tempFilePaths[0];
-          common_vendor.index.showLoading({ title: "上传中..." });
-          const { data: fileUrl, error } = await utils_upload.uploadFile(tempFilePath);
+          const tempFile = res.tempFiles[0];
+          if (!tempFile) {
+            common_vendor.index.showToast({
+              title: "选择图片失败，请重试",
+              icon: "none"
+            });
+            return;
+          }
+          common_vendor.index.showLoading({
+            title: "上传中..."
+          });
+          const {
+            data: fileUrl,
+            error
+          } = await utils_upload.uploadFile(tempFile);
           common_vendor.index.hideLoading();
           if (error) {
-            common_vendor.index.showToast({ title: `上传失败: ${error}`, icon: "none" });
+            common_vendor.index.showToast({
+              title: `上传失败: ${error}`,
+              icon: "none"
+            });
             return;
           }
           if (type === "cover") {
@@ -160,7 +218,10 @@ const _sfc_main = {
           } else if (type === "wechat") {
             form.value.contactWechatQrCodeUrl = fileUrl;
           }
-          common_vendor.index.showToast({ title: "上传成功", icon: "success" });
+          common_vendor.index.showToast({
+            title: "上传成功",
+            icon: "success"
+          });
         }
       });
     };
@@ -172,36 +233,61 @@ const _sfc_main = {
           form.value.fullAddress = res.address;
           form.value.longitude = res.longitude;
           form.value.latitude = res.latitude;
-        },
-        fail: (err) => {
-          if (!err.errMsg.includes("cancel")) {
-            common_vendor.index.showToast({ title: "选择位置失败", icon: "none" });
+          if (!form.value.storeName) {
+            form.value.storeName = res.name;
           }
         }
       });
     };
+    const handleCategoryChange = (e) => {
+      form.value.category = categoryOptions[e.detail.value];
+    };
     const handleSubmit = async () => {
-      if (!form.value.storeName.trim()) {
-        return common_vendor.index.showToast({ title: "请输入聚店名称", icon: "none" });
-      }
-      if (!form.value.fullAddress) {
-        return common_vendor.index.showToast({ title: "请选择聚店地址", icon: "none" });
-      }
+      if (!form.value.storeName.trim())
+        return common_vendor.index.showToast({
+          title: "请输入聚店名称",
+          icon: "none"
+        });
+      if (!form.value.category)
+        return common_vendor.index.showToast({
+          title: "请选择聚店类别",
+          icon: "none"
+        });
+      if (!form.value.fullAddress)
+        return common_vendor.index.showToast({
+          title: "请选择聚店地址",
+          icon: "none"
+        });
       isSubmitting.value = true;
-      const operatingHoursJson = serializeOperatingHours();
       const payload = {
         ...form.value,
-        operatingHours: operatingHoursJson
+        operatingHours: serializeOperatingHours()
       };
-      const { error } = await utils_request.request("/app-api/member/store/update", {
+      const isUpdate = !!form.value.id;
+      const apiUrl = isUpdate ? "/app-api/member/store/update" : "/app-api/member/store/create";
+      const successMsg = isUpdate ? "修改成功，等待审核" : "申请成功，等待审核";
+      const errorMsgPrefix = isUpdate ? "修改失败: " : "申请失败: ";
+      if (!isUpdate) {
+        delete payload.id;
+      }
+      const {
+        error
+      } = await utils_request.request(apiUrl, {
         method: "POST",
         data: payload
       });
       isSubmitting.value = false;
       if (error) {
-        common_vendor.index.showToast({ title: `修改失败: ${error}`, icon: "none", duration: 2e3 });
+        common_vendor.index.showToast({
+          title: `${errorMsgPrefix}${error}`,
+          icon: "none",
+          duration: 2e3
+        });
       } else {
-        common_vendor.index.showToast({ title: "修改成功，等待审核", icon: "none" });
+        common_vendor.index.showToast({
+          title: successMsg,
+          icon: "success"
+        });
         const pages = getCurrentPages();
         if (pages.length > 1) {
           const prevPage = pages[pages.length - 2];
@@ -209,9 +295,7 @@ const _sfc_main = {
             prevPage.handleRefresh();
           }
         }
-        setTimeout(() => {
-          common_vendor.index.navigateBack();
-        }, 1500);
+        setTimeout(() => common_vendor.index.navigateBack(), 1500);
       }
     };
     return (_ctx, _cache) => {
@@ -224,23 +308,32 @@ const _sfc_main = {
           inputBorder: false,
           modelValue: form.value.storeName
         }),
-        d: form.value.storeCoverImageUrl || "/static/images/placeholder-cover.png",
-        e: common_vendor.o(($event) => handleImageUpload("cover")),
-        f: common_vendor.t(form.value.fullAddress || "点击选择位置"),
-        g: common_vendor.p({
+        d: common_vendor.t(categoryMap[form.value.category] || "请选择聚店类别"),
+        e: common_vendor.p({
           type: "right",
           size: "16",
           color: "#999"
         }),
-        h: common_vendor.o(openMapToChooseLocation),
-        i: common_vendor.o(($event) => form.value.storeDescription = $event),
-        j: common_vendor.p({
+        f: categoryOptions,
+        g: form.value.category,
+        h: common_vendor.o(handleCategoryChange),
+        i: form.value.storeCoverImageUrl || "/static/images/placeholder-cover.png",
+        j: common_vendor.o(($event) => handleImageUpload("cover")),
+        k: common_vendor.t(form.value.fullAddress || "点击选择位置"),
+        l: common_vendor.p({
+          type: "right",
+          size: "16",
+          color: "#999"
+        }),
+        m: common_vendor.o(openMapToChooseLocation),
+        n: common_vendor.o(($event) => form.value.storeDescription = $event),
+        o: common_vendor.p({
           type: "textarea",
           placeholder: "请输入聚店简介",
           inputBorder: false,
           modelValue: form.value.storeDescription
         }),
-        k: common_vendor.f(editableHours.regular, (day, index, i0) => {
+        p: common_vendor.f(editableHours.regular, (day, index, i0) => {
           return common_vendor.e({
             a: common_vendor.t(day.label),
             b: day.isOpen
@@ -262,19 +355,19 @@ const _sfc_main = {
             m: index
           });
         }),
-        l: common_vendor.o(addSpecialHour),
-        m: editableHours.special.length === 0
+        q: common_vendor.o(addSpecialHour),
+        r: editableHours.special.length === 0
       }, editableHours.special.length === 0 ? {} : {}, {
-        n: common_vendor.f(editableHours.special, (specialDay, index, i0) => {
+        s: common_vendor.f(editableHours.special, (specialDay, index, i0) => {
           return common_vendor.e({
-            a: "1bd087ec-3-" + i0,
+            a: "1bd087ec-4-" + i0,
             b: common_vendor.t(specialDay.date || "选择日期"),
             c: specialDay.date,
             d: common_vendor.o((e) => specialDay.date = e.detail.value, index),
             e: specialDay.is_open,
             f: common_vendor.o((e) => specialDay.is_open = e.detail.value, index),
             g: common_vendor.o(($event) => removeSpecialHour(index), index),
-            h: "1bd087ec-4-" + i0,
+            h: "1bd087ec-5-" + i0,
             i: specialDay.is_open
           }, specialDay.is_open ? {
             j: common_vendor.t(specialDay.open),
@@ -284,7 +377,7 @@ const _sfc_main = {
             n: specialDay.close,
             o: common_vendor.o((e) => specialDay.close = e.detail.value, index)
           } : {}, {
-            p: "1bd087ec-5-" + i0,
+            p: "1bd087ec-6-" + i0,
             q: common_vendor.o(($event) => specialDay.description = $event, index),
             r: common_vendor.p({
               placeholder: "备注说明 (如：跨年夜延长)",
@@ -294,38 +387,38 @@ const _sfc_main = {
             s: index
           });
         }),
-        o: common_vendor.p({
+        t: common_vendor.p({
           type: "calendar-filled",
           size: "16",
           color: "#666"
         }),
-        p: common_vendor.p({
+        v: common_vendor.p({
           type: "trash-filled",
           size: "22",
           color: "#e43d33"
         }),
-        q: common_vendor.o(($event) => form.value.contactPhone = $event),
-        r: common_vendor.p({
+        w: common_vendor.o(($event) => form.value.contactPhone = $event),
+        x: common_vendor.p({
           type: "text",
           placeholder: "请输入联系电话",
           inputBorder: false,
           modelValue: form.value.contactPhone
         }),
-        s: common_vendor.o(($event) => form.value.averageConsumptionRange = $event),
-        t: common_vendor.p({
+        y: common_vendor.o(($event) => form.value.averageConsumptionRange = $event),
+        z: common_vendor.p({
           type: "text",
           placeholder: "例如：100-200",
           inputBorder: false,
           modelValue: form.value.averageConsumptionRange
         }),
-        v: form.value.contactWechatQrCodeUrl || "/static/images/placeholder-qr.png",
-        w: common_vendor.o(($event) => handleImageUpload("wechat")),
-        x: common_vendor.t(isSubmitting.value ? "提交中..." : "提交审核"),
-        y: common_vendor.o(handleSubmit),
-        z: isSubmitting.value,
-        A: isSubmitting.value
+        A: form.value.contactWechatQrCodeUrl || "/static/images/placeholder-qr.png",
+        B: common_vendor.o(($event) => handleImageUpload("wechat")),
+        C: common_vendor.t(isSubmitting.value ? "提交中..." : form.value.id ? "提交修改" : "申请上榜"),
+        D: common_vendor.o(handleSubmit),
+        E: isSubmitting.value,
+        F: isSubmitting.value
       }) : {
-        B: common_vendor.p({
+        G: common_vendor.p({
           type: "spinner-cycle",
           size: "30",
           color: "#999"

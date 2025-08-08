@@ -26,13 +26,39 @@ const _sfc_main = {
       name: "全部",
       value: "all"
     }]);
+    const bannerList = common_vendor.ref([]);
     const isLocationLoaded = common_vendor.ref(false);
+    const fetchBanners = async () => {
+      const {
+        data,
+        error
+      } = await utils_request.request("/app-api/member/banner-rec/list", {
+        method: "GET",
+        data: {
+          positionCode: "1",
+          // 【关键】根据要求，这里传 '1'
+          pageNo: 1,
+          pageSize: 50
+        }
+      });
+      if (error) {
+        common_vendor.index.__f__("error", "at pages/shop/shop.vue:125", "获取聚店页轮播图失败:", error);
+        bannerList.value = [];
+        return;
+      }
+      if (data && data.list) {
+        bannerList.value = data.list.sort((a, b) => a.sort - b.sort);
+        common_vendor.index.__f__("log", "at pages/shop/shop.vue:132", "聚店页轮播图获取成功:", bannerList.value);
+      } else {
+        bannerList.value = [];
+      }
+    };
     const getStoreList = async () => {
       if (loadingMore.value || !hasMore.value) {
         return;
       }
       if (!userLocation.value) {
-        common_vendor.index.__f__("log", "at pages/shop/shop.vue:103", "getStoreList 被调用，但位置信息依然为空，已中断。");
+        common_vendor.index.__f__("log", "at pages/shop/shop.vue:147", "getStoreList 被调用，但位置信息依然为空，已中断。");
         isRefreshing.value = false;
         return;
       }
@@ -57,7 +83,7 @@ const _sfc_main = {
       loadingMore.value = false;
       isRefreshing.value = false;
       if (error) {
-        common_vendor.index.__f__("error", "at pages/shop/shop.vue:134", "获取店铺列表失败:", error);
+        common_vendor.index.__f__("error", "at pages/shop/shop.vue:178", "获取店铺列表失败:", error);
         common_vendor.index.showToast({
           title: error,
           icon: "none"
@@ -80,16 +106,16 @@ const _sfc_main = {
     const initData = () => {
       const storedLocation = common_vendor.index.getStorageSync("userLocation");
       if (storedLocation) {
-        common_vendor.index.__f__("log", "at pages/shop/shop.vue:163", "从缓存加载位置信息");
+        common_vendor.index.__f__("log", "at pages/shop/shop.vue:207", "从缓存加载位置信息");
         userLocation.value = storedLocation;
         isLocationLoaded.value = true;
         handleRefresh();
       } else {
-        common_vendor.index.__f__("log", "at pages/shop/shop.vue:169", "缓存中无位置，开始请求...");
+        common_vendor.index.__f__("log", "at pages/shop/shop.vue:213", "缓存中无位置，开始请求...");
         common_vendor.index.getLocation({
           type: "gcj02",
           success: (res) => {
-            common_vendor.index.__f__("log", "at pages/shop/shop.vue:173", "成功获取新位置信息");
+            common_vendor.index.__f__("log", "at pages/shop/shop.vue:217", "成功获取新位置信息");
             const location = {
               latitude: res.latitude,
               longitude: res.longitude
@@ -100,7 +126,7 @@ const _sfc_main = {
             handleRefresh();
           },
           fail: (err) => {
-            common_vendor.index.__f__("error", "at pages/shop/shop.vue:185", "获取位置信息失败:", err);
+            common_vendor.index.__f__("error", "at pages/shop/shop.vue:229", "获取位置信息失败:", err);
             isLocationLoaded.value = true;
             common_vendor.index.showModal({
               title: "定位失败",
@@ -115,20 +141,32 @@ const _sfc_main = {
       }
     };
     const getShopType = async () => {
-      const { data, error } = await utils_request.request("/app-api/system/dict-data/type", {
+      const {
+        data,
+        error
+      } = await utils_request.request("/app-api/system/dict-data/type", {
         method: "GET",
-        data: { type: "member_store_category" }
+        data: {
+          type: "member_store_category"
+        }
       });
       if (error) {
         return;
       }
       if (data && data.length > 0) {
-        const dynamicFilters = data.map((item) => ({ name: item.label, value: item.value }));
-        filters.value = [{ name: "全部", value: "all" }, ...dynamicFilters];
+        const dynamicFilters = data.map((item) => ({
+          name: item.label,
+          value: item.value
+        }));
+        filters.value = [{
+          name: "全部",
+          value: "all"
+        }, ...dynamicFilters];
       }
     };
     common_vendor.onMounted(() => {
       getShopType();
+      fetchBanners();
     });
     common_vendor.onShow(() => {
       if (!isLocationLoaded.value) {
@@ -178,6 +216,12 @@ const _sfc_main = {
         url: "/pages/shop-recommend/shop-recommend"
       });
     };
+    const skipToNewShop = () => {
+      common_vendor.index.navigateTo({
+        // url: '/pages/shop-apply/shop-apply'
+        url: "/pages/myStore-edit/myStore-edit"
+      });
+    };
     return (_ctx, _cache) => {
       return common_vendor.e({
         a: common_vendor.p({
@@ -188,7 +232,20 @@ const _sfc_main = {
         b: common_vendor.o([($event) => searchTerm.value = $event.detail.value, onSearchInput]),
         c: searchTerm.value,
         d: common_vendor.o(handleSearchClick),
-        e: common_vendor.f(filters.value, (filter, k0, i0) => {
+        e: bannerList.value.length > 0
+      }, bannerList.value.length > 0 ? {
+        f: common_vendor.f(bannerList.value, (banner, k0, i0) => {
+          return common_vendor.e({
+            a: banner.imageUrl,
+            b: banner.title
+          }, banner.title ? {
+            c: common_vendor.t(banner.title)
+          } : {}, {
+            d: banner.id
+          });
+        })
+      } : {}, {
+        g: common_vendor.f(filters.value, (filter, k0, i0) => {
           return {
             a: common_vendor.t(filter.name),
             b: filter.value,
@@ -196,7 +253,7 @@ const _sfc_main = {
             d: common_vendor.o(($event) => selectFilter(filter.value), filter.value)
           };
         }),
-        f: common_vendor.f(filteredStores.value, (store, k0, i0) => {
+        h: common_vendor.f(filteredStores.value, (store, k0, i0) => {
           return {
             a: store.id,
             b: common_vendor.o(goToStoreDetail, store.id),
@@ -206,44 +263,45 @@ const _sfc_main = {
             })
           };
         }),
-        g: loadingMore.value
+        i: loadingMore.value
       }, loadingMore.value ? {
-        h: common_vendor.p({
+        j: common_vendor.p({
           type: "spinner-cycle",
           size: "20",
           color: "#999"
         })
       } : {}, {
-        i: !hasMore.value && allStores.value.length > 0
+        k: !hasMore.value && allStores.value.length > 0
       }, !hasMore.value && allStores.value.length > 0 ? {
-        j: common_vendor.p({
+        l: common_vendor.p({
           type: "checkmarkempty",
           size: "20",
           color: "#999"
         })
       } : {}, {
-        k: allStores.value.length === 0 && !loadingMore.value && !isRefreshing.value
+        m: allStores.value.length === 0 && !loadingMore.value && !isRefreshing.value
       }, allStores.value.length === 0 && !loadingMore.value && !isRefreshing.value ? {
-        l: common_vendor.p({
+        n: common_vendor.p({
           type: "info",
           size: "60",
           color: "#ffd8c1"
         })
       } : {}, {
-        m: common_vendor.o(loadMore),
-        n: isRefreshing.value,
-        o: common_vendor.o(onPullDownRefresh),
-        p: common_vendor.p({
+        o: common_vendor.o(loadMore),
+        p: isRefreshing.value,
+        q: common_vendor.o(onPullDownRefresh),
+        r: common_vendor.p({
           type: "redo",
           size: "20",
           color: "#fff"
         }),
-        q: common_vendor.o(shareStore),
-        r: common_vendor.p({
+        s: common_vendor.o(shareStore),
+        t: common_vendor.p({
           type: "plus-filled",
           size: "20",
           color: "#fff"
-        })
+        }),
+        v: common_vendor.o(skipToNewShop)
       });
     };
   }

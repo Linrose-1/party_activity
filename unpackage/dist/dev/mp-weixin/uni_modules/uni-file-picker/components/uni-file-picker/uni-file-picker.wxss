@@ -23,13 +23,6 @@
 		font-size: 14px;
 		color: #999;
 }
-.is-add {
-
-		display: flex;
-
-		align-items: center;
-		justify-content: center;
-}
 .icon-add {
 		width: 50px;
 		height: 5px;

@@ -156,13 +156,22 @@ const _sfc_main = {
         return;
       }
       let result = [];
-      for (let i = 0; i < value.length; i++) {
-        var val = value[i];
-        var item = dataList.find((v) => {
-          return v.value == val;
+      if (Array.isArray(value)) {
+        for (let i = 0; i < value.length; i++) {
+          var val = value[i];
+          var item = dataList.find((v) => {
+            return v.value == val;
+          });
+          if (item) {
+            result.push(item);
+          }
+        }
+      } else {
+        let item2 = dataList.find((v) => {
+          return v.value == value;
         });
-        if (item) {
-          result.push(item);
+        if (item2) {
+          result.push(item2);
         }
       }
       if (result.length) {

@@ -57,12 +57,6 @@
   align-items: center;
   justify-content: center;
 }
-.icon-add {
-  width: 50px;
-  height: 5px;
-  background-color: #f1f1f1;
-  border-radius: 2px;
-}
 .rotate {
   position: absolute;
   transform: rotate(90deg);

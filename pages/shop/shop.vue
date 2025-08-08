@@ -10,6 +10,19 @@
 				<button class="search-btn" @click="handleSearchClick">搜索</button>
 			</view>
 
+			<!-- 轮播图区域 -->
+			<view v-if="bannerList.length > 0" class="swiper-section">
+				<swiper class="swiper" circular :indicator-dots="true" :autoplay="true" :interval="3000"
+					:duration="500">
+					<swiper-item v-for="banner in bannerList" :key="banner.id">
+						<view class="swiper-item">
+							<image :src="banner.imageUrl" mode="aspectFill" class="swiper-image"></image>
+							<view v-if="banner.title" class="swiper-title">{{ banner.title }}</view>
+						</view>
+					</swiper-item>
+				</swiper>
+			</view>
+
 			<scroll-view scroll-x class="filters-scroll">
 				<view class="filters">
 					<!-- v-for 动态渲染从接口获取的 filters -->
@@ -25,8 +38,8 @@
 		<scroll-view class="store-list" scroll-y="true" @scrolltolower="loadMore" refresher-enabled="true"
 			:refresher-triggered="isRefreshing" @refresherrefresh="onPullDownRefresh">
 			<!-- 卡片列表 -->
-			<!-- 修复：之前这里缺少了 @click-card 事件来处理跳转 -->
-			<StoreCard v-for="store in filteredStores" :key="store.id" :store="store"  @click-card="goToStoreDetail" />
+			<!-- 之前这里缺少了 @click-card 事件来处理跳转 -->
+			<StoreCard v-for="store in filteredStores" :key="store.id" :store="store" @click-card="goToStoreDetail" />
 
 			<!-- 加载状态提示 -->
 			<view v-if="loadingMore" class="load-more">
@@ -52,7 +65,7 @@
 				<uni-icons type="redo" size="20" color="#fff"></uni-icons>
 				<text>聚店推荐</text>
 			</button>
-			<button class="action-btn register-btn" open-type="contact">
+			<button class="action-btn register-btn" @click="skipToNewShop">
 				<uni-icons type="plus-filled" size="20" color="#fff"></uni-icons>
 				<text>申请上榜</text>
 			</button>
@@ -88,8 +101,39 @@
 		name: '全部',
 		value: 'all'
 	}]);
-	// [新增] 一个标志位，防止 onShow 和 onMounted 中的位置获取逻辑冲突
+	const bannerList = ref([]);
+	//一个标志位，防止 onShow 和 onMounted 中的位置获取逻辑冲突
 	const isLocationLoaded = ref(false);
+
+	/**
+	 * 获取轮播图数据
+	 */
+	const fetchBanners = async () => {
+		const {
+			data,
+			error
+		} = await request('/app-api/member/banner-rec/list', {
+			method: 'GET',
+			data: {
+				positionCode: '1', // 【关键】根据要求，这里传 '1'
+				pageNo: 1,
+				pageSize: 50
+			}
+		});
+
+		if (error) {
+			console.error('获取聚店页轮播图失败:', error);
+			bannerList.value = [];
+			return;
+		}
+
+		if (data && data.list) {
+			bannerList.value = data.list.sort((a, b) => a.sort - b.sort);
+			console.log('聚店页轮播图获取成功:', bannerList.value);
+		} else {
+			bannerList.value = [];
+		}
+	};
 
 	/**
 	 * 获取店铺列表
@@ -197,27 +241,41 @@
 			});
 		}
 	};
-	
+
 	/**
 	 * 获取店铺分类
 	 */
 	const getShopType = async () => {
-		const { data, error } = await request('/app-api/system/dict-data/type', {
+		const {
+			data,
+			error
+		} = await request('/app-api/system/dict-data/type', {
 			method: 'GET',
-			data: { type: "member_store_category" }
+			data: {
+				type: "member_store_category"
+			}
 		});
-		if (error) { return; }
+		if (error) {
+			return;
+		}
 		if (data && data.length > 0) {
-			const dynamicFilters = data.map(item => ({ name: item.label, value: item.value }));
-			filters.value = [{ name: '全部', value: 'all' }, ...dynamicFilters];
+			const dynamicFilters = data.map(item => ({
+				name: item.label,
+				value: item.value
+			}));
+			filters.value = [{
+				name: '全部',
+				value: 'all'
+			}, ...dynamicFilters];
 		}
 	};
-	
+
 	/**
 	 * onMounted: 仅执行一次性的初始化，比如获取分类
 	 */
 	onMounted(() => {
 		getShopType();
+		fetchBanners();
 	});
 
 	/**
@@ -238,11 +296,11 @@
 		hasMore.value = true;
 		getStoreList();
 	};
-	
+
 	const loadMore = () => {
 		getStoreList();
 	};
-	
+
 	const onPullDownRefresh = () => {
 		isRefreshing.value = true;
 		handleRefresh();
@@ -250,7 +308,7 @@
 
 	watch(activeFilter, (newValue, oldValue) => {
 		// 只有在值真正改变时才刷新，避免 onShow 触发不必要的刷新
-		if(newValue !== oldValue) {
+		if (newValue !== oldValue) {
 			handleRefresh();
 		}
 	});
@@ -283,6 +341,12 @@
 	const shareStore = () => {
 		uni.navigateTo({
 			url: '/pages/shop-recommend/shop-recommend'
+		});
+	};
+	const skipToNewShop = () => {
+		uni.navigateTo({
+			// url: '/pages/shop-apply/shop-apply'
+			url: '/pages/myStore-edit/myStore-edit'
 		});
 	};
 </script>
@@ -359,10 +423,49 @@
 		border: none;
 	}
 
+	/* 【新增】轮播图样式，与活动页保持一致 */
+	.swiper-section {
+		margin-top: 20rpx; // 与搜索框拉开一点距离
+		border-radius: 16rpx;
+		overflow: hidden;
+		box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.05);
+	}
+
+	.swiper {
+		height: 250rpx; // 聚店页的轮播图可以稍微矮一些
+	}
+
+	.swiper-item {
+		position: relative;
+		width: 100%;
+		height: 100%;
+	}
+
+	.swiper-image {
+		width: 100%;
+		height: 100%;
+	}
+
+	.swiper-title {
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		color: white;
+		font-size: 36rpx;
+		font-weight: bold;
+		text-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.5);
+		pointer-events: none;
+	}
+
 	.filters-scroll {
 		white-space: nowrap;
 		width: 100%;
-		padding-top: 15rpx;
+		padding-top: 20rpx;
 	}
 
 	.filters {

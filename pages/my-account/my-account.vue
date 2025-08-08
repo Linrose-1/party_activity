@@ -169,6 +169,16 @@
 						<view class="level-price">充值 36,500 元</view>
 					</view>
 				</view>
+
+				<!-- 会员操作按钮区域 -->
+				<view class="membership-actions">
+					<button class="action-button details-btn" @click="navigateToMemberDetails">
+						<uni-icons type="list" size="20" color="#fff"></uni-icons> 会员详情
+					</button>
+					<button class="action-button recharge-btn" @click="navigateToMembershipRecharge">
+						<uni-icons type="wallet" size="20" color="#fff"></uni-icons> 立即充值
+					</button>
+				</view>
 			</view>
 			<!-- ================= 会员等级系统修改结束 ================= -->
 
@@ -188,12 +198,12 @@
 						<uni-icons type="forward" size="20" color="#fff"></uni-icons> 申请兑换
 					</button>
 					<button class="action-button recharge-button" @click="handleRechargeSmartRice">
-						<uni-icons type="redo" size="20" color="#fff"></uni-icons> 充值智米
+						<uni-icons type="wallet" size="20" color="#fff"></uni-icons> 立即充值
 					</button>
 				</view>
-				<p class="smart-rice-note">
+				<!-- <p class="smart-rice-note">
 					<uni-icons type="info-filled" size="18" color="#FF6B00"></uni-icons> 智米充值请联系平台客服。
-				</p>
+				</p> -->
 			</view>
 
 			<!-- 贡分获取区域 -->
@@ -217,7 +227,7 @@
 						<view class="task-desc">{{ task.desc }}</view>
 						<view class="task-footer">
 							<span class="task-points">{{ task.points }}</span>
-							<button class="task-button" @click="handleTaskClick(task.name, $event)">
+							<button class="task-button" @click="handleTaskClick(task)">
 								<uni-icons type="plus" size="20" color="#fff"></uni-icons>
 							</button>
 						</view>
@@ -304,26 +314,25 @@
 			return;
 		}
 		userInfo.value = data;
+		console.log("123",userInfo.value)
 	};
 
 	/**
 	 * 跳转到个人信息详情页
 	 */
 	const navigateToInfoDetails = () => {
-		if (!userInfo.value) {
+		// 检查 userInfo.value 和 userInfo.value.id 是否存在
+		if (!userInfo.value || !userInfo.value.id) {
 			uni.showToast({
-				title: '用户信息加载中',
+				title: '无法获取用户ID',
 				icon: 'none'
 			});
 			return;
 		}
-		// 将用户信息对象转换为JSON字符串并编码，以便通过URL传递
-		const userJson = JSON.stringify(userInfo.value);
-		const encodedData = encodeURIComponent(userJson);
 
+		// 【核心修改】只传递用户的 ID
 		uni.navigateTo({
-			// 假设详情页也需要user信息
-			url: `/pages/my-account-informationDetails/my-account-informationDetails?user=${encodedData}`
+			url: `/packages/my-account-informationDetails/my-account-informationDetails?id=${userInfo.value.id}`
 		});
 	};
 
@@ -383,6 +392,25 @@
 		}
 		return membershipLevels.value[0];
 	});
+
+	/**
+	 * 跳转到会员详情页
+	 */
+	const navigateToMemberDetails = () => {
+		uni.navigateTo({
+			url: '/pages/my-memberDetails/my-memberDetails'
+		});
+	};
+	/**
+	 * 跳转到会员充值页
+	 */
+	const navigateToMembershipRecharge = () => {
+		// 注意：这里跳转到和智米充值相同的页面
+		// 将来可以通过参数区分充值类型，例如：?type=membership
+		uni.navigateTo({
+			url: '/pages/recharge/recharge?type=membership'
+		});
+	};
 
 	// 计算下一会员等级
 	const nextMembershipLevel = computed(() => {
@@ -476,44 +504,61 @@
 			icon: 'calendar',
 			name: '参与活动',
 			desc: '参加平台组织的线上/线下活动',
-			points: '+5分/次'
+			points: '+5分/次',
+			path: '/pages/active/active'
 		},
 		{
 			icon: 'flag',
 			name: '组织活动',
 			desc: '成功组织并举办一次活动',
-			points: '+30分/次'
+			points: '+30分/次',
+			path: '/pages/active-publish/active-publish'
 		},
 		{
 			icon: 'sound',
 			name: '分享商机',
 			desc: '分享有价值的商业机会',
-			points: '+10分/次'
+			points: '+10分/次',
+			path: '/pages/home/home'
 		},
 		{
 			icon: 'personadd',
 			name: '邀请好友',
 			desc: '成功邀请好友注册并认证',
-			points: '+20分/人'
+			points: '+20分/人',
+			path: '/pages/my-businessCard/my-businessCard'
 		},
-		{
-			icon: 'chat',
-			name: '每日签到',
-			desc: '每日登录并签到',
-			points: '+1分/天'
-		},
-		{
-			icon: 'star',
-			name: '完善资料',
-			desc: '完善个人和企业资料',
-			points: '+50分'
-		},
+		// {
+		// 	icon: 'chat',
+		// 	name: '每日签到',
+		// 	desc: '每日登录并签到',
+		// 	points: '+1分/天'
+		// },
+		// {
+		// 	icon: 'star',
+		// 	name: '完善资料',
+		// 	desc: '完善个人和企业资料',
+		// 	points: '+50分'
+		// },
 	]);
 
-	const handleTaskClick = (taskName, event) => {
-		uni.showToast({
-			title: `点击了任务：${taskName}`,
-			icon: 'none'
+	const handleTaskClick = (task) => {
+		if (!task.path) {
+			uni.showToast({
+				title: '该功能正在开发中...',
+				icon: 'none'
+			});
+			return;
+		}
+		uni.navigateTo({
+			url: task.path,
+			fail: (err) => {
+				console.error(`跳转失败: ${err.errMsg}`);
+				uni.showToast({
+					title: '请手动前往对应页面',
+					icon: 'none'
+				});
+			}
 		});
 	};
 
@@ -550,7 +595,25 @@
 </script>
 
 <style scoped>
-	/* ================== 历史记录模块新增/修改样式 ================== */
+	/* ================== 会员操作按钮样式 ================== */
+	.membership-actions {
+		display: flex;
+		justify-content: space-around;
+		gap: 30rpx;
+		margin-top: 50rpx;
+		/* 与列表保持间距 */
+	}
+
+	/* 复用 .action-button 基础样式，并为新按钮定义颜色 */
+	.details-btn {
+		background: linear-gradient(to right, #FF8C00, #FF6B00);
+	}
+
+	.recharge-btn {
+		background: linear-gradient(to right, #007bff, #0056b3);
+	}
+
+	/* ================== 历史记录模块样式 ================== */
 	.history-empty {
 		display: flex;
 		flex-direction: column;
@@ -585,14 +648,14 @@
 		/* 红色 */
 	}
 
-	/* 新增：当前会员等级高亮样式 */
+	/* 当前会员等级高亮样式 */
 	.current-member-highlight {
 		transform: translateY(-8rpx);
 		box-shadow: 0 12rpx 30rpx rgba(0, 0, 0, 0.15) !important;
 		border: 4rpx solid #FF6B00 !important;
 	}
 
-	/* ================== 以下为页面原有全部样式 (保持不变) ================== */
+
 	body {
 		background: linear-gradient(135deg, #f8f9fa, #e9ecef);
 		color: #333;

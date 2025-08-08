@@ -203,6 +203,10 @@ const _sfc_main = {
         if (!Array.isArray(value)) {
           value = [];
         }
+      } else {
+        if (Array.isArray(value) && value.length) {
+          value = value[0];
+        }
       }
       dataList.forEach((item, index) => {
         item.disabled = item.disable || item.disabled || false;

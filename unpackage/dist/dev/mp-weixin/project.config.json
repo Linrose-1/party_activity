@@ -19,7 +19,7 @@
     "ignoreUploadUnusedFiles": false
   },
   "compileType": "miniprogram",
-  "libVersion": "",
+  "libVersion": "2.19.2",
   "appid": "wxf3093a8dbb878b16",
   "projectname": "party_activity",
   "condition": {},

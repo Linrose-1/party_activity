@@ -90,6 +90,12 @@ const _sfc_main = {
     });
     const featureList = common_vendor.ref([
       {
+        name: "我的订单",
+        desc: "查看您的所有支付订单",
+        icon: "../../static/icon/订单.png",
+        path: "/pages/my-order/my-order"
+      },
+      {
         name: "我的活动",
         desc: "已报名/已发布的活动",
         icon: "../../static/icon/活动.png",
@@ -124,6 +130,12 @@ const _sfc_main = {
         desc: "查看您的聚店信息",
         icon: "../../static/icon/店铺.png",
         path: "/pages/my-shop/my-shop"
+      },
+      {
+        name: "系统建议",
+        desc: "提供您对本平台的建议",
+        icon: "../../static/icon/系统建议.png",
+        path: "/pages/my-systemSuggestions/my-systemSuggestions"
       },
       {
         name: "用户协议",
@@ -172,8 +184,8 @@ const _sfc_main = {
     };
     const skipToLogin = () => {
       common_vendor.index.navigateTo({
-        // url: '/pages/index/index'
-        url: "/pages/login/login"
+        url: "/pages/index/index"
+        // url: '/pages/login/login'
       });
     };
     return (_ctx, _cache) => {
@@ -234,8 +246,7 @@ const _sfc_main = {
             d: item.name,
             e: common_vendor.o(($event) => navigateToFeature(item.path), item.name)
           };
-        }),
-        C: common_vendor.o(skipToLogin)
+        })
       });
     };
   }

@@ -93,11 +93,10 @@ const _sfc_main = {
       }
     },
     value(val) {
-      if (this.maxlength != -1 && this.mode === "input") {
-        this.val = val.slice(0, this.maxlength);
-      } else {
-        this.val = val;
-      }
+      this.setVal(val);
+    },
+    modelValue(val) {
+      this.setVal(val);
     },
     val(val) {
       this.$emit("update:modelValue", val);
@@ -114,6 +113,16 @@ const _sfc_main = {
     }
   },
   methods: {
+    /**
+     * 给val属性赋值
+     */
+    setVal(val) {
+      if (this.maxlength != -1 && this.mode === "input") {
+        this.val = val.slice(0, this.maxlength);
+      } else {
+        this.val = val;
+      }
+    },
     /**
      * 点击确认按钮
      */

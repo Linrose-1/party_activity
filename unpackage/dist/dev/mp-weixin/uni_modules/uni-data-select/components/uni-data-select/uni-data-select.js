@@ -86,9 +86,6 @@ const _sfc_main = {
     },
     textShow() {
       let text = this.current;
-      if (text.length > 10) {
-        return text.slice(0, 25) + "...";
-      }
       return text;
     },
     getOffsetByPlacement() {
@@ -182,6 +179,7 @@ const _sfc_main = {
     },
     clearVal() {
       this.emit("");
+      this.current = "";
       if (this.collection) {
         this.removeCache();
       }

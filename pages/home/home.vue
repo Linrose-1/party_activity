@@ -566,8 +566,8 @@
 	const goToLogin = () => {
 		// 4. 【修改】实现真正的跳转逻辑
 		uni.navigateTo({
-			// url: '/pages/index/index' 
-			url: '/pages/login/login' 
+			url: '/pages/index/index' 
+			// url: '/pages/login/login' 
 		});
 	};
 

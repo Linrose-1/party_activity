@@ -1,3 +1,50 @@
+## 1.5.9（2025-07-18）
+- uni-popup 修复 nvue 下弹窗样式错乱的问题 ，更新依赖 uni-transition 组件
+- uni-popup 更新 示例取消 borderRadius 属性 ，如需内容圆角，用户应该直接在内容插槽中实现
+- uni-transition 修复 nvue 页面，样式错误问题
+## 1.5.8（2025-06-24）
+- uni-countdown 修复 filterShow 导致的运行报错
+- uni-data-picker 修复 在readonly属性为true时选项匹配错误的问题
+- uni-data-select 修复 清除按钮不展示问题
+- uni-data-select 优化 默认背景为白色与整体组件保持风格统一
+- uni-datetime-picker 修复 绑定字符串值的时，日历面板选中状态未重置到默认值的问题
+- uni-datetime-picker 修复 在 iOS 微信小程序上type='daterange'时，传入'YYYY-MM-DD'格式不生效的问题
+- uni-file-picker 修复 支付宝小程序 上传样式问题
+- uni-list 修复 可触发点击反馈的 uni-list-item 没有hover效果的问题
+- uni-list 修复 示例中过期图片地址
+- uni-nav-bar 适配微信小程序固定导航栏时，右侧插槽避让胶囊按钮
+- uni-notice-bar 新增 左侧自定义插槽，可自定义文字或图标
+- uni-popup 修复 uni-popup-dialog 中 setVal 方法报错的问题
+- uni-popup 修复 uni-popup-dialog 数据双向绑定问题。
+- uni-popup 修复 更新组件示例 ，解决更新数据或保存项目导致弹窗消失的问题
+- uni-popup 修复 uni-popup-dialog 弹出框在vue3中双向绑定问题
+- uni-popup 修复 示例中过期图片地址
+- uni-swipe-action 修复 鸿蒙 next 浏览器上无法滑动的问题
+- uni-swipe-action 优化 更新示例项目
+- uni-swipe-action 修复 app 端 缺少leftOptions 或 rightOptions 时无法滑动的问题
+- uni-swipe-action 修复 由上一个兼容版本引发的 安卓运行报错且无法回弹的问题
+- uni-swipe-action 优化 兼容鸿蒙平台
+- uni-swipe-action 修复 WEB 平台控制台报错
+- uni-table 修复： 下拉筛选中 toISOString() 引发的时区问题
+- uni-transition 修复 第一次执行不显示动画的问题
+- uni-transition 修复 页面数据更新到底动画复原的问题
+- uni-transition 修复 示例页面打开报错的问题
+## 1.5.7（2024-10-31）
+- uni-calendar 修复 calendar 在选择日期范围后重新选择日期需要点两次的 Bug
+- uni-combox 新增 clearAble 属性
+- uni-countdown 新增 支持控制显示位数 默认显示 2 位
+- uni-datetime-picker 修复 没有选中日期时点击确定直接报错的 Bug [详情](https://ask.dcloud.net.cn/question/198168)
+- uni-easyinput 修复 初始值传入 null 导致 input 报错的 Bug
+- uni-fab 修复 微信小程序中的 getSystemInfo 警告
+- uni-file-picker 优化 vue3 兼容性
+- uni-file-picker 修复 value 属性不兼容 vue3 的 Bug
+- uni-forms 修复 校验规则在抖音开发者工具上不生效的 Bug [详情](https://ask.dcloud.net.cn/question/191933)
+- uni-forms 修复 form 上次修改的问题
+- uni-forms 修复 binddata 的兼容性问题
+- uni-popup 修复 uni-popup 在 android 上的重复点击弹出位置不正确的 Bug
+- uni-table 修复 运行到抖音小程序上出现的问题
+- 修复 uni-load-more uni-nav-bar uni-popup uni-table uni-datetime-picker 在微信小程序中的 getSystemInfo 警告
+
 ## 1.5.6（2024-07-08）
 - uni-datetime-picker 新增 日期点击事件，在点击日期时会触发该事件。
 - uni-datetime-picker 修复 抖音小程序事件传递失效bug

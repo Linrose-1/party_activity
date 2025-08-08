@@ -1,6 +1,6 @@
 "use strict";
-const common_vendor = require("../../../../common/vendor.js");
 const uni_modules_uniTransition_components_uniTransition_createAnimation = require("./createAnimation.js");
+const common_vendor = require("../../../../common/vendor.js");
 const _sfc_main = {
   name: "uniTransition",
   emits: ["click", "change"],
@@ -38,7 +38,7 @@ const _sfc_main = {
     return {
       isShow: false,
       transform: "",
-      opacity: 1,
+      opacity: 0,
       animationData: {},
       durationTime: 300,
       config: {}
@@ -110,18 +110,13 @@ const _sfc_main = {
      */
     step(obj, config = {}) {
       if (!this.animation)
-        return;
-      for (let i in obj) {
-        try {
-          if (typeof obj[i] === "object") {
-            this.animation[i](...obj[i]);
-          } else {
-            this.animation[i](obj[i]);
-          }
-        } catch (e) {
-          common_vendor.index.__f__("error", "at uni_modules/uni-transition/components/uni-transition/uni-transition.vue:148", `方法 ${i} 不存在`);
+        return this;
+      Object.keys(obj).forEach((key) => {
+        const value = obj[key];
+        if (typeof this.animation[key] === "function") {
+          Array.isArray(value) ? this.animation[key](...value) : this.animation[key](value);
         }
-      }
+      });
       this.animation.step(config);
       return this;
     },
@@ -136,22 +131,21 @@ const _sfc_main = {
     // 开始过度动画
     open() {
       clearTimeout(this.timer);
-      this.transform = "";
       this.isShow = true;
-      let { opacity, transform } = this.styleInit(false);
-      if (typeof opacity !== "undefined") {
-        this.opacity = opacity;
-      }
-      this.transform = transform;
+      this.transform = this.styleInit(false).transform || "";
+      this.opacity = this.styleInit(false).opacity || 0;
       this.$nextTick(() => {
         this.timer = setTimeout(() => {
           this.animation = uni_modules_uniTransition_components_uniTransition_createAnimation.createAnimation(this.config, this);
           this.tranfromInit(false).step();
-          this.animation.run();
-          this.$emit("change", {
-            detail: this.isShow
+          this.animation.run(() => {
+            this.transform = "";
+            this.opacity = this.styleInit(false).opacity || 1;
+            this.$emit("change", {
+              detail: this.isShow
+            });
           });
-        }, 20);
+        }, 80);
       });
     },
     // 关闭过度动画
@@ -172,22 +166,19 @@ const _sfc_main = {
     },
     // 处理动画开始前的默认样式
     styleInit(type) {
-      let styles = {
-        transform: ""
-      };
-      let buildStyle = (type2, mode) => {
-        if (mode === "fade") {
-          styles.opacity = this.animationType(type2)[mode];
+      let styles = { transform: "", opacity: 1 };
+      const buildStyle = (type2, mode) => {
+        const value = this.animationType(type2)[mode];
+        if (mode.startsWith("fade")) {
+          styles.opacity = value;
         } else {
-          styles.transform += this.animationType(type2)[mode] + " ";
+          styles.transform += value + " ";
         }
       };
       if (typeof this.modeClass === "string") {
         buildStyle(type, this.modeClass);
       } else {
-        this.modeClass.forEach((mode) => {
-          buildStyle(type, mode);
-        });
+        this.modeClass.forEach((mode) => buildStyle(type, mode));
       }
       return styles;
     },
@@ -225,7 +216,7 @@ const _sfc_main = {
     },
     animationType(type) {
       return {
-        fade: type ? 0 : 1,
+        fade: type ? 1 : 0,
         "slide-top": `translateY(${type ? "0" : "-100%"})`,
         "slide-right": `translateX(${type ? "0" : "100%"})`,
         "slide-bottom": `translateY(${type ? "0" : "100%"})`,

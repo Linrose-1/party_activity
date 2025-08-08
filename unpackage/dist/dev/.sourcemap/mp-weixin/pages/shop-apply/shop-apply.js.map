@@ -1,0 +1,1 @@
+{"version":3,"file":"shop-apply.js","sources":["C:/Program Files/yingyong/HBuilderX.3.99.2023122611/HBuilderX/plugins/uniapp-cli-vite/uniPage:/cGFnZXMvc2hvcC1hcHBseS9zaG9wLWFwcGx5LnZ1ZQ"],"sourcesContent":["import MiniProgramPage from 'D:/evagi/party_activity/pages/shop-apply/shop-apply.vue'\nwx.createPage(MiniProgramPage)"],"names":[],"mappings":";;;;;;;AACA,GAAG,WAAW,eAAe;"}

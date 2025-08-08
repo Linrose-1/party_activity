@@ -66,10 +66,45 @@
 .search-btn::after {
   border: none;
 }
+
+/* 【新增】轮播图样式，与活动页保持一致 */
+.swiper-section {
+  margin-top: 20rpx;
+  border-radius: 16rpx;
+  overflow: hidden;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.05);
+}
+.swiper {
+  height: 250rpx;
+}
+.swiper-item {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+.swiper-image {
+  width: 100%;
+  height: 100%;
+}
+.swiper-title {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 36rpx;
+  font-weight: bold;
+  text-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+}
 .filters-scroll {
   white-space: nowrap;
   width: 100%;
-  padding-top: 15rpx;
+  padding-top: 20rpx;
 }
 .filters {
   display: flex;

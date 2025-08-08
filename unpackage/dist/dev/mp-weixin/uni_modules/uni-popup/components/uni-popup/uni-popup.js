@@ -147,7 +147,7 @@ const _sfc_main = {
         safeArea,
         screenHeight,
         safeAreaInsets
-      } = common_vendor.index.getSystemInfoSync();
+      } = common_vendor.index.getWindowInfo();
       this.popupWidth = windowWidth;
       this.popupHeight = windowHeight + (windowTop || 0);
       if (safeArea && this.safeArea) {
@@ -212,7 +212,7 @@ const _sfc_main = {
         direction = this.type;
       }
       if (!this.config[direction]) {
-        common_vendor.index.__f__("error", "at uni_modules/uni-popup/components/uni-popup/uni-popup.vue:298", "缺少类型：", direction);
+        common_vendor.index.__f__("error", "at uni_modules/uni-popup/components/uni-popup/uni-popup.vue:310", "缺少类型：", direction);
         return;
       }
       this[this.config[direction]]();
@@ -264,6 +264,7 @@ const _sfc_main = {
       this.showPopup = true;
       this.showTrans = true;
       this.$nextTick(() => {
+        this.showPoptrans();
         if (this.messageChild && this.type === "message") {
           this.messageChild.timerClose();
         }
@@ -286,8 +287,7 @@ const _sfc_main = {
       };
       if (type)
         return;
-      this.showPopup = true;
-      this.showTrans = true;
+      this.showPoptrans();
     },
     /**
      * 中间弹出样式处理
@@ -309,8 +309,7 @@ const _sfc_main = {
       };
       if (type)
         return;
-      this.showPopup = true;
-      this.showTrans = true;
+      this.showPoptrans();
     },
     left(type) {
       this.popupstyle = "left";
@@ -327,8 +326,7 @@ const _sfc_main = {
       };
       if (type)
         return;
-      this.showPopup = true;
-      this.showTrans = true;
+      this.showPoptrans();
     },
     right(type) {
       this.popupstyle = "right";
@@ -345,8 +343,13 @@ const _sfc_main = {
       };
       if (type)
         return;
-      this.showPopup = true;
-      this.showTrans = true;
+      this.showPoptrans();
+    },
+    showPoptrans() {
+      this.$nextTick(() => {
+        this.showPopup = true;
+        this.showTrans = true;
+      });
     }
   }
 };

@@ -41,20 +41,18 @@ const _sfc_main = {
         return;
       }
       userInfo.value = data;
+      common_vendor.index.__f__("log", "at pages/my-account/my-account.vue:317", "123", userInfo.value);
     };
     const navigateToInfoDetails = () => {
-      if (!userInfo.value) {
+      if (!userInfo.value || !userInfo.value.id) {
         common_vendor.index.showToast({
-          title: "用户信息加载中",
+          title: "无法获取用户ID",
           icon: "none"
         });
         return;
       }
-      const userJson = JSON.stringify(userInfo.value);
-      const encodedData = encodeURIComponent(userJson);
       common_vendor.index.navigateTo({
-        // 假设详情页也需要user信息
-        url: `/pages/my-account-informationDetails/my-account-informationDetails?user=${encodedData}`
+        url: `/packages/my-account-informationDetails/my-account-informationDetails?id=${userInfo.value.id}`
       });
     };
     const pointsToNextLevel = common_vendor.computed(() => {
@@ -110,6 +108,16 @@ const _sfc_main = {
       }
       return membershipLevels.value[0];
     });
+    const navigateToMemberDetails = () => {
+      common_vendor.index.navigateTo({
+        url: "/pages/my-memberDetails/my-memberDetails"
+      });
+    };
+    const navigateToMembershipRecharge = () => {
+      common_vendor.index.navigateTo({
+        url: "/pages/recharge/recharge?type=membership"
+      });
+    };
     const nextMembershipLevel = common_vendor.computed(() => {
       const currentIndex = membershipLevels.value.findIndex((level) => level.name === currentMembershipLevel.value.name);
       if (currentIndex < membershipLevels.value.length - 2) {
@@ -191,54 +199,71 @@ const _sfc_main = {
         icon: "calendar",
         name: "参与活动",
         desc: "参加平台组织的线上/线下活动",
-        points: "+5分/次"
+        points: "+5分/次",
+        path: "/pages/active/active"
       },
       {
         icon: "flag",
         name: "组织活动",
         desc: "成功组织并举办一次活动",
-        points: "+30分/次"
+        points: "+30分/次",
+        path: "/pages/active-publish/active-publish"
       },
       {
         icon: "sound",
         name: "分享商机",
         desc: "分享有价值的商业机会",
-        points: "+10分/次"
+        points: "+10分/次",
+        path: "/pages/home/home"
       },
       {
         icon: "personadd",
         name: "邀请好友",
         desc: "成功邀请好友注册并认证",
-        points: "+20分/人"
-      },
-      {
-        icon: "chat",
-        name: "每日签到",
-        desc: "每日登录并签到",
-        points: "+1分/天"
-      },
-      {
-        icon: "star",
-        name: "完善资料",
-        desc: "完善个人和企业资料",
-        points: "+50分"
+        points: "+20分/人",
+        path: "/pages/my-businessCard/my-businessCard"
       }
+      // {
+      // 	icon: 'chat',
+      // 	name: '每日签到',
+      // 	desc: '每日登录并签到',
+      // 	points: '+1分/天'
+      // },
+      // {
+      // 	icon: 'star',
+      // 	name: '完善资料',
+      // 	desc: '完善个人和企业资料',
+      // 	points: '+50分'
+      // },
     ]);
-    const handleTaskClick = (taskName, event) => {
-      common_vendor.index.showToast({
-        title: `点击了任务：${taskName}`,
-        icon: "none"
+    const handleTaskClick = (task) => {
+      if (!task.path) {
+        common_vendor.index.showToast({
+          title: "该功能正在开发中...",
+          icon: "none"
+        });
+        return;
+      }
+      common_vendor.index.navigateTo({
+        url: task.path,
+        fail: (err) => {
+          common_vendor.index.__f__("error", "at pages/my-account/my-account.vue:556", `跳转失败: ${err.errMsg}`);
+          common_vendor.index.showToast({
+            title: "请手动前往对应页面",
+            icon: "none"
+          });
+        }
       });
     };
     const handleExchangeSmartRice = () => {
-      common_vendor.index.__f__("log", "at pages/my-account/my-account.vue:521", "用户点击了申请兑换，准备跳转到兑换页面...");
+      common_vendor.index.__f__("log", "at pages/my-account/my-account.vue:566", "用户点击了申请兑换，准备跳转到兑换页面...");
       common_vendor.index.showToast({
         title: "兑换页面开发中...",
         icon: "none"
       });
     };
     const handleRechargeSmartRice = () => {
-      common_vendor.index.__f__("log", "at pages/my-account/my-account.vue:530", "用户点击了充值智米，跳转到充值页面...");
+      common_vendor.index.__f__("log", "at pages/my-account/my-account.vue:575", "用户点击了充值智米，跳转到充值页面...");
       common_vendor.index.navigateTo({
         url: "/pages/recharge/recharge"
         // 跳转到充值页面
@@ -317,37 +342,44 @@ const _sfc_main = {
         C: userInfo.value.topUpLevel.name === "黄金会员" ? 1 : "",
         D: userInfo.value.topUpLevel.name === "黑钻会员" ? 1 : "",
         E: common_vendor.p({
+          type: "list",
+          size: "20",
+          color: "#fff"
+        }),
+        F: common_vendor.o(navigateToMemberDetails),
+        G: common_vendor.p({
+          type: "wallet",
+          size: "20",
+          color: "#fff"
+        }),
+        H: common_vendor.o(navigateToMembershipRecharge),
+        I: common_vendor.p({
           type: "wallet",
           size: "24",
           color: "#FF6B00"
         }),
-        F: common_vendor.t(userInfo.value.point),
-        G: common_vendor.p({
+        J: common_vendor.t(userInfo.value.point),
+        K: common_vendor.p({
           type: "forward",
           size: "20",
           color: "#fff"
         }),
-        H: common_vendor.o(handleExchangeSmartRice),
-        I: common_vendor.p({
-          type: "redo",
+        L: common_vendor.o(handleExchangeSmartRice),
+        M: common_vendor.p({
+          type: "wallet",
           size: "20",
           color: "#fff"
         }),
-        J: common_vendor.o(handleRechargeSmartRice),
-        K: common_vendor.p({
-          type: "info-filled",
-          size: "18",
-          color: "#FF6B00"
-        }),
-        L: common_vendor.p({
+        N: common_vendor.o(handleRechargeSmartRice),
+        O: common_vendor.p({
           type: "compose",
           size: "24",
           color: "#FF6B00"
         }),
-        M: common_vendor.t(userInfo.value.currExperience),
-        N: common_vendor.f(tasks.value, (task, index, i0) => {
+        P: common_vendor.t(userInfo.value.currExperience),
+        Q: common_vendor.f(tasks.value, (task, index, i0) => {
           return {
-            a: "04e670bd-13-" + i0,
+            a: "04e670bd-14-" + i0,
             b: common_vendor.p({
               type: task.icon,
               size: "24",
@@ -356,32 +388,32 @@ const _sfc_main = {
             c: common_vendor.t(task.name),
             d: common_vendor.t(task.desc),
             e: common_vendor.t(task.points),
-            f: "04e670bd-14-" + i0,
-            g: common_vendor.o(($event) => handleTaskClick(task.name), index),
+            f: "04e670bd-15-" + i0,
+            g: common_vendor.o(($event) => handleTaskClick(task), index),
             h: index
           };
         }),
-        O: common_vendor.p({
+        R: common_vendor.p({
           type: "plus",
           size: "20",
           color: "#fff"
         }),
-        P: common_vendor.p({
+        S: common_vendor.p({
           type: "bars",
           size: "24",
           color: "#FF6B00"
         }),
-        Q: historyList.value.length === 0 && historyLoadStatus.value === "noMore"
+        T: historyList.value.length === 0 && historyLoadStatus.value === "noMore"
       }, historyList.value.length === 0 && historyLoadStatus.value === "noMore" ? {
-        R: common_vendor.p({
+        U: common_vendor.p({
           type: "info-filled",
           size: "40",
           color: "#ccc"
         })
       } : {
-        S: common_vendor.f(historyList.value, (record, index, i0) => {
+        V: common_vendor.f(historyList.value, (record, index, i0) => {
           return {
-            a: "04e670bd-17-" + i0,
+            a: "04e670bd-18-" + i0,
             b: common_vendor.p({
               type: record.experience >= 0 ? "arrow-up" : "arrow-down",
               size: "20",
@@ -399,9 +431,9 @@ const _sfc_main = {
           };
         })
       }, {
-        T: historyList.value.length > 0
+        W: historyList.value.length > 0
       }, historyList.value.length > 0 ? {
-        U: common_vendor.p({
+        X: common_vendor.p({
           status: historyLoadStatus.value
         })
       } : {}) : {});

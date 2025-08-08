@@ -1,0 +1,1 @@
+<view class="chart-container data-v-8df059ca"><block wx:if="{{r0}}"><canvas class="data-v-8df059ca" type="2d" style="{{'width:' + a + ';' + ('height:' + b)}}" canvas-id="{{c}}" id="{{d}}"></canvas></block></view>

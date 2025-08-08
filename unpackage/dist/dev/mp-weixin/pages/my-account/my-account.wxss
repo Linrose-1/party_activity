@@ -1,5 +1,22 @@
 
-	/* ================== 历史记录模块新增/修改样式 ================== */
+	/* ================== 会员操作按钮样式 ================== */
+.membership-actions.data-v-04e670bd {
+		display: flex;
+		justify-content: space-around;
+		gap: 30rpx;
+		margin-top: 50rpx;
+		/* 与列表保持间距 */
+}
+
+	/* 复用 .action-button 基础样式，并为新按钮定义颜色 */
+.details-btn.data-v-04e670bd {
+		background: linear-gradient(to right, #FF8C00, #FF6B00);
+}
+.recharge-btn.data-v-04e670bd {
+		background: linear-gradient(to right, #007bff, #0056b3);
+}
+
+	/* ================== 历史记录模块样式 ================== */
 .history-empty.data-v-04e670bd {
 		display: flex;
 		flex-direction: column;
@@ -29,14 +46,12 @@
 		/* 红色 */
 }
 
-	/* 新增：当前会员等级高亮样式 */
+	/* 当前会员等级高亮样式 */
 .current-member-highlight.data-v-04e670bd {
 		transform: translateY(-8rpx);
 		box-shadow: 0 12rpx 30rpx rgba(0, 0, 0, 0.15) !important;
 		border: 4rpx solid #FF6B00 !important;
 }
-
-	/* ================== 以下为页面原有全部样式 (保持不变) ================== */
 body.data-v-04e670bd {
 		background: linear-gradient(135deg, #f8f9fa, #e9ecef);
 		color: #333;

@@ -160,7 +160,8 @@ class Calendar {
     if (!date) {
       date = /* @__PURE__ */ new Date();
     }
-    return this.calendar.find((item) => item.fullDate === this.getDateObj(date).fullDate);
+    const res = this.calendar.find((item) => item.fullDate === this.getDateObj(date).fullDate);
+    return res ? res : this.getDateObj(date);
   }
   /**
    * 比较时间是否相等

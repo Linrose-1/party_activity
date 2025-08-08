@@ -88,6 +88,10 @@ const looseToNumber = (val) => {
   const n2 = parseFloat(val);
   return isNaN(n2) ? val : n2;
 };
+const toNumber = (val) => {
+  const n2 = isString(val) ? Number(val) : NaN;
+  return isNaN(n2) ? val : n2;
+};
 function normalizeStyle(value) {
   if (isArray(value)) {
     const res = {};
@@ -5119,6 +5123,24 @@ function createVueApp(rootComponent, rootProps = null) {
   };
   return app;
 }
+function useCssVars(getter) {
+  const instance = getCurrentInstance();
+  if (!instance) {
+    warn(`useCssVars is called without current active component instance.`);
+    return;
+  }
+  initCssVarsRender(instance, getter);
+}
+function initCssVarsRender(instance, getter) {
+  instance.ctx.__cssVars = () => {
+    const vars = getter(instance.proxy);
+    const cssVars = {};
+    for (const key in vars) {
+      cssVars[`--${key}`] = vars[key];
+    }
+    return cssVars;
+  };
+}
 function injectLifecycleHook(name, hook, publicThis, instance) {
   if (isFunction(hook)) {
     injectHook(name, hook.bind(publicThis), instance);
@@ -5483,6 +5505,27 @@ function setRef(ref2, id, opts = {}) {
   const { $templateRefs } = getCurrentInstance();
   $templateRefs.push({ i: id, r: ref2, k: opts.k, f: opts.f });
 }
+function withModelModifiers(fn, { number, trim }, isComponent = false) {
+  if (isComponent) {
+    return (...args) => {
+      if (trim) {
+        args = args.map((a2) => a2.trim());
+      } else if (number) {
+        args = args.map(toNumber);
+      }
+      return fn(...args);
+    };
+  }
+  return (event) => {
+    const value = event.detail.value;
+    if (trim) {
+      event.detail.value = value.trim();
+    } else if (number) {
+      event.detail.value = toNumber(value);
+    }
+    return fn(event);
+  };
+}
 const o$1 = (value, key) => vOn(value, key);
 const f$1 = (source, renderItem) => vFor(source, renderItem);
 const r$1 = (name, props, key) => renderSlot(name, props, key);
@@ -5492,6 +5535,7 @@ const n$1 = (value) => normalizeClass(value);
 const t$1 = (val) => toDisplayString(val);
 const p$1 = (props) => renderProps(props);
 const sr = (ref2, id, opts) => setRef(ref2, id, opts);
+const m$1 = (fn, modifiers, isComponent = false) => withModelModifiers(fn, modifiers, isComponent);
 function createApp$1(rootComponent, rootProps = null) {
   rootComponent && (rootComponent.mpType = "app");
   return createVueApp(rootComponent, rootProps).use(plugin);
@@ -7255,7 +7299,7 @@ function initOnError() {
 function initRuntimeSocketService() {
   const hosts = "172.20.10.4,127.0.0.1";
   const port = "8090";
-  const id = "mp-weixin_cTVJjM";
+  const id = "mp-weixin_8tXRLA";
   const lazy = typeof swan !== "undefined";
   let restoreError = lazy ? () => {
   } : initOnError();
@@ -8198,6 +8242,7 @@ const createHook = (lifecycle) => (hook, target = getCurrentInstance()) => {
   !isInSSRComponentSetup && injectHook(lifecycle, hook, target);
 };
 const onShow = /* @__PURE__ */ createHook(ON_SHOW);
+const onHide = /* @__PURE__ */ createHook(ON_HIDE);
 const onLoad = /* @__PURE__ */ createHook(ON_LOAD);
 const onUnload = /* @__PURE__ */ createHook(ON_UNLOAD);
 const onReachBottom = /* @__PURE__ */ createHook(ON_REACH_BOTTOM);
@@ -8418,12 +8463,6 @@ const pages = [
     }
   },
   {
-    path: "pages/my-account-informationDetails/my-account-informationDetails",
-    style: {
-      navigationBarTitleText: "个人信息详情"
-    }
-  },
-  {
     path: "pages/my-recommendFriends/my-recommendFriends",
     style: {
       navigationBarTitleText: "我的推荐商友"
@@ -8434,6 +8473,50 @@ const pages = [
     style: {
       navigationBarTitleText: "充值"
     }
+  },
+  {
+    path: "pages/my-memberDetails/my-memberDetails",
+    style: {
+      navigationBarTitleText: "会员详情"
+    }
+  },
+  {
+    path: "pages/my-order/my-order",
+    style: {
+      navigationBarTitleText: "订单"
+    }
+  },
+  {
+    path: "pages/relation/relation",
+    style: {
+      navigationBarTitleText: "六度人脉"
+    }
+  },
+  {
+    path: "pages/shop-apply/shop-apply",
+    style: {
+      navigationBarTitleText: "申请上榜"
+    }
+  },
+  {
+    path: "pages/my-systemSuggestions/my-systemSuggestions",
+    style: {
+      navigationBarTitleText: "系统建议"
+    }
+  }
+];
+const subPackages = [
+  {
+    root: "packages",
+    independent: true,
+    pages: [
+      {
+        path: "my-account-informationDetails/my-account-informationDetails",
+        style: {
+          navigationBarTitleText: "用户详情"
+        }
+      }
+    ]
   }
 ];
 const tabBar = {
@@ -8454,8 +8537,8 @@ const tabBar = {
       selectedIconPath: "/static/tabbar/active-active.png"
     },
     {
-      pagePath: "pages/location/location",
-      text: "附近",
+      pagePath: "pages/relation/relation",
+      text: "人脉",
       iconPath: "/static/tabbar/location.png",
       selectedIconPath: "/static/tabbar/location-active.png"
     },
@@ -8484,6 +8567,7 @@ const globalStyle = {
 };
 const e = {
   pages,
+  subPackages,
   tabBar,
   globalStyle
 };
@@ -11331,12 +11415,14 @@ exports.computed = computed;
 exports.createSSRApp = createSSRApp;
 exports.e = e$1;
 exports.f = f$1;
+exports.getCurrentInstance = getCurrentInstance;
 exports.index = index;
 exports.initVueI18n = initVueI18n;
+exports.m = m$1;
 exports.n = n$1;
-exports.nextTick$1 = nextTick$1;
 exports.nr = nr;
 exports.o = o$1;
+exports.onHide = onHide;
 exports.onLoad = onLoad;
 exports.onMounted = onMounted;
 exports.onPullDownRefresh = onPullDownRefresh;
@@ -11345,7 +11431,6 @@ exports.onShareAppMessage = onShareAppMessage;
 exports.onShareTimeline = onShareTimeline;
 exports.onShow = onShow;
 exports.onUnload = onUnload;
-exports.onUnmounted = onUnmounted;
 exports.p = p$1;
 exports.r = r$1;
 exports.reactive = reactive;
@@ -11355,6 +11440,7 @@ exports.s = s$1;
 exports.sr = sr;
 exports.t = t$1;
 exports.unref = unref;
+exports.useCssVars = useCssVars;
 exports.watch = watch;
 exports.wx$1 = wx$1;
 //# sourceMappingURL=../../.sourcemap/mp-weixin/common/vendor.js.map

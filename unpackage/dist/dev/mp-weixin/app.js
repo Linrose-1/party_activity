@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, Symbol.toStringTag, { value: "Module" });
 const common_vendor = require("./common/vendor.js");
+const utils_request = require("./utils/request.js");
 if (!Math) {
   "./pages/home/home.js";
   "./pages/index/index.js";
@@ -37,20 +38,90 @@ if (!Math) {
   "./pages/my-edit-label/my-edit-label.js";
   "./pages/my-active-registeredUser/my-active-registeredUser.js";
   "./pages/my-active-secondRegistration/my-active-secondRegistration.js";
-  "./pages/my-account-informationDetails/my-account-informationDetails.js";
   "./pages/my-recommendFriends/my-recommendFriends.js";
   "./pages/recharge/recharge.js";
+  "./pages/my-memberDetails/my-memberDetails.js";
+  "./pages/my-order/my-order.js";
+  "./pages/relation/relation.js";
+  "./pages/shop-apply/shop-apply.js";
+  "./pages/my-systemSuggestions/my-systemSuggestions.js";
+  "./packages/my-account-informationDetails/my-account-informationDetails.js";
 }
 const _sfc_main = {
+  data() {
+    return {
+      locationTimer: null
+    };
+  },
   onLaunch: function() {
-    common_vendor.index.__f__("warn", "at App.vue:4", "当前组件仅支持 uni_modules 目录结构 ，请升级 HBuilderX 到 3.1.0 版本以上！");
-    common_vendor.index.__f__("log", "at App.vue:5", "App Launch");
+    common_vendor.index.__f__("warn", "at App.vue:11", "当前组件仅支持 uni_modules 目录结构 ，请升级 HBuilderX 到 3.1.0 版本以上！");
+    common_vendor.index.__f__("log", "at App.vue:12", "App Launch");
   },
   onShow: function() {
-    common_vendor.index.__f__("log", "at App.vue:8", "App Show");
+    common_vendor.index.__f__("log", "at App.vue:15", "App Show");
+    this.startLocationUpdates();
   },
   onHide: function() {
-    common_vendor.index.__f__("log", "at App.vue:11", "App Hide");
+    common_vendor.index.__f__("log", "at App.vue:20", "App Hide");
+    this.stopLocationUpdates();
+  },
+  methods: {
+    /**
+     * 检查用户是否已登录
+     */
+    isLoggedIn() {
+      const token = common_vendor.index.getStorageSync("token");
+      return !!token;
+    },
+    /**
+     * 启动周期性位置上传
+     */
+    startLocationUpdates() {
+      this.stopLocationUpdates();
+      if (!this.isLoggedIn()) {
+        common_vendor.index.__f__("log", "at App.vue:45", "用户未登录，不启动位置上传定时器");
+        return;
+      }
+      const updateTask = () => {
+        common_vendor.index.__f__("log", "at App.vue:50", "正在获取并上传用户当前位置...");
+        common_vendor.index.getLocation({
+          type: "gcj02",
+          success: async (res) => {
+            common_vendor.index.__f__("log", "at App.vue:54", `获取位置成功: ${res.longitude}, ${res.latitude}`);
+            const {
+              error
+            } = await utils_request.request("/app-api/member/user/upload-location", {
+              method: "POST",
+              data: {
+                longitude: res.longitude,
+                latitude: res.latitude
+              }
+            });
+            if (error) {
+              common_vendor.index.__f__("error", "at App.vue:68", "自动上传位置信息失败:", error);
+            } else {
+              common_vendor.index.__f__("log", "at App.vue:70", "用户当前位置上传成功！");
+            }
+          },
+          fail: (err) => {
+            common_vendor.index.__f__("error", "at App.vue:74", "获取位置信息失败:", err);
+          }
+        });
+      };
+      updateTask();
+      this.locationTimer = setInterval(updateTask, 6e5);
+      common_vendor.index.__f__("log", "at App.vue:84", "位置上传定时器已启动");
+    },
+    /**
+     * 停止位置上传
+     */
+    stopLocationUpdates() {
+      if (this.locationTimer) {
+        clearInterval(this.locationTimer);
+        this.locationTimer = null;
+        common_vendor.index.__f__("log", "at App.vue:94", "位置上传定时器已停止");
+      }
+    }
   }
 };
 function createApp() {

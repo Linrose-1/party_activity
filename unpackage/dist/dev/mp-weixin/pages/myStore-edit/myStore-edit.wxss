@@ -1,5 +1,6 @@
 /* 水平间距 */
 /* 水平间距 */
+/* 您的样式完全不用修改，这里只新增 .location-picker 的样式 */
 .edit-store-container.data-v-1bd087ec {
   display: flex;
   flex-direction: column;

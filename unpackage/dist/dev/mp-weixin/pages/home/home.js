@@ -356,8 +356,8 @@ const _sfc_main = {
     };
     const goToLogin = () => {
       common_vendor.index.navigateTo({
-        // url: '/pages/index/index' 
-        url: "/pages/login/login"
+        url: "/pages/index/index"
+        // url: '/pages/login/login' 
       });
     };
     const goToMembership = () => {

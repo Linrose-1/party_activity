@@ -117,8 +117,13 @@ const _sfc_main = {
             }
           }
           if (!formVm)
-            return common_vendor.index.__f__("error", "at uni_modules/uni-forms/components/uni-forms/uni-forms.vue:182", "当前 uni-froms 组件缺少 ref 属性");
-          formVm.setValue(name, value);
+            return common_vendor.index.__f__("error", "at uni_modules/uni-forms/components/uni-forms/uni-forms.vue:187", "当前 uni-froms 组件缺少 ref 属性");
+          if (formVm.model)
+            formVm.model[name] = value;
+          if (formVm.modelValue)
+            formVm.modelValue[name] = value;
+          if (formVm.value)
+            formVm.value[name] = value;
         }
       };
     }
@@ -213,7 +218,7 @@ const _sfc_main = {
         }
       }
       if (!type) {
-        common_vendor.index.__f__("warn", "at uni_modules/uni-forms/components/uni-forms/uni-forms.vue:289", "submit 方法即将废弃，请使用validate方法代替！");
+        common_vendor.index.__f__("warn", "at uni_modules/uni-forms/components/uni-forms/uni-forms.vue:296", "submit 方法即将废弃，请使用validate方法代替！");
       }
       return this.checkAll(this.formData, keepitem, callback, "submit");
     },

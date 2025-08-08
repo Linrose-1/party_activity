@@ -23,6 +23,7 @@ const _sfc_main = {
     const pageNo = common_vendor.ref(1);
     const activitiesData = common_vendor.ref([]);
     const isLogin = common_vendor.ref(false);
+    const bannerList = common_vendor.ref([]);
     const searchKeyword = common_vendor.ref("");
     const typeList = common_vendor.ref([]);
     const typeIndex = common_vendor.ref(0);
@@ -41,57 +42,96 @@ const _sfc_main = {
     common_vendor.onShow(() => {
       const token = common_vendor.index.getStorageSync("token");
       isLogin.value = !!token;
-      common_vendor.index.__f__("log", "at pages/active/active.vue:150", "页面显示，当前登录状态:", isLogin.value);
+      common_vendor.index.__f__("log", "at pages/active/active.vue:167", "页面显示，当前登录状态:", isLogin.value);
       initializePage();
     });
     common_vendor.onPullDownRefresh(async () => {
-      common_vendor.index.__f__("log", "at pages/active/active.vue:158", "用户触发了下拉刷新");
+      common_vendor.index.__f__("log", "at pages/active/active.vue:175", "用户触发了下拉刷新");
       await initializePage();
       common_vendor.index.stopPullDownRefresh();
     });
     common_vendor.onReachBottom(() => {
-      common_vendor.index.__f__("log", "at pages/active/active.vue:165", "滑动到底部，触发加载更多");
+      common_vendor.index.__f__("log", "at pages/active/active.vue:182", "滑动到底部，触发加载更多");
       if (hasMore.value && !loading.value) {
         getActiveList(true);
       }
     });
     const initializePage = async () => {
-      common_vendor.index.showLoading({ title: "加载中..." });
+      common_vendor.index.showLoading({
+        title: "加载中..."
+      });
       try {
         pageNo.value = 1;
         hasMore.value = true;
         activitiesData.value = [];
         await Promise.all([
+          fetchBanners(),
           fetchActivityTypeList(),
           fetchActivityStatusList()
         ]);
         await getActiveList(false);
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/active/active.vue:197", "页面初始化失败:", error);
-        common_vendor.index.showToast({ title: "数据加载失败", icon: "none" });
+        common_vendor.index.__f__("error", "at pages/active/active.vue:217", "页面初始化失败:", error);
+        common_vendor.index.showToast({
+          title: "数据加载失败",
+          icon: "none"
+        });
       } finally {
         common_vendor.index.hideLoading();
       }
     };
-    const fetchActivityTypeList = async () => {
-      const { data, error } = await utils_request.request("/app-api/system/dict-data/type", {
-        data: { type: "member_activity_category" }
+    const fetchBanners = async () => {
+      const {
+        data,
+        error
+      } = await utils_request.request("/app-api/member/banner-rec/list", {
+        method: "GET",
+        data: {
+          positionCode: "0",
+          // 固定参数
+          pageNo: 1,
+          pageSize: 50
+        }
       });
       if (error) {
-        common_vendor.index.__f__("error", "at pages/active/active.vue:212", "获取活动类型列表失败:", error);
+        common_vendor.index.__f__("error", "at pages/active/active.vue:244", "获取轮播图失败:", error);
+        bannerList.value = [];
+        return;
+      }
+      if (data && data.list) {
+        bannerList.value = data.list.sort((a, b) => a.sort - b.sort);
+        common_vendor.index.__f__("log", "at pages/active/active.vue:252", "轮播图数据获取成功:", bannerList.value);
+      } else {
+        bannerList.value = [];
+      }
+    };
+    const fetchActivityTypeList = async () => {
+      const {
+        data,
+        error
+      } = await utils_request.request("/app-api/system/dict-data/type", {
+        data: {
+          type: "member_activity_category"
+        }
+      });
+      if (error) {
+        common_vendor.index.__f__("error", "at pages/active/active.vue:271", "获取活动类型列表失败:", error);
         throw new Error("获取类型失败");
       }
       typeList.value = data || [];
-      common_vendor.index.__f__("log", "at pages/active/active.vue:217", "动态活动类型列表获取成功:", typeList.value);
+      common_vendor.index.__f__("log", "at pages/active/active.vue:276", "动态活动类型列表获取成功:", typeList.value);
     };
     const fetchActivityStatusList = async () => {
-      const { data, error } = await utils_request.request("/app-api/member/activity/status-list");
+      const {
+        data,
+        error
+      } = await utils_request.request("/app-api/member/activity/status-list");
       if (error) {
-        common_vendor.index.__f__("error", "at pages/active/active.vue:223", "获取活动状态列表失败:", error);
+        common_vendor.index.__f__("error", "at pages/active/active.vue:285", "获取活动状态列表失败:", error);
         throw new Error("获取状态失败");
       }
       statusList.value = data || [];
-      common_vendor.index.__f__("log", "at pages/active/active.vue:227", "动态活动状态列表获取成功:", statusList.value);
+      common_vendor.index.__f__("log", "at pages/active/active.vue:289", "动态活动状态列表获取成功:", statusList.value);
     };
     const getActiveList = async (isLoadMore = false) => {
       if (loading.value)
@@ -115,13 +155,16 @@ const _sfc_main = {
         latitude: selectedLocationInfo.value ? selectedLocationInfo.value.latitude : ""
       };
       try {
-        common_vendor.index.__f__("log", "at pages/active/active.vue:259", "发起活动列表请求, 参数:", params);
+        common_vendor.index.__f__("log", "at pages/active/active.vue:321", "发起活动列表请求, 参数:", params);
         const result = await utils_request.request("/app-api/member/activity/list", {
           method: "GET",
           data: params
         });
         if (result && !result.error && result.data) {
-          const { list = [], total = 0 } = result.data;
+          const {
+            list = [],
+            total = 0
+          } = result.data;
           if (isLoadMore) {
             activitiesData.value.push(...list);
           } else {
@@ -130,11 +173,11 @@ const _sfc_main = {
           hasMore.value = activitiesData.value.length < total;
           pageNo.value++;
         } else {
-          common_vendor.index.__f__("error", "at pages/active/active.vue:280", "获取活动列表失败:", result ? result.error : "无有效返回");
+          common_vendor.index.__f__("error", "at pages/active/active.vue:344", "获取活动列表失败:", result ? result.error : "无有效返回");
           hasMore.value = false;
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/active/active.vue:284", "请求异常:", error);
+        common_vendor.index.__f__("error", "at pages/active/active.vue:348", "请求异常:", error);
         hasMore.value = false;
       } finally {
         loading.value = false;
@@ -163,7 +206,7 @@ const _sfc_main = {
           };
         },
         fail: (err) => {
-          common_vendor.index.__f__("log", "at pages/active/active.vue:322", "选择位置失败:", err);
+          common_vendor.index.__f__("log", "at pages/active/active.vue:386", "选择位置失败:", err);
         }
       });
     };
@@ -182,18 +225,22 @@ const _sfc_main = {
           cancelText: "再看看",
           success: (res) => {
             if (res.confirm) {
-              common_vendor.index.navigateTo({ url: "/pages/login/login" });
+              common_vendor.index.navigateTo({
+                url: "/pages/login/login"
+              });
             }
           }
         });
         return;
       }
-      common_vendor.index.navigateTo({ url: "/pages/active-publish/active-publish" });
+      common_vendor.index.navigateTo({
+        url: "/pages/active-publish/active-publish"
+      });
     };
     common_vendor.watch(
       [searchKeyword, selectedCategory, statusIndex, selectedLocationInfo],
       (newValue, oldValue) => {
-        common_vendor.index.__f__("log", "at pages/active/active.vue:360", "筛选条件变化，重新搜索...");
+        common_vendor.index.__f__("log", "at pages/active/active.vue:428", "筛选条件变化，重新搜索...");
         getActiveList(false);
       },
       {
@@ -210,24 +257,37 @@ const _sfc_main = {
         }),
         b: searchKeyword.value,
         c: common_vendor.o(($event) => searchKeyword.value = $event.detail.value),
-        d: common_vendor.t(typePickerRange.value[typeIndex.value]),
-        e: common_vendor.o(bindTypePickerChange),
-        f: typeIndex.value,
-        g: typePickerRange.value,
-        h: common_vendor.t(statusPickerRange.value[statusIndex.value]),
-        i: common_vendor.o(bindStatusPickerChange),
-        j: statusIndex.value,
-        k: statusPickerRange.value,
-        l: selectedLocationInfo.value
-      }, selectedLocationInfo.value ? {
-        m: common_vendor.t(selectedLocationInfo.value.address || selectedLocationInfo.value.name)
+        d: bannerList.value.length > 0
+      }, bannerList.value.length > 0 ? {
+        e: common_vendor.f(bannerList.value, (banner, k0, i0) => {
+          return common_vendor.e({
+            a: banner.imageUrl,
+            b: banner.title
+          }, banner.title ? {
+            c: common_vendor.t(banner.title)
+          } : {}, {
+            d: banner.id
+          });
+        })
       } : {}, {
-        n: common_vendor.o(openMapToChooseLocation),
-        o: common_vendor.p({
+        f: common_vendor.t(typePickerRange.value[typeIndex.value]),
+        g: common_vendor.o(bindTypePickerChange),
+        h: typeIndex.value,
+        i: typePickerRange.value,
+        j: common_vendor.t(statusPickerRange.value[statusIndex.value]),
+        k: common_vendor.o(bindStatusPickerChange),
+        l: statusIndex.value,
+        m: statusPickerRange.value,
+        n: selectedLocationInfo.value
+      }, selectedLocationInfo.value ? {
+        o: common_vendor.t(selectedLocationInfo.value.address || selectedLocationInfo.value.name)
+      } : {}, {
+        p: common_vendor.o(openMapToChooseLocation),
+        q: common_vendor.p({
           title: "活动筛选",
           open: true
         }),
-        p: common_vendor.f(activitiesData.value, (activity, index, i0) => {
+        r: common_vendor.f(activitiesData.value, (activity, index, i0) => {
           return {
             a: activity.id,
             b: common_vendor.o(handleFavoriteChange, activity.id),
@@ -238,16 +298,16 @@ const _sfc_main = {
             })
           };
         }),
-        q: !hasMore.value && activitiesData.value.length > 0
+        s: !hasMore.value && activitiesData.value.length > 0
       }, !hasMore.value && activitiesData.value.length > 0 ? {} : {}, {
-        r: !loading.value && activitiesData.value.length === 0
+        t: !loading.value && activitiesData.value.length === 0
       }, !loading.value && activitiesData.value.length === 0 ? {} : {}, {
-        s: common_vendor.p({
+        v: common_vendor.p({
           type: "plus",
           size: "18",
           color: "white"
         }),
-        t: common_vendor.o(publishActivity)
+        w: common_vendor.o(publishActivity)
       });
     };
   }
