@@ -40,17 +40,35 @@ const _sfc_main = {
       switch (post.status) {
         case "active":
         case "reactive":
-          return { text: "正常", class: "status-active" };
+          return {
+            text: "正常",
+            class: "status-active"
+          };
         case "hidden":
-          return { text: "待申诉", class: "status-hidden" };
+          return {
+            text: "待申诉",
+            class: "status-hidden"
+          };
         case "reject":
-          return { text: "申诉失败", class: "status-rejected" };
+          return {
+            text: "申诉失败",
+            class: "status-rejected"
+          };
         case "completed":
-          return { text: "已完成", class: "status-completed" };
+          return {
+            text: "已完成",
+            class: "status-completed"
+          };
         case "closed":
-          return { text: "已关闭", class: "status-closed" };
+          return {
+            text: "已关闭",
+            class: "status-closed"
+          };
         default:
-          return { text: "未知", class: "status-unknown" };
+          return {
+            text: "未知",
+            class: "status-unknown"
+          };
       }
     };
     const getMyOpportunitiesList = async (isRefresh = false) => {
@@ -63,9 +81,16 @@ const _sfc_main = {
       }
       loadStatus.value = "loading";
       const userId = common_vendor.index.getStorageSync("userId");
-      const { data, error } = await utils_request.request("/app-api/member/business-opportunities/my-list", {
+      const {
+        data,
+        error
+      } = await utils_request.request("/app-api/member/business-opportunities/my-list", {
         method: "GET",
-        data: { pageNo: pageNo.value, pageSize: pageSize.value, userId }
+        data: {
+          pageNo: pageNo.value,
+          pageSize: pageSize.value,
+          userId
+        }
       });
       if (isRefresh)
         common_vendor.index.stopPullDownRefresh();
@@ -86,23 +111,41 @@ const _sfc_main = {
         loadStatus.value = "noMore";
       }
     };
+    const previewImage = (urls, current) => {
+      common_vendor.index.previewImage({
+        urls,
+        current: urls[current]
+      });
+    };
     const deleteOpportunity = (id) => {
       common_vendor.index.showModal({
         title: "确认删除",
         content: "您确定要删除这条商机吗？删除后将无法恢复。",
         success: async (res) => {
           if (res.confirm) {
-            common_vendor.index.showLoading({ title: "删除中..." });
-            const { error } = await utils_request.request("/app-api/member/business-opportunities/delete", {
+            common_vendor.index.showLoading({
+              title: "删除中..."
+            });
+            const {
+              error
+            } = await utils_request.request("/app-api/member/business-opportunities/delete", {
               method: "POST",
-              data: { id }
+              data: {
+                id
+              }
             });
             common_vendor.index.hideLoading();
             if (error) {
-              common_vendor.index.showToast({ title: "删除失败: " + error, icon: "none" });
+              common_vendor.index.showToast({
+                title: "删除失败: " + error,
+                icon: "none"
+              });
               return;
             }
-            common_vendor.index.showToast({ title: "删除成功", icon: "success" });
+            common_vendor.index.showToast({
+              title: "删除成功",
+              icon: "success"
+            });
             getMyOpportunitiesList(true);
           }
         }
@@ -114,11 +157,18 @@ const _sfc_main = {
     };
     const confirmAppeal = async (appealContent) => {
       if (!appealContent || !appealContent.trim()) {
-        common_vendor.index.showToast({ title: "申诉内容不能为空", icon: "none" });
+        common_vendor.index.showToast({
+          title: "申诉内容不能为空",
+          icon: "none"
+        });
         return;
       }
-      common_vendor.index.showLoading({ title: "提交中..." });
-      const { error } = await utils_request.request("/app-api/member/business-opportunities/appeal", {
+      common_vendor.index.showLoading({
+        title: "提交中..."
+      });
+      const {
+        error
+      } = await utils_request.request("/app-api/member/business-opportunities/appeal", {
         method: "POST",
         data: {
           id: currentAppealPost.value.id,
@@ -127,9 +177,15 @@ const _sfc_main = {
       });
       common_vendor.index.hideLoading();
       if (error) {
-        common_vendor.index.showToast({ title: "申诉失败: " + error, icon: "none" });
+        common_vendor.index.showToast({
+          title: "申诉失败: " + error,
+          icon: "none"
+        });
       } else {
-        common_vendor.index.showToast({ title: "申诉已提交，请等待审核", icon: "success" });
+        common_vendor.index.showToast({
+          title: "申诉已提交，请等待审核",
+          icon: "success"
+        });
         appealPopup.value.close();
         getMyOpportunitiesList(true);
       }
@@ -159,26 +215,28 @@ const _sfc_main = {
             j: common_vendor.f(post.postImg.split(","), (image, imgIndex, i1) => {
               return {
                 a: image,
-                b: common_vendor.o(($event) => _ctx.previewImage(post.postImg.split(","), imgIndex), imgIndex),
+                b: common_vendor.o(($event) => previewImage(post.postImg.split(","), imgIndex), imgIndex),
                 c: imgIndex
               };
-            })
+            }),
+            k: post.postImg.split(",").length === 1 ? "widthFix" : "aspectFill",
+            l: common_vendor.n("images-count-" + post.postImg.split(",").length)
           } : {}, {
-            k: post.tags && post.tags.length > 0
+            m: post.tags && post.tags.length > 0
           }, post.tags && post.tags.length > 0 ? {} : {}, {
-            l: "481e0091-1-" + i0,
-            m: common_vendor.o(($event) => deleteOpportunity(post.id), post.id),
-            n: "481e0091-2-" + i0,
-            o: common_vendor.p({
+            n: "481e0091-1-" + i0,
+            o: common_vendor.o(($event) => deleteOpportunity(post.id), post.id),
+            p: "481e0091-2-" + i0,
+            q: common_vendor.p({
               type: "chat-filled",
               size: "16",
               color: post.status === "hidden" ? "#3498db" : "#ccc"
             }),
-            p: post.status !== "hidden" ? 1 : "",
-            q: post.status !== "hidden",
-            r: common_vendor.o(($event) => openAppealModal(post), post.id),
-            s: post.id,
-            t: common_vendor.o(($event) => skipCommercialDetail(post.id), post.id)
+            r: post.status !== "hidden" ? 1 : "",
+            s: post.status !== "hidden",
+            t: common_vendor.o(($event) => openAppealModal(post), post.id),
+            v: post.id,
+            w: common_vendor.o(($event) => skipCommercialDetail(post.id), post.id)
           });
         }),
         b: common_vendor.p({

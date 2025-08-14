@@ -203,7 +203,7 @@ const _sfc_main = {
         h: common_vendor.o(onEdit),
         i: userInfo.value.id
       }, userInfo.value.id ? {
-        j: common_vendor.t(userInfo.value.id)
+        j: common_vendor.t(userInfo.value.virtualId)
       } : {}) : {
         k: common_vendor.p({
           type: "person-filled",

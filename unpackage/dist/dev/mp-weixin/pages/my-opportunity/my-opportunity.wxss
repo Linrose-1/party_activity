@@ -39,7 +39,7 @@
 		font-size: 24rpx;
 		color: #999;
 }
-	
+
 	/* 【新增】状态标签样式 */
 .status-tag.data-v-481e0091 {
 		font-size: 24rpx;
@@ -47,15 +47,26 @@
 		border-radius: 30rpx;
 		font-weight: 500;
 }
-.status-active.data-v-481e0091 { background-color: #f6ffed; color: #52c41a;
+.status-active.data-v-481e0091 {
+		background-color: #f6ffed;
+		color: #52c41a;
 }
-.status-hidden.data-v-481e0091 { background-color: #fffbe6; color: #faad14;
+.status-hidden.data-v-481e0091 {
+		background-color: #fffbe6;
+		color: #faad14;
 }
-.status-rejected.data-v-481e0091 { background-color: #fff1f0; color: #f5222d;
+.status-rejected.data-v-481e0091 {
+		background-color: #fff1f0;
+		color: #f5222d;
 }
-.status-completed.data-v-481e0091, .status-closed.data-v-481e0091 { background-color: #f0f0f0; color: #999;
+.status-completed.data-v-481e0091,
+	.status-closed.data-v-481e0091 {
+		background-color: #f0f0f0;
+		color: #999;
 }
-.status-unknown.data-v-481e0091 { background-color: #f0f0f0; color: #999;
+.status-unknown.data-v-481e0091 {
+		background-color: #f0f0f0;
+		color: #999;
 }
 .post-content.data-v-481e0091 {
 		font-size: 28rpx;
@@ -64,13 +75,46 @@
 }
 .post-images.data-v-481e0091 {
 		display: grid;
-		grid-template-columns: repeat(3, 1fr);
 		gap: 10rpx;
+		/* 网格间距 */
 		margin-bottom: 20rpx;
 }
-.image-wrapper.data-v-481e0091 { aspect-ratio: 1/1; border-radius: 8rpx; overflow: hidden;
+.image-wrapper.data-v-481e0091 {
+		width: 100%;
+		border-radius: 8rpx;
+		overflow: hidden;
 }
-.post-image.data-v-481e0091 { width: 100%; height: 100%; object-fit: cover;
+.post-image.data-v-481e0091 {
+		width: 100%;
+		height: 100%;
+		display: block;
+		/* 消除 image 标签底部空隙 */
+}
+
+	/* --- 核心：根据图片数量调整网格布局 --- */
+
+	/* 默认（3张及以上）: 3列网格 */
+.post-images.data-v-481e0091 {
+		grid-template-columns: repeat(3, 1fr);
+}
+.image-wrapper.data-v-481e0091 {
+		aspect-ratio: 1 / 1;
+		/* 多图时，保持1:1的正方形比例 */
+}
+
+	/* Case 1: 只有 1 张图片 */
+.images-count-1 .image-wrapper.data-v-481e0091 {
+		grid-column: 1 / -1;
+		/* 占据整行 */
+		aspect-ratio: unset;
+		/* 移除正方形限制，让图片以原始比例显示 */
+}
+
+	/* Case 2: 有 2 张或 4 张图片 */
+.images-count-2.data-v-481e0091,
+	.images-count-4.data-v-481e0091 {
+		grid-template-columns: repeat(2, 1fr);
+		/* 2列网格，布局更美观 */
 }
 .feedback-stats.data-v-481e0091 {
 		display: flex;
@@ -81,19 +125,28 @@
 		border-bottom: 1rpx solid #f5f5f5;
 		margin-bottom: 20rpx;
 }
-.like-count.data-v-481e0091 { margin-right: 30rpx; color: #e74c3c;
+.like-count.data-v-481e0091 {
+		margin-right: 30rpx;
+		color: #e74c3c;
 }
-.dislike-count.data-v-481e0091 { color: #3498db;
+.dislike-count.data-v-481e0091 {
+		color: #3498db;
 }
-.like-count.data-v-481e0091, .dislike-count.data-v-481e0091 { display: flex; align-items: center;
+.like-count.data-v-481e0091,
+	.dislike-count.data-v-481e0091 {
+		display: flex;
+		align-items: center;
 }
-.like-count uni-icons.data-v-481e0091, .dislike-count uni-icons.data-v-481e0091 { margin-right: 8rpx;
+.like-count uni-icons.data-v-481e0091,
+	.dislike-count uni-icons.data-v-481e0091 {
+		margin-right: 8rpx;
 }
 
 	/* 【新增】底部操作按钮样式 */
 .card-actions.data-v-481e0091 {
 		display: flex;
-		justify-content: flex-end; /* 按钮靠右对齐 */
+		justify-content: flex-end;
+		/* 按钮靠右对齐 */
 		gap: 20rpx;
 		padding-top: 20rpx;
 }
@@ -108,18 +161,25 @@
 		margin: 0;
 		line-height: 1;
 }
-.action-btn.data-v-481e0091::after { border: none;
+.action-btn.data-v-481e0091::after {
+		border: none;
 }
-.action-btn uni-icons.data-v-481e0091 { margin-right: 8rpx;
+.action-btn uni-icons.data-v-481e0091 {
+		margin-right: 8rpx;
 }
-.delete-btn.data-v-481e0091 { color: #e74c3c;
+.delete-btn.data-v-481e0091 {
+		color: #e74c3c;
 }
-.appeal-btn.data-v-481e0091 { color: #3498db;
+.appeal-btn.data-v-481e0091 {
+		color: #3498db;
 }
 .appeal-btn.disabled.data-v-481e0091 {
 		background-color: #f5f5f5;
 		color: #ccc;
-		pointer-events: none; /* 禁用点击事件 */
+		pointer-events: none;
+		/* 禁用点击事件 */
 }
-.no-posts-message.data-v-481e0091, .empty-post-button.data-v-481e0091 { /* 样式保持不变 */
+.no-posts-message.data-v-481e0091,
+	.empty-post-button.data-v-481e0091 {
+		/* 样式保持不变 */
 }

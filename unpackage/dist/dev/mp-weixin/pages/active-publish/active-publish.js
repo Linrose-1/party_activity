@@ -29,6 +29,7 @@ const _sfc_main = {
     common_vendor.onMounted(() => {
       getActiveType();
     });
+    const isPublishing = common_vendor.ref(false);
     const isPickerOpen = common_vendor.ref(false);
     const timeRange = common_vendor.ref([]);
     const enrollTimeRange = common_vendor.ref([]);
@@ -81,16 +82,16 @@ const _sfc_main = {
           type: "member_activity_category "
         }
       });
-      common_vendor.index.__f__("log", "at pages/active-publish/active-publish.vue:233", "getActiveType result:", result);
+      common_vendor.index.__f__("log", "at pages/active-publish/active-publish.vue:240", "getActiveType result:", result);
       tagOptions.value = result.data.map((item) => ({
         value: item.value,
         // 使用后端返回的value
         text: item.label
         // 使用后端返回的label
       }));
-      common_vendor.index.__f__("log", "at pages/active-publish/active-publish.vue:238", "tagOptions updated:", tagOptions.value);
+      common_vendor.index.__f__("log", "at pages/active-publish/active-publish.vue:245", "tagOptions updated:", tagOptions.value);
       if (result.error) {
-        common_vendor.index.__f__("log", "at pages/active-publish/active-publish.vue:241", "请求失败:", result.error);
+        common_vendor.index.__f__("log", "at pages/active-publish/active-publish.vue:248", "请求失败:", result.error);
       }
     };
     const enrollmentOptions = common_vendor.ref([
@@ -149,7 +150,7 @@ const _sfc_main = {
               icon: "none"
             });
           } else {
-            common_vendor.index.__f__("error", "at pages/active-publish/active-publish.vue:311", "上传失败:", result.error);
+            common_vendor.index.__f__("error", "at pages/active-publish/active-publish.vue:318", "上传失败:", result.error);
             common_vendor.index.showToast({
               title: result.error || "上传失败",
               icon: "none"
@@ -194,17 +195,17 @@ const _sfc_main = {
             title: "已成功加载草稿",
             icon: "none"
           });
-          common_vendor.index.__f__("log", "at pages/active-publish/active-publish.vue:371", "草稿已加载:", parsedDraft);
+          common_vendor.index.__f__("log", "at pages/active-publish/active-publish.vue:377", "草稿已加载:", parsedDraft);
         } else {
-          timeRange.value = ["2025-07-19 14:00:00", "2025-07-19 17:00:00"];
-          enrollTimeRange.value = ["2025-07-01 14:00:00", "2025-07-18 17:00:00"];
+          timeRange.value = ["2025-01-01 14:00:00", "2025-01-01 17:00:00"];
+          enrollTimeRange.value = ["2025-01-01 14:00:00", "2025-01-01 17:00:00"];
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/active-publish/active-publish.vue:378", "加载草稿失败:", error);
+        common_vendor.index.__f__("error", "at pages/active-publish/active-publish.vue:384", "加载草稿失败:", error);
         common_vendor.index.removeStorageSync(DRAFT_STORAGE_KEY);
       }
       common_vendor.index.$on("shopSelected", (shop) => {
-        common_vendor.index.__f__("log", "at pages/active-publish/active-publish.vue:384", "接收到选择的店铺信息:", shop);
+        common_vendor.index.__f__("log", "at pages/active-publish/active-publish.vue:390", "接收到选择的店铺信息:", shop);
         form.value.associatedStoreId = shop.id;
         associatedStoreName.value = shop.storeName;
       });
@@ -226,16 +227,23 @@ const _sfc_main = {
           icon: "success"
           // 使用成功图标
         });
-        common_vendor.index.__f__("log", "at pages/active-publish/active-publish.vue:410", "草稿已保存:", draftData);
+        common_vendor.index.__f__("log", "at pages/active-publish/active-publish.vue:416", "草稿已保存:", draftData);
       } catch (e) {
         common_vendor.index.showToast({
           title: "草稿保存失败",
           icon: "none"
         });
-        common_vendor.index.__f__("error", "at pages/active-publish/active-publish.vue:416", "保存草稿到本地存储失败:", e);
+        common_vendor.index.__f__("error", "at pages/active-publish/active-publish.vue:422", "保存草稿到本地存储失败:", e);
       }
     }
-    function publish() {
+    async function publish() {
+      if (isPublishing.value) {
+        common_vendor.index.showToast({
+          title: "正在发布中，请稍候...",
+          icon: "none"
+        });
+        return;
+      }
       if (!form.value.activityTitle) {
         common_vendor.index.showToast({
           title: "请输入活动标题",
@@ -344,6 +352,13 @@ const _sfc_main = {
         });
         return;
       }
+      if (!form.value.organizerPaymentQrCodeUrl) {
+        common_vendor.index.showToast({
+          title: "请上传收款码",
+          icon: "none"
+        });
+        return;
+      }
       if (!form.value.associatedStoreId) {
         common_vendor.index.showToast({
           title: "请选择合作店铺",
@@ -351,66 +366,90 @@ const _sfc_main = {
         });
         return;
       }
-      const payload = JSON.parse(JSON.stringify(form.value));
-      payload.startDatetime = new Date(timeRange.value[0]).getTime();
-      payload.endDatetime = new Date(timeRange.value[1]).getTime();
-      payload.registrationStartDatetime = new Date(enrollTimeRange.value[0]).getTime();
-      payload.registrationEndDatetime = new Date(enrollTimeRange.value[1]).getTime();
-      const selectedTagOption = tagOptions.value.find((option) => option.value === payload.tag);
-      if (selectedTagOption) {
-        payload.category = selectedTagOption.value;
-        payload.tags = [selectedTagOption.text];
-      } else {
-        payload.category = payload.tag;
-        payload.tags = [payload.tag];
-      }
-      delete payload.tag;
-      payload.activitySessions = payload.activitySessions.map((session, index) => ({
-        ...session,
-        sessionOrder: index + 1
-        // 顺序从1开始
-      }));
-      if (payload.activityFunds === 1) {
-        delete payload.companyName;
-        delete payload.companyLogo;
-      } else {
-        delete payload.registrationFee;
-      }
-      common_vendor.index.__f__("log", "at pages/active-publish/active-publish.vue:585", "发布活动 - 最终Payload:", payload);
-      createActive(payload);
-      common_vendor.index.switchTab({
-        url: "/pages/active/active"
+      isPublishing.value = true;
+      common_vendor.index.showLoading({
+        title: "正在处理...",
+        mask: true
       });
-    }
-    const createActive = async (payload) => {
-      common_vendor.index.__f__("log", "at pages/active-publish/active-publish.vue:599", "payload", payload);
-      const result = await utils_request.request("/app-api/member/activity/create", {
-        method: "POST",
-        // 请求方式
-        data: payload
-      });
-      common_vendor.index.__f__("log", "at pages/active-publish/active-publish.vue:606", "createActive result:", result);
-      common_vendor.index.showToast({
-        title: "活动发布成功！",
-        icon: "success"
-      });
-      if (result.error) {
-        common_vendor.index.__f__("log", "at pages/active-publish/active-publish.vue:613", "请求失败:", result.error);
+      try {
+        const payload = JSON.parse(JSON.stringify(form.value));
+        payload.startDatetime = new Date(timeRange.value[0]).getTime();
+        payload.endDatetime = new Date(timeRange.value[1]).getTime();
+        payload.registrationStartDatetime = new Date(enrollTimeRange.value[0]).getTime();
+        payload.registrationEndDatetime = new Date(enrollTimeRange.value[1]).getTime();
+        const selectedTagOption = tagOptions.value.find((option) => option.value === payload.tag);
+        if (selectedTagOption) {
+          payload.category = selectedTagOption.value;
+          payload.tags = [selectedTagOption.text];
+        } else {
+          payload.category = payload.tag;
+          payload.tags = [payload.tag];
+        }
+        delete payload.tag;
+        payload.activitySessions = payload.activitySessions.map((session, index) => ({
+          ...session,
+          sessionOrder: index + 1
+        }));
+        if (payload.activityFunds === 1) {
+          delete payload.companyName;
+          delete payload.companyLogo;
+        } else {
+          delete payload.registrationFee;
+        }
+        common_vendor.index.__f__("log", "at pages/active-publish/active-publish.vue:598", "发布活动 - 最终Payload:", payload);
+        const success = await createActive(payload);
+        if (success) {
+          common_vendor.index.removeStorageSync(DRAFT_STORAGE_KEY);
+          common_vendor.index.__f__("log", "at pages/active-publish/active-publish.vue:604", "活动发布成功，草稿已清除。");
+          common_vendor.index.switchTab({
+            url: "/pages/active/active"
+          });
+        }
+      } catch (e) {
+        common_vendor.index.__f__("error", "at pages/active-publish/active-publish.vue:614", "发布流程中发生未知错误:", e);
         common_vendor.index.showToast({
-          title: result.error,
+          title: "操作失败，请检查网络",
           icon: "none"
         });
+      } finally {
+        isPublishing.value = false;
+        common_vendor.index.hideLoading();
+      }
+    }
+    const createActive = async (payload) => {
+      common_vendor.index.__f__("log", "at pages/active-publish/active-publish.vue:628", "payload", payload);
+      const result = await utils_request.request("/app-api/member/activity/create", {
+        method: "POST",
+        data: payload
+      });
+      if (result && !result.error) {
+        common_vendor.index.__f__("log", "at pages/active-publish/active-publish.vue:636", "createActive result:", result);
+        common_vendor.index.showToast({
+          title: "活动发布成功！",
+          icon: "success"
+        });
+        return true;
+      } else {
+        common_vendor.index.__f__("log", "at pages/active-publish/active-publish.vue:645", "请求失败:", result.error);
+        common_vendor.index.showToast({
+          title: result.error || "发布失败，请检查填写内容",
+          // 优先使用后端返回的错误
+          icon: "none",
+          duration: 3e3
+          // 延长提示时间
+        });
+        return false;
       }
     };
     return (_ctx, _cache) => {
       return common_vendor.e({
         a: common_vendor.o(($event) => form.value.activityTitle = $event),
         b: common_vendor.p({
-          placeholder: "请输入活动标题",
+          placeholder: "请输入活动主题",
           modelValue: form.value.activityTitle
         }),
         c: common_vendor.p({
-          label: "活动标题",
+          label: "活动主题",
           required: true
         }),
         d: common_vendor.o(($event) => form.value.tag = $event),
@@ -464,27 +503,27 @@ const _sfc_main = {
       } : {}, {
         z: common_vendor.o(openMapToChooseLocation),
         A: common_vendor.p({
-          label: "活动地点",
+          label: "活动聚点",
           required: true
         }),
         B: common_vendor.o(($event) => form.value.totalSlots = $event),
         C: common_vendor.p({
           type: "number",
-          placeholder: "请输入活动总名额",
+          placeholder: "超过人数上限,不能报名",
           modelValue: form.value.totalSlots
         }),
         D: common_vendor.p({
-          label: "总名额",
+          label: "人数上限",
           required: true
         }),
         E: common_vendor.o(($event) => form.value.limitSlots = $event),
         F: common_vendor.p({
           type: "number",
-          placeholder: "请输入最低起聚名额",
+          placeholder: "不达起聚人数,活动取消",
           modelValue: form.value.limitSlots
         }),
         G: common_vendor.p({
-          label: "最低起聚名额",
+          label: "起聚人数",
           required: true
         }),
         H: common_vendor.o(($event) => form.value.activityFunds = $event),
@@ -502,11 +541,11 @@ const _sfc_main = {
         L: common_vendor.o(($event) => form.value.registrationFee = $event),
         M: common_vendor.p({
           type: "digit",
-          placeholder: "请输入预报名费用",
+          placeholder: "请输入活动费用(元)",
           modelValue: form.value.registrationFee
         }),
         N: common_vendor.p({
-          label: "预报名费用 (元)",
+          label: "单人费用",
           required: true
         })
       } : {}, {
@@ -574,11 +613,11 @@ const _sfc_main = {
         ad: common_vendor.o(addAgenda),
         ae: common_vendor.o(($event) => form.value.organizerUnitName = $event),
         af: common_vendor.p({
-          placeholder: "请输入组织单位名称",
+          placeholder: "请输入组织者名称",
           modelValue: form.value.organizerUnitName
         }),
         ag: common_vendor.p({
-          label: "组织单位",
+          label: "组织者",
           required: true
         }),
         ah: common_vendor.o(($event) => form.value.organizerContactPhone = $event),
@@ -614,8 +653,10 @@ const _sfc_main = {
           ["label-width"]: 80
         }),
         at: common_vendor.o(saveDraft),
-        av: common_vendor.o(publish),
-        aw: isPickerOpen.value ? 1 : ""
+        av: common_vendor.t(isPublishing.value ? "发布中..." : "发布活动"),
+        aw: isPublishing.value ? 1 : "",
+        ax: common_vendor.o(publish),
+        ay: isPickerOpen.value ? 1 : ""
       });
     };
   }

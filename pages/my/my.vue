@@ -22,7 +22,7 @@
 				</view>
 				<view class="edit-btn" @tap="onEdit">编辑</view>
 				
-				<text v-if="userInfo.id" class="user-id-display">ID: {{ userInfo.id }}</text>
+				<text v-if="userInfo.id" class="user-id-display">ID: {{ userInfo.virtualId }}</text>
 			</template>
 
 			<!-- 如果未登录，显示 "去登录" -->

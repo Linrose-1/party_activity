@@ -222,15 +222,13 @@
   color: #444;
 }
 .post-images.data-v-7c9d235a {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16rpx;
+  display: grid;
+  gap: 10rpx;
+  /* 网格间距 */
   margin-bottom: 30rpx;
-  overflow: hidden;
 }
 .image-wrapper.data-v-7c9d235a {
-  width: calc((100% - 32rpx) / 3);
-  aspect-ratio: 1/1;
+  width: 100%;
   border-radius: 12rpx;
   overflow: hidden;
   box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.08);
@@ -238,8 +236,33 @@
 .post-image.data-v-7c9d235a {
   width: 100%;
   height: 100%;
-  object-fit: cover;
   display: block;
+  /* 消除 image 标签底部空隙 */
+}
+
+/* --- 核心：根据图片数量调整网格布局 --- */
+/* 默认（3张及以上）: 3列网格 */
+.post-images.data-v-7c9d235a {
+  grid-template-columns: repeat(3, 1fr);
+}
+.image-wrapper.data-v-7c9d235a {
+  aspect-ratio: 1/1;
+  /* 多图时，保持1:1的正方形比例 */
+}
+
+/* Case 1: 只有 1 张图片 */
+.images-count-1 .image-wrapper.data-v-7c9d235a {
+  grid-column: 1/-1;
+  /* 占据整行 */
+  aspect-ratio: unset;
+  /* 移除正方形限制，让图片以原始比例显示 */
+}
+
+/* Case 2: 有 2 张或 4 张图片 */
+.images-count-2.data-v-7c9d235a,
+.images-count-4.data-v-7c9d235a {
+  grid-template-columns: repeat(2, 1fr);
+  /* 2列网格，布局更美观 */
 }
 .tags.data-v-7c9d235a {
   display: flex;

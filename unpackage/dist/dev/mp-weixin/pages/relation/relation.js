@@ -168,6 +168,23 @@ const _sfc_main = {
         isFollowActionInProgress.value = false;
       }
     };
+    const navigateToBusinessCard = (user) => {
+      if (!user || !user.id) {
+        common_vendor.index.showToast({
+          title: "无法查看该用户主页",
+          icon: "none"
+        });
+        return;
+      }
+      const defaultAvatar = "/static/icon/default-avatar.png";
+      const name = user.nickname || "匿名用户";
+      const avatarUrl = user.avatar || defaultAvatar;
+      const url = `/pages/applicationBusinessCard/applicationBusinessCard?id=${user.id}&name=${encodeURIComponent(name)}&avatar=${encodeURIComponent(avatarUrl)}`;
+      common_vendor.index.__f__("log", "at pages/relation/relation.vue:315", "从人脉列表页跳转，URL:", url);
+      common_vendor.index.navigateTo({
+        url
+      });
+    };
     const handleChooseLocation = () => common_vendor.index.chooseLocation({
       success: (res) => destination.value = res
     });
@@ -242,18 +259,19 @@ const _sfc_main = {
         t: common_vendor.f(userList.value, (user, k0, i0) => {
           return common_vendor.e({
             a: user.avatar,
-            b: common_vendor.t(user.nickname),
-            c: user.levelName
+            b: common_vendor.o(($event) => navigateToBusinessCard(user), user.id),
+            c: common_vendor.t(user.nickname),
+            d: user.levelName
           }, user.levelName ? {
-            d: common_vendor.t(user.levelName)
+            e: common_vendor.t(user.levelName)
           } : {}, {
-            e: common_vendor.t(user.companyName),
-            f: activeTab.value === 1 && user.followMyFlag === 1
+            f: common_vendor.t(user.companyName),
+            g: activeTab.value === 1 && user.followMyFlag === 1
           }, activeTab.value === 1 && user.followMyFlag === 1 ? {} : {}, {
-            g: common_vendor.t(user.followToFlag === 1 ? "已关注" : "+ 关注"),
-            h: user.followToFlag === 1 ? 1 : "",
-            i: common_vendor.o(($event) => handleFollowAction(user), user.id),
-            j: user.id
+            h: common_vendor.t(user.followToFlag === 1 ? "已关注" : "+ 关注"),
+            i: user.followToFlag === 1 ? 1 : "",
+            j: common_vendor.o(($event) => handleFollowAction(user), user.id),
+            k: user.id
           });
         }),
         v: isListEmpty.value

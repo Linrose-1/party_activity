@@ -21,7 +21,7 @@
 				<button class="nav-btn" @click.stop="handleCardClick">
 					<uni-icons type="map-filled" size="16" color="#fff"></uni-icons>
 					<!-- 【可选建议】您也可以通过 props 让按钮的文字可配置，比如 '查看' 或 '修改' -->
-					<text>查看</text>
+					<text>聚店详情</text>
 				</button>
 			</view>
 		</view>

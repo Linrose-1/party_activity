@@ -59,11 +59,12 @@ const _sfc_main = {
         nickname: rawUserData.nickname,
         avatar: rawUserData.avatar,
         realName: rawUserData.realName,
-        locationAddress: rawUserData.locationAddress,
+        locationAddressStr: rawUserData.locationAddressStr,
         professionalTitle: rawUserData.professionalTitle,
         companyName: rawUserData.companyName,
         contactEmail: rawUserData.contactEmail,
         wechatQrCodeUrl: rawUserData.wechatQrCodeUrl,
+        shardCode: rawUserData.shardCode,
         // ... 其他你需要的通用字段
         // --- 差异字段适配 ---
         // 目标：统一为 pinyinName 和 titleName
@@ -76,18 +77,33 @@ const _sfc_main = {
       };
     };
     const fetchOwnUserInfo = async () => {
-      common_vendor.index.showLoading({ title: "加载中..." });
-      const { data, error } = await utils_request.request("/app-api/member/user/get", { method: "GET" });
+      common_vendor.index.showLoading({
+        title: "加载中..."
+      });
+      const {
+        data,
+        error
+      } = await utils_request.request("/app-api/member/user/get", {
+        method: "GET"
+      });
       common_vendor.index.hideLoading();
       if (error) {
-        common_vendor.index.showToast({ title: `加载失败: ${error}`, icon: "none" });
+        common_vendor.index.showToast({
+          title: `加载失败: ${error}`,
+          icon: "none"
+        });
         return;
       }
       userInfo.value = adaptUserInfo(data);
     };
     const fetchTargetUserInfo = async (userId) => {
-      common_vendor.index.showLoading({ title: "加载中..." });
-      const { data, error } = await utils_request.request("/app-api/member/user/read-card", {
+      common_vendor.index.showLoading({
+        title: "加载中..."
+      });
+      const {
+        data,
+        error
+      } = await utils_request.request("/app-api/member/user/read-card", {
         method: "POST",
         data: {
           readUserId: userId
@@ -95,7 +111,10 @@ const _sfc_main = {
       });
       common_vendor.index.hideLoading();
       if (error) {
-        common_vendor.index.showToast({ title: `获取名片失败: ${error}`, icon: "none" });
+        common_vendor.index.showToast({
+          title: `获取名片失败: ${error}`,
+          icon: "none"
+        });
         setTimeout(() => common_vendor.index.navigateBack(), 2e3);
         return;
       }
@@ -105,19 +124,32 @@ const _sfc_main = {
       if (!userInfo.value)
         return [];
       return [
-        { icon: "phone-filled", value: userInfo.value.mobile || "未设置手机" },
-        { icon: "email-filled", value: userInfo.value.contactEmail || "未设置邮箱" },
-        { icon: "location-filled", value: userInfo.value.locationAddress || "未设置地址" }
+        {
+          icon: "phone-filled",
+          value: userInfo.value.mobile || "未设置手机"
+        },
+        {
+          icon: "email-filled",
+          value: userInfo.value.contactEmail || "未设置邮箱"
+        },
+        {
+          icon: "location-filled",
+          value: userInfo.value.locationAddressStr || "未设置地址"
+        }
       ];
     });
     const goToEdit = () => {
-      common_vendor.index.navigateTo({ url: "/pages/my-edit/my-edit" });
+      common_vendor.index.navigateTo({
+        url: "/pages/my-edit/my-edit"
+      });
     };
     const triggerShareHitApi = async (sharerId, bizId) => {
       if (!sharerId || !bizId)
         return;
-      common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:207", `准备为分享者 (ID: ${sharerId}) 增加贡分, 关联名片ID (bizId): ${bizId}`);
-      const { error } = await utils_request.request("/app-api/member/experience-record/share-experience-hit", {
+      common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:237", `准备为分享者 (ID: ${sharerId}) 增加贡分, 关联名片ID (bizId): ${bizId}`);
+      const {
+        error
+      } = await utils_request.request("/app-api/member/experience-record/share-experience-hit", {
         method: "POST",
         data: {
           type: 30,
@@ -127,14 +159,17 @@ const _sfc_main = {
         }
       });
       if (error) {
-        common_vendor.index.__f__("error", "at pages/my-businessCard/my-businessCard.vue:219", "调用分享名片加分接口失败:", error);
+        common_vendor.index.__f__("error", "at pages/my-businessCard/my-businessCard.vue:251", "调用分享名片加分接口失败:", error);
       } else {
-        common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:221", `成功为分享者 (ID: ${sharerId}) 触发贡分增加`);
+        common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:253", `成功为分享者 (ID: ${sharerId}) 触发贡分增加`);
       }
     };
     const openSharePopup = () => {
       if (!userInfo.value) {
-        common_vendor.index.showToast({ title: "信息加载中，请稍候", icon: "none" });
+        common_vendor.index.showToast({
+          title: "信息加载中，请稍候",
+          icon: "none"
+        });
         return;
       }
       customShareTitle.value = `这是 ${userInfo.value.realName || userInfo.value.nickname} 的名片`;
@@ -144,10 +179,12 @@ const _sfc_main = {
       sharePopup.value.close();
     };
     common_vendor.onShareAppMessage((res) => {
-      common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:244", "触发了分享给好友", res);
+      common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:279", "触发了分享给好友", res);
       closeSharePopup();
       if (!userInfo.value) {
-        return { title: "快来看看我的专业电子名片！" };
+        return {
+          title: "快来看看我的专业电子名片！"
+        };
       }
       const sharerId = common_vendor.index.getStorageSync("userId");
       let sharePath = `/pages/my-businessCard/my-businessCard?id=${userInfo.value.id}`;
@@ -162,10 +199,12 @@ const _sfc_main = {
       };
     });
     common_vendor.onShareTimeline(() => {
-      common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:270", "触发了分享到朋友圈");
+      common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:308", "触发了分享到朋友圈");
       hideTimelineGuide();
       if (!userInfo.value) {
-        return { title: "快来看看我的专业电子名片！" };
+        return {
+          title: "快来看看我的专业电子名片！"
+        };
       }
       const sharerId = common_vendor.index.getStorageSync("userId");
       let queryString = `id=${userInfo.value.id}`;
@@ -207,6 +246,7 @@ const _sfc_main = {
           ["contact-info"]: formattedContactInfo.value,
           ["show-user-qr-code"]: !!userInfo.value.wechatQrCodeUrl,
           ["user-we-chat-qr-code-url"]: userInfo.value.wechatQrCodeUrl,
+          ["shard-code"]: userInfo.value.shardCode,
           ["platform-qr-code-url"]: "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=platform-info",
           ["logo-url"]: "https://gitee.com/image_store/repo_1/raw/master/go-for-planet-logo.png"
         })

@@ -16,7 +16,7 @@
 					</image>
 					<view class="info-details">
 						<view class="info-name">{{ userInfo.nickname || '未设置昵称' }}</view>
-						<view class="info-id">ID: {{ userInfo.id }}</view>
+						<view class="info-id">ID: {{ userInfo.virtualId }}</view>
 					</view>
 					<button class="details-button" @click="navigateToInfoDetails">
 						查看 <uni-icons type="right" size="14" color="#fff"></uni-icons>

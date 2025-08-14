@@ -64,6 +64,21 @@ const _sfc_main = {
         return "女";
       return "未设置";
     };
+    const formatBirthday = (timestamp) => {
+      if (!timestamp) {
+        return "未填写";
+      }
+      try {
+        const date = new Date(timestamp);
+        const year = date.getFullYear();
+        const month = (date.getMonth() + 1).toString().padStart(2, "0");
+        const day = date.getDate().toString().padStart(2, "0");
+        return `${year}-${month}-${day}`;
+      } catch (e) {
+        common_vendor.index.__f__("error", "at packages/my-account-informationDetails/my-account-informationDetails.vue:208", "无效的生日时间戳:", timestamp, e);
+        return "日期无效";
+      }
+    };
     const previewImage = (url) => {
       if (!url)
         return;
@@ -82,9 +97,9 @@ const _sfc_main = {
         d: common_vendor.t(userInfo.value.nickname || "未填写"),
         e: common_vendor.t(userInfo.value.realName || "未填写"),
         f: common_vendor.t(formatSex(userInfo.value.sex)),
-        g: common_vendor.t(userInfo.value.birthday || "未填写"),
-        h: common_vendor.t(userInfo.value.areaName || "未填写"),
-        i: common_vendor.t(userInfo.value.residenceName || "未填写"),
+        g: common_vendor.t(formatBirthday(userInfo.value.birthday)),
+        h: common_vendor.t(userInfo.value.locationAddressStr || "未填写"),
+        i: common_vendor.t(userInfo.value.birthplaceStr || "未填写"),
         j: common_vendor.t(userInfo.value.nativePlace || "未填写"),
         k: common_vendor.p({
           type: "flag-filled",

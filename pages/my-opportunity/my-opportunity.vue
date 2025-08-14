@@ -6,7 +6,8 @@
 			<view v-for="post in postList" :key="post.id" class="post-card" @click="skipCommercialDetail(post.id)">
 				<view class="post-header">
 					<view class="user-info">
-						<image :src="post.memberUser.avatar" mode="" class="avatar" @click.stop="skipApplicationBusinessCard"></image>
+						<image :src="post.memberUser.avatar" mode="" class="avatar"
+							@click.stop="skipApplicationBusinessCard"></image>
 						<view class="user-details-wrapper">
 							<view class="user-name">{{ post.memberUser.nickname || '匿名用户' }}</view>
 							<view class="post-time">
@@ -25,9 +26,12 @@
 					{{ post.postContent }}
 				</view>
 
-				<view class="post-images" v-if="post.postImg">
+				<view class="post-images" v-if="post.postImg"
+					:class="['images-count-' + post.postImg.split(',').length]">
 					<view v-for="(image, imgIndex) in post.postImg.split(',')" :key="imgIndex" class="image-wrapper">
-						<img :src="image" alt="商机图片" class="post-image"
+						<!-- 核心改动：使用 image 标签并动态绑定 mode -->
+						<image :src="image" class="post-image"
+							:mode="post.postImg.split(',').length === 1 ? 'widthFix' : 'aspectFill'"
 							@click.stop="previewImage(post.postImg.split(','), imgIndex)" />
 					</view>
 				</view>
@@ -46,11 +50,10 @@
 						<uni-icons type="trash" size="16" color="#e74c3c"></uni-icons>
 						删除
 					</button>
-					<button class="action-btn appeal-btn" 
-						:class="{ 'disabled': post.status !== 'hidden' }" 
-						:disabled="post.status !== 'hidden'" 
-						@click.stop="openAppealModal(post)">
-						<uni-icons type="chat-filled" size="16" :color="post.status === 'hidden' ? '#3498db' : '#ccc'"></uni-icons>
+					<button class="action-btn appeal-btn" :class="{ 'disabled': post.status !== 'hidden' }"
+						:disabled="post.status !== 'hidden'" @click.stop="openAppealModal(post)">
+						<uni-icons type="chat-filled" size="16"
+							:color="post.status === 'hidden' ? '#3498db' : '#ccc'"></uni-icons>
 						申诉
 					</button>
 				</view>
@@ -62,7 +65,7 @@
 				<!-- ... -->
 			</view>
 		</view>
-		
+
 		<!-- 【新增】申诉弹窗 -->
 		<uni-popup ref="appealPopup" type="dialog">
 			<uni-popup-dialog mode="input" title="提交申诉" placeholder="请输入申诉理由..."
@@ -73,8 +76,14 @@
 </template>
 
 <script setup>
-	import { ref } from 'vue';
-	import { onLoad, onReachBottom, onPullDownRefresh } from '@dcloudio/uni-app';
+	import {
+		ref
+	} from 'vue';
+	import {
+		onLoad,
+		onReachBottom,
+		onPullDownRefresh
+	} from '@dcloudio/uni-app';
 	import request from '@/utils/request.js';
 
 	// --- 状态定义 ---
@@ -83,7 +92,7 @@
 	const pageSize = ref(10);
 	const total = ref(0);
 	const loadStatus = ref('more');
-	
+
 	// 【新增】申诉弹窗相关状态
 	const appealPopup = ref(null); // 弹窗实例
 	const currentAppealPost = ref(null); // 当前正在申诉的帖子对象
@@ -108,17 +117,29 @@
 		switch (post.status) {
 			case 'active':
 			case 'reactive': // reactive 也视为正常
-				return { text: '正常', class: 'status-active' };
+				return {
+					text: '正常', class: 'status-active'
+				};
 			case 'hidden':
-				return { text: '待申诉', class: 'status-hidden' };
+				return {
+					text: '待申诉', class: 'status-hidden'
+				};
 			case 'reject': // 假设'reject'是申诉失败的状态码
-				return { text: '申诉失败', class: 'status-rejected' };
+				return {
+					text: '申诉失败', class: 'status-rejected'
+				};
 			case 'completed':
-				return { text: '已完成', class: 'status-completed' };
+				return {
+					text: '已完成', class: 'status-completed'
+				};
 			case 'closed':
-				return { text: '已关闭', class: 'status-closed' };
+				return {
+					text: '已关闭', class: 'status-closed'
+				};
 			default:
-				return { text: '未知', class: 'status-unknown' };
+				return {
+					text: '未知', class: 'status-unknown'
+				};
 		}
 	};
 
@@ -126,24 +147,48 @@
 	const getMyOpportunitiesList = async (isRefresh = false) => {
 		// ... 数据请求逻辑保持不变 ...
 		if (loadStatus.value === 'loading' || (loadStatus.value === 'noMore' && !isRefresh)) return;
-		if (isRefresh) { pageNo.value = 1; postList.value = []; loadStatus.value = 'more'; }
+		if (isRefresh) {
+			pageNo.value = 1;
+			postList.value = [];
+			loadStatus.value = 'more';
+		}
 		loadStatus.value = 'loading';
 		const userId = uni.getStorageSync('userId'); // 动态获取userId
-		const { data, error } = await request('/app-api/member/business-opportunities/my-list', {
+		const {
+			data,
+			error
+		} = await request('/app-api/member/business-opportunities/my-list', {
 			method: 'GET',
-			data: { pageNo: pageNo.value, pageSize: pageSize.value, userId: userId }
+			data: {
+				pageNo: pageNo.value,
+				pageSize: pageSize.value,
+				userId: userId
+			}
 		});
 		if (isRefresh) uni.stopPullDownRefresh();
-		if (error) { loadStatus.value = 'more'; return; }
+		if (error) {
+			loadStatus.value = 'more';
+			return;
+		}
 		if (data && data.list && data.list.length > 0) {
 			postList.value = [...postList.value, ...data.list];
 			total.value = data.total;
 			loadStatus.value = postList.value.length >= total.value ? 'noMore' : 'more';
 			if (loadStatus.value === 'more') pageNo.value++;
 		} else {
-			if (pageNo.value === 1) { postList.value = []; }
+			if (pageNo.value === 1) {
+				postList.value = [];
+			}
 			loadStatus.value = 'noMore';
 		}
+	};
+
+	// 【新增】图片预览函数
+	const previewImage = (urls, current) => {
+		uni.previewImage({
+			urls: urls,
+			current: urls[current]
+		});
 	};
 
 	// --- 事件处理函数 ---
@@ -154,19 +199,35 @@
 			content: '您确定要删除这条商机吗？删除后将无法恢复。',
 			success: async (res) => {
 				if (res.confirm) {
-					uni.showLoading({ title: '删除中...' });
-					const { error } = await request('/app-api/member/business-opportunities/delete', {
-						method: 'POST', data: { id: id }
+					uni.showLoading({
+						title: '删除中...'
+					});
+					const {
+						error
+					} = await request('/app-api/member/business-opportunities/delete', {
+						method: 'POST',
+						data: {
+							id: id
+						}
 					});
 					uni.hideLoading();
-					if (error) { uni.showToast({ title: '删除失败: ' + error, icon: 'none' }); return; }
-					uni.showToast({ title: '删除成功', icon: 'success' });
+					if (error) {
+						uni.showToast({
+							title: '删除失败: ' + error,
+							icon: 'none'
+						});
+						return;
+					}
+					uni.showToast({
+						title: '删除成功',
+						icon: 'success'
+					});
 					getMyOpportunitiesList(true); // 刷新列表
 				}
 			}
 		});
 	};
-	
+
 	/**
 	 * 【新增】打开申诉弹窗
 	 * @param {object} post - 要申诉的帖子对象
@@ -182,13 +243,20 @@
 	 */
 	const confirmAppeal = async (appealContent) => {
 		if (!appealContent || !appealContent.trim()) {
-			uni.showToast({ title: '申诉内容不能为空', icon: 'none' });
+			uni.showToast({
+				title: '申诉内容不能为空',
+				icon: 'none'
+			});
 			return;
 		}
 
-		uni.showLoading({ title: '提交中...' });
+		uni.showLoading({
+			title: '提交中...'
+		});
 
-		const { error } = await request('/app-api/member/business-opportunities/appeal', {
+		const {
+			error
+		} = await request('/app-api/member/business-opportunities/appeal', {
 			method: 'POST',
 			data: {
 				id: currentAppealPost.value.id,
@@ -199,9 +267,15 @@
 		uni.hideLoading();
 
 		if (error) {
-			uni.showToast({ title: '申诉失败: ' + error, icon: 'none' });
+			uni.showToast({
+				title: '申诉失败: ' + error,
+				icon: 'none'
+			});
 		} else {
-			uni.showToast({ title: '申诉已提交，请等待审核', icon: 'success' });
+			uni.showToast({
+				title: '申诉已提交，请等待审核',
+				icon: 'success'
+			});
 			appealPopup.value.close();
 			// 申诉后，最好也刷新一下列表，以便看到状态更新
 			getMyOpportunitiesList(true);
@@ -224,7 +298,7 @@
 
 <style scoped>
 	/* ... .my-opportunities-app, .post-list, .post-card 等大部分样式保持不变 ... */
-	
+
 	.my-opportunities-app {
 		background-color: #f9f9f9;
 		min-height: 100vh;
@@ -233,7 +307,7 @@
 	.post-list {
 		padding: 30rpx 0;
 	}
-	
+
 	.post-card {
 		background: white;
 		border-radius: 20rpx;
@@ -241,33 +315,37 @@
 		margin: 0 30rpx 30rpx;
 		box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.04);
 	}
-	
+
 	.post-header {
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
 		margin-bottom: 24rpx;
 	}
+
 	.user-info {
 		display: flex;
 		align-items: center;
 		flex: 1;
 	}
+
 	.avatar {
 		width: 80rpx;
 		height: 80rpx;
 		border-radius: 50%;
 		margin-right: 20rpx;
 	}
+
 	.user-name {
 		font-weight: 600;
 		font-size: 30rpx;
 	}
+
 	.post-time {
 		font-size: 24rpx;
 		color: #999;
 	}
-	
+
 	/* 【新增】状态标签样式 */
 	.status-tag {
 		font-size: 24rpx;
@@ -275,26 +353,85 @@
 		border-radius: 30rpx;
 		font-weight: 500;
 	}
-	.status-active { background-color: #f6ffed; color: #52c41a; }
-	.status-hidden { background-color: #fffbe6; color: #faad14; }
-	.status-rejected { background-color: #fff1f0; color: #f5222d; }
-	.status-completed, .status-closed { background-color: #f0f0f0; color: #999; }
-	.status-unknown { background-color: #f0f0f0; color: #999; }
+
+	.status-active {
+		background-color: #f6ffed;
+		color: #52c41a;
+	}
+
+	.status-hidden {
+		background-color: #fffbe6;
+		color: #faad14;
+	}
+
+	.status-rejected {
+		background-color: #fff1f0;
+		color: #f5222d;
+	}
+
+	.status-completed,
+	.status-closed {
+		background-color: #f0f0f0;
+		color: #999;
+	}
+
+	.status-unknown {
+		background-color: #f0f0f0;
+		color: #999;
+	}
 
 	.post-content {
 		font-size: 28rpx;
 		line-height: 1.6;
 		margin-bottom: 20rpx;
 	}
-	
+
 	.post-images {
 		display: grid;
-		grid-template-columns: repeat(3, 1fr);
 		gap: 10rpx;
+		/* 网格间距 */
 		margin-bottom: 20rpx;
 	}
-	.image-wrapper { aspect-ratio: 1/1; border-radius: 8rpx; overflow: hidden; }
-	.post-image { width: 100%; height: 100%; object-fit: cover; }
+
+	.image-wrapper {
+		width: 100%;
+		border-radius: 8rpx;
+		overflow: hidden;
+	}
+
+	.post-image {
+		width: 100%;
+		height: 100%;
+		display: block;
+		/* 消除 image 标签底部空隙 */
+	}
+
+	/* --- 核心：根据图片数量调整网格布局 --- */
+
+	/* 默认（3张及以上）: 3列网格 */
+	.post-images {
+		grid-template-columns: repeat(3, 1fr);
+	}
+
+	.image-wrapper {
+		aspect-ratio: 1 / 1;
+		/* 多图时，保持1:1的正方形比例 */
+	}
+
+	/* Case 1: 只有 1 张图片 */
+	.images-count-1 .image-wrapper {
+		grid-column: 1 / -1;
+		/* 占据整行 */
+		aspect-ratio: unset;
+		/* 移除正方形限制，让图片以原始比例显示 */
+	}
+
+	/* Case 2: 有 2 张或 4 张图片 */
+	.images-count-2,
+	.images-count-4 {
+		grid-template-columns: repeat(2, 1fr);
+		/* 2列网格，布局更美观 */
+	}
 
 	.feedback-stats {
 		display: flex;
@@ -305,18 +442,36 @@
 		border-bottom: 1rpx solid #f5f5f5;
 		margin-bottom: 20rpx;
 	}
-	.like-count { margin-right: 30rpx; color: #e74c3c; }
-	.dislike-count { color: #3498db; }
-	.like-count, .dislike-count { display: flex; align-items: center; }
-	.like-count uni-icons, .dislike-count uni-icons { margin-right: 8rpx; }
+
+	.like-count {
+		margin-right: 30rpx;
+		color: #e74c3c;
+	}
+
+	.dislike-count {
+		color: #3498db;
+	}
+
+	.like-count,
+	.dislike-count {
+		display: flex;
+		align-items: center;
+	}
+
+	.like-count uni-icons,
+	.dislike-count uni-icons {
+		margin-right: 8rpx;
+	}
 
 	/* 【新增】底部操作按钮样式 */
 	.card-actions {
 		display: flex;
-		justify-content: flex-end; /* 按钮靠右对齐 */
+		justify-content: flex-end;
+		/* 按钮靠右对齐 */
 		gap: 20rpx;
 		padding-top: 20rpx;
 	}
+
 	.action-btn {
 		display: flex;
 		align-items: center;
@@ -328,15 +483,32 @@
 		margin: 0;
 		line-height: 1;
 	}
-	.action-btn::after { border: none; }
-	.action-btn uni-icons { margin-right: 8rpx; }
-	.delete-btn { color: #e74c3c; }
-	.appeal-btn { color: #3498db; }
+
+	.action-btn::after {
+		border: none;
+	}
+
+	.action-btn uni-icons {
+		margin-right: 8rpx;
+	}
+
+	.delete-btn {
+		color: #e74c3c;
+	}
+
+	.appeal-btn {
+		color: #3498db;
+	}
+
 	.appeal-btn.disabled {
 		background-color: #f5f5f5;
 		color: #ccc;
-		pointer-events: none; /* 禁用点击事件 */
+		pointer-events: none;
+		/* 禁用点击事件 */
 	}
-	
-	.no-posts-message, .empty-post-button { /* 样式保持不变 */ }
+
+	.no-posts-message,
+	.empty-post-button {
+		/* 样式保持不变 */
+	}
 </style>

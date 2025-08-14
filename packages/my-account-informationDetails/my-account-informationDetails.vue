@@ -26,15 +26,15 @@
 				</view>
 				<view class="info-item">
 					<text class="label">出生日期</text>
-					<text class="value">{{ userInfo.birthday || '未填写' }}</text>
+					<text class="value">{{ formatBirthday(userInfo.birthday) }}</text>
 				</view>
 				<view class="info-item">
 					<text class="label">常住地</text>
-					<text class="value">{{ userInfo.areaName || '未填写' }}</text>
+					<text class="value">{{ userInfo.locationAddressStr || '未填写' }}</text>
 				</view>
 				<view class="info-item">
 					<text class="label">出生地</text>
-					<text class="value">{{ userInfo.residenceName || '未填写' }}</text>
+					<text class="value">{{ userInfo.birthplaceStr || '未填写' }}</text>
 				</view>
 				<view class="info-item">
 					<text class="label">籍贯</text>
@@ -184,6 +184,30 @@ const formatSex = (sex) => {
 	if (sex === 1) return '男';
 	if (sex === 2) return '女';
 	return '未设置';
+};
+
+/**
+ * 【新增】格式化生日时间戳
+ * @param {number|null|undefined} timestamp - 后端返回的生日时间戳
+ * @returns {string} - 格式化后的 "YYYY-MM-DD" 字符串，或 "未填写"
+ */
+const formatBirthday = (timestamp) => {
+    // 检查时间戳是否有效（非 null、非 undefined、非 0）
+	if (!timestamp) {
+		return '未填写';
+	}
+	
+	try {
+		const date = new Date(timestamp);
+		// getFullYear() 等方法可能会因为无效的 date 对象（比如 new Date(null)）而报错，所以放在 try-catch 里更安全
+		const year = date.getFullYear();
+		const month = (date.getMonth() + 1).toString().padStart(2, '0');
+		const day = date.getDate().toString().padStart(2, '0');
+		return `${year}-${month}-${day}`;
+	} catch (e) {
+		console.error("无效的生日时间戳:", timestamp, e);
+		return '日期无效';
+	}
 };
 
 const previewImage = (url) => {

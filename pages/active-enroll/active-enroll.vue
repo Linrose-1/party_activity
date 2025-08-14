@@ -29,10 +29,12 @@
 			</view>
 			<view class="info-box">
 				<!-- 【修改】动态绑定组织者单位和电话 -->
-				<view><strong>单位：</strong> {{ activityDetail.organizerUnitName }}</view>
+				<view><strong>组织者：</strong> {{ activityDetail.organizerUnitName }}</view>
 				<view><strong>电话：</strong> {{ activityDetail.organizerContactPhone }}</view>
 				<!-- 【修改】动态绑定活动时间和地点 -->
-				<view><strong>活动时间：</strong> {{ formatRangeTime(activityDetail.startDatetime, activityDetail.endDatetime) }}</view>
+				<view><strong>活动时间：</strong>
+					{{ formatRangeTime(activityDetail.startDatetime, activityDetail.endDatetime) }}
+				</view>
 				<view><strong>报名时间：</strong> {{ formattedRegistrationTime }}</view>
 				<view><strong>活动地点：</strong> {{ activityDetail.locationAddress }}</view>
 			</view>
@@ -61,11 +63,12 @@
 				<uni-easyinput type="text" v-model="formData.contactAddress" placeholder="请输入单位或学校名称"
 					:styles="{ borderColor: '#eee', borderRadius: '12rpx' }"></uni-easyinput>
 			</view>
-			
+
 			<!-- 【新增】当需要排队时，显示申请理由输入框 -->
 			<view class="input-item" v-if="isQueuing">
 				<label for="remark">申请理由（排队中）</label>
-				<uni-easyinput type="textarea" autoHeight v-model="formData.remark" placeholder="当前报名人数已满，填写申请理由可提高审核通过率"
+				<uni-easyinput type="textarea" autoHeight v-model="formData.remark"
+					placeholder="当前报名人数已满，填写申请理由可提高审核通过率"
 					:styles="{ borderColor: '#eee', borderRadius: '12rpx' }"></uni-easyinput>
 			</view>
 
@@ -84,7 +87,8 @@
 
 			<view class="qr-code">
 				<!-- 【修改】动态绑定收款码 -->
-				<img :src="activityDetail.organizerPaymentQrCodeUrl" alt="微信支付二维码" />
+				<image v-if="activityDetail.organizerPaymentQrCodeUrl" :src="activityDetail.organizerPaymentQrCodeUrl"
+					class="qr-code-image" mode="widthFix" @click="previewQrCode" alt="微信支付二维码" />
 				<view class="qr-note">请使用微信扫码完成支付</view>
 			</view>
 
@@ -92,7 +96,7 @@
 				<uni-icons type="image" size="18" color="#FF6E00"></uni-icons>
 				<span>上传付款凭证</span>
 			</view>
-			
+
 			<!-- 【修改】使用真实上传逻辑 -->
 			<view class="upload-box" @click="chooseImage">
 				<view v-if="!formData.paymentScreenshotUrl">
@@ -107,7 +111,7 @@
 				<img v-else :src="formData.paymentScreenshotUrl" class="preview-image" alt="付款截图" />
 			</view>
 			<view class="prompt">
-				ⓘ请上传带支付订单号的付款凭证截图
+				ⓘ请上传带支付订单号的付款凭证截图（微信支付-->账单详情页）
 			</view>
 
 			<!-- 【修改】绑定真实的提交方法 -->
@@ -143,10 +147,10 @@
 			</button>
 		</view>
 
-		<view class="footer">
+		<!-- <view class="footer">
 			<p>创新科技活动策划部 © 2023 版权所有</p>
 			<p>客服电话: 021-68881234 | 服务时间: 9:00-18:00</p>
-		</view>
+		</view> -->
 	</view>
 </template>
 
@@ -164,7 +168,7 @@
 	import uploadFile from '../../utils/upload.js';
 
 	const currentStep = ref(1);
-	
+
 	const formData = reactive({
 		userName: '',
 		userPhone: '',
@@ -176,36 +180,49 @@
 	const activityId = ref(null);
 	const activityDetail = ref(null);
 
+	const ticketNumber = ref('');
+
 	onLoad((options) => {
 		if (options.id) {
 			activityId.value = options.id;
-			getActiveDetail(); // 在拿到 ID 后直接调用数据获取函数
+			// 【修改】现在 getActiveDetail 会处理所有逻辑
+			getActiveDetail();
 		} else {
 			console.error('未接收到活动ID！');
-			uni.showToast({ title: '加载活动详情失败，缺少ID', icon: 'none' });
+			uni.showToast({
+				title: '加载活动详情失败，缺少ID',
+				icon: 'none'
+			});
+			// 如果没有ID，直接返回，避免后续执行
+			setTimeout(() => uni.navigateBack(), 1500);
 		}
 	});
 
 	const currentDate = new Date().toLocaleString('zh-CN', {
-		year: 'numeric', month: '2-digit', day: '2-digit',
-		hour: '2-digit', minute: '2-digit', second: '2-digit',
+		year: 'numeric',
+		month: '2-digit',
+		day: '2-digit',
+		hour: '2-digit',
+		minute: '2-digit',
+		second: '2-digit',
 	}).replace(/\//g, '-');
-	
+
 	const formatRangeTime = (start, end) => {
-			const format = (timestamp) => {
-				if (!timestamp) return '';
-				const date = new Date(timestamp);
-				return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')} ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
-			}
-			return `${format(start)} - ${format(end)}`;
+		const format = (timestamp) => {
+			if (!timestamp) return '';
+			const date = new Date(timestamp);
+			return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')} ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
 		}
-	
-	    // 【新增】用于报名时间的计算属性
-	    const formattedRegistrationTime = computed(() => {
-	        if (!activityDetail.value) return '待定';
-	        return formatRangeTime(activityDetail.value.registrationStartDatetime, activityDetail.value.registrationEndDatetime);
-	    });
-	
+		return `${format(start)} - ${format(end)}`;
+	}
+
+	// 【新增】用于报名时间的计算属性
+	const formattedRegistrationTime = computed(() => {
+		if (!activityDetail.value) return '待定';
+		return formatRangeTime(activityDetail.value.registrationStartDatetime, activityDetail.value
+			.registrationEndDatetime);
+	});
+
 	const isQueuing = computed(() => {
 		if (!activityDetail.value) return false;
 		return (activityDetail.value.joinCount || 0) >= activityDetail.value.totalSlots;
@@ -221,73 +238,163 @@
 
 	const confirmSignup = () => {
 		if (!canSubmitStep1.value) {
-			if (!formData.userName.trim()) { uni.showToast({ title: '请输入姓名', icon: 'none' }); return; }
-			if (!/^1[3-9]\d{9}$/.test(formData.userPhone)) { uni.showToast({ title: '请输入有效的手机号', icon: 'none' }); return; }
-			if (isQueuing.value && !formData.remark.trim()) { uni.showToast({ title: '报名已满，请填写申请理由', icon: 'none' }); return; }
+			if (!formData.userName.trim()) {
+				uni.showToast({
+					title: '请输入姓名',
+					icon: 'none'
+				});
+				return;
+			}
+			if (!/^1[3-9]\d{9}$/.test(formData.userPhone)) {
+				uni.showToast({
+					title: '请输入有效的手机号',
+					icon: 'none'
+				});
+				return;
+			}
+			if (isQueuing.value && !formData.remark.trim()) {
+				uni.showToast({
+					title: '报名已满，请填写申请理由',
+					icon: 'none'
+				});
+				return;
+			}
 		}
 		currentStep.value = 2;
 	};
-	
+
 	const chooseImage = () => {
-			uni.chooseImage({
-				count: 1,
-				sizeType: ['compressed'],
-				sourceType: ['album', 'camera'],
-				success: async (res) => {
-					const file = res.tempFiles[0];
-	
-					// (可选) 文件大小校验
-					const maxSize = 5 * 1024 * 1024; // 5MB
-					if (file.size > maxSize) {
-						return uni.showToast({ title: '文件大小不能超过5MB', icon: 'none' });
-					}
-	
-					uni.showLoading({ title: '上传中...', mask: true });
-	
-					// 【关键】直接调用导入的 uploadFile 工具函数
-					// 为付款凭证指定一个清晰的目录名，方便后端管理
-					const result = await uploadFile(file, { directory: 'payment-proof' });
-	
-					uni.hideLoading();
-	
-					if (result.data) {
-						// 上传成功，将返回的真实URL赋值给 formData
-						formData.paymentScreenshotUrl = result.data;
-						uni.showToast({ title: '上传成功', icon: 'success' });
-					} else {
-						console.error("上传失败:", result.error);
-						uni.showToast({ title: result.error || '上传失败', icon: 'none' });
-					}
+		uni.chooseImage({
+			count: 1,
+			sizeType: ['compressed'],
+			sourceType: ['album', 'camera'],
+			success: async (res) => {
+				const file = res.tempFiles[0];
+
+				// (可选) 文件大小校验
+				const maxSize = 5 * 1024 * 1024; // 5MB
+				if (file.size > maxSize) {
+					return uni.showToast({
+						title: '文件大小不能超过5MB',
+						icon: 'none'
+					});
 				}
-			});
-		};
+
+				uni.showLoading({
+					title: '上传中...',
+					mask: true
+				});
+
+				// 【关键】直接调用导入的 uploadFile 工具函数
+				// 为付款凭证指定一个清晰的目录名，方便后端管理
+				const result = await uploadFile(file, {
+					directory: 'payment-proof'
+				});
+
+				uni.hideLoading();
+
+				if (result.data) {
+					// 上传成功，将返回的真实URL赋值给 formData
+					formData.paymentScreenshotUrl = result.data;
+					uni.showToast({
+						title: '上传成功',
+						icon: 'success'
+					});
+				} else {
+					console.error("上传失败:", result.error);
+					uni.showToast({
+						title: result.error || '上传失败',
+						icon: 'none'
+					});
+				}
+			}
+		});
+	};
 
 
 	const getActiveDetail = async () => {
 		if (!activityId.value) return;
-		const result = await request('/app-api/member/activity/get', {
-			method: 'GET',
-			data: { id: activityId.value }
+
+		uni.showLoading({
+			title: '加载中...',
+			mask: true
 		});
-		if (result && !result.error) {
-			activityDetail.value = result.data;
-		} else {
-			console.log('请求失败:', result ? result.error : '无返回结果');
+
+		try {
+			const result = await request('/app-api/member/activity/get', {
+				method: 'GET',
+				data: {
+					id: activityId.value
+				}
+			});
+
+			uni.hideLoading();
+
+			if (result && !result.error) {
+				const data = result.data;
+				console.log('getActiveDetail result:', data);
+
+				// 1. 检查用户是否已报名
+				if (data && data.memberActivityJoinResp) {
+					console.log('用户已报名，直接跳转到成功页。');
+					activityDetail.value = data; // 仍然需要赋值，以便成功页显示信息
+
+					// 【新增】如果已报名，从返回数据中获取信息，而不是重新生成
+					// 注意：后端目前没有返回报名编号，我们暂时还用前端生成逻辑
+					// 如果后端返回了，可以用：ticketNumber.value = data.memberActivityJoinResp.ticketId || generateTicketNumber();
+					ticketNumber.value = generateTicketNumber();
+
+					currentStep.value = 3; // 直接设置为步骤3
+
+					// 并且预填一些信息，虽然用不上，但保持数据一致性
+					formData.userName = data.memberActivityJoinResp.userName || '';
+					formData.userPhone = data.memberActivityJoinResp.userPhone || '';
+					formData.paymentScreenshotUrl = data.memberActivityJoinResp.paymentScreenshotUrl || '';
+
+				} else {
+					console.log('用户未报名，进入正常报名流程。');
+					// 用户未报名，正常赋值并停留在步骤1
+					activityDetail.value = data;
+					currentStep.value = 1;
+				}
+			} else {
+				console.log('请求失败:', result ? result.error : '无返回结果');
+				uni.showToast({
+					title: result.error || '获取活动信息失败',
+					icon: 'none'
+				});
+			}
+		} catch (e) {
+			uni.hideLoading();
+			console.error('获取活动详情时发生异常:', e);
+			uni.showToast({
+				title: '网络异常，请稍后重试',
+				icon: 'none'
+			});
 		}
 	};
 
 	const joinActivity = async () => {
 		if (!formData.paymentScreenshotUrl) {
-			uni.showToast({ title: '请上传付款截图', icon: 'none' });
+			uni.showToast({
+				title: '请上传付款截图',
+				icon: 'none'
+			});
 			return;
 		}
-		
-		uni.showLoading({ title: '提交中...', mask: true });
+
+		uni.showLoading({
+			title: '提交中...',
+			mask: true
+		});
 
 		const userId = uni.getStorageSync('userId');
 		if (!userId) {
 			uni.hideLoading();
-			uni.showToast({ title: '无法获取用户信息，请重新登录', icon: 'none' });
+			uni.showToast({
+				title: '无法获取用户信息，请重新登录',
+				icon: 'none'
+			});
 			return;
 		}
 
@@ -306,23 +413,47 @@
 			method: 'POST',
 			data: params
 		});
-		
+
 		uni.hideLoading();
 
 		if (result && !result.error) {
-			uni.showToast({ title: '报名成功！', icon: 'success' });
+			uni.showToast({
+				title: '报名成功！',
+				icon: 'success'
+			});
 			currentStep.value = 3;
 		} else {
 			console.log('报名失败:', result ? result.error : '无返回结果');
-			uni.showToast({ title: result.error || '报名失败，请重试', icon: 'none' });
+			uni.showToast({
+				title: result.error || '报名失败，请重试',
+				icon: 'none'
+			});
+		}
+	};
+
+	/**
+	 * ==================== 预览二维码 ====================
+	 */
+	const previewQrCode = () => {
+		// 确保 activityDetail 和其中的 URL 存在，防止报错
+		if (activityDetail.value && activityDetail.value.organizerPaymentQrCodeUrl) {
+			uni.previewImage({
+				// uni.previewImage 需要一个 URL 数组
+				urls: [activityDetail.value.organizerPaymentQrCodeUrl],
+				// 指定当前要显示的图片，因为只有一个，所以就是它自己
+				current: activityDetail.value.organizerPaymentQrCodeUrl
+			});
 		}
 	};
 
 	const generateTicketNumber = () => {
-		const letters = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
-		const randomLetter = letters[Math.floor(Math.random() * letters.length)];
-		const randomNumbers = Math.floor(100000 + Math.random() * 900000);
-		return `TK${randomLetter}${randomNumbers}`;
+		if (!ticketNumber.value) {
+			const letters = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+			const randomLetter = letters[Math.floor(Math.random() * letters.length)];
+			const randomNumbers = Math.floor(100000 + Math.random() * 900000);
+			ticketNumber.value = `TK${randomLetter}${randomNumbers}`;
+		}
+		return ticketNumber.value;
 	};
 
 	const backToHome = () => {
@@ -441,14 +572,20 @@
 		border-radius: 16rpx;
 	}
 
-	.qr-code img {
-		width: 300rpx;
-		height: 300rpx;
+	.qr-code .qr-code-image {
+		/* 使用新的 class 选择器 */
+		width: 400rpx;
+		/* 可以适当调大宽度，让二维码更清晰 */
+		/* height: 300rpx;  <--  关键：删除或注释掉固定的 height 属性 */
 		border-radius: 16rpx;
 		border: 1rpx solid #eee;
 		background: white;
 		padding: 20rpx;
 		box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
+		display: block;
+		/* 确保图片表现为块级元素，便于居中 */
+		margin: 0 auto;
+		/* 水平居中图片 */
 	}
 
 	.qr-note {
@@ -495,8 +632,8 @@
 		transition: all 0.3s;
 		cursor: pointer;
 	}
-	
-	.prompt{
+
+	.prompt {
 		color: #999;
 		font-size: 28rpx;
 	}

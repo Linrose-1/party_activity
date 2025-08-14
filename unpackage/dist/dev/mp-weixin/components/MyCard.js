@@ -48,10 +48,23 @@ const _sfc_main = {
     contactInfo: {
       type: Array,
       default: () => [
-        { icon: "phone-filled", value: "18888888888" },
-        { icon: "email-filled", value: "ZHANGSAN@foxmail.com" },
-        { icon: "location-filled", value: "广东省广州市天河区珠江新城潭村路328号二楼" }
+        {
+          icon: "phone-filled",
+          value: "18888888888"
+        },
+        {
+          icon: "email-filled",
+          value: "ZHANGSAN@foxmail.com"
+        },
+        {
+          icon: "location-filled",
+          value: "广东省广州市天河区珠江新城潭村路328号二楼"
+        }
       ]
+    },
+    shardCode: {
+      type: String,
+      default: ""
     },
     // --- 用户个人二维码 ---
     showUserQrCode: {
@@ -73,6 +86,26 @@ const _sfc_main = {
     }
   },
   setup(__props) {
+    const props = __props;
+    const copyShardCode = () => {
+      if (!props.shardCode)
+        return;
+      common_vendor.index.setClipboardData({
+        data: props.shardCode,
+        success: () => {
+          common_vendor.index.showToast({
+            title: "邀请码已复制",
+            icon: "success"
+          });
+        },
+        fail: () => {
+          common_vendor.index.showToast({
+            title: "复制失败",
+            icon: "none"
+          });
+        }
+      });
+    };
     return (_ctx, _cache) => {
       return common_vendor.e({
         a: __props.avatar,
@@ -101,8 +134,17 @@ const _sfc_main = {
       }, __props.showUserQrCode ? {
         k: __props.userWeChatQrCodeUrl
       } : {}, {
-        l: __props.platformQrCodeUrl,
-        m: __props.logoUrl
+        l: __props.shardCode
+      }, __props.shardCode ? {
+        m: common_vendor.t(__props.shardCode),
+        n: common_vendor.p({
+          type: "paperclip",
+          size: "16",
+          color: "#FF7B00"
+        }),
+        o: common_vendor.o(copyShardCode)
+      } : {}, {
+        p: __props.logoUrl
       });
     };
   }

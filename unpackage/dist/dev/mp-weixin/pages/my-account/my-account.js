@@ -285,7 +285,7 @@ const _sfc_main = {
         }),
         c: userInfo.value.avatar || "/static/default-avatar.png",
         d: common_vendor.t(userInfo.value.nickname || "未设置昵称"),
-        e: common_vendor.t(userInfo.value.id),
+        e: common_vendor.t(userInfo.value.virtualId),
         f: common_vendor.p({
           type: "right",
           size: "14",

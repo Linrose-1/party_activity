@@ -23,22 +23,6 @@ if (!Math) {
 const _sfc_main = {
   __name: "my-edit",
   setup(__props) {
-    const AreaApi = {
-      getAreaTree: () => utils_request.request("/app-api/system/area/tree", { method: "GET" })
-    };
-    const IndustryApi = {
-      getIndustryTree: () => utils_request.request("/app-api/member/national-industry/tree", { method: "POST" })
-    };
-    common_vendor.onMounted(async () => {
-      common_vendor.index.showLoading({ title: "加载中..." });
-      await Promise.all([
-        getUserInfo(),
-        getAreaTreeData(),
-        getIndustryTreeData()
-        // 新增
-      ]);
-      common_vendor.index.hideLoading();
-    });
     const formRef = common_vendor.ref(null);
     const form = common_vendor.ref({
       nickname: "",
@@ -47,13 +31,12 @@ const _sfc_main = {
       sex: null,
       birthday: "",
       locationAddress: null,
-      // 【修正】存储常住地ID，初始为null
-      residence: null,
-      // 【修正】存储出生地ID，初始为null
+      // 将存储ID数组用于反显，或单个ID用于提交
+      birthplace: null,
+      // 将存储ID数组用于反显，或单个ID用于提交
       nativePlace: "",
       professionalTitle: "",
       industry: null,
-      // 【核心修改】新增行业ID字段
       companyName: "",
       school: "",
       mobile: "",
@@ -62,49 +45,177 @@ const _sfc_main = {
       hobby: "",
       personalBio: ""
     });
-    const industryTree = common_vendor.ref([]);
     const areaTree = common_vendor.ref([]);
-    const rules = {
-      // 校验规则无变化
-      nickname: { rules: [{ required: true, errorMessage: "请输入用户昵称" }] },
-      avatar: { rules: [{ required: true, errorMessage: "请上传头像" }] },
-      sex: { rules: [{ type: "number", required: true, errorMessage: "请选择性别" }] }
-    };
-    const genderOptions = [{ value: 1, text: "男" }, { value: 2, text: "女" }];
+    const industryTree = common_vendor.ref([]);
+    const genderOptions = [{
+      value: 1,
+      text: "男"
+    }, {
+      value: 2,
+      text: "女"
+    }];
     const today = common_vendor.computed(() => {
       const date = /* @__PURE__ */ new Date();
       return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, "0")}-${date.getDate().toString().padStart(2, "0")}`;
     });
+    const rules = {
+      nickname: {
+        rules: [{
+          required: true,
+          errorMessage: "请输入用户昵称"
+        }]
+      },
+      avatar: {
+        rules: [{
+          required: true,
+          errorMessage: "请上传头像"
+        }]
+      },
+      sex: {
+        rules: [{
+          type: "number",
+          required: true,
+          errorMessage: "请选择性别"
+        }]
+      }
+    };
+    const Api = {
+      getAreaTree: () => utils_request.request("/app-api/system/area/tree", {
+        method: "GET"
+      }),
+      getIndustryTree: () => utils_request.request("/app-api/member/national-industry/tree", {
+        method: "POST"
+      }),
+      getUserInfo: () => utils_request.request("/app-api/member/user/get", {
+        method: "GET"
+      }),
+      updateUser: (data) => utils_request.request("/app-api/member/user/update", {
+        method: "PUT",
+        data
+      })
+    };
+    common_vendor.onMounted(async () => {
+      common_vendor.index.showLoading({
+        title: "加载基础数据..."
+      });
+      await Promise.all([
+        getAreaTreeData(),
+        getIndustryTreeData()
+      ]);
+      await fetchUserInfoAndPopulateForm();
+      common_vendor.index.hideLoading();
+    });
     const getAreaTreeData = async () => {
-      const { data, error } = await AreaApi.getAreaTree();
+      const {
+        data,
+        error
+      } = await Api.getAreaTree();
       if (error) {
-        common_vendor.index.__f__("error", "at pages/my-edit/my-edit.vue:193", "获取地区树失败:", error);
-        common_vendor.index.showToast({ title: "地区数据加载失败", icon: "none" });
+        common_vendor.index.__f__("error", "at pages/my-edit/my-edit.vue:201", "获取地区树失败:", error);
       } else {
-        areaTree.value = data;
+        areaTree.value = data || [];
       }
     };
     const getIndustryTreeData = async () => {
-      const { data, error } = await IndustryApi.getIndustryTree();
+      const {
+        data,
+        error
+      } = await Api.getIndustryTree();
       if (error) {
-        common_vendor.index.__f__("error", "at pages/my-edit/my-edit.vue:204", "获取行业树失败:", error);
-        common_vendor.index.showToast({ title: "行业数据加载失败", icon: "none" });
+        common_vendor.index.__f__("error", "at pages/my-edit/my-edit.vue:213", "获取行业树失败:", error);
       } else {
-        industryTree.value = data;
+        industryTree.value = data || [];
       }
     };
-    const getUserInfo = async () => {
-      const { data: userInfo, error } = await utils_request.request("/app-api/member/user/get", { method: "GET" });
+    function findPathById(tree, targetId) {
+      for (const node of tree) {
+        if (node.id === targetId)
+          return [node.id];
+        if (node.children && node.children.length > 0) {
+          const path = findPathById(node.children, targetId);
+          if (path)
+            return [node.id, ...path];
+        }
+      }
+      return null;
+    }
+    const fetchUserInfoAndPopulateForm = async () => {
+      const {
+        data: userInfo,
+        error
+      } = await Api.getUserInfo();
+      if (error) {
+        return common_vendor.index.showToast({
+          title: error || "获取用户信息失败",
+          icon: "none"
+        });
+      }
       if (userInfo) {
         Object.keys(form.value).forEach((key) => {
           if (userInfo[key] !== void 0 && userInfo[key] !== null) {
             form.value[key] = userInfo[key];
           }
         });
-      } else {
-        common_vendor.index.showToast({ title: error || "获取用户信息失败", icon: "none" });
+        if (userInfo.locationAddress) {
+          const targetId = parseInt(userInfo.locationAddress, 10);
+          const path = findPathById(areaTree.value, targetId);
+          if (path)
+            form.value.locationAddress = path;
+        }
+        if (userInfo.birthplace) {
+          const targetId = parseInt(userInfo.birthplace, 10);
+          const path = findPathById(areaTree.value, targetId);
+          if (path)
+            form.value.birthplace = path;
+        }
+        if (userInfo.birthday && typeof userInfo.birthday === "number") {
+          const date = new Date(userInfo.birthday);
+          form.value.birthday = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, "0")}-${date.getDate().toString().padStart(2, "0")}`;
+        }
       }
     };
+    const chooseAvatar = () => {
+      common_vendor.index.chooseImage({
+        count: 1,
+        sourceType: ["album", "camera"],
+        success: (res) => {
+          const tempFilePath = res.tempFilePaths[0];
+          common_vendor.wx$1.cropImage({
+            src: tempFilePath,
+            cropScale: "1:1",
+            success: (cropRes) => uploadAvatar(cropRes.tempFilePath),
+            fail: (err) => common_vendor.index.__f__("log", "at pages/my-edit/my-edit.vue:290", "用户取消裁剪或裁剪失败:", err)
+          });
+        }
+      });
+    };
+    const uploadAvatar = async (filePath) => {
+      common_vendor.index.showLoading({
+        title: "上传中...",
+        mask: true
+      });
+      const result = await utils_upload.uploadFile({
+        path: filePath
+      }, {
+        directory: "avatar"
+      });
+      common_vendor.index.hideLoading();
+      if (result.data) {
+        form.value.avatar = result.data;
+        common_vendor.index.showToast({
+          title: "头像更新成功",
+          icon: "success"
+        });
+      } else {
+        common_vendor.index.showToast({
+          title: result.error || "上传失败",
+          icon: "none"
+        });
+      }
+    };
+    function chooseWechatQr() {
+      handleImageUpload("wechatQrCodeUrl", "qrcode");
+    }
     const handleImageUpload = (field, directory) => {
       common_vendor.index.chooseImage({
         count: 1,
@@ -112,44 +223,71 @@ const _sfc_main = {
         success: async (res) => {
           const file = res.tempFiles[0];
           if (file.size > 5 * 1024 * 1024) {
-            return common_vendor.index.showToast({ title: "文件大小不能超过5MB", icon: "none" });
+            return common_vendor.index.showToast({
+              title: "文件大小不能超过5MB",
+              icon: "none"
+            });
           }
-          common_vendor.index.showLoading({ title: "上传中...", mask: true });
-          const result = await utils_upload.uploadFile(file, { directory });
+          common_vendor.index.showLoading({
+            title: "上传中...",
+            mask: true
+          });
+          const result = await utils_upload.uploadFile(file, {
+            directory
+          });
           common_vendor.index.hideLoading();
           if (result.data) {
             form.value[field] = result.data;
           } else {
-            common_vendor.index.showToast({ title: result.error || "上传失败", icon: "none" });
+            common_vendor.index.showToast({
+              title: result.error || "上传失败",
+              icon: "none"
+            });
           }
         }
       });
     };
-    function chooseAvatar() {
-      handleImageUpload("avatar", "avatar");
-    }
-    function chooseWechatQr() {
-      handleImageUpload("wechatQrCodeUrl", "qrcode");
-    }
     const previewImage = (url) => {
-      common_vendor.index.previewImage({ urls: [url] });
+      common_vendor.index.previewImage({
+        urls: [url]
+      });
     };
     const submitForm = () => {
       formRef.value.validate().then(async () => {
-        common_vendor.index.showLoading({ title: "正在保存..." });
-        const result = await utils_request.request("/app-api/member/user/update", {
-          method: "PUT",
-          data: form.value
+        common_vendor.index.showLoading({
+          title: "正在保存..."
         });
+        const payload = {
+          ...form.value
+        };
+        if (Array.isArray(payload.locationAddress) && payload.locationAddress.length > 0) {
+          payload.locationAddress = payload.locationAddress[payload.locationAddress.length - 1];
+        }
+        if (Array.isArray(payload.birthplace) && payload.birthplace.length > 0) {
+          payload.birthplace = payload.birthplace[payload.birthplace.length - 1];
+        }
+        if (payload.birthday && typeof payload.birthday === "string") {
+          const dateStr = payload.birthday.replace(/-/g, "/");
+          payload.birthday = new Date(dateStr).getTime();
+        }
+        const {
+          error
+        } = await Api.updateUser(payload);
         common_vendor.index.hideLoading();
-        if (result.data !== null) {
-          common_vendor.index.showToast({ title: "保存成功", icon: "success" });
-          setTimeout(() => common_vendor.index.navigateBack(), 1500);
+        if (error) {
+          common_vendor.index.showToast({
+            title: error || "保存失败",
+            icon: "none"
+          });
         } else {
-          common_vendor.index.showToast({ title: result.error || "保存失败", icon: "none" });
+          common_vendor.index.showToast({
+            title: "保存成功",
+            icon: "success"
+          });
+          setTimeout(() => common_vendor.index.navigateBack(), 1500);
         }
       }).catch((err) => {
-        common_vendor.index.__f__("log", "at pages/my-edit/my-edit.vue:269", "表单验证失败：", err);
+        common_vendor.index.__f__("log", "at pages/my-edit/my-edit.vue:411", "表单验证失败：", err);
       });
     };
     const goToLabelEditPage = () => {
@@ -223,7 +361,7 @@ const _sfc_main = {
           label: "常住地",
           name: "locationAddress"
         }),
-        v: common_vendor.o(($event) => form.value.residence = $event),
+        v: common_vendor.o(($event) => form.value.birthplace = $event),
         w: common_vendor.p({
           placeholder: "请选择出生地",
           ["popup-title"]: "请选择省市区",
@@ -232,11 +370,11 @@ const _sfc_main = {
             text: "name",
             value: "id"
           },
-          modelValue: form.value.residence
+          modelValue: form.value.birthplace
         }),
         x: common_vendor.p({
           label: "出生地",
-          name: "residence"
+          name: "birthplace"
         }),
         y: common_vendor.o(($event) => form.value.nativePlace = $event),
         z: common_vendor.p({
@@ -300,6 +438,7 @@ const _sfc_main = {
         }),
         Q: common_vendor.o(($event) => form.value.contactEmail = $event),
         R: common_vendor.p({
+          placeholder: "请输入邮箱",
           modelValue: form.value.contactEmail
         }),
         S: common_vendor.p({

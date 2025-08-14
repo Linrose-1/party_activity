@@ -94,14 +94,20 @@ label.data-v-d315542e {
 		background: #fff8f2;
 		border-radius: 16rpx;
 }
-.qr-code img.data-v-d315542e {
-		width: 300rpx;
-		height: 300rpx;
+.qr-code .qr-code-image.data-v-d315542e {
+		/* 使用新的 class 选择器 */
+		width: 400rpx;
+		/* 可以适当调大宽度，让二维码更清晰 */
+		/* height: 300rpx;  <--  关键：删除或注释掉固定的 height 属性 */
 		border-radius: 16rpx;
 		border: 1rpx solid #eee;
 		background: white;
 		padding: 20rpx;
 		box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
+		display: block;
+		/* 确保图片表现为块级元素，便于居中 */
+		margin: 0 auto;
+		/* 水平居中图片 */
 }
 .qr-note.data-v-d315542e {
 		color: #ff6e00;
@@ -143,7 +149,7 @@ label.data-v-d315542e {
 		transition: all 0.3s;
 		cursor: pointer;
 }
-.prompt.data-v-d315542e{
+.prompt.data-v-d315542e {
 		color: #999;
 		font-size: 28rpx;
 }

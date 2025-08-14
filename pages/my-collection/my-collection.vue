@@ -81,10 +81,13 @@
 					<!-- 数据绑定到 item.postRespVO -->
 					<div class="post-header">
 						<div class="user-info">
-							<div class="avatar" @click.stop="skipApplicationBusinessCard">
-								{{ item.postRespVO.contactPerson.charAt(0) }}</div>
+							<!-- <div class="avatar" @click.stop="skipApplicationBusinessCard">
+								{{ item.postRespVO.memberUser.avatar }}
+							</div> -->
+							<image :src="item.postRespVO.memberUser.avatar" mode="" class="avatar"
+								@click.stop="skipApplicationBusinessCard"></image>
 							<div class="user-details-wrapper">
-								<div class="user-name">{{ item.postRespVO.contactPerson }}</div>
+								<div class="user-name">{{ item.postRespVO.memberUser.nickname }}</div>
 								<div class="post-time">
 									<uni-icons type="redo" size="14" color="#888"></uni-icons>
 									{{ formatTimestamp(item.postRespVO.createTime) }}
@@ -102,13 +105,16 @@
 						{{ item.postRespVO.postContent }}
 					</div>
 
-					<div class="post-images" v-if="item.postRespVO.postImg && item.postRespVO.postImg.length">
-						<div v-for="(image, imgIndex) in item.postRespVO.postImg.split(',')" :key="imgIndex"
-							class="image-wrapper">
-							<img :src="image" alt="商机图片" class="post-image"
-								@click.stop="previewImage(item.postRespVO.postImg.split(','), imgIndex)" />
-						</div>
-					</div>
+					<view class="post-images" v-if="item.postRespVO.postImg && item.postRespVO.postImg.length"
+						:class="['images-count-' + item.postRespVO.postImg.split(',').length]">
+						<view v-for="(image, imgIndex) in item.postRespVO.postImg.split(',')" :key="imgIndex"
+							class="image-wrapper"
+							@click.stop="previewImage(item.postRespVO.postImg.split(','), imgIndex)">
+							<!-- 核心改动：使用 image 标签并动态绑定 mode -->
+							<image :src="image" class="post-image"
+								:mode="item.postRespVO.postImg.split(',').length === 1 ? 'widthFix' : 'aspectFill'" />
+						</view>
+					</view>
 
 					<div class="tags" v-if="item.postRespVO.tags && item.postRespVO.tags.length">
 						<div v-for="(tag, tagIndex) in item.postRespVO.tags" :key="tagIndex" class="tag">
@@ -243,7 +249,7 @@
 					// ================================================================
 					const filteredList = rawList
 						.filter(item => item.postRespVO && typeof item.postRespVO ===
-						'object') // 1. 过滤掉 postRespVO 为 null 的项
+							'object') // 1. 过滤掉 postRespVO 为 null 的项
 						.map(item => {
 							// 2. 对每一项进行数据清洗，提供默认值
 							const post = item.postRespVO;
@@ -645,16 +651,14 @@
 	}
 
 	.post-images {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 16rpx;
+		display: grid;
+		gap: 10rpx;
+		/* 网格间距 */
 		margin-bottom: 30rpx;
-		overflow: hidden;
 	}
 
 	.image-wrapper {
-		width: calc((100% - 32rpx) / 3);
-		aspect-ratio: 1 / 1;
+		width: 100%;
 		border-radius: 12rpx;
 		overflow: hidden;
 		box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.08);
@@ -663,8 +667,35 @@
 	.post-image {
 		width: 100%;
 		height: 100%;
-		object-fit: cover;
 		display: block;
+		/* 消除 image 标签底部空隙 */
+	}
+
+	/* --- 核心：根据图片数量调整网格布局 --- */
+
+	/* 默认（3张及以上）: 3列网格 */
+	.post-images {
+		grid-template-columns: repeat(3, 1fr);
+	}
+
+	.image-wrapper {
+		aspect-ratio: 1 / 1;
+		/* 多图时，保持1:1的正方形比例 */
+	}
+
+	/* Case 1: 只有 1 张图片 */
+	.images-count-1 .image-wrapper {
+		grid-column: 1 / -1;
+		/* 占据整行 */
+		aspect-ratio: unset;
+		/* 移除正方形限制，让图片以原始比例显示 */
+	}
+
+	/* Case 2: 有 2 张或 4 张图片 */
+	.images-count-2,
+	.images-count-4 {
+		grid-template-columns: repeat(2, 1fr);
+		/* 2列网格，布局更美观 */
 	}
 
 	.tags {

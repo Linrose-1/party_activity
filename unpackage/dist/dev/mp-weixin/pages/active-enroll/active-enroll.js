@@ -26,13 +26,18 @@ const _sfc_main = {
     });
     const activityId = common_vendor.ref(null);
     const activityDetail = common_vendor.ref(null);
+    const ticketNumber = common_vendor.ref("");
     common_vendor.onLoad((options) => {
       if (options.id) {
         activityId.value = options.id;
         getActiveDetail();
       } else {
-        common_vendor.index.__f__("error", "at pages/active-enroll/active-enroll.vue:184", "未接收到活动ID！");
-        common_vendor.index.showToast({ title: "加载活动详情失败，缺少ID", icon: "none" });
+        common_vendor.index.__f__("error", "at pages/active-enroll/active-enroll.vue:191", "未接收到活动ID！");
+        common_vendor.index.showToast({
+          title: "加载活动详情失败，缺少ID",
+          icon: "none"
+        });
+        setTimeout(() => common_vendor.index.navigateBack(), 1500);
       }
     });
     const currentDate = (/* @__PURE__ */ new Date()).toLocaleString("zh-CN", {
@@ -72,15 +77,24 @@ const _sfc_main = {
     const confirmSignup = () => {
       if (!canSubmitStep1.value) {
         if (!formData.userName.trim()) {
-          common_vendor.index.showToast({ title: "请输入姓名", icon: "none" });
+          common_vendor.index.showToast({
+            title: "请输入姓名",
+            icon: "none"
+          });
           return;
         }
         if (!/^1[3-9]\d{9}$/.test(formData.userPhone)) {
-          common_vendor.index.showToast({ title: "请输入有效的手机号", icon: "none" });
+          common_vendor.index.showToast({
+            title: "请输入有效的手机号",
+            icon: "none"
+          });
           return;
         }
         if (isQueuing.value && !formData.remark.trim()) {
-          common_vendor.index.showToast({ title: "报名已满，请填写申请理由", icon: "none" });
+          common_vendor.index.showToast({
+            title: "报名已满，请填写申请理由",
+            icon: "none"
+          });
           return;
         }
       }
@@ -95,17 +109,31 @@ const _sfc_main = {
           const file = res.tempFiles[0];
           const maxSize = 5 * 1024 * 1024;
           if (file.size > maxSize) {
-            return common_vendor.index.showToast({ title: "文件大小不能超过5MB", icon: "none" });
+            return common_vendor.index.showToast({
+              title: "文件大小不能超过5MB",
+              icon: "none"
+            });
           }
-          common_vendor.index.showLoading({ title: "上传中...", mask: true });
-          const result = await utils_upload.uploadFile(file, { directory: "payment-proof" });
+          common_vendor.index.showLoading({
+            title: "上传中...",
+            mask: true
+          });
+          const result = await utils_upload.uploadFile(file, {
+            directory: "payment-proof"
+          });
           common_vendor.index.hideLoading();
           if (result.data) {
             formData.paymentScreenshotUrl = result.data;
-            common_vendor.index.showToast({ title: "上传成功", icon: "success" });
+            common_vendor.index.showToast({
+              title: "上传成功",
+              icon: "success"
+            });
           } else {
-            common_vendor.index.__f__("error", "at pages/active-enroll/active-enroll.vue:258", "上传失败:", result.error);
-            common_vendor.index.showToast({ title: result.error || "上传失败", icon: "none" });
+            common_vendor.index.__f__("error", "at pages/active-enroll/active-enroll.vue:304", "上传失败:", result.error);
+            common_vendor.index.showToast({
+              title: result.error || "上传失败",
+              icon: "none"
+            });
           }
         }
       });
@@ -113,26 +141,69 @@ const _sfc_main = {
     const getActiveDetail = async () => {
       if (!activityId.value)
         return;
-      const result = await utils_request.request("/app-api/member/activity/get", {
-        method: "GET",
-        data: { id: activityId.value }
+      common_vendor.index.showLoading({
+        title: "加载中...",
+        mask: true
       });
-      if (result && !result.error) {
-        activityDetail.value = result.data;
-      } else {
-        common_vendor.index.__f__("log", "at pages/active-enroll/active-enroll.vue:275", "请求失败:", result ? result.error : "无返回结果");
+      try {
+        const result = await utils_request.request("/app-api/member/activity/get", {
+          method: "GET",
+          data: {
+            id: activityId.value
+          }
+        });
+        common_vendor.index.hideLoading();
+        if (result && !result.error) {
+          const data = result.data;
+          common_vendor.index.__f__("log", "at pages/active-enroll/active-enroll.vue:335", "getActiveDetail result:", data);
+          if (data && data.memberActivityJoinResp) {
+            common_vendor.index.__f__("log", "at pages/active-enroll/active-enroll.vue:339", "用户已报名，直接跳转到成功页。");
+            activityDetail.value = data;
+            ticketNumber.value = generateTicketNumber();
+            currentStep.value = 3;
+            formData.userName = data.memberActivityJoinResp.userName || "";
+            formData.userPhone = data.memberActivityJoinResp.userPhone || "";
+            formData.paymentScreenshotUrl = data.memberActivityJoinResp.paymentScreenshotUrl || "";
+          } else {
+            common_vendor.index.__f__("log", "at pages/active-enroll/active-enroll.vue:355", "用户未报名，进入正常报名流程。");
+            activityDetail.value = data;
+            currentStep.value = 1;
+          }
+        } else {
+          common_vendor.index.__f__("log", "at pages/active-enroll/active-enroll.vue:361", "请求失败:", result ? result.error : "无返回结果");
+          common_vendor.index.showToast({
+            title: result.error || "获取活动信息失败",
+            icon: "none"
+          });
+        }
+      } catch (e) {
+        common_vendor.index.hideLoading();
+        common_vendor.index.__f__("error", "at pages/active-enroll/active-enroll.vue:369", "获取活动详情时发生异常:", e);
+        common_vendor.index.showToast({
+          title: "网络异常，请稍后重试",
+          icon: "none"
+        });
       }
     };
     const joinActivity = async () => {
       if (!formData.paymentScreenshotUrl) {
-        common_vendor.index.showToast({ title: "请上传付款截图", icon: "none" });
+        common_vendor.index.showToast({
+          title: "请上传付款截图",
+          icon: "none"
+        });
         return;
       }
-      common_vendor.index.showLoading({ title: "提交中...", mask: true });
+      common_vendor.index.showLoading({
+        title: "提交中...",
+        mask: true
+      });
       const userId = common_vendor.index.getStorageSync("userId");
       if (!userId) {
         common_vendor.index.hideLoading();
-        common_vendor.index.showToast({ title: "无法获取用户信息，请重新登录", icon: "none" });
+        common_vendor.index.showToast({
+          title: "无法获取用户信息，请重新登录",
+          icon: "none"
+        });
         return;
       }
       const params = {
@@ -151,18 +222,37 @@ const _sfc_main = {
       });
       common_vendor.index.hideLoading();
       if (result && !result.error) {
-        common_vendor.index.showToast({ title: "报名成功！", icon: "success" });
+        common_vendor.index.showToast({
+          title: "报名成功！",
+          icon: "success"
+        });
         currentStep.value = 3;
       } else {
-        common_vendor.index.__f__("log", "at pages/active-enroll/active-enroll.vue:316", "报名失败:", result ? result.error : "无返回结果");
-        common_vendor.index.showToast({ title: result.error || "报名失败，请重试", icon: "none" });
+        common_vendor.index.__f__("log", "at pages/active-enroll/active-enroll.vue:426", "报名失败:", result ? result.error : "无返回结果");
+        common_vendor.index.showToast({
+          title: result.error || "报名失败，请重试",
+          icon: "none"
+        });
+      }
+    };
+    const previewQrCode = () => {
+      if (activityDetail.value && activityDetail.value.organizerPaymentQrCodeUrl) {
+        common_vendor.index.previewImage({
+          // uni.previewImage 需要一个 URL 数组
+          urls: [activityDetail.value.organizerPaymentQrCodeUrl],
+          // 指定当前要显示的图片，因为只有一个，所以就是它自己
+          current: activityDetail.value.organizerPaymentQrCodeUrl
+        });
       }
     };
     const generateTicketNumber = () => {
-      const letters = "ABCDEFGHJKLMNPQRSTUVWXYZ";
-      const randomLetter = letters[Math.floor(Math.random() * letters.length)];
-      const randomNumbers = Math.floor(1e5 + Math.random() * 9e5);
-      return `TK${randomLetter}${randomNumbers}`;
+      if (!ticketNumber.value) {
+        const letters = "ABCDEFGHJKLMNPQRSTUVWXYZ";
+        const randomLetter = letters[Math.floor(Math.random() * letters.length)];
+        const randomNumbers = Math.floor(1e5 + Math.random() * 9e5);
+        ticketNumber.value = `TK${randomLetter}${randomNumbers}`;
+      }
+      return ticketNumber.value;
     };
     const backToHome = () => {
       common_vendor.index.navigateBack();
@@ -248,35 +338,39 @@ const _sfc_main = {
           color: "#FF6E00"
         }),
         B: common_vendor.t(activityDetail.value.registrationFee),
-        C: activityDetail.value.organizerPaymentQrCodeUrl,
-        D: common_vendor.p({
+        C: activityDetail.value.organizerPaymentQrCodeUrl
+      }, activityDetail.value.organizerPaymentQrCodeUrl ? {
+        D: activityDetail.value.organizerPaymentQrCodeUrl,
+        E: common_vendor.o(previewQrCode)
+      } : {}, {
+        F: common_vendor.p({
           type: "image",
           size: "18",
           color: "#FF6E00"
         }),
-        E: !formData.paymentScreenshotUrl
+        G: !formData.paymentScreenshotUrl
       }, !formData.paymentScreenshotUrl ? {
-        F: common_vendor.p({
+        H: common_vendor.p({
           type: "plus",
           size: "24",
           color: "#FF6E00"
         })
       } : {
-        G: formData.paymentScreenshotUrl
+        I: formData.paymentScreenshotUrl
       }, {
-        H: common_vendor.o(chooseImage),
-        I: !formData.paymentScreenshotUrl ? 1 : "",
-        J: common_vendor.o(joinActivity)
+        J: common_vendor.o(chooseImage),
+        K: !formData.paymentScreenshotUrl ? 1 : "",
+        L: common_vendor.o(joinActivity)
       }) : {}, {
-        K: currentStep.value === 3
+        M: currentStep.value === 3
       }, currentStep.value === 3 ? common_vendor.e({
-        L: activityDetail.value
+        N: activityDetail.value
       }, activityDetail.value ? {
-        M: common_vendor.t(activityDetail.value.activityTitle),
-        N: common_vendor.t(generateTicketNumber()),
-        O: common_vendor.t(common_vendor.unref(currentDate))
+        O: common_vendor.t(activityDetail.value.activityTitle),
+        P: common_vendor.t(generateTicketNumber()),
+        Q: common_vendor.t(common_vendor.unref(currentDate))
       } : {}, {
-        P: common_vendor.o(backToHome)
+        R: common_vendor.o(backToHome)
       }) : {});
     };
   }

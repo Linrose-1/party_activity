@@ -36,7 +36,7 @@
 
 		<!-- 2. 店铺列表区域 -->
 		<scroll-view class="store-list" scroll-y="true" @scrolltolower="loadMore" refresher-enabled="true"
-			:refresher-triggered="isRefreshing" @refresherrefresh="onPullDownRefresh">
+			:refresher-triggered="isRefreshing" @refresherrefresh="handleRefresherRefresh">
 			<!-- 卡片列表 -->
 			<!-- 之前这里缺少了 @click-card 事件来处理跳转 -->
 			<StoreCard v-for="store in filteredStores" :key="store.id" :store="store" @click-card="goToStoreDetail" />
@@ -54,8 +54,8 @@
 			<!-- 空状态提示 -->
 			<view v-if="allStores.length === 0 && !loadingMore && !isRefreshing" class="empty-state">
 				<uni-icons type="info" size="60" color="#ffd8c1"></uni-icons>
-				<text>暂无相关聚店</text>
-				<text>请尝试其他关键词或筛选条件</text>
+				<text>附近3公里暂时没有猩聚社“聚店”</text>
+				<text>欢迎在下方猛击“聚店推荐”，推荐您喜欢的聚店！（可以获得贡分哦！）</text>
 			</view>
 		</scroll-view>
 
@@ -86,24 +86,96 @@
 	import StoreCard from '../../components/StoreCard.vue';
 	import request from '../../utils/request.js';
 
+	// --- 状态变量 ---
 	const searchTerm = ref('');
 	const activeFilter = ref('all');
-
-	// --- 状态变量 ---
 	const allStores = ref([]);
 	const loadingMore = ref(false);
 	const hasMore = ref(true);
 	const pageNo = ref(1);
 	const pageSize = 10;
 	const isRefreshing = ref(false);
+	const isLoading = ref(false);
 	const userLocation = ref(null);
 	const filters = ref([{
 		name: '全部',
 		value: 'all'
 	}]);
 	const bannerList = ref([]);
-	//一个标志位，防止 onShow 和 onMounted 中的位置获取逻辑冲突
-	const isLocationLoaded = ref(false);
+
+	/**
+	 * 获取实时位置的 Promise 函数
+	 * 增加了高精度定位失败后自动降级的功能，提高成功率
+	 * @returns {Promise<{latitude: number, longitude: number}|null>}
+	 */
+	const getCurrentLocation = () => {
+		console.log('[定位流程] 开始执行 getCurrentLocation 函数...');
+
+		return new Promise((resolve) => {
+			let isResolved = false; // 标志位，防止重复 resolve
+
+			// 设置一个8秒的超时定时器
+			const timeoutId = setTimeout(() => {
+				if (!isResolved) {
+					isResolved = true;
+					console.error('[定位流程] 获取位置超时（8秒），主动返回失败。');
+					uni.showToast({
+						title: '定位超时，请稍后重试',
+						icon: 'none'
+					});
+					resolve(null); // 超时，主动 resolve(null) 让程序继续
+				}
+			}, 8000); // 8秒超时
+
+			const handleSuccess = (res) => {
+				if (!isResolved) {
+					isResolved = true;
+					clearTimeout(timeoutId); // 清除超时定时器
+					console.log('[定位流程] 成功获取位置', res);
+					const location = {
+						latitude: res.latitude,
+						longitude: res.longitude
+					};
+					userLocation.value = location;
+					uni.setStorageSync('userLocation', location);
+					resolve(location);
+				}
+			};
+
+			const handleError = (err) => {
+				if (!isResolved) {
+					isResolved = true;
+					clearTimeout(timeoutId); // 清除超时定时器
+					console.error('[定位流程] 获取位置失败', err);
+					if (isRefreshing.value) {
+						uni.showToast({
+							title: '定位失败，请检查权限',
+							icon: 'none'
+						});
+					}
+					resolve(null);
+				}
+			};
+
+			// 开始调用 uni.getLocation
+			console.log('[定位流程] 正在调用 uni.getLocation API...');
+			uni.getLocation({
+				type: 'gcj02',
+				isHighAccuracy: true,
+				accuracy: 'best',
+				success: handleSuccess,
+				fail: (err) => {
+					console.warn('[定位流程] 高精度定位失败，尝试普通定位...', err);
+					// 降级尝试
+					uni.getLocation({
+						type: 'gcj02',
+						success: handleSuccess,
+						fail: handleError,
+					});
+				},
+			});
+		});
+	};
 
 	/**
 	 * 获取轮播图数据
@@ -115,7 +187,7 @@
 		} = await request('/app-api/member/banner-rec/list', {
 			method: 'GET',
 			data: {
-				positionCode: '1', // 【关键】根据要求，这里传 '1'
+				positionCode: '1',
 				pageNo: 1,
 				pageSize: 50
 			}
@@ -129,7 +201,6 @@
 
 		if (data && data.list) {
 			bannerList.value = data.list.sort((a, b) => a.sort - b.sort);
-			console.log('聚店页轮播图获取成功:', bannerList.value);
 		} else {
 			bannerList.value = [];
 		}
@@ -139,13 +210,18 @@
 	 * 获取店铺列表
 	 */
 	const getStoreList = async () => {
-		if (loadingMore.value || !hasMore.value) {
+		if (!userLocation.value) {
+			console.warn("getStoreList 中断：位置信息为空。");
+			isRefreshing.value = false;
+			loadingMore.value = false;
+			if (pageNo.value === 1) {
+				allStores.value = [];
+				hasMore.value = false;
+			}
 			return;
 		}
-		// [核心修改] 这里的判断依然保留，作为最后一道防线
-		if (!userLocation.value) {
-			console.log('getStoreList 被调用，但位置信息依然为空，已中断。');
-			isRefreshing.value = false;
+
+		if (loadingMore.value || (pageNo.value > 1 && !hasMore.value)) {
 			return;
 		}
 
@@ -172,7 +248,6 @@
 		});
 
 		loadingMore.value = false;
-		isRefreshing.value = false;
 
 		if (error) {
 			console.error('获取店铺列表失败:', error);
@@ -186,59 +261,66 @@
 		const newList = result ? result.list : [];
 		const total = result ? result.total : 0;
 
-		if (newList && newList.length > 0) {
-			allStores.value = pageNo.value === 1 ? newList : [...allStores.value, ...newList];
+		if (pageNo.value === 1) {
+			allStores.value = newList;
+		} else {
+			allStores.value = [...allStores.value, ...newList];
+		}
+
+		if (newList.length > 0) {
 			pageNo.value++;
 			hasMore.value = allStores.value.length < total;
 		} else {
-			if (pageNo.value === 1) {
-				allStores.value = [];
-			}
 			hasMore.value = false;
 		}
 	};
 
 	/**
-	 * [核心修改] 封装一个获取位置并加载数据的主函数
+	 * 刷新/加载数据的核心函数
+	 * @param {boolean} isPullDown - 是否由下拉刷新触发
 	 */
-	const initData = () => {
-		const storedLocation = uni.getStorageSync('userLocation');
-		if (storedLocation) {
-			console.log('从缓存加载位置信息');
-			userLocation.value = storedLocation;
-			isLocationLoaded.value = true;
-			// 有缓存位置，直接刷新列表
-			handleRefresh();
+	const handleRefresh = async (isPullDown = false) => {
+		// 【关键】检查“加载锁”，如果正在加载，则直接退出，防止重复执行
+		if (isLoading.value) {
+			console.log("刷新操作已在进行中，本次触发被忽略。");
+			return;
+		}
+
+		// 上锁，开始加载流程
+		isLoading.value = true;
+
+		if (isPullDown) {
+			isRefreshing.value = true;
 		} else {
-			console.log('缓存中无位置，开始请求...');
-			uni.getLocation({
-				type: 'gcj02',
-				success: (res) => {
-					console.log('成功获取新位置信息');
-					const location = {
-						latitude: res.latitude,
-						longitude: res.longitude
-					};
-					userLocation.value = location;
-					uni.setStorageSync('userLocation', location);
-					isLocationLoaded.value = true;
-					// [关键] 在获取位置成功的回调里，才去刷新列表
-					handleRefresh();
-				},
-				fail: (err) => {
-					console.error('获取位置信息失败:', err);
-					isLocationLoaded.value = true; // 标记为已处理，防止 onShow 重复调用
-					uni.showModal({
-						title: '定位失败',
-						content: '无法获取您的位置信息，将无法为您推荐附近的聚店。',
-						showCancel: false,
-						success: () => {
-							// 定位失败，列表将显示为空状态
-							handleRefresh();
-						}
-					});
-				}
+			uni.showLoading({
+				title: '加载中...'
 			});
+		}
+
+		try {
+			// --- 核心逻辑 ---
+			const location = await getCurrentLocation();
+
+			pageNo.value = 1;
+			hasMore.value = true;
+			allStores.value = [];
+
+			if (location) {
+				await getStoreList();
+			}
+		} catch (error) {
+			// 捕获意料之外的错误
+			console.error("handleRefresh 过程中捕获到错误:", error);
+		} finally {
+			// 【关键】解锁！无论成功或失败，最后一定要把锁打开
+			isLoading.value = false;
+
+			// 恢复UI状态
+			if (isPullDown) {
+				isRefreshing.value = false;
+			} else {
+				uni.hideLoading();
+			}
 		}
 	};
 
@@ -270,67 +352,72 @@
 		}
 	};
 
-	/**
-	 * onMounted: 仅执行一次性的初始化，比如获取分类
-	 */
+
+	// --- 生命周期钩子 ---
+
 	onMounted(() => {
 		getShopType();
 		fetchBanners();
 	});
 
-	/**
-	 * onShow: 每次页面显示时检查数据是否需要加载
-	 */
 	onShow(() => {
-		// 如果位置信息还未加载过（首次进入或权限被重置后），则启动初始化流程
-		if (!isLocationLoaded.value) {
-			initData();
+		// 只有在列表为空（首次进入）时，才触发自动刷新
+		if (allStores.value.length === 0) {
+			console.log('onShow: 列表为空，执行初次加载...');
+			// 尝试从缓存快速恢复位置，避免加载白屏
+			const storedLocation = uni.getStorageSync('userLocation');
+			if (storedLocation) {
+				userLocation.value = storedLocation;
+			}
+			handleRefresh();
+		} else {
+			console.log('onShow: 列表已有数据，不自动刷新位置。');
 		}
 	});
 
-	// --- 以下为辅助函数和监听器，逻辑基本不变 ---
-
-	const handleRefresh = () => {
-		pageNo.value = 1;
-		allStores.value = [];
-		hasMore.value = true;
-		getStoreList();
+	const handleRefresherRefresh = async () => {
+		// 为了调试，先放一个日志确保它被调用了
+		console.log('--- scroll-view 的 @refresherrefresh 事件已触发 ---');
+		await handleRefresh(true);
 	};
+
+
+
+	// --- 用户交互与监听 ---
 
 	const loadMore = () => {
 		getStoreList();
 	};
 
-	const onPullDownRefresh = () => {
-		isRefreshing.value = true;
-		handleRefresh();
-	};
-
 	watch(activeFilter, (newValue, oldValue) => {
-		// 只有在值真正改变时才刷新，避免 onShow 触发不必要的刷新
+		// 用户主动切换筛选分类，刷新数据
 		if (newValue !== oldValue) {
 			handleRefresh();
 		}
 	});
 
+	// 计算属性，保持模板简洁
 	const filteredStores = computed(() => allStores.value);
 
 	let searchTimer = null;
 	const onSearchInput = () => {
 		clearTimeout(searchTimer);
 		searchTimer = setTimeout(() => {
-			handleRefresh();
+			handleRefresh(); // 用户输入停止后，主动刷新
 		}, 500);
 	};
 
 	const handleSearchClick = () => {
 		clearTimeout(searchTimer);
-		handleRefresh();
+		handleRefresh(); // 用户点击搜索，立即主动刷新
 	};
 
 	const selectFilter = (filterValue) => {
 		activeFilter.value = filterValue;
 	};
+
+
+	// --- 页面跳转 ---
 
 	const goToStoreDetail = (store) => {
 		uni.navigateTo({
@@ -345,7 +432,6 @@
 	};
 	const skipToNewShop = () => {
 		uni.navigateTo({
-			// url: '/pages/shop-apply/shop-apply'
 			url: '/pages/myStore-edit/myStore-edit'
 		});
 	};

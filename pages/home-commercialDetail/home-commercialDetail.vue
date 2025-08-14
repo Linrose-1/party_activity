@@ -29,10 +29,13 @@
 				<view class="opportunity-content">
 					{{ postDetail.content }}
 				</view>
-				<view class="post-images" v-if="postDetail.images && postDetail.images.length">
-					<view v-for="(image, imgIndex) in postDetail.images" :key="imgIndex" class="image-wrapper">
-						<img :src="image" alt="商机图片" class="post-image"
-							@click.stop="previewImage(postDetail.images, imgIndex)" />
+				<view class="post-images" v-if="postDetail.images && postDetail.images.length"
+					:class="['images-count-' + postDetail.images.length]">
+					<!-- 直接遍历所有图片 -->
+					<view v-for="(image, imgIndex) in postDetail.images" :key="imgIndex" class="image-wrapper"
+						@click.stop="previewImage(postDetail.images, imgIndex)">
+						<image :src="image" class="post-image"
+							:mode="postDetail.images.length === 1 ? 'widthFix' : 'aspectFill'" />
 					</view>
 				</view>
 				<view class="tags">
@@ -941,16 +944,14 @@
 	}
 
 	.post-images {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 16rpx;
-		margin-bottom: 30rpx;
-		overflow: hidden;
+		display: grid;
+		gap: 10rpx;
+		/* 网格间距 */
+		margin: 30rpx 0;
 	}
 
 	.image-wrapper {
-		width: calc((100% - 32rpx) / 3);
-		aspect-ratio: 1 / 1;
+		width: 100%;
 		border-radius: 12rpx;
 		overflow: hidden;
 		box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.08);
@@ -959,8 +960,36 @@
 	.post-image {
 		width: 100%;
 		height: 100%;
-		object-fit: cover;
 		display: block;
+		/* 消除 image 标签底部空隙 */
+	}
+
+	/* --- 核心：根据图片数量调整网格布局 --- */
+
+	/* 默认（3张及3张以上）: 3列网格 */
+	.post-images {
+		grid-template-columns: repeat(3, 1fr);
+	}
+
+	.image-wrapper {
+		aspect-ratio: 1 / 1;
+		/* 多图时，保持1:1的正方形比例 */
+	}
+
+
+	/* Case 1: 只有 1 张图片 */
+	.images-count-1 .image-wrapper {
+		grid-column: 1 / -1;
+		/* 占据整行 */
+		aspect-ratio: unset;
+		/* 移除正方形限制，让图片以原始比例显示 */
+	}
+
+	/* Case 2: 有 2 张或 4 张图片 */
+	.images-count-2,
+	.images-count-4 {
+		grid-template-columns: repeat(2, 1fr);
+		/* 2列网格，布局更美观 */
 	}
 
 	.tags {

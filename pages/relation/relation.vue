@@ -59,7 +59,8 @@
 			<view class="user-list">
 				<!-- 【修改】将 v-for 移到 user-card 上，统一循环 userList -->
 				<view class="user-card" v-for="user in userList" :key="user.id">
-					<image :src="user.avatar" mode="aspectFill" class="avatar"></image>
+					<image :src="user.avatar" mode="aspectFill" class="avatar"
+						@click.stop="navigateToBusinessCard(user)"></image>
 					<view class="user-info">
 						<view class="name-row">
 							<text class="name">{{ user.nickname }}</text>
@@ -285,6 +286,40 @@
 			isFollowActionInProgress.value = false;
 		}
 	};
+
+	/**
+	 * ==================== 新增方法：跳转到个人名片页 ====================
+	 * 
+	 */
+	const navigateToBusinessCard = (user) => {
+		// 1. 检查传入的 user 对象和 user.id 是否有效
+		if (!user || !user.id) {
+			uni.showToast({
+				title: '无法查看该用户主页',
+				icon: 'none'
+			});
+			return;
+		}
+
+		// 2. 【核心】为 avatar 提供一个默认值，防止空字符串导致的问题
+		const defaultAvatar = '/static/icon/default-avatar.png'; // 请确保这个默认头像图片存在于你的项目中
+		// 【注意】这里的 user.nickname 对应的是后端返回的字段
+		const name = user.nickname || '匿名用户';
+		const avatarUrl = user.avatar || defaultAvatar;
+
+		// 3. 构建带有多参数的URL，并使用 encodeURIComponent 编码
+		const url = `/pages/applicationBusinessCard/applicationBusinessCard?id=${user.id}` +
+			`&name=${encodeURIComponent(name)}` +
+			`&avatar=${encodeURIComponent(avatarUrl)}`;
+
+		console.log('从人脉列表页跳转，URL:', url);
+
+		// 4. 执行跳转
+		uni.navigateTo({
+			url: url
+		});
+	};
+
 
 
 	// --- 事件处理器 ---

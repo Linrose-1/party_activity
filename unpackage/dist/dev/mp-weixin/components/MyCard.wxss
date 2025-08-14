@@ -2,7 +2,7 @@
 /* 水平间距 */
 .business-card-container.data-v-0262bca8 {
   width: 100%;
-  max-width: 90vw;
+  min-width: 80vw;
   margin: 30rpx auto;
   box-shadow: 0 10rpx 40rpx rgba(0, 0, 0, 0.1);
   border-radius: 20rpx;
@@ -107,6 +107,41 @@
   font-size: 26rpx;
   color: #777;
   margin-top: 30rpx;
+}
+.shard-code-section.data-v-0262bca8 {
+  margin-top: 40rpx;
+  padding: 20rpx 30rpx;
+  background-color: #fff8f2;
+  border: 1rpx solid #ffe8d1;
+  border-radius: 16rpx;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+.shard-code-section.data-v-0262bca8:active {
+  background-color: #fff0e0;
+}
+.shard-code-value.data-v-0262bca8 {
+  font-size: 30rpx;
+  color: #555;
+}
+.shard-code-value .code.data-v-0262bca8 {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #FF7B00;
+  margin-left: 10rpx;
+  letter-spacing: 2rpx;
+}
+.copy-action.data-v-0262bca8 {
+  display: flex;
+  align-items: center;
+  color: #FF7B00;
+  font-size: 26rpx;
+}
+.copy-action .uni-icons.data-v-0262bca8 {
+  margin-right: 8rpx;
 }
 .value-slogan.data-v-0262bca8 {
   display: flex;

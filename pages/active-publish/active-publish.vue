@@ -6,8 +6,8 @@
 
 			<uni-forms :label-width="80">
 				<!-- activityTitle -->
-				<uni-forms-item label="活动标题" required>
-					<uni-easyinput v-model="form.activityTitle" placeholder="请输入活动标题" />
+				<uni-forms-item label="活动主题" required>
+					<uni-easyinput v-model="form.activityTitle" placeholder="请输入活动主题" />
 				</uni-forms-item>
 
 				<!-- tags (原 activityType) -->
@@ -42,7 +42,7 @@
 				</uni-forms-item>
 
 				<!-- locationAddress, longitude, latitude -->
-				<uni-forms-item label="活动地点" required>
+				<uni-forms-item label="活动聚点" required>
 					<view class="uni-list-cell-db">
 						<view @click="openMapToChooseLocation" class="uni-input">
 							<text v-if="form.locationAddress">{{ form.locationAddress }}</text>
@@ -53,12 +53,12 @@
 				</uni-forms-item>
 
 				<!-- totalSlots -->
-				<uni-forms-item label="总名额" required>
-					<uni-easyinput type="number" v-model="form.totalSlots" placeholder="请输入活动总名额" />
+				<uni-forms-item label="人数上限" required>
+					<uni-easyinput type="number" v-model="form.totalSlots" placeholder="超过人数上限,不能报名" />
 				</uni-forms-item>
 
-				<uni-forms-item label="最低起聚名额" required>
-					<uni-easyinput type="number" v-model="form.limitSlots" placeholder="请输入最低起聚名额" />
+				<uni-forms-item label="起聚人数" required>
+					<uni-easyinput type="number" v-model="form.limitSlots" placeholder="不达起聚人数,活动取消" />
 				</uni-forms-item>
 
 				<!-- activityFunds -->
@@ -68,8 +68,8 @@
 				</uni-forms-item>
 
 				<!-- registrationFee (当 activityFunds 为 1 'AA') -->
-				<uni-forms-item label="预报名费用 (元)" v-if="form.activityFunds === 1" required>
-					<uni-easyinput type="digit" v-model="form.registrationFee" placeholder="请输入预报名费用" />
+				<uni-forms-item label="单人费用" v-if="form.activityFunds === 1" required>
+					<uni-easyinput type="digit" v-model="form.registrationFee" placeholder="请输入活动费用(元)" />
 				</uni-forms-item>
 
 				<!-- companyName & companyLogo (当 activityFunds 为 2 '赞助') -->
@@ -114,8 +114,8 @@
 
 			<uni-forms :label-width="80">
 				<!-- organizerUnitName -->
-				<uni-forms-item label="组织单位" required>
-					<uni-easyinput v-model="form.organizerUnitName" placeholder="请输入组织单位名称" />
+				<uni-forms-item label="组织者" required>
+					<uni-easyinput v-model="form.organizerUnitName" placeholder="请输入组织者名称" />
 				</uni-forms-item>
 
 				<!-- organizerContactPhone -->
@@ -151,7 +151,10 @@
 		<!-- 底部操作栏 -->
 		<view class="action-bar" :class="{ 'z-index-low': isPickerOpen }">
 			<view class="action-btn save-btn" @click="saveDraft">保存草稿</view>
-			<view class="action-btn publish-btn" @click="publish">发布活动</view>
+			<!-- 【优化】动态绑定 class 和文本内容 -->
+			<view class="action-btn publish-btn" :class="{ 'disabled': isPublishing }" @click="publish">
+				{{ isPublishing ? '发布中...' : '发布活动' }}
+			</view>
 		</view>
 	</view>
 </template>
@@ -159,7 +162,8 @@
 <script setup>
 	import {
 		ref,
-		onMounted
+		onMounted,
+		computed
 	} from 'vue';
 	import {
 		onLoad,
@@ -172,7 +176,10 @@
 		getActiveType();
 	});
 
-	// 【新增】定义一个用于本地存储草稿的唯一键
+	// 防止重复提交
+	const isPublishing = ref(false);
+
+	// 定义一个用于本地存储草稿的唯一键
 	const DRAFT_STORAGE_KEY = 'activity_draft';
 
 	const isPickerOpen = ref(false);
@@ -318,7 +325,6 @@
 		});
 	};
 
-	// --- 【简化】具体的上传调用，现在它们都调用统一的处理器 ---
 	function uploadCover() {
 		handleImageUpload('coverImageUrl', 'activity-cover');
 	}
@@ -371,8 +377,8 @@
 				console.log('草稿已加载:', parsedDraft);
 			} else {
 				// 如果没有草稿，设置一些默认值
-				timeRange.value = ['2025-07-19 14:00:00', '2025-07-19 17:00:00'];
-				enrollTimeRange.value = ['2025-07-01 14:00:00', '2025-07-18 17:00:00'];
+				timeRange.value = ['2025-01-01 14:00:00', '2025-01-01 17:00:00'];
+				enrollTimeRange.value = ['2025-01-01 14:00:00', '2025-01-01 17:00:00'];
 			}
 		} catch (error) {
 			console.error("加载草稿失败:", error);
@@ -420,7 +426,17 @@
 		// createActive() 
 	}
 
-	function publish() {
+	async function publish() {
+
+		//【节流】
+		if (isPublishing.value) {
+			uni.showToast({
+				title: '正在发布中，请稍候...',
+				icon: 'none'
+			});
+			return;
+		}
+
 		// --- 表单验证 (使用新字段) ---
 		if (!form.value.activityTitle) {
 			uni.showToast({
@@ -531,6 +547,13 @@
 			});
 			return;
 		}
+		if (!form.value.organizerPaymentQrCodeUrl) {
+			uni.showToast({
+				title: '请上传收款码',
+				icon: 'none'
+			});
+			return;
+		}
 		if (!form.value.associatedStoreId) {
 			uni.showToast({
 				title: '请选择合作店铺',
@@ -539,82 +562,94 @@
 			return;
 		}
 
-		// --- 构建最终提交给后端的 payload ---
-		const payload = JSON.parse(JSON.stringify(form.value));
+		isPublishing.value = true;
+		uni.showLoading({
+			title: '正在处理...',
+			mask: true
+		});
 
-		// 1. 【修改】处理时间范围，转换为毫秒时间戳
-		// 使用 new Date(...).getTime() 将日期字符串转换为毫秒时间戳
-		payload.startDatetime = new Date(timeRange.value[0]).getTime();
-		payload.endDatetime = new Date(timeRange.value[1]).getTime();
-		payload.registrationStartDatetime = new Date(enrollTimeRange.value[0]).getTime();
-		payload.registrationEndDatetime = new Date(enrollTimeRange.value[1]).getTime();
+		try {
+			// --- 构建最终提交给后端的 payload (这部分逻辑保持不变) ---
+			const payload = JSON.parse(JSON.stringify(form.value));
+			payload.startDatetime = new Date(timeRange.value[0]).getTime();
+			payload.endDatetime = new Date(timeRange.value[1]).getTime();
+			payload.registrationStartDatetime = new Date(enrollTimeRange.value[0]).getTime();
+			payload.registrationEndDatetime = new Date(enrollTimeRange.value[1]).getTime();
+			const selectedTagOption = tagOptions.value.find(option => option.value === payload.tag);
+			if (selectedTagOption) {
+				payload.category = selectedTagOption.value;
+				payload.tags = [selectedTagOption.text];
+			} else {
+				payload.category = payload.tag;
+				payload.tags = [payload.tag];
+			}
+			delete payload.tag;
+			payload.activitySessions = payload.activitySessions.map((session, index) => ({
+				...session,
+				sessionOrder: index + 1
+			}));
+			if (payload.activityFunds === 1) {
+				delete payload.companyName;
+				delete payload.companyLogo;
+			} else {
+				delete payload.registrationFee;
+			}
 
-		// 2. 【修改】处理活动类型 (category) 和标签 (tags)
-		// 首先从 tagOptions 中找到当前选中的项
-		const selectedTagOption = tagOptions.value.find(option => option.value === payload.tag);
-		if (selectedTagOption) {
-			// 【新增】将选中项的 value 赋值给 category
-			payload.category = selectedTagOption.value;
-			// 【修改】将选中项的 text 赋值给 tags 数组
-			payload.tags = [selectedTagOption.text];
-		} else {
-			// 如果出于某种原因找不到，做一个降级处理，虽然在正常流程下不太可能发生
-			payload.category = payload.tag;
-			payload.tags = [payload.tag];
+			console.log('发布活动 - 最终Payload:', payload);
+
+			const success = await createActive(payload);
+
+			if (success) {
+				uni.removeStorageSync(DRAFT_STORAGE_KEY);
+				console.log('活动发布成功，草稿已清除。');
+				uni.switchTab({
+					url: '/pages/active/active'
+				});
+			}
+			// 如果 success 为 false，createActive 内部已处理错误提示，
+			// finally 块会重置 isPublishing 状态，允许用户重新提交。
+
+		} catch (e) {
+			// 捕获网络请求或代码执行中可能出现的预料之外的错误
+			console.error("发布流程中发生未知错误:", e);
+			uni.showToast({
+				title: '操作失败，请检查网络',
+				icon: 'none'
+			});
+		} finally {
+			// 【修正点1 和 2】无论成功、失败还是异常，最后都必须执行这里的代码
+			isPublishing.value = false;
+			uni.hideLoading();
 		}
-		// 删除临时的 tag 字段，因为它已经被处理成 category 和 tags
-		delete payload.tag;
 
-		// 3. 处理活动环节，添加 sessionOrder
-		payload.activitySessions = payload.activitySessions.map((session, index) => ({
-			...session,
-			sessionOrder: index + 1 // 顺序从1开始
-		}));
-
-		// 4. 清理AA或赞助模式下的多余字段
-		if (payload.activityFunds === 1) { // AA 模式
-			delete payload.companyName;
-			delete payload.companyLogo;
-		} else { // 赞助模式
-			delete payload.registrationFee;
-		}
-
-		
-
-		// 最终打印完全符合后端接口要求的 payload
-		console.log('发布活动 - 最终Payload:', payload);
-
-		// 在这里可以发起网络请求，将 payload 发送给后端
-		// uni.request({ url: 'YOUR_API_ENDPOINT', method: 'POST', data: payload, ... })
-		createActive(payload)
-		
-		uni.switchTab({
-			url:'/pages/active/active'
-		})
-		
-		
 	}
 
 	const createActive = async (payload) => {
-		console.log("payload", payload)
-		// 调用封装的请求方法
+		console.log("payload", payload);
 		const result = await request('/app-api/member/activity/create', {
-			method: 'POST', // 请求方式
+			method: 'POST',
 			data: payload
 		});
-		// 如果请求成功，打印返回的数据
-		console.log('createActive result:', result);
-		uni.showToast({
-			title: '活动发布成功！',
-			icon: 'success'
-		});
-		// 如果请求失败，打印错误信息
-		if (result.error) {
-			console.log('请求失败:', result.error);
+
+		// 如果请求成功且后端没有返回业务错误
+		if (result && !result.error) {
+			console.log('createActive result:', result);
 			uni.showToast({
-				title: result.error,
-				icon: 'none'
+				title: '活动发布成功！',
+				icon: 'success'
 			});
+			return true; // 返回 true 表示成功
+		}
+		// 如果请求失败或后端返回了业务错误
+		else {
+			console.log('请求失败:', result.error);
+			// 【修正 Bug 1】显示后端返回的错误信息，并给用户足够的时间阅读
+			uni.showToast({
+				title: result.error || '发布失败，请检查填写内容', // 优先使用后端返回的错误
+				icon: 'none',
+				duration: 3000 // 延长提示时间
+			});
+			return false; // 返回 false 表示失败
 		}
 	};
 </script>
@@ -850,5 +885,11 @@
 	.action-bar.z-index-low {
 		z-index: 1;
 		/* 或者 z-index: auto; */
+	}
+
+	.action-btn.disabled {
+		opacity: 0.6;
+		pointer-events: none;
+		/* 让按钮在视觉和行为上都真正被禁用 */
 	}
 </style>

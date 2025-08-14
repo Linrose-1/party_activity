@@ -75,7 +75,7 @@ const _sfc_main = {
           method: "GET",
           data: params
         });
-        common_vendor.index.__f__("log", "at pages/my-collection/my-collection.vue:227", `获取收藏的${isActivityTab ? "活动" : "商机"}:`, result);
+        common_vendor.index.__f__("log", "at pages/my-collection/my-collection.vue:233", `获取收藏的${isActivityTab ? "活动" : "商机"}:`, result);
         if (result && !result.error && result.data) {
           const rawList = result.data.list || [];
           if (isActivityTab) {
@@ -278,9 +278,9 @@ const _sfc_main = {
       }, favoriteOpportunities.value.length > 0 ? {
         r: common_vendor.f(favoriteOpportunities.value, (item, k0, i0) => {
           return common_vendor.e({
-            a: common_vendor.t(item.postRespVO.contactPerson.charAt(0)),
+            a: item.postRespVO.memberUser.avatar,
             b: common_vendor.o(skipApplicationBusinessCard, item.id),
-            c: common_vendor.t(item.postRespVO.contactPerson),
+            c: common_vendor.t(item.postRespVO.memberUser.nickname),
             d: "7c9d235a-6-" + i0,
             e: common_vendor.t(formatTimestamp(item.postRespVO.createTime)),
             f: "7c9d235a-7-" + i0,
@@ -291,26 +291,28 @@ const _sfc_main = {
             j: common_vendor.f(item.postRespVO.postImg.split(","), (image, imgIndex, i1) => {
               return {
                 a: image,
-                b: common_vendor.o(($event) => previewImage(item.postRespVO.postImg.split(","), imgIndex), imgIndex),
-                c: imgIndex
+                b: imgIndex,
+                c: common_vendor.o(($event) => previewImage(item.postRespVO.postImg.split(","), imgIndex), imgIndex)
               };
-            })
+            }),
+            k: item.postRespVO.postImg.split(",").length === 1 ? "widthFix" : "aspectFill",
+            l: common_vendor.n("images-count-" + item.postRespVO.postImg.split(",").length)
           } : {}, {
-            k: item.postRespVO.tags && item.postRespVO.tags.length
+            m: item.postRespVO.tags && item.postRespVO.tags.length
           }, item.postRespVO.tags && item.postRespVO.tags.length ? {
-            l: common_vendor.f(item.postRespVO.tags, (tag, tagIndex, i1) => {
+            n: common_vendor.f(item.postRespVO.tags, (tag, tagIndex, i1) => {
               return {
                 a: common_vendor.t(tag),
                 b: tagIndex
               };
             })
           } : {}, {
-            m: "7c9d235a-8-" + i0,
-            n: common_vendor.t(item.postRespVO.likesCount),
-            o: "7c9d235a-9-" + i0,
-            p: common_vendor.t(item.postRespVO.dislikesCount),
-            q: item.id,
-            r: common_vendor.o(($event) => skipCommercialDetail(item.postRespVO.id), item.id)
+            o: "7c9d235a-8-" + i0,
+            p: common_vendor.t(item.postRespVO.likesCount),
+            q: "7c9d235a-9-" + i0,
+            r: common_vendor.t(item.postRespVO.dislikesCount),
+            s: item.id,
+            t: common_vendor.o(($event) => skipCommercialDetail(item.postRespVO.id), item.id)
           });
         }),
         s: common_vendor.p({

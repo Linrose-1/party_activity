@@ -32,7 +32,7 @@ const _sfc_main = {
     const activities = common_vendor.ref([]);
     const businesses = common_vendor.ref([]);
     const resetState = () => {
-      common_vendor.index.__f__("log", "at pages/location/location.vue:104", "页面状态已重置");
+      common_vendor.index.__f__("log", "at pages/location/location.vue:110", "页面状态已重置");
       shaken.value = false;
       loading.value = false;
       activities.value = [];
@@ -57,7 +57,10 @@ const _sfc_main = {
       getLocationAndProceed();
     };
     const getLocationAndProceed = () => {
-      common_vendor.index.showLoading({ title: "正在定位...", mask: true });
+      common_vendor.index.showLoading({
+        title: "正在定位...",
+        mask: true
+      });
       common_vendor.index.getLocation({
         type: "gcj02",
         success: async (res) => {
@@ -75,7 +78,7 @@ const _sfc_main = {
               getNearbyBusinesses(true)
             ]);
           } catch (error) {
-            common_vendor.index.__f__("error", "at pages/location/location.vue:154", "加载初始数据时发生错误:", error);
+            common_vendor.index.__f__("error", "at pages/location/location.vue:163", "加载初始数据时发生错误:", error);
           } finally {
             loading.value = false;
             setTimeout(() => {
@@ -85,7 +88,10 @@ const _sfc_main = {
         },
         fail: (err) => {
           common_vendor.index.hideLoading();
-          common_vendor.index.showToast({ title: "获取位置失败", icon: "none" });
+          common_vendor.index.showToast({
+            title: "获取位置失败",
+            icon: "none"
+          });
           shakeDebounce.value = true;
         }
       });
@@ -99,7 +105,10 @@ const _sfc_main = {
         activities.value = [];
       }
       try {
-        const { data, error } = await utils_request.request("/app-api/member/activity/list", {
+        const {
+          data,
+          error
+        } = await utils_request.request("/app-api/member/activity/list", {
           method: "GET",
           data: {
             pageNo: activityPageNo.value,
@@ -128,7 +137,10 @@ const _sfc_main = {
         businesses.value = [];
       }
       try {
-        const { data, error } = await utils_request.request("/app-api/member/user/list", {
+        const {
+          data,
+          error
+        } = await utils_request.request("/app-api/member/user/list", {
           method: "GET",
           data: {
             pageNo: businessPageNo.value,
@@ -158,7 +170,9 @@ const _sfc_main = {
           content: "关注功能需要登录后才能使用，是否前往登录？",
           success: (res) => {
             if (res.confirm) {
-              common_vendor.index.navigateTo({ url: "/pages/login/login" });
+              common_vendor.index.navigateTo({
+                url: "/pages/login/login"
+              });
             }
           }
         });
@@ -171,7 +185,9 @@ const _sfc_main = {
       const successMsg = newFollowStatus === 1 ? "关注成功" : "已取消关注";
       user.followFlag = newFollowStatus;
       try {
-        const { error } = await utils_request.request(apiUrl, {
+        const {
+          error
+        } = await utils_request.request(apiUrl, {
           method: "POST",
           data: {
             userId: currentUserId,
@@ -181,13 +197,36 @@ const _sfc_main = {
         });
         if (error)
           throw new Error(error);
-        common_vendor.index.showToast({ title: successMsg, icon: "success" });
+        common_vendor.index.showToast({
+          title: successMsg,
+          icon: "success"
+        });
       } catch (err) {
         user.followFlag = originalFollowStatus;
-        common_vendor.index.showToast({ title: err.message || "操作失败，请重试", icon: "none" });
+        common_vendor.index.showToast({
+          title: err.message || "操作失败，请重试",
+          icon: "none"
+        });
       } finally {
         isFollowActionInProgress.value = false;
       }
+    };
+    const navigateToBusinessCard = (user) => {
+      if (!user || !user.id) {
+        common_vendor.index.showToast({
+          title: "无法查看该用户主页",
+          icon: "none"
+        });
+        return;
+      }
+      const defaultAvatar = "/static/icon/default-avatar.png";
+      const name = user.nickname || "匿名用户";
+      const avatarUrl = user.avatar || defaultAvatar;
+      const url = `/pages/applicationBusinessCard/applicationBusinessCard?id=${user.id}&name=${encodeURIComponent(name)}&avatar=${encodeURIComponent(avatarUrl)}`;
+      common_vendor.index.__f__("log", "at pages/location/location.vue:336", "从摇一摇页跳转，URL:", url);
+      common_vendor.index.navigateTo({
+        url
+      });
     };
     common_vendor.onShow(() => {
       resetState();
@@ -259,19 +298,20 @@ const _sfc_main = {
         m: common_vendor.f(businesses.value, (business, k0, i0) => {
           return common_vendor.e({
             a: business.avatar || "/static/images/default-avatar.png",
-            b: common_vendor.t(business.nickname),
-            c: business.professionalTitle
+            b: common_vendor.o(($event) => navigateToBusinessCard(business), business.id),
+            c: common_vendor.t(business.nickname),
+            d: business.professionalTitle
           }, business.professionalTitle ? {
-            d: common_vendor.t(business.professionalTitle)
+            e: common_vendor.t(business.professionalTitle)
           } : {}, {
-            e: business.companyName
+            f: business.companyName
           }, business.companyName ? {
-            f: common_vendor.t(business.companyName)
+            g: common_vendor.t(business.companyName)
           } : {}, {
-            g: common_vendor.t(business.followFlag === 1 ? "已关注" : "关注"),
-            h: business.followFlag === 1 ? 1 : "",
-            i: common_vendor.o(($event) => handleFollowAction(business), business.id),
-            j: business.id
+            h: common_vendor.t(business.followFlag === 1 ? "已关注" : "关注"),
+            i: business.followFlag === 1 ? 1 : "",
+            j: common_vendor.o(($event) => handleFollowAction(business), business.id),
+            k: business.id
           });
         }),
         n: common_vendor.p({

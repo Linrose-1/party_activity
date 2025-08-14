@@ -191,3 +191,8 @@
   z-index: 1;
   /* 或者 z-index: auto; */
 }
+.action-btn.disabled.data-v-d21abf49 {
+  opacity: 0.6;
+  pointer-events: none;
+  /* 让按钮在视觉和行为上都真正被禁用 */
+}

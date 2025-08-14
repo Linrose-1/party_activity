@@ -113,7 +113,8 @@
   margin-right: 30rpx;
   flex-shrink: 0;
 }
-.business-card .card-position.data-v-4d9b4fcb, .business-card .card-company.data-v-4d9b4fcb {
+.business-card .card-position.data-v-4d9b4fcb,
+.business-card .card-company.data-v-4d9b4fcb {
   font-size: 26rpx;
   color: #666;
   margin-top: 8rpx;
