@@ -6,25 +6,25 @@
 
 			<uni-forms :label-width="80">
 				<!-- activityTitle -->
-				<uni-forms-item label="活动主题" required>
-					<uni-easyinput v-model="form.activityTitle" placeholder="请输入活动主题" />
+				<uni-forms-item label="聚会主题" required>
+					<uni-easyinput v-model="form.activityTitle" placeholder="请输入聚会主题" />
 				</uni-forms-item>
 
 				<!-- tags (原 activityType) -->
-				<uni-forms-item label="活动类型" required>
-					<uni-data-select v-model="form.tag" :localdata="tagOptions" placeholder="请选择活动类型"></uni-data-select>
+				<uni-forms-item label="聚会类型" required>
+					<uni-data-select v-model="form.tag" :localdata="tagOptions" placeholder="请选择聚会类型"></uni-data-select>
 				</uni-forms-item>
 
 				<!-- coverImageUrl -->
-				<uni-forms-item label="活动封面" required>
+				<uni-forms-item label="聚会封面" required>
 					<view class="cover-upload" @click="uploadCover">
 						<image v-if="form.coverImageUrl" :src="form.coverImageUrl" mode="aspectFill"></image>
 						<text v-else>点击上传封面图片</text>
 					</view>
 				</uni-forms-item>
 
-				<!-- 【修改】活动时间选择器 -->
-				<uni-forms-item label="活动时间" required>
+				<!-- 【修改】聚会时间选择器 -->
+				<uni-forms-item label="聚会时间" required>
 					<!-- 用一个 view 包裹并监听点击事件来打开 picker -->
 					<view @click="isPickerOpen = true">
 						<uni-datetime-picker type="datetimerange" v-model="timeRange" rangeSeparator="至"
@@ -42,11 +42,21 @@
 				</uni-forms-item>
 
 				<!-- locationAddress, longitude, latitude -->
-				<uni-forms-item label="活动聚点" required>
+				<uni-forms-item label="聚会地点" required>
 					<view class="uni-list-cell-db">
 						<view @click="openMapToChooseLocation" class="uni-input">
 							<text v-if="form.locationAddress">{{ form.locationAddress }}</text>
 							<text v-else class="placeholder">点击选择位置</text>
+							<text class="arrow">></text>
+						</view>
+					</view>
+				</uni-forms-item>
+
+				<uni-forms-item label="合作聚店" required :label-width="80">
+					<view class="uni-list-cell-db">
+						<view @click="goToSelectShop" class="uni-input">
+							<text v-if="associatedStoreName">{{ associatedStoreName }}</text>
+							<text v-else class="placeholder">点击选择合作店铺</text>
 							<text class="arrow">></text>
 						</view>
 					</view>
@@ -58,7 +68,7 @@
 				</uni-forms-item>
 
 				<uni-forms-item label="起聚人数" required>
-					<uni-easyinput type="number" v-model="form.limitSlots" placeholder="不达起聚人数,活动取消" />
+					<uni-easyinput type="number" v-model="form.limitSlots" placeholder="不达起聚人数,聚会取消" />
 				</uni-forms-item>
 
 				<!-- activityFunds -->
@@ -69,7 +79,7 @@
 
 				<!-- registrationFee (当 activityFunds 为 1 'AA') -->
 				<uni-forms-item label="单人费用" v-if="form.activityFunds === 1" required>
-					<uni-easyinput type="digit" v-model="form.registrationFee" placeholder="请输入活动费用(元)" />
+					<uni-easyinput type="digit" v-model="form.registrationFee" placeholder="请输入聚会费用(元)" />
 				</uni-forms-item>
 
 				<!-- companyName & companyLogo (当 activityFunds 为 2 '赞助') -->
@@ -89,10 +99,10 @@
 		</view>
 
 		<view class="form-section">
-			<view class="section-title">活动详情</view>
+			<view class="section-title">聚会详情</view>
 			<!-- activityDescription -->
-			<uni-forms-item label="活动介绍" required :label-width="80">
-				<uni-easyinput type="textarea" autoHeight v-model="form.activityDescription" placeholder="请输入活动详细介绍" />
+			<uni-forms-item label="聚会介绍" required :label-width="80">
+				<uni-easyinput type="textarea" autoHeight v-model="form.activityDescription" placeholder="请输入聚会详细介绍" />
 			</uni-forms-item>
 
 			<!-- activitySessions -->
@@ -105,7 +115,7 @@
 			</view>
 
 			<view class="add-btn" @click="addAgenda">
-				<uni-icons type="plusempty" /><text>添加活动环节</text>
+				<uni-icons type="plusempty" color="red" /><text>添加聚会环节</text>
 			</view>
 		</view>
 
@@ -124,7 +134,7 @@
 				</uni-forms-item>
 
 				<!-- organizerPaymentQrCodeUrl -->
-				<uni-forms-item label="收款码上传" required>
+				<uni-forms-item label="收款码" required>
 					<view class="cover-upload" @click="uploadCode">
 						<image v-if="form.organizerPaymentQrCodeUrl" :src="form.organizerPaymentQrCodeUrl"
 							mode="aspectFit"></image>
@@ -133,10 +143,13 @@
 				</uni-forms-item>
 			</uni-forms>
 		</view>
+		
+		<view class="form-bottom">
+			到底啦，请发起聚会吧！
+		</view>
 
-		<view class="form-section">
+		<!-- <view class="form-section">
 			<view class="section-title">商圈信息</view>
-			<!-- associatedStoreId -->
 			<uni-forms-item label="合作聚店" required :label-width="80">
 				<view class="uni-list-cell-db">
 					<view @click="goToSelectShop" class="uni-input">
@@ -146,14 +159,14 @@
 					</view>
 				</view>
 			</uni-forms-item>
-		</view>
+		</view> -->
 
 		<!-- 底部操作栏 -->
 		<view class="action-bar" :class="{ 'z-index-low': isPickerOpen }">
 			<view class="action-btn save-btn" @click="saveDraft">保存草稿</view>
 			<!-- 【优化】动态绑定 class 和文本内容 -->
 			<view class="action-btn publish-btn" :class="{ 'disabled': isPublishing }" @click="publish">
-				{{ isPublishing ? '发布中...' : '发布活动' }}
+				{{ isPublishing ? '发布中...' : '发起聚会' }}
 			</view>
 		</view>
 	</view>
@@ -211,21 +224,12 @@
 		associatedStoreId: null, // 由店铺选择页面填充
 		tag: '', // 这是UI选择的单值，提交时会放入`tags`数组
 		activitySessions: [{
-				sessionTitle: '',
-				sessionDescription: ''
-			},
-			{
-				sessionTitle: '',
-				sessionDescription: ''
-			},
-			{
-				sessionTitle: '',
-				sessionDescription: ''
-			}
-		],
+			sessionTitle: '环节标题',
+			sessionDescription: '环节描述'
+		}],
 	});
 
-	// 活动类型/标签选项
+	// 聚会类型/标签选项
 	const tagOptions = ref([]); // 初始化为空数组
 
 	const getActiveType = async () => {
@@ -337,7 +341,7 @@
 		handleImageUpload('organizerPaymentQrCodeUrl', 'payment-qrcode');
 	}
 
-	// 动态增删活动环节
+	// 动态增删聚会环节
 	function addAgenda() {
 		form.value.activitySessions.push({
 			sessionTitle: '',
@@ -410,7 +414,7 @@
 			// 2. 将对象转换为 JSON 字符串并存入本地存储
 			uni.setStorageSync(DRAFT_STORAGE_KEY, JSON.stringify(draftData));
 			uni.showToast({
-				title: '活动已保存为草稿',
+				title: '聚会已保存为草稿',
 				icon: 'success' // 使用成功图标
 			});
 			console.log('草稿已保存:', draftData);
@@ -440,28 +444,28 @@
 		// --- 表单验证 (使用新字段) ---
 		if (!form.value.activityTitle) {
 			uni.showToast({
-				title: '请输入活动标题',
+				title: '请输入聚会标题',
 				icon: 'none'
 			});
 			return;
 		}
 		if (!form.value.tag) {
 			uni.showToast({
-				title: '请选择活动类型',
+				title: '请选择聚会类型',
 				icon: 'none'
 			});
 			return;
 		}
 		if (!form.value.coverImageUrl) {
 			uni.showToast({
-				title: '请上传活动封面',
+				title: '请上传聚会封面',
 				icon: 'none'
 			});
 			return;
 		}
 		if (!timeRange.value || timeRange.value.length !== 2) {
 			uni.showToast({
-				title: '请选择活动时间',
+				title: '请选择聚会时间',
 				icon: 'none'
 			});
 			return;
@@ -475,7 +479,7 @@
 		}
 		if (!form.value.locationAddress) {
 			uni.showToast({
-				title: '请选择活动地点',
+				title: '请选择聚会地点',
 				icon: 'none'
 			});
 			return;
@@ -528,7 +532,7 @@
 		}
 		if (!form.value.activityDescription) {
 			uni.showToast({
-				title: '请输入活动介绍',
+				title: '请输入聚会介绍',
 				icon: 'none'
 			});
 			return;
@@ -595,13 +599,13 @@
 				delete payload.registrationFee;
 			}
 
-			console.log('发布活动 - 最终Payload:', payload);
+			console.log('发布聚会 - 最终Payload:', payload);
 
 			const success = await createActive(payload);
 
 			if (success) {
 				uni.removeStorageSync(DRAFT_STORAGE_KEY);
-				console.log('活动发布成功，草稿已清除。');
+				console.log('聚会发布成功，草稿已清除。');
 				uni.switchTab({
 					url: '/pages/active/active'
 				});
@@ -635,7 +639,7 @@
 		if (result && !result.error) {
 			console.log('createActive result:', result);
 			uni.showToast({
-				title: '活动发布成功！',
+				title: '聚会发布成功！',
 				icon: 'success'
 			});
 			return true; // 返回 true 表示成功
@@ -793,6 +797,12 @@
 		font-weight: bold;
 		margin-top: 20rpx;
 		gap: 10rpx;
+	}
+	
+	.form-bottom{
+		text-align: center;
+		font-size: 24rpx;
+		color: #999;
 	}
 
 	.action-bar {

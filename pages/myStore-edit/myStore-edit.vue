@@ -25,7 +25,7 @@
 					<view class="image-uploader">
 						<image :src="form.storeCoverImageUrl || '/static/images/placeholder-cover.png'"
 							class="preview-image" mode="aspectFill" @click="handleImageUpload('cover')"></image>
-						<view class="upload-tip">点击图片可更换封面</view>
+						<view class="upload-tip">点击图片可更换封面（建议上传横图）</view>
 					</view>
 				</view>
 				<view class="form-group">

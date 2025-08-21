@@ -29,13 +29,13 @@ const _sfc_main = {
     }]);
     const bannerList = common_vendor.ref([]);
     const getCurrentLocation = () => {
-      common_vendor.index.__f__("log", "at pages/shop/shop.vue:112", "[定位流程] 开始执行 getCurrentLocation 函数...");
+      common_vendor.index.__f__("log", "at pages/shop/shop.vue:114", "[定位流程] 开始执行 getCurrentLocation 函数...");
       return new Promise((resolve) => {
         let isResolved = false;
         const timeoutId = setTimeout(() => {
           if (!isResolved) {
             isResolved = true;
-            common_vendor.index.__f__("error", "at pages/shop/shop.vue:121", "[定位流程] 获取位置超时（8秒），主动返回失败。");
+            common_vendor.index.__f__("error", "at pages/shop/shop.vue:123", "[定位流程] 获取位置超时（8秒），主动返回失败。");
             common_vendor.index.showToast({
               title: "定位超时，请稍后重试",
               icon: "none"
@@ -47,7 +47,7 @@ const _sfc_main = {
           if (!isResolved) {
             isResolved = true;
             clearTimeout(timeoutId);
-            common_vendor.index.__f__("log", "at pages/shop/shop.vue:134", "[定位流程] 成功获取位置", res);
+            common_vendor.index.__f__("log", "at pages/shop/shop.vue:136", "[定位流程] 成功获取位置", res);
             const location = {
               latitude: res.latitude,
               longitude: res.longitude
@@ -61,7 +61,7 @@ const _sfc_main = {
           if (!isResolved) {
             isResolved = true;
             clearTimeout(timeoutId);
-            common_vendor.index.__f__("error", "at pages/shop/shop.vue:149", "[定位流程] 获取位置失败", err);
+            common_vendor.index.__f__("error", "at pages/shop/shop.vue:151", "[定位流程] 获取位置失败", err);
             if (isRefreshing.value) {
               common_vendor.index.showToast({
                 title: "定位失败，请检查权限",
@@ -71,14 +71,14 @@ const _sfc_main = {
             resolve(null);
           }
         };
-        common_vendor.index.__f__("log", "at pages/shop/shop.vue:161", "[定位流程] 正在调用 uni.getLocation API...");
+        common_vendor.index.__f__("log", "at pages/shop/shop.vue:163", "[定位流程] 正在调用 uni.getLocation API...");
         common_vendor.index.getLocation({
           type: "gcj02",
           isHighAccuracy: true,
           accuracy: "best",
           success: handleSuccess,
           fail: (err) => {
-            common_vendor.index.__f__("warn", "at pages/shop/shop.vue:168", "[定位流程] 高精度定位失败，尝试普通定位...", err);
+            common_vendor.index.__f__("warn", "at pages/shop/shop.vue:170", "[定位流程] 高精度定位失败，尝试普通定位...", err);
             common_vendor.index.getLocation({
               type: "gcj02",
               success: handleSuccess,
@@ -101,7 +101,7 @@ const _sfc_main = {
         }
       });
       if (error) {
-        common_vendor.index.__f__("error", "at pages/shop/shop.vue:197", "获取聚店页轮播图失败:", error);
+        common_vendor.index.__f__("error", "at pages/shop/shop.vue:199", "获取聚店页轮播图失败:", error);
         bannerList.value = [];
         return;
       }
@@ -113,7 +113,7 @@ const _sfc_main = {
     };
     const getStoreList = async () => {
       if (!userLocation.value) {
-        common_vendor.index.__f__("warn", "at pages/shop/shop.vue:214", "getStoreList 中断：位置信息为空。");
+        common_vendor.index.__f__("warn", "at pages/shop/shop.vue:216", "getStoreList 中断：位置信息为空。");
         isRefreshing.value = false;
         loadingMore.value = false;
         if (pageNo.value === 1) {
@@ -145,7 +145,7 @@ const _sfc_main = {
       });
       loadingMore.value = false;
       if (error) {
-        common_vendor.index.__f__("error", "at pages/shop/shop.vue:253", "获取店铺列表失败:", error);
+        common_vendor.index.__f__("error", "at pages/shop/shop.vue:255", "获取店铺列表失败:", error);
         common_vendor.index.showToast({
           title: error,
           icon: "none"
@@ -168,7 +168,7 @@ const _sfc_main = {
     };
     const handleRefresh = async (isPullDown = false) => {
       if (isLoading.value) {
-        common_vendor.index.__f__("log", "at pages/shop/shop.vue:285", "刷新操作已在进行中，本次触发被忽略。");
+        common_vendor.index.__f__("log", "at pages/shop/shop.vue:287", "刷新操作已在进行中，本次触发被忽略。");
         return;
       }
       isLoading.value = true;
@@ -188,7 +188,7 @@ const _sfc_main = {
           await getStoreList();
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/shop/shop.vue:313", "handleRefresh 过程中捕获到错误:", error);
+        common_vendor.index.__f__("error", "at pages/shop/shop.vue:315", "handleRefresh 过程中捕获到错误:", error);
       } finally {
         isLoading.value = false;
         if (isPullDown) {
@@ -228,18 +228,18 @@ const _sfc_main = {
     });
     common_vendor.onShow(() => {
       if (allStores.value.length === 0) {
-        common_vendor.index.__f__("log", "at pages/shop/shop.vue:366", "onShow: 列表为空，执行初次加载...");
+        common_vendor.index.__f__("log", "at pages/shop/shop.vue:368", "onShow: 列表为空，执行初次加载...");
         const storedLocation = common_vendor.index.getStorageSync("userLocation");
         if (storedLocation) {
           userLocation.value = storedLocation;
         }
         handleRefresh();
       } else {
-        common_vendor.index.__f__("log", "at pages/shop/shop.vue:374", "onShow: 列表已有数据，不自动刷新位置。");
+        common_vendor.index.__f__("log", "at pages/shop/shop.vue:376", "onShow: 列表已有数据，不自动刷新位置。");
       }
     });
     const handleRefresherRefresh = async () => {
-      common_vendor.index.__f__("log", "at pages/shop/shop.vue:380", "--- scroll-view 的 @refresherrefresh 事件已触发 ---");
+      common_vendor.index.__f__("log", "at pages/shop/shop.vue:382", "--- scroll-view 的 @refresherrefresh 事件已触发 ---");
       await handleRefresh(true);
     };
     const loadMore = () => {
@@ -349,7 +349,7 @@ const _sfc_main = {
         p: isRefreshing.value,
         q: common_vendor.o(handleRefresherRefresh),
         r: common_vendor.p({
-          type: "redo",
+          type: "hand-up-filled",
           size: "20",
           color: "#fff"
         }),

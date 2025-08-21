@@ -6,9 +6,9 @@
       <text>{{ bannerText }}</text>
     </view>
 
-    <!-- 活动信息卡片 -->
+    <!-- 聚会信息卡片 -->
     <view class="card activity-card">
-      <view class="card-title">活动信息</view>
+      <view class="card-title">聚会信息</view>
       <view class="activity-details">
         <image :src="activityInfo.image" class="activity-image" mode="aspectFill" />
         <view class="info-text-group">
@@ -147,13 +147,13 @@ onLoad((options) => {
         title: parsedData.activityTitle,
         image: parsedData.coverImageUrl,
         date: formatDateTime(parsedData.startDatetime),
-        location: parsedData.locationAddress || '线上活动',
+        location: parsedData.locationAddress || '线上聚会',
         participants: { current: parsedData.joinCount || 0 },
         totalRefundAmount: null 
       };
 
     } catch (e) {
-      console.error("解析活动数据失败:", e);
+      console.error("解析聚会数据失败:", e);
       return;
     }
   }
@@ -161,7 +161,7 @@ onLoad((options) => {
   pageMode.value = options.mode || 'individual';
   bannerText.value = pageMode.value === 'individual' 
     ? '请为提交申请的用户办理退款'
-    : '活动已取消，请为所有报名用户办理退款';
+    : '聚会已取消，请为所有报名用户办理退款';
 
   fetchRefundList();
 });

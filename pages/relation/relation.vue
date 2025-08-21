@@ -1,16 +1,23 @@
 <template>
 	<view class="connections-page">
-		<!-- 顶部的背景和摇一摇入口 (无变化) -->
-		<view class="header-section">
+		<view class="header-section" @click="goToShakePage">
 			<image src="/static/connections-bg.png" mode="aspectFill" class="header-bg"></image>
 			<view class="header-content">
-				<view class="title-area">
+				<!-- 左侧标题 -->
+				<view class="header-title-group">
 					<h1 class="page-title">六度人脉</h1>
 					<p class="page-subtitle">连接每一个有价值的相遇</p>
 				</view>
-				<view class="shake-entry" @click="goToShakePage">
-					<uni-icons type="paperplane-filled" size="24" color="#fff"></uni-icons>
-					<text class="shake-text">摇一摇</text>
+
+				<!-- 右侧新的摇一摇入口 -->
+				<view class="shake-entry-new">
+					<!-- 单个图标 -->
+					<uni-icons type="personadd" size="36" color="#fff" class="entry-icon"></uni-icons>
+					<!-- 文字组合 -->
+					<view class="entry-text-group">
+						<text class="entry-text">摇一摇</text>
+						<text class="entry-text">找商友</text>
+					</view>
 				</view>
 			</view>
 		</view>
@@ -88,7 +95,7 @@
 				</view>
 
 				<!-- 加载更多组件 (无变化) -->
-				<uni-load-more :status="loadingStatus"></uni-load-more>
+				<!-- <uni-load-more :status="loadingStatus"></uni-load-more> -->
 			</view>
 		</view>
 	</view>
@@ -104,7 +111,9 @@
 	import {
 		onLoad,
 		onPullDownRefresh,
-		onReachBottom
+		onReachBottom,
+		onShow,
+		onHide
 	} from '@dcloudio/uni-app';
 	import request from '@/utils/request.js';
 
@@ -135,6 +144,9 @@
 	});
 	// 【新增】状态锁，防止用户在关注操作完成前重复点击
 	const isFollowActionInProgress = ref(false);
+
+	const isShaking = ref(false);
+
 
 	// --- 计算属性 ---
 	const timeRangeText = computed(() => {
@@ -338,6 +350,41 @@
 
 
 	// --- 页面生命周期 ---
+	onShow(() => {
+		console.log("人脉页 onShow: 开始监听摇一摇");
+		isShaking.value = false; // 每次进入页面重置防抖状态
+
+		uni.onAccelerometerChange((res) => {
+			// 设置一个灵敏度阈值，X、Y、Z轴任一方向的变化大于1.5则认为是在摇动
+			// 这个值可以根据实际测试效果进行微调
+			if (Math.abs(res.x) > 1.5 || Math.abs(res.y) > 1.5 || Math.abs(res.z) > 1.5) {
+				// 检查防抖状态，如果不在“摇动中”，则执行
+				if (!isShaking.value) {
+					// 1. 立即上锁，防止连续触发
+					isShaking.value = true;
+
+					// 2. 震动一下，给用户反馈
+					uni.vibrateShort();
+
+					// 3. 执行跳转
+					console.log("检测到摇一摇，准备跳转...");
+					goToShakePage();
+
+					// 4. 设置一个2秒的冷却时间，2秒后才允许再次通过摇一摇触发
+					setTimeout(() => {
+						isShaking.value = false;
+					}, 2000);
+				}
+			}
+		});
+	});
+	/**
+	 * 页面隐藏时，停止监听，节省资源
+	 */
+	onHide(() => {
+		console.log("人脉页 onHide: 停止监听摇一摇");
+		uni.stopAccelerometer();
+	});
 	onLoad(() => {});
 	onPullDownRefresh(() => fetchUserList(true));
 	onReachBottom(() => {
@@ -358,9 +405,11 @@
 
 	.header-section {
 		position: relative;
-		height: 300rpx;
+		height: 250rpx;
 		color: white;
 		overflow: hidden;
+		border-radius: 0 0 40rpx 40rpx;
+		box-shadow: 0 10rpx 30rpx rgba(0, 0, 0, 0.1);
 	}
 
 	.header-bg {
@@ -378,10 +427,15 @@
 		z-index: 2;
 		padding: 40rpx;
 		display: flex;
-		flex-direction: column;
+		align-items: center;
 		justify-content: space-between;
 		height: 100%;
 		box-sizing: border-box;
+	}
+
+	/* 左侧标题组 */
+	.header-title-group {
+		flex: 1;
 	}
 
 	.page-title {
@@ -396,21 +450,35 @@
 		opacity: 0.9;
 	}
 
-	.shake-entry {
-		align-self: flex-end;
-		background: rgba(255, 255, 255, 0.2);
-		border: 1px solid rgba(255, 255, 255, 0.3);
-		padding: 15rpx 35rpx;
-		border-radius: 40rpx;
+	/* 【核心修改】新的右侧入口样式 */
+	.shake-entry-new {
 		display: flex;
 		align-items: center;
-		margin-bottom: 20rpx;
+		/* 垂直居中对齐图标和文字组 */
+		background: rgba(255, 255, 255, 0.15);
+		border: 1px solid rgba(255, 255, 255, 0.2);
+		border-radius: 20rpx;
+		padding: 20rpx 30rpx;
+		flex-shrink: 0;
+		/* 防止被压缩 */
+	}
 
-		.shake-text {
-			margin-left: 15rpx;
-			font-size: 28rpx;
-			font-weight: 500;
-		}
+	.entry-icon {
+		margin-right: 20rpx;
+		/* 图标和文字之间的距离 */
+	}
+
+	.entry-text-group {
+		display: flex;
+		flex-direction: column;
+		/* 让文字垂直排列 */
+	}
+
+	.entry-text {
+		font-size: 28rpx;
+		font-weight: 500;
+		line-height: 1.4;
+		/* 调整行高，让两行文字更紧凑 */
 	}
 
 	.main-content {

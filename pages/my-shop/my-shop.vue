@@ -29,8 +29,10 @@
 
 			<!-- 空状态提示 -->
 			<view v-if="stores.length === 0 && !loadingMore && !isRefreshing" class="empty-state">
-				<uni-icons type="shop" size="60" color="#ffd8c1"></uni-icons>
-				<text>您还没有自己的聚店</text>
+			    <uni-icons type="shop" size="60" color="#ffd8c1"></uni-icons>
+			    <text class="empty-text">您还没有自己的聚店</text>
+			    <text class="empty-subtext">立即申请，让更多人发现您的店铺</text>
+			    <button class="apply-button" @click="goToApplyPage">申请上榜</button>
 			</view>
 		</scroll-view>
 	</view>
@@ -159,6 +161,16 @@
 		clearTimeout(searchTimer);
 		handleRefresh();
 	};
+	
+	/**
+	 * 【新增】跳转到申请上榜页面的方法
+	 */
+	const goToApplyPage = () => {
+	    uni.navigateTo({
+	        // 目标是新建/编辑页面
+	        url: `/pages/myStore-edit/myStore-edit` 
+	    });
+	};
 
 	/**
 	 * 【修改】将原来的跳转函数修改为跳转到编辑页
@@ -258,6 +270,42 @@
 			margin-top: 10rpx;
 			line-height: 1.5;
 		}
+		
+		
+		.empty-text {
+				font-size: 32rpx;
+				font-weight: 600;
+				color: #333;
+				margin-top: 10rpx;
+			}
+		
+			.empty-subtext {
+				font-size: 26rpx;
+				color: #999;
+				margin-top: 10rpx;
+				margin-bottom: 40rpx;
+			}
+		
+			.apply-button {
+				background: #FF6B00;
+				color: white;
+				border: none;
+				padding: 18rpx 80rpx;
+				border-radius: 40rpx;
+				font-size: 28rpx;
+				font-weight: bold;
+				box-shadow: 0 4rpx 12rpx rgba(255, 107, 0, 0.3);
+				transition: all 0.2s ease;
+			}
+		
+			.apply-button::after {
+				border: none;
+			}
+		
+			.apply-button:active {
+				background: #e05a00;
+				transform: scale(0.98);
+			}
 	}
 
 	.load-more {

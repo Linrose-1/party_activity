@@ -20,6 +20,7 @@ const _sfc_main = {
     const pageSize = common_vendor.ref(10);
     const total = common_vendor.ref(0);
     const loadStatus = common_vendor.ref("more");
+    const isFollowActionInProgress = common_vendor.ref(false);
     const getShareUserList = async (isRefresh = false) => {
       if (loadStatus.value === "loading")
         return;
@@ -47,7 +48,8 @@ const _sfc_main = {
         return;
       }
       if (data && data.list) {
-        friendList.value.push(...data.list);
+        const list = data.list || [];
+        friendList.value = isRefresh ? list : [...friendList.value, ...list];
         total.value = data.total;
         if (friendList.value.length >= total.value) {
           loadStatus.value = "noMore";
@@ -61,6 +63,57 @@ const _sfc_main = {
     };
     const handleImageError = (item) => {
       item.avatar = "/static/images/default-avatar.png";
+    };
+    const handleFollowAction = async (user) => {
+      if (isFollowActionInProgress.value)
+        return;
+      const currentUserId = common_vendor.index.getStorageSync("userId");
+      if (!currentUserId) {
+        common_vendor.index.showModal({
+          title: "需要登录",
+          content: "关注功能需要登录后才能使用，是否前往登录？",
+          success: (res) => {
+            if (res.confirm) {
+              common_vendor.index.navigateTo({
+                url: "/pages/login/login"
+              });
+            }
+          }
+        });
+        return;
+      }
+      isFollowActionInProgress.value = true;
+      const originalFollowStatus = user.followFlag;
+      const newFollowStatus = originalFollowStatus === 1 ? 0 : 1;
+      const apiUrl = newFollowStatus === 1 ? "/app-api/member/follow/add" : "/app-api/member/follow/del";
+      const successMsg = newFollowStatus === 1 ? "关注成功" : "已取消关注";
+      user.followFlag = newFollowStatus;
+      try {
+        const {
+          error
+        } = await utils_request.request(apiUrl, {
+          method: "POST",
+          data: {
+            userId: currentUserId,
+            targetId: user.id,
+            targetType: "post_user"
+          }
+        });
+        if (error)
+          throw new Error(error);
+        common_vendor.index.showToast({
+          title: successMsg,
+          icon: "success"
+        });
+      } catch (err) {
+        user.followFlag = originalFollowStatus;
+        common_vendor.index.showToast({
+          title: err.message || "操作失败，请重试",
+          icon: "none"
+        });
+      } finally {
+        isFollowActionInProgress.value = false;
+      }
     };
     common_vendor.onLoad(() => {
       common_vendor.index.showLoading({ title: "正在加载..." });
@@ -85,7 +138,10 @@ const _sfc_main = {
             e: common_vendor.t(friend.companyName || "暂无公司信息"),
             f: "41a0c04c-1-" + i0,
             g: common_vendor.t(friend.professionalTitle || "暂无职位"),
-            h: friend.id
+            h: common_vendor.t(friend.followFlag === 1 ? "取关" : "关注"),
+            i: friend.followFlag === 1 ? 1 : "",
+            j: common_vendor.o(($event) => handleFollowAction(friend), friend.id),
+            k: friend.id
           };
         }),
         b: common_vendor.p({

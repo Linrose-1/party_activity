@@ -34,7 +34,7 @@
 				关注
 			</view>
 			<view class="tab" :class="{ active: activeTab === 4 }" @click="handleTabClick(4)">
-				🔥猎伙
+				֍猎伙
 			</view>
 			<button class="post-button" @click="postNew">
 				<uni-icons type="compose" size="18" color="#FFFFFF"></uni-icons>
@@ -708,6 +708,7 @@
 		border-radius: 40rpx;
 		padding: 10rpx 30rpx;
 		font-size: 28rpx;
+		font-weight: bold;
 		margin-left: 20rpx;
 		-webkit-appearance: none;
 		background-color: transparent;
@@ -843,7 +844,7 @@
 	.avatar {
 		width: 90rpx;
 		height: 90rpx;
-		border-radius: 50%;
+		border-radius: 10rpx;
 		background: linear-gradient(135deg, #FF6A00, #FF8C37);
 		display: flex;
 		align-items: center;

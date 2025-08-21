@@ -7297,9 +7297,9 @@ function initOnError() {
   };
 }
 function initRuntimeSocketService() {
-  const hosts = "172.20.10.4,127.0.0.1";
+  const hosts = "192.168.100.38,127.0.0.1";
   const port = "8090";
-  const id = "mp-weixin_WBdQuF";
+  const id = "mp-weixin_qkxHUK";
   const lazy = typeof swan !== "undefined";
   let restoreError = lazy ? () => {
   } : initOnError();
@@ -8266,7 +8266,7 @@ const pages = [
   {
     path: "pages/active/active",
     style: {
-      navigationBarTitleText: "活动",
+      navigationBarTitleText: "聚会",
       enablePullDownRefresh: true
     }
   },
@@ -8285,19 +8285,19 @@ const pages = [
   {
     path: "pages/active-detail/active-detail",
     style: {
-      navigationBarTitleText: "活动详情"
+      navigationBarTitleText: "聚会详情"
     }
   },
   {
     path: "pages/active-publish/active-publish",
     style: {
-      navigationBarTitleText: "活动发布"
+      navigationBarTitleText: "发起聚会"
     }
   },
   {
     path: "pages/active-enroll/active-enroll",
     style: {
-      navigationBarTitleText: "活动报名"
+      navigationBarTitleText: "聚会报名"
     }
   },
   {
@@ -8351,7 +8351,7 @@ const pages = [
   {
     path: "pages/my-active/my-active",
     style: {
-      navigationBarTitleText: "我的活动"
+      navigationBarTitleText: "我的聚会"
     }
   },
   {
@@ -8375,7 +8375,7 @@ const pages = [
   {
     path: "pages/location/location",
     style: {
-      navigationBarTitleText: "附近"
+      navigationBarTitleText: "摇一摇"
     }
   },
   {
@@ -8532,7 +8532,7 @@ const tabBar = {
     },
     {
       pagePath: "pages/active/active",
-      text: "活动",
+      text: "聚会",
       iconPath: "/static/tabbar/active.png",
       selectedIconPath: "/static/tabbar/active-active.png"
     },

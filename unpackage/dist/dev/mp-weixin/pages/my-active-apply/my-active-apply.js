@@ -34,12 +34,12 @@ const _sfc_main = {
           };
           fetchExistingRefundInfo();
         } catch (e) {
-          common_vendor.index.__f__("error", "at pages/my-active-apply/my-active-apply.vue:90", "解析活动数据失败:", e);
-          common_vendor.index.showToast({ title: "加载活动信息失败", icon: "none" });
+          common_vendor.index.__f__("error", "at pages/my-active-apply/my-active-apply.vue:90", "解析聚会数据失败:", e);
+          common_vendor.index.showToast({ title: "加载聚会信息失败", icon: "none" });
         }
       } else {
-        common_vendor.index.__f__("error", "at pages/my-active-apply/my-active-apply.vue:94", "未从上个页面接收到活动信息");
-        common_vendor.index.showToast({ title: "无法获取活动信息", icon: "none" });
+        common_vendor.index.__f__("error", "at pages/my-active-apply/my-active-apply.vue:94", "未从上个页面接收到聚会信息");
+        common_vendor.index.showToast({ title: "无法获取聚会信息", icon: "none" });
       }
     });
     const fetchExistingRefundInfo = async () => {

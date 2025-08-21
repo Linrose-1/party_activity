@@ -4,7 +4,7 @@
 		<view class="user-header">
 			<!-- 如果已登录，显示用户信息 -->
 			<template v-if="isLogin">
-				<view class="user-info">
+				<view class="user-info" @tap="onEdit">
 					<view class="avatar">
 						<image class="avatar-img" :src="userInfo.avatar || '../../static/images/default-avatar.png'" />
 					</view>
@@ -21,7 +21,7 @@
 					</view>
 				</view>
 				<view class="edit-btn" @tap="onEdit">编辑</view>
-				
+
 				<text v-if="userInfo.id" class="user-id-display">ID: {{ userInfo.virtualId }}</text>
 			</template>
 
@@ -45,11 +45,11 @@
 		<view class="account-section">
 			<view class="section-header">
 				<text class="section-title-main">账户信息</text>
-				<text class="view-all" @tap="onViewAll">查看全部 ›</text>
+				<text class="view-all" @tap="onViewAll">查看 ›</text>
 			</view>
 			<view class="account-grid">
 				<!-- v-for 循环使用计算属性 accountList -->
-				<view class="account-item" v-for="item in accountList" :key="item.label">
+				<view class="account-item" v-for="item in accountList" :key="item.label"  @tap="navigateToAccountDetail(item)">
 					<view class="account-value">{{ item.value }}</view>
 					<view class="account-label">{{ item.label }}</view>
 				</view>
@@ -59,23 +59,21 @@
 		<!-- AI名片 -->
 		<view class="card-section">
 			<view class="section-header">
-				<text class="section-title-main">我的名片</text>
-				<text class="view-all" @tap="onViewDetail">分享名片 ›</text>
+				<text class="section-title-main">名片分享</text>
+				<text class="view-all" @tap="onViewDetail">分享 ›</text>
 			</view>
 
 			<view class="ai-card">
-				<view class="card-top">
+				<!-- <view class="card-top">
 					<view class="card-avatar">
 						<image class="avatar-img" :src="userInfo.avatar || '../../static/images/default-avatar.png'" />
 					</view>
 					<view class="card-details">
 						<view class="card-name">
-							<!-- 优先显示真实姓名，否则显示昵称 -->
-							{{ userInfo.realName || userInfo.nickname }}
+							{{ userInfo.nickname|| userInfo.realName  }}
 							<text class="vip-badge"
 								v-if="userInfo.topUpLevel && userInfo.topUpLevel.name">{{ userInfo.topUpLevel.name }}</text>
 						</view>
-						<!-- 动态绑定职位和公司 -->
 						<view class="card-position" v-if="userInfo.professionalTitle"><text class="iconfont">👤</text>
 							{{ userInfo.professionalTitle }}
 						</view>
@@ -83,18 +81,11 @@
 							{{ userInfo.companyName }}
 						</view>
 					</view>
-				</view>
+				</view> -->
 
-				<view class="contact-info">
-					<!-- 动态绑定邀请码并传入复制函数 -->
-					<view class="contact-item" @tap="copyToClipboard(userInfo.shardCode)">
-						<text class="iconfont">我的邀请码：</text>
-						<text style="font-weight: bold;">{{ userInfo.shardCode || '暂无' }}</text>
-						<text class="copy-btn">复制</text>
-					</view>
-				</view>
 
-				<view class="qrcode-section">
+
+				<view class="qrcode-section"  @tap="onViewDetail">
 					<text class="qrcode-title">微信二维码 - 扫码添加好友</text>
 					<view class="qrcode-container">
 						<!-- 动态绑定微信二维码，提供一个默认图 -->
@@ -105,6 +96,15 @@
 						<button class="qrcode-btn" @tap="saveQrcode">保存</button>
 						<button class="qrcode-btn" @tap="onViewDetail">分享名片</button>
 					</view> -->
+				</view>
+
+				<view class="contact-info">
+					<!-- 动态绑定邀请码并传入复制函数 -->
+					<view class="contact-item" @tap="copyToClipboard(userInfo.shardCode)">
+						<text class="iconfont">我的邀请码：</text>
+						<text style="font-weight: bold;">{{ userInfo.shardCode || '暂无' }}</text>
+						<text class="copy-btn">复制</text>
+					</view>
 				</view>
 			</view>
 		</view>
@@ -127,7 +127,7 @@
 			</view>
 		</view>
 
-<!-- 		<button style="margin-top: 30rpx;background-color: red;color: white;" @click="skipToLogin">退出登录</button> -->
+		<!-- 		<button style="margin-top: 30rpx;background-color: red;color: white;" @click="skipToLogin">退出登录</button> -->
 	</view>
 </template>
 
@@ -206,19 +206,23 @@
 		const user = userInfo.value;
 		return [{
 				value: user.currExperience || 0,
-				label: '我的贡分'
+				label: '我的贡分',
+				path: '/pages/my-account/my-account'
 			},
 			{
 				value: user.activityCount || 0,
-				label: '我的活动'
+				label: '我的聚会',
+				path: '/pages/my-active/my-active'
 			},
 			{
 				value: user.postCount || 0,
-				label: '我的商机'
+				label: '我的商机',
+				path: '/pages/my-opportunity/my-opportunity'
 			},
 			{
 				value: user.point || 0,
-				label: '我的智米'
+				label: '我的智米',
+				path: '/pages/my-account/my-account'
 			}
 		]
 	})
@@ -236,18 +240,30 @@
 		}
 		return title || company || '暂未设置职位和公司';
 	});
+	
+	/**
+	 * 【新增】处理账户信息区域点击跳转的方法
+	 * @param {object} item - 被点击的账户项，包含 path 属性
+	 */
+	const navigateToAccountDetail = (item) => {
+		// 确保路径存在再跳转
+		if (item && item.path) {
+			uni.navigateTo({
+				url: item.path
+			});
+		}
+	};
 
 
-	const featureList = ref([
-		{
+	const featureList = ref([{
 			name: '我的订单',
 			desc: '查看您的所有支付订单',
 			icon: '../../static/icon/订单.png',
 			path: '/pages/my-order/my-order'
 		},
 		{
-			name: '我的活动',
-			desc: '已报名/已发布的活动',
+			name: '我的聚会',
+			desc: '已报名/已发布的聚会',
 			icon: '../../static/icon/活动.png',
 			path: '/pages/my-active/my-active'
 		},
@@ -374,17 +390,17 @@
 		color: white;
 		position: relative;
 	}
-	
+
 	.user-id-display {
-			position: absolute;
-			bottom: 20rpx;
-			right: 30rpx;
-			font-size: 22rpx;
-			color: rgba(255, 255, 255, 0.7);
-			background-color: rgba(0, 0, 0, 0.1);
-			padding: 4rpx 12rpx;
-			border-radius: 10rpx;
-		}
+		position: absolute;
+		bottom: 20rpx;
+		right: 30rpx;
+		font-size: 22rpx;
+		color: rgba(255, 255, 255, 0.7);
+		background-color: rgba(0, 0, 0, 0.1);
+		padding: 4rpx 12rpx;
+		border-radius: 10rpx;
+	}
 
 	.avatar {
 		width: 140rpx;
@@ -432,7 +448,7 @@
 		position: absolute;
 		right: 30rpx;
 		top: 30rpx;
-		font-size: 24rpx;
+		font-size: 28rpx;
 		background: rgba(255, 255, 255, 0.2);
 		padding: 10rpx 20rpx;
 		border-radius: 30rpx;
@@ -452,7 +468,7 @@
 	}
 
 	.view-all {
-		font-size: 24rpx;
+		font-size: 28rpx;
 		color: #3a7bd5;
 		cursor: pointer;
 	}
@@ -473,7 +489,15 @@
 
 	.account-item {
 		text-align: center;
+	    padding: 10rpx 0;
+	    border-radius: 12rpx;
+	    transition: background-color 0.2s;
 	}
+	
+	.account-item:active {
+	    background-color: #f5f5f5;
+	}
+
 
 	.account-value {
 		font-size: 36rpx;
@@ -584,7 +608,7 @@
 		background: rgba(255, 255, 255, 0.2);
 		padding: 20rpx;
 		border-radius: 20rpx;
-		margin-bottom: 30rpx;
+		margin: 30rpx  0;
 	}
 
 	.contact-item {

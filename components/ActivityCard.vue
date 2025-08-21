@@ -20,7 +20,7 @@
 			</view>
 
 			<view class="activity-info">
-				<uni-icons type="map-pin" size="16" color="#FF6B00" />
+				<uni-icons type="location" size="16" color="#FF6B00" />
 				<!-- 绑定正确的地点字段 (locationAddress) -->
 				<text>{{ activity.locationAddress || '线上活动' }}</text>
 			</view>
@@ -43,7 +43,7 @@
 
 		<view class="activity-footer">
 			<view class="organizer">
-				<uni-icons type="person" size="16" color="#FF6B00" />
+				<uni-icons type="contact-filled" size="16" color="#FF6B00" />
 				<!-- 绑定正确的组织者字段 (organizerUnitName) -->
 				<text>{{ activity.memberUser.nickname || '主办方' }}</text>
 			</view>

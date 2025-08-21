@@ -7,14 +7,14 @@
 				active-color="#FF6B00" />
 		</view>
 
-		<!-- 我的报名活动 -->
+		<!-- 我的报名聚会 -->
 		<view v-show="currentTab === 0" scroll-y class="content-scroll" refresher-enabled
 			:refresher-triggered="refreshing" @refresherrefresh="onRefresh" @scrolltolower="onReachBottom">
 			<view class="section-header">
-				<text class="section-title">✍️ 我报名的活动</text>
+				<text class="section-title">✍️ 我报名的聚会</text>
 			</view>
 
-			<!-- 活动列表 -->
+			<!-- 聚会列表 -->
 			<view v-if="enrolledActivities.length > 0" class="activity-list">
 				<view v-for="(item, index) in enrolledActivities" :key="item.id" class="activity-item"
 					@click="handleActivityClick(item.id)">
@@ -39,7 +39,7 @@
 
 						<view class="activity-info">
 							<uni-icons type="map-pin" size="16" color="#999" />
-							<text class="info-text">{{ item.locationAddress || '线上活动' }}</text>
+							<text class="info-text">{{ item.locationAddress || '线上聚会' }}</text>
 						</view>
 
 						<view v-if="item.memberActivityJoinResp.rejectMsg" class="rejection-reason-box">
@@ -81,21 +81,21 @@
 
 			<!-- 空状态 -->
 			<view v-else-if="!loading" class="empty-state-placeholder">
-				<text class="empty-title">暂无报名活动</text>
-				<text class="empty-desc">快去发现并报名感兴趣的活动吧</text>
+				<text class="empty-title">暂无报名聚会</text>
+				<text class="empty-desc">快去发现并报名感兴趣的聚会吧</text>
 				<button class="primary-btn" @click="navigateToDiscover">去发现</button>
 			</view>
 
 		</view>
 
-		<!-- 我的发布活动 -->
+		<!-- 我的发布聚会 -->
 		<view v-show="currentTab === 1" scroll-y class="content-scroll" refresher-enabled
 			:refresher-triggered="refreshing" @refresherrefresh="onRefresh" @scrolltolower="onReachBottom">
 			<view class="section-header">
-				<text class="section-title">📢 我发布的活动</text>
+				<text class="section-title">📢 我发起的聚会</text>
 			</view>
 
-			<!-- 活动列表 -->
+			<!-- 聚会列表 -->
 			<view v-if="publishedActivities.length > 0" class="activity-list">
 				<view v-for="(item, index) in publishedActivities" :key="item.id" class="activity-item"
 					@click="handleActivityClick(item.id)">
@@ -116,7 +116,7 @@
 
 						<view class="activity-info">
 							<uni-icons type="map-pin" size="16" color="#999" />
-							<text class="info-text">{{ item.locationAddress || '线上活动' }}</text>
+							<text class="info-text">{{ item.locationAddress || '线上聚会' }}</text>
 						</view>
 
 						<view class="activity-footer">
@@ -132,17 +132,17 @@
 										type="error"></uni-badge>
 								</button>
 
-								<button v-if="['未开始', '报名中', '活动即将开始', '进行中'].includes(item.statusStr)"
+								<button v-if="['未开始', '报名中', '聚会即将开始', '进行中'].includes(item.statusStr)"
 									class="btn btn-cancel" @click.stop="cancelActivity(item.id)">
-									取消活动
+									取消聚会
 								</button>
 
-								<button v-if="item.statusStr === '活动取消'" class="btn btn-refund-manage"
+								<button v-if="item.statusStr === '聚会取消'" class="btn btn-refund-manage"
 									@click.stop="manageRefunds(item, 'all')">
 									处理退款
 								</button>
 
-								<button v-if="item.statusStr !== '活动取消'" class="btn btn-view-users"
+								<button v-if="item.statusStr !== '聚会取消'" class="btn btn-view-users"
 									@click.stop="navigateToRegisteredUsers(item)">
 									报名用户
 								</button>
@@ -158,9 +158,9 @@
 
 			<!-- 空状态 -->
 			<view v-else-if="!loading" class="empty-state-placeholder">
-				<text class="empty-title">暂无发布活动</text>
-				<text class="empty-desc">创建一个活动，邀请大家参与吧</text>
-				<button class="primary-btn" @click="navigateToCreate">创建活动</button>
+				<text class="empty-title">暂无发布聚会</text>
+				<text class="empty-desc">创建一个聚会，邀请大家参与吧</text>
+				<button class="primary-btn" @click="navigateToCreate">创建聚会</button>
 			</view>
 
 		</view>
@@ -182,7 +182,7 @@
 
 	// --- 状态管理 ---
 	const currentTab = ref(0);
-	const tabs = ref(['我的报名', '我的发布']);
+	const tabs = ref(['我的报名', '我的发起']);
 	const refreshing = ref(false);
 	const loading = ref(false);
 
@@ -233,7 +233,7 @@
 				data: params
 			});
 
-			console.log(`获取Tab ${currentTab.value} 的活动`, result);
+			console.log(`获取Tab ${currentTab.value} 的聚会`, result);
 
 			if (result && !result.error && result.data) {
 				const list = result.data.list || [];
@@ -252,7 +252,7 @@
 				}
 			}
 		} catch (error) {
-			console.error("请求我的活动列表失败:", error);
+			console.error("请求我的聚会列表失败:", error);
 		} finally {
 			loading.value = false;
 			refreshing.value = false;
@@ -401,14 +401,14 @@
 	const cancelActivity = (activityId) => {
 		uni.showModal({
 			title: '警告',
-			content: '确定要取消您发布的此活动吗？此操作不可逆。',
+			content: '确定要取消您发布的此聚会吗？此操作不可逆。',
 			confirmColor: '#f44336',
 			success: async (res) => {
 				if (res.confirm) {
 					uni.showLoading({
 						title: '正在删除...'
 					});
-					// 【注意】接口应该是取消活动，而不是删除。请确认接口地址是否正确。
+					// 【注意】接口应该是取消聚会，而不是删除。请确认接口地址是否正确。
 					// 假设接口是 /cancel-activity
 					const result = await request('/app-api/member/activity/cancel-activity', {
 						method: 'POST',
@@ -420,7 +420,7 @@
 
 					if (result && !result.error) {
 						uni.showToast({
-							title: '活动已取消',
+							title: '聚会已取消',
 							icon: 'success'
 						});
 						handleRefresh();
@@ -445,7 +445,7 @@
 
 	/**
 	 * 【新增】跳转到重新上传凭证页面
-	 * @param {object} activityItem - 当前活动对象
+	 * @param {object} activityItem - 当前聚会对象
 	 */
 	const navigateToReUpload = (activityItem) => {
 		const activityJson = JSON.stringify(activityItem);
@@ -457,7 +457,7 @@
 
 	/**
 	 * 跳转到报名用户页面
-	 * @param {object} activityItem - 当前活动对象
+	 * @param {object} activityItem - 当前聚会对象
 	 */
 	const navigateToRegisteredUsers = (activityItem) => {
 		const activityJson = JSON.stringify(activityItem);

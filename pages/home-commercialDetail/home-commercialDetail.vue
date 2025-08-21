@@ -842,7 +842,7 @@
 	.author-avatar {
 		width: 112rpx;
 		height: 112rpx;
-		border-radius: 50%;
+		border-radius: 10rpx;
 		background: linear-gradient(135deg, #FF6A00, #FF8C00);
 		display: flex;
 		align-items: center;
@@ -1101,7 +1101,7 @@
 	.comment-avatar {
 		width: 92rpx;
 		height: 92rpx;
-		border-radius: 50%;
+		border-radius: 10rpx;
 		background: linear-gradient(135deg, #FF8C00, #FF6A00);
 		display: flex;
 		align-items: center;

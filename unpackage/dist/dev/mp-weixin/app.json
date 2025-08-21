@@ -71,7 +71,7 @@
       },
       {
         "pagePath": "pages/active/active",
-        "text": "活动",
+        "text": "聚会",
         "iconPath": "/static/tabbar/active.png",
         "selectedIconPath": "/static/tabbar/active-active.png"
       },

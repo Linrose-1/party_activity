@@ -11,7 +11,7 @@
 		<scroll-view v-show="currentTab === 0" scroll-y class="content-scroll" refresher-enabled
 			:refresher-triggered="refreshing" @refresherrefresh="onRefresh" @scrolltolower="loadMore">
 			<view class="section-header">
-				<text class="section-title">⭐ 收藏的活动</text>
+				<text class="section-title">⭐ 收藏的聚会</text>
 			</view>
 
 			<view v-if="favoriteActivities.length > 0" class="activity-list">
@@ -159,7 +159,7 @@
 
 	// --- 状态管理 ---
 	const currentTab = ref(0);
-	const tabs = ref(['收藏的活动', '收藏的商机']);
+	const tabs = ref(['收藏的聚会', '收藏的商机']);
 	const refreshing = ref(false);
 	const pageSize = 10;
 	const userId = ref(null);

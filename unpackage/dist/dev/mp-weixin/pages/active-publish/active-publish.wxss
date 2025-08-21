@@ -113,6 +113,11 @@
   margin-top: 20rpx;
   gap: 10rpx;
 }
+.form-bottom.data-v-d21abf49 {
+  text-align: center;
+  font-size: 24rpx;
+  color: #999;
+}
 .action-bar.data-v-d21abf49 {
   position: fixed;
   bottom: 0;

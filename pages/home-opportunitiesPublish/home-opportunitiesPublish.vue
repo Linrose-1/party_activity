@@ -4,20 +4,19 @@
 		<view class="form-container">
 			<view class="form-card">
 				<view class="form-group">
-					<view class="form-label">帖子标题</view>
-					<input v-model="title" class="form-input" placeholder="请输入标题（最多50字）" maxlength="50" />
-					<text class="hint">清晰明了的标题能吸引更多关注</text>
+					<view class="form-label">标题</view>
+					<input v-model="title" class="form-input" placeholder="请输入标题（最多20字）" maxlength="20" />
+					<!-- <text class="hint">清晰明了的标题能吸引更多关注</text> -->
 				</view>
 
 				<view class="form-group">
-					<view class="form-label">帖子内容</view>
-					<textarea v-model="content" class="form-textarea" placeholder="详细描述您的商机、需求或经验分享..." />
-					<text class="hint">内容需大于20字</text>
+					<view class="form-label">内容</view>
+					<textarea v-model="content" class="form-textarea" placeholder="详细描述您的项目/商机、需求或经验分享..." />
+					<!-- <text class="hint">内容需大于20字</text> -->
 				</view>
 
-				<!-- 新增：选择专题 -->
 				<view class="form-group">
-					<view class="form-label">选择专题</view>
+					<view class="form-label">选择分类</view>
 					<radio-group @change="topicChange" class="radio-group-container">
 						<label class="radio-item">
 							<radio value="普通商机" :checked="topic === '普通商机'" color="#FF6A00" />
@@ -25,7 +24,7 @@
 						</label>
 						<label class="radio-item">
 							<radio value="创业猎伙" :checked="topic === '创业猎伙'" color="#FF6A00" />
-							<text>创业猎伙</text>
+							<text>创业猎伙🔥</text>
 						</label>
 					</radio-group>
 				</view>
@@ -39,10 +38,10 @@
 						</view>
 					</view>
 					<view class="tag-input-container">
-						<input v-model="tagInput" class="tag-input" placeholder="输入标签（如 #合作）" />
+						<input v-model="tagInput" class="tag-input" placeholder="输入标签（如,合作/需求/经验/创业灵感...）" />
 						<button class="add-tag-btn" @click="addTag">添加</button>
 					</view>
-					<text class="hint">添加1-5个标签，让更多人发现您的帖子</text>
+					<text class="hint">添加精准标签让更多人发现您的商机</text>
 				</view>
 
 				<view class="form-group">
@@ -89,8 +88,8 @@
 	import uploadFile from '../../utils/upload.js';
 
 	// --- 页面表单数据 (与之前相同) ---
-	const title = ref('商机标题')
-	const content = ref('商机内容商机内容商机内容商机内容商机内容商机内容商机内容商机内容商机内容')
+	const title = ref('')
+	const content = ref('')
 	const topic = ref('普通商机')
 	const tags = ref([])
 	const tagInput = ref('')
@@ -353,9 +352,14 @@
 		margin-bottom: 30rpx;
 		box-shadow: 0 6rpx 12rpx rgba(0, 0, 0, 0.05);
 	}
+	
+	.form-group{
+		margin-bottom: 30rpx;
+	}
 
 	.form-label {
 		font-size: 28rpx;
+		font-weight: 700;
 		margin-top: 10rpx;
 		display: block;
 		color: #666;

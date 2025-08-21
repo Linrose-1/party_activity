@@ -195,6 +195,11 @@ const _sfc_main = {
         url: `/pages/home-commercialDetail/home-commercialDetail?id=${id}`
       });
     };
+    const goToPublishPage = () => {
+      common_vendor.index.navigateTo({
+        url: "/pages/home-opportunitiesPublish/home-opportunitiesPublish"
+      });
+    };
     common_vendor.onLoad(() => getMyOpportunitiesList(true));
     common_vendor.onReachBottom(() => getMyOpportunitiesList());
     common_vendor.onPullDownRefresh(() => getMyOpportunitiesList(true));
@@ -256,17 +261,24 @@ const _sfc_main = {
         })
       } : {}, {
         f: postList.value.length === 0 && loadStatus.value === "noMore"
-      }, postList.value.length === 0 && loadStatus.value === "noMore" ? {} : {}, {
-        g: common_vendor.o(confirmAppeal),
-        h: common_vendor.p({
+      }, postList.value.length === 0 && loadStatus.value === "noMore" ? {
+        g: common_vendor.p({
+          type: "compose",
+          size: "60",
+          color: "#e0e0e0"
+        }),
+        h: common_vendor.o(goToPublishPage)
+      } : {}, {
+        i: common_vendor.o(confirmAppeal),
+        j: common_vendor.p({
           mode: "input",
           title: "提交申诉",
           placeholder: "请输入申诉理由..."
         }),
-        i: common_vendor.sr(appealPopup, "481e0091-4", {
+        k: common_vendor.sr(appealPopup, "481e0091-5", {
           "k": "appealPopup"
         }),
-        j: common_vendor.p({
+        l: common_vendor.p({
           type: "dialog"
         })
       });

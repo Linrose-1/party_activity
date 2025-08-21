@@ -11,7 +11,7 @@ const _easycom_uni_segmented_control = () => "../../uni_modules/uni-segmented-co
 const _easycom_uni_icons = () => "../../uni_modules/uni-icons/components/uni-icons/uni-icons.js";
 const _easycom_uni_load_more = () => "../../uni_modules/uni-load-more/components/uni-load-more/uni-load-more.js";
 if (!Math) {
-  (_easycom_uni_segmented_control + _easycom_uni_icons + ActivityCard + _easycom_uni_load_more)();
+  (_easycom_uni_segmented_control + _easycom_uni_icons + _easycom_uni_load_more + ActivityCard)();
 }
 const ActivityCard = () => "../../components/ActivityCard.js";
 const _sfc_main = {
@@ -19,7 +19,7 @@ const _sfc_main = {
   setup(__props) {
     let shakeAudioContext = null;
     const currentTab = common_vendor.ref(0);
-    const tabItems = ["活动", "商友"];
+    const tabItems = ["商友", "活动"];
     const shaken = common_vendor.ref(false);
     const loading = common_vendor.ref(false);
     const shakeDebounce = common_vendor.ref(true);
@@ -32,7 +32,7 @@ const _sfc_main = {
     const activities = common_vendor.ref([]);
     const businesses = common_vendor.ref([]);
     const resetState = () => {
-      common_vendor.index.__f__("log", "at pages/location/location.vue:110", "页面状态已重置");
+      common_vendor.index.__f__("log", "at pages/location/location.vue:113", "页面状态已重置");
       shaken.value = false;
       loading.value = false;
       activities.value = [];
@@ -78,7 +78,7 @@ const _sfc_main = {
               getNearbyBusinesses(true)
             ]);
           } catch (error) {
-            common_vendor.index.__f__("error", "at pages/location/location.vue:163", "加载初始数据时发生错误:", error);
+            common_vendor.index.__f__("error", "at pages/location/location.vue:166", "加载初始数据时发生错误:", error);
           } finally {
             loading.value = false;
             setTimeout(() => {
@@ -223,7 +223,7 @@ const _sfc_main = {
       const name = user.nickname || "匿名用户";
       const avatarUrl = user.avatar || defaultAvatar;
       const url = `/pages/applicationBusinessCard/applicationBusinessCard?id=${user.id}&name=${encodeURIComponent(name)}&avatar=${encodeURIComponent(avatarUrl)}`;
-      common_vendor.index.__f__("log", "at pages/location/location.vue:336", "从摇一摇页跳转，URL:", url);
+      common_vendor.index.__f__("log", "at pages/location/location.vue:339", "从摇一摇页跳转，URL:", url);
       common_vendor.index.navigateTo({
         url
       });
@@ -271,31 +271,11 @@ const _sfc_main = {
         e: common_vendor.o(triggerShakeSequence)
       } : loading.value ? {} : common_vendor.e({
         g: common_vendor.p({
-          type: "calendar-filled",
-          size: "20",
-          color: "#FF6B00"
-        }),
-        h: common_vendor.f(activities.value, (activity, k0, i0) => {
-          return {
-            a: activity.id,
-            b: "4d9b4fcb-3-" + i0,
-            c: common_vendor.p({
-              activity
-            })
-          };
-        }),
-        i: common_vendor.p({
-          status: activityLoadingStatus.value
-        }),
-        j: activities.value.length === 0 && activityLoadingStatus.value === "noMore"
-      }, activities.value.length === 0 && activityLoadingStatus.value === "noMore" ? {} : {}, {
-        k: currentTab.value === 0,
-        l: common_vendor.p({
           type: "staff-filled",
           size: "20",
           color: "#FF6B00"
         }),
-        m: common_vendor.f(businesses.value, (business, k0, i0) => {
+        h: common_vendor.f(businesses.value, (business, k0, i0) => {
           return common_vendor.e({
             a: business.avatar || "/static/images/default-avatar.png",
             b: common_vendor.o(($event) => navigateToBusinessCard(business), business.id),
@@ -308,17 +288,37 @@ const _sfc_main = {
           }, business.companyName ? {
             g: common_vendor.t(business.companyName)
           } : {}, {
-            h: common_vendor.t(business.followFlag === 1 ? "已关注" : "关注"),
+            h: common_vendor.t(business.followFlag === 1 ? "取关" : "关注"),
             i: business.followFlag === 1 ? 1 : "",
             j: common_vendor.o(($event) => handleFollowAction(business), business.id),
             k: business.id
           });
         }),
-        n: common_vendor.p({
+        i: common_vendor.p({
           status: businessLoadingStatus.value
         }),
-        o: businesses.value.length === 0 && businessLoadingStatus.value === "noMore"
+        j: businesses.value.length === 0 && businessLoadingStatus.value === "noMore"
       }, businesses.value.length === 0 && businessLoadingStatus.value === "noMore" ? {} : {}, {
+        k: currentTab.value === 0,
+        l: common_vendor.p({
+          type: "calendar-filled",
+          size: "20",
+          color: "#FF6B00"
+        }),
+        m: common_vendor.f(activities.value, (activity, k0, i0) => {
+          return {
+            a: activity.id,
+            b: "4d9b4fcb-5-" + i0,
+            c: common_vendor.p({
+              activity
+            })
+          };
+        }),
+        n: common_vendor.p({
+          status: activityLoadingStatus.value
+        }),
+        o: activities.value.length === 0 && activityLoadingStatus.value === "noMore"
+      }, activities.value.length === 0 && activityLoadingStatus.value === "noMore" ? {} : {}, {
         p: currentTab.value === 1
       }), {
         f: loading.value

@@ -2,10 +2,10 @@
 	<view class="page-container">
 		<!-- ... template部分无任何变化 ... -->
 		<view v-if="activityInfo" class="info-card">
-			<view class="card-title">活动信息</view>
+			<view class="card-title">聚会信息</view>
 			<view class="card-content">
 				<view class="info-item">
-					<text class="label">活动标题:</text>
+					<text class="label">聚会标题:</text>
 					<text class="value">{{ activityInfo.activityTitle }}</text>
 				</view>
 				<view class="info-item">

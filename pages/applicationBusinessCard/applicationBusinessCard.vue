@@ -9,7 +9,8 @@
 					<image v-if="targetUserInfo.avatar" :src="targetUserInfo.avatar" class="target-avatar-image">
 					</image>
 					<view v-else class="target-avatar">
-						{{ (targetUserInfo.realName || targetUserInfo.nickname || '?').charAt(0) }}</view>
+						{{ (targetUserInfo.realName || targetUserInfo.nickname || '?').charAt(0) }}
+					</view>
 
 					<view class="target-name">{{ targetUserInfo.realName || targetUserInfo.nickname }}</view>
 					<!-- <view class="target-title">{{ targetUserInfo.companyName || '公司信息未设置' }}</view> -->
@@ -107,13 +108,16 @@
 
 	// --- 状态管理 ---
 	const currentUserInfo = ref(null); // 存储【当前登录用户】的信息
-	const targetUserInfo = ref(null);  // 存储【目标用户】的信息
+	const targetUserInfo = ref(null); // 存储【目标用户】的信息
 	const targetUserId = ref(null);
+	const fromShare = ref(false);
 	const isPaying = ref(false);
 	const showInsufficient = ref(false);
 
 	// --- 页面生命周期 ---
 	onLoad((options) => {
+		console.log('[business-card-apply] onLoad 触发。收到的选项：', JSON.stringify(options));
+
 		if (options.id && options.name) {
 			targetUserId.value = parseInt(options.id, 10);
 			// 1. 立即使用URL参数填充目标用户信息，实现UI即时响应
@@ -121,14 +125,23 @@
 				id: targetUserId.value,
 				nickname: decodeURIComponent(options.name),
 				realName: decodeURIComponent(options.name), // 预填充，后续可能被API覆盖
-				avatar: options.avatar ? decodeURIComponent(options.avatar) : '/static/images/default-avatar.png'
+				avatar: options.avatar ? decodeURIComponent(options.avatar) :
+					'/static/images/default-avatar.png'
 			};
 			console.log('已预填充目标用户信息:', targetUserInfo.value);
+
+			if (options.fromShare && options.fromShare === '1') {
+				fromShare.value = true;
+				console.log('访问来源：免费分享链接');
+			}
 
 			// 2. 开始页面初始化流程
 			initializePage();
 		} else {
-			uni.showToast({ title: '缺少必要的用户信息', icon: 'error' });
+			uni.showToast({
+				title: '缺少必要的用户信息',
+				icon: 'error'
+			});
 			setTimeout(() => uni.navigateBack(), 1000);
 		}
 	});
@@ -147,15 +160,28 @@
 
 	// 任务一：检查权限，如果成功则直接跳转
 	const checkAccessPermission = async () => {
+
+		const requestData = {
+			readUserId: targetUserId.value
+		};
+
+		// 如果是通过免费分享链接进来的，就加上 notPay: 1
+		if (fromShare.value) {
+			requestData.notPay = 1;
+		}
+
+		console.log('[business-card-apply] 准备使用参数调用 /read-card:', JSON.stringify(
+			requestData));
+
 		const checkResult = await request('/app-api/member/user/read-card', {
 			method: 'POST',
-			data: { readUserId: targetUserId.value }
+			data: requestData
 		});
 
 		if (checkResult && checkResult.data && !checkResult.error) {
 			console.log("权限检查成功，直接跳转到名片页。");
 			uni.redirectTo({
-				url: `/pages/my-businessCard/my-businessCard?id=${targetUserId.value}`
+				url: `/pages/my-businessCard/my-businessCard?id=${targetUserId.value}&fromShare=${fromShare.value ? '1' : '0'}`
 			});
 		} else {
 			// 权限检查失败，什么都不做，让页面停留在支付流程
@@ -165,13 +191,21 @@
 
 	// 任务二：获取当前登录用户的信息（为了余额和好友申请语）
 	const fetchCurrentUserInfo = async () => {
-		const { data, error } = await request('/app-api/member/user/get', { method: 'GET' });
+		const {
+			data,
+			error
+		} = await request('/app-api/member/user/get', {
+			method: 'GET'
+		});
 		if (data) {
 			currentUserInfo.value = data;
 			console.log('已获取当前登录用户信息:', currentUserInfo.value);
 		} else {
 			console.error('获取当前用户信息失败:', error);
-			uni.showToast({ title: '获取您的账户信息失败', icon: 'none' });
+			uni.showToast({
+				title: '获取您的账户信息失败',
+				icon: 'none'
+			});
 		}
 	};
 
@@ -179,64 +213,95 @@
 	const handlePayToReadCard = async () => {
 		if (isPaying.value) return;
 		if (!targetUserId.value) {
-			uni.showToast({ title: '目标用户ID无效', icon: 'none' });
+			uni.showToast({
+				title: '目标用户ID无效',
+				icon: 'none'
+			});
 			return;
 		}
 		if (currentUserInfo.value && currentUserInfo.value.point < 1) {
 			showInsufficient.value = true;
-			uni.showToast({ title: '智米不足', icon: 'none' });
+			uni.showToast({
+				title: '智米不足',
+				icon: 'none'
+			});
 			return;
 		}
 		isPaying.value = true;
 		showInsufficient.value = false;
 
-		const { data, error } = await request('/app-api/member/user/pay-read-card', {
+		const {
+			data,
+			error
+		} = await request('/app-api/member/user/pay-read-card', {
 			method: 'POST',
-			data: { readUserId: targetUserId.value }
+			data: {
+				readUserId: targetUserId.value
+			}
 		});
 
 		isPaying.value = false;
 
 		if (error) {
-			uni.showToast({ title: `支付失败: ${error}`, icon: 'none', duration: 2000 });
+			uni.showToast({
+				title: `支付失败: ${error}`,
+				icon: 'none',
+				duration: 2000
+			});
 		} else if (data === true) {
-			uni.showToast({ title: '支付成功！', icon: 'success', duration: 2000 });
-			
+			uni.showToast({
+				title: '支付成功！',
+				icon: 'success',
+				duration: 2000
+			});
+
 			// 【修正】支付成功后，只需刷新当前用户的余额信息即可
 			fetchCurrentUserInfo();
-			
+
 			setTimeout(() => {
 				uni.redirectTo({
 					url: `/pages/my-businessCard/my-businessCard?id=${targetUserId.value}`
 				});
 			}, 2000);
 		} else {
-			uni.showToast({ title: '支付遇到未知问题', icon: 'none', duration: 2000 });
+			uni.showToast({
+				title: '支付遇到未知问题',
+				icon: 'none',
+				duration: 2000
+			});
 		}
 	};
 
 	// --- 辅助功能 ---
 	const goToEarnPoints = () => {
-		uni.navigateTo({ url: '/pages/my-account/my-account' });
+		uni.navigateTo({
+			url: '/pages/my-account/my-account'
+		});
 	};
 
 	// 计算属性现在可以正确地从两个独立的数据源取值
 	const formattedFriendRequestMessage = computed(() => {
 		if (!currentUserInfo.value || !targetUserInfo.value) return '正在生成中...';
-        
+
 		const targetName = targetUserInfo.value.realName; // 来自URL参数
 		const myName = currentUserInfo.value.realName || currentUserInfo.value.nickname; // 来自API
 		const myCompany = currentUserInfo.value.companyName || '我的公司'; // 来自API
 		const myWork = currentUserInfo.value.professionalTitle || '我的职位'; // 来自API
-        
+
 		return `您好 ${targetName}！我是${myCompany}的${myName}，目前在从事${myWork}工作。我从高伙猩球平台获得您的联系方式，希望可以认识一下。`;
 	});
 
 	const copyFriendRequestMessage = () => {
 		uni.setClipboardData({
 			data: formattedFriendRequestMessage.value,
-			success: () => uni.showToast({ title: '复制成功！', icon: 'success' }),
-			fail: () => uni.showToast({ title: '复制失败', icon: 'none' })
+			success: () => uni.showToast({
+				title: '复制成功！',
+				icon: 'success'
+			}),
+			fail: () => uni.showToast({
+				title: '复制失败',
+				icon: 'none'
+			})
 		});
 	};
 </script>

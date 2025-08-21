@@ -28,19 +28,6 @@
 				<!-- 活动列表 -->
 				<view v-show="currentTab === 0">
 					<view class="list-title">
-						<uni-icons type="calendar-filled" size="20" color="#FF6B00" />
-						<text>附近活动</text>
-					</view>
-					<ActivityCard v-for="activity in activities" :key="activity.id" :activity="activity" />
-					<uni-load-more :status="activityLoadingStatus"></uni-load-more>
-					<view v-if="activities.length === 0 && activityLoadingStatus === 'noMore'" class="no-more-content">
-						附近暂无活动，去别处看看吧
-					</view>
-				</view>
-
-				<!-- 商友列表 -->
-				<view v-show="currentTab === 1">
-					<view class="list-title">
 						<uni-icons type="staff-filled" size="20" color="#FF6B00" />
 						<text>附近商友</text>
 					</view>
@@ -59,13 +46,29 @@
 						<!-- 【核心修改】按钮状态绑定到 followFlag，并调用统一的 handleFollowAction 方法 -->
 						<button class="connect-btn" :class="{ 'connected': business.followFlag === 1 }"
 							@click.stop="handleFollowAction(business)">
-							{{ business.followFlag === 1 ? '已关注' : '关注' }}
+							{{ business.followFlag === 1 ? '取关' : '关注' }}
 						</button>
 					</view>
 					<uni-load-more :status="businessLoadingStatus"></uni-load-more>
 					<view v-if="businesses.length === 0 && businessLoadingStatus === 'noMore'" class="no-more-content">
 						附近暂无商友，去别处看看吧
 					</view>
+				</view>
+
+				<!-- 商友列表 -->
+				<view v-show="currentTab === 1">
+					<view class="list-title">
+						<uni-icons type="calendar-filled" size="20" color="#FF6B00" />
+						<text>附近活动</text>
+					</view>
+					<ActivityCard v-for="activity in activities" :key="activity.id" :activity="activity" />
+					<uni-load-more :status="activityLoadingStatus"></uni-load-more>
+					<view v-if="activities.length === 0 && activityLoadingStatus === 'noMore'" class="no-more-content">
+						附近暂无活动，去别处看看吧
+					</view>
+
+
+
 				</view>
 			</view>
 		</view>
@@ -88,7 +91,7 @@
 
 	// --- 状态管理 ---
 	const currentTab = ref(0);
-	const tabItems = ['活动', '商友'];
+	const tabItems = ['商友', '活动'];
 	const shaken = ref(false); // 是否已经摇过并显示结果
 	const loading = ref(false); // 是否正在加载数据（摇动后）
 	const shakeDebounce = ref(true); // 摇一摇的防抖

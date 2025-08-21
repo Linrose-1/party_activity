@@ -2,14 +2,14 @@
 	<!-- 使用 v-if 确保在数据加载完成后再渲染主要内容，避免闪烁和错误 -->
 	<view v-if="activityDetail" class="page">
 
-		<!-- 活动封面 -->
+		<!-- 聚会封面 -->
 		<!-- 【修改】动态绑定封面图片和标题 -->
 		<view class="event-cover" :style="{ backgroundImage: `url(${activityDetail.coverImageUrl})` }">
-			<!-- 【修改】动态绑定活动标签 -->
+			<!-- 【修改】动态绑定聚会标签 -->
 			<text class="event-cover-text">{{ activityDetail.tags.join(' · ') }}</text>
 		</view>
 
-		<!-- 【新增】活动状态显示 -->
+		<!-- 【新增】聚会状态显示 -->
 		<view v-if="statusInfo.text" class="status-banner" :style="{ backgroundColor: statusInfo.color }">
 			{{ statusInfo.text }}
 		</view>
@@ -17,21 +17,21 @@
 		<!-- 【新增】最低起聚名额提示 -->
 		<view v-if="showLimitSlotsTip" class="limit-slots-tip">
 			<uni-icons type="info-filled" color="#e6a23c" size="16" style="margin-right: 10rpx;"></uni-icons>
-			当前报名人数未达到最低起聚名额 ({{ activityDetail.limitSlots }}人)，活动可能被取消。
+			当前报名人数未达到最低起聚名额 ({{ activityDetail.limitSlots }}人)，聚会可能被取消；聚会组织者将退回报名费用。
 		</view>
 
-		<!-- 活动信息 -->
+		<!-- 聚会信息 -->
 		<view class="event-header">
-			<!-- 【修改】动态绑定活动标题 -->
+			<!-- 【修改】动态绑定聚会标题 -->
 			<text class="event-title">{{ activityDetail.activityTitle }}</text>
 			<view class="event-meta">
 				<uni-icons type="calendar" size="18" color="#FF6B00" />
-				<!-- 【修改】动态绑定格式化后的活动时间 -->
+				<!-- 【修改】动态绑定格式化后的聚会时间 -->
 				<text>{{ formattedActivityTime }}</text>
 			</view>
 			<view class="event-meta">
 				<uni-icons type="location" size="18" color="#FF6B00" />
-				<!-- 【修改】动态绑定活动地点 -->
+				<!-- 【修改】动态绑定聚会地点 -->
 				<text>{{ activityDetail.locationAddress }}</text>
 			</view>
 			<view class="event-stats">
@@ -56,14 +56,14 @@
 			</view>
 		</view>
 
-		<!-- 活动介绍 -->
+		<!-- 聚会介绍 -->
 		<view class="event-content">
-			<view class="section-title">活动介绍</view>
-			<!-- 【修改】动态绑定活动介绍 -->
+			<view class="section-title">聚会介绍</view>
+			<!-- 【修改】动态绑定聚会介绍 -->
 			<view class="event-description">{{ activityDetail.activityDescription }}</view>
 
-			<text class="section-title">活动内容</text>
-			<!-- 【修改】动态绑定活动环节 -->
+			<text class="section-title">聚会内容</text>
+			<!-- 【修改】动态绑定聚会环节 -->
 			<view class="activity-grid">
 				<view class="activity-item" v-for="item in activityDetail.memberActivitySessionList" :key="item.id">
 					<view class="activity-title">{{ item.sessionTitle }}</view>
@@ -74,8 +74,8 @@
 
 		<!-- 主办方 -->
 		<view class="organizer-section">
-			<view class="organizer-title">活动组织者</view>
-			<view class="organizer-info">
+			<view class="organizer-title">聚会组织者</view>
+			<view class="organizer-info" @click="navigateToBusinessCard(activityDetail.memberUser)">
 				<view class="organizer-avatar">
 					<!-- <uni-icons type="person-filled" size="24" color="#fff" /> -->
 					<img :src="activityDetail.memberUser.avatar" alt="" class="organizer-avatar" />
@@ -91,8 +91,9 @@
 
 		<!-- 商圈信息 -->
 		<!-- 【修改】使用 v-if 判断是否存在关联聚店信息 -->
-		<view v-if="activityDetail.memberStoreRespVO" class="business-section">
-			<view class="business-title">活动聚店</view>
+		<view v-if="activityDetail.memberStoreRespVO" class="business-section"
+			@click="navigateToStoreDetail(activityDetail.memberStoreRespVO)">
+			<view class="business-title">聚会聚店</view>
 			<view class="business-info">
 				<view class="business-logo">
 					<!-- 【修改】可以使用聚店的封面图 -->
@@ -104,10 +105,10 @@
 					<!-- 【修改】动态绑定聚店信息 -->
 					<text class="business-name">{{ activityDetail.memberStoreRespVO.storeName }}</text>
 					<view class="business-meta">
-						<view style="font-size: 25rpx;margin: 10rpx 0;">📍
+						<view style="font-size: 25rpx;margin: 10rpx 0;">📌
 							{{ activityDetail.memberStoreRespVO.fullAddress }}
 						</view>
-						<view style="font-size: 25rpx;margin: 10rpx 0;">📞
+						<view style="font-size: 25rpx;margin: 10rpx 0;">📱
 							{{ activityDetail.memberStoreRespVO.contactPhone }}
 						</view>
 						<!-- <view style="font-size: 25rpx;margin: 10rpx 0;">🕒
@@ -120,11 +121,11 @@
 			</view>
 		</view>
 
-		<!-- 活动贡分（暂时写死，如果后端有返回则替换） -->
+		<!-- 聚会贡分（暂时写死，如果后端有返回则替换） -->
 		<view class="organizer-section">
-			<view class="organizer-title">活动贡分</view>
+			<view class="organizer-title">聚会贡分</view>
 			<view class="organizer-info">
-				<view class="organizer-name">参与本次活动，活动结束可以获得<span style="color: #ff6b00;">10</span>贡分</view>
+				<view class="organizer-name">参与本次聚会，聚会结束可以获得<span style="color: #ff6b00;">10</span>贡分</view>
 			</view>
 		</view>
 
@@ -167,7 +168,7 @@
 				<image :src="activityDetail.companyLogo" class="sponsor-logo"></image>
 				<view class="sponsor-details">
 					<view class="sponsor-name">{{ activityDetail.companyName }}</view>
-					<view class="sponsor-description">感谢{{ activityDetail.companyName }}对本次活动的大力支持！</view>
+					<view class="sponsor-description">感谢{{ activityDetail.companyName }}对本次聚会的大力支持！</view>
 				</view>
 			</view>
 		</view>
@@ -179,9 +180,9 @@
 				{{ formattedRegistrationTimes.start }} - {{ formattedRegistrationTimes.end }}
 			</span>
 		</view>
-		
+
 		<view style="width: 100%;height: 100rpx;"></view>
-		
+
 
 
 		<!-- 操作栏 -->
@@ -244,7 +245,7 @@
 	import request from '../../utils/request.js';
 
 	const activityId = ref(null);
-	// 【新增】创建一个 ref 来存储整个活动详情对象
+	// 【新增】创建一个 ref 来存储整个聚会详情对象
 	const activityDetail = ref(null);
 
 	// 【新增】分享弹窗和引导蒙层的状态变量
@@ -269,12 +270,12 @@
 			activityId.value = options.id;
 			// 在拿到 ID 后直接调用数据获取函数
 			getActiveDetail();
-			// 在获取活动详情后，接着获取报名用户列表
+			// 在获取聚会详情后，接着获取报名用户列表
 			getParticipantList();
 		} else {
-			console.error('未接收到活动ID！');
+			console.error('未接收到聚会ID！');
 			uni.showToast({
-				title: '加载活动详情失败，缺少ID',
+				title: '加载聚会详情失败，缺少ID',
 				icon: 'none'
 			});
 		}
@@ -282,25 +283,25 @@
 		// ==================== 【新增】处理分享点击加分逻辑 ====================
 		if (options && options.sharerId) {
 			const sharerId = options.sharerId;
-			const bizId = options.id; // 活动ID就是 bizId
+			const bizId = options.id; // 聚会ID就是 bizId
 
 			// 1. 如果是本人点击，不处理
 			if (sharerId && loggedInUserId.value && sharerId === loggedInUserId.value) {
-				console.log('用户点击了自己的活动分享链接，不计分。');
+				console.log('用户点击了自己的聚会分享链接，不计分。');
 			}
 			// 2. 如果是其他已登录用户点击，直接调用接口加分
 			else if (sharerId && loggedInUserId.value && bizId) {
-				console.log('其他用户点击了活动分享链接，且已登录，准备为分享者加分。');
+				console.log('其他用户点击了聚会分享链接，且已登录，准备为分享者加分。');
 				triggerShareHitApi(sharerId, bizId);
 			}
 			// 3. 如果是未登录用户点击，暂存信息
 			else if (sharerId && bizId) {
-				console.log('用户点击了活动分享链接，但尚未登录。暂存分享信息。');
-				// 将分享者ID、活动ID和类型作为一个对象进行缓存
+				console.log('用户点击了聚会分享链接，但尚未登录。暂存分享信息。');
+				// 将分享者ID、聚会ID和类型作为一个对象进行缓存
 				uni.setStorageSync('pendingShareReward', {
 					sharerId: sharerId,
 					bizId: bizId,
-					type: 31 // 明确是分享活动
+					type: 31 // 明确是分享聚会
 				});
 			}
 		}
@@ -313,7 +314,7 @@
 		});
 	});
 	const isRegistrationActive = computed(() => {
-		// 如果活动详情还没加载出来，则默认不可报名
+		// 如果聚会详情还没加载出来，则默认不可报名
 		if (!activityDetail.value) {
 			return false;
 		}
@@ -347,7 +348,7 @@
 		isActionBarHidden.value = e.show;
 	};
 
-	// 【新增】用于活动时间的计算属性
+	// 【新增】用于聚会时间的计算属性
 	const formattedActivityTime = computed(() => {
 		if (!activityDetail.value) return '';
 		const start = formatDateTime(activityDetail.value.startDatetime);
@@ -373,7 +374,7 @@
 	});
 
 
-	// 【新增】用于活动状态显示的计算属性
+	// 【新增】用于聚会状态显示的计算属性
 	const statusInfo = computed(() => {
 		if (!activityDetail.value) return {
 			text: '',
@@ -381,11 +382,11 @@
 		};
 		const statusMap = {
 			0: {
-				text: '活动已取消',
+				text: '聚会已取消',
 				color: '#909399'
 			},
 			1: {
-				text: '活动未开始',
+				text: '聚会未开始',
 				color: '#f9ae3d'
 			},
 			2: {
@@ -393,19 +394,19 @@
 				color: '#4cd964'
 			},
 			3: {
-				text: '活动即将开始',
+				text: '聚会即将开始',
 				color: '#007aff'
 			},
 			4: {
-				text: '活动进行中',
+				text: '聚会进行中',
 				color: '#dd524d'
 			},
 			5: {
-				text: '活动已结束',
+				text: '聚会已结束',
 				color: '#8f8f94'
 			},
 			6: {
-				text: '活动待退款',
+				text: '聚会待退款',
 				color: '#e6a23c'
 			},
 		};
@@ -478,18 +479,18 @@
 		if (!operatingHoursStr) {
 			return ['暂无营业时间'];
 		}
-	
+
 		try {
 			const data = JSON.parse(operatingHoursStr);
 			const regularHours = data?.business_hours?.regular;
 			const specialDates = data?.business_hours?.special_dates;
-	
+
 			if (!regularHours && (!specialDates || specialDates.length === 0)) {
 				return ['暂无营业时间'];
 			}
-	
+
 			const resultLines = [];
-	
+
 			// 1. 处理常规营业时间
 			if (regularHours) {
 				const dayMap = {
@@ -502,7 +503,7 @@
 					sunday: '周日',
 				};
 				const dayOrder = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
-	
+
 				dayOrder.forEach(dayKey => {
 					const dayInfo = regularHours[dayKey];
 					if (dayInfo && dayInfo.is_open) {
@@ -513,24 +514,24 @@
 					}
 				});
 			}
-			
+
 			// 2. 处理特殊营业日期
 			if (specialDates && specialDates.length > 0) {
 				if (resultLines.length > 0) {
-					resultLines.push(''); 
+					resultLines.push('');
 				}
 				resultLines.push('【特殊营业时间】');
-				
+
 				specialDates.forEach(special => {
 					let line = special.date;
-					if(special.description) {
+					if (special.description) {
 						line += ` (${special.description})`;
 					}
-	
+
 					if (special.is_open) {
-	                    // 【修正点】在这里定义 isNextDay 变量
+						// 【修正点】在这里定义 isNextDay 变量
 						const isNextDay = special.close < special.open;
-	                    // 【修正点】在这里正确使用 isNextDay 变量
+						// 【修正点】在这里正确使用 isNextDay 变量
 						line += `: ${special.open} - ${isNextDay ? '次日' : ''}${special.close}`;
 					} else {
 						line += `: 休息`;
@@ -538,13 +539,13 @@
 					resultLines.push(line);
 				});
 			}
-	
+
 			if (resultLines.length === 0) {
 				return ['商家未设置营业时间'];
 			}
-	
+
 			return resultLines;
-	
+
 		} catch (e) {
 			console.error('解析营业时间JSON失败:', e);
 			console.error('原始字符串:', operatingHoursStr);
@@ -555,8 +556,8 @@
 
 	// 【新增】打开分享弹窗的方法
 	const openSharePopup = () => {
-		// 设置输入框的默认值为活动标题
-		customShareTitle.value = activityDetail.value.activityTitle || '发现一个很棒的活动，快来看看吧！';
+		// 设置输入框的默认值为聚会标题
+		customShareTitle.value = activityDetail.value.activityTitle || '发现一个很棒的聚会，快来看看吧！';
 		sharePopup.value.open();
 	};
 
@@ -580,14 +581,14 @@
 	const triggerShareHitApi = async (sharerId, bizId) => {
 		if (!sharerId || !bizId) return;
 
-		console.log(`准备为分享者 (ID: ${sharerId}) 增加贡分, 关联活动ID: ${bizId}`);
+		console.log(`准备为分享者 (ID: ${sharerId}) 增加贡分, 关联聚会ID: ${bizId}`);
 
 		const {
 			error
 		} = await request('/app-api/member/experience-record/share-experience-hit', {
 			method: 'POST',
 			data: {
-				type: 31, // 31 代表 "分享活动奖励"
+				type: 31, // 31 代表 "分享聚会奖励"
 				shareUserId: sharerId,
 				bizId: bizId
 			}
@@ -607,7 +608,7 @@
 
 		// 【新增】获取分享者自己的用户ID
 		const sharerId = uni.getStorageSync('userId');
-		const finalTitle = customShareTitle.value || activityDetail.value.activityTitle || '发现一个很棒的活动，快来看看吧！';
+		const finalTitle = customShareTitle.value || activityDetail.value.activityTitle || '发现一个很棒的聚会，快来看看吧！';
 
 		// 【修改】在路径中添加 sharerId 参数
 		let sharePath = `/pages/active-detail/active-detail?id=${activityDetail.value.id}`;
@@ -628,7 +629,7 @@
 
 		// 【新增】获取分享者自己的用户ID
 		const sharerId = uni.getStorageSync('userId');
-		const finalTitle = customShareTitle.value || activityDetail.value.activityTitle || '发现一个很棒的活动，快来看看吧！';
+		const finalTitle = customShareTitle.value || activityDetail.value.activityTitle || '发现一个很棒的聚会，快来看看吧！';
 
 		// 【修改】在 query 中添加 sharerId 参数
 		let queryString = `id=${activityDetail.value.id}&from=timeline`;
@@ -675,6 +676,69 @@
 			url: `/pages/activity-participants/activity-participants?id=${activityId.value}`
 		})
 	}
+
+
+	/**
+	 * 跳转到申请兑换名片页面
+	 * @param {object} user - 包含用户信息的对象 (id, nickname, avatar)
+	 */
+	const navigateToBusinessCard = (user) => {
+		// 1. 安全检查
+		if (!user || !user.id) {
+			uni.showToast({
+				title: '无法查看该用户主页',
+				icon: 'none'
+			});
+			return;
+		}
+
+		// 2. 提供默认值
+		const defaultAvatar = '/static/images/default-avatar.png';
+		const name = user.nickname || '匿名用户';
+		const avatarUrl = user.avatar || defaultAvatar;
+
+		// 3. 构建URL并编码
+		const url = `/pages/applicationBusinessCard/applicationBusinessCard?id=${user.id}` +
+			`&name=${encodeURIComponent(name)}` +
+			`&avatar=${encodeURIComponent(avatarUrl)}`;
+
+		console.log('从活动详情页跳转到名片申请页, URL:', url);
+
+		// 4. 执行跳转
+		uni.navigateTo({
+			url: url
+		});
+	};
+
+	/**
+	 * 跳转到聚店详情页面
+	 * @param {object} store - 包含聚店信息的对象 (id)
+	 */
+	const navigateToStoreDetail = (store) => {
+		// 1. 安全检查
+		if (!store || !store.id) {
+			uni.showToast({
+				title: '无法查看聚店详情',
+				icon: 'none'
+			});
+			return;
+		}
+
+		// 【重要修正】您提供的目标路径是 /pages/active-publish/active-publish，这似乎是“发布活动”的页面。
+		// 通常聚店详情页的路径可能是 /pages/shop-detail/shop-detail。
+		// 这里我将使用您提供的路径，但请确认它是否正确。
+		const targetPath = '/pages/shop-detail/shop-detail'; // <--- 请确认此路径是否正确！
+
+		// 2. 构建URL
+		const url = `${targetPath}?id=${store.id}`;
+
+		console.log('从活动详情页跳转到聚店详情页, URL:', url);
+
+		// 3. 执行跳转
+		uni.navigateTo({
+			url: url
+		});
+	};
 </script>
 
 <style lang="scss" scoped>
@@ -698,7 +762,7 @@
 	 * 页面内容模块
 	 * ================================================================== */
 
-	/* --- 活动封面 --- */
+	/* --- 聚会封面 --- */
 	.event-cover {
 		height: 400rpx;
 		background: linear-gradient(45deg, #ff9a9e, #fad0c4);
@@ -747,7 +811,7 @@
 		box-shadow: 0 10rpx 20rpx rgba(0, 0, 0, 0.05);
 	}
 
-	/* --- 活动头部信息 (Header Card) --- */
+	/* --- 聚会头部信息 (Header Card) --- */
 	.event-title {
 		font-size: 36rpx;
 		font-weight: bold;
@@ -785,7 +849,7 @@
 		color: #888;
 	}
 
-	/* --- 活动介绍 (Content Card) --- */
+	/* --- 聚会介绍 (Content Card) --- */
 	.event-description {
 		font-size: 28rpx;
 		color: #555;
@@ -887,6 +951,7 @@
 		display: flex;
 		align-items: center;
 		gap: 20rpx;
+		margin-left: 10rpx;
 	}
 
 	.view-all-link {
@@ -1094,12 +1159,12 @@
 		display: block;
 		margin-bottom: 10rpx;
 	}
-	
+
 	/* --- 参与用户 --- */
 	.no-participants {
-	    padding: 20rpx 0;
-	    text-align: center;
-	    color: #999;
-	    font-size: 26rpx;
+		padding: 20rpx 0;
+		text-align: center;
+		color: #999;
+		font-size: 26rpx;
 	}
 </style>

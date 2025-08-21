@@ -61,8 +61,11 @@
 
 			<uni-load-more v-if="postList.length > 0" :status="loadStatus"></uni-load-more>
 
-			<view v-if="postList.length === 0 && loadStatus === 'noMore'" class="no-posts-message">
-				<!-- ... -->
+			<view v-if="postList.length === 0 && loadStatus === 'noMore'" class="empty-state-container">
+				<uni-icons type="compose" size="60" color="#e0e0e0"></uni-icons>
+				<text class="empty-text">您还没有发布过任何商机</text>
+				<text class="empty-subtext">分享您的商机，连接更多可能</text>
+				<button class="publish-button" @click="goToPublishPage">立即发布</button>
 			</view>
 		</view>
 
@@ -290,6 +293,15 @@
 		})
 	};
 
+	/**
+	 * 【新增】跳转到发布商机页面的方法
+	 */
+	const goToPublishPage = () => {
+		uni.navigateTo({
+			url: '/pages/home-opportunitiesPublish/home-opportunitiesPublish'
+		});
+	};
+
 	// --- Uni-app 页面生命周期钩子 ---
 	onLoad(() => getMyOpportunitiesList(true));
 	onReachBottom(() => getMyOpportunitiesList());
@@ -510,5 +522,54 @@
 	.no-posts-message,
 	.empty-post-button {
 		/* 样式保持不变 */
+	}
+
+
+	/* 【新增】空状态引导容器的样式 */
+	.empty-state-container {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		padding: 100rpx 40rpx;
+		margin: 30rpx;
+		/* 与 post-card 的外边距保持一致 */
+		background-color: #fff;
+		border-radius: 20rpx;
+	}
+
+	.empty-text {
+		margin-top: 20rpx;
+		font-size: 32rpx;
+		font-weight: 600;
+		color: #333;
+	}
+
+	.empty-subtext {
+		margin-top: 10rpx;
+		font-size: 26rpx;
+		color: #999;
+		margin-bottom: 40rpx;
+	}
+
+	.publish-button {
+		background: linear-gradient(135deg, #FF6A00, #FF8C00);
+		color: white;
+		border: none;
+		border-radius: 40rpx;
+		padding: 18rpx 80rpx;
+		font-size: 28rpx;
+		font-weight: bold;
+		box-shadow: 0 4rpx 12rpx rgba(255, 106, 0, 0.3);
+		transition: all 0.2s ease;
+	}
+
+	.publish-button::after {
+		border: none;
+	}
+
+	.publish-button:active {
+		background: linear-gradient(135deg, #e05a00, #e07a00);
+		transform: scale(0.98);
 	}
 </style>

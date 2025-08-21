@@ -129,7 +129,7 @@ const _sfc_main = {
         }),
         g: common_vendor.t(formattedDate.value),
         h: common_vendor.p({
-          type: "map-pin",
+          type: "location",
           size: "16",
           color: "#FF6B00"
         }),
@@ -144,7 +144,7 @@ const _sfc_main = {
         }),
         m: common_vendor.o(handleCardClick),
         n: common_vendor.p({
-          type: "person",
+          type: "contact-filled",
           size: "16",
           color: "#FF6B00"
         }),

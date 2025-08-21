@@ -4,7 +4,7 @@
 		<view class="header">
 			<view class="search-bar">
 				<uni-icons type="search" size="18" color="rgba(255, 255, 255, 0.7)" />
-				<input type="text" placeholder="搜索活动" placeholder-class="placeholder" v-model="searchKeyword"
+				<input type="text" placeholder="搜索聚会" placeholder-class="placeholder" v-model="searchKeyword"
 					:placeholder-style="'color: white; opacity: 0.7;'" />
 			</view>
 		</view>
@@ -26,7 +26,7 @@
 
 		<!-- 筛选区域 -->
 		<uni-collapse>
-			<uni-collapse-item title="活动筛选" :open="true" class="collapse-title">
+			<uni-collapse-item title="聚会筛选" :open="true" class="collapse-title">
 				<view class="filters">
 					<!-- 选择类型 -->
 					<view class="uni-list">
@@ -81,7 +81,7 @@
 			</uni-collapse-item>
 		</uni-collapse>
 
-		<!-- 活动列表 -->
+		<!-- 聚会列表 -->
 		<view class="activity-list" scroll-y="true">
 			<ActivityCard v-for="(activity, index) in activitiesData" :key="activity.id" :activity="activity"
 				:is-login="isLogin" @updateFavoriteStatus="handleFavoriteChange" />
@@ -89,19 +89,19 @@
 
 		<!-- 根据新的状态变量来显示提示 -->
 		<view v-if="!hasMore && activitiesData.length > 0" class="no-more-content">
-			暂无更多活动
+			暂无更多聚会
 		</view>
 
 		<!-- 如果希望在列表为空时也显示提示，可以添加一个空状态 -->
 		<view v-if="!loading && activitiesData.length === 0" class="no-more-content">
-			暂无活动，快去发布一个吧！
+			暂无聚会，快去发布一个吧！
 		</view>
 
 		<!-- 底部操作栏 -->
 		<view class="action-bar">
 			<view class="action-btn register-btn" @click="publishActivity">
 				<uni-icons type="plus" size="18" color="white" />
-				<text>发布活动</text>
+				<text>发起聚会</text>
 			</view>
 		</view>
 	</view>
@@ -133,11 +133,11 @@
 
 	// --- 筛选条件状态 ---
 	const searchKeyword = ref('');
-	// 活动类型
+	// 聚会类型
 	const typeList = ref([]); // 从后端获取的类型列表
 	const typeIndex = ref(0); // Picker 使用的索引
 	const selectedCategory = ref(''); // 发送给后端的类型值
-	// 活动状态
+	// 聚会状态
 	const statusList = ref([]); // 从后端获取的状态列表
 	const statusIndex = ref(0); // Picker 使用的索引
 	// 位置信息
@@ -191,7 +191,7 @@
 	 * 页面初始化函数
 	 * - 重置状态
 	 * - 并行获取所有筛选条件
-	 * - 获取第一页活动列表
+	 * - 获取第一页聚会列表
 	 */
 	const initializePage = async () => {
 		uni.showLoading({
@@ -210,7 +210,7 @@
 				fetchActivityStatusList()
 			]);
 
-			// 筛选条件加载完毕后，获取第一页的活动列表
+			// 筛选条件加载完毕后，获取第一页的聚会列表
 			await getActiveList(false);
 
 		} catch (error) {
@@ -256,7 +256,7 @@
 	};
 
 	/**
-	 * 获取活动类型列表
+	 * 获取聚会类型列表
 	 */
 	const fetchActivityTypeList = async () => {
 		const {
@@ -268,12 +268,12 @@
 			}
 		});
 		if (error) {
-			console.error('获取活动类型列表失败:', error);
+			console.error('获取聚会类型列表失败:', error);
 			throw new Error('获取类型失败'); // 抛出错误，让 Promise.all 捕获
 		}
 		// 将获取到的数据赋值给我们定义的 ref
 		typeList.value = data || [];
-		console.log('动态活动类型列表获取成功:', typeList.value);
+		console.log('动态聚会类型列表获取成功:', typeList.value);
 	};
 
 	const fetchActivityStatusList = async () => {
@@ -282,15 +282,15 @@
 			error
 		} = await request('/app-api/member/activity/status-list');
 		if (error) {
-			console.error('获取活动状态列表失败:', error);
+			console.error('获取聚会状态列表失败:', error);
 			throw new Error('获取状态失败');
 		}
 		statusList.value = data || [];
-		console.log('动态活动状态列表获取成功:', statusList.value);
+		console.log('动态聚会状态列表获取成功:', statusList.value);
 	};
 
 	/**
-	 * 获取活动列表的核心方法
+	 * 获取聚会列表的核心方法
 	 * @param {boolean} isLoadMore - 是否为加载更多
 	 */
 	const getActiveList = async (isLoadMore = false) => {
@@ -318,7 +318,7 @@
 		};
 
 		try {
-			console.log('发起活动列表请求, 参数:', params);
+			console.log('发起聚会列表请求, 参数:', params);
 			const result = await request('/app-api/member/activity/list', {
 				method: 'GET',
 				data: params
@@ -341,7 +341,7 @@
 				pageNo.value++;
 
 			} else {
-				console.error('获取活动列表失败:', result ? result.error : '无有效返回');
+				console.error('获取聚会列表失败:', result ? result.error : '无有效返回');
 				hasMore.value = false;
 			}
 		} catch (error) {
@@ -396,12 +396,12 @@
 		}
 	};
 
-	// 发布活动
+	// 发布聚会
 	const publishActivity = () => {
 		if (!isLogin.value) {
 			uni.showModal({
 				title: '温馨提示',
-				content: '登录后才能发布活动，是否立即登录？',
+				content: '登录后才能发布聚会，是否立即登录？',
 				confirmText: '去登录',
 				cancelText: '再看看',
 				success: (res) => {
@@ -563,7 +563,7 @@
 	}
 
 
-	/* 活动列表 */
+	/* 聚会列表 */
 	.activity-list {
 		padding: 0 32rpx;
 	}

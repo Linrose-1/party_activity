@@ -70,6 +70,36 @@
   margin-top: 10rpx;
   line-height: 1.5;
 }
+.empty-state .empty-text {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #333;
+  margin-top: 10rpx;
+}
+.empty-state .empty-subtext {
+  font-size: 26rpx;
+  color: #999;
+  margin-top: 10rpx;
+  margin-bottom: 40rpx;
+}
+.empty-state .apply-button {
+  background: #FF6B00;
+  color: white;
+  border: none;
+  padding: 18rpx 80rpx;
+  border-radius: 40rpx;
+  font-size: 28rpx;
+  font-weight: bold;
+  box-shadow: 0 4rpx 12rpx rgba(255, 107, 0, 0.3);
+  transition: all 0.2s ease;
+}
+.empty-state .apply-button::after {
+  border: none;
+}
+.empty-state .apply-button:active {
+  background: #e05a00;
+  transform: scale(0.98);
+}
 .load-more {
   text-align: center;
   padding: 20rpx;

@@ -24,11 +24,16 @@ const _sfc_main = {
       if (typeof props.store.distance !== "number") {
         return null;
       }
-      const distanceAsInteger = Math.floor(props.store.distance);
-      return `${distanceAsInteger}km`;
+      const distanceWithDecimals = props.store.distance.toFixed(2);
+      return `${distanceWithDecimals}公里`;
     });
     const handleCardClick = () => {
       emit("click-card", props.store);
+    };
+    const handleInitiateParty = () => {
+      common_vendor.index.navigateTo({
+        url: `/pages/active-publish/active-publish?storeId=${props.store.id}`
+      });
     };
     return (_ctx, _cache) => {
       return common_vendor.e({
@@ -48,18 +53,8 @@ const _sfc_main = {
         e: common_vendor.t(formattedDistance.value)
       } : {}, {
         f: common_vendor.t(__props.store.storeDescription),
-        g: common_vendor.f(__props.store.tags, (tag, k0, i0) => {
-          return {
-            a: common_vendor.t(tag),
-            b: tag
-          };
-        }),
-        h: common_vendor.p({
-          type: "map-filled",
-          size: "16",
-          color: "#fff"
-        }),
-        i: common_vendor.o(handleCardClick)
+        g: common_vendor.o(handleInitiateParty),
+        h: common_vendor.o(handleCardClick)
       });
     };
   }

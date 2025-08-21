@@ -6,9 +6,9 @@
       <text>请为提交申请的用户办理退款</text>
     </view>
 
-    <!-- 活动信息卡片 -->
+    <!-- 聚会信息卡片 -->
     <view class="card activity-card">
-      <view class="card-title">活动信息</view>
+      <view class="card-title">聚会信息</view>
       <view class="activity-details">
         <image :src="activityInfo.image" class="activity-image" mode="aspectFill" />
         <view class="info-text-group">

@@ -17,7 +17,7 @@ const _sfc_main = {
   __name: "my-active",
   setup(__props) {
     const currentTab = common_vendor.ref(0);
-    const tabs = common_vendor.ref(["我的报名", "我的发布"]);
+    const tabs = common_vendor.ref(["我的报名", "我的发起"]);
     const refreshing = common_vendor.ref(false);
     const loading = common_vendor.ref(false);
     const enrolledActivities = common_vendor.ref([]);
@@ -49,7 +49,7 @@ const _sfc_main = {
           method: "GET",
           data: params
         });
-        common_vendor.index.__f__("log", "at pages/my-active/my-active.vue:236", `获取Tab ${currentTab.value} 的活动`, result);
+        common_vendor.index.__f__("log", "at pages/my-active/my-active.vue:236", `获取Tab ${currentTab.value} 的聚会`, result);
         if (result && !result.error && result.data) {
           const list = result.data.list || [];
           const total = result.data.total || 0;
@@ -64,7 +64,7 @@ const _sfc_main = {
           }
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/my-active/my-active.vue:255", "请求我的活动列表失败:", error);
+        common_vendor.index.__f__("error", "at pages/my-active/my-active.vue:255", "请求我的聚会列表失败:", error);
       } finally {
         loading.value = false;
         refreshing.value = false;
@@ -184,7 +184,7 @@ const _sfc_main = {
     const cancelActivity = (activityId) => {
       common_vendor.index.showModal({
         title: "警告",
-        content: "确定要取消您发布的此活动吗？此操作不可逆。",
+        content: "确定要取消您发布的此聚会吗？此操作不可逆。",
         confirmColor: "#f44336",
         success: async (res) => {
           if (res.confirm) {
@@ -200,7 +200,7 @@ const _sfc_main = {
             common_vendor.index.hideLoading();
             if (result && !result.error) {
               common_vendor.index.showToast({
-                title: "活动已取消",
+                title: "聚会已取消",
                 icon: "success"
               });
               handleRefresh();
@@ -268,7 +268,7 @@ const _sfc_main = {
             f: "37541c0b-1-" + i0,
             g: common_vendor.t(formatDateTime(item.startDatetime)),
             h: "37541c0b-2-" + i0,
-            i: common_vendor.t(item.locationAddress || "线上活动"),
+            i: common_vendor.t(item.locationAddress || "线上聚会"),
             j: item.memberActivityJoinResp.rejectMsg
           }, item.memberActivityJoinResp.rejectMsg ? {
             k: "37541c0b-3-" + i0,
@@ -333,7 +333,7 @@ const _sfc_main = {
             e: "37541c0b-5-" + i0,
             f: common_vendor.t(formatDateTime(item.startDatetime)),
             g: "37541c0b-6-" + i0,
-            h: common_vendor.t(item.locationAddress || "线上活动"),
+            h: common_vendor.t(item.locationAddress || "线上聚会"),
             i: "37541c0b-7-" + i0,
             j: common_vendor.t(item.joinCount || 0),
             k: common_vendor.t(item.totalSlots || "不限"),
@@ -346,16 +346,16 @@ const _sfc_main = {
             }),
             o: common_vendor.o(($event) => manageRefunds(item, "individual"), item.id)
           } : {}, {
-            p: ["未开始", "报名中", "活动即将开始", "进行中"].includes(item.statusStr)
-          }, ["未开始", "报名中", "活动即将开始", "进行中"].includes(item.statusStr) ? {
+            p: ["未开始", "报名中", "聚会即将开始", "进行中"].includes(item.statusStr)
+          }, ["未开始", "报名中", "聚会即将开始", "进行中"].includes(item.statusStr) ? {
             q: common_vendor.o(($event) => cancelActivity(item.id), item.id)
           } : {}, {
-            r: item.statusStr === "活动取消"
-          }, item.statusStr === "活动取消" ? {
+            r: item.statusStr === "聚会取消"
+          }, item.statusStr === "聚会取消" ? {
             s: common_vendor.o(($event) => manageRefunds(item, "all"), item.id)
           } : {}, {
-            t: item.statusStr !== "活动取消"
-          }, item.statusStr !== "活动取消" ? {
+            t: item.statusStr !== "聚会取消"
+          }, item.statusStr !== "聚会取消" ? {
             v: common_vendor.o(($event) => navigateToRegisteredUsers(item), item.id)
           } : {}, {
             w: common_vendor.o(($event) => viewDetail(item.id), item.id),

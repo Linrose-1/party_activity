@@ -12,6 +12,7 @@
   align-items: center;
   justify-content: flex-start;
   padding-top: 80rpx;
+  box-sizing: border-box;
 }
 .card-header.data-v-30894501 {
   text-align: center;
@@ -43,7 +44,6 @@
 .share-fab.data-v-30894501 {
   position: fixed;
   top: 180rpx;
-  /* 可根据需要调整，避开导航栏 */
   right: 30rpx;
   width: 90rpx;
   height: 90rpx;
@@ -60,8 +60,22 @@
   transform: scale(0.95);
 }
 
-/* --- 整合后的分享弹窗与引导蒙层样式 --- */
-/* 分享弹窗内容区 */
+/* 新增：加载和错误状态的容器样式 */
+.status-indicator.data-v-30894501 {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding-top: 200rpx;
+  width: 100%;
+}
+.error-state .error-text.data-v-30894501 {
+  font-size: 30rpx;
+  color: #888;
+  margin-top: 20rpx;
+}
+
+/* --- 分享弹窗与引导蒙层样式 (保持不变) --- */
 .share-popup-content.data-v-30894501 {
   padding: 30rpx;
   padding-bottom: calc(30rpx + env(safe-area-inset-bottom));
@@ -69,8 +83,6 @@
   border-top-left-radius: 24rpx;
   border-top-right-radius: 24rpx;
 }
-
-/* 弹窗顶部标题 */
 .share-popup-title.data-v-30894501 {
   text-align: center;
   font-size: 32rpx;
@@ -78,8 +90,6 @@
   color: #333;
   margin-bottom: 40rpx;
 }
-
-/* 自定义标题编辑区 */
 .share-title-editor.data-v-30894501 {
   display: flex;
   align-items: center;
@@ -98,16 +108,12 @@
   font-size: 28rpx;
   color: #333;
 }
-
-/* 分享渠道区域 */
 .share-channels.data-v-30894501 {
   display: flex;
   justify-content: space-around;
   padding: 20rpx 0;
   margin-bottom: 40rpx;
 }
-
-/* 分享渠道按钮 (好友、朋友圈) */
 .share-channel-btn.data-v-30894501 {
   display: flex;
   flex-direction: column;
@@ -126,8 +132,6 @@
   color: #666;
   margin-top: 10rpx;
 }
-
-/* 弹窗取消按钮 */
 .share-popup-cancel.data-v-30894501 {
   width: 100%;
   height: 90rpx;
@@ -138,8 +142,6 @@
   font-size: 30rpx;
   color: #333;
 }
-
-/* 分享到朋友圈的引导蒙层 */
 .timeline-guide-mask.data-v-30894501 {
   position: fixed;
   top: 0;
@@ -171,6 +173,3 @@
   display: block;
   margin-bottom: 10rpx;
 }
-
-/* --- 以下为旧的、已移除的样式，仅作参考 --- */
-/* .action-buttons, .action-btn, .share-btn, .share-options, .share-option, .share-icon, .share-title 等选择器相关的旧样式已被移除 */

@@ -64,6 +64,7 @@
 		border-radius: 40rpx;
 		padding: 10rpx 30rpx;
 		font-size: 28rpx;
+		font-weight: bold;
 		margin-left: 20rpx;
 		-webkit-appearance: none;
 		background-color: transparent;
@@ -183,7 +184,7 @@
 .avatar.data-v-07e72d3c {
 		width: 90rpx;
 		height: 90rpx;
-		border-radius: 50%;
+		border-radius: 10rpx;
 		background: linear-gradient(135deg, #FF6A00, #FF8C37);
 		display: flex;
 		align-items: center;

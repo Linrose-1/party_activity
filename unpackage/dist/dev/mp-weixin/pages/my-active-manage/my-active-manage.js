@@ -36,17 +36,17 @@ const _sfc_main = {
             title: parsedData.activityTitle,
             image: parsedData.coverImageUrl,
             date: formatDateTime(parsedData.startDatetime),
-            location: parsedData.locationAddress || "线上活动",
+            location: parsedData.locationAddress || "线上聚会",
             participants: { current: parsedData.joinCount || 0 },
             totalRefundAmount: null
           };
         } catch (e) {
-          common_vendor.index.__f__("error", "at pages/my-active-manage/my-active-manage.vue:156", "解析活动数据失败:", e);
+          common_vendor.index.__f__("error", "at pages/my-active-manage/my-active-manage.vue:156", "解析聚会数据失败:", e);
           return;
         }
       }
       pageMode.value = options.mode || "individual";
-      bannerText.value = pageMode.value === "individual" ? "请为提交申请的用户办理退款" : "活动已取消，请为所有报名用户办理退款";
+      bannerText.value = pageMode.value === "individual" ? "请为提交申请的用户办理退款" : "聚会已取消，请为所有报名用户办理退款";
       fetchRefundList();
     });
     const fetchRefundList = async () => {

@@ -3,12 +3,12 @@
     <!-- 顶部信息栏 -->
     <view class="info-banner">
       <uni-icons type="info-filled" color="#FF6B00" size="18"></uni-icons>
-      <text>您正在为以下活动申请退款</text>
+      <text>您正在为以下聚会申请退款</text>
     </view>
     
-    <!-- 活动信息卡片 -->
+    <!-- 聚会信息卡片 -->
     <view class="card activity-card">
-      <view class="card-title">退款活动</view>
+      <view class="card-title">退款聚会</view>
       <view class="activity-details">
         <image :src="activityInfo.image" class="activity-image" mode="aspectFill" />
         <view class="info-text-group">
@@ -83,16 +83,16 @@ onLoad((options) => {
         fee: parsedData.registrationFee.toFixed(2) 
       };
 
-      // 【核心新增】在获取到活动信息后，立即检查是否已存在退款信息
+      // 【核心新增】在获取到聚会信息后，立即检查是否已存在退款信息
       fetchExistingRefundInfo();
 
     } catch (e) {
-      console.error("解析活动数据失败:", e);
-      uni.showToast({ title: '加载活动信息失败', icon: 'none' });
+      console.error("解析聚会数据失败:", e);
+      uni.showToast({ title: '加载聚会信息失败', icon: 'none' });
     }
   } else {
-    console.error("未从上个页面接收到活动信息");
-    uni.showToast({ title: '无法获取活动信息', icon: 'none' });
+    console.error("未从上个页面接收到聚会信息");
+    uni.showToast({ title: '无法获取聚会信息', icon: 'none' });
   }
 });
 

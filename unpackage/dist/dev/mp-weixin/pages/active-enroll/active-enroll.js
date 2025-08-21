@@ -3,14 +3,14 @@ const common_vendor = require("../../common/vendor.js");
 const utils_request = require("../../utils/request.js");
 const utils_upload = require("../../utils/upload.js");
 if (!Array) {
-  const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
   const _easycom_uni_easyinput2 = common_vendor.resolveComponent("uni-easyinput");
-  (_easycom_uni_icons2 + _easycom_uni_easyinput2)();
+  const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
+  (_easycom_uni_easyinput2 + _easycom_uni_icons2)();
 }
-const _easycom_uni_icons = () => "../../uni_modules/uni-icons/components/uni-icons/uni-icons.js";
 const _easycom_uni_easyinput = () => "../../uni_modules/uni-easyinput/components/uni-easyinput/uni-easyinput.js";
+const _easycom_uni_icons = () => "../../uni_modules/uni-icons/components/uni-icons/uni-icons.js";
 if (!Math) {
-  (_easycom_uni_icons + _easycom_uni_easyinput)();
+  (_easycom_uni_easyinput + _easycom_uni_icons)();
 }
 const _sfc_main = {
   __name: "active-enroll",
@@ -32,9 +32,9 @@ const _sfc_main = {
         activityId.value = options.id;
         getActiveDetail();
       } else {
-        common_vendor.index.__f__("error", "at pages/active-enroll/active-enroll.vue:191", "未接收到活动ID！");
+        common_vendor.index.__f__("error", "at pages/active-enroll/active-enroll.vue:189", "未接收到聚会ID！");
         common_vendor.index.showToast({
-          title: "加载活动详情失败，缺少ID",
+          title: "加载聚会详情失败，缺少ID",
           icon: "none"
         });
         setTimeout(() => common_vendor.index.navigateBack(), 1500);
@@ -129,7 +129,7 @@ const _sfc_main = {
               icon: "success"
             });
           } else {
-            common_vendor.index.__f__("error", "at pages/active-enroll/active-enroll.vue:304", "上传失败:", result.error);
+            common_vendor.index.__f__("error", "at pages/active-enroll/active-enroll.vue:302", "上传失败:", result.error);
             common_vendor.index.showToast({
               title: result.error || "上传失败",
               icon: "none"
@@ -155,9 +155,9 @@ const _sfc_main = {
         common_vendor.index.hideLoading();
         if (result && !result.error) {
           const data = result.data;
-          common_vendor.index.__f__("log", "at pages/active-enroll/active-enroll.vue:335", "getActiveDetail result:", data);
+          common_vendor.index.__f__("log", "at pages/active-enroll/active-enroll.vue:333", "getActiveDetail result:", data);
           if (data && data.memberActivityJoinResp) {
-            common_vendor.index.__f__("log", "at pages/active-enroll/active-enroll.vue:339", "用户已报名，直接跳转到成功页。");
+            common_vendor.index.__f__("log", "at pages/active-enroll/active-enroll.vue:337", "用户已报名，直接跳转到成功页。");
             activityDetail.value = data;
             ticketNumber.value = generateTicketNumber();
             currentStep.value = 3;
@@ -165,20 +165,20 @@ const _sfc_main = {
             formData.userPhone = data.memberActivityJoinResp.userPhone || "";
             formData.paymentScreenshotUrl = data.memberActivityJoinResp.paymentScreenshotUrl || "";
           } else {
-            common_vendor.index.__f__("log", "at pages/active-enroll/active-enroll.vue:355", "用户未报名，进入正常报名流程。");
+            common_vendor.index.__f__("log", "at pages/active-enroll/active-enroll.vue:353", "用户未报名，进入正常报名流程。");
             activityDetail.value = data;
             currentStep.value = 1;
           }
         } else {
-          common_vendor.index.__f__("log", "at pages/active-enroll/active-enroll.vue:361", "请求失败:", result ? result.error : "无返回结果");
+          common_vendor.index.__f__("log", "at pages/active-enroll/active-enroll.vue:359", "请求失败:", result ? result.error : "无返回结果");
           common_vendor.index.showToast({
-            title: result.error || "获取活动信息失败",
+            title: result.error || "获取聚会信息失败",
             icon: "none"
           });
         }
       } catch (e) {
         common_vendor.index.hideLoading();
-        common_vendor.index.__f__("error", "at pages/active-enroll/active-enroll.vue:369", "获取活动详情时发生异常:", e);
+        common_vendor.index.__f__("error", "at pages/active-enroll/active-enroll.vue:367", "获取聚会详情时发生异常:", e);
         common_vendor.index.showToast({
           title: "网络异常，请稍后重试",
           icon: "none"
@@ -228,7 +228,7 @@ const _sfc_main = {
         });
         currentStep.value = 3;
       } else {
-        common_vendor.index.__f__("log", "at pages/active-enroll/active-enroll.vue:426", "报名失败:", result ? result.error : "无返回结果");
+        common_vendor.index.__f__("log", "at pages/active-enroll/active-enroll.vue:424", "报名失败:", result ? result.error : "无返回结果");
         common_vendor.index.showToast({
           title: result.error || "报名失败，请重试",
           icon: "none"
@@ -259,32 +259,22 @@ const _sfc_main = {
     };
     return (_ctx, _cache) => {
       return common_vendor.e({
-        a: common_vendor.t(activityDetail.value ? activityDetail.value.activityTitle : "活动报名"),
+        a: common_vendor.t(activityDetail.value ? activityDetail.value.activityTitle : "聚会报名"),
         b: currentStep.value >= 1 ? 1 : "",
         c: currentStep.value >= 2 ? 1 : "",
         d: currentStep.value >= 3 ? 1 : "",
         e: activityDetail.value
       }, activityDetail.value ? {
-        f: common_vendor.p({
-          type: "person",
-          size: "18",
-          color: "#FF6E00"
-        }),
-        g: common_vendor.t(activityDetail.value.organizerUnitName),
-        h: common_vendor.t(activityDetail.value.organizerContactPhone),
-        i: common_vendor.t(formatRangeTime(activityDetail.value.startDatetime, activityDetail.value.endDatetime)),
-        j: common_vendor.t(formattedRegistrationTime.value),
-        k: common_vendor.t(activityDetail.value.locationAddress)
+        f: common_vendor.t(activityDetail.value.organizerUnitName),
+        g: common_vendor.t(activityDetail.value.organizerContactPhone),
+        h: common_vendor.t(formatRangeTime(activityDetail.value.startDatetime, activityDetail.value.endDatetime)),
+        i: common_vendor.t(formattedRegistrationTime.value),
+        j: common_vendor.t(activityDetail.value.locationAddress)
       } : {}, {
-        l: currentStep.value === 1
+        k: currentStep.value === 1
       }, currentStep.value === 1 ? common_vendor.e({
+        l: common_vendor.o(($event) => formData.userName = $event),
         m: common_vendor.p({
-          type: "compose",
-          size: "18",
-          color: "#FF6E00"
-        }),
-        n: common_vendor.o(($event) => formData.userName = $event),
-        o: common_vendor.p({
           type: "text",
           placeholder: "请输入您的姓名",
           styles: {
@@ -293,8 +283,8 @@ const _sfc_main = {
           },
           modelValue: formData.userName
         }),
-        p: common_vendor.o(($event) => formData.userPhone = $event),
-        q: common_vendor.p({
+        n: common_vendor.o(($event) => formData.userPhone = $event),
+        o: common_vendor.p({
           type: "tel",
           placeholder: "请输入手机号",
           styles: {
@@ -303,8 +293,8 @@ const _sfc_main = {
           },
           modelValue: formData.userPhone
         }),
-        r: common_vendor.o(($event) => formData.contactAddress = $event),
-        s: common_vendor.p({
+        p: common_vendor.o(($event) => formData.contactAddress = $event),
+        q: common_vendor.p({
           type: "text",
           placeholder: "请输入单位或学校名称",
           styles: {
@@ -313,10 +303,10 @@ const _sfc_main = {
           },
           modelValue: formData.contactAddress
         }),
-        t: isQueuing.value
+        r: isQueuing.value
       }, isQueuing.value ? {
-        v: common_vendor.o(($event) => formData.remark = $event),
-        w: common_vendor.p({
+        s: common_vendor.o(($event) => formData.remark = $event),
+        t: common_vendor.p({
           type: "textarea",
           autoHeight: true,
           placeholder: "当前报名人数已满，填写申请理由可提高审核通过率",
@@ -327,50 +317,38 @@ const _sfc_main = {
           modelValue: formData.remark
         })
       } : {}, {
-        x: !canSubmitStep1.value ? 1 : "",
-        y: common_vendor.o(confirmSignup)
+        v: !canSubmitStep1.value ? 1 : "",
+        w: common_vendor.o(confirmSignup)
       }) : {}, {
-        z: currentStep.value === 2 && activityDetail.value
+        x: currentStep.value === 2 && activityDetail.value
       }, currentStep.value === 2 && activityDetail.value ? common_vendor.e({
-        A: common_vendor.p({
-          type: "shop",
-          size: "18",
-          color: "#FF6E00"
-        }),
-        B: common_vendor.t(activityDetail.value.registrationFee),
-        C: activityDetail.value.organizerPaymentQrCodeUrl
+        y: common_vendor.t(activityDetail.value.registrationFee),
+        z: activityDetail.value.organizerPaymentQrCodeUrl
       }, activityDetail.value.organizerPaymentQrCodeUrl ? {
-        D: activityDetail.value.organizerPaymentQrCodeUrl,
-        E: common_vendor.o(previewQrCode)
+        A: activityDetail.value.organizerPaymentQrCodeUrl,
+        B: common_vendor.o(previewQrCode)
       } : {}, {
-        F: common_vendor.p({
+        C: common_vendor.p({
           type: "image",
           size: "18",
           color: "#FF6E00"
         }),
-        G: !formData.paymentScreenshotUrl
-      }, !formData.paymentScreenshotUrl ? {
-        H: common_vendor.p({
-          type: "plus",
-          size: "24",
-          color: "#FF6E00"
-        })
-      } : {
-        I: formData.paymentScreenshotUrl
+        D: !formData.paymentScreenshotUrl
+      }, !formData.paymentScreenshotUrl ? {} : {
+        E: formData.paymentScreenshotUrl
       }, {
-        J: common_vendor.o(chooseImage),
-        K: !formData.paymentScreenshotUrl ? 1 : "",
-        L: common_vendor.o(joinActivity)
+        F: common_vendor.o(chooseImage),
+        G: !formData.paymentScreenshotUrl ? 1 : "",
+        H: common_vendor.o(joinActivity)
       }) : {}, {
-        M: currentStep.value === 3
+        I: currentStep.value === 3
       }, currentStep.value === 3 ? common_vendor.e({
-        N: activityDetail.value
+        J: activityDetail.value
       }, activityDetail.value ? {
-        O: common_vendor.t(activityDetail.value.activityTitle),
-        P: common_vendor.t(generateTicketNumber()),
-        Q: common_vendor.t(common_vendor.unref(currentDate))
+        K: common_vendor.t(activityDetail.value.activityTitle),
+        L: common_vendor.t(common_vendor.unref(currentDate))
       } : {}, {
-        R: common_vendor.o(backToHome)
+        M: common_vendor.o(backToHome)
       }) : {});
     };
   }

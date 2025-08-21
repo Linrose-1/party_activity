@@ -1,6 +1,6 @@
 /* 水平间距 */
 /* 水平间距 */
-/* Scoped styles 意味着它们只适用于此组件 */
+/* ... (其他样式保持不变) ... */
 .data-v-8cae2ec5:root {
   --primary: #FF6B00;
   --primary-light: #FF8A33;
@@ -57,7 +57,6 @@
   color: var(--gray-text);
   margin-bottom: 15px;
   line-height: 1.5;
-  /* 对于 uni-app 中的多行省略号，使用 text-overflow: ellipsis 配合 -webkit-line-clamp */
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -66,26 +65,18 @@
 }
 .store-footer.data-v-8cae2ec5 {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
+  /* 修改为 flex-end，让按钮靠右对齐 */
   align-items: center;
   padding-top: 10px;
   border-top: 1px dashed #ffe8d9;
+  gap: 10px;
+  /* 新增：给按钮之间增加一些间距 */
 }
-.store-tags.data-v-8cae2ec5 {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-.store-tag.data-v-8cae2ec5 {
-  background: #fff5ec;
-  color: var(--primary);
-  padding: 4px 10px;
-  border-radius: 12px;
-  font-size: 12px;
-  font-weight: 500;
-}
+
+/* 移除 .store-tags 和 .store-tag 的样式 */
 .nav-btn.data-v-8cae2ec5 {
-  background: var(--primary);
+  /* 这是两个按钮的通用样式 */
   color: white;
   border: none;
   padding: 6px 18px;
@@ -97,13 +88,22 @@
   transition: all 0.3s;
   font-weight: 500;
   line-height: 1;
-  /* 调整按钮行高 */
   margin: 0;
-  /* 重置按钮默认边距 */
 }
 .nav-btn.data-v-8cae2ec5::after {
   border: none;
-  /* 移除 uni-app 按钮默认边框 */
+}
+
+/* 新增：“发起聚会”按钮的特定样式 */
+.initiate-btn.data-v-8cae2ec5 {
+  background: #FF8A33;
+  /* 使用一个稍浅的橙色以作区分 */
+}
+
+/* 修改：“聚店详情”按钮的样式 */
+.detail-btn.data-v-8cae2ec5 {
+  background: var(--primary);
+  /* 使用主色 */
 }
 .nav-btn .uni-icons.data-v-8cae2ec5 {
   margin-right: 5px;

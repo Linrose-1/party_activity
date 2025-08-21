@@ -11,7 +11,7 @@
 					<view class="store-name">{{ storeDetail.storeName }}</view>
 					<view class="distance" v-if="storeDetail.distance !== null">
 						<uni-icons type="paperplane-filled" color="#fff" size="16"></uni-icons>
-						{{ storeDetail.distance }}km
+						{{ storeDetail.distance }}公里
 					</view>
 				</view>
 			</view>
@@ -34,7 +34,7 @@
 				<!-- 地址 -->
 				<view class="info-item">
 					<view class="info-content">
-						<view class="info-title">📍地址</view>
+						<view class="info-title">📌地址</view>
 						<view class="info-text">{{ storeDetail.fullAddress || '暂无地址信息' }}</view>
 					</view>
 				</view>

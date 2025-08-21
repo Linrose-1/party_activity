@@ -5,14 +5,12 @@ const utils_request = require("../../utils/request.js");
 if (!Array) {
   const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
   const _easycom_uni_datetime_picker2 = common_vendor.resolveComponent("uni-datetime-picker");
-  const _easycom_uni_load_more2 = common_vendor.resolveComponent("uni-load-more");
-  (_easycom_uni_icons2 + _easycom_uni_datetime_picker2 + _easycom_uni_load_more2)();
+  (_easycom_uni_icons2 + _easycom_uni_datetime_picker2)();
 }
 const _easycom_uni_icons = () => "../../uni_modules/uni-icons/components/uni-icons/uni-icons.js";
 const _easycom_uni_datetime_picker = () => "../../uni_modules/uni-datetime-picker/components/uni-datetime-picker/uni-datetime-picker.js";
-const _easycom_uni_load_more = () => "../../uni_modules/uni-load-more/components/uni-load-more/uni-load-more.js";
 if (!Math) {
-  (_easycom_uni_icons + _easycom_uni_datetime_picker + _easycom_uni_load_more)();
+  (_easycom_uni_icons + _easycom_uni_datetime_picker)();
 }
 const themeColor = "#FF7500";
 const _sfc_main = {
@@ -40,6 +38,7 @@ const _sfc_main = {
       pageSize: 10
     });
     const isFollowActionInProgress = common_vendor.ref(false);
+    const isShaking = common_vendor.ref(false);
     const timeRangeText = common_vendor.computed(() => {
       if (timeRange.value && timeRange.value.length === 2) {
         const start = timeRange.value[0].slice(5, 16);
@@ -180,7 +179,7 @@ const _sfc_main = {
       const name = user.nickname || "匿名用户";
       const avatarUrl = user.avatar || defaultAvatar;
       const url = `/pages/applicationBusinessCard/applicationBusinessCard?id=${user.id}&name=${encodeURIComponent(name)}&avatar=${encodeURIComponent(avatarUrl)}`;
-      common_vendor.index.__f__("log", "at pages/relation/relation.vue:315", "从人脉列表页跳转，URL:", url);
+      common_vendor.index.__f__("log", "at pages/relation/relation.vue:327", "从人脉列表页跳转，URL:", url);
       common_vendor.index.navigateTo({
         url
       });
@@ -195,6 +194,27 @@ const _sfc_main = {
     });
     common_vendor.watch([destination, timeRange], updateNextLocation);
     common_vendor.watch(activeTab, () => fetchUserList(true));
+    common_vendor.onShow(() => {
+      common_vendor.index.__f__("log", "at pages/relation/relation.vue:354", "人脉页 onShow: 开始监听摇一摇");
+      isShaking.value = false;
+      common_vendor.index.onAccelerometerChange((res) => {
+        if (Math.abs(res.x) > 1.5 || Math.abs(res.y) > 1.5 || Math.abs(res.z) > 1.5) {
+          if (!isShaking.value) {
+            isShaking.value = true;
+            common_vendor.index.vibrateShort();
+            common_vendor.index.__f__("log", "at pages/relation/relation.vue:370", "检测到摇一摇，准备跳转...");
+            goToShakePage();
+            setTimeout(() => {
+              isShaking.value = false;
+            }, 2e3);
+          }
+        }
+      });
+    });
+    common_vendor.onHide(() => {
+      common_vendor.index.__f__("log", "at pages/relation/relation.vue:385", "人脉页 onHide: 停止监听摇一摇");
+      common_vendor.index.stopAccelerometer();
+    });
     common_vendor.onLoad(() => {
     });
     common_vendor.onPullDownRefresh(() => fetchUserList(true));
@@ -208,8 +228,8 @@ const _sfc_main = {
       return common_vendor.e({
         a: common_assets._imports_0$3,
         b: common_vendor.p({
-          type: "paperplane-filled",
-          size: "24",
+          type: "personadd",
+          size: "36",
           color: "#fff"
         }),
         c: common_vendor.o(goToShakePage),
@@ -281,11 +301,7 @@ const _sfc_main = {
           size: "60",
           color: "#e0e0e0"
         })
-      } : {}, {
-        x: common_vendor.p({
-          status: loadingStatus.value
-        })
-      });
+      } : {});
     };
   }
 };

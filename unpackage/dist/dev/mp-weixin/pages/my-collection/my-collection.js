@@ -19,7 +19,7 @@ const _sfc_main = {
   __name: "my-collection",
   setup(__props) {
     const currentTab = common_vendor.ref(0);
-    const tabs = common_vendor.ref(["收藏的活动", "收藏的商机"]);
+    const tabs = common_vendor.ref(["收藏的聚会", "收藏的商机"]);
     const refreshing = common_vendor.ref(false);
     const userId = common_vendor.ref(null);
     const favoriteActivities = common_vendor.ref([]);

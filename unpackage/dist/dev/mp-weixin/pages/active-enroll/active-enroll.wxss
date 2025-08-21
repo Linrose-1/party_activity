@@ -51,6 +51,9 @@
 		line-height: 1.6;
 		font-size: 28rpx;
 }
+.info-label.data-v-d315542e {
+		font-weight: bold;
+}
 .info-box view.data-v-d315542e {
 		margin: 15rpx 0;
 }

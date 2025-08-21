@@ -62,19 +62,23 @@ const _sfc_main = {
       return [
         {
           value: user.currExperience || 0,
-          label: "我的贡分"
+          label: "我的贡分",
+          path: "/pages/my-account/my-account"
         },
         {
           value: user.activityCount || 0,
-          label: "我的活动"
+          label: "我的聚会",
+          path: "/pages/my-active/my-active"
         },
         {
           value: user.postCount || 0,
-          label: "我的商机"
+          label: "我的商机",
+          path: "/pages/my-opportunity/my-opportunity"
         },
         {
           value: user.point || 0,
-          label: "我的智米"
+          label: "我的智米",
+          path: "/pages/my-account/my-account"
         }
       ];
     });
@@ -88,6 +92,13 @@ const _sfc_main = {
       }
       return title || company || "暂未设置职位和公司";
     });
+    const navigateToAccountDetail = (item) => {
+      if (item && item.path) {
+        common_vendor.index.navigateTo({
+          url: item.path
+        });
+      }
+    };
     const featureList = common_vendor.ref([
       {
         name: "我的订单",
@@ -96,8 +107,8 @@ const _sfc_main = {
         path: "/pages/my-order/my-order"
       },
       {
-        name: "我的活动",
-        desc: "已报名/已发布的活动",
+        name: "我的聚会",
+        desc: "已报名/已发布的聚会",
         icon: "../../static/icon/活动.png",
         path: "/pages/my-active/my-active"
       },
@@ -201,44 +212,33 @@ const _sfc_main = {
         f: common_vendor.t(userTitleAndCompany.value),
         g: common_vendor.t(userInfo.value.parentName || "无"),
         h: common_vendor.o(onEdit),
-        i: userInfo.value.id
+        i: common_vendor.o(onEdit),
+        j: userInfo.value.id
       }, userInfo.value.id ? {
-        j: common_vendor.t(userInfo.value.virtualId)
+        k: common_vendor.t(userInfo.value.virtualId)
       } : {}) : {
-        k: common_vendor.p({
+        l: common_vendor.p({
           type: "person-filled",
           size: "30",
           color: "#FF8C00"
         }),
-        l: common_vendor.o(skipToLogin)
+        m: common_vendor.o(skipToLogin)
       }, {
-        m: common_vendor.o(onViewAll),
-        n: common_vendor.f(accountList.value, (item, k0, i0) => {
+        n: common_vendor.o(onViewAll),
+        o: common_vendor.f(accountList.value, (item, k0, i0) => {
           return {
             a: common_vendor.t(item.value),
             b: common_vendor.t(item.label),
-            c: item.label
+            c: item.label,
+            d: common_vendor.o(($event) => navigateToAccountDetail(item), item.label)
           };
         }),
-        o: common_vendor.o(onViewDetail),
-        p: userInfo.value.avatar || "../../static/images/default-avatar.png",
-        q: common_vendor.t(userInfo.value.realName || userInfo.value.nickname),
-        r: userInfo.value.topUpLevel && userInfo.value.topUpLevel.name
-      }, userInfo.value.topUpLevel && userInfo.value.topUpLevel.name ? {
-        s: common_vendor.t(userInfo.value.topUpLevel.name)
-      } : {}, {
-        t: userInfo.value.professionalTitle
-      }, userInfo.value.professionalTitle ? {
-        v: common_vendor.t(userInfo.value.professionalTitle)
-      } : {}, {
-        w: userInfo.value.companyName
-      }, userInfo.value.companyName ? {
-        x: common_vendor.t(userInfo.value.companyName)
-      } : {}, {
-        y: common_vendor.t(userInfo.value.shardCode || "暂无"),
-        z: common_vendor.o(($event) => copyToClipboard(userInfo.value.shardCode)),
-        A: userInfo.value.wechatQrCodeUrl || "../../static/images/default-qrcode.png",
-        B: common_vendor.f(featureList.value, (item, k0, i0) => {
+        p: common_vendor.o(onViewDetail),
+        q: userInfo.value.wechatQrCodeUrl || "../../static/images/default-qrcode.png",
+        r: common_vendor.o(onViewDetail),
+        s: common_vendor.t(userInfo.value.shardCode || "暂无"),
+        t: common_vendor.o(($event) => copyToClipboard(userInfo.value.shardCode)),
+        v: common_vendor.f(featureList.value, (item, k0, i0) => {
           return {
             a: item.icon,
             b: common_vendor.t(item.name),

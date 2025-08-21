@@ -6,9 +6,11 @@
 }
 .header-section.data-v-85e55c19 {
   position: relative;
-  height: 300rpx;
+  height: 250rpx;
   color: white;
   overflow: hidden;
+  border-radius: 0 0 40rpx 40rpx;
+  box-shadow: 0 10rpx 30rpx rgba(0, 0, 0, 0.1);
 }
 .header-bg.data-v-85e55c19 {
   position: absolute;
@@ -24,10 +26,15 @@
   z-index: 2;
   padding: 40rpx;
   display: flex;
-  flex-direction: column;
+  align-items: center;
   justify-content: space-between;
   height: 100%;
   box-sizing: border-box;
+}
+
+/* 左侧标题组 */
+.header-title-group.data-v-85e55c19 {
+  flex: 1;
 }
 .page-title.data-v-85e55c19 {
   font-size: 52rpx;
@@ -39,20 +46,33 @@
   margin-top: 10rpx;
   opacity: 0.9;
 }
-.shake-entry.data-v-85e55c19 {
-  align-self: flex-end;
-  background: rgba(255, 255, 255, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  padding: 15rpx 35rpx;
-  border-radius: 40rpx;
+
+/* 【核心修改】新的右侧入口样式 */
+.shake-entry-new.data-v-85e55c19 {
   display: flex;
   align-items: center;
-  margin-bottom: 20rpx;
+  /* 垂直居中对齐图标和文字组 */
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 20rpx;
+  padding: 20rpx 30rpx;
+  flex-shrink: 0;
+  /* 防止被压缩 */
 }
-.shake-entry .shake-text.data-v-85e55c19 {
-  margin-left: 15rpx;
+.entry-icon.data-v-85e55c19 {
+  margin-right: 20rpx;
+  /* 图标和文字之间的距离 */
+}
+.entry-text-group.data-v-85e55c19 {
+  display: flex;
+  flex-direction: column;
+  /* 让文字垂直排列 */
+}
+.entry-text.data-v-85e55c19 {
   font-size: 28rpx;
   font-weight: 500;
+  line-height: 1.4;
+  /* 调整行高，让两行文字更紧凑 */
 }
 .main-content.data-v-85e55c19 {
   padding: 30rpx;

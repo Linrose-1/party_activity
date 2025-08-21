@@ -1,28 +1,46 @@
 <template>
 	<view class="container">
-		<!-- 修正点 1: 新增的悬浮分享按钮 -->
-		<view class="share-fab" @click="openSharePopup">
+		<!-- 1. 悬浮分享按钮：仅在数据加载成功后显示 -->
+		<view class="share-fab" v-if="userInfo" @click="openSharePopup">
 			<uni-icons type="undo-filled" size="24" color="#fff"></uni-icons>
 		</view>
 
-		<view class="card-header">
-			<view class="header-title">我的个人名片</view>
-			<view class="header-subtitle">专业形象，随时分享</view>
+		<!-- 2. 页面状态处理：加载、错误、成功 -->
+		<!-- 加载中 -->
+		<view v-if="isLoading" class="status-indicator">
+			<uni-load-more status="loading" contentText="正在加载名片..."></uni-load-more>
 		</view>
 
-		<MyCard v-if="userInfo" :avatar="userInfo.avatar" :name="userInfo.realName || userInfo.nickname"
-			:pinyin-name="userInfo.pinyinName" :title="userInfo.titleName" :company-name="userInfo.companyName"
-			department="" :full-company-name="userInfo.professionalTitle" :contact-info="formattedContactInfo"
-			:show-user-qr-code="!!userInfo.wechatQrCodeUrl" :user-we-chat-qr-code-url="userInfo.wechatQrCodeUrl"
-			:shard-code="userInfo.shardCode"
-			platform-qr-code-url="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=platform-info"
-			logo-url="https://gitee.com/image_store/repo_1/raw/master/go-for-planet-logo.png" />
-
-		<view class="edit-hint" v-if="userInfo">
-			名片信息可在 <text @click="goToEdit" class="edit-link">个人资料</text> 中编辑
+		<!-- 加载失败 -->
+		<view v-else-if="errorMsg" class="status-indicator error-state">
+			<uni-icons type="closeempty" size="50" color="#999"></uni-icons>
+			<text class="error-text">{{ errorMsg }}</text>
 		</view>
 
-		<!-- 2. 【重大修改】新增自定义分享弹窗 -->
+		<!-- 加载成功，显示内容 -->
+		<template v-else-if="userInfo">
+			<view class="card-header">
+				<view class="header-title">
+					{{ isViewingOwnCard ? '我的个人名片' : 'Ta 的个人名片' }}
+				</view>
+				<view class="header-subtitle">专业形象，随时分享</view>
+			</view>
+
+			<MyCard :avatar="userInfo.avatar" :name="userInfo.realName || userInfo.nickname"
+				:pinyin-name="userInfo.pinyinName" :title="userInfo.titleName" :company-name="userInfo.companyName"
+				department="" :full-company-name="userInfo.professionalTitle" :contact-info="formattedContactInfo"
+				:show-user-qr-code="!!userInfo.wechatQrCodeUrl" :user-we-chat-qr-code-url="userInfo.wechatQrCodeUrl"
+				:shard-code="userInfo.shardCode"
+				platform-qr-code-url="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=platform-info"
+				logo-url="https://gitee.com/image_store/repo_1/raw/master/go-for-planet-logo.png" />
+
+			<!-- 编辑提示：仅在查看自己的名片时显示 -->
+			<view v-if="isViewingOwnCard" class="edit-hint">
+				名片信息可在 <text @click="goToEdit" class="edit-link">个人资料</text> 中编辑
+			</view>
+		</template>
+
+		<!-- 3. 自定义分享弹窗 (逻辑不变) -->
 		<uni-popup ref="sharePopup" type="bottom" background-color="#fff">
 			<view class="share-popup-content">
 				<view class="share-popup-title">自定义分享内容</view>
@@ -31,12 +49,10 @@
 					<input class="editor-input" v-model="customShareTitle" placeholder="请输入分享标题" />
 				</view>
 				<view class="share-channels">
-					<!-- 分享到好友的按钮 -->
 					<button class="share-channel-btn" open-type="share">
 						<uni-icons type="weixin" size="30" color="#07c160"></uni-icons>
 						<text>微信好友</text>
 					</button>
-					<!-- 引导分享到朋友圈的按钮 -->
 					<button class="share-channel-btn" @click="guideShareTimeline">
 						<uni-icons type="pyq" size="30" color="#53a046"></uni-icons>
 						<text>朋友圈</text>
@@ -46,7 +62,7 @@
 			</view>
 		</uni-popup>
 
-		<!-- 3. 【重大修改】新增分享到朋友圈的引导遮罩层 -->
+		<!-- 4. 分享到朋友圈的引导遮罩层 (逻辑不变) -->
 		<view v-if="showTimelineGuide" class="timeline-guide-mask" @click="hideTimelineGuide">
 			<image src="/static/icons/share-guide-arrow.png" class="guide-arrow"></image>
 			<view class="guide-text">
@@ -54,79 +70,148 @@
 				<text>分享到朋友圈</text>
 			</view>
 		</view>
-
 	</view>
 </template>
 
 <script setup>
 	import {
 		ref,
-		computed,
-		onMounted
+		computed
 	} from 'vue';
 	import {
 		onLoad,
 		onShareAppMessage,
 		onShareTimeline
-	} from '@dcloudio/uni-app'; // 修正点 2: 导入分享钩子
+	} from '@dcloudio/uni-app';
 	import MyCard from '../../components/MyCard.vue';
 	import request from '../../utils/request.js';
 
+	// --- 1. 状态管理：更清晰的状态变量 ---
 	const userInfo = ref(null);
-	const sharePopup = ref(null); // 修正点 3: 用于控制分享弹窗
-	const targetUserId = ref(null); // 新增：用于存储目标用户ID
-	const loggedInUserId = ref(null); // 新增：当前登录用户的ID
+	const isLoading = ref(true);
+	const errorMsg = ref('');
+	const isViewingOwnCard = ref(true); // 默认是查看自己的名片
+	const targetUserId = ref(null); // 仅在查看他人名片时有值
+	const fromShare = ref(false);
 
-	// 【新增】分享功能所需的状态变量
+	// 分享UI相关的状态
+	const sharePopup = ref(null);
 	const customShareTitle = ref('');
 	const showTimelineGuide = ref(false);
 
-
+	// --- 2. 页面生命周期与初始化 ---
 	onLoad((options) => {
-		// 检查是否有ID传入
-		if (options && options.id) {
+		console.log('[my-businessCard] onLoad 触发。已收到的选项:', JSON.stringify(options));
+
+		const loggedInUserId = uni.getStorageSync('userId');
+
+		if (options.fromShare && options.fromShare === '1') {
+			fromShare.value = true;
+		}
+
+		// 判断当前是查看自己还是他人名片
+		if (options && options.id && options.id != loggedInUserId) {
+			isViewingOwnCard.value = false;
 			targetUserId.value = options.id;
-			// 如果有ID，则获取指定用户的名片信息
-			fetchTargetUserInfo(options.id);
 		} else {
-			// 如果没有ID，则获取自己的名片信息
-			fetchOwnUserInfo();
+			isViewingOwnCard.value = true;
 		}
 
-		// ==================== 【新增】处理分享点击加分逻辑 ====================
-		if (options && options.sharerId) {
-			const sharerId = options.sharerId;
-			// 注意：这里的 bizId 是被查看用户的ID，也就是 targetUserId.value
-			// 但在 onLoad 早期，targetUserId.value 可能还未被赋值，所以直接从 options.id 获取更可靠
-			const bizId = options.id;
+		// 统一的页面初始化入口
+		initializePage();
 
-			// 1. 如果是本人点击，不处理
-			if (sharerId && loggedInUserId.value && sharerId === loggedInUserId.value) {
-				console.log('用户点击了自己的名片分享链接，不计分。');
-			}
-			// 2. 如果是其他已登录用户点击，直接调用接口加分
-			else if (sharerId && loggedInUserId.value && bizId) {
-				console.log('其他用户点击了名片分享链接，且已登录，准备为分享者加分。');
-				triggerShareHitApi(sharerId, bizId);
-			}
-			// 3. 如果是未登录用户点击，暂存信息
-			else if (sharerId && bizId) {
-				console.log('用户点击了名片分享链接，但尚未登录。暂存分享信息。');
-				uni.setStorageSync('pendingShareReward', {
-					sharerId: sharerId,
-					bizId: bizId,
-					type: 30 // 30 代表 "分享名片奖励"
-				});
-			}
-		}
-		// =======================================================================
+		// 处理分享点击带来的奖励逻辑
+		handleShareReward(options);
 	});
 
+	/**
+	 * @description 页面初始化总函数，负责数据加载和状态管理
+	 */
+	const initializePage = async () => {
+		isLoading.value = true;
+		errorMsg.value = '';
+		userInfo.value = null; // 每次加载前重置
+
+		try {
+			const rawData = isViewingOwnCard.value ?
+				await fetchOwnUserInfo() :
+				await fetchTargetUserInfo(targetUserId.value);
+
+			if (!rawData) throw new Error('未能获取到名片信息');
+
+			userInfo.value = adaptUserInfo(rawData);
+		} catch (err) {
+			errorMsg.value = err.message || '加载失败，请稍后重试';
+			console.error('页面初始化失败:', err);
+		} finally {
+			isLoading.value = false;
+		}
+	};
+
+	// --- 3. 数据获取与适配 ---
+
+	/**
+	 * @description 获取自己的名片信息
+	 */
+	const fetchOwnUserInfo = async () => {
+		const {
+			data,
+			error
+		} = await request('/app-api/member/user/get', {
+			method: 'GET'
+		});
+		if (error) throw new Error(error);
+		return data;
+	};
+
+	/**
+	 * @description 获取他人的名片信息
+	 */
+	const fetchTargetUserInfo = async (userId) => {
+		// 【修改点】在这里构建请求参数
+		const requestData = {
+			readUserId: userId
+		};
+
+		// 如果是通过免费分享链接进来的，就加上 notPay: 1
+		if (fromShare.value) {
+			requestData.notPay = 1;
+		}
+
+		console.log('[my-businessCard] 准备使用参数调用 /read-card:', JSON.stringify(requestData));
+
+		const {
+			data,
+			error
+		} = await request('/app-api/member/user/read-card', {
+			method: 'POST',
+			data: requestData
+		});
+		if (error) {
+			// 【关键逻辑】如果出错，且不是查看自己的卡片，则跳转到申请页
+			if (!isViewingOwnCard.value) {
+				uni.redirectTo({
+					url: `/pages/business-card-apply/business-card-apply?id=${userId}&name=${encodeURIComponent('目标用户')}&fromShare=${fromShare.value ? '1' : '0'}`
+					// 注意：这里可能没有用户信息，所以name只能用一个占位符，或者尝试从缓存获取。
+					// 更优化的方案是在跳转前先请求一个简单的用户信息接口。
+					// 但根据现有代码，我们直接跳转。
+				});
+				// 抛出一个特定错误，避免在当前页面显示错误信息
+				throw new Error('Redirecting to apply page');
+			} else {
+				// 如果是查看自己的卡片出错，则正常抛出错误
+				throw new Error(error);
+			}
+		}
+		return data;
+	};
+
+	/**
+	 * @description 适配不同接口返回的用户数据，统一为组件所需格式
+	 */
 	const adaptUserInfo = (rawUserData) => {
 		if (!rawUserData) return null;
-
 		return {
-			// --- 通用字段直接映射 ---
 			id: rawUserData.id,
 			mobile: rawUserData.mobile,
 			nickname: rawUserData.nickname,
@@ -138,210 +223,164 @@
 			contactEmail: rawUserData.contactEmail,
 			wechatQrCodeUrl: rawUserData.wechatQrCodeUrl,
 			shardCode: rawUserData.shardCode,
-
-			// ... 其他你需要的通用字段
-
-			// --- 差异字段适配 ---
-			// 目标：统一为 pinyinName 和 titleName
-
-			// 会员等级 (目标字段：pinyinName)
-			// 检查 /get 接口的嵌套结构，如果不存在，则使用 /read-card 接口的平铺结构
 			pinyinName: rawUserData.topUpLevel?.name || rawUserData.topUpLevelName || '',
-
-			// 用户头衔/等级 (目标字段：titleName)
-			// 检查 /get 接口的嵌套结构，如果不存在，则使用 /read-card 接口的平铺结构
 			titleName: rawUserData.level?.name || rawUserData.levelName || ''
 		};
 	};
 
-	const fetchOwnUserInfo = async () => {
-		uni.showLoading({
-			title: '加载中...'
-		});
-		const {
-			data,
-			error
-		} = await request('/app-api/member/user/get', {
-			method: 'GET'
-		});
-		uni.hideLoading();
-
-		if (error) {
-			uni.showToast({
-				title: `加载失败: ${error}`,
-				icon: 'none'
-			});
-			return;
-		}
-
-		userInfo.value = adaptUserInfo(data);
-	};
-
-	// 新增：获取他人名片信息的函数
-	const fetchTargetUserInfo = async (userId) => {
-		uni.showLoading({
-			title: '加载中...'
-		});
-		const {
-			data,
-			error
-		} = await request('/app-api/member/user/read-card', {
-			method: 'POST',
-			data: {
-				readUserId: userId
-			}
-		});
-		uni.hideLoading();
-
-		if (error) {
-			// 如果在这里仍然失败，说明可能发生了异常或权限突然失效
-			uni.showToast({
-				title: `获取名片失败: ${error}`,
-				icon: 'none'
-			});
-			// 可以选择跳转回上一页或首页
-			setTimeout(() => uni.navigateBack(), 2000);
-			return;
-		}
-
-		userInfo.value = adaptUserInfo(data);
-	};
-
+	// --- 4. 计算属性 ---
 	const formattedContactInfo = computed(() => {
 		if (!userInfo.value) return [];
 		return [{
 				icon: 'phone-filled',
-				value: userInfo.value.mobile || '未设置手机'
+				value: userInfo.value.mobile || '未设置'
 			},
 			{
 				icon: 'email-filled',
-				value: userInfo.value.contactEmail || '未设置邮箱'
+				value: userInfo.value.contactEmail || '未设置'
 			},
 			{
 				icon: 'location-filled',
-				value: userInfo.value.locationAddressStr || '未设置地址'
+				value: userInfo.value.locationAddressStr || '未设置'
 			}
 		];
 	});
 
-	const goToEdit = () => {
-		uni.navigateTo({
-			url: '/pages/my-edit/my-edit'
-		});
+	// --- 5. 分享相关逻辑 ---
+
+	/**
+	 * @description 处理分享链接被点击后的奖励逻辑
+	 */
+	const handleShareReward = (options) => {
+		if (!options || !options.sharerId) return;
+
+		const {
+			sharerId,
+			id: bizId
+		} = options;
+		const loggedInUserId = uni.getStorageSync('userId');
+
+		// 本人点击，不处理
+		if (sharerId == loggedInUserId) {
+			console.log('用户点击了自己的分享链接，不计分。');
+			return;
+		}
+
+		// 已登录用户点击，直接加分
+		if (loggedInUserId) {
+			console.log('其他已登录用户点击，准备为分享者加分。');
+			triggerShareHitApi(sharerId, bizId);
+		}
+		// 未登录用户点击，暂存信息
+		else {
+			console.log('未登录用户点击，暂存分享信息。');
+			uni.setStorageSync('pendingShareReward', {
+				sharerId,
+				bizId,
+				type: 30 // 30 代表 "分享名片奖励"
+			});
+		}
 	};
 
-	// 【新增】调用分享命中接口的函数
+	/**
+	 * @description 调用分享命中接口，为分享者增加贡分
+	 */
 	const triggerShareHitApi = async (sharerId, bizId) => {
 		if (!sharerId || !bizId) return;
-
-		console.log(`准备为分享者 (ID: ${sharerId}) 增加贡分, 关联名片ID (bizId): ${bizId}`);
-
 		const {
 			error
 		} = await request('/app-api/member/experience-record/share-experience-hit', {
 			method: 'POST',
 			data: {
-				type: 30, // 30 代表 "分享名片奖励"
+				type: 30,
 				shareUserId: sharerId,
 				bizId: bizId
 			}
 		});
-
 		if (error) {
 			console.error('调用分享名片加分接口失败:', error);
 		} else {
-			console.log(`成功为分享者 (ID: ${sharerId}) 触发贡分增加`);
+			console.log(`成功为分享者(ID: ${sharerId})触发贡分增加`);
 		}
 	};
 
-	// 打开分享弹窗
-	const openSharePopup = () => {
-		if (!userInfo.value) {
-			uni.showToast({
-				title: '信息加载中，请稍候',
-				icon: 'none'
-			});
-			return;
-		}
-		// 设置默认的分享标题
-		customShareTitle.value = `这是 ${userInfo.value.realName || userInfo.value.nickname} 的名片`;
-		sharePopup.value.open();
-	};
-
-	// 关闭分享弹窗
-	const closeSharePopup = () => {
-		sharePopup.value.close();
-	};
-
-
-	// 1. 监听用户点击“微信好友”按钮或右上角菜单“转发”
-	onShareAppMessage((res) => {
-		console.log('触发了分享给好友', res);
-		// 触发分享后，自动关闭弹窗
+	// 监听“分享给好友”
+	onShareAppMessage(() => {
 		closeSharePopup();
+		if (!userInfo.value) return {
+			title: '一张很棒的电子名片'
+		};
 
-		if (!userInfo.value) {
-			return {
-				title: '快来看看我的专业电子名片！'
-			};
+		const loggedInUserId = uni.getStorageSync('userId');
+		const cardOwnerId = userInfo.value.id; // 分享路径中的ID应始终是名片所有者的ID
+
+		let sharePath = `/pages/my-businessCard/my-businessCard?id=${cardOwnerId}&fromShare=1`;
+		// 分享者ID是当前登录用户的ID
+		if (loggedInUserId) {
+			sharePath += `&sharerId=${loggedInUserId}`;
 		}
 
-		const sharerId = uni.getStorageSync('userId');
-		let sharePath = `/pages/my-businessCard/my-businessCard?id=${userInfo.value.id}`;
-		if (sharerId) {
-			sharePath += `&sharerId=${sharerId}`;
-		}
-
-		// 【核心】优先使用用户在弹窗中输入的标题
 		const finalTitle = customShareTitle.value ||
 			`这是 ${userInfo.value.realName || userInfo.value.nickname} 的名片`;
 
-		return {
+		const shareContent = {
 			title: finalTitle,
 			path: sharePath,
 			imageUrl: userInfo.value.avatar,
 		};
+
+		// ===================== LOG START: 分享数据 =====================
+		console.log('[my-businessCard] 分享好友内容:', JSON.stringify(shareContent));
+		// ===================== LOG END ===============================
+
+		return shareContent;
 	});
 
-	// 2. 监听用户在引导下点击右上角菜单“分享到朋友圈”
+	// 监听“分享到朋友圈”
 	onShareTimeline(() => {
-		console.log('触发了分享到朋友圈');
-		// 触发分享时，隐藏引导蒙层
 		hideTimelineGuide();
+		if (!userInfo.value) return {
+			title: '一张很棒的电子名片'
+		};
 
-		if (!userInfo.value) {
-			return {
-				title: '快来看看我的专业电子名片！'
-			};
+		const loggedInUserId = uni.getStorageSync('userId');
+		const cardOwnerId = userInfo.value.id;
+
+		let queryString = `id=${cardOwnerId}&fromShare=1`;
+		if (loggedInUserId) {
+			queryString += `&sharerId=${loggedInUserId}`;
 		}
 
-		const sharerId = uni.getStorageSync('userId');
-		let queryString = `id=${userInfo.value.id}`;
-		if (sharerId) {
-			queryString += `&sharerId=${sharerId}`;
-		}
-
-		// 【核心】同样优先使用用户在弹窗中输入的标题
 		const finalTitle = customShareTitle.value ||
 			`这是 ${userInfo.value.realName || userInfo.value.nickname} 的名片`;
 
-		return {
+		const shareContent = {
 			title: finalTitle,
 			query: queryString,
 			imageUrl: userInfo.value.avatar,
 		};
+
+		// ===================== LOG START: 分享数据 =====================
+		console.log('[my-businessCard] 生成时间轴共享内容:', JSON.stringify(shareContent));
+		// ===================== LOG END ===============================
+
+		return shareContent;
 	});
 
-
+	// --- 6. 事件处理器 ---
+	const goToEdit = () => uni.navigateTo({
+		url: '/pages/my-edit/my-edit'
+	});
+	const openSharePopup = () => {
+		customShareTitle.value = `这是 ${userInfo.value.realName || userInfo.value.nickname} 的名片`;
+		sharePopup.value.open();
+	};
+	const closeSharePopup = () => sharePopup.value.close();
 	const guideShareTimeline = () => {
 		closeSharePopup();
 		showTimelineGuide.value = true;
 	};
-
-	// 【新增】隐藏朋友圈引导蒙层的方法
-	const hideTimelineGuide = () => {
-		showTimelineGuide.value = false;
-	};
+	const hideTimelineGuide = () => showTimelineGuide.value = false;
 </script>
 
 <style lang="scss" scoped>
@@ -357,6 +396,7 @@
 		align-items: center;
 		justify-content: flex-start;
 		padding-top: 80rpx;
+		box-sizing: border-box;
 	}
 
 	.card-header {
@@ -393,7 +433,6 @@
 	.share-fab {
 		position: fixed;
 		top: 180rpx;
-		/* 可根据需要调整，避开导航栏 */
 		right: 30rpx;
 		width: 90rpx;
 		height: 90rpx;
@@ -411,9 +450,25 @@
 		}
 	}
 
-	/* --- 整合后的分享弹窗与引导蒙层样式 --- */
+	/* 新增：加载和错误状态的容器样式 */
+	.status-indicator {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		padding-top: 200rpx;
+		width: 100%;
+	}
 
-	/* 分享弹窗内容区 */
+	.error-state {
+		.error-text {
+			font-size: 30rpx;
+			color: #888;
+			margin-top: 20rpx;
+		}
+	}
+
+	/* --- 分享弹窗与引导蒙层样式 (保持不变) --- */
 	.share-popup-content {
 		padding: 30rpx;
 		padding-bottom: calc(30rpx + env(safe-area-inset-bottom));
@@ -422,7 +477,6 @@
 		border-top-right-radius: 24rpx;
 	}
 
-	/* 弹窗顶部标题 */
 	.share-popup-title {
 		text-align: center;
 		font-size: 32rpx;
@@ -431,7 +485,6 @@
 		margin-bottom: 40rpx;
 	}
 
-	/* 自定义标题编辑区 */
 	.share-title-editor {
 		display: flex;
 		align-items: center;
@@ -453,7 +506,6 @@
 		color: #333;
 	}
 
-	/* 分享渠道区域 */
 	.share-channels {
 		display: flex;
 		justify-content: space-around;
@@ -461,7 +513,6 @@
 		margin-bottom: 40rpx;
 	}
 
-	/* 分享渠道按钮 (好友、朋友圈) */
 	.share-channel-btn {
 		display: flex;
 		flex-direction: column;
@@ -483,7 +534,6 @@
 		margin-top: 10rpx;
 	}
 
-	/* 弹窗取消按钮 */
 	.share-popup-cancel {
 		width: 100%;
 		height: 90rpx;
@@ -495,7 +545,6 @@
 		color: #333;
 	}
 
-	/* 分享到朋友圈的引导蒙层 */
 	.timeline-guide-mask {
 		position: fixed;
 		top: 0;
@@ -530,7 +579,4 @@
 			margin-bottom: 10rpx;
 		}
 	}
-
-	/* --- 以下为旧的、已移除的样式，仅作参考 --- */
-	/* .action-buttons, .action-btn, .share-btn, .share-options, .share-option, .share-icon, .share-title 等选择器相关的旧样式已被移除 */
 </style>

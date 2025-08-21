@@ -115,11 +115,11 @@ const _sfc_main = {
         }
       });
       if (error) {
-        common_vendor.index.__f__("error", "at pages/active/active.vue:271", "获取活动类型列表失败:", error);
+        common_vendor.index.__f__("error", "at pages/active/active.vue:271", "获取聚会类型列表失败:", error);
         throw new Error("获取类型失败");
       }
       typeList.value = data || [];
-      common_vendor.index.__f__("log", "at pages/active/active.vue:276", "动态活动类型列表获取成功:", typeList.value);
+      common_vendor.index.__f__("log", "at pages/active/active.vue:276", "动态聚会类型列表获取成功:", typeList.value);
     };
     const fetchActivityStatusList = async () => {
       const {
@@ -127,11 +127,11 @@ const _sfc_main = {
         error
       } = await utils_request.request("/app-api/member/activity/status-list");
       if (error) {
-        common_vendor.index.__f__("error", "at pages/active/active.vue:285", "获取活动状态列表失败:", error);
+        common_vendor.index.__f__("error", "at pages/active/active.vue:285", "获取聚会状态列表失败:", error);
         throw new Error("获取状态失败");
       }
       statusList.value = data || [];
-      common_vendor.index.__f__("log", "at pages/active/active.vue:289", "动态活动状态列表获取成功:", statusList.value);
+      common_vendor.index.__f__("log", "at pages/active/active.vue:289", "动态聚会状态列表获取成功:", statusList.value);
     };
     const getActiveList = async (isLoadMore = false) => {
       if (loading.value)
@@ -155,7 +155,7 @@ const _sfc_main = {
         latitude: selectedLocationInfo.value ? selectedLocationInfo.value.latitude : ""
       };
       try {
-        common_vendor.index.__f__("log", "at pages/active/active.vue:321", "发起活动列表请求, 参数:", params);
+        common_vendor.index.__f__("log", "at pages/active/active.vue:321", "发起聚会列表请求, 参数:", params);
         const result = await utils_request.request("/app-api/member/activity/list", {
           method: "GET",
           data: params
@@ -173,7 +173,7 @@ const _sfc_main = {
           hasMore.value = activitiesData.value.length < total;
           pageNo.value++;
         } else {
-          common_vendor.index.__f__("error", "at pages/active/active.vue:344", "获取活动列表失败:", result ? result.error : "无有效返回");
+          common_vendor.index.__f__("error", "at pages/active/active.vue:344", "获取聚会列表失败:", result ? result.error : "无有效返回");
           hasMore.value = false;
         }
       } catch (error) {
@@ -220,7 +220,7 @@ const _sfc_main = {
       if (!isLogin.value) {
         common_vendor.index.showModal({
           title: "温馨提示",
-          content: "登录后才能发布活动，是否立即登录？",
+          content: "登录后才能发布聚会，是否立即登录？",
           confirmText: "去登录",
           cancelText: "再看看",
           success: (res) => {
@@ -284,7 +284,7 @@ const _sfc_main = {
       } : {}, {
         p: common_vendor.o(openMapToChooseLocation),
         q: common_vendor.p({
-          title: "活动筛选",
+          title: "聚会筛选",
           open: true
         }),
         r: common_vendor.f(activitiesData.value, (activity, index, i0) => {

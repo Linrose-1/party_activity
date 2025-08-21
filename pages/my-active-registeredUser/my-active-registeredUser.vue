@@ -1,6 +1,6 @@
 <template>
 	<view class="page-container">
-		<!-- 活动信息头部卡片 -->
+		<!-- 聚会信息头部卡片 -->
 		<view v-if="activityInfo" class="activity-header-card">
 			<view class="header-title-row">
 				<uni-icons type="flag-filled" size="20" color="#FF7900"></uni-icons>
@@ -12,7 +12,7 @@
 			</view>
 			<view class="header-info-row">
 				<uni-icons type="map-pin" size="16" color="#909399"></uni-icons>
-				<text class="info-text">{{ activityInfo.locationAddress || '线上活动' }}</text>
+				<text class="info-text">{{ activityInfo.locationAddress || '线上聚会' }}</text>
 			</view>
 		</view>
 
@@ -106,9 +106,9 @@
 				});
 				handleRefresh();
 			} catch (e) {
-				console.error("解析活动信息失败", e);
+				console.error("解析聚会信息失败", e);
 				uni.showToast({
-					title: '加载活动信息失败',
+					title: '加载聚会信息失败',
 					icon: 'none'
 				});
 			}

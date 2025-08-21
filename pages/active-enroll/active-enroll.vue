@@ -1,8 +1,8 @@
 <template>
 	<view class="container">
 		<view class="header">
-			<!-- 【修改】动态绑定活动标题 -->
-			<h1>{{ activityDetail ? activityDetail.activityTitle : '活动报名' }}</h1>
+			<!-- 【修改】动态绑定聚会标题 -->
+			<h1>{{ activityDetail ? activityDetail.activityTitle : '聚会报名' }}</h1>
 		</view>
 
 		<!-- 步骤指示器 -->
@@ -24,26 +24,24 @@
 		<!-- 【修改】使用 v-if 确保数据加载后再渲染 -->
 		<view class="section" v-if="activityDetail">
 			<view class="section-title">
-				<uni-icons type="person" size="18" color="#FF6E00"></uni-icons>
+				<!-- <uni-icons type="person" size="18" color="#FF6E00"></uni-icons> -->
 				<span>组织者信息</span>
 			</view>
 			<view class="info-box">
-				<!-- 【修改】动态绑定组织者单位和电话 -->
-				<view><strong>组织者：</strong> {{ activityDetail.organizerUnitName }}</view>
-				<view><strong>电话：</strong> {{ activityDetail.organizerContactPhone }}</view>
-				<!-- 【修改】动态绑定活动时间和地点 -->
-				<view><strong>活动时间：</strong>
+				<view><span class="info-label">组织者：</span> {{ activityDetail.organizerUnitName }}</view>
+				<view><span class="info-label">电话：</span> {{ activityDetail.organizerContactPhone }}</view>
+				<view><span class="info-label">聚会时间：</span>
 					{{ formatRangeTime(activityDetail.startDatetime, activityDetail.endDatetime) }}
 				</view>
-				<view><strong>报名时间：</strong> {{ formattedRegistrationTime }}</view>
-				<view><strong>活动地点：</strong> {{ activityDetail.locationAddress }}</view>
+				<view><span class="info-label">报名时间：</span> {{ formattedRegistrationTime }}</view>
+				<view><span class="info-label">聚会地点：</span> {{ activityDetail.locationAddress }}</view>
 			</view>
 		</view>
 
 		<!-- 第一步：填写信息 -->
 		<view class="section" v-if="currentStep === 1">
 			<view class="section-title">
-				<uni-icons type="compose" size="18" color="#FF6E00"></uni-icons>
+				<!-- <uni-icons type="compose" size="18" color="#FF6E00"></uni-icons> -->
 				<span>填写报名信息</span>
 			</view>
 
@@ -59,7 +57,7 @@
 					:styles="{ borderColor: '#eee', borderRadius: '12rpx' }"></uni-easyinput>
 			</view>
 			<view class="input-item">
-				<label for="company">单位/学校</label>
+				<label for="company">所在机构</label>
 				<uni-easyinput type="text" v-model="formData.contactAddress" placeholder="请输入单位或学校名称"
 					:styles="{ borderColor: '#eee', borderRadius: '12rpx' }"></uni-easyinput>
 			</view>
@@ -80,7 +78,7 @@
 		<!-- 第二步：支付费用 -->
 		<view class="section" v-if="currentStep === 2 && activityDetail">
 			<view class="section-title">
-				<uni-icons type="shop" size="18" color="#FF6E00"></uni-icons>
+				<!-- <uni-icons type="shop" size="18" color="#FF6E00"></uni-icons> -->
 				<!-- 【修改】动态绑定报名费用 -->
 				<span>支付报名费用 <span class="price-tag">¥{{ activityDetail.registrationFee }}</span></span>
 			</view>
@@ -100,9 +98,9 @@
 			<!-- 【修改】使用真实上传逻辑 -->
 			<view class="upload-box" @click="chooseImage">
 				<view v-if="!formData.paymentScreenshotUrl">
-					<view class="upload-icon">
+					<!-- <view class="upload-icon">
 						<uni-icons type="plus" size="24" color="#FF6E00"></uni-icons>
-					</view>
+					</view> -->
 					<view class="upload-text">点击上传付款截图</view>
 					<view class="upload-text" style="font-size: 24rpx; margin-top: 10rpx">
 						支持JPG、PNG格式，小于5MB
@@ -124,7 +122,7 @@
 		<view v-if="currentStep === 3">
 			<view class="success-message">
 				<view class="success-icon">🎉</view>
-				<view>恭喜您报名成功！</view>
+				<view>您的申请已递交，请等候组织者确认</view>
 				<!-- <view style="font-size: 28rpx; color: #666; margin-top: 30rpx">
 					我们已发送确认短信至您的手机
 				</view>
@@ -135,10 +133,10 @@
 
 			<view class="section" v-if="activityDetail">
 				<view class="info-box">
-					<view><strong>活动名称：</strong> {{ activityDetail.activityTitle }}</view>
-					<view><strong>报名编号：</strong> {{ generateTicketNumber() }}</view>
-					<view><strong>报名时间：</strong> {{ currentDate }}</view>
-					<view><strong>温馨提示：</strong> 请于活动开始前15分钟携带本页面截图签到</view>
+					<view><span class="info-label">聚会名称：</span> {{ activityDetail.activityTitle }}</view>
+					<view><span class="info-label">报名时间：</span> {{ currentDate }}</view>
+					<view><span class="info-label">温馨提示：</span> 请于聚会开始前15分钟携带本页面截图签到</view>
+					<!-- <view><strong>报名编号：</strong> {{ generateTicketNumber() }}</view> -->
 				</view>
 			</view>
 
@@ -148,7 +146,7 @@
 		</view>
 
 		<!-- <view class="footer">
-			<p>创新科技活动策划部 © 2023 版权所有</p>
+			<p>创新科技聚会策划部 © 2023 版权所有</p>
 			<p>客服电话: 021-68881234 | 服务时间: 9:00-18:00</p>
 		</view> -->
 	</view>
@@ -188,9 +186,9 @@
 			// 【修改】现在 getActiveDetail 会处理所有逻辑
 			getActiveDetail();
 		} else {
-			console.error('未接收到活动ID！');
+			console.error('未接收到聚会ID！');
 			uni.showToast({
-				title: '加载活动详情失败，缺少ID',
+				title: '加载聚会详情失败，缺少ID',
 				icon: 'none'
 			});
 			// 如果没有ID，直接返回，避免后续执行
@@ -360,13 +358,13 @@
 			} else {
 				console.log('请求失败:', result ? result.error : '无返回结果');
 				uni.showToast({
-					title: result.error || '获取活动信息失败',
+					title: result.error || '获取聚会信息失败',
 					icon: 'none'
 				});
 			}
 		} catch (e) {
 			uni.hideLoading();
-			console.error('获取活动详情时发生异常:', e);
+			console.error('获取聚会详情时发生异常:', e);
 			uni.showToast({
 				title: '网络异常，请稍后重试',
 				icon: 'none'
@@ -520,6 +518,10 @@
 		border-radius: 12rpx;
 		line-height: 1.6;
 		font-size: 28rpx;
+	}
+
+	.info-label {
+		font-weight: bold;
 	}
 
 	.info-box view {

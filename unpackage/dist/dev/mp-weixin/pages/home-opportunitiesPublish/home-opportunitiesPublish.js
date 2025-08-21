@@ -5,8 +5,8 @@ const utils_upload = require("../../utils/upload.js");
 const _sfc_main = {
   __name: "home-opportunitiesPublish",
   setup(__props) {
-    const title = common_vendor.ref("商机标题");
-    const content = common_vendor.ref("商机内容商机内容商机内容商机内容商机内容商机内容商机内容商机内容商机内容");
+    const title = common_vendor.ref("");
+    const content = common_vendor.ref("");
     const topic = common_vendor.ref("普通商机");
     const tags = common_vendor.ref([]);
     const tagInput = common_vendor.ref("");
@@ -74,7 +74,7 @@ const _sfc_main = {
               successfulUrls.push(result.data);
             } else {
               failedCount++;
-              common_vendor.index.__f__("error", "at pages/home-opportunitiesPublish/home-opportunitiesPublish.vue:175", "上传失败:", result.error);
+              common_vendor.index.__f__("error", "at pages/home-opportunitiesPublish/home-opportunitiesPublish.vue:174", "上传失败:", result.error);
             }
           });
           images.value = images.value.concat(successfulUrls);
@@ -160,7 +160,7 @@ const _sfc_main = {
         tags: tags.value,
         status: "active"
       };
-      common_vendor.index.__f__("log", "at pages/home-opportunitiesPublish/home-opportunitiesPublish.vue:281", "--- 准备提交到后端的帖子数据 (图片已是URL) ---", postData);
+      common_vendor.index.__f__("log", "at pages/home-opportunitiesPublish/home-opportunitiesPublish.vue:280", "--- 准备提交到后端的帖子数据 (图片已是URL) ---", postData);
       createOpportunities(postData);
     }
     const createOpportunities = async (postData) => {

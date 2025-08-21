@@ -54,15 +54,17 @@
 			<!-- 空状态提示 -->
 			<view v-if="allStores.length === 0 && !loadingMore && !isRefreshing" class="empty-state">
 				<uni-icons type="info" size="60" color="#ffd8c1"></uni-icons>
-				<text>附近3公里暂时没有猩聚社“聚店”</text>
-				<text>欢迎在下方猛击“聚店推荐”，推荐您喜欢的聚店！（可以获得贡分哦！）</text>
+				<text>附近3公里暂无合适的“聚店”</text>
+				<text>请在下方猛击 “聚店推荐” </text>
+				<text>(推荐成功可获贡分)</text>
+			
 			</view>
 		</scroll-view>
 
 		<!-- 3. 底部操作栏 -->
 		<view class="action-bar">
 			<button class="action-btn share-btn" @click="shareStore">
-				<uni-icons type="redo" size="20" color="#fff"></uni-icons>
+				<uni-icons type="hand-up-filled" size="20" color="#fff"></uni-icons>
 				<text>聚店推荐</text>
 			</button>
 			<button class="action-btn register-btn" @click="skipToNewShop">
@@ -565,7 +567,7 @@
 		border: none;
 		padding: 16rpx 28rpx;
 		border-radius: 16rpx;
-		font-size: 24rpx;
+		font-size: 28rpx;
 		cursor: pointer;
 		transition: all 0.2s;
 		white-space: nowrap;

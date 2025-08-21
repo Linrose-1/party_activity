@@ -42,7 +42,7 @@ const _sfc_main = {
         isRefreshing.value = false;
       }
       if (error) {
-        common_vendor.index.__f__("error", "at pages/my-shop/my-shop.vue:90", "获取我的聚店列表失败:", error);
+        common_vendor.index.__f__("error", "at pages/my-shop/my-shop.vue:92", "获取我的聚店列表失败:", error);
         common_vendor.index.showToast({
           title: error,
           icon: "none"
@@ -87,6 +87,12 @@ const _sfc_main = {
     const handleSearchClick = () => {
       clearTimeout(searchTimer);
       handleRefresh();
+    };
+    const goToApplyPage = () => {
+      common_vendor.index.navigateTo({
+        // 目标是新建/编辑页面
+        url: `/pages/myStore-edit/myStore-edit`
+      });
     };
     const goToEditPage = (store) => {
       common_vendor.index.navigateTo({
@@ -139,11 +145,12 @@ const _sfc_main = {
           type: "shop",
           size: "60",
           color: "#ffd8c1"
-        })
+        }),
+        l: common_vendor.o(goToApplyPage)
       } : {}, {
-        l: common_vendor.o(loadMore),
-        m: isRefreshing.value,
-        n: common_vendor.o(onPullDownRefresh)
+        m: common_vendor.o(loadMore),
+        n: isRefreshing.value,
+        o: common_vendor.o(onPullDownRefresh)
       });
     };
   }

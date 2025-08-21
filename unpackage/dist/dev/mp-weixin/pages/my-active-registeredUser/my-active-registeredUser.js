@@ -31,9 +31,9 @@ const _sfc_main = {
           });
           handleRefresh();
         } catch (e) {
-          common_vendor.index.__f__("error", "at pages/my-active-registeredUser/my-active-registeredUser.vue:109", "解析活动信息失败", e);
+          common_vendor.index.__f__("error", "at pages/my-active-registeredUser/my-active-registeredUser.vue:109", "解析聚会信息失败", e);
           common_vendor.index.showToast({
-            title: "加载活动信息失败",
+            title: "加载聚会信息失败",
             icon: "none"
           });
         }
@@ -226,7 +226,7 @@ const _sfc_main = {
           size: "16",
           color: "#909399"
         }),
-        g: common_vendor.t(activityInfo.value.locationAddress || "线上活动")
+        g: common_vendor.t(activityInfo.value.locationAddress || "线上聚会")
       } : {}, {
         h: userList.value.length > 0
       }, userList.value.length > 0 ? {

@@ -116,7 +116,7 @@
   border: none;
   padding: 16rpx 28rpx;
   border-radius: 16rpx;
-  font-size: 24rpx;
+  font-size: 28rpx;
   cursor: pointer;
   transition: all 0.2s;
   white-space: nowrap;

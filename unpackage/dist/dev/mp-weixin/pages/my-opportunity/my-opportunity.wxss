@@ -183,3 +183,47 @@
 	.empty-post-button.data-v-481e0091 {
 		/* 样式保持不变 */
 }
+
+
+	/* 【新增】空状态引导容器的样式 */
+.empty-state-container.data-v-481e0091 {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		padding: 100rpx 40rpx;
+		margin: 30rpx;
+		/* 与 post-card 的外边距保持一致 */
+		background-color: #fff;
+		border-radius: 20rpx;
+}
+.empty-text.data-v-481e0091 {
+		margin-top: 20rpx;
+		font-size: 32rpx;
+		font-weight: 600;
+		color: #333;
+}
+.empty-subtext.data-v-481e0091 {
+		margin-top: 10rpx;
+		font-size: 26rpx;
+		color: #999;
+		margin-bottom: 40rpx;
+}
+.publish-button.data-v-481e0091 {
+		background: linear-gradient(135deg, #FF6A00, #FF8C00);
+		color: white;
+		border: none;
+		border-radius: 40rpx;
+		padding: 18rpx 80rpx;
+		font-size: 28rpx;
+		font-weight: bold;
+		box-shadow: 0 4rpx 12rpx rgba(255, 106, 0, 0.3);
+		transition: all 0.2s ease;
+}
+.publish-button.data-v-481e0091::after {
+		border: none;
+}
+.publish-button.data-v-481e0091:active {
+		background: linear-gradient(135deg, #e05a00, #e07a00);
+		transform: scale(0.98);
+}

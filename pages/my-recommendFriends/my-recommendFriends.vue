@@ -22,6 +22,14 @@
 						<text>{{ friend.professionalTitle || '暂无职位' }}</text>
 					</view>
 				</view>
+				<!-- 【新增】关注/取消关注按钮 -->
+				<button 
+					class="follow-btn" 
+					:class="{ 'followed': friend.followFlag === 1 }"
+					@click.stop="handleFollowAction(friend)"
+				>
+					{{ friend.followFlag === 1 ? '取关' : '关注' }}
+				</button>
 			</view>
 		</view>
 
@@ -47,6 +55,8 @@
 	const pageSize = ref(10);
 	const total = ref(0);
 	const loadStatus = ref('more'); // 'more', 'loading', 'noMore'
+	// 【新增】防止重复点击关注按钮的状态
+	const isFollowActionInProgress = ref(false);
 
 	// --- API 调用 ---
 	const getShareUserList = async (isRefresh = false) => {
@@ -84,7 +94,8 @@
 		}
 
 		if (data && data.list) {
-			friendList.value.push(...data.list);
+			const list = data.list || [];
+			friendList.value = isRefresh ? list : [...friendList.value, ...list];
 			total.value = data.total;
 			
 			// 判断是否还有更多数据
@@ -104,6 +115,67 @@
 		// 你可以给 item 一个默认图片，以防止无限循环的错误
 		// 这里假设静态文件夹里有一个 default-avatar.png
 		item.avatar = '/static/images/default-avatar.png';
+	};
+	
+	// --- 【新增】关注/取关功能 (逻辑与摇一摇页面完全一致) ---
+	const handleFollowAction = async (user) => {
+		if (isFollowActionInProgress.value) return;
+
+		const currentUserId = uni.getStorageSync('userId');
+		if (!currentUserId) {
+			uni.showModal({
+				title: '需要登录',
+				content: '关注功能需要登录后才能使用，是否前往登录？',
+				success: (res) => {
+					if (res.confirm) {
+						uni.navigateTo({
+							url: '/pages/login/login'
+						});
+					}
+				}
+			});
+			return;
+		}
+
+		isFollowActionInProgress.value = true;
+
+		const originalFollowStatus = user.followFlag;
+		const newFollowStatus = originalFollowStatus === 1 ? 0 : 1;
+		const apiUrl = newFollowStatus === 1 ? '/app-api/member/follow/add' : '/app-api/member/follow/del';
+		const successMsg = newFollowStatus === 1 ? '关注成功' : '已取消关注';
+
+		// 乐观更新UI
+		user.followFlag = newFollowStatus;
+
+		try {
+			const {
+				error
+			} = await request(apiUrl, {
+				method: 'POST',
+				data: {
+					userId: currentUserId,
+					targetId: user.id,
+					targetType: 'post_user'
+				}
+			});
+
+			if (error) throw new Error(error);
+
+			uni.showToast({
+				title: successMsg,
+				icon: 'success'
+			});
+
+		} catch (err) {
+			// 失败回滚
+			user.followFlag = originalFollowStatus;
+			uni.showToast({
+				title: err.message || '操作失败，请重试',
+				icon: 'none'
+			});
+		} finally {
+			isFollowActionInProgress.value = false;
+		}
 	};
 
 	// --- 生命周期钩子 ---
@@ -198,6 +270,32 @@
 		white-space: nowrap;
 		overflow: hidden;
 		text-overflow: ellipsis;
+	}
+
+	/* 【新增】关注按钮样式 */
+	.follow-btn {
+		background: linear-gradient(135deg, #ff6b00 0%, #ff8c00 100%);
+		color: white;
+		border: none;
+		padding: 0 30rpx;
+		height: 60rpx;
+		line-height: 60rpx;
+		border-radius: 40rpx;
+		font-weight: 500;
+		font-size: 26rpx;
+		margin-left: 20rpx; /* 与左侧信息区拉开距离 */
+		white-space: nowrap;
+		flex-shrink: 0; /* 防止按钮被压缩 */
+	}
+	
+	.follow-btn::after {
+		border: none;
+	}
+	
+	/* 【新增】已关注状态的样式 */
+	.follow-btn.followed {
+		background: #f0f2f5;
+		color: #999;
 	}
 
 	.empty-container {
