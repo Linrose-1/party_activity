@@ -405,7 +405,7 @@
 	.avatar {
 		width: 140rpx;
 		height: 140rpx;
-		border-radius: 50%;
+		border-radius: 10rpx;
 		overflow: hidden;
 		margin-right: 20rpx;
 	}
@@ -644,6 +644,7 @@
 		background: white;
 		padding: 10rpx;
 		border-radius: 12rpx;
+		margin-top: 20rpx;
 	}
 
 	.qrcode-img {
