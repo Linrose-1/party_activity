@@ -75,7 +75,7 @@ const _sfc_main = {
           method: "GET",
           data: params
         });
-        common_vendor.index.__f__("log", "at pages/my-collection/my-collection.vue:233", `获取收藏的${isActivityTab ? "活动" : "商机"}:`, result);
+        common_vendor.index.__f__("log", "at pages/my-collection/my-collection.vue:233", `获取收藏的${isActivityTab ? "聚会" : "商机"}:`, result);
         if (result && !result.error && result.data) {
           const rawList = result.data.list || [];
           if (isActivityTab) {
@@ -126,7 +126,7 @@ const _sfc_main = {
     const removeFavorite = async (followId, type) => {
       common_vendor.index.showModal({
         title: "取消收藏",
-        content: `确定要取消收藏此${type === "activity" ? "活动" : "商机"}吗？`,
+        content: `确定要取消收藏此${type === "activity" ? "聚会" : "商机"}吗？`,
         success: async (res) => {
           if (res.confirm) {
             const payload = {
@@ -266,8 +266,8 @@ const _sfc_main = {
       }, activityLoadingStatus.value === "noMore" && favoriteActivities.value.length === 0 ? {
         k: common_vendor.o(navigateToDiscoverActivities),
         l: common_vendor.p({
-          title: "暂无收藏活动",
-          description: "快去发现并收藏感兴趣的活动吧"
+          title: "暂无收藏聚会",
+          description: "快去发现并收藏感兴趣的聚会吧"
         })
       } : {}, {
         m: currentTab.value === 0,

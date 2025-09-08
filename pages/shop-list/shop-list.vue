@@ -173,7 +173,7 @@ function selectShop(shop) {
   // 1. 触发一个全局事件，并把选择的店铺对象作为参数传递出去
   uni.$emit('shopSelected', shop);
   
-  // 2. 关闭当前页面，返回到上一页（即活动创建页）
+  // 2. 关闭当前页面，返回到上一页（即聚会创建页）
   uni.navigateBack();
 }
 </script>

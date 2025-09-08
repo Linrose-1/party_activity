@@ -37,7 +37,7 @@
 			<view class="event-stats">
 				<view class="stat-item">
 					<!-- 【修改】动态绑定已报名人数 -->
-					<view class="stat-value">{{ activityDetail.joinCount || 0 }}</view>
+					<view class="stat-value">{{ participantTotal || 0 }}</view>
 					<view class="stat-label">已报名</view>
 				</view>
 				<view class="stat-item">
@@ -105,13 +105,13 @@
 					<!-- 【修改】动态绑定聚店信息 -->
 					<text class="business-name">{{ activityDetail.memberStoreRespVO.storeName }}</text>
 					<view class="business-meta">
-						<view style="font-size: 25rpx;margin: 10rpx 0;">📌
+						<view style="font-size: 25rpx;margin: 10rpx 0;">??
 							{{ activityDetail.memberStoreRespVO.fullAddress }}
 						</view>
-						<view style="font-size: 25rpx;margin: 10rpx 0;">📱
+						<view style="font-size: 25rpx;margin: 10rpx 0;">??
 							{{ activityDetail.memberStoreRespVO.contactPhone }}
 						</view>
-						<!-- <view style="font-size: 25rpx;margin: 10rpx 0;">🕒
+						<!-- <view style="font-size: 25rpx;margin: 10rpx 0;">??
 							<view v-for="(line, index) in formattedOperatingHours" :key="index" style="display: block;">
 								{{ line }}
 							</view>
@@ -188,7 +188,7 @@
 		<!-- 操作栏 -->
 		<view class="action-bar" v-if="!isActionBarHidden">
 			<view class="action-btn share-btn" @click="openSharePopup">
-				<text>🔗分享</text>
+				<text> 🔗聚会分享</text>
 			</view>
 
 			<view class="action-btn register-btn" :class="{ 'disabled': !isRegistrationActive }"
@@ -702,7 +702,7 @@
 			`&name=${encodeURIComponent(name)}` +
 			`&avatar=${encodeURIComponent(avatarUrl)}`;
 
-		console.log('从活动详情页跳转到名片申请页, URL:', url);
+		console.log('从聚会详情页跳转到名片申请页, URL:', url);
 
 		// 4. 执行跳转
 		uni.navigateTo({
@@ -724,7 +724,7 @@
 			return;
 		}
 
-		// 【重要修正】您提供的目标路径是 /pages/active-publish/active-publish，这似乎是“发布活动”的页面。
+		// 【重要修正】您提供的目标路径是 /pages/active-publish/active-publish，这似乎是“发布聚会”的页面。
 		// 通常聚店详情页的路径可能是 /pages/shop-detail/shop-detail。
 		// 这里我将使用您提供的路径，但请确认它是否正确。
 		const targetPath = '/pages/shop-detail/shop-detail'; // <--- 请确认此路径是否正确！
@@ -732,7 +732,7 @@
 		// 2. 构建URL
 		const url = `${targetPath}?id=${store.id}`;
 
-		console.log('从活动详情页跳转到聚店详情页, URL:', url);
+		console.log('从聚会详情页跳转到聚店详情页, URL:', url);
 
 		// 3. 执行跳转
 		uni.navigateTo({

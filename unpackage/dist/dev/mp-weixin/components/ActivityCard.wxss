@@ -85,6 +85,18 @@
   padding: 6rpx 20rpx;
   border-radius: 20rpx;
 }
+.activity-distance.data-v-f73ae0ce {
+  display: flex;
+  align-items: center;
+  color: #FF6B00;
+  /* 覆盖父级的灰色 */
+  font-weight: 500;
+  margin-bottom: -150rpx;
+}
+.activity-distance text.data-v-f73ae0ce {
+  margin-left: 8rpx;
+  /* 图标和文字间距 */
+}
 .activity-tags.data-v-f73ae0ce {
   display: flex;
   gap: 16rpx;

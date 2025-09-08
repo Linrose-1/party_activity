@@ -78,6 +78,33 @@
 			<view class="section-header"><text class="section-title">数字标签</text></view>
 			<view class="form-content"><button class="label-btn" @click="goToLabelEditPage">编辑数字标签</button></view>
 		</view>
+
+
+		<view class="form-section">
+			<view class="section-header"><text class="section-title">实名认证</text></view>
+			<view class="form-content">
+				<!-- 如果用户已实名 (我们通过 idCard 字段判断) -->
+				<view v-if="form.idCard" class="auth-info">
+					<view class="auth-item">
+						<text class="auth-label">真实姓名</text>
+						<text class="auth-value">{{ maskedName }}</text>
+					</view>
+					<view class="auth-item">
+						<text class="auth-label">身份证号</text>
+						<text class="auth-value">{{ maskedIdCard }}</text>
+					</view>
+					<view class="auth-status">
+						<uni-icons type="checkbox-filled" color="#00C777" size="18"></uni-icons>
+						<text>已认证</text>
+					</view>
+				</view>
+
+				<!-- 如果用户未实名 -->
+				<view v-else>
+					<button class="auth-btn" @click="goToAuthPage">去认证</button>
+				</view>
+			</view>
+		</view>
 	</view>
 </template>
 
@@ -111,6 +138,8 @@
 		wechatQrCodeUrl: '',
 		hobby: '',
 		personalBio: '',
+		idCard: '',
+		cardName: ''
 	});
 
 	// 数据源
@@ -273,6 +302,17 @@
 		}
 	};
 
+	// 两个计算属性用于信息脱敏
+	const maskedName = computed(() => {
+		// 直接返回后端提供的已脱敏的 cardName
+		return form.value.cardName || '信息已隐藏';
+	});
+
+	const maskedIdCard = computed(() => {
+		// 直接返回后端提供的已脱敏的 idCard
+		return form.value.idCard || '信息已隐藏';
+	});
+
 
 	// --- 5. 用户交互方法 ---
 
@@ -417,6 +457,13 @@
 			url: '/pages/my-edit-label/my-edit-label'
 		});
 	};
+
+	// 跳转到实名认证页面的方法
+	const goToAuthPage = () => {
+		uni.navigateTo({
+			url: '/pages/my-auth/my-auth'
+		});
+	};
 </script>
 
 <style scoped lang="scss">
@@ -463,33 +510,39 @@
 
 	/* 1. 限制选择器组件本身的最大宽度为100% */
 	::v-deep .industry-picker {
-	  width: 450rpx !important;
-	  box-sizing: border-box; /* 确保 padding 不会撑大宽度 */
+		width: 450rpx !important;
+		box-sizing: border-box;
+		/* 确保 padding 不会撑大宽度 */
 	}
-	
+
 	/* 2. 深入组件内部，控制显示文本的区域 */
 	::v-deep .industry-picker .uni-data-tree-input {
-	  /* 同样限制宽度，并设置自动换行和美化样式 */
-	  width: 450rpx !important;
-	  white-space: normal !important; /* 允许换行 */
-	  height: auto !important;        /* 高度自适应 */
-	  line-height: 1.5;              /* 舒适的行高 */
-	  
-	  /* 增加内边距，让文本不贴着边框，看起来更像输入框 */
-	  padding-top: 10rpx;
-	  padding-bottom: 10rpx;
-	  box-sizing: border-box;
+		/* 同样限制宽度，并设置自动换行和美化样式 */
+		width: 450rpx !important;
+		white-space: normal !important;
+		/* 允许换行 */
+		height: auto !important;
+		/* 高度自适应 */
+		line-height: 1.5;
+		/* 舒适的行高 */
+
+		/* 增加内边距，让文本不贴着边框，看起来更像输入框 */
+		padding-top: 10rpx;
+		padding-bottom: 10rpx;
+		box-sizing: border-box;
 	}
-	
+
 	/* 3. （可选，但推荐）如果希望文本最多显示两行，然后出现省略号 */
 	/* 如果不需要省略号，可以注释或删除下面这段 */
 	::v-deep .industry-picker .uni-data-tree-input .input-value {
-	  display: -webkit-box;
-	  -webkit-line-clamp: 2; /* 最多显示2行 */
-	  -webkit-box-orient: vertical;
-	  overflow: hidden;
-	  text-overflow: ellipsis;
-	  white-space: normal !important; /* 必须再次声明以覆盖内联样式 */
+		display: -webkit-box;
+		-webkit-line-clamp: 2;
+		/* 最多显示2行 */
+		-webkit-box-orient: vertical;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: normal !important;
+		/* 必须再次声明以覆盖内联样式 */
 	}
 
 
@@ -572,5 +625,53 @@
 
 	.digital-label-section {
 		/* 可根据需要为数字标签区域添加特定样式 */
+	}
+
+	.auth-btn {
+		width: 100%;
+		height: 80rpx;
+		line-height: 80rpx;
+		font-size: 30rpx;
+		color: white;
+		background: linear-gradient(to right, #00C777, #00A362);
+		border: none;
+		border-radius: 40rpx;
+
+		&::after {
+			border: none;
+		}
+	}
+
+	.auth-info {
+		font-size: 28rpx;
+		color: #666;
+
+		.auth-item {
+			display: flex;
+			justify-content: space-between;
+			padding: 20rpx 0;
+			border-bottom: 1rpx solid #f0f0f0;
+
+			.auth-label {
+				color: #333;
+			}
+
+			.auth-value {
+				font-weight: bold;
+			}
+		}
+
+		.auth-status {
+			display: flex;
+			align-items: center;
+			justify-content: flex-end;
+			padding-top: 20rpx;
+			color: #00C777;
+			font-size: 26rpx;
+
+			uni-icons {
+				margin-right: 8rpx;
+			}
+		}
 	}
 </style>

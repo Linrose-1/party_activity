@@ -7297,9 +7297,9 @@ function initOnError() {
   };
 }
 function initRuntimeSocketService() {
-  const hosts = "192.168.100.38,127.0.0.1";
+  const hosts = "172.20.10.4,127.0.0.1";
   const port = "8090";
-  const id = "mp-weixin_qkxHUK";
+  const id = "mp-weixin_22Y4gN";
   const lazy = typeof swan !== "undefined";
   let restoreError = lazy ? () => {
   } : initOnError();
@@ -8502,6 +8502,12 @@ const pages = [
     path: "pages/my-systemSuggestions/my-systemSuggestions",
     style: {
       navigationBarTitleText: "系统建议"
+    }
+  },
+  {
+    path: "pages/my-auth/my-auth",
+    style: {
+      navigationBarTitleText: "实名认证"
     }
   }
 ];

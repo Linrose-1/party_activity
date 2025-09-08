@@ -38,9 +38,26 @@
   color: var(--dark-text);
   display: flex;
   align-items: center;
+  flex: 1;
+  /* 1. 让它占据所有剩余空间，这是最关键的一步 */
+  min-width: 0;
+  /* 2. 允许 flex 项在内容溢出时收缩，这是 flex 布局的一个重要技巧 */
 }
 .store-name .uni-icons.data-v-8cae2ec5 {
   margin-right: 8px;
+  flex-shrink: 0;
+}
+.store-name text.data-v-8cae2ec5 {
+  white-space: nowrap;
+  /* 禁止文本换行 */
+  overflow: hidden;
+  /* 隐藏超出的部分 */
+  text-overflow: ellipsis;
+  /* 将隐藏的部分显示为省略号 */
+  display: inline-block;
+  /* 确保 text 元素表现为块级行为，以便应用溢出样式 */
+  vertical-align: middle;
+  /* (可选) 确保文本和图标垂直对齐更精确 */
 }
 .distance.data-v-8cae2ec5 {
   color: var(--primary);
@@ -48,6 +65,10 @@
   display: flex;
   align-items: center;
   font-weight: 500;
+  margin-left: 10px;
+  /* 5. (推荐) 给距离增加一个左边距，确保即使店名不长，两者之间也有安全间距 */
+  flex-shrink: 0;
+  /* 6. (推荐) 确保距离部分本身不会被压缩 */
 }
 .distance .uni-icons.data-v-8cae2ec5 {
   margin-right: 4px;

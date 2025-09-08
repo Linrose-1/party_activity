@@ -143,6 +143,18 @@
 		color: #666;
 		box-shadow: none;
 }
+.delete-post-button.data-v-361e9b2c {
+		background-color: #f5f5f5;
+		/* 使用一个中性的灰色背景 */
+		color: #e74c3c;
+		/* 文本和图标使用危险红色 */
+		box-shadow: none;
+		/* 移除阴影，使其不那么突出 */
+}
+.delete-post-button.data-v-361e9b2c:active {
+		background-color: #e0e0e0;
+		/* 点击时颜色变深一点 */
+}
 
 	/* --- 商机内容、图片、标签 --- */
 .opportunity-content.data-v-361e9b2c {

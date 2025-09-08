@@ -25,12 +25,14 @@
 			<view class="card-content proof-section">
 				<view class="proof-item">
 					<text class="proof-label">原凭证:</text>
-					<image :src="oldProofUrl" class="proof-image" mode="aspectFill" @click="previewImage([oldProofUrl])" />
+					<image :src="oldProofUrl" class="proof-image" mode="aspectFill"
+						@click="previewImage([oldProofUrl])" />
 				</view>
 				<view class="proof-item">
 					<text class="proof-label">新凭证:</text>
 					<view class="uploader" @click="handleChooseImage">
-						<image v-if="newProofLocalPath" :src="newProofLocalPath" class="proof-image" mode="aspectFill" />
+						<image v-if="newProofLocalPath" :src="newProofLocalPath" class="proof-image"
+							mode="aspectFill" />
 						<uni-icons v-else type="plusempty" size="40" color="#c8c9cc"></uni-icons>
 						<text v-if="!newProofLocalPath" class="uploader-text">点击上传</text>
 					</view>
@@ -46,8 +48,12 @@
 </template>
 
 <script setup>
-	import { ref } from 'vue';
-	import { onLoad } from '@dcloudio/uni-app';
+	import {
+		ref
+	} from 'vue';
+	import {
+		onLoad
+	} from '@dcloudio/uni-app';
 	import request from '@/utils/request.js';
 	import uploadFile from '@/utils/upload.js';
 
@@ -59,6 +65,8 @@
 	const newProofLocalPath = ref('');
 	const isSubmitting = ref(false);
 
+	const newProofServerUrl = ref('');
+
 	onLoad((options) => {
 		if (options.item) {
 			try {
@@ -67,10 +75,15 @@
 				enrollmentInfo.value = itemData.memberActivityJoinResp;
 				rejectionMsg.value = enrollmentInfo.value.rejectMsg;
 				oldProofUrl.value = enrollmentInfo.value.paymentScreenshotUrl;
-				uni.setNavigationBarTitle({ title: '重新上传支付凭证' });
+				uni.setNavigationBarTitle({
+					title: '重新上传支付凭证'
+				});
 			} catch (e) {
 				console.error("解析数据失败", e);
-				uni.showToast({ title: '页面数据加载失败', icon: 'none' });
+				uni.showToast({
+					title: '页面数据加载失败',
+					icon: 'none'
+				});
 			}
 		}
 	});
@@ -80,60 +93,79 @@
 			count: 1,
 			success: (res) => {
 				newProofLocalPath.value = res.tempFilePaths[0];
+				newProofServerUrl.value = '';
 			},
 		});
 	};
 
 	/**
-	 * 【核心修改】处理提交逻辑，增加对“审核中”错误的特殊处理
+	 * 处理提交逻辑，增加对“审核中”错误的特殊处理
 	 */
 	const handleSubmit = async () => {
-		if (!newProofLocalPath.value) {
-			uni.showToast({ title: '请先选择新的支付凭证', icon: 'none' });
+		// 当本地路径和服务器URL都为空时，才提示选择图片
+		if (!newProofLocalPath.value && !newProofServerUrl.value) {
+			uni.showToast({
+				title: '请先选择新的支付凭证',
+				icon: 'none'
+			});
 			return;
 		}
 		if (isSubmitting.value) return;
 
 		isSubmitting.value = true;
-		uni.showLoading({ title: '正在上传凭证...' });
 
-		// 1. 使用uploadFile上传图片到云存储
-		const uploadResult = await uploadFile({ path: newProofLocalPath.value });
+		let finalImageUrl = newProofServerUrl.value;
 
-		// 2. 【关键】检查上传结果
-		if (uploadResult.error) {
-			uni.hideLoading();
-			isSubmitting.value = false;
+		// 步骤 1: 检查是否需要上传文件
+		// 如果我们还没有服务器端的URL，说明是第一次提交或用户更换了图片
+		if (!finalImageUrl) {
+			uni.showLoading({
+				title: '正在上传凭证...'
+			});
+			const uploadResult = await uploadFile({
+				path: newProofLocalPath.value
+			});
 
-			// 2.1 如果是“审核中”的特定错误
-			if (uploadResult.error.includes('审核中')) {
-				uni.showToast({
-					title: '图片正在安全审核，请稍后重试',
-					icon: 'none',
-					duration: 2500
-				});
-			} else {
-				// 2.2 其他上传错误
-				uni.showToast({
-					title: `上传失败: ${uploadResult.error}`,
-					icon: 'none',
-					duration: 2500
-				});
+			if (uploadResult.error) {
+				uni.hideLoading();
+				isSubmitting.value = false;
+
+				const errorMsg = uploadResult.error;
+				// 判断是否是安全审核中的特定错误
+				if (errorMsg.includes('审核中') || errorMsg.includes('内容安全')) {
+					uni.showToast({
+						title: '图片正在安全审核，请稍后重试提交',
+						icon: 'none',
+						duration: 3000
+					});
+				} else {
+					uni.showToast({
+						title: `上传失败: ${errorMsg}`,
+						icon: 'none',
+						duration: 2500
+					});
+				}
+				// 终止本次提交
+				return;
 			}
-			// 无论哪种上传错误，都终止本次提交
-			return;
+
+			// 上传成功，保存URL
+			finalImageUrl = uploadResult.data;
+			newProofServerUrl.value = finalImageUrl;
 		}
-		
-		// 3. 上传成功，继续提交业务信息
+
+		// 步骤 2: 提交业务信息
+		// 能走到这里，说明文件已经成功上传到云端并获取到了URL
 		try {
-			const newImageUrl = uploadResult.data;
-			uni.showLoading({ title: '正在提交信息...' });
+			uni.showLoading({
+				title: '正在提交信息...'
+			});
 
 			const params = {
 				id: enrollmentInfo.value.id,
 				activityId: activityInfo.value.id,
 				userId: enrollmentInfo.value.userId,
-				paymentScreenshotUrl: newImageUrl,
+				paymentScreenshotUrl: finalImageUrl, // 使用最终的URL
 			};
 
 			const submitResult = await request('/app-api/member/activity-join/upload-payment-img', {
@@ -141,34 +173,48 @@
 				data: params,
 			});
 
+			// 检查业务接口返回的错误
 			if (submitResult.error) {
-				// 业务接口返回的错误
-				throw new Error(submitResult.error);
+				// 【特别处理】如果业务接口也返回审核中的提示，说明上次提交的审核还没完
+				if (submitResult.error.includes('审核中')) {
+					uni.showToast({
+						title: '凭证仍在审核中，请勿重复提交',
+						icon: 'none',
+						duration: 2500
+					});
+				} else {
+					throw new Error(submitResult.error);
+				}
+			} else {
+				// 真正的成功
+				uni.hideLoading();
+				uni.showToast({
+					title: '提交成功，请等待审核',
+					icon: 'success',
+					duration: 2000,
+				});
+
+				setTimeout(() => {
+					uni.navigateBack();
+				}, 2000);
 			}
 
-			uni.hideLoading();
-			uni.showToast({
-				title: '提交成功，请等待审核',
-				icon: 'success',
-				duration: 2000,
-			});
-
-			setTimeout(() => {
-				uni.navigateBack();
-			}, 2000);
-
 		} catch (err) {
-			uni.hideLoading();
-			isSubmitting.value = false;
 			uni.showToast({
 				title: err.message || '操作失败，请重试',
 				icon: 'none',
 			});
+		} finally {
+			// 无论成功失败，最后都结束提交状态
+			uni.hideLoading();
+			isSubmitting.value = false;
 		}
 	};
-	
+
 	const previewImage = (urls) => {
-		uni.previewImage({ urls });
+		uni.previewImage({
+			urls
+		});
 	};
 
 	const formatTime = (timestamp) => {
@@ -185,6 +231,7 @@
 		padding: 24rpx;
 		min-height: 100vh;
 	}
+
 	.info-card {
 		background-color: #fff;
 		border-radius: 16rpx;
@@ -192,6 +239,7 @@
 		margin-bottom: 24rpx;
 		box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.05);
 	}
+
 	.card-title {
 		font-size: 32rpx;
 		font-weight: 600;
@@ -200,58 +248,69 @@
 		margin-bottom: 20rpx;
 		border-bottom: 1rpx solid #f0f2f5;
 	}
+
 	.info-item {
 		display: flex;
 		font-size: 28rpx;
 		line-height: 1.6;
+
 		&:not(:last-child) {
 			margin-bottom: 16rpx;
 		}
+
 		.label {
 			color: #909399;
 			margin-right: 16rpx;
 			flex-shrink: 0;
 		}
+
 		.value {
 			color: #303133;
 			flex: 1;
 		}
 	}
+
 	.rejection-card {
 		.card-content {
 			background-color: #fef0f0;
 			padding: 20rpx;
 			border-radius: 12rpx;
 		}
+
 		.rejection-text {
 			font-size: 28rpx;
 			color: #f56c6c;
 			line-height: 1.6;
 		}
 	}
+
 	.proof-section {
 		display: flex;
 		justify-content: space-around;
 		align-items: flex-start;
 		gap: 30rpx;
 	}
+
 	.proof-item {
 		display: flex;
 		flex-direction: column;
 		align-items: center;
 		flex: 1;
 	}
+
 	.proof-label {
 		font-size: 26rpx;
 		color: #606266;
 		margin-bottom: 16rpx;
 	}
+
 	.proof-image {
 		width: 250rpx;
 		height: 250rpx;
 		border-radius: 12rpx;
 		background-color: #f5f5f5;
 	}
+
 	.uploader {
 		width: 250rpx;
 		height: 250rpx;
@@ -262,12 +321,14 @@
 		justify-content: center;
 		align-items: center;
 		background-color: #fafafa;
+
 		.uploader-text {
 			font-size: 24rpx;
 			color: #909399;
 			margin-top: 8rpx;
 		}
 	}
+
 	.footer {
 		position: fixed;
 		bottom: 0;
@@ -279,6 +340,7 @@
 		background-color: #fff;
 		border-top: 1rpx solid #f0f2f5;
 	}
+
 	.submit-btn {
 		background: linear-gradient(135deg, #FF9500, #FF7900);
 		color: #fff;
@@ -287,6 +349,7 @@
 		font-size: 30rpx;
 		border-radius: 44rpx;
 		border: none;
+
 		&[disabled] {
 			background: #fab37b;
 			color: #fffde6;

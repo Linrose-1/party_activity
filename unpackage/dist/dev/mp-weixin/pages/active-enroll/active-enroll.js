@@ -3,18 +3,38 @@ const common_vendor = require("../../common/vendor.js");
 const utils_request = require("../../utils/request.js");
 const utils_upload = require("../../utils/upload.js");
 if (!Array) {
-  const _easycom_uni_easyinput2 = common_vendor.resolveComponent("uni-easyinput");
   const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
-  (_easycom_uni_easyinput2 + _easycom_uni_icons2)();
+  const _easycom_uni_easyinput2 = common_vendor.resolveComponent("uni-easyinput");
+  (_easycom_uni_icons2 + _easycom_uni_easyinput2)();
 }
-const _easycom_uni_easyinput = () => "../../uni_modules/uni-easyinput/components/uni-easyinput/uni-easyinput.js";
 const _easycom_uni_icons = () => "../../uni_modules/uni-icons/components/uni-icons/uni-icons.js";
+const _easycom_uni_easyinput = () => "../../uni_modules/uni-easyinput/components/uni-easyinput/uni-easyinput.js";
 if (!Math) {
-  (_easycom_uni_easyinput + _easycom_uni_icons)();
+  (_easycom_uni_icons + _easycom_uni_easyinput)();
 }
 const _sfc_main = {
   __name: "active-enroll",
   setup(__props) {
+    const isUserVerified = common_vendor.ref(true);
+    const checkUserVerificationStatus = async () => {
+      const {
+        data,
+        error
+      } = await utils_request.request("/app-api/member/user/get", {
+        method: "GET"
+      });
+      if (!error && data) {
+        isUserVerified.value = !!data.idCard;
+      } else {
+        isUserVerified.value = false;
+        common_vendor.index.__f__("log", "at pages/active-enroll/active-enroll.vue:213", "获取用户信息失败，无法确认实名状态。");
+      }
+    };
+    const goToAuthPage = () => {
+      common_vendor.index.navigateTo({
+        url: "/pages/my-auth/my-auth"
+      });
+    };
     const currentStep = common_vendor.ref(1);
     const formData = common_vendor.reactive({
       userName: "",
@@ -26,13 +46,15 @@ const _sfc_main = {
     });
     const activityId = common_vendor.ref(null);
     const activityDetail = common_vendor.ref(null);
+    const agreedToTerms = common_vendor.ref(false);
     const ticketNumber = common_vendor.ref("");
     common_vendor.onLoad((options) => {
+      checkUserVerificationStatus();
       if (options.id) {
         activityId.value = options.id;
         getActiveDetail();
       } else {
-        common_vendor.index.__f__("error", "at pages/active-enroll/active-enroll.vue:189", "未接收到聚会ID！");
+        common_vendor.index.__f__("error", "at pages/active-enroll/active-enroll.vue:249", "未接收到聚会ID！");
         common_vendor.index.showToast({
           title: "加载聚会详情失败，缺少ID",
           icon: "none"
@@ -40,6 +62,14 @@ const _sfc_main = {
         setTimeout(() => common_vendor.index.navigateBack(), 1500);
       }
     });
+    const toggleAgreement = () => {
+      agreedToTerms.value = !agreedToTerms.value;
+    };
+    const navigateToAgreement = () => {
+      common_vendor.index.navigateTo({
+        url: "/pages/user-agreement/user-agreement"
+      });
+    };
     const currentDate = (/* @__PURE__ */ new Date()).toLocaleString("zh-CN", {
       year: "numeric",
       month: "2-digit",
@@ -129,7 +159,7 @@ const _sfc_main = {
               icon: "success"
             });
           } else {
-            common_vendor.index.__f__("error", "at pages/active-enroll/active-enroll.vue:302", "上传失败:", result.error);
+            common_vendor.index.__f__("error", "at pages/active-enroll/active-enroll.vue:374", "上传失败:", result.error);
             common_vendor.index.showToast({
               title: result.error || "上传失败",
               icon: "none"
@@ -155,9 +185,9 @@ const _sfc_main = {
         common_vendor.index.hideLoading();
         if (result && !result.error) {
           const data = result.data;
-          common_vendor.index.__f__("log", "at pages/active-enroll/active-enroll.vue:333", "getActiveDetail result:", data);
+          common_vendor.index.__f__("log", "at pages/active-enroll/active-enroll.vue:405", "getActiveDetail result:", data);
           if (data && data.memberActivityJoinResp) {
-            common_vendor.index.__f__("log", "at pages/active-enroll/active-enroll.vue:337", "用户已报名，直接跳转到成功页。");
+            common_vendor.index.__f__("log", "at pages/active-enroll/active-enroll.vue:409", "用户已报名，直接跳转到成功页。");
             activityDetail.value = data;
             ticketNumber.value = generateTicketNumber();
             currentStep.value = 3;
@@ -165,12 +195,12 @@ const _sfc_main = {
             formData.userPhone = data.memberActivityJoinResp.userPhone || "";
             formData.paymentScreenshotUrl = data.memberActivityJoinResp.paymentScreenshotUrl || "";
           } else {
-            common_vendor.index.__f__("log", "at pages/active-enroll/active-enroll.vue:353", "用户未报名，进入正常报名流程。");
+            common_vendor.index.__f__("log", "at pages/active-enroll/active-enroll.vue:425", "用户未报名，进入正常报名流程。");
             activityDetail.value = data;
             currentStep.value = 1;
           }
         } else {
-          common_vendor.index.__f__("log", "at pages/active-enroll/active-enroll.vue:359", "请求失败:", result ? result.error : "无返回结果");
+          common_vendor.index.__f__("log", "at pages/active-enroll/active-enroll.vue:431", "请求失败:", result ? result.error : "无返回结果");
           common_vendor.index.showToast({
             title: result.error || "获取聚会信息失败",
             icon: "none"
@@ -178,7 +208,7 @@ const _sfc_main = {
         }
       } catch (e) {
         common_vendor.index.hideLoading();
-        common_vendor.index.__f__("error", "at pages/active-enroll/active-enroll.vue:367", "获取聚会详情时发生异常:", e);
+        common_vendor.index.__f__("error", "at pages/active-enroll/active-enroll.vue:439", "获取聚会详情时发生异常:", e);
         common_vendor.index.showToast({
           title: "网络异常，请稍后重试",
           icon: "none"
@@ -189,6 +219,13 @@ const _sfc_main = {
       if (!formData.paymentScreenshotUrl) {
         common_vendor.index.showToast({
           title: "请上传付款截图",
+          icon: "none"
+        });
+        return;
+      }
+      if (!agreedToTerms.value) {
+        common_vendor.index.showToast({
+          title: "请先阅读并同意用户协议",
           icon: "none"
         });
         return;
@@ -228,11 +265,27 @@ const _sfc_main = {
         });
         currentStep.value = 3;
       } else {
-        common_vendor.index.__f__("log", "at pages/active-enroll/active-enroll.vue:424", "报名失败:", result ? result.error : "无返回结果");
-        common_vendor.index.showToast({
-          title: result.error || "报名失败，请重试",
-          icon: "none"
-        });
+        const error = result.error;
+        if (typeof error === "object" && error !== null && error.code === 453) {
+          common_vendor.index.showModal({
+            title: "认证提醒",
+            content: error.msg || "报名聚会需要先完成实名认证，是否现在就去认证？",
+            confirmText: "去认证",
+            cancelText: "取消",
+            success: (res) => {
+              if (res.confirm) {
+                common_vendor.index.navigateTo({
+                  url: "/pages/my-auth/my-auth"
+                });
+              }
+            }
+          });
+        } else {
+          common_vendor.index.showToast({
+            title: (typeof error === "string" ? error : error.msg) || "报名失败，请重试",
+            icon: "none"
+          });
+        }
       }
     };
     const previewQrCode = () => {
@@ -259,22 +312,31 @@ const _sfc_main = {
     };
     return (_ctx, _cache) => {
       return common_vendor.e({
-        a: common_vendor.t(activityDetail.value ? activityDetail.value.activityTitle : "聚会报名"),
-        b: currentStep.value >= 1 ? 1 : "",
-        c: currentStep.value >= 2 ? 1 : "",
-        d: currentStep.value >= 3 ? 1 : "",
-        e: activityDetail.value
-      }, activityDetail.value ? {
-        f: common_vendor.t(activityDetail.value.organizerUnitName),
-        g: common_vendor.t(activityDetail.value.organizerContactPhone),
-        h: common_vendor.t(formatRangeTime(activityDetail.value.startDatetime, activityDetail.value.endDatetime)),
-        i: common_vendor.t(formattedRegistrationTime.value),
-        j: common_vendor.t(activityDetail.value.locationAddress)
+        a: !isUserVerified.value
+      }, !isUserVerified.value ? {
+        b: common_vendor.p({
+          type: "info-filled",
+          size: "18",
+          color: "#e6a23c"
+        }),
+        c: common_vendor.o(goToAuthPage)
       } : {}, {
-        k: currentStep.value === 1
+        d: common_vendor.t(activityDetail.value ? activityDetail.value.activityTitle : "聚会报名"),
+        e: currentStep.value >= 1 ? 1 : "",
+        f: currentStep.value >= 2 ? 1 : "",
+        g: currentStep.value >= 3 ? 1 : "",
+        h: activityDetail.value
+      }, activityDetail.value ? {
+        i: common_vendor.t(activityDetail.value.organizerUnitName),
+        j: common_vendor.t(activityDetail.value.organizerContactPhone),
+        k: common_vendor.t(formatRangeTime(activityDetail.value.startDatetime, activityDetail.value.endDatetime)),
+        l: common_vendor.t(formattedRegistrationTime.value),
+        m: common_vendor.t(activityDetail.value.locationAddress)
+      } : {}, {
+        n: currentStep.value === 1
       }, currentStep.value === 1 ? common_vendor.e({
-        l: common_vendor.o(($event) => formData.userName = $event),
-        m: common_vendor.p({
+        o: common_vendor.o(($event) => formData.userName = $event),
+        p: common_vendor.p({
           type: "text",
           placeholder: "请输入您的姓名",
           styles: {
@@ -283,8 +345,8 @@ const _sfc_main = {
           },
           modelValue: formData.userName
         }),
-        n: common_vendor.o(($event) => formData.userPhone = $event),
-        o: common_vendor.p({
+        q: common_vendor.o(($event) => formData.userPhone = $event),
+        r: common_vendor.p({
           type: "tel",
           placeholder: "请输入手机号",
           styles: {
@@ -293,8 +355,8 @@ const _sfc_main = {
           },
           modelValue: formData.userPhone
         }),
-        p: common_vendor.o(($event) => formData.contactAddress = $event),
-        q: common_vendor.p({
+        s: common_vendor.o(($event) => formData.contactAddress = $event),
+        t: common_vendor.p({
           type: "text",
           placeholder: "请输入单位或学校名称",
           styles: {
@@ -303,10 +365,10 @@ const _sfc_main = {
           },
           modelValue: formData.contactAddress
         }),
-        r: isQueuing.value
+        v: isQueuing.value
       }, isQueuing.value ? {
-        s: common_vendor.o(($event) => formData.remark = $event),
-        t: common_vendor.p({
+        w: common_vendor.o(($event) => formData.remark = $event),
+        x: common_vendor.p({
           type: "textarea",
           autoHeight: true,
           placeholder: "当前报名人数已满，填写申请理由可提高审核通过率",
@@ -317,38 +379,41 @@ const _sfc_main = {
           modelValue: formData.remark
         })
       } : {}, {
-        v: !canSubmitStep1.value ? 1 : "",
-        w: common_vendor.o(confirmSignup)
+        y: !canSubmitStep1.value ? 1 : "",
+        z: common_vendor.o(confirmSignup)
       }) : {}, {
-        x: currentStep.value === 2 && activityDetail.value
+        A: currentStep.value === 2 && activityDetail.value
       }, currentStep.value === 2 && activityDetail.value ? common_vendor.e({
-        y: common_vendor.t(activityDetail.value.registrationFee),
-        z: activityDetail.value.organizerPaymentQrCodeUrl
+        B: common_vendor.t(activityDetail.value.registrationFee),
+        C: activityDetail.value.organizerPaymentQrCodeUrl
       }, activityDetail.value.organizerPaymentQrCodeUrl ? {
-        A: activityDetail.value.organizerPaymentQrCodeUrl,
-        B: common_vendor.o(previewQrCode)
+        D: activityDetail.value.organizerPaymentQrCodeUrl,
+        E: common_vendor.o(previewQrCode)
       } : {}, {
-        C: common_vendor.p({
+        F: common_vendor.p({
           type: "image",
           size: "18",
           color: "#FF6E00"
         }),
-        D: !formData.paymentScreenshotUrl
+        G: !formData.paymentScreenshotUrl
       }, !formData.paymentScreenshotUrl ? {} : {
-        E: formData.paymentScreenshotUrl
+        H: formData.paymentScreenshotUrl
       }, {
-        F: common_vendor.o(chooseImage),
-        G: !formData.paymentScreenshotUrl ? 1 : "",
-        H: common_vendor.o(joinActivity)
+        I: common_vendor.o(chooseImage),
+        J: agreedToTerms.value,
+        K: common_vendor.o(toggleAgreement),
+        L: common_vendor.o(navigateToAgreement),
+        M: !formData.paymentScreenshotUrl || !agreedToTerms.value ? 1 : "",
+        N: common_vendor.o(joinActivity)
       }) : {}, {
-        I: currentStep.value === 3
+        O: currentStep.value === 3
       }, currentStep.value === 3 ? common_vendor.e({
-        J: activityDetail.value
+        P: activityDetail.value
       }, activityDetail.value ? {
-        K: common_vendor.t(activityDetail.value.activityTitle),
-        L: common_vendor.t(common_vendor.unref(currentDate))
+        Q: common_vendor.t(activityDetail.value.activityTitle),
+        R: common_vendor.t(common_vendor.unref(currentDate))
       } : {}, {
-        M: common_vendor.o(backToHome)
+        S: common_vendor.o(backToHome)
       }) : {});
     };
   }

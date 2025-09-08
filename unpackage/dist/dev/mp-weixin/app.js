@@ -45,6 +45,7 @@ if (!Math) {
   "./pages/relation/relation.js";
   "./pages/shop-apply/shop-apply.js";
   "./pages/my-systemSuggestions/my-systemSuggestions.js";
+  "./pages/my-auth/my-auth.js";
   "./packages/my-account-informationDetails/my-account-informationDetails.js";
 }
 const _sfc_main = {

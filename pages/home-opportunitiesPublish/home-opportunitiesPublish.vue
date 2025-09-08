@@ -277,8 +277,17 @@
 			status: 'active'
 		};
 
-		console.log('--- 准备提交到后端的帖子数据 (图片已是URL) ---', postData);
-		createOpportunities(postData);
+		uni.showModal({
+			title: '确认发布',
+			content: '请确认您填写的内容无误。',
+			success: (res) => {
+				if (res.confirm) {
+					// 用户点击确认后，才执行真正的发布操作
+					console.log('--- 准备提交到后端的帖子数据 ---', postData);
+					createOpportunities(postData);
+				}
+			}
+		});
 	}
 
 	const createOpportunities = async (postData) => {
@@ -293,11 +302,18 @@
 		uni.hideLoading();
 
 		if (result.data !== null) {
-			uni.showToast({
-				title: '发布成功！',
-				icon: 'success'
+			uni.showModal({
+				title: '发布成功',
+				content: '可在【我的】-【我的商机】中查看您发布的商机。',
+				showCancel: false, // 隐藏取消按钮
+				confirmText: '知道了', // 自定义确认按钮文字
+				success: (res) => {
+					if (res.confirm) {
+						// 用户点击“知道了”之后，再返回上一页
+						uni.navigateBack();
+					}
+				}
 			});
-			setTimeout(() => uni.navigateBack(), 1500);
 		} else {
 			uni.showToast({
 				title: result.error || '发布失败',
@@ -352,8 +368,8 @@
 		margin-bottom: 30rpx;
 		box-shadow: 0 6rpx 12rpx rgba(0, 0, 0, 0.05);
 	}
-	
-	.form-group{
+
+	.form-group {
 		margin-bottom: 30rpx;
 	}
 

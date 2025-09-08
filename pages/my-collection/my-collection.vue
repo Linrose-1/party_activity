@@ -7,7 +7,7 @@
 				active-color="#FF6B00" />
 		</view>
 
-		<!-- 收藏的活动 -->
+		<!-- 收藏的聚会 -->
 		<scroll-view v-show="currentTab === 0" scroll-y class="content-scroll" refresher-enabled
 			:refresher-triggered="refreshing" @refresherrefresh="onRefresh" @scrolltolower="loadMore">
 			<view class="section-header">
@@ -15,7 +15,7 @@
 			</view>
 
 			<view v-if="favoriteActivities.length > 0" class="activity-list">
-				<!-- 注意: item.id 是关注记录的ID, item.activityRespVO.id 才是活动的ID -->
+				<!-- 注意: item.id 是关注记录的ID, item.activityRespVO.id 才是聚会的ID -->
 				<view v-for="item in favoriteActivities" :key="item.id" class="activity-item"
 					@click="skipActivityDetail(item.activityRespVO.id)">
 					<!-- 数据绑定到 item.activityRespVO -->
@@ -60,8 +60,8 @@
 
 			<view v-if="activityLoadingStatus === 'noMore' && favoriteActivities.length === 0"
 				class="empty-state-container">
-				<empty-state title="暂无收藏活动" description="快去发现并收藏感兴趣的活动吧">
-					<button class="primary-btn" @click="navigateToDiscoverActivities">去发现活动</button>
+				<empty-state title="暂无收藏聚会" description="快去发现并收藏感兴趣的聚会吧">
+					<button class="primary-btn" @click="navigateToDiscoverActivities">去发现聚会</button>
 				</empty-state>
 			</view>
 
@@ -71,7 +71,7 @@
 		<scroll-view v-show="currentTab === 1" scroll-y class="content-scroll" refresher-enabled
 			:refresher-triggered="refreshing" @refresherrefresh="onRefresh" @scrolltolower="loadMore">
 			<view class="section-header">
-				<text class="section-title">💡 收藏的商机</text>
+				<text class="section-title">?? 收藏的商机</text>
 			</view>
 
 			<view v-if="favoriteOpportunities.length > 0" class="post-list">
@@ -164,7 +164,7 @@
 	const pageSize = 10;
 	const userId = ref(null);
 
-	// 活动收藏的状态
+	// 聚会收藏的状态
 	const favoriteActivities = ref([]);
 	const activityPageNo = ref(1);
 	const activityLoadingStatus = ref('more');
@@ -230,7 +230,7 @@
 				data: params
 			});
 
-			console.log(`获取收藏的${isActivityTab ? '活动' : '商机'}:`, result);
+			console.log(`获取收藏的${isActivityTab ? '聚会' : '商机'}:`, result);
 
 			if (result && !result.error && result.data) {
 				const rawList = result.data.list || [];
@@ -302,7 +302,7 @@
 	const removeFavorite = async (followId, type) => {
 		uni.showModal({
 			title: '取消收藏',
-			content: `确定要取消收藏此${type === 'activity' ? '活动' : '商机'}吗？`,
+			content: `确定要取消收藏此${type === 'activity' ? '聚会' : '商机'}吗？`,
 			success: async (res) => {
 				if (res.confirm) {
 					const payload = {
@@ -440,7 +440,7 @@
 		}
 	}
 
-	/* 活动列表项 - 复用“我的活动”页面样式 */
+	/* 聚会列表项 - 复用“我的聚会”页面样式 */
 	.activity-list {
 		margin-bottom: 40rpx;
 	}

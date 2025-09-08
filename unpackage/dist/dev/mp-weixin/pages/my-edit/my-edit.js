@@ -9,7 +9,8 @@ if (!Array) {
   const _easycom_uni_datetime_picker2 = common_vendor.resolveComponent("uni-datetime-picker");
   const _easycom_uni_data_picker2 = common_vendor.resolveComponent("uni-data-picker");
   const _easycom_uni_forms2 = common_vendor.resolveComponent("uni-forms");
-  (_easycom_uni_forms_item2 + _easycom_uni_easyinput2 + _easycom_uni_data_select2 + _easycom_uni_datetime_picker2 + _easycom_uni_data_picker2 + _easycom_uni_forms2)();
+  const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
+  (_easycom_uni_forms_item2 + _easycom_uni_easyinput2 + _easycom_uni_data_select2 + _easycom_uni_datetime_picker2 + _easycom_uni_data_picker2 + _easycom_uni_forms2 + _easycom_uni_icons2)();
 }
 const _easycom_uni_forms_item = () => "../../uni_modules/uni-forms/components/uni-forms-item/uni-forms-item.js";
 const _easycom_uni_easyinput = () => "../../uni_modules/uni-easyinput/components/uni-easyinput/uni-easyinput.js";
@@ -17,8 +18,9 @@ const _easycom_uni_data_select = () => "../../uni_modules/uni-data-select/compon
 const _easycom_uni_datetime_picker = () => "../../uni_modules/uni-datetime-picker/components/uni-datetime-picker/uni-datetime-picker.js";
 const _easycom_uni_data_picker = () => "../../uni_modules/uni-data-picker/components/uni-data-picker/uni-data-picker.js";
 const _easycom_uni_forms = () => "../../uni_modules/uni-forms/components/uni-forms/uni-forms.js";
+const _easycom_uni_icons = () => "../../uni_modules/uni-icons/components/uni-icons/uni-icons.js";
 if (!Math) {
-  (_easycom_uni_forms_item + _easycom_uni_easyinput + _easycom_uni_data_select + _easycom_uni_datetime_picker + _easycom_uni_data_picker + _easycom_uni_forms)();
+  (_easycom_uni_forms_item + _easycom_uni_easyinput + _easycom_uni_data_select + _easycom_uni_datetime_picker + _easycom_uni_data_picker + _easycom_uni_forms + _easycom_uni_icons)();
 }
 const _sfc_main = {
   __name: "my-edit",
@@ -43,7 +45,9 @@ const _sfc_main = {
       contactEmail: "",
       wechatQrCodeUrl: "",
       hobby: "",
-      personalBio: ""
+      personalBio: "",
+      idCard: "",
+      cardName: ""
     });
     const areaTree = common_vendor.ref([]);
     const industryTree = common_vendor.ref([]);
@@ -111,7 +115,7 @@ const _sfc_main = {
         error
       } = await Api.getAreaTree();
       if (error) {
-        common_vendor.index.__f__("error", "at pages/my-edit/my-edit.vue:201", "获取地区树失败:", error);
+        common_vendor.index.__f__("error", "at pages/my-edit/my-edit.vue:230", "获取地区树失败:", error);
       } else {
         areaTree.value = data || [];
       }
@@ -122,7 +126,7 @@ const _sfc_main = {
         error
       } = await Api.getIndustryTree();
       if (error) {
-        common_vendor.index.__f__("error", "at pages/my-edit/my-edit.vue:213", "获取行业树失败:", error);
+        common_vendor.index.__f__("error", "at pages/my-edit/my-edit.vue:242", "获取行业树失败:", error);
       } else {
         industryTree.value = data || [];
       }
@@ -174,6 +178,12 @@ const _sfc_main = {
         }
       }
     };
+    const maskedName = common_vendor.computed(() => {
+      return form.value.cardName || "信息已隐藏";
+    });
+    const maskedIdCard = common_vendor.computed(() => {
+      return form.value.idCard || "信息已隐藏";
+    });
     const chooseAvatar = () => {
       common_vendor.index.chooseImage({
         count: 1,
@@ -184,7 +194,7 @@ const _sfc_main = {
             src: tempFilePath,
             cropScale: "1:1",
             success: (cropRes) => uploadAvatar(cropRes.tempFilePath),
-            fail: (err) => common_vendor.index.__f__("log", "at pages/my-edit/my-edit.vue:290", "用户取消裁剪或裁剪失败:", err)
+            fail: (err) => common_vendor.index.__f__("log", "at pages/my-edit/my-edit.vue:330", "用户取消裁剪或裁剪失败:", err)
           });
         }
       });
@@ -287,12 +297,17 @@ const _sfc_main = {
           setTimeout(() => common_vendor.index.navigateBack(), 1500);
         }
       }).catch((err) => {
-        common_vendor.index.__f__("log", "at pages/my-edit/my-edit.vue:411", "表单验证失败：", err);
+        common_vendor.index.__f__("log", "at pages/my-edit/my-edit.vue:451", "表单验证失败：", err);
       });
     };
     const goToLabelEditPage = () => {
       common_vendor.index.navigateTo({
         url: "/pages/my-edit-label/my-edit-label"
+      });
+    };
+    const goToAuthPage = () => {
+      common_vendor.index.navigateTo({
+        url: "/pages/my-auth/my-auth"
       });
     };
     return (_ctx, _cache) => {
@@ -483,7 +498,18 @@ const _sfc_main = {
           rules
         }),
         ah: common_vendor.o(submitForm),
-        ai: common_vendor.o(goToLabelEditPage)
+        ai: common_vendor.o(goToLabelEditPage),
+        aj: form.value.idCard
+      }, form.value.idCard ? {
+        ak: common_vendor.t(maskedName.value),
+        al: common_vendor.t(maskedIdCard.value),
+        am: common_vendor.p({
+          type: "checkbox-filled",
+          color: "#00C777",
+          size: "18"
+        })
+      } : {
+        an: common_vendor.o(goToAuthPage)
       });
     };
   }

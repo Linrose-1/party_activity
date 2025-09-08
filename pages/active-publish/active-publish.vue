@@ -1,5 +1,12 @@
 <template>
 	<view class="page">
+		<!-- 实名认证引导提示 -->
+		<view v-if="!isUserVerified" class="auth-reminder" @click="goToAuthPage">
+			<uni-icons type="info-filled" size="18" color="#e6a23c"></uni-icons>
+			<text class="reminder-text">为保障活动用户安全，请先进行实名认证，点击前往</text>
+			<text class="reminder-arrow">›</text>
+		</view>
+
 		<!-- 表单内容 -->
 		<view class="form-section">
 			<view class="section-title">基本信息</view>
@@ -143,7 +150,7 @@
 				</uni-forms-item>
 			</uni-forms>
 		</view>
-		
+
 		<view class="form-bottom">
 			到底啦，请发起聚会吧！
 		</view>
@@ -164,7 +171,6 @@
 		<!-- 底部操作栏 -->
 		<view class="action-bar" :class="{ 'z-index-low': isPickerOpen }">
 			<view class="action-btn save-btn" @click="saveDraft">保存草稿</view>
-			<!-- 【优化】动态绑定 class 和文本内容 -->
 			<view class="action-btn publish-btn" :class="{ 'disabled': isPublishing }" @click="publish">
 				{{ isPublishing ? '发布中...' : '发起聚会' }}
 			</view>
@@ -185,9 +191,38 @@
 	import request from '../../utils/request.js';
 	import uploadFile from '../../utils/upload.js';
 
+	const isUserVerified = ref(true);
+
 	onMounted(() => {
+		checkUserVerificationStatus();
 		getActiveType();
 	});
+
+	// 检查用户实名认证状态的函数
+	const checkUserVerificationStatus = async () => {
+		const {
+			data,
+			error
+		} = await request('/app-api/member/user/get', {
+			method: 'GET'
+		});
+		if (!error && data) {
+			// 如果 idCard 字段为空或 null，则视为未实名
+			isUserVerified.value = !!data.idCard;
+			console.log('用户实名状态:', isUserVerified.value);
+		} else {
+			// 获取用户信息失败，也按未认证处理，并给出提示
+			isUserVerified.value = false;
+			console.log('获取用户信息失败，无法确认实名状态。');
+		}
+	};
+
+	// 跳转到实名认证页面的函数
+	const goToAuthPage = () => {
+		uni.navigateTo({
+			url: '/pages/my-auth/my-auth'
+		});
+	};
 
 	// 防止重复提交
 	const isPublishing = ref(false);
@@ -431,6 +466,7 @@
 	}
 
 	async function publish() {
+		if (isPublishing.value) return; // 防重触
 
 		//【节流】
 		if (isPublishing.value) {
@@ -566,6 +602,21 @@
 			return;
 		}
 
+		uni.showModal({
+			title: '确认发布',
+			content: '请确认您填写的内容无误。',
+			success: async (res) => {
+				if (res.confirm) {
+					// 用户确认后才执行真正的发布逻辑
+					await processPublishing();
+				}
+			}
+		});
+
+	}
+
+	async function processPublishing() {
+
 		isPublishing.value = true;
 		uni.showLoading({
 			title: '正在处理...',
@@ -601,13 +652,54 @@
 
 			console.log('发布聚会 - 最终Payload:', payload);
 
-			const success = await createActive(payload);
+			const {
+				success,
+				error
+			} = await createActive(payload);
 
 			if (success) {
 				uni.removeStorageSync(DRAFT_STORAGE_KEY);
 				console.log('聚会发布成功，草稿已清除。');
-				uni.switchTab({
-					url: '/pages/active/active'
+				uni.showModal({
+					title: '发布成功',
+					content: '可在【我的】-【我的聚会】中查看您发布的聚会。',
+					showCancel: false,
+					confirmText: '知道了',
+					success: (modalRes) => {
+						if (modalRes.confirm) {
+							uni.switchTab({
+								url: '/pages/active/active'
+							});
+						}
+					}
+				});
+			} else {
+				if (typeof error === 'object' && error !== null && error.code === 453) {
+					// 453 错误码：未实名认证
+					uni.hideLoading();
+					saveDraft();
+					uni.showModal({
+						title: '认证提醒',
+						content: error.msg || '发布聚会需要先完成实名认证，是否现在就去认证？您的聚会信息已为您保存为草稿。', // 使用 error.msg
+						confirmText: '去认证',
+						cancelText: '取消',
+						success: (res) => {
+							if (res.confirm) {
+								uni.navigateTo({
+									url: '/pages/my-auth/my-auth'
+								});
+							}
+						}
+					});
+					isPublishing.value = false;
+					return;
+				}
+
+				// 其他错误 (error 是字符串)
+				uni.showToast({
+					title: typeof error === 'string' ? error : (error.msg || '发布失败'),
+					icon: 'none',
+					duration: 3000
 				});
 			}
 			// 如果 success 为 false，createActive 内部已处理错误提示，
@@ -625,7 +717,6 @@
 			isPublishing.value = false;
 			uni.hideLoading();
 		}
-
 	}
 
 	const createActive = async (payload) => {
@@ -638,22 +729,20 @@
 		// 如果请求成功且后端没有返回业务错误
 		if (result && !result.error) {
 			console.log('createActive result:', result);
-			uni.showToast({
-				title: '聚会发布成功！',
-				icon: 'success'
-			});
-			return true; // 返回 true 表示成功
+			// 【修改】这里不再显示 Toast，只返回结果
+			return {
+				success: true,
+				error: null
+			};
 		}
 		// 如果请求失败或后端返回了业务错误
 		else {
 			console.log('请求失败:', result.error);
-			// 【修正 Bug 1】显示后端返回的错误信息，并给用户足够的时间阅读
-			uni.showToast({
-				title: result.error || '发布失败，请检查填写内容', // 优先使用后端返回的错误
-				icon: 'none',
-				duration: 3000 // 延长提示时间
-			});
-			return false; // 返回 false 表示失败
+			// 【修改】这里不再显示 Toast，只返回结果
+			return {
+				success: false,
+				error: result.error
+			};
 		}
 	};
 </script>
@@ -798,8 +887,8 @@
 		margin-top: 20rpx;
 		gap: 10rpx;
 	}
-	
-	.form-bottom{
+
+	.form-bottom {
 		text-align: center;
 		font-size: 24rpx;
 		color: #999;
@@ -891,7 +980,7 @@
 		color: #939393;
 	}
 
-	/* 【新增】这个类用于在 picker 打开时降低操作栏的层级 */
+	/* 这个类用于在 picker 打开时降低操作栏的层级 */
 	.action-bar.z-index-low {
 		z-index: 1;
 		/* 或者 z-index: auto; */
@@ -901,5 +990,28 @@
 		opacity: 0.6;
 		pointer-events: none;
 		/* 让按钮在视觉和行为上都真正被禁用 */
+	}
+
+	.auth-reminder {
+		display: flex;
+		align-items: center;
+		padding: 20rpx;
+		margin: 20rpx 20rpx 0;
+		/* 顶部和左右边距 */
+		background-color: #fdf6ec;
+		border: 1rpx solid #faecd8;
+		border-radius: 12rpx;
+		color: #e6a23c;
+		font-size: 26rpx;
+	}
+
+	.reminder-text {
+		flex: 1;
+		margin: 0 16rpx;
+	}
+
+	.reminder-arrow {
+		font-size: 32rpx;
+		color: #c0c4cc;
 	}
 </style>

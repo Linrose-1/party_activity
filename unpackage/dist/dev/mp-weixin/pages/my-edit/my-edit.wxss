@@ -127,3 +127,43 @@
 .digital-label-section.data-v-13622257 {
   /* 可根据需要为数字标签区域添加特定样式 */
 }
+.auth-btn.data-v-13622257 {
+  width: 100%;
+  height: 80rpx;
+  line-height: 80rpx;
+  font-size: 30rpx;
+  color: white;
+  background: linear-gradient(to right, #00C777, #00A362);
+  border: none;
+  border-radius: 40rpx;
+}
+.auth-btn.data-v-13622257::after {
+  border: none;
+}
+.auth-info.data-v-13622257 {
+  font-size: 28rpx;
+  color: #666;
+}
+.auth-info .auth-item.data-v-13622257 {
+  display: flex;
+  justify-content: space-between;
+  padding: 20rpx 0;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+.auth-info .auth-item .auth-label.data-v-13622257 {
+  color: #333;
+}
+.auth-info .auth-item .auth-value.data-v-13622257 {
+  font-weight: bold;
+}
+.auth-info .auth-status.data-v-13622257 {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-top: 20rpx;
+  color: #00C777;
+  font-size: 26rpx;
+}
+.auth-info .auth-status uni-icons.data-v-13622257 {
+  margin-right: 8rpx;
+}

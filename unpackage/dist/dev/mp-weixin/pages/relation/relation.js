@@ -2,6 +2,7 @@
 const common_vendor = require("../../common/vendor.js");
 const common_assets = require("../../common/assets.js");
 const utils_request = require("../../utils/request.js");
+const utils_shakeLock = require("../../utils/shakeLock.js");
 if (!Array) {
   const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
   const _easycom_uni_datetime_picker2 = common_vendor.resolveComponent("uni-datetime-picker");
@@ -16,6 +17,10 @@ const themeColor = "#FF7500";
 const _sfc_main = {
   __name: "relation",
   setup(__props) {
+    const {
+      isShakeLocked,
+      lockShake
+    } = utils_shakeLock.useShakeLock();
     const formatDateTime = (date) => {
       if (!(date instanceof Date))
         return "";
@@ -38,7 +43,7 @@ const _sfc_main = {
       pageSize: 10
     });
     const isFollowActionInProgress = common_vendor.ref(false);
-    const isShaking = common_vendor.ref(false);
+    common_vendor.ref(false);
     const timeRangeText = common_vendor.computed(() => {
       if (timeRange.value && timeRange.value.length === 2) {
         const start = timeRange.value[0].slice(5, 16);
@@ -179,7 +184,7 @@ const _sfc_main = {
       const name = user.nickname || "匿名用户";
       const avatarUrl = user.avatar || defaultAvatar;
       const url = `/pages/applicationBusinessCard/applicationBusinessCard?id=${user.id}&name=${encodeURIComponent(name)}&avatar=${encodeURIComponent(avatarUrl)}`;
-      common_vendor.index.__f__("log", "at pages/relation/relation.vue:327", "从人脉列表页跳转，URL:", url);
+      common_vendor.index.__f__("log", "at pages/relation/relation.vue:335", "从人脉列表页跳转，URL:", url);
       common_vendor.index.navigateTo({
         url
       });
@@ -190,23 +195,18 @@ const _sfc_main = {
     const handleTimeChange = (e) => timeRange.value = e;
     const switchTab = (tabIndex) => activeTab.value = tabIndex;
     const goToShakePage = () => common_vendor.index.navigateTo({
-      url: "/pages/location/location"
+      url: "/pages/location/location?autoShake=true"
     });
     common_vendor.watch([destination, timeRange], updateNextLocation);
     common_vendor.watch(activeTab, () => fetchUserList(true));
     common_vendor.onShow(() => {
-      common_vendor.index.__f__("log", "at pages/relation/relation.vue:354", "人脉页 onShow: 开始监听摇一摇");
-      isShaking.value = false;
+      common_vendor.index.__f__("log", "at pages/relation/relation.vue:362", "人脉页 onShow: 开始监听摇一摇");
       common_vendor.index.onAccelerometerChange((res) => {
         if (Math.abs(res.x) > 1.5 || Math.abs(res.y) > 1.5 || Math.abs(res.z) > 1.5) {
-          if (!isShaking.value) {
-            isShaking.value = true;
-            common_vendor.index.vibrateShort();
-            common_vendor.index.__f__("log", "at pages/relation/relation.vue:370", "检测到摇一摇，准备跳转...");
+          if (!isShakeLocked.value) {
+            lockShake();
+            common_vendor.index.__f__("log", "at pages/relation/relation.vue:374", "检测到摇一摇，准备跳转...");
             goToShakePage();
-            setTimeout(() => {
-              isShaking.value = false;
-            }, 2e3);
           }
         }
       });

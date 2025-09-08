@@ -19,7 +19,7 @@
 				<button class="nav-btn initiate-btn" @click.stop="handleInitiateParty">
 					<text>发起聚会</text>
 				</button>
-				
+
 				<button class="nav-btn detail-btn" @click.stop="handleCardClick">
 					<text>聚店详情</text>
 				</button>
@@ -57,7 +57,7 @@
 	const handleCardClick = () => {
 		emit('click-card', props.store);
 	};
-	
+
 	/**
 	 * 新增点 2：处理“发起聚会”按钮的点击事件
 	 */
@@ -67,7 +67,6 @@
 			url: `/pages/active-publish/active-publish?storeId=${props.store.id}`
 		});
 	};
-
 </script>
 
 <style lang="scss" scoped>
@@ -114,10 +113,29 @@
 		color: var(--dark-text);
 		display: flex;
 		align-items: center;
+
+		flex: 1;
+		/* 1. 让它占据所有剩余空间，这是最关键的一步 */
+		min-width: 0;
+		/* 2. 允许 flex 项在内容溢出时收缩，这是 flex 布局的一个重要技巧 */
 	}
 
 	.store-name .uni-icons {
 		margin-right: 8px;
+		flex-shrink: 0;
+	}
+
+	.store-name text {
+		white-space: nowrap;
+		/* 禁止文本换行 */
+		overflow: hidden;
+		/* 隐藏超出的部分 */
+		text-overflow: ellipsis;
+		/* 将隐藏的部分显示为省略号 */
+		display: inline-block;
+		/* 确保 text 元素表现为块级行为，以便应用溢出样式 */
+		vertical-align: middle;
+		/* (可选) 确保文本和图标垂直对齐更精确 */
 	}
 
 	.distance {
@@ -126,6 +144,11 @@
 		display: flex;
 		align-items: center;
 		font-weight: 500;
+
+		margin-left: 10px;
+		/* 5. (推荐) 给距离增加一个左边距，确保即使店名不长，两者之间也有安全间距 */
+		flex-shrink: 0;
+		/* 6. (推荐) 确保距离部分本身不会被压缩 */
 	}
 
 	.distance .uni-icons {
@@ -146,15 +169,17 @@
 
 	.store-footer {
 		display: flex;
-		justify-content: flex-end; /* 修改为 flex-end，让按钮靠右对齐 */
+		justify-content: flex-end;
+		/* 修改为 flex-end，让按钮靠右对齐 */
 		align-items: center;
 		padding-top: 10px;
 		border-top: 1px dashed #ffe8d9;
-		gap: 10px; /* 新增：给按钮之间增加一些间距 */
+		gap: 10px;
+		/* 新增：给按钮之间增加一些间距 */
 	}
 
 	/* 移除 .store-tags 和 .store-tag 的样式 */
-	
+
 	.nav-btn {
 		/* 这是两个按钮的通用样式 */
 		color: white;
@@ -174,15 +199,17 @@
 	.nav-btn::after {
 		border: none;
 	}
-	
+
 	/* 新增：“发起聚会”按钮的特定样式 */
 	.initiate-btn {
-		background: #FF8A33; /* 使用一个稍浅的橙色以作区分 */
+		background: #FF8A33;
+		/* 使用一个稍浅的橙色以作区分 */
 	}
-	
+
 	/* 修改：“聚店详情”按钮的样式 */
 	.detail-btn {
-		background: var(--primary); /* 使用主色 */
+		background: var(--primary);
+		/* 使用主色 */
 	}
 
 	.nav-btn .uni-icons {

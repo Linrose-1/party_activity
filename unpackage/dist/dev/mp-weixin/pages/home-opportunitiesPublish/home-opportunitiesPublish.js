@@ -160,8 +160,16 @@ const _sfc_main = {
         tags: tags.value,
         status: "active"
       };
-      common_vendor.index.__f__("log", "at pages/home-opportunitiesPublish/home-opportunitiesPublish.vue:280", "--- 准备提交到后端的帖子数据 (图片已是URL) ---", postData);
-      createOpportunities(postData);
+      common_vendor.index.showModal({
+        title: "确认发布",
+        content: "请确认您填写的内容无误。",
+        success: (res) => {
+          if (res.confirm) {
+            common_vendor.index.__f__("log", "at pages/home-opportunitiesPublish/home-opportunitiesPublish.vue:286", "--- 准备提交到后端的帖子数据 ---", postData);
+            createOpportunities(postData);
+          }
+        }
+      });
     }
     const createOpportunities = async (postData) => {
       common_vendor.index.showLoading({
@@ -174,11 +182,19 @@ const _sfc_main = {
       });
       common_vendor.index.hideLoading();
       if (result.data !== null) {
-        common_vendor.index.showToast({
-          title: "发布成功！",
-          icon: "success"
+        common_vendor.index.showModal({
+          title: "发布成功",
+          content: "可在【我的】-【我的商机】中查看您发布的商机。",
+          showCancel: false,
+          // 隐藏取消按钮
+          confirmText: "知道了",
+          // 自定义确认按钮文字
+          success: (res) => {
+            if (res.confirm) {
+              common_vendor.index.navigateBack();
+            }
+          }
         });
-        setTimeout(() => common_vendor.index.navigateBack(), 1500);
       } else {
         common_vendor.index.showToast({
           title: result.error || "发布失败",

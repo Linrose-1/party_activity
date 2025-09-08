@@ -20,9 +20,16 @@
 							<uni-icons type="redo" size="14" color="#888"></uni-icons> {{ postDetail.time }}
 						</view>
 					</view>
+					<!-- 如果是访客，显示关注按钮 -->
 					<button v-if="showFollowButton" class="follow-button"
 						:class="{ 'followed': postDetail.isFollowedUser }" @click.stop="toggleFollow(postDetail)">
 						{{ postDetail.isFollowedUser ? '已关注' : '关注' }}
+					</button>
+					<!-- 如果是作者本人，显示删除按钮 -->
+					<button v-else-if="loggedInUserId && loggedInUserId === postDetail.userId"
+						class="follow-button delete-post-button" @click.stop="deletePost">
+						<uni-icons type="trash" size="14" color="#e74c3c"></uni-icons>
+						删除
 					</button>
 				</view>
 				<view style="font-weight: 700;font-size: 36rpx;">{{postDetail.postTitle}}</view>
@@ -68,6 +75,7 @@
 							:color="postDetail.saved ? '#FF6A00' : '#666'"></uni-icons>
 						{{ postDetail.saved ? '已收藏' : '收藏' }}
 					</view>
+
 				</view>
 			</view>
 
@@ -771,6 +779,44 @@
 			url: url
 		});
 	};
+
+	const deletePost = () => {
+		uni.showModal({
+			title: '确认删除',
+			content: '您确定要删除这条商机吗？删除后将无法恢复。',
+			success: async (res) => {
+				if (res.confirm) {
+					uni.showLoading({
+						title: '删除中...'
+					});
+					const {
+						error
+					} = await request('/app-api/member/business-opportunities/delete', {
+						method: 'POST',
+						data: {
+							id: postDetail.id // 使用详情页的商机ID
+						}
+					});
+					uni.hideLoading();
+					if (error) {
+						uni.showToast({
+							title: '删除失败: ' + error,
+							icon: 'none'
+						});
+						return;
+					}
+					uni.showToast({
+						title: '删除成功',
+						icon: 'success'
+					});
+					// 延迟1.5秒后返回上一页，确保用户能看到提示
+					setTimeout(() => {
+						uni.navigateBack();
+					}, 1500);
+				}
+			}
+		});
+	};
 </script>
 
 <style scoped>
@@ -932,6 +978,20 @@
 		background: #e0e0e0;
 		color: #666;
 		box-shadow: none;
+	}
+
+	.delete-post-button {
+		background-color: #f5f5f5;
+		/* 使用一个中性的灰色背景 */
+		color: #e74c3c;
+		/* 文本和图标使用危险红色 */
+		box-shadow: none;
+		/* 移除阴影，使其不那么突出 */
+	}
+
+	.delete-post-button:active {
+		background-color: #e0e0e0;
+		/* 点击时颜色变深一点 */
 	}
 
 	/* --- 商机内容、图片、标签 --- */

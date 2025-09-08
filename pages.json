@@ -262,6 +262,13 @@
 			{
 				"navigationBarTitleText" : "系统建议"
 			}
+		},
+		{
+			"path" : "pages/my-auth/my-auth",
+			"style" : 
+			{
+				"navigationBarTitleText" : "实名认证"
+			}
 		}
 	],
 

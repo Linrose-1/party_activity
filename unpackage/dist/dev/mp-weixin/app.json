@@ -41,7 +41,8 @@
     "pages/my-order/my-order",
     "pages/relation/relation",
     "pages/shop-apply/shop-apply",
-    "pages/my-systemSuggestions/my-systemSuggestions"
+    "pages/my-systemSuggestions/my-systemSuggestions",
+    "pages/my-auth/my-auth"
   ],
   "subPackages": [
     {

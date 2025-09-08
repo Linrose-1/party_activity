@@ -38,7 +38,7 @@
 		margin-bottom: 30rpx;
 		box-shadow: 0 6rpx 12rpx rgba(0, 0, 0, 0.05);
 }
-.form-group.data-v-90e28424{
+.form-group.data-v-90e28424 {
 		margin-bottom: 30rpx;
 }
 .form-label.data-v-90e28424 {

@@ -116,8 +116,16 @@
 		onHide
 	} from '@dcloudio/uni-app';
 	import request from '@/utils/request.js';
+	import {
+		useShakeLock
+	} from '@/utils/shakeLock.js';
 
 	const themeColor = '#FF7500';
+
+	const {
+		isShakeLocked,
+		lockShake
+	} = useShakeLock(); //获取锁的状态和方法
 
 	// --- 辅助函数 ---
 	const formatDateTime = (date) => {
@@ -341,7 +349,7 @@
 	const handleTimeChange = (e) => timeRange.value = e;
 	const switchTab = (tabIndex) => activeTab.value = tabIndex;
 	const goToShakePage = () => uni.navigateTo({
-		url: '/pages/location/location'
+		url: '/pages/location/location?autoShake=true'
 	});
 
 	// --- 监听筛选条件变化 ---
@@ -352,32 +360,24 @@
 	// --- 页面生命周期 ---
 	onShow(() => {
 		console.log("人脉页 onShow: 开始监听摇一摇");
-		isShaking.value = false; // 每次进入页面重置防抖状态
+		// isShaking.value = false; // 不再需要页面内的锁
 
 		uni.onAccelerometerChange((res) => {
-			// 设置一个灵敏度阈值，X、Y、Z轴任一方向的变化大于1.5则认为是在摇动
-			// 这个值可以根据实际测试效果进行微调
 			if (Math.abs(res.x) > 1.5 || Math.abs(res.y) > 1.5 || Math.abs(res.z) > 1.5) {
-				// 检查防抖状态，如果不在“摇动中”，则执行
-				if (!isShaking.value) {
-					// 1. 立即上锁，防止连续触发
-					isShaking.value = true;
 
-					// 2. 震动一下，给用户反馈
-					uni.vibrateShort();
+				// 【【【核心修改：使用全局锁】】】
+				if (!isShakeLocked.value) {
+					// 1. 立即上锁
+					lockShake();
 
-					// 3. 执行跳转
+					// 2. 静默跳转（保持之前的修改）
 					console.log("检测到摇一摇，准备跳转...");
 					goToShakePage();
-
-					// 4. 设置一个2秒的冷却时间，2秒后才允许再次通过摇一摇触发
-					setTimeout(() => {
-						isShaking.value = false;
-					}, 2000);
 				}
 			}
 		});
 	});
+
 	/**
 	 * 页面隐藏时，停止监听，节省资源
 	 */
@@ -458,7 +458,7 @@
 		background: rgba(255, 255, 255, 0.15);
 		border: 1px solid rgba(255, 255, 255, 0.2);
 		border-radius: 20rpx;
-		padding: 20rpx 30rpx;
+		padding: 15rpx 30rpx;
 		flex-shrink: 0;
 		/* 防止被压缩 */
 	}
@@ -475,8 +475,8 @@
 	}
 
 	.entry-text {
-		font-size: 28rpx;
-		font-weight: 500;
+		font-size: 32rpx;
+		font-weight: 900;
 		line-height: 1.4;
 		/* 调整行高，让两行文字更紧凑 */
 	}

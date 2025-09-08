@@ -42,7 +42,7 @@
   color: #1c1e21;
 }
 
-/* 活动列表项 - 复用“我的活动”页面样式 */
+/* 聚会列表项 - 复用“我的聚会”页面样式 */
 .activity-list.data-v-7c9d235a {
   margin-bottom: 40rpx;
 }

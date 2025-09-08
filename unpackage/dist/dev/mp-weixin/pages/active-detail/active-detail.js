@@ -359,7 +359,7 @@ const _sfc_main = {
       const name = user.nickname || "匿名用户";
       const avatarUrl = user.avatar || defaultAvatar;
       const url = `/pages/applicationBusinessCard/applicationBusinessCard?id=${user.id}&name=${encodeURIComponent(name)}&avatar=${encodeURIComponent(avatarUrl)}`;
-      common_vendor.index.__f__("log", "at pages/active-detail/active-detail.vue:705", "从活动详情页跳转到名片申请页, URL:", url);
+      common_vendor.index.__f__("log", "at pages/active-detail/active-detail.vue:705", "从聚会详情页跳转到名片申请页, URL:", url);
       common_vendor.index.navigateTo({
         url
       });
@@ -374,7 +374,7 @@ const _sfc_main = {
       }
       const targetPath = "/pages/shop-detail/shop-detail";
       const url = `${targetPath}?id=${store.id}`;
-      common_vendor.index.__f__("log", "at pages/active-detail/active-detail.vue:735", "从活动详情页跳转到聚店详情页, URL:", url);
+      common_vendor.index.__f__("log", "at pages/active-detail/active-detail.vue:735", "从聚会详情页跳转到聚店详情页, URL:", url);
       common_vendor.index.navigateTo({
         url
       });
@@ -412,7 +412,7 @@ const _sfc_main = {
           color: "#FF6B00"
         }),
         n: common_vendor.t(activityDetail.value.locationAddress),
-        o: common_vendor.t(activityDetail.value.joinCount || 0),
+        o: common_vendor.t(participantTotal.value || 0),
         p: common_vendor.t(activityDetail.value.totalSlots),
         q: activityDetail.value.activityFunds === 1
       }, activityDetail.value.activityFunds === 1 ? {

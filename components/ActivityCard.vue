@@ -7,7 +7,7 @@
 
 			<view class="activity-header">
 				<text class="activity-title">{{ activity.activityTitle }}</text>
-				<!-- 显示活动状态的标签 -->
+				<!-- 显示聚会状态的标签 -->
 				<view v-if="activity.statusStr" :class="['status-tag', getStatusClass(activity.statusStr)]">
 					{{ activity.statusStr }}
 				</view>
@@ -22,13 +22,19 @@
 			<view class="activity-info">
 				<uni-icons type="location" size="16" color="#FF6B00" />
 				<!-- 绑定正确的地点字段 (locationAddress) -->
-				<text>{{ activity.locationAddress || '线上活动' }}</text>
+				<text>{{ activity.locationAddress || '线上聚会' }}</text>
 			</view>
 
+			<!-- 将距离显示移入此区域 -->
 			<view class="activity-stats">
 				<view class="participants">
 					<!-- 绑定正确的报名人数(joinCount)和总名额(totalSlots) -->
 					{{ activity.joinCount || 0 }}/{{ activity.totalSlots || '不限' }} 人参与
+				</view>
+				<!-- 活动距离显示，放置在行末 -->
+				<view v-if="formattedDistance" class="activity-distance">
+					<uni-icons type="paperplane-filled" size="16" color="#FF6B00" />
+					<text>{{ formattedDistance }}</text>
 				</view>
 			</view>
 
@@ -97,6 +103,13 @@
 		return `${Y}-${M}-${D} ${h}:${m}`;
 	});
 
+	const formattedDistance = computed(() => {
+		if (typeof props.activity.distance === 'number') {
+			return `${props.activity.distance.toFixed(2)} km`;
+		}
+		return null; // 如果没有distance字段或不是数字，则不显示
+	});
+
 	const getStatusClass = (statusStr) => {
 		const classMap = {
 			'已取消': 'canceled',
@@ -110,7 +123,7 @@
 		return classMap[statusStr] || '';
 	};
 
-	// 【新增】一个统一的函数来处理需要登录的操作
+	// 一个统一的函数来处理需要登录的操作
 	const requireLogin = (actionCallback, message) => {
 		if (props.isLogin) {
 			// 如果已登录，直接执行回调函数
@@ -140,7 +153,7 @@
 			uni.navigateTo({
 				url: `/pages/active-detail/active-detail?id=${props.activity.id}`
 			});
-		}, '登录后才能查看活动详情，是否立即登录？');
+		}, '登录后才能查看聚会详情，是否立即登录？');
 	};
 
 	// 【新增】报名按钮点击事件
@@ -150,7 +163,7 @@
 			uni.navigateTo({
 				url: `/pages/active-enroll/active-enroll?id=${props.activity.id}`
 			});
-		}, '登录后才能报名活动，是否立即登录？');
+		}, '登录后才能报名聚会，是否立即登录？');
 	};
 
 	const toggleFavorite = async () => {
@@ -158,30 +171,52 @@
 			return;
 		}
 		requireLogin(async () => {
-		    loading.value = true;
-		    const userId = uni.getStorageSync('userId');
-		    const originalFavoriteStatus = isFavorite.value;
-		    isFavorite.value = !isFavorite.value;
-		    const endpoint = isFavorite.value ? '/app-api/member/follow/add' : '/app-api/member/follow/del';
-		    const successMessage = isFavorite.value ? '收藏成功' : '已取消收藏';
-		    const payload = { userId, targetId: props.activity.id, targetType: "activity" };
-		
-		    try {
-		      const { error } = await request(endpoint, { method: 'POST', data: payload });
-		      if (!error) {
-		        uni.showToast({ title: successMessage, icon: 'success' });
-		        emit('updateFavoriteStatus', { id: props.activity.id, newFollowFlag: isFavorite.value ? 1 : 0 });
-		      } else {
-		        isFavorite.value = originalFavoriteStatus;
-		        uni.showToast({ title: error || '操作失败', icon: 'none' });
-		      }
-		    } catch (err) {
-		      isFavorite.value = originalFavoriteStatus;
-		      uni.showToast({ title: '网络错误', icon: 'none' });
-		    } finally {
-		      loading.value = false;
-		    }
-		  }, '登录后才能收藏活动，是否立即登录？');
+			loading.value = true;
+			const userId = uni.getStorageSync('userId');
+			const originalFavoriteStatus = isFavorite.value;
+			isFavorite.value = !isFavorite.value;
+			const endpoint = isFavorite.value ? '/app-api/member/follow/add' :
+				'/app-api/member/follow/del';
+			const successMessage = isFavorite.value ? '收藏成功' : '已取消收藏';
+			const payload = {
+				userId,
+				targetId: props.activity.id,
+				targetType: "activity"
+			};
+
+			try {
+				const {
+					error
+				} = await request(endpoint, {
+					method: 'POST',
+					data: payload
+				});
+				if (!error) {
+					uni.showToast({
+						title: successMessage,
+						icon: 'success'
+					});
+					emit('updateFavoriteStatus', {
+						id: props.activity.id,
+						newFollowFlag: isFavorite.value ? 1 : 0
+					});
+				} else {
+					isFavorite.value = originalFavoriteStatus;
+					uni.showToast({
+						title: error || '操作失败',
+						icon: 'none'
+					});
+				}
+			} catch (err) {
+				isFavorite.value = originalFavoriteStatus;
+				uni.showToast({
+					title: '网络错误',
+					icon: 'none'
+				});
+			} finally {
+				loading.value = false;
+			}
+		}, '登录后才能收藏聚会，是否立即登录？');
 	};
 
 	const registerActivity = (activityId) => {
@@ -296,6 +331,18 @@
 		padding: 6rpx 20rpx;
 		border-radius: 20rpx;
 	}
+	
+	.activity-distance {
+			display: flex;
+			align-items: center;
+			color: #FF6B00; /* 覆盖父级的灰色 */
+			font-weight: 500;
+			margin-bottom: -150rpx;
+			
+			text {
+				margin-left: 8rpx; /* 图标和文字间距 */
+			}
+		}
 
 	.activity-tags {
 		display: flex;
@@ -312,6 +359,7 @@
 		font-size: 24rpx;
 		border: 2rpx solid #ffdcc7;
 	}
+
 
 	/* 底部区域样式 */
 	.activity-footer {

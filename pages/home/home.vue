@@ -11,7 +11,7 @@
 				<view class="search-container">
 					<uni-icons type="search" size="20" color="#FF6A00"></uni-icons>
 					<!-- v-model绑定到新的searchQuery ref -->
-					<input type="text" v-model="searchQuery" class="search-input" placeholder="搜索活动、商友或商机"
+					<input type="text" v-model="searchQuery" class="search-input" placeholder="搜索聚会、商友或商机"
 						confirm-type="search" @confirm="handleSearch" />
 					<button class="search-button" @click="handleSearch">搜索</button>
 				</view>
@@ -19,7 +19,7 @@
 		</view>
 
 		<!-- 商机发现标题 -->
-		<view class="section-title">商机发现</view>
+		<view class="section-title">商友圈</view>
 
 		<!-- 导航标签栏 -->
 		<view class="tabs">
@@ -47,75 +47,82 @@
 			<!-- 帖子卡片 - 循环改为 postList -->
 			<!-- 【请用这个已修正的 post-card 块替换掉原来的】 -->
 			<view v-for="post in postList" :key="post.id" class="post-card" @click="handlePostClick(post)">
-			    <view class="post-header">
-			        <image :src="post.user.avatar" mode="aspectFill" class="avatar"
-			            @click.stop="navigateToBusinessCard(post.user)">
-			        </image>
-			        <view class="user-info">
-			            <view class="user-name">{{ post.user.name }}</view>
-			            <view class="post-time">{{ post.time }}</view>
-			        </view>
-			        <!-- 【优化】只有登录后才可能显示关注按钮 -->
-			        <button v-if="isLogin && loggedInUserId !== post.user.id" class="follow-button"
-			            :class="{ 'followed': post.isFollowedUser }" @click.stop="toggleFollow(post)">
-			            {{ post.isFollowedUser ? '已关注' : '关注' }}
-			        </button>
-			    </view>
-			
-			    <!-- ==================== 内容权限控制逻辑（已修正） ==================== -->
-			    
-			    <!-- 1. 公开内容：这部分移出 v-if，所有人都能看到 -->
-			    <view class="post-content">
-			        {{ post.title }}
-			    </view>
-			    <view class="post-images" v-if="post.images && post.images.length">
-			        <view v-for="(image, imgIndex) in post.images" :key="imgIndex" class="image-wrapper">
-			            <!-- 【优化】uniapp 中推荐使用 image 标签 -->
-			            <image :src="image" alt="商机图片" class="post-image" mode="aspectFill" />
-			        </view>
-			    </view>
-			    <view class="tags" v-if="post.tags && post.tags.length">
-			        <view v-for="(tag, tagIndex) in post.tags" :key="tagIndex" class="tag">
-			            {{ tag }}
-			        </view>
-			    </view>
-			
-			    <!-- 2. 私有/交互内容：这部分保留在 v-if 内，仅登录用户可见 -->
-			    <template v-if="isLogin">
-			        <view class="feedback-stats">
-			            <view class="like-count">
-			                <uni-icons type="hand-up-filled" size="18" color="#e74c3c"></uni-icons>
-			                <span>{{ post.likes }}</span>
-			            </view>
-			            <view class="dislike-count">
-			                <uni-icons type="hand-down-filled" size="18" color="#3498db"></uni-icons>
-			                <span>{{ post.dislikes }}</span>
-			            </view>
-			        </view>
-			        <view class="post-actions">
-			            <view class="action-group">
-			                <view class="action like" :class="{ active: post.userAction === 'like' }"
-			                    @click.stop="toggleAction(post, 'like')">
-			                    <uni-icons :type="post.userAction === 'like' ? 'hand-up-filled' : 'hand-up'" size="20"
-			                        :color="post.userAction === 'like' ? '#e74c3c' : '#666'"></uni-icons>
-			                    <span>赞</span>
-			                </view>
-			                <view class="action dislike" :class="{ active: post.userAction === 'dislike' }"
-			                    @click.stop="toggleAction(post, 'dislike')">
-			                    <uni-icons :type="post.userAction === 'dislike' ? 'hand-down-filled' : 'hand-down'"
-			                        size="20" :color="post.userAction === 'dislike' ? '#3498db' : '#666'"></uni-icons>
-			                    <span>踩</span>
-			                </view>
-			            </view>
-			            <view class="action-group">
-			                <view class="action comment" :class="{ active: post.isSaved }" @click.stop="toggleSave(post)">
-			                    <uni-icons :type="post.isSaved ? 'star-filled' : 'star'" size="20"
-			                        :color="post.isSaved ? '#FF6A00' : '#666'"></uni-icons>
-			                    <span>{{ post.isSaved ? '已收藏' : '收藏' }}</span>
-			                </view>
-			            </view>
-			        </view>
-			    </template>
+				<view class="post-header">
+					<image :src="post.user.avatar" mode="aspectFill" class="avatar"
+						@click.stop="navigateToBusinessCard(post.user)">
+					</image>
+					<view class="user-info">
+						<view class="user-name">{{ post.user.name }}</view>
+						<view class="post-time">{{ post.time }}</view>
+					</view>
+					<!-- 【优化】只有登录后才可能显示关注按钮 -->
+					<button v-if="isLogin && loggedInUserId !== post.user.id" class="follow-button"
+						:class="{ 'followed': post.isFollowedUser }" @click.stop="toggleFollow(post)">
+						{{ post.isFollowedUser ? '已关注' : '关注' }}
+					</button>
+				</view>
+
+				<!-- ==================== 内容权限控制逻辑（已修正） ==================== -->
+
+				<!-- 1. 公开内容：这部分移出 v-if，所有人都能看到 -->
+				<view class="post-content">
+					{{ post.title }}
+				</view>
+				<view class="post-images" v-if="post.images && post.images.length">
+					<view v-for="(image, imgIndex) in post.images" :key="imgIndex" class="image-wrapper">
+						<!-- 【优化】uniapp 中推荐使用 image 标签 -->
+						<image :src="image" alt="商机图片" class="post-image" mode="aspectFill" />
+					</view>
+				</view>
+				<view class="tags" v-if="post.tags && post.tags.length">
+					<view v-for="(tag, tagIndex) in post.tags" :key="tagIndex" class="tag">
+						{{ tag }}
+					</view>
+				</view>
+
+				<!-- 2. 私有/交互内容：这部分保留在 v-if 内，仅登录用户可见 -->
+				<template v-if="isLogin">
+					<view class="feedback-stats">
+						<view class="like-count">
+							<uni-icons type="hand-up-filled" size="18" color="#e74c3c"></uni-icons>
+							<span>{{ post.likes }}</span>
+						</view>
+						<view class="dislike-count">
+							<uni-icons type="hand-down-filled" size="18" color="#3498db"></uni-icons>
+							<span>{{ post.dislikes }}</span>
+						</view>
+					</view>
+					<view class="post-actions">
+						<view class="action-group">
+							<view class="action like" :class="{ active: post.userAction === 'like' }"
+								@click.stop="toggleAction(post, 'like')">
+								<uni-icons :type="post.userAction === 'like' ? 'hand-up-filled' : 'hand-up'" size="20"
+									:color="post.userAction === 'like' ? '#e74c3c' : '#666'"></uni-icons>
+								<span>赞</span>
+							</view>
+							<view class="action dislike" :class="{ active: post.userAction === 'dislike' }"
+								@click.stop="toggleAction(post, 'dislike')">
+								<uni-icons :type="post.userAction === 'dislike' ? 'hand-down-filled' : 'hand-down'"
+									size="20" :color="post.userAction === 'dislike' ? '#3498db' : '#666'"></uni-icons>
+								<span>踩</span>
+							</view>
+						</view>
+						<view class="action-group">
+							<view class="action comment" :class="{ active: post.isSaved }"
+								@click.stop="toggleSave(post)">
+								<uni-icons :type="post.isSaved ? 'star-filled' : 'star'" size="20"
+									:color="post.isSaved ? '#FF6A00' : '#666'"></uni-icons>
+								<span>{{ post.isSaved ? '已收藏' : '收藏' }}</span>
+							</view>
+
+							<view class="action delete-btn" v-if="isLogin && loggedInUserId === post.user.id"
+								@click.stop="deletePost(post)">
+								<uni-icons type="trash" size="20" color="#e74c3c"></uni-icons>
+								<!-- 这里不放文字 -->
+							</view>
+						</view>
+					</view>
+				</template>
 			</view>
 
 			<!-- 加载状态提示 -->
@@ -218,42 +225,48 @@
 	const getBusinessOpportunitiesList = async (isRefresh = false) => {
 		if (loadingStatus.value === 'loading' && !isRefresh) return; // 防止重复加载，但允许下拉刷新
 		loadingStatus.value = 'loading';
-	
+
 		if (isRefresh) {
 			pageNo.value = 1;
 			postList.value = [];
 			loadingStatus.value = 'more';
 		}
-	
+
 		const params = {
 			pageNo: pageNo.value,
 			pageSize: pageSize.value,
 			tabIndex: activeTab.value,
 		};
-	
+
 		if (searchQuery.value) {
 			params.searchKey = searchQuery.value;
 		}
-	
+
 		if (activeTab.value === 2 && location.longitude && location.latitude) {
 			params.longitude = location.longitude;
 			params.latitude = location.latitude;
 		}
-	
+
 		try {
-			const { data: apiData, error } = await request('/app-api/member/business-opportunities/list', {
+			const {
+				data: apiData,
+				error
+			} = await request('/app-api/member/business-opportunities/list', {
 				method: 'GET',
 				data: params
 			});
-			
+
 			// 【核心修改】直接处理成功和失败两种情况
 			if (error) {
 				// 如果请求真的发生错误（网络问题、服务器500等）
 				loadingStatus.value = 'more'; // 允许用户重试
-				uni.showToast({ title: `加载失败: ${error}`, icon: 'none' });
+				uni.showToast({
+					title: `加载失败: ${error}`,
+					icon: 'none'
+				});
 				return; // 终止
 			}
-			
+
 			// 如果请求成功 (error为null)，但后端返回的业务数据为空或格式不对
 			if (!apiData || !apiData.list) {
 				loadingStatus.value = 'noMore'; // 没有数据了
@@ -262,49 +275,53 @@
 				}
 				return;
 			}
-	
+
 			// 【核心修改】数据映射逻辑保持不变，但要确保它能处理 memberUser 为 null 的情况
 			const mappedData = apiData.list.map(item => ({
 				id: item.id,
 				content: item.postContent,
 				title: item.postTitle,
 				images: item.postImg ? String(item.postImg).split(',').filter(img => img) : [],
-				tags: item.tags ? (Array.isArray(item.tags) ? item.tags : String(item.tags).split(',').filter(tag => tag)) : [],
+				tags: item.tags ? (Array.isArray(item.tags) ? item.tags : String(item.tags).split(',')
+					.filter(tag => tag)) : [],
 				likes: item.likesCount || 0,
 				dislikes: item.dislikesCount || 0,
 				// 【关键】未登录时 userLikeStr 为 null，这是正确的
-				userAction: item.userLikeStr || null, 
+				userAction: item.userLikeStr || null,
 				// 【关键】未登录时 followFlag 为 0 或 null，这样 isSaved 就是 false，这是正确的
 				isSaved: item.followFlag === 1,
 				// 【关键】未登录时 followUserFlag 为 0 或 null，isFollowedUser 就是 false，这是正确的
-				isFollowedUser: item.followUserFlag === 1, 
+				isFollowedUser: item.followUserFlag === 1,
 				time: formatTimestamp(item.createTime),
 				user: {
 					// 【关键】处理 memberUser 可能为 null 的情况
-					id: item.memberUser?.id || item.userId, 
+					id: item.memberUser?.id || item.userId,
 					name: item.memberUser?.nickname || '匿名用户',
 					avatar: item.memberUser?.avatar || defaultAvatarUrl
 				}
 			}));
-	
+
 			if (isRefresh) {
 				postList.value = mappedData;
 			} else {
 				postList.value = [...postList.value, ...mappedData];
 			}
-	
+
 			if (postList.value.length >= apiData.total) {
 				loadingStatus.value = 'noMore';
 			} else {
 				loadingStatus.value = 'more';
 				pageNo.value++;
 			}
-	
+
 		} catch (err) {
 			// 捕获 try...catch 的异常，比如代码本身写的有问题
 			console.error('getBusinessOpportunitiesList 逻辑异常:', err);
 			loadingStatus.value = 'more'; // 允许用户重试
-			uni.showToast({ title: '页面逻辑异常，请稍后重试', icon: 'none' });
+			uni.showToast({
+				title: '页面逻辑异常，请稍后重试',
+				icon: 'none'
+			});
 		} finally {
 			uni.stopPullDownRefresh();
 		}
@@ -494,6 +511,53 @@
 	};
 
 	/**
+	 * 删除商机
+	 */
+	const deletePost = (postToDelete) => {
+		uni.showModal({
+			title: '确认删除',
+			content: '您确定要删除这条商机吗？删除后将无法恢复。',
+			success: async (res) => {
+				if (res.confirm) {
+					uni.showLoading({
+						title: '删除中...'
+					});
+
+					const {
+						error
+					} = await request('/app-api/member/business-opportunities/delete', {
+						method: 'POST',
+						data: {
+							id: postToDelete.id // 使用传入的 post 对象的 ID
+						}
+					});
+
+					uni.hideLoading();
+
+					if (error) {
+						uni.showToast({
+							title: '删除失败: ' + error,
+							icon: 'none'
+						});
+						return;
+					}
+
+					uni.showToast({
+						title: '删除成功',
+						icon: 'success'
+					});
+
+					// 【关键】从前端列表中移除该项，实现即时更新
+					const index = postList.value.findIndex(p => p.id === postToDelete.id);
+					if (index !== -1) {
+						postList.value.splice(index, 1);
+					}
+				}
+			}
+		});
+	};
+
+	/**
 	 * 切换关注用户状态
 	 */
 	const toggleFollow = async (post) => {
@@ -566,7 +630,7 @@
 	const goToLogin = () => {
 		// 4. 【修改】实现真正的跳转逻辑
 		uni.navigateTo({
-			url: '/pages/index/index' 
+			url: '/pages/index/index'
 			// url: '/pages/login/login' 
 		});
 	};
@@ -990,6 +1054,7 @@
 	.action-group {
 		display: flex;
 		gap: 40rpx;
+		align-items: center; 
 	}
 
 	.action {
@@ -1005,6 +1070,10 @@
 
 	.action:active {
 		opacity: 0.7;
+	}
+
+	.action.delete-btn {
+		padding: 0 10rpx;
 	}
 
 	.content-placeholder {

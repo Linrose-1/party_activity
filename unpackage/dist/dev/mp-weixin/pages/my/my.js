@@ -45,14 +45,14 @@ const _sfc_main = {
         });
         if (!error && data) {
           userInfo.value = data;
-          common_vendor.index.__f__("log", "at pages/my/my.vue:190", "getUserInfo userInfo:", userInfo.value);
+          common_vendor.index.__f__("log", "at pages/my/my.vue:191", "getUserInfo userInfo:", userInfo.value);
         } else {
-          common_vendor.index.__f__("log", "at pages/my/my.vue:192", "获取用户信息失败:", error);
+          common_vendor.index.__f__("log", "at pages/my/my.vue:193", "获取用户信息失败:", error);
           isLogin.value = false;
           userInfo.value = {};
         }
       } catch (err) {
-        common_vendor.index.__f__("log", "at pages/my/my.vue:198", "请求异常:", err);
+        common_vendor.index.__f__("log", "at pages/my/my.vue:199", "请求异常:", err);
         isLogin.value = false;
         userInfo.value = {};
       }
@@ -109,7 +109,7 @@ const _sfc_main = {
       {
         name: "我的聚会",
         desc: "已报名/已发布的聚会",
-        icon: "../../static/icon/活动.png",
+        icon: "../../static/icon/聚会.png",
         path: "/pages/my-active/my-active"
       },
       {
@@ -126,7 +126,7 @@ const _sfc_main = {
       },
       {
         name: "我的收藏",
-        desc: "收藏的活动和商机",
+        desc: "收藏的聚会和商机",
         icon: "../../static/icon/收藏.png",
         path: "/pages/my-collection/my-collection"
       },

@@ -27,10 +27,19 @@ const request = async (url, options = {}) => {
           error: null
         };
       } else {
-        return {
-          data: null,
-          error: res.data.msg || "请求失败"
-        };
+        if (res.data.code === 453) {
+          return {
+            data: null,
+            error: res.data
+            // 返回 { code: 453, msg: '...' }
+          };
+        } else {
+          return {
+            data: null,
+            error: res.data.msg || "请求失败"
+            // 只返回错误消息字符串
+          };
+        }
       }
     } else {
       return {

@@ -39,6 +39,12 @@ const _sfc_main = {
       const m = date.getMinutes().toString().padStart(2, "0");
       return `${Y}-${M}-${D} ${h}:${m}`;
     });
+    const formattedDistance = common_vendor.computed(() => {
+      if (typeof props.activity.distance === "number") {
+        return `${props.activity.distance.toFixed(2)} km`;
+      }
+      return null;
+    });
     const getStatusClass = (statusStr) => {
       const classMap = {
         "已取消": "canceled",
@@ -75,14 +81,14 @@ const _sfc_main = {
         common_vendor.index.navigateTo({
           url: `/pages/active-detail/active-detail?id=${props.activity.id}`
         });
-      }, "登录后才能查看活动详情，是否立即登录？");
+      }, "登录后才能查看聚会详情，是否立即登录？");
     };
     const handleRegisterClick = () => {
       requireLogin(() => {
         common_vendor.index.navigateTo({
           url: `/pages/active-enroll/active-enroll?id=${props.activity.id}`
         });
-      }, "登录后才能报名活动，是否立即登录？");
+      }, "登录后才能报名聚会，是否立即登录？");
     };
     const toggleFavorite = async () => {
       if (loading.value) {
@@ -95,23 +101,44 @@ const _sfc_main = {
         isFavorite.value = !isFavorite.value;
         const endpoint = isFavorite.value ? "/app-api/member/follow/add" : "/app-api/member/follow/del";
         const successMessage = isFavorite.value ? "收藏成功" : "已取消收藏";
-        const payload = { userId, targetId: props.activity.id, targetType: "activity" };
+        const payload = {
+          userId,
+          targetId: props.activity.id,
+          targetType: "activity"
+        };
         try {
-          const { error } = await utils_request.request(endpoint, { method: "POST", data: payload });
+          const {
+            error
+          } = await utils_request.request(endpoint, {
+            method: "POST",
+            data: payload
+          });
           if (!error) {
-            common_vendor.index.showToast({ title: successMessage, icon: "success" });
-            emit("updateFavoriteStatus", { id: props.activity.id, newFollowFlag: isFavorite.value ? 1 : 0 });
+            common_vendor.index.showToast({
+              title: successMessage,
+              icon: "success"
+            });
+            emit("updateFavoriteStatus", {
+              id: props.activity.id,
+              newFollowFlag: isFavorite.value ? 1 : 0
+            });
           } else {
             isFavorite.value = originalFavoriteStatus;
-            common_vendor.index.showToast({ title: error || "操作失败", icon: "none" });
+            common_vendor.index.showToast({
+              title: error || "操作失败",
+              icon: "none"
+            });
           }
         } catch (err) {
           isFavorite.value = originalFavoriteStatus;
-          common_vendor.index.showToast({ title: "网络错误", icon: "none" });
+          common_vendor.index.showToast({
+            title: "网络错误",
+            icon: "none"
+          });
         } finally {
           loading.value = false;
         }
-      }, "登录后才能收藏活动，是否立即登录？");
+      }, "登录后才能收藏聚会，是否立即登录？");
     };
     return (_ctx, _cache) => {
       return common_vendor.e({
@@ -133,31 +160,40 @@ const _sfc_main = {
           size: "16",
           color: "#FF6B00"
         }),
-        i: common_vendor.t(__props.activity.locationAddress || "线上活动"),
+        i: common_vendor.t(__props.activity.locationAddress || "线上聚会"),
         j: common_vendor.t(__props.activity.joinCount || 0),
         k: common_vendor.t(__props.activity.totalSlots || "不限"),
-        l: common_vendor.f(__props.activity.tags, (tag, index, i0) => {
+        l: formattedDistance.value
+      }, formattedDistance.value ? {
+        m: common_vendor.p({
+          type: "paperplane-filled",
+          size: "16",
+          color: "#FF6B00"
+        }),
+        n: common_vendor.t(formattedDistance.value)
+      } : {}, {
+        o: common_vendor.f(__props.activity.tags, (tag, index, i0) => {
           return {
             a: common_vendor.t(tag),
             b: index
           };
         }),
-        m: common_vendor.o(handleCardClick),
-        n: common_vendor.p({
+        p: common_vendor.o(handleCardClick),
+        q: common_vendor.p({
           type: "contact-filled",
           size: "16",
           color: "#FF6B00"
         }),
-        o: common_vendor.t(__props.activity.memberUser.nickname || "主办方"),
-        p: common_vendor.p({
+        r: common_vendor.t(__props.activity.memberUser.nickname || "主办方"),
+        s: common_vendor.p({
           type: isFavorite.value ? "heart-filled" : "heart",
           size: "16",
           color: "#FF6B00"
         }),
-        q: common_vendor.t(isFavorite.value ? "已收藏" : "收藏"),
-        r: common_vendor.o(toggleFavorite),
-        s: loading.value,
-        t: common_vendor.o(handleRegisterClick)
+        t: common_vendor.t(isFavorite.value ? "已收藏" : "收藏"),
+        v: common_vendor.o(toggleFavorite),
+        w: loading.value,
+        x: common_vendor.o(handleRegisterClick)
       });
     };
   }

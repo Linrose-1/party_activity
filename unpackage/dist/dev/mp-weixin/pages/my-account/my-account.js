@@ -196,45 +196,60 @@ const _sfc_main = {
     };
     const tasks = common_vendor.ref([
       {
-        icon: "calendar",
-        name: "参与活动",
-        desc: "参加平台组织的线上/线下活动",
-        points: "+5分/次",
-        path: "/pages/active/active"
-      },
-      {
         icon: "flag",
-        name: "组织活动",
-        desc: "成功组织并举办一次活动",
+        name: "发起聚会",
+        desc: "成功发起并举办一次聚会",
         points: "+30分/次",
         path: "/pages/active-publish/active-publish"
       },
       {
+        icon: "calendar",
+        name: "参与聚会",
+        desc: "参加平台组织的聚会",
+        points: "+5分/次",
+        path: "/pages/active/active"
+      },
+      {
+        icon: "chat",
+        name: "分享聚会",
+        desc: "分享有价值的聚会",
+        points: "+5分/次",
+        path: "/pages/active/active"
+      },
+      {
         icon: "sound",
-        name: "分享商机",
+        name: "发布商机",
         desc: "分享有价值的商业机会",
-        points: "+10分/次",
+        points: "+5分/次",
         path: "/pages/home/home"
       },
       {
+        icon: "mic",
+        name: "评论商机",
+        desc: "对他人分享的商机进行评价",
+        points: "+5分/次",
+        path: "/pages/home-commercialDetail/home-commercialDetail"
+      },
+      {
         icon: "personadd",
-        name: "邀请好友",
-        desc: "成功邀请好友注册并认证",
-        points: "+20分/人",
+        name: "分享名片",
+        desc: "分享个人名片卡片",
+        points: "+5分/人",
         path: "/pages/my-businessCard/my-businessCard"
+      },
+      {
+        icon: "personadd",
+        name: "邀请注册",
+        desc: "邀请新用户进行注册",
+        points: "+5分/人",
+        path: "/pages/index/index"
+      },
+      {
+        icon: "star",
+        name: "其他贡献",
+        desc: "用户在平台的其他贡献",
+        points: "+5分"
       }
-      // {
-      // 	icon: 'chat',
-      // 	name: '每日签到',
-      // 	desc: '每日登录并签到',
-      // 	points: '+1分/天'
-      // },
-      // {
-      // 	icon: 'star',
-      // 	name: '完善资料',
-      // 	desc: '完善个人和企业资料',
-      // 	points: '+50分'
-      // },
     ]);
     const handleTaskClick = (task) => {
       if (!task.path) {
@@ -247,7 +262,7 @@ const _sfc_main = {
       common_vendor.index.navigateTo({
         url: task.path,
         fail: (err) => {
-          common_vendor.index.__f__("error", "at pages/my-account/my-account.vue:556", `跳转失败: ${err.errMsg}`);
+          common_vendor.index.__f__("error", "at pages/my-account/my-account.vue:572", `跳转失败: ${err.errMsg}`);
           common_vendor.index.showToast({
             title: "请手动前往对应页面",
             icon: "none"
@@ -256,14 +271,14 @@ const _sfc_main = {
       });
     };
     const handleExchangeSmartRice = () => {
-      common_vendor.index.__f__("log", "at pages/my-account/my-account.vue:566", "用户点击了申请兑换，准备跳转到兑换页面...");
+      common_vendor.index.__f__("log", "at pages/my-account/my-account.vue:582", "用户点击了申请兑换，准备跳转到兑换页面...");
       common_vendor.index.showToast({
         title: "兑换页面开发中...",
         icon: "none"
       });
     };
     const handleRechargeSmartRice = () => {
-      common_vendor.index.__f__("log", "at pages/my-account/my-account.vue:575", "用户点击了充值智米，跳转到充值页面...");
+      common_vendor.index.__f__("log", "at pages/my-account/my-account.vue:591", "用户点击了充值智米，跳转到充值页面...");
       common_vendor.index.navigateTo({
         url: "/pages/recharge/recharge"
         // 跳转到充值页面

@@ -34,10 +34,10 @@ const _sfc_main = {
       latitude: ""
     });
     common_vendor.onShow(() => {
-      common_vendor.index.__f__("log", "at pages/home/home.vue:185", "页面显示，执行 onShow 钩子");
+      common_vendor.index.__f__("log", "at pages/home/home.vue:192", "页面显示，执行 onShow 钩子");
       loggedInUserId.value = common_vendor.index.getStorageSync("userId");
       isLogin.value = !!loggedInUserId.value;
-      common_vendor.index.__f__("log", "at pages/home/home.vue:189", "当前登录状态 isLogin:", isLogin.value);
+      common_vendor.index.__f__("log", "at pages/home/home.vue:196", "当前登录状态 isLogin:", isLogin.value);
       getBusinessOpportunitiesList(true);
     });
     common_vendor.onReachBottom(() => {
@@ -46,7 +46,7 @@ const _sfc_main = {
       }
     });
     common_vendor.onPullDownRefresh(() => {
-      common_vendor.index.__f__("log", "at pages/home/home.vue:202", "用户触发了下拉刷新");
+      common_vendor.index.__f__("log", "at pages/home/home.vue:209", "用户触发了下拉刷新");
       getBusinessOpportunitiesList(true);
     });
     function formatTimestamp(timestamp) {
@@ -82,13 +82,19 @@ const _sfc_main = {
         params.latitude = location.latitude;
       }
       try {
-        const { data: apiData, error } = await utils_request.request("/app-api/member/business-opportunities/list", {
+        const {
+          data: apiData,
+          error
+        } = await utils_request.request("/app-api/member/business-opportunities/list", {
           method: "GET",
           data: params
         });
         if (error) {
           loadingStatus.value = "more";
-          common_vendor.index.showToast({ title: `加载失败: ${error}`, icon: "none" });
+          common_vendor.index.showToast({
+            title: `加载失败: ${error}`,
+            icon: "none"
+          });
           return;
         }
         if (!apiData || !apiData.list) {
@@ -135,9 +141,12 @@ const _sfc_main = {
           pageNo.value++;
         }
       } catch (err) {
-        common_vendor.index.__f__("error", "at pages/home/home.vue:305", "getBusinessOpportunitiesList 逻辑异常:", err);
+        common_vendor.index.__f__("error", "at pages/home/home.vue:319", "getBusinessOpportunitiesList 逻辑异常:", err);
         loadingStatus.value = "more";
-        common_vendor.index.showToast({ title: "页面逻辑异常，请稍后重试", icon: "none" });
+        common_vendor.index.showToast({
+          title: "页面逻辑异常，请稍后重试",
+          icon: "none"
+        });
       } finally {
         common_vendor.index.stopPullDownRefresh();
       }
@@ -280,7 +289,7 @@ const _sfc_main = {
           method: "POST",
           data: requestData
         });
-        common_vendor.index.__f__("log", "at pages/home/home.vue:469", "触发收藏", result);
+        common_vendor.index.__f__("log", "at pages/home/home.vue:486", "触发收藏", result);
         if (result && result.error) {
           post.isSaved = originalStatus;
           common_vendor.index.showToast({
@@ -302,6 +311,44 @@ const _sfc_main = {
       } finally {
         isActionInProgress.value = false;
       }
+    };
+    const deletePost = (postToDelete) => {
+      common_vendor.index.showModal({
+        title: "确认删除",
+        content: "您确定要删除这条商机吗？删除后将无法恢复。",
+        success: async (res) => {
+          if (res.confirm) {
+            common_vendor.index.showLoading({
+              title: "删除中..."
+            });
+            const {
+              error
+            } = await utils_request.request("/app-api/member/business-opportunities/delete", {
+              method: "POST",
+              data: {
+                id: postToDelete.id
+                // 使用传入的 post 对象的 ID
+              }
+            });
+            common_vendor.index.hideLoading();
+            if (error) {
+              common_vendor.index.showToast({
+                title: "删除失败: " + error,
+                icon: "none"
+              });
+              return;
+            }
+            common_vendor.index.showToast({
+              title: "删除成功",
+              icon: "success"
+            });
+            const index = postList.value.findIndex((p) => p.id === postToDelete.id);
+            if (index !== -1) {
+              postList.value.splice(index, 1);
+            }
+          }
+        }
+      });
     };
     const toggleFollow = async (post) => {
       if (isActionInProgress.value)
@@ -386,7 +433,7 @@ const _sfc_main = {
       const defaultAvatar = "/static/images/default-avatar.png";
       const avatarUrl = user.avatar || defaultAvatar;
       const url = `/pages/applicationBusinessCard/applicationBusinessCard?id=${user.id}&name=${encodeURIComponent(user.name)}&avatar=${encodeURIComponent(avatarUrl)}`;
-      common_vendor.index.__f__("log", "at pages/home/home.vue:620", "从商机列表页跳转，URL:", url);
+      common_vendor.index.__f__("log", "at pages/home/home.vue:684", "从商机列表页跳转，URL:", url);
       common_vendor.index.navigateTo({
         url
       });
@@ -451,7 +498,7 @@ const _sfc_main = {
                 b: tagIndex
               };
             })
-          } : {}, isLogin.value ? {
+          } : {}, isLogin.value ? common_vendor.e({
             n: "07e72d3c-2-" + i0,
             o: common_vendor.p({
               type: "hand-up-filled",
@@ -490,10 +537,19 @@ const _sfc_main = {
             }),
             E: common_vendor.t(post.isSaved ? "已收藏" : "收藏"),
             F: post.isSaved ? 1 : "",
-            G: common_vendor.o(($event) => toggleSave(post), post.id)
-          } : {}, {
-            H: post.id,
-            I: common_vendor.o(($event) => handlePostClick(post), post.id)
+            G: common_vendor.o(($event) => toggleSave(post), post.id),
+            H: isLogin.value && loggedInUserId.value === post.user.id
+          }, isLogin.value && loggedInUserId.value === post.user.id ? {
+            I: "07e72d3c-7-" + i0,
+            J: common_vendor.p({
+              type: "trash",
+              size: "20",
+              color: "#e74c3c"
+            }),
+            K: common_vendor.o(($event) => deletePost(post), post.id)
+          } : {}) : {}, {
+            L: post.id,
+            M: common_vendor.o(($event) => handlePostClick(post), post.id)
           });
         }),
         q: isLogin.value,

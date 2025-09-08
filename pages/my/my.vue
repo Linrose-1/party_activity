@@ -49,7 +49,8 @@
 			</view>
 			<view class="account-grid">
 				<!-- v-for 循环使用计算属性 accountList -->
-				<view class="account-item" v-for="item in accountList" :key="item.label"  @tap="navigateToAccountDetail(item)">
+				<view class="account-item" v-for="item in accountList" :key="item.label"
+					@tap="navigateToAccountDetail(item)">
 					<view class="account-value">{{ item.value }}</view>
 					<view class="account-label">{{ item.label }}</view>
 				</view>
@@ -85,7 +86,7 @@
 
 
 
-				<view class="qrcode-section"  @tap="onViewDetail">
+				<view class="qrcode-section" @tap="onViewDetail">
 					<text class="qrcode-title">微信二维码 - 扫码添加好友</text>
 					<view class="qrcode-container">
 						<!-- 动态绑定微信二维码，提供一个默认图 -->
@@ -240,7 +241,7 @@
 		}
 		return title || company || '暂未设置职位和公司';
 	});
-	
+
 	/**
 	 * 【新增】处理账户信息区域点击跳转的方法
 	 * @param {object} item - 被点击的账户项，包含 path 属性
@@ -264,7 +265,7 @@
 		{
 			name: '我的聚会',
 			desc: '已报名/已发布的聚会',
-			icon: '../../static/icon/活动.png',
+			icon: '../../static/icon/聚会.png',
 			path: '/pages/my-active/my-active'
 		},
 		{
@@ -281,7 +282,7 @@
 		},
 		{
 			name: '我的收藏',
-			desc: '收藏的活动和商机',
+			desc: '收藏的聚会和商机',
 			icon: '../../static/icon/收藏.png',
 			path: '/pages/my-collection/my-collection'
 		},
@@ -408,6 +409,7 @@
 		border-radius: 10rpx;
 		overflow: hidden;
 		margin-right: 20rpx;
+		flex-shrink: 0;
 	}
 
 	.avatar-img {
@@ -489,13 +491,13 @@
 
 	.account-item {
 		text-align: center;
-	    padding: 10rpx 0;
-	    border-radius: 12rpx;
-	    transition: background-color 0.2s;
+		padding: 10rpx 0;
+		border-radius: 12rpx;
+		transition: background-color 0.2s;
 	}
-	
+
 	.account-item:active {
-	    background-color: #f5f5f5;
+		background-color: #f5f5f5;
 	}
 
 
@@ -608,7 +610,7 @@
 		background: rgba(255, 255, 255, 0.2);
 		padding: 20rpx;
 		border-radius: 20rpx;
-		margin: 30rpx  0;
+		margin: 30rpx 0;
 	}
 
 	.contact-item {

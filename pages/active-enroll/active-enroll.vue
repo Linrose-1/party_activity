@@ -1,7 +1,14 @@
 <template>
-	<view class="container">
+	<view class="container"><!-- 实名认证引导提示 -->
+		<view v-if="!isUserVerified" class="auth-reminder" @click="goToAuthPage">
+			<uni-icons type="info-filled" size="18" color="#e6a23c"></uni-icons>
+			<text class="reminder-text">为保障活动用户安全，请先进行实名认证，点击前往</text>
+			<text class="reminder-arrow">›</text>
+		</view>
+
+
 		<view class="header">
-			<!-- 【修改】动态绑定聚会标题 -->
+			<!-- 动态绑定聚会标题 -->
 			<h1>{{ activityDetail ? activityDetail.activityTitle : '聚会报名' }}</h1>
 		</view>
 
@@ -112,8 +119,29 @@
 				ⓘ请上传带支付订单号的付款凭证截图（微信支付-->账单详情页）
 			</view>
 
-			<!-- 【修改】绑定真实的提交方法 -->
-			<button class="btn" :class="{ 'btn-disabled': !formData.paymentScreenshotUrl }" @click="joinActivity">
+			<view class="agreement-section">
+				<!-- 用户协议勾选框 -->
+				<view class="agreement-checkbox">
+					<radio :checked="agreedToTerms" @click="toggleAgreement" color="#FF6E00"
+						style="transform:scale(0.8)" />
+					<view class="agreement-text">
+						我已充分知悉并同意
+						<text class="link" @click.stop="navigateToAgreement">《用户协议》</text>
+					</view>
+				</view>
+
+				<!-- 风险提示 -->
+				<view class="risk-warning">
+					<view class="risk-title">猩聚会聚会风险提示</view>
+					<view class="risk-content">
+						猩聚会为平台用户提供自主化的主题聚会/聚会的组织工具，平台会通过腾讯风控系统对小程序的风控措施与要求，对聚会上传的文案与图片进行基本审核，但对主题聚会/聚会组织者以及聚会/聚会本身的动机与环境不能给予足够完善或全面的审核，请用户务必基于实际风险判断决定是否参与主题聚会/聚会；主题聚会/聚会组织者有义务与责任，共同监督与杜绝欺瞒、诈骗甚至人身安全等商业社交风险的发生，并对聚会/聚会中发生的以上商业社交风险负有全部责任。
+					</view>
+				</view>
+			</view>
+
+			<!-- 绑定真实的提交方法 -->
+			<button class="btn" :class="{ 'btn-disabled': !formData.paymentScreenshotUrl || !agreedToTerms }"
+				@click="joinActivity">
 				提交报名信息
 			</button>
 		</view>
@@ -165,6 +193,34 @@
 	import request from '../../utils/request.js';
 	import uploadFile from '../../utils/upload.js';
 
+	const isUserVerified = ref(true); // 默认为 true，避免页面闪烁
+
+	// 检查用户实名认证状态的函数
+	const checkUserVerificationStatus = async () => {
+		const {
+			data,
+			error
+		} = await request('/app-api/member/user/get', {
+			method: 'GET'
+		});
+		if (!error && data) {
+			// 如果 idCard 字段为空或 null，则视为未实名
+			isUserVerified.value = !!data.idCard;
+		} else {
+			// 获取用户信息失败，也按未认证处理，但这里我们先假设已认证，避免不必要的打扰
+			// 真正的拦截会在提交时由后端完成
+			isUserVerified.value = false; // 或者根据业务需要设为 false
+			console.log('获取用户信息失败，无法确认实名状态。');
+		}
+	};
+
+	// 跳转到实名认证页面的函数
+	const goToAuthPage = () => {
+		uni.navigateTo({
+			url: '/pages/my-auth/my-auth'
+		});
+	};
+
 	const currentStep = ref(1);
 
 	const formData = reactive({
@@ -178,9 +234,13 @@
 	const activityId = ref(null);
 	const activityDetail = ref(null);
 
+	const agreedToTerms = ref(false);
+
 	const ticketNumber = ref('');
 
 	onLoad((options) => {
+		checkUserVerificationStatus();
+
 		if (options.id) {
 			activityId.value = options.id;
 			// 【修改】现在 getActiveDetail 会处理所有逻辑
@@ -195,6 +255,18 @@
 			setTimeout(() => uni.navigateBack(), 1500);
 		}
 	});
+
+	// 切换协议勾选状态的方法
+	const toggleAgreement = () => {
+		agreedToTerms.value = !agreedToTerms.value;
+	};
+
+	// 跳转到用户协议页面的方法
+	const navigateToAgreement = () => {
+		uni.navigateTo({
+			url: '/pages/user-agreement/user-agreement'
+		});
+	};
 
 	const currentDate = new Date().toLocaleString('zh-CN', {
 		year: 'numeric',
@@ -381,6 +453,14 @@
 			return;
 		}
 
+		if (!agreedToTerms.value) {
+			uni.showToast({
+				title: '请先阅读并同意用户协议',
+				icon: 'none'
+			});
+			return;
+		}
+
 		uni.showLoading({
 			title: '提交中...',
 			mask: true
@@ -415,17 +495,40 @@
 		uni.hideLoading();
 
 		if (result && !result.error) {
+			// 报名成功
 			uni.showToast({
 				title: '报名成功！',
 				icon: 'success'
 			});
 			currentStep.value = 3;
 		} else {
-			console.log('报名失败:', result ? result.error : '无返回结果');
-			uni.showToast({
-				title: result.error || '报名失败，请重试',
-				icon: 'none'
-			});
+			// 报名失败，处理错误
+			const error = result.error;
+
+			// 判断是否是 453 未实名错误
+			if (typeof error === 'object' && error !== null && error.code === 453) {
+				// 弹出提示框引导用户去认证
+				uni.showModal({
+					title: '认证提醒',
+					content: error.msg || '报名聚会需要先完成实名认证，是否现在就去认证？',
+					confirmText: '去认证',
+					cancelText: '取消',
+					success: (res) => {
+						if (res.confirm) {
+							// 用户确认，跳转到实名认证页面
+							uni.navigateTo({
+								url: '/pages/my-auth/my-auth'
+							});
+						}
+					}
+				});
+			} else {
+				// 其他所有类型的错误
+				uni.showToast({
+					title: (typeof error === 'string' ? error : error.msg) || '报名失败，请重试',
+					icon: 'none'
+				});
+			}
 		}
 	};
 
@@ -461,12 +564,6 @@
 
 
 <style scoped>
-	/* body {
-  font-family: 'PingFang SC', 'Helvetica Neue', Arial, sans-serif;
-  background-color: #f5f5f5;
-  color: #333;
-  padding: 20rpx;
-} */
 	.container {
 		max-width: 500px;
 		margin: 0 auto;
@@ -475,6 +572,30 @@
 		overflow: hidden;
 		box-shadow: 0 10rpx 30rpx rgba(0, 0, 0, 0.05);
 	}
+
+	.auth-reminder {
+		display: flex;
+		align-items: center;
+		padding: 20rpx;
+		/* 为了美观，可以调整外边距，让它在白色容器内部显示 */
+		margin: 20rpx 30rpx 0;
+		background-color: #fdf6ec;
+		border: 1rpx solid #faecd8;
+		border-radius: 12rpx;
+		color: #e6a23c;
+		font-size: 26rpx;
+	}
+
+	.reminder-text {
+		flex: 1;
+		margin: 0 16rpx;
+	}
+
+	.reminder-arrow {
+		font-size: 32rpx;
+		color: #c0c4cc;
+	}
+
 
 	.header {
 		text-align: center;
@@ -753,5 +874,45 @@
 		font-size: 24rpx;
 		border-top: 1rpx solid #eee;
 		margin-top: 30rpx;
+	}
+
+	.agreement-section {
+		margin-top: 40rpx;
+		margin-bottom: 20rpx;
+	}
+
+	.agreement-checkbox {
+		display: flex;
+		align-items: center;
+		margin-bottom: 30rpx;
+	}
+
+	.agreement-text {
+		font-size: 26rpx;
+		color: #606266;
+		margin-left: 10rpx;
+	}
+
+	.agreement-text .link {
+		color: #FF6E00;
+		/* 主题色 */
+		text-decoration: none;
+		/* 去掉下划线，如果需要可以保留 */
+	}
+
+	.risk-warning {
+		background-color: #f5f5f5;
+		border-radius: 12rpx;
+		padding: 20rpx;
+		font-size: 24rpx;
+		color: #909399;
+		line-height: 1.6;
+	}
+
+	.risk-title {
+		font-weight: bold;
+		color: #606266;
+		margin-bottom: 10rpx;
+		text-align: center;
 	}
 </style>

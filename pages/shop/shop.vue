@@ -511,7 +511,7 @@
 		border: none;
 	}
 
-	/* 【新增】轮播图样式，与活动页保持一致 */
+	/* 【新增】轮播图样式，与聚会页保持一致 */
 	.swiper-section {
 		margin-top: 20rpx; // 与搜索框拉开一点距离
 		border-radius: 16rpx;

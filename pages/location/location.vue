@@ -14,7 +14,7 @@
 					<uni-icons type="hand-up" size="60" color="#FFFFFF" class="shake-icon" />
 					<text>摇一摇</text>
 				</view>
-				<text class="shake-hint">点击按钮或晃动手机，发现附近的活动和商友</text>
+				<text class="shake-hint">点击按钮或晃动手机，发现附近的聚会和商友</text>
 			</view>
 
 			<!-- 2. 加载中界面 (v-else-if="loading") -->
@@ -25,7 +25,7 @@
 
 			<!-- 3. 结果列表界面 (v-else) -->
 			<view v-else class="list-container fade-in">
-				<!-- 活动列表 -->
+				<!-- 聚会列表 -->
 				<view v-show="currentTab === 0">
 					<view class="list-title">
 						<uni-icons type="staff-filled" size="20" color="#FF6B00" />
@@ -37,10 +37,10 @@
 						<view class="business-info">
 							<view class="business-name">{{ business.nickname }}</view>
 							<view class="card-position" v-if="business.professionalTitle">
-								<text class="iconfont">👤</text> {{ business.professionalTitle }}
+								<text class="iconfont">??</text> {{ business.professionalTitle }}
 							</view>
 							<view class="card-company" v-if="business.companyName">
-								<text class="iconfont">🏢</text> {{ business.companyName }}
+								<text class="iconfont">??</text> {{ business.companyName }}
 							</view>
 						</view>
 						<!-- 【核心修改】按钮状态绑定到 followFlag，并调用统一的 handleFollowAction 方法 -->
@@ -59,12 +59,13 @@
 				<view v-show="currentTab === 1">
 					<view class="list-title">
 						<uni-icons type="calendar-filled" size="20" color="#FF6B00" />
-						<text>附近活动</text>
+						<text>附近聚会</text>
 					</view>
-					<ActivityCard v-for="activity in activities" :key="activity.id" :activity="activity" />
+					<ActivityCard v-for="activity in activities" :key="activity.id" :activity="activity"
+						:is-login="isUserLoggedIn" />
 					<uni-load-more :status="activityLoadingStatus"></uni-load-more>
 					<view v-if="activities.length === 0 && activityLoadingStatus === 'noMore'" class="no-more-content">
-						附近暂无活动，去别处看看吧
+						附近暂无聚会，去别处看看吧
 					</view>
 
 
@@ -82,16 +83,29 @@
 	import {
 		onReachBottom,
 		onShow,
-		onHide
+		onHide,
+		onLoad
 	} from '@dcloudio/uni-app';
 	import ActivityCard from '@/components/ActivityCard.vue';
 	import request from '../../utils/request.js';
+	import {
+		useShakeLock
+	} from '@/utils/shakeLock.js';
 
 	let shakeAudioContext = null;
 
+	const {
+		isShakeLocked,
+		lockShake
+	} = useShakeLock();
+
+	const isUserLoggedIn = ref(false);
+
+	const autoShakeOnLoad = ref(false);
+
 	// --- 状态管理 ---
 	const currentTab = ref(0);
-	const tabItems = ['商友', '活动'];
+	const tabItems = ['商友', '聚会'];
 	const shaken = ref(false); // 是否已经摇过并显示结果
 	const loading = ref(false); // 是否正在加载数据（摇动后）
 	const shakeDebounce = ref(true); // 摇一摇的防抖
@@ -119,23 +133,32 @@
 		businessPageNo.value = 1;
 		activityLoadingStatus.value = 'more';
 		businessLoadingStatus.value = 'more';
-		shakeDebounce.value = true;
+		// shakeDebounce.value = true;
 	};
 
 	// --- 方法 ---
+	const checkLoginStatus = () => {
+		const token = uni.getStorageSync('token');
+		isUserLoggedIn.value = !!token; // 如果token存在，则为true，否则为false
+	};
+
+
+
 	const handleTabClick = (e) => {
 		currentTab.value = e.currentIndex;
 	};
 
 	const triggerShakeSequence = () => {
-		if (!shakeDebounce.value) return;
+		// if (!shakeDebounce.value) return;
+
+		lockShake();
 
 		if (shakeAudioContext) {
 			shakeAudioContext.stop();
 			shakeAudioContext.play();
 		}
 
-		shakeDebounce.value = false;
+		// shakeDebounce.value = false;
 		getLocationAndProceed();
 	};
 
@@ -157,7 +180,7 @@
 				uni.vibrateShort();
 
 				try {
-					// 并发请求活动和商友列表
+					// 并发请求聚会和商友列表
 					await Promise.all([
 						getNearbyActivities(true),
 						getNearbyBusinesses(true)
@@ -166,18 +189,20 @@
 					console.error('加载初始数据时发生错误:', error);
 				} finally {
 					loading.value = false; // 结束加载动画，显示结果
-					setTimeout(() => {
-						shakeDebounce.value = true;
-					}, 1000); // 1秒后允许再次摇动
+					// setTimeout(() => {
+					// 	shakeDebounce.value = true;
+					// }, 1000); // 1秒后允许再次摇动
 				}
 			},
 			fail: (err) => {
+				// 如果定位失败，也应该提前结束，此时可以提前解锁让用户重试
 				uni.hideLoading();
 				uni.showToast({
 					title: '获取位置失败',
 					icon: 'none'
 				});
-				shakeDebounce.value = true;
+				// 定位失败时，可以设置一个较短的解锁时间
+				lockShake(1000); // 锁1秒后允许重试
 			}
 		});
 	};
@@ -256,15 +281,15 @@
 	const handleFollowAction = async (user) => {
 		if (isFollowActionInProgress.value) return;
 
-		const currentUserId = uni.getStorageSync('userId');
-		if (!currentUserId) {
+		const token = uni.getStorageSync('token');
+		if (!token) {
 			uni.showModal({
 				title: '需要登录',
 				content: '关注功能需要登录后才能使用，是否前往登录？',
 				success: (res) => {
 					if (res.confirm) {
 						uni.navigateTo({
-							url: '/pages/login/login'
+							url: '/pages/index/index' // 或者你的登录页
 						});
 					}
 				}
@@ -272,9 +297,11 @@
 			return;
 		}
 
+		const currentUserId = uni.getStorageSync('userId');
+
+
 		isFollowActionInProgress.value = true;
 
-		// 【核心修改】使用 `followFlag`
 		const originalFollowStatus = user.followFlag;
 		const newFollowStatus = originalFollowStatus === 1 ? 0 : 1;
 		const apiUrl = newFollowStatus === 1 ? '/app-api/member/follow/add' : '/app-api/member/follow/del';
@@ -345,16 +372,43 @@
 	};
 
 	// --- 生命周期钩子 ---
-	onShow(() => {
-		// 【核心修改】每次进入页面，都重置状态，回到初始的摇一摇界面
-		resetState();
+	onLoad((options) => {
+		// 这个钩子只在页面首次加载时运行一次
+		if (options.autoShake === 'true') {
+			console.log("onLoad: 接收到自动摇一摇指令");
+			// 设置标记，告诉 onShow 需要立即执行
+			autoShakeOnLoad.value = true;
+		}
+	});
 
+	onShow(() => {
+		checkLoginStatus();
+
+		// 1. 保证音效实例最先被创建
 		shakeAudioContext = uni.createInnerAudioContext();
 		shakeAudioContext.src = 'https://img.gofor.club/wechat_shake.mp3';
 
+		// 2. 每次进入页面，都先重置到初始状态
+		//    这能确保 shakeDebounce.value 为 true，为摇一摇做好准备
+		resetState();
+
+		// 3. 在状态重置后，再检查是否需要自动触发
+		if (autoShakeOnLoad.value) {
+			console.log("onShow: 执行自动摇一摇流程");
+			// 直接触发摇一摇的完整流程
+			triggerShakeSequence();
+			// 【重要】用完后立即重置该指令，防止下次 onShow 时重复触发
+			autoShakeOnLoad.value = false;
+		} else {
+			console.log("onShow: 正常进入，等待用户手动触发");
+		}
+
+		// 4. 最后，为手动摇一摇开启监听
 		uni.onAccelerometerChange((res) => {
-			if (Math.abs(res.x) > 1.2 && Math.abs(res.y) > 1.2) { // 稍微调高灵敏度
-				triggerShakeSequence();
+			if (Math.abs(res.x) > 1.2 && Math.abs(res.y) > 1.2) {
+				if (!isShakeLocked.value) {
+					triggerShakeSequence();
+				}
 			}
 		});
 	});

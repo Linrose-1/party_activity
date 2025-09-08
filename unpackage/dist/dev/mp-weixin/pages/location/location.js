@@ -1,6 +1,7 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
 const utils_request = require("../../utils/request.js");
+const utils_shakeLock = require("../../utils/shakeLock.js");
 if (!Array) {
   const _easycom_uni_segmented_control2 = common_vendor.resolveComponent("uni-segmented-control");
   const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
@@ -18,11 +19,17 @@ const _sfc_main = {
   __name: "location",
   setup(__props) {
     let shakeAudioContext = null;
+    const {
+      isShakeLocked,
+      lockShake
+    } = utils_shakeLock.useShakeLock();
+    const isUserLoggedIn = common_vendor.ref(false);
+    const autoShakeOnLoad = common_vendor.ref(false);
     const currentTab = common_vendor.ref(0);
-    const tabItems = ["商友", "活动"];
+    const tabItems = ["商友", "聚会"];
     const shaken = common_vendor.ref(false);
     const loading = common_vendor.ref(false);
-    const shakeDebounce = common_vendor.ref(true);
+    common_vendor.ref(true);
     const userLocation = common_vendor.ref(null);
     const activityPageNo = common_vendor.ref(1);
     const businessPageNo = common_vendor.ref(1);
@@ -32,7 +39,7 @@ const _sfc_main = {
     const activities = common_vendor.ref([]);
     const businesses = common_vendor.ref([]);
     const resetState = () => {
-      common_vendor.index.__f__("log", "at pages/location/location.vue:113", "页面状态已重置");
+      common_vendor.index.__f__("log", "at pages/location/location.vue:127", "页面状态已重置");
       shaken.value = false;
       loading.value = false;
       activities.value = [];
@@ -41,19 +48,20 @@ const _sfc_main = {
       businessPageNo.value = 1;
       activityLoadingStatus.value = "more";
       businessLoadingStatus.value = "more";
-      shakeDebounce.value = true;
+    };
+    const checkLoginStatus = () => {
+      const token = common_vendor.index.getStorageSync("token");
+      isUserLoggedIn.value = !!token;
     };
     const handleTabClick = (e) => {
       currentTab.value = e.currentIndex;
     };
     const triggerShakeSequence = () => {
-      if (!shakeDebounce.value)
-        return;
+      lockShake();
       if (shakeAudioContext) {
         shakeAudioContext.stop();
         shakeAudioContext.play();
       }
-      shakeDebounce.value = false;
       getLocationAndProceed();
     };
     const getLocationAndProceed = () => {
@@ -78,12 +86,9 @@ const _sfc_main = {
               getNearbyBusinesses(true)
             ]);
           } catch (error) {
-            common_vendor.index.__f__("error", "at pages/location/location.vue:166", "加载初始数据时发生错误:", error);
+            common_vendor.index.__f__("error", "at pages/location/location.vue:189", "加载初始数据时发生错误:", error);
           } finally {
             loading.value = false;
-            setTimeout(() => {
-              shakeDebounce.value = true;
-            }, 1e3);
           }
         },
         fail: (err) => {
@@ -92,7 +97,7 @@ const _sfc_main = {
             title: "获取位置失败",
             icon: "none"
           });
-          shakeDebounce.value = true;
+          lockShake(1e3);
         }
       });
     };
@@ -163,21 +168,23 @@ const _sfc_main = {
     const handleFollowAction = async (user) => {
       if (isFollowActionInProgress.value)
         return;
-      const currentUserId = common_vendor.index.getStorageSync("userId");
-      if (!currentUserId) {
+      const token = common_vendor.index.getStorageSync("token");
+      if (!token) {
         common_vendor.index.showModal({
           title: "需要登录",
           content: "关注功能需要登录后才能使用，是否前往登录？",
           success: (res) => {
             if (res.confirm) {
               common_vendor.index.navigateTo({
-                url: "/pages/login/login"
+                url: "/pages/index/index"
+                // 或者你的登录页
               });
             }
           }
         });
         return;
       }
+      const currentUserId = common_vendor.index.getStorageSync("userId");
       isFollowActionInProgress.value = true;
       const originalFollowStatus = user.followFlag;
       const newFollowStatus = originalFollowStatus === 1 ? 0 : 1;
@@ -223,18 +230,34 @@ const _sfc_main = {
       const name = user.nickname || "匿名用户";
       const avatarUrl = user.avatar || defaultAvatar;
       const url = `/pages/applicationBusinessCard/applicationBusinessCard?id=${user.id}&name=${encodeURIComponent(name)}&avatar=${encodeURIComponent(avatarUrl)}`;
-      common_vendor.index.__f__("log", "at pages/location/location.vue:339", "从摇一摇页跳转，URL:", url);
+      common_vendor.index.__f__("log", "at pages/location/location.vue:366", "从摇一摇页跳转，URL:", url);
       common_vendor.index.navigateTo({
         url
       });
     };
+    common_vendor.onLoad((options) => {
+      if (options.autoShake === "true") {
+        common_vendor.index.__f__("log", "at pages/location/location.vue:378", "onLoad: 接收到自动摇一摇指令");
+        autoShakeOnLoad.value = true;
+      }
+    });
     common_vendor.onShow(() => {
-      resetState();
+      checkLoginStatus();
       shakeAudioContext = common_vendor.index.createInnerAudioContext();
       shakeAudioContext.src = "https://img.gofor.club/wechat_shake.mp3";
+      resetState();
+      if (autoShakeOnLoad.value) {
+        common_vendor.index.__f__("log", "at pages/location/location.vue:397", "onShow: 执行自动摇一摇流程");
+        triggerShakeSequence();
+        autoShakeOnLoad.value = false;
+      } else {
+        common_vendor.index.__f__("log", "at pages/location/location.vue:403", "onShow: 正常进入，等待用户手动触发");
+      }
       common_vendor.index.onAccelerometerChange((res) => {
         if (Math.abs(res.x) > 1.2 && Math.abs(res.y) > 1.2) {
-          triggerShakeSequence();
+          if (!isShakeLocked.value) {
+            triggerShakeSequence();
+          }
         }
       });
     });
@@ -310,7 +333,8 @@ const _sfc_main = {
             a: activity.id,
             b: "4d9b4fcb-5-" + i0,
             c: common_vendor.p({
-              activity
+              activity,
+              ["is-login"]: isUserLoggedIn.value
             })
           };
         }),

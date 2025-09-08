@@ -311,6 +311,7 @@
 .action-group.data-v-07e72d3c {
 		display: flex;
 		gap: 40rpx;
+		align-items: center;
 }
 .action.data-v-07e72d3c {
 		display: flex;
@@ -323,6 +324,9 @@
 }
 .action.data-v-07e72d3c:active {
 		opacity: 0.7;
+}
+.action.delete-btn.data-v-07e72d3c {
+		padding: 0 10rpx;
 }
 .content-placeholder.data-v-07e72d3c {
 		margin-top: 30rpx;

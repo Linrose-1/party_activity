@@ -19,6 +19,7 @@ const _sfc_main = {
     const enrollmentInfo = common_vendor.ref(null);
     const newProofLocalPath = common_vendor.ref("");
     const isSubmitting = common_vendor.ref(false);
+    const newProofServerUrl = common_vendor.ref("");
     common_vendor.onLoad((options) => {
       if (options.item) {
         try {
@@ -27,10 +28,15 @@ const _sfc_main = {
           enrollmentInfo.value = itemData.memberActivityJoinResp;
           rejectionMsg.value = enrollmentInfo.value.rejectMsg;
           oldProofUrl.value = enrollmentInfo.value.paymentScreenshotUrl;
-          common_vendor.index.setNavigationBarTitle({ title: "重新上传支付凭证" });
+          common_vendor.index.setNavigationBarTitle({
+            title: "重新上传支付凭证"
+          });
         } catch (e) {
-          common_vendor.index.__f__("error", "at pages/my-active-secondRegistration/my-active-secondRegistration.vue:72", "解析数据失败", e);
-          common_vendor.index.showToast({ title: "页面数据加载失败", icon: "none" });
+          common_vendor.index.__f__("error", "at pages/my-active-secondRegistration/my-active-secondRegistration.vue:82", "解析数据失败", e);
+          common_vendor.index.showToast({
+            title: "页面数据加载失败",
+            icon: "none"
+          });
         }
       }
     });
@@ -39,73 +45,101 @@ const _sfc_main = {
         count: 1,
         success: (res) => {
           newProofLocalPath.value = res.tempFilePaths[0];
+          newProofServerUrl.value = "";
         }
       });
     };
     const handleSubmit = async () => {
-      if (!newProofLocalPath.value) {
-        common_vendor.index.showToast({ title: "请先选择新的支付凭证", icon: "none" });
+      if (!newProofLocalPath.value && !newProofServerUrl.value) {
+        common_vendor.index.showToast({
+          title: "请先选择新的支付凭证",
+          icon: "none"
+        });
         return;
       }
       if (isSubmitting.value)
         return;
       isSubmitting.value = true;
-      common_vendor.index.showLoading({ title: "正在上传凭证..." });
-      const uploadResult = await utils_upload.uploadFile({ path: newProofLocalPath.value });
-      if (uploadResult.error) {
-        common_vendor.index.hideLoading();
-        isSubmitting.value = false;
-        if (uploadResult.error.includes("审核中")) {
-          common_vendor.index.showToast({
-            title: "图片正在安全审核，请稍后重试",
-            icon: "none",
-            duration: 2500
-          });
-        } else {
-          common_vendor.index.showToast({
-            title: `上传失败: ${uploadResult.error}`,
-            icon: "none",
-            duration: 2500
-          });
+      let finalImageUrl = newProofServerUrl.value;
+      if (!finalImageUrl) {
+        common_vendor.index.showLoading({
+          title: "正在上传凭证..."
+        });
+        const uploadResult = await utils_upload.uploadFile({
+          path: newProofLocalPath.value
+        });
+        if (uploadResult.error) {
+          common_vendor.index.hideLoading();
+          isSubmitting.value = false;
+          const errorMsg = uploadResult.error;
+          if (errorMsg.includes("审核中") || errorMsg.includes("内容安全")) {
+            common_vendor.index.showToast({
+              title: "图片正在安全审核，请稍后重试提交",
+              icon: "none",
+              duration: 3e3
+            });
+          } else {
+            common_vendor.index.showToast({
+              title: `上传失败: ${errorMsg}`,
+              icon: "none",
+              duration: 2500
+            });
+          }
+          return;
         }
-        return;
+        finalImageUrl = uploadResult.data;
+        newProofServerUrl.value = finalImageUrl;
       }
       try {
-        const newImageUrl = uploadResult.data;
-        common_vendor.index.showLoading({ title: "正在提交信息..." });
+        common_vendor.index.showLoading({
+          title: "正在提交信息..."
+        });
         const params = {
           id: enrollmentInfo.value.id,
           activityId: activityInfo.value.id,
           userId: enrollmentInfo.value.userId,
-          paymentScreenshotUrl: newImageUrl
+          paymentScreenshotUrl: finalImageUrl
+          // 使用最终的URL
         };
         const submitResult = await utils_request.request("/app-api/member/activity-join/upload-payment-img", {
           method: "POST",
           data: params
         });
         if (submitResult.error) {
-          throw new Error(submitResult.error);
+          if (submitResult.error.includes("审核中")) {
+            common_vendor.index.showToast({
+              title: "凭证仍在审核中，请勿重复提交",
+              icon: "none",
+              duration: 2500
+            });
+          } else {
+            throw new Error(submitResult.error);
+          }
+        } else {
+          common_vendor.index.hideLoading();
+          common_vendor.index.showToast({
+            title: "提交成功，请等待审核",
+            icon: "success",
+            duration: 2e3
+          });
+          setTimeout(() => {
+            common_vendor.index.navigateBack();
+          }, 2e3);
         }
-        common_vendor.index.hideLoading();
-        common_vendor.index.showToast({
-          title: "提交成功，请等待审核",
-          icon: "success",
-          duration: 2e3
-        });
-        setTimeout(() => {
-          common_vendor.index.navigateBack();
-        }, 2e3);
       } catch (err) {
-        common_vendor.index.hideLoading();
-        isSubmitting.value = false;
         common_vendor.index.showToast({
           title: err.message || "操作失败，请重试",
           icon: "none"
         });
+      } finally {
+        common_vendor.index.hideLoading();
+        isSubmitting.value = false;
       }
     };
     const previewImage = (urls) => {
-      common_vendor.index.previewImage({ urls });
+      common_vendor.index.previewImage({
+        urls
+      });
     };
     const formatTime = (timestamp) => {
       if (!timestamp)
