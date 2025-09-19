@@ -2,13 +2,10 @@
 	<view class="page-container">
 		<!-- 商友列表 -->
 		<view class="friend-list">
-			<view class="friend-card" v-for="friend in friendList" :key="friend.id">
-				<image 
-					class="friend-avatar" 
-					:src="friend.avatar || '/static/images/default-avatar.png'" 
-					mode="aspectFill"
-					@error="handleImageError(friend)"
-				></image>
+			<view class="friend-card" v-for="friend in friendList" :key="friend.id"
+				@click="navigateToBusinessCard(friend)">
+				<image class="friend-avatar" :src="friend.avatar || '/static/images/default-avatar.png'"
+					mode="aspectFill" @error="handleImageError(friend)"></image>
 				<view class="friend-info">
 					<view class="info-header">
 						<text class="friend-name">{{ friend.nickname || friend.realName || '匿名用户' }}</text>
@@ -23,11 +20,8 @@
 					</view>
 				</view>
 				<!-- 【新增】关注/取消关注按钮 -->
-				<button 
-					class="follow-btn" 
-					:class="{ 'followed': friend.followFlag === 1 }"
-					@click.stop="handleFollowAction(friend)"
-				>
+				<button class="follow-btn" :class="{ 'followed': friend.followFlag === 1 }"
+					@click.stop="handleFollowAction(friend)">
 					{{ friend.followFlag === 1 ? '取关' : '关注' }}
 				</button>
 			</view>
@@ -45,8 +39,14 @@
 </template>
 
 <script setup>
-	import { ref } from 'vue';
-	import { onLoad, onPullDownRefresh, onReachBottom } from '@dcloudio/uni-app';
+	import {
+		ref
+	} from 'vue';
+	import {
+		onLoad,
+		onPullDownRefresh,
+		onReachBottom
+	} from '@dcloudio/uni-app';
 	import request from '@/utils/request.js'; // 确保路径正确
 
 	// --- 响应式状态 ---
@@ -73,8 +73,11 @@
 		}
 
 		loadStatus.value = 'loading';
-		
-		const { data, error } = await request('/app-api/member/user/share-user-list', {
+
+		const {
+			data,
+			error
+		} = await request('/app-api/member/user/share-user-list', {
 			method: 'GET',
 			data: {
 				pageNo: pageNo.value,
@@ -86,10 +89,13 @@
 		if (isRefresh) {
 			uni.stopPullDownRefresh();
 		}
-		
+
 		if (error) {
 			loadStatus.value = 'more'; // 加载失败，允许重试
-			uni.showToast({ title: error, icon: 'none' });
+			uni.showToast({
+				title: error,
+				icon: 'none'
+			});
 			return;
 		}
 
@@ -97,7 +103,7 @@
 			const list = data.list || [];
 			friendList.value = isRefresh ? list : [...friendList.value, ...list];
 			total.value = data.total;
-			
+
 			// 判断是否还有更多数据
 			if (friendList.value.length >= total.value) {
 				loadStatus.value = 'noMore';
@@ -109,14 +115,14 @@
 			loadStatus.value = 'noMore';
 		}
 	};
-	
+
 	// --- 图片加载失败处理 ---
 	const handleImageError = (item) => {
 		// 你可以给 item 一个默认图片，以防止无限循环的错误
 		// 这里假设静态文件夹里有一个 default-avatar.png
 		item.avatar = '/static/images/default-avatar.png';
 	};
-	
+
 	// --- 【新增】关注/取关功能 (逻辑与摇一摇页面完全一致) ---
 	const handleFollowAction = async (user) => {
 		if (isFollowActionInProgress.value) return;
@@ -178,9 +184,44 @@
 		}
 	};
 
+	/**
+	 * @description 跳转到申请兑换名片页面
+	 * @param {object} user - 包含用户信息的对象 (id, nickname, realName, avatar)
+	 */
+	const navigateToBusinessCard = (user) => {
+		// 1. 安全检查，确保 user 对象和 id 存在
+		if (!user || !user.id) {
+			uni.showToast({
+				title: '无法查看该用户主页',
+				icon: 'none'
+			});
+			return;
+		}
+
+		// 2. 准备传递的参数，并提供默认值
+		const defaultAvatar = '/static/images/default-avatar.png'; // 确保这个默认头像图片存在
+		const name = user.nickname || user.realName || '匿名用户';
+		const avatarUrl = user.avatar || defaultAvatar;
+
+		// 3. 构建带有多参数的URL，并使用 encodeURIComponent 编码，防止特殊字符导致问题
+		const url = `/pages/applicationBusinessCard/applicationBusinessCard?id=${user.id}` +
+			`&name=${encodeURIComponent(name)}` +
+			`&avatar=${encodeURIComponent(avatarUrl)}` +
+			`&fromShare=1`;
+
+		console.log('从推荐商友页跳转到名片申请页, URL:', url);
+
+		// 4. 执行跳转
+		uni.navigateTo({
+			url: url
+		});
+	};
+
 	// --- 生命周期钩子 ---
 	onLoad(() => {
-		uni.showLoading({ title: '正在加载...' });
+		uni.showLoading({
+			title: '正在加载...'
+		});
 		getShareUserList(true).finally(() => {
 			uni.hideLoading();
 		});
@@ -216,6 +257,7 @@
 		box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.05);
 		transition: transform 0.2s ease-in-out;
 	}
+
 	.friend-card:active {
 		transform: scale(0.98);
 	}
@@ -251,7 +293,7 @@
 		overflow: hidden;
 		text-overflow: ellipsis;
 	}
-	
+
 	.friend-company,
 	.friend-title {
 		display: flex;
@@ -259,12 +301,12 @@
 		font-size: 26rpx;
 		color: #666;
 	}
-	
+
 	.friend-company uni-icons,
 	.friend-title uni-icons {
 		margin-right: 10rpx;
 	}
-	
+
 	.friend-company text,
 	.friend-title text {
 		white-space: nowrap;
@@ -283,15 +325,17 @@
 		border-radius: 40rpx;
 		font-weight: 500;
 		font-size: 26rpx;
-		margin-left: 20rpx; /* 与左侧信息区拉开距离 */
+		margin-left: 20rpx;
+		/* 与左侧信息区拉开距离 */
 		white-space: nowrap;
-		flex-shrink: 0; /* 防止按钮被压缩 */
+		flex-shrink: 0;
+		/* 防止按钮被压缩 */
 	}
-	
+
 	.follow-btn::after {
 		border: none;
 	}
-	
+
 	/* 【新增】已关注状态的样式 */
 	.follow-btn.followed {
 		background: #f0f2f5;

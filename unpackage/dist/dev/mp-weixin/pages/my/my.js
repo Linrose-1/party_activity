@@ -45,14 +45,14 @@ const _sfc_main = {
         });
         if (!error && data) {
           userInfo.value = data;
-          common_vendor.index.__f__("log", "at pages/my/my.vue:191", "getUserInfo userInfo:", userInfo.value);
+          common_vendor.index.__f__("log", "at pages/my/my.vue:166", "getUserInfo userInfo:", userInfo.value);
         } else {
-          common_vendor.index.__f__("log", "at pages/my/my.vue:193", "获取用户信息失败:", error);
+          common_vendor.index.__f__("log", "at pages/my/my.vue:168", "获取用户信息失败:", error);
           isLogin.value = false;
           userInfo.value = {};
         }
       } catch (err) {
-        common_vendor.index.__f__("log", "at pages/my/my.vue:199", "请求异常:", err);
+        common_vendor.index.__f__("log", "at pages/my/my.vue:174", "请求异常:", err);
         isLogin.value = false;
         userInfo.value = {};
       }
@@ -85,20 +85,21 @@ const _sfc_main = {
     const userTitleAndCompany = common_vendor.computed(() => {
       if (!isLogin.value)
         return "登录后查看";
-      const title = userInfo.value.professionalTitle;
-      const company = userInfo.value.companyName;
-      if (title && company) {
-        return `${title} | ${company}`;
+      const titlesString = userInfo.value.professionalTitle;
+      const companiesString = userInfo.value.companyName;
+      let firstTitle = "";
+      if (titlesString) {
+        firstTitle = titlesString.split(",")[0].trim();
       }
-      return title || company || "暂未设置职位和公司";
+      let firstCompany = "";
+      if (companiesString) {
+        firstCompany = companiesString.split(",")[0].trim();
+      }
+      if (firstTitle && firstCompany) {
+        return `${firstTitle} | ${firstCompany}`;
+      }
+      return firstTitle || firstCompany || "暂未设置职位和公司";
     });
-    const navigateToAccountDetail = (item) => {
-      if (item && item.path) {
-        common_vendor.index.navigateTo({
-          url: item.path
-        });
-      }
-    };
     const featureList = common_vendor.ref([
       {
         name: "我的订单",
@@ -165,10 +166,17 @@ const _sfc_main = {
         url: "/pages/my-edit/my-edit"
       });
     };
-    const onViewAll = () => {
+    const onViewAccountDetail = () => {
       common_vendor.index.navigateTo({
         url: "/pages/my-account/my-account"
       });
+    };
+    const navigateToAccountDetail = (item) => {
+      if (item && item.path) {
+        common_vendor.index.navigateTo({
+          url: item.path
+        });
+      }
     };
     const copyToClipboard = (text) => {
       if (!text) {
@@ -202,43 +210,52 @@ const _sfc_main = {
     return (_ctx, _cache) => {
       return common_vendor.e({
         a: isLogin.value
-      }, isLogin.value ? common_vendor.e({
-        b: userInfo.value.avatar || "../../static/images/default-avatar.png",
-        c: common_vendor.t(userInfo.value.nickname || "未设置昵称"),
-        d: userInfo.value.topUpLevel && userInfo.value.topUpLevel.name
-      }, userInfo.value.topUpLevel && userInfo.value.topUpLevel.name ? {
-        e: common_vendor.t(userInfo.value.topUpLevel.name)
+      }, isLogin.value ? {
+        b: common_vendor.o(onEdit),
+        c: common_vendor.o(onViewAccountDetail)
       } : {}, {
-        f: common_vendor.t(userTitleAndCompany.value),
-        g: common_vendor.t(userInfo.value.parentName || "无"),
-        h: common_vendor.o(onEdit),
-        i: common_vendor.o(onEdit),
-        j: userInfo.value.id
+        d: isLogin.value
+      }, isLogin.value ? common_vendor.e({
+        e: userInfo.value.avatar || "../../static/images/default-avatar.png",
+        f: common_vendor.o(onEdit),
+        g: common_vendor.t(userInfo.value.nickname || "未设置昵称"),
+        h: userInfo.value.topUpLevel && userInfo.value.topUpLevel.name
+      }, userInfo.value.topUpLevel && userInfo.value.topUpLevel.name ? {
+        i: common_vendor.t(userInfo.value.topUpLevel.name)
+      } : {}, {
+        j: userInfo.value.nickname === "微信用户"
+      }, userInfo.value.nickname === "微信用户" ? {
+        k: common_vendor.o(onEdit)
+      } : {}, {
+        l: common_vendor.t(userTitleAndCompany.value),
+        m: common_vendor.t(userInfo.value.parentName || "无"),
+        n: userInfo.value.id
       }, userInfo.value.id ? {
-        k: common_vendor.t(userInfo.value.virtualId)
-      } : {}) : {
-        l: common_vendor.p({
-          type: "person-filled",
-          size: "30",
-          color: "#FF8C00"
-        }),
-        m: common_vendor.o(skipToLogin)
-      }, {
-        n: common_vendor.o(onViewAll),
-        o: common_vendor.f(accountList.value, (item, k0, i0) => {
+        o: common_vendor.t(userInfo.value.virtualId)
+      } : {}, {
+        p: common_vendor.o(onViewAccountDetail),
+        q: common_vendor.f(accountList.value, (item, k0, i0) => {
           return {
             a: common_vendor.t(item.value),
             b: common_vendor.t(item.label),
             c: item.label,
             d: common_vendor.o(($event) => navigateToAccountDetail(item), item.label)
           };
+        })
+      }) : {
+        r: common_vendor.p({
+          type: "person-filled",
+          size: "30",
+          color: "#FF8C00"
         }),
-        p: common_vendor.o(onViewDetail),
-        q: userInfo.value.wechatQrCodeUrl || "../../static/images/default-qrcode.png",
-        r: common_vendor.o(onViewDetail),
-        s: common_vendor.t(userInfo.value.shardCode || "暂无"),
-        t: common_vendor.o(($event) => copyToClipboard(userInfo.value.shardCode)),
-        v: common_vendor.f(featureList.value, (item, k0, i0) => {
+        s: common_vendor.o(skipToLogin)
+      }, {
+        t: common_vendor.o(onViewDetail),
+        v: userInfo.value.wechatQrCodeUrl || "../../static/images/default-qrcode.png",
+        w: common_vendor.o(onViewDetail),
+        x: common_vendor.t(userInfo.value.shardCode || "暂无"),
+        y: common_vendor.o(($event) => copyToClipboard(userInfo.value.shardCode)),
+        z: common_vendor.f(featureList.value, (item, k0, i0) => {
           return {
             a: item.icon,
             b: common_vendor.t(item.name),

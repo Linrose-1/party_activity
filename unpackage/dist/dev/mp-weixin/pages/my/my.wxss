@@ -1,42 +1,80 @@
 
-	/* 主页面样式 */
+	/* --- 页面基础 --- */
 .container.data-v-2f1ef635 {
 		padding: 30rpx;
+		background-color: #f9f9f9;
 }
+
+	/* --- 1. 数字身份模块 (user-header) --- */
 .user-header.data-v-2f1ef635 {
 		background: linear-gradient(135deg, #FF8C00, #FF6B00);
-		padding: 40rpx;
+		padding: 30rpx;
 		border-radius: 20rpx;
 		color: white;
-		position: relative;
+		display: flex;
+		flex-direction: column;
+		margin-bottom: 30rpx;
 }
-.user-id-display.data-v-2f1ef635 {
-		position: absolute;
-		bottom: 20rpx;
-		right: 30rpx;
-		font-size: 22rpx;
-		color: rgba(255, 255, 255, 0.7);
-		background-color: rgba(0, 0, 0, 0.1);
-		padding: 4rpx 12rpx;
-		border-radius: 10rpx;
+
+	/* 1.1 模块头部：标题与操作按钮 */
+.section-header.data-v-2f1ef635 {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 30rpx;
+		width: 100%;
+}
+.section-title-main.data-v-2f1ef635 {
+		font-size: 32rpx;
+		font-weight: bold;
+		color: #FF8000;
+}
+.white-text.data-v-2f1ef635 {
+		color: white;
+}
+.header-actions.data-v-2f1ef635 {
+		display: flex;
+		gap: 20rpx;
+}
+.header-action-btn.data-v-2f1ef635 {
+		font-size: 26rpx;
+		color: rgba(255, 255, 255, 0.9);
+		background: rgba(255, 255, 255, 0.2);
+		padding: 8rpx 18rpx;
+		border-radius: 30rpx;
+}
+
+	/* ==================== 【【【核心修复】】】 ==================== */
+	/* 1.2 用户信息主体 */
+.user-info-wrapper.data-v-2f1ef635 {
+		width: 100%;
+		display: flex;
+		flex-direction: column;
+		/* (1) 关键：改为垂直堆叠 */
+}
+.user-info-main.data-v-2f1ef635 {
+		display: flex;
+		align-items: center;
+		width: 100%;
+		/* 确保 main 部分撑满宽度 */
 }
 .avatar.data-v-2f1ef635 {
 		width: 140rpx;
 		height: 140rpx;
 		border-radius: 10rpx;
 		overflow: hidden;
-		margin-right: 20rpx;
+		margin-right: 30rpx;
 		flex-shrink: 0;
+		border: 4rpx solid rgba(255, 255, 255, 0.3);
 }
 .avatar-img.data-v-2f1ef635 {
 		width: 100%;
 		height: 100%;
 		object-fit: cover;
 }
-.user-info.data-v-2f1ef635 {
-		display: flex;
-		align-items: center;
-		margin-bottom: 20rpx;
+.user-details.data-v-2f1ef635 {
+		flex: 1;
+		min-width: 0;
 }
 .user-name.data-v-2f1ef635 {
 		font-size: 36rpx;
@@ -51,48 +89,39 @@
 		border-radius: 20rpx;
 		margin-left: 10rpx;
 		font-size: 22rpx;
+		flex-shrink: 0;
 }
 .user-title.data-v-2f1ef635,
 	.user-company.data-v-2f1ef635 {
 		font-size: 24rpx;
 		margin-top: 6rpx;
+		opacity: 0.9;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
 }
-.edit-btn.data-v-2f1ef635 {
-		position: absolute;
-		right: 30rpx;
-		top: 30rpx;
-		font-size: 28rpx;
-		background: rgba(255, 255, 255, 0.2);
-		padding: 10rpx 20rpx;
-		border-radius: 30rpx;
-		cursor: pointer;
+.user-id-display.data-v-2f1ef635 {
+		font-size: 22rpx;
+		color: rgba(255, 255, 255, 0.7);
+		background-color: rgba(0, 0, 0, 0.1);
+		padding: 4rpx 12rpx;
+		border-radius: 10rpx;
+		align-self: flex-end;
+		/* (2) 关键：使其在自己的行内靠右 */
+		margin-top: 10rpx;
+		/* (3) 关键：与上方信息拉开距离 */
 }
-.section-header.data-v-2f1ef635 {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		margin-bottom: 20rpx;
-}
-.section-title-main.data-v-2f1ef635 {
-		font-size: 32rpx;
-		font-weight: bold;
-}
-.view-all.data-v-2f1ef635 {
-		font-size: 28rpx;
-		color: #3a7bd5;
-		cursor: pointer;
-}
-.account-section.data-v-2f1ef635,
-	.features-section.data-v-2f1ef635 {
-		background: #fff;
-		padding: 30rpx;
-		border-radius: 20rpx;
-		margin-top: 50rpx;
-}
+
+	/* ========================================================== */
+
+	/* 1.3 账户信息网格 */
 .account-grid.data-v-2f1ef635 {
 		display: grid;
 		grid-template-columns: repeat(4, 1fr);
 		gap: 20rpx;
+		margin-top: 30rpx;
+		padding-top: 30rpx;
+		border-top: 1rpx solid rgba(255, 255, 255, 0.2);
 }
 .account-item.data-v-2f1ef635 {
 		text-align: center;
@@ -101,118 +130,67 @@
 		transition: background-color 0.2s;
 }
 .account-item.data-v-2f1ef635:active {
-		background-color: #f5f5f5;
+		background-color: rgba(0, 0, 0, 0.1);
 }
 .account-value.data-v-2f1ef635 {
 		font-size: 36rpx;
-		color: #FF6B00;
+		color: #fff;
 		font-weight: bold;
 }
 .account-label.data-v-2f1ef635 {
 		font-size: 24rpx;
-		color: #666;
+		color: rgba(255, 255, 255, 0.8);
 }
-.feature-item.data-v-2f1ef635 {
+
+	/* 1.4 未登录状态 */
+.login-prompt.data-v-2f1ef635 {
 		display: flex;
 		align-items: center;
-		background: #f9f9f9;
-		padding: 20rpx;
-		border-radius: 20rpx;
-		margin-bottom: 20rpx;
+		padding: 20rpx 0;
 }
-.feature-icon.data-v-2f1ef635 {
-		width: 60rpx;
-		height: 60rpx;
-		font-size: 32rpx;
-		color: #FF6B00;
-		margin-right: 20rpx;
+.login-prompt-avatar.data-v-2f1ef635 {
+		width: 140rpx;
+		height: 140rpx;
+		border-radius: 50%;
+		background-color: rgba(255, 255, 255, 0.9);
 		display: flex;
 		align-items: center;
 		justify-content: center;
+		margin-right: 20rpx;
 }
-.feature-name.data-v-2f1ef635 {
-		font-size: 28rpx;
+.login-prompt-text.data-v-2f1ef635 {
+		font-size: 36rpx;
 		font-weight: bold;
-		color: #333;
+		color: white;
 }
-.feature-desc.data-v-2f1ef635 {
-		font-size: 24rpx;
-		color: #999;
-}
-.chevron-icon.data-v-2f1ef635 {
-		font-size: 30rpx;
-		color: #ccc;
+.login-prompt-arrow.data-v-2f1ef635 {
 		margin-left: auto;
+		font-size: 40rpx;
+		color: rgba(255, 255, 255, 0.7);
 }
 
-	/* MyCard部分样式 */
+	/* --- 2. 名片分享模块 (card-section) --- */
 .card-section.data-v-2f1ef635 {
 		background: #fff;
 		padding: 30rpx;
 		border-radius: 20rpx;
 		margin-top: 30rpx;
 }
+.card-section .section-header.data-v-2f1ef635 {
+		margin-bottom: 20rpx;
+}
+.view-all.data-v-2f1ef635 {
+		font-size: 26rpx;
+		padding: 8rpx 18rpx;
+		border-radius: 30rpx;
+		background: #f5f5f5;
+		color: #666;
+}
 .ai-card.data-v-2f1ef635 {
 		background: linear-gradient(135deg, #FF8C00, #FF6B00);
 		padding: 30rpx;
 		border-radius: 20rpx;
 		color: white;
-}
-.card-top.data-v-2f1ef635 {
-		display: flex;
-		align-items: center;
-		margin-bottom: 30rpx;
-}
-.card-avatar.data-v-2f1ef635 {
-		width: 160rpx;
-		height: 160rpx;
-		border-radius: 30rpx;
-		overflow: hidden;
-		margin-right: 20rpx;
-}
-.card-name.data-v-2f1ef635 {
-		font-size: 36rpx;
-		font-weight: bold;
-		display: flex;
-		align-items: center;
-		margin-bottom: 10rpx;
-}
-.vip-badge.data-v-2f1ef635 {
-		background: #ffd700;
-		color: #8a6d00;
-		padding: 6rpx 14rpx;
-		border-radius: 20rpx;
-		font-size: 20rpx;
-		margin-left: 10rpx;
-}
-.card-position.data-v-2f1ef635,
-	.card-company.data-v-2f1ef635 {
-		font-size: 26rpx;
-		margin-bottom: 5rpx;
-		opacity: 0.95;
-}
-.contact-info.data-v-2f1ef635 {
-		display: grid;
-		grid-template-columns: 1fr;
-		gap: 15rpx;
-		background: rgba(255, 255, 255, 0.2);
-		padding: 20rpx;
-		border-radius: 20rpx;
-		margin: 30rpx 0;
-}
-.contact-item.data-v-2f1ef635 {
-		display: flex;
-		align-items: center;
-		font-size: 26rpx;
-		cursor: pointer;
-}
-.copy-btn.data-v-2f1ef635 {
-		margin-left: auto;
-		font-size: 24rpx;
-		color: #fff;
-		background: rgba(255, 255, 255, 0.3);
-		padding: 6rpx 16rpx;
-		border-radius: 30rpx;
 }
 .qrcode-section.data-v-2f1ef635 {
 		text-align: center;
@@ -236,45 +214,74 @@
 		height: 100%;
 		object-fit: contain;
 }
-
-	/* .qrcode-actions {
-		display: flex;
-		justify-content: center;
-		margin: 20rpx 0;
-	}
-
-	.qrcode-btn {
-		background-color: #FF8F3D;
-		color: white;
-		padding: 10rpx 150rpx;
-		border-radius: 30rpx;
-		font-size: 24rpx;
-		cursor: pointer;
-	} */
-.login-prompt.data-v-2f1ef635 {
-		display: flex;
-		align-items: center;
-		padding: 20rpx 0;
-		/* 调整内边距以匹配原始布局 */
-		cursor: pointer;
+.contact-info.data-v-2f1ef635 {
+		display: grid;
+		grid-template-columns: 1fr;
+		gap: 15rpx;
+		background: rgba(255, 255, 255, 0.2);
+		padding: 20rpx;
+		border-radius: 20rpx;
+		margin: 30rpx 0;
 }
-.login-prompt-avatar.data-v-2f1ef635 {
-		width: 140rpx;
-		height: 140rpx;
-		border-radius: 50%;
-		background-color: rgba(255, 255, 255, 0.9);
+.contact-item.data-v-2f1ef635 {
 		display: flex;
 		align-items: center;
-		justify-content: center;
+		font-size: 26rpx;
+}
+.copy-btn.data-v-2f1ef635 {
+		margin-left: auto;
+		font-size: 24rpx;
+		color: #fff;
+		background: rgba(255, 255, 255, 0.3);
+		padding: 6rpx 16rpx;
+		border-radius: 30rpx;
+		flex-shrink: 0;
+}
+
+	/* --- 3. 功能中心模块 (features-section) --- */
+.features-section.data-v-2f1ef635 {
+		background: #fff;
+		padding: 30rpx;
+		border-radius: 20rpx;
+		margin-top: 30rpx;
+}
+.features-list.data-v-2f1ef635 {
+		margin-top: 20rpx;
+}
+.feature-item.data-v-2f1ef635 {
+		display: flex;
+		align-items: center;
+		background: #f9f9f5;
+		padding: 20rpx;
+		border-radius: 20rpx;
+		margin-bottom: 20rpx;
+}
+.feature-item.data-v-2f1ef635:last-child {
+		margin-bottom: 0;
+}
+.feature-icon.data-v-2f1ef635 {
+		width: 60rpx;
+		height: 60rpx;
 		margin-right: 20rpx;
 }
-.login-prompt-text.data-v-2f1ef635 {
-		font-size: 36rpx;
-		font-weight: bold;
-		color: white;
+.feature-content.data-v-2f1ef635 {
+		flex: 1;
+		min-width: 0;
 }
-.login-prompt-arrow.data-v-2f1ef635 {
+.feature-name.data-v-2f1ef635 {
+		font-size: 28rpx;
+		font-weight: bold;
+		color: #333;
+}
+.feature-desc.data-v-2f1ef635 {
+		font-size: 24rpx;
+		color: #999;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+}
+.chevron-icon.data-v-2f1ef635 {
+		font-size: 30rpx;
+		color: #ccc;
 		margin-left: auto;
-		font-size: 40rpx;
-		color: rgba(255, 255, 255, 0.7);
 }

@@ -139,9 +139,9 @@
 
 				<view class="membership-levels">
 					<view class="membership-level-item visitor"
-						:class="{'current-member-highlight': userInfo.topUpLevel.name === '游客会员'}">
+						:class="{'current-member-highlight': userInfo.topUpLevel.name === '玄铁会员'}">
 						<view class="level-icon">👤</view>
-						<view class="level-name">游客会员</view>
+						<view class="level-name">玄铁会员</view>
 						<view class="level-price">充值 0 元</view>
 					</view>
 					<view class="membership-level-item bronze-member"
@@ -351,7 +351,7 @@
 	// ======================= 会员等级模块 (已修改) =======================
 	// 定义会员等级及其门槛
 	const membershipLevels = ref([{
-			name: '游客会员',
+			name: '玄铁会员',
 			threshold: 0
 		},
 		{

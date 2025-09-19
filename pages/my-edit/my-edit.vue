@@ -24,8 +24,9 @@
 							placeholder="请输入真实姓名" /></uni-forms-item>
 					<uni-forms-item label="性别" name="sex"><uni-data-select v-model="form.sex" :localdata="genderOptions"
 							placeholder="请选择性别" /></uni-forms-item>
-					<uni-forms-item label="出生日期" name="birthday"><uni-datetime-picker type="date" :end="today"
-							return-type="string" v-model="form.birthday" /></uni-forms-item>
+					<uni-forms-item label="出生年代" name="era">
+						<uni-data-select v-model="form.era" :localdata="eraOptions" placeholder="请选择出生年代" />
+					</uni-forms-item>
 
 					<!-- 地区选择器 -->
 					<uni-forms-item label="常住地" name="locationAddress"><uni-data-picker placeholder="请选择常住地"
@@ -36,17 +37,63 @@
 							v-model="form.birthplace" /></uni-forms-item>
 
 					<!-- 更多简单输入项 -->
-					<uni-forms-item label="籍贯" name="nativePlace"><uni-easyinput v-model="form.nativePlace"
-							placeholder="请输入籍贯" /></uni-forms-item>
-					<uni-forms-item label="职业" name="professionalTitle"><uni-easyinput v-model="form.professionalTitle"
-							placeholder="请输入职业" /></uni-forms-item>
-					<uni-forms-item label="行业" name="industryId"><uni-data-picker class="industry-picker"
-							placeholder="请选择所在行业" popup-title="请选择行业" :localdata="industryTree"
-							:map="{text: 'name', value: 'id'}" v-model="form.industry" /></uni-forms-item>
-					<uni-forms-item label="公司/机构" name="companyName"><uni-easyinput v-model="form.companyName"
-							placeholder="请输入公司或机构名称" /></uni-forms-item>
-					<uni-forms-item label="毕业学校" name="school"><uni-easyinput v-model="form.school"
-							placeholder="请输入毕业学校" /></uni-forms-item>
+					<uni-forms-item label="籍贯" name="nativePlace">
+						<uni-data-picker placeholder="请选择籍贯" popup-title="请选择省市区" :localdata="areaTree"
+							:map="{text: 'name', value: 'id'}" v-model="form.nativePlace" />
+					</uni-forms-item>
+					<view class="dynamic-section">
+						<view class="dynamic-header">
+							<text class="dynamic-label">商会/协会与职务</text>
+							<button v-if="professionsList.length < 3" class="add-btn-small" @click="addProfession">
+								<uni-icons type="plusempty" size="14" color="#007bff"></uni-icons>
+								添加
+							</button>
+						</view>
+						<view v-for="(profession, index) in professionsList" :key="index" class="dynamic-item">
+							<uni-easyinput v-model="professionsList[index]" placeholder="示例：XXX商会/会长，XXX协会/理事" />
+							<button v-if="professionsList.length > 1" class="remove-btn-small"
+								@click="removeProfession(index)">×</button>
+						</view>
+					</view>
+					<view class="dynamic-section">
+						<view class="dynamic-header">
+							<text class="dynamic-label">公司/机构与行业</text>
+							<button v-if="companyAndIndustryList.length < 3" class="add-btn-small" @click="addCompany">
+								<uni-icons type="plusempty" size="14" color="#007bff"></uni-icons>
+								添加
+							</button>
+						</view>
+						<view v-for="(company, index) in companyAndIndustryList" :key="index" class="dynamic-group">
+							<view class="group-header">
+								<text class="group-title">第 {{ index + 1 }} 组</text>
+								<button v-if="companyAndIndustryList.length > 1" class="remove-btn"
+									@click="removeCompany(index)">删除</button>
+							</view>
+							<!-- 【样式修复关键】uni-forms-item 放在循环内，并使用动态 name -->
+							<uni-forms-item :label="`行业`" :name="`industry_${index}`">
+								<uni-data-picker class="dynamic-picker" placeholder="请选择所在行业" popup-title="请选择行业"
+									:localdata="industryTree" :map="{text: 'name', value: 'name'}"
+									v-model="company.industryName" />
+							</uni-forms-item>
+							<uni-forms-item :label="`公司`" :name="`company_${index}`">
+								<uni-easyinput v-model="company.name" placeholder="请输入公司或机构名称" />
+							</uni-forms-item>
+						</view>
+					</view>
+					<view class="dynamic-section">
+						<view class="dynamic-header">
+							<text class="dynamic-label">毕业学校</text>
+							<button v-if="schoolsList.length < 6" class="add-btn-small" @click="addSchool">
+								<uni-icons type="plusempty" size="14" color="#007bff"></uni-icons>
+								添加
+							</button>
+						</view>
+						<view v-for="(school, index) in schoolsList" :key="index" class="dynamic-item">
+							<uni-easyinput v-model="schoolsList[index]" placeholder="可以多填,用以查同学会" />
+							<button v-if="schoolsList.length > 1" class="remove-btn-small"
+								@click="removeSchool(index)">×</button>
+						</view>
+					</view>
 					<uni-forms-item label="手机号码" name="mobile"><uni-easyinput class="phone-text" v-model="form.mobile"
 							:disabled="true" /></uni-forms-item>
 					<uni-forms-item label="邮箱" name="contactEmail"><uni-easyinput v-model="form.contactEmail"
@@ -63,9 +110,17 @@
 					</uni-forms-item>
 
 					<!-- 爱好和简介 -->
-					<uni-forms-item label="爱好" name="hobby"><uni-easyinput v-model="form.hobby"
-							placeholder="请输入爱好" /></uni-forms-item>
-					<uni-forms-item label="个人简介" name="personalBio"><uni-easyinput type="textarea"
+					<uni-forms-item label="爱好" name="hobby">
+						<uni-data-checkbox v-model="selectedHobbies" :localdata="hobbyOptions" multiple
+							@change="onHobbyChange" />
+						<!-- 当“其他”被选中时，显示输入框 -->
+						<uni-easyinput v-if="isOtherHobbySelected" v-model="otherHobbyText" placeholder="请输入您的其他爱好"
+							class="other-hobby-input" />
+					</uni-forms-item>
+					<uni-forms-item label="个性签名&理念" name="signature">
+						<uni-easyinput v-model="form.signature" placeholder="设置一个独特的个性签名吧" />
+					</uni-forms-item>
+					<uni-forms-item label="个人简介&资源" name="personalBio"><uni-easyinput type="textarea"
 							v-model="form.personalBio" placeholder="介绍一下自己..." /></uni-forms-item>
 				</uni-forms>
 
@@ -112,12 +167,47 @@
 	import {
 		ref,
 		onMounted,
-		computed
+		computed,
+		watch
 	} from 'vue';
 	import request from '../../utils/request.js';
 	import uploadFile from '../../utils/upload.js';
 
 	// --- 1. 响应式状态定义 ---
+
+	/**
+	 * @description 创建一个通用的侦听器来处理输入限制
+	 * @param {Ref<Array<string>|Array<object>|string>} target - 要侦听的目标 ref
+	 * @param {string|null} key - 如果目标是对象数组，则指定要检查的属性名
+	 */
+	const watchAndSanitize = (target, key = null) => {
+		watch(target, (newValue) => {
+			if (Array.isArray(newValue)) {
+				newValue.forEach((item, index) => {
+					if (key && typeof item === 'object') {
+						// 处理对象数组，如 companyAndIndustryList
+						if (item[key] && typeof item[key] === 'string' && item[key].includes(',')) {
+							target.value[index][key] = item[key].replace(/,/g, '');
+						}
+					} else if (typeof item === 'string' && item.includes(',')) {
+						// 处理字符串数组，如 professionsList, schoolsList
+						target.value[index] = item.replace(/,/g, '');
+					}
+				});
+			} else if (typeof newValue === 'string' && newValue.includes(',')) {
+				// 处理单个字符串，如 otherHobbyText
+				target.value = newValue.replace(/,/g, '');
+			}
+		}, {
+			deep: true
+		}); // 使用 deep: true 来侦听对象数组内部属性的变化
+	};
+
+	// 应用侦听器到所有需要限制的字段
+	watchAndSanitize(professionsList);
+	watchAndSanitize(schoolsList);
+	watchAndSanitize(companyAndIndustryList, 'name'); // 只限制公司名称字段
+	watchAndSanitize(otherHobbyText);
 
 	const formRef = ref(null);
 	const form = ref({
@@ -128,9 +218,8 @@
 		birthday: '',
 		locationAddress: null, // 将存储ID数组用于反显，或单个ID用于提交
 		birthplace: null, // 将存储ID数组用于反显，或单个ID用于提交
-		nativePlace: '',
 		professionalTitle: '',
-		industry: null,
+		industry: '',
 		companyName: '',
 		school: '',
 		mobile: '',
@@ -139,12 +228,47 @@
 		hobby: '',
 		personalBio: '',
 		idCard: '',
-		cardName: ''
+		cardName: '',
+		era: null, // 出生年代
+		nativePlace: null, //  籍贯 (与地区同构)
+		signature: '', // 个性签名
 	});
 
 	// 数据源
 	const areaTree = ref([]);
 	const industryTree = ref([]);
+	const professionOptions = ref([]);
+	const hobbyOptions = ref([]);
+
+	const eraOptions = [{
+			value: '50/60',
+			text: '50/60'
+		},
+		{
+			value: '70/80',
+			text: '70/80'
+		},
+		{
+			value: '90/00',
+			text: '90/00'
+		},
+		{
+			value: '不问年代',
+			text: '不问年代'
+		},
+	];
+
+	//  爱好-多选
+	const selectedHobbies = ref([]);
+	const otherHobbyText = ref('');
+	const isOtherHobbySelected = computed(() => selectedHobbies.value.includes('其他'));
+	const professionsList = ref(['']); // 职业列表
+	const schoolsList = ref(['']); // 学校列表
+	// 动态公司/行业列表
+	const companyAndIndustryList = ref([{
+		name: '',
+		industryName: ''
+	}]);
 
 	// 静态选项和计算属性
 	const genderOptions = [{
@@ -195,6 +319,12 @@
 		getUserInfo: () => request('/app-api/member/user/get', {
 			method: 'GET'
 		}),
+		getDictData: (type) => request('/app-api/system/dict-data/type', {
+			method: 'GET',
+			data: {
+				type
+			}
+		}),
 		updateUser: (data) => request('/app-api/member/user/update', {
 			method: 'PUT',
 			data
@@ -211,7 +341,9 @@
 		// 确保数据源先加载
 		await Promise.all([
 			getAreaTreeData(),
-			getIndustryTreeData()
+			getIndustryTreeData(),
+			getProfessionData(),
+			getHobbyData()
 		]);
 		// 再获取用户信息并填充
 		await fetchUserInfoAndPopulateForm();
@@ -262,6 +394,22 @@
 		return null;
 	}
 
+	/**
+	 * @description 当行业选择器值变化时，手动更新 companyAndIndustryList
+	 * @param {object} event - uni-data-picker 派发的事件对象
+	 * @param {number} index - 当前操作的是第几个公司/行业组
+	 */
+	const onIndustryChange = (event, index) => {
+		// event.detail.value 是一个数组，每个元素是 { text, value }
+		// 我们只需要每个元素的 value (即 id)
+		const pathIds = event.detail.value.map(item => item.value);
+
+		console.log(`第 ${index + 1} 组行业已选择，路径ID数组:`, pathIds);
+
+		// 手动将获取到的路径ID数组赋值给响应式数据
+		companyAndIndustryList.value[index].industry = pathIds;
+	};
+
 	const fetchUserInfoAndPopulateForm = async () => {
 		const {
 			data: userInfo,
@@ -282,15 +430,64 @@
 			});
 
 			// 【关键】处理地区反显
-			if (userInfo.locationAddress) {
-				const targetId = parseInt(userInfo.locationAddress, 10); // 字符串ID转为数字
-				const path = findPathById(areaTree.value, targetId);
-				if (path) form.value.locationAddress = path; // 赋ID数组给v-model
+			['locationAddress', 'birthplace', 'nativePlace'].forEach(key => {
+				if (userInfo[key]) {
+					const targetId = parseInt(userInfo[key], 10);
+					const path = findPathById(areaTree.value, targetId);
+					if (path) form.value[key] = path;
+				}
+			});
+			// if (userInfo.locationAddress) {
+			// 	const targetId = parseInt(userInfo.locationAddress, 10); // 字符串ID转为数字
+			// 	const path = findPathById(areaTree.value, targetId);
+			// 	if (path) form.value.locationAddress = path; // 赋ID数组给v-model
+			// }
+			// if (userInfo.birthplace) {
+			// 	const targetId = parseInt(userInfo.birthplace, 10); // 字符串ID转为数字
+			// 	const path = findPathById(areaTree.value, targetId);
+			// 	if (path) form.value.birthplace = path; // 赋ID数组给v-model
+			// }
+
+			// 爱好反显
+			if (userInfo.hobby) {
+				const hobbies = userInfo.hobby.split(',');
+				const predefinedHobbies = hobbies.filter(h => hobbyOptions.value.some(opt => opt.value === h));
+				const otherHobbies = hobbies.filter(h => !hobbyOptions.value.some(opt => opt.value === h));
+				selectedHobbies.value = [...predefinedHobbies];
+				if (otherHobbies.length > 0) {
+					selectedHobbies.value.push('其他');
+					otherHobbyText.value = otherHobbies.join(',');
+				}
 			}
-			if (userInfo.birthplace) {
-				const targetId = parseInt(userInfo.birthplace, 10); // 字符串ID转为数字
-				const path = findPathById(areaTree.value, targetId);
-				if (path) form.value.birthplace = path; // 赋ID数组给v-model
+
+			// 职业反显 (修改点2)
+			if (userInfo.professionalTitle) {
+				professionsList.value = userInfo.professionalTitle.split(',');
+			} else {
+				professionsList.value = ['']; // 保证至少有一个空输入框
+			}
+
+			// 学校反显 (修改点1)
+			if (userInfo.school) {
+				schoolsList.value = userInfo.school.split(',');
+			} else {
+				schoolsList.value = ['']; // 保证至少有一个空输入框
+			}
+
+			// 公司/行业反显 (修改点6)
+			if (userInfo.companyName && userInfo.industry) {
+				const companyNames = userInfo.companyName.split(',');
+				const industryNames = userInfo.industry.split(',');
+
+				companyAndIndustryList.value = companyNames.map((name, index) => ({
+					name: name || '',
+					industryName: industryNames[index] || '' // 直接赋值中文字符串
+				}));
+			} else {
+				companyAndIndustryList.value = [{
+					name: '',
+					industryName: ''
+				}];
 			}
 
 			// 【关键】处理生日回显：时间戳 -> YYYY-MM-DD
@@ -313,8 +510,75 @@
 		return form.value.idCard || '信息已隐藏';
 	});
 
+	// 获取职业数据
+	const getProfessionData = async () => {
+		const {
+			data,
+			error
+		} = await Api.getDictData('professional_list');
+		if (!error && data) {
+			professionOptions.value = data.map(item => ({
+				text: item.label,
+				value: item.value
+			}));
+		}
+	};
+
+	// 获取爱好数据
+	const getHobbyData = async () => {
+		const {
+			data,
+			error
+		} = await Api.getDictData('hobby_list');
+		if (!error && data) {
+			hobbyOptions.value = data.map(item => ({
+				text: item.label,
+				value: item.label // value 直接使用中文标签
+			}));
+			hobbyOptions.value.push({
+				text: '其他',
+				value: '其他'
+			});
+		}
+	};
+
 
 	// --- 5. 用户交互方法 ---
+
+	// 爱好变化时处理
+	const onHobbyChange = (e) => {
+		// 如果“其他”被取消选中，清空自定义输入
+		if (!e.detail.value.includes('其他')) {
+			otherHobbyText.value = '';
+		}
+	};
+
+	// 动态增删公司/行业
+	const addCompany = () => {
+		if (companyAndIndustryList.value.length < 6) {
+			companyAndIndustryList.value.push({
+				name: '',
+				industry: null
+			});
+		}
+	};
+
+	const addProfession = () => {
+		if (professionsList.value.length < 3) professionsList.value.push('');
+	};
+	const removeProfession = (index) => {
+		professionsList.value.splice(index, 1);
+	};
+
+	const addSchool = () => {
+		if (schoolsList.value.length < 6) schoolsList.value.push('');
+	};
+	const removeSchool = (index) => {
+		schoolsList.value.splice(index, 1);
+	};
+	const removeCompany = (index) => {
+		companyAndIndustryList.value.splice(index, 1);
+	};
 
 	const chooseAvatar = () => {
 		uni.chooseImage({
@@ -416,15 +680,38 @@
 				...form.value
 			};
 
-			// 【关键】处理地区提交：ID数组 -> 最后一个ID
-			if (Array.isArray(payload.locationAddress) && payload.locationAddress.length > 0) {
-				payload.locationAddress = payload.locationAddress[payload.locationAddress.length - 1];
-			}
-			if (Array.isArray(payload.birthplace) && payload.birthplace.length > 0) {
-				payload.birthplace = payload.birthplace[payload.birthplace.length - 1];
-			}
+			//处理地区提交：ID数组 -> 最后一个ID
+			// if (Array.isArray(payload.locationAddress) && payload.locationAddress.length > 0) {
+			// 	payload.locationAddress = payload.locationAddress[payload.locationAddress.length - 1];
+			// }
+			// if (Array.isArray(payload.birthplace) && payload.birthplace.length > 0) {
+			// 	payload.birthplace = payload.birthplace[payload.birthplace.length - 1];
+			// }
+			['locationAddress', 'birthplace', 'nativePlace'].forEach(key => {
+				if (Array.isArray(payload[key]) && payload[key].length > 0) {
+					payload[key] = payload[key][payload[key].length - 1];
+				}
+			});
 
-			// 【关键】处理生日提交：YYYY-MM-DD -> 时间戳
+			// 爱好提交 
+			let finalHobbies = selectedHobbies.value.filter(h => h !== '其他');
+			if (isOtherHobbySelected.value && otherHobbyText.value.trim()) {
+				finalHobbies.push(otherHobbyText.value.trim());
+			}
+			payload.hobby = finalHobbies.join(',');
+
+			payload.professionalTitle = professionsList.value.map(p => p.trim()).filter(p => p).join(',');
+			payload.school = schoolsList.value.map(s => s.trim()).filter(s => s).join(',');
+			payload.companyName = companyAndIndustryList.value
+				.map(item => (item.name || '').trim())
+				.filter(name => name)
+				.join(',');
+
+			payload.industry = companyAndIndustryList.value
+				.map(item => (item.industryName || '').trim()) // 直接使用 industryName
+				.join(',');
+
+			// 处理生日提交：YYYY-MM-DD -> 时间戳
 			if (payload.birthday && typeof payload.birthday === 'string') {
 				const dateStr = payload.birthday.replace(/-/g, '/');
 				payload.birthday = new Date(dateStr).getTime();
@@ -467,6 +754,7 @@
 </script>
 
 <style scoped lang="scss">
+	/* --- 1. 页面基础与布局 --- */
 	.container {
 		padding: 20rpx 30rpx 40rpx;
 		background-color: #f9f9f9;
@@ -486,74 +774,178 @@
 		display: block;
 	}
 
-	// --- 表单项样式修正 ---
+	/* --- 2. 【【【核心修复】】】表单项通用布局 --- */
 
-	// 1. 通用表单项样式
+	// 统一所有表单项的布局和标签样式
 	::v-deep .uni-forms-item {
+		display: flex;
+		align-items: center; // 垂直居中对齐
 		margin-bottom: 20rpx;
-		/* 让label和内容区在垂直方向上顶部对齐，以适应多行内容 */
-		align-items: flex-start;
 
 		.uni-forms-item__label {
-			width: 180rpx !important;
+			width: 160rpx !important;
 			font-size: 28rpx;
 			color: #333;
-			/* 给label一个上边距，使其与多行文本的顶部在视觉上更协调 */
-			padding-top: 10rpx;
+			flex-shrink: 0; // 防止标签被压缩
+			padding-right: 20rpx; // 标签和内容之间的距离
+			box-sizing: border-box;
+		}
+
+		.uni-forms-item__content {
+			flex: 1; // 内容区占据所有剩余空间
+			min-width: 0; // 允许内容区在flex布局中被压缩，防止溢出
 		}
 	}
 
-	// 2. 修正 data-picker 的基础字体大小
-	::v-deep .uni-data-tree-input {
-		font-size: 28rpx !important;
+	// 让内容区里的组件（输入框、选择器）真正撑满
+	::v-deep .uni-easyinput,
+	::v-deep .uni-data-select,
+	::v-deep .uni-datetime-picker,
+	::v-deep .uni-data-picker {
+		width: 100% !important;
 	}
 
-	/* 1. 限制选择器组件本身的最大宽度为100% */
-	::v-deep .industry-picker {
-		width: 450rpx !important;
+	/* --- 3. 【【【核心修复】】】 DataPicker 文本溢出终极解决方案 --- */
+	::v-deep .uni-data-picker .uni-data-tree-input {
+		display: flex !important;
+		align-items: center;
+		width: 100% !important;
+		height: 36px; // 与 easyinput 保持一致
+		border: 1px solid #e5e5e5;
+		border-radius: 4px;
+		padding: 0 10px;
 		box-sizing: border-box;
-		/* 确保 padding 不会撑大宽度 */
-	}
-
-	/* 2. 深入组件内部，控制显示文本的区域 */
-	::v-deep .industry-picker .uni-data-tree-input {
-		/* 同样限制宽度，并设置自动换行和美化样式 */
-		width: 450rpx !important;
-		white-space: normal !important;
-		/* 允许换行 */
-		height: auto !important;
-		/* 高度自适应 */
-		line-height: 1.5;
-		/* 舒适的行高 */
-
-		/* 增加内边距，让文本不贴着边框，看起来更像输入框 */
-		padding-top: 10rpx;
-		padding-bottom: 10rpx;
-		box-sizing: border-box;
-	}
-
-	/* 3. （可选，但推荐）如果希望文本最多显示两行，然后出现省略号 */
-	/* 如果不需要省略号，可以注释或删除下面这段 */
-	::v-deep .industry-picker .uni-data-tree-input .input-value {
-		display: -webkit-box;
-		-webkit-line-clamp: 2;
-		/* 最多显示2行 */
-		-webkit-box-orient: vertical;
 		overflow: hidden;
-		text-overflow: ellipsis;
-		white-space: normal !important;
-		/* 必须再次声明以覆盖内联样式 */
+
+		.input-value {
+			flex: 1;
+			min-width: 0; // 关键！
+			display: block;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+		}
 	}
 
 
+	/* --- 4. 动态增删区块样式 (布局重构) --- */
+
+	.dynamic-section {
+		// 动态区块现在是一个独立的视觉单元
+		margin-top: 40rpx;
+		margin-bottom: 20rpx;
+		padding-top: 30rpx;
+		border-top: 1px solid #f0f0f0;
+	}
+
+	.dynamic-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 20rpx;
+	}
+
+	.dynamic-label {
+		// 大标题，如“职业”、“毕业学校”
+		font-size: 32rpx;
+		font-weight: bold;
+		color: #333;
+	}
+
+	.add-btn-small {
+		display: flex;
+		align-items: center;
+		font-size: 24rpx;
+		height: 50rpx;
+		line-height: 50rpx;
+		padding: 0 20rpx;
+		margin: 0;
+		background-color: #f0f7ff;
+		color: #007bff;
+		border: 1px solid #d2e7ff;
+
+		&::after {
+			border: none;
+		}
+
+		uni-icons {
+			margin-right: 8rpx;
+		}
+	}
+
+	// 单行动态项 (用于职业、学校) - 【布局重构】
+	.dynamic-item {
+		display: flex;
+		align-items: center;
+		margin-bottom: 20rpx;
+		gap: 20rpx;
+
+		.uni-easyinput {
+			flex: 1;
+		}
+	}
+
+	.remove-btn-small {
+		width: 50rpx;
+		height: 50rpx;
+		line-height: 50rpx;
+		padding: 0;
+		margin: 0;
+		border-radius: 50%;
+		background-color: #fef0f0;
+		color: #f56c6c;
+		font-size: 28rpx;
+		font-weight: bold;
+		border: none;
+		flex-shrink: 0;
+
+		&::after {
+			border: none;
+		}
+	}
+
+	// 多行动态组 (用于公司/行业) - 【布局重构】
+	.dynamic-group {
+		background-color: #f9f9f9;
+		padding: 30rpx;
+		border-radius: 12rpx;
+		margin-bottom: 20rpx;
+		border: 1px solid #eee;
+		// 【关键】移除了所有 margin-left
+
+		.group-header {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			margin-bottom: 30rpx;
+		}
+
+		.group-title {
+			font-size: 28rpx;
+			font-weight: bold;
+			color: #555;
+		}
+
+		.remove-btn {
+			font-size: 24rpx;
+			height: 50rpx;
+			line-height: 50rpx;
+			padding: 0 20rpx;
+			margin: 0;
+			background-color: #fef0f0;
+			color: #f56c6c;
+			border: 1px solid #fde2e2;
+
+			&::after {
+				border: none;
+			}
+		}
+
+		// 组内的表单项会自动继承第2部分的通用样式，无需特殊处理
+	}
 
 
-
-
-
-	// --- 其他组件样式 ---
-
-	// 上传区域
+	/* --- 5. 其他组件与通用样式 (保持不变) --- */
 	.avatar-uploader,
 	.qr-uploader {
 		display: flex;
@@ -561,18 +953,16 @@
 		gap: 30rpx;
 	}
 
-	.avatar-img,
-	.qr-img {
+	.avatar-img {
 		width: 120rpx;
 		height: 120rpx;
-		border-radius: 8rpx;
-	}
-
-	.avatar-img {
 		border-radius: 50%;
 	}
 
 	.qr-img {
+		width: 120rpx;
+		height: 120rpx;
+		border-radius: 8rpx;
 		border: 1px solid #eee;
 	}
 
@@ -590,14 +980,19 @@
 		}
 	}
 
-	// 特殊输入框样式
 	.phone-text ::v-deep .uni-easyinput__content-input {
 		color: #999 !important;
 	}
 
-	// 按钮样式
+	.other-hobby-input {
+		margin-top: 20rpx;
+	}
+
+
+	/* --- 6. 底部按钮与认证区 (保持不变) --- */
 	.save-btn,
-	.label-btn {
+	.label-btn,
+	.auth-btn {
 		width: 100%;
 		height: 88rpx;
 		line-height: 88rpx;
@@ -617,29 +1012,11 @@
 	}
 
 	.label-btn {
-		height: 80rpx;
-		line-height: 80rpx;
-		font-size: 30rpx;
 		background: linear-gradient(to right, #007bff, #0056b3);
 	}
 
-	.digital-label-section {
-		/* 可根据需要为数字标签区域添加特定样式 */
-	}
-
 	.auth-btn {
-		width: 100%;
-		height: 80rpx;
-		line-height: 80rpx;
-		font-size: 30rpx;
-		color: white;
 		background: linear-gradient(to right, #00C777, #00A362);
-		border: none;
-		border-radius: 40rpx;
-
-		&::after {
-			border: none;
-		}
 	}
 
 	.auth-info {

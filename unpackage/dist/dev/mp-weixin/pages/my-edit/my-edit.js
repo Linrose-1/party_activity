@@ -6,25 +6,48 @@ if (!Array) {
   const _easycom_uni_forms_item2 = common_vendor.resolveComponent("uni-forms-item");
   const _easycom_uni_easyinput2 = common_vendor.resolveComponent("uni-easyinput");
   const _easycom_uni_data_select2 = common_vendor.resolveComponent("uni-data-select");
-  const _easycom_uni_datetime_picker2 = common_vendor.resolveComponent("uni-datetime-picker");
   const _easycom_uni_data_picker2 = common_vendor.resolveComponent("uni-data-picker");
-  const _easycom_uni_forms2 = common_vendor.resolveComponent("uni-forms");
   const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
-  (_easycom_uni_forms_item2 + _easycom_uni_easyinput2 + _easycom_uni_data_select2 + _easycom_uni_datetime_picker2 + _easycom_uni_data_picker2 + _easycom_uni_forms2 + _easycom_uni_icons2)();
+  const _easycom_uni_data_checkbox2 = common_vendor.resolveComponent("uni-data-checkbox");
+  const _easycom_uni_forms2 = common_vendor.resolveComponent("uni-forms");
+  (_easycom_uni_forms_item2 + _easycom_uni_easyinput2 + _easycom_uni_data_select2 + _easycom_uni_data_picker2 + _easycom_uni_icons2 + _easycom_uni_data_checkbox2 + _easycom_uni_forms2)();
 }
 const _easycom_uni_forms_item = () => "../../uni_modules/uni-forms/components/uni-forms-item/uni-forms-item.js";
 const _easycom_uni_easyinput = () => "../../uni_modules/uni-easyinput/components/uni-easyinput/uni-easyinput.js";
 const _easycom_uni_data_select = () => "../../uni_modules/uni-data-select/components/uni-data-select/uni-data-select.js";
-const _easycom_uni_datetime_picker = () => "../../uni_modules/uni-datetime-picker/components/uni-datetime-picker/uni-datetime-picker.js";
 const _easycom_uni_data_picker = () => "../../uni_modules/uni-data-picker/components/uni-data-picker/uni-data-picker.js";
-const _easycom_uni_forms = () => "../../uni_modules/uni-forms/components/uni-forms/uni-forms.js";
 const _easycom_uni_icons = () => "../../uni_modules/uni-icons/components/uni-icons/uni-icons.js";
+const _easycom_uni_data_checkbox = () => "../../uni_modules/uni-data-checkbox/components/uni-data-checkbox/uni-data-checkbox.js";
+const _easycom_uni_forms = () => "../../uni_modules/uni-forms/components/uni-forms/uni-forms.js";
 if (!Math) {
-  (_easycom_uni_forms_item + _easycom_uni_easyinput + _easycom_uni_data_select + _easycom_uni_datetime_picker + _easycom_uni_data_picker + _easycom_uni_forms + _easycom_uni_icons)();
+  (_easycom_uni_forms_item + _easycom_uni_easyinput + _easycom_uni_data_select + _easycom_uni_data_picker + _easycom_uni_icons + _easycom_uni_data_checkbox + _easycom_uni_forms)();
 }
 const _sfc_main = {
   __name: "my-edit",
   setup(__props) {
+    const watchAndSanitize = (target, key = null) => {
+      common_vendor.watch(target, (newValue) => {
+        if (Array.isArray(newValue)) {
+          newValue.forEach((item, index) => {
+            if (key && typeof item === "object") {
+              if (item[key] && typeof item[key] === "string" && item[key].includes(",")) {
+                target.value[index][key] = item[key].replace(/,/g, "");
+              }
+            } else if (typeof item === "string" && item.includes(",")) {
+              target.value[index] = item.replace(/,/g, "");
+            }
+          });
+        } else if (typeof newValue === "string" && newValue.includes(",")) {
+          target.value = newValue.replace(/,/g, "");
+        }
+      }, {
+        deep: true
+      });
+    };
+    watchAndSanitize(professionsList);
+    watchAndSanitize(schoolsList);
+    watchAndSanitize(companyAndIndustryList, "name");
+    watchAndSanitize(otherHobbyText);
     const formRef = common_vendor.ref(null);
     const form = common_vendor.ref({
       nickname: "",
@@ -36,9 +59,8 @@ const _sfc_main = {
       // 将存储ID数组用于反显，或单个ID用于提交
       birthplace: null,
       // 将存储ID数组用于反显，或单个ID用于提交
-      nativePlace: "",
       professionalTitle: "",
-      industry: null,
+      industry: "",
       companyName: "",
       school: "",
       mobile: "",
@@ -47,10 +69,45 @@ const _sfc_main = {
       hobby: "",
       personalBio: "",
       idCard: "",
-      cardName: ""
+      cardName: "",
+      era: null,
+      // 出生年代
+      nativePlace: null,
+      //  籍贯 (与地区同构)
+      signature: ""
+      // 个性签名
     });
     const areaTree = common_vendor.ref([]);
     const industryTree = common_vendor.ref([]);
+    const professionOptions = common_vendor.ref([]);
+    const hobbyOptions = common_vendor.ref([]);
+    const eraOptions = [
+      {
+        value: "50/60",
+        text: "50/60"
+      },
+      {
+        value: "70/80",
+        text: "70/80"
+      },
+      {
+        value: "90/00",
+        text: "90/00"
+      },
+      {
+        value: "不问年代",
+        text: "不问年代"
+      }
+    ];
+    const selectedHobbies = common_vendor.ref([]);
+    const otherHobbyText = common_vendor.ref("");
+    const isOtherHobbySelected = common_vendor.computed(() => selectedHobbies.value.includes("其他"));
+    const professionsList = common_vendor.ref([""]);
+    const schoolsList = common_vendor.ref([""]);
+    const companyAndIndustryList = common_vendor.ref([{
+      name: "",
+      industryName: ""
+    }]);
     const genderOptions = [{
       value: 1,
       text: "男"
@@ -58,7 +115,7 @@ const _sfc_main = {
       value: 2,
       text: "女"
     }];
-    const today = common_vendor.computed(() => {
+    common_vendor.computed(() => {
       const date = /* @__PURE__ */ new Date();
       return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, "0")}-${date.getDate().toString().padStart(2, "0")}`;
     });
@@ -93,6 +150,12 @@ const _sfc_main = {
       getUserInfo: () => utils_request.request("/app-api/member/user/get", {
         method: "GET"
       }),
+      getDictData: (type) => utils_request.request("/app-api/system/dict-data/type", {
+        method: "GET",
+        data: {
+          type
+        }
+      }),
       updateUser: (data) => utils_request.request("/app-api/member/user/update", {
         method: "PUT",
         data
@@ -104,7 +167,9 @@ const _sfc_main = {
       });
       await Promise.all([
         getAreaTreeData(),
-        getIndustryTreeData()
+        getIndustryTreeData(),
+        getProfessionData(),
+        getHobbyData()
       ]);
       await fetchUserInfoAndPopulateForm();
       common_vendor.index.hideLoading();
@@ -115,7 +180,7 @@ const _sfc_main = {
         error
       } = await Api.getAreaTree();
       if (error) {
-        common_vendor.index.__f__("error", "at pages/my-edit/my-edit.vue:230", "获取地区树失败:", error);
+        common_vendor.index.__f__("error", "at pages/my-edit/my-edit.vue:362", "获取地区树失败:", error);
       } else {
         areaTree.value = data || [];
       }
@@ -126,7 +191,7 @@ const _sfc_main = {
         error
       } = await Api.getIndustryTree();
       if (error) {
-        common_vendor.index.__f__("error", "at pages/my-edit/my-edit.vue:242", "获取行业树失败:", error);
+        common_vendor.index.__f__("error", "at pages/my-edit/my-edit.vue:374", "获取行业树失败:", error);
       } else {
         industryTree.value = data || [];
       }
@@ -160,17 +225,47 @@ const _sfc_main = {
             form.value[key] = userInfo[key];
           }
         });
-        if (userInfo.locationAddress) {
-          const targetId = parseInt(userInfo.locationAddress, 10);
-          const path = findPathById(areaTree.value, targetId);
-          if (path)
-            form.value.locationAddress = path;
+        ["locationAddress", "birthplace", "nativePlace"].forEach((key) => {
+          if (userInfo[key]) {
+            const targetId = parseInt(userInfo[key], 10);
+            const path = findPathById(areaTree.value, targetId);
+            if (path)
+              form.value[key] = path;
+          }
+        });
+        if (userInfo.hobby) {
+          const hobbies = userInfo.hobby.split(",");
+          const predefinedHobbies = hobbies.filter((h) => hobbyOptions.value.some((opt) => opt.value === h));
+          const otherHobbies = hobbies.filter((h) => !hobbyOptions.value.some((opt) => opt.value === h));
+          selectedHobbies.value = [...predefinedHobbies];
+          if (otherHobbies.length > 0) {
+            selectedHobbies.value.push("其他");
+            otherHobbyText.value = otherHobbies.join(",");
+          }
         }
-        if (userInfo.birthplace) {
-          const targetId = parseInt(userInfo.birthplace, 10);
-          const path = findPathById(areaTree.value, targetId);
-          if (path)
-            form.value.birthplace = path;
+        if (userInfo.professionalTitle) {
+          professionsList.value = userInfo.professionalTitle.split(",");
+        } else {
+          professionsList.value = [""];
+        }
+        if (userInfo.school) {
+          schoolsList.value = userInfo.school.split(",");
+        } else {
+          schoolsList.value = [""];
+        }
+        if (userInfo.companyName && userInfo.industry) {
+          const companyNames = userInfo.companyName.split(",");
+          const industryNames = userInfo.industry.split(",");
+          companyAndIndustryList.value = companyNames.map((name, index) => ({
+            name: name || "",
+            industryName: industryNames[index] || ""
+            // 直接赋值中文字符串
+          }));
+        } else {
+          companyAndIndustryList.value = [{
+            name: "",
+            industryName: ""
+          }];
         }
         if (userInfo.birthday && typeof userInfo.birthday === "number") {
           const date = new Date(userInfo.birthday);
@@ -184,6 +279,65 @@ const _sfc_main = {
     const maskedIdCard = common_vendor.computed(() => {
       return form.value.idCard || "信息已隐藏";
     });
+    const getProfessionData = async () => {
+      const {
+        data,
+        error
+      } = await Api.getDictData("professional_list");
+      if (!error && data) {
+        professionOptions.value = data.map((item) => ({
+          text: item.label,
+          value: item.value
+        }));
+      }
+    };
+    const getHobbyData = async () => {
+      const {
+        data,
+        error
+      } = await Api.getDictData("hobby_list");
+      if (!error && data) {
+        hobbyOptions.value = data.map((item) => ({
+          text: item.label,
+          value: item.label
+          // value 直接使用中文标签
+        }));
+        hobbyOptions.value.push({
+          text: "其他",
+          value: "其他"
+        });
+      }
+    };
+    const onHobbyChange = (e) => {
+      if (!e.detail.value.includes("其他")) {
+        otherHobbyText.value = "";
+      }
+    };
+    const addCompany = () => {
+      if (companyAndIndustryList.value.length < 6) {
+        companyAndIndustryList.value.push({
+          name: "",
+          industry: null
+        });
+      }
+    };
+    const addProfession = () => {
+      if (professionsList.value.length < 3)
+        professionsList.value.push("");
+    };
+    const removeProfession = (index) => {
+      professionsList.value.splice(index, 1);
+    };
+    const addSchool = () => {
+      if (schoolsList.value.length < 6)
+        schoolsList.value.push("");
+    };
+    const removeSchool = (index) => {
+      schoolsList.value.splice(index, 1);
+    };
+    const removeCompany = (index) => {
+      companyAndIndustryList.value.splice(index, 1);
+    };
     const chooseAvatar = () => {
       common_vendor.index.chooseImage({
         count: 1,
@@ -194,7 +348,7 @@ const _sfc_main = {
             src: tempFilePath,
             cropScale: "1:1",
             success: (cropRes) => uploadAvatar(cropRes.tempFilePath),
-            fail: (err) => common_vendor.index.__f__("log", "at pages/my-edit/my-edit.vue:330", "用户取消裁剪或裁剪失败:", err)
+            fail: (err) => common_vendor.index.__f__("log", "at pages/my-edit/my-edit.vue:594", "用户取消裁剪或裁剪失败:", err)
           });
         }
       });
@@ -270,12 +424,20 @@ const _sfc_main = {
         const payload = {
           ...form.value
         };
-        if (Array.isArray(payload.locationAddress) && payload.locationAddress.length > 0) {
-          payload.locationAddress = payload.locationAddress[payload.locationAddress.length - 1];
+        ["locationAddress", "birthplace", "nativePlace"].forEach((key) => {
+          if (Array.isArray(payload[key]) && payload[key].length > 0) {
+            payload[key] = payload[key][payload[key].length - 1];
+          }
+        });
+        let finalHobbies = selectedHobbies.value.filter((h) => h !== "其他");
+        if (isOtherHobbySelected.value && otherHobbyText.value.trim()) {
+          finalHobbies.push(otherHobbyText.value.trim());
         }
-        if (Array.isArray(payload.birthplace) && payload.birthplace.length > 0) {
-          payload.birthplace = payload.birthplace[payload.birthplace.length - 1];
-        }
+        payload.hobby = finalHobbies.join(",");
+        payload.professionalTitle = professionsList.value.map((p) => p.trim()).filter((p) => p).join(",");
+        payload.school = schoolsList.value.map((s) => s.trim()).filter((s) => s).join(",");
+        payload.companyName = companyAndIndustryList.value.map((item) => (item.name || "").trim()).filter((name) => name).join(",");
+        payload.industry = companyAndIndustryList.value.map((item) => (item.industryName || "").trim()).join(",");
         if (payload.birthday && typeof payload.birthday === "string") {
           const dateStr = payload.birthday.replace(/-/g, "/");
           payload.birthday = new Date(dateStr).getTime();
@@ -297,7 +459,7 @@ const _sfc_main = {
           setTimeout(() => common_vendor.index.navigateBack(), 1500);
         }
       }).catch((err) => {
-        common_vendor.index.__f__("log", "at pages/my-edit/my-edit.vue:451", "表单验证失败：", err);
+        common_vendor.index.__f__("log", "at pages/my-edit/my-edit.vue:738", "表单验证失败：", err);
       });
     };
     const goToLabelEditPage = () => {
@@ -350,16 +512,15 @@ const _sfc_main = {
           label: "性别",
           name: "sex"
         }),
-        o: common_vendor.o(($event) => form.value.birthday = $event),
+        o: common_vendor.o(($event) => form.value.era = $event),
         p: common_vendor.p({
-          type: "date",
-          end: today.value,
-          ["return-type"]: "string",
-          modelValue: form.value.birthday
+          localdata: eraOptions,
+          placeholder: "请选择出生年代",
+          modelValue: form.value.era
         }),
         q: common_vendor.p({
-          label: "出生日期",
-          name: "birthday"
+          label: "出生年代",
+          name: "era"
         }),
         r: common_vendor.o(($event) => form.value.locationAddress = $event),
         s: common_vendor.p({
@@ -393,123 +554,201 @@ const _sfc_main = {
         }),
         y: common_vendor.o(($event) => form.value.nativePlace = $event),
         z: common_vendor.p({
-          placeholder: "请输入籍贯",
+          placeholder: "请选择籍贯",
+          ["popup-title"]: "请选择省市区",
+          localdata: areaTree.value,
+          map: {
+            text: "name",
+            value: "id"
+          },
           modelValue: form.value.nativePlace
         }),
         A: common_vendor.p({
           label: "籍贯",
           name: "nativePlace"
         }),
-        B: common_vendor.o(($event) => form.value.professionalTitle = $event),
+        B: professionsList.value.length < 3
+      }, professionsList.value.length < 3 ? {
         C: common_vendor.p({
-          placeholder: "请输入职业",
-          modelValue: form.value.professionalTitle
+          type: "plusempty",
+          size: "14",
+          color: "#007bff"
         }),
-        D: common_vendor.p({
-          label: "职业",
-          name: "professionalTitle"
+        D: common_vendor.o(addProfession)
+      } : {}, {
+        E: common_vendor.f(professionsList.value, (profession, index, i0) => {
+          return common_vendor.e({
+            a: "13622257-17-" + i0 + ",13622257-0",
+            b: common_vendor.o(($event) => professionsList.value[index] = $event, index),
+            c: common_vendor.p({
+              placeholder: "示例：XXX商会/会长，XXX协会/理事",
+              modelValue: professionsList.value[index]
+            })
+          }, professionsList.value.length > 1 ? {
+            d: common_vendor.o(($event) => removeProfession(index), index)
+          } : {}, {
+            e: index
+          });
         }),
-        E: common_vendor.o(($event) => form.value.industry = $event),
-        F: common_vendor.p({
-          placeholder: "请选择所在行业",
-          ["popup-title"]: "请选择行业",
-          localdata: industryTree.value,
-          map: {
-            text: "name",
-            value: "id"
-          },
-          modelValue: form.value.industry
+        F: professionsList.value.length > 1,
+        G: companyAndIndustryList.value.length < 3
+      }, companyAndIndustryList.value.length < 3 ? {
+        H: common_vendor.p({
+          type: "plusempty",
+          size: "14",
+          color: "#007bff"
         }),
-        G: common_vendor.p({
-          label: "行业",
-          name: "industryId"
+        I: common_vendor.o(addCompany)
+      } : {}, {
+        J: common_vendor.f(companyAndIndustryList.value, (company, index, i0) => {
+          return common_vendor.e({
+            a: common_vendor.t(index + 1)
+          }, companyAndIndustryList.value.length > 1 ? {
+            b: common_vendor.o(($event) => removeCompany(index), index)
+          } : {}, {
+            c: "13622257-20-" + i0 + "," + ("13622257-19-" + i0),
+            d: common_vendor.o(($event) => company.industryName = $event, index),
+            e: common_vendor.p({
+              placeholder: "请选择所在行业",
+              ["popup-title"]: "请选择行业",
+              localdata: industryTree.value,
+              map: {
+                text: "name",
+                value: "name"
+              },
+              modelValue: company.industryName
+            }),
+            f: "13622257-19-" + i0 + ",13622257-0",
+            g: common_vendor.p({
+              label: `行业`,
+              name: `industry_${index}`
+            }),
+            h: "13622257-22-" + i0 + "," + ("13622257-21-" + i0),
+            i: common_vendor.o(($event) => company.name = $event, index),
+            j: common_vendor.p({
+              placeholder: "请输入公司或机构名称",
+              modelValue: company.name
+            }),
+            k: "13622257-21-" + i0 + ",13622257-0",
+            l: common_vendor.p({
+              label: `公司`,
+              name: `company_${index}`
+            }),
+            m: index
+          });
         }),
-        H: common_vendor.o(($event) => form.value.companyName = $event),
-        I: common_vendor.p({
-          placeholder: "请输入公司或机构名称",
-          modelValue: form.value.companyName
-        }),
-        J: common_vendor.p({
-          label: "公司/机构",
-          name: "companyName"
-        }),
-        K: common_vendor.o(($event) => form.value.school = $event),
-        L: common_vendor.p({
-          placeholder: "请输入毕业学校",
-          modelValue: form.value.school
-        }),
+        K: companyAndIndustryList.value.length > 1,
+        L: schoolsList.value.length < 6
+      }, schoolsList.value.length < 6 ? {
         M: common_vendor.p({
-          label: "毕业学校",
-          name: "school"
+          type: "plusempty",
+          size: "14",
+          color: "#007bff"
         }),
-        N: common_vendor.o(($event) => form.value.mobile = $event),
-        O: common_vendor.p({
+        N: common_vendor.o(addSchool)
+      } : {}, {
+        O: common_vendor.f(schoolsList.value, (school, index, i0) => {
+          return common_vendor.e({
+            a: "13622257-24-" + i0 + ",13622257-0",
+            b: common_vendor.o(($event) => schoolsList.value[index] = $event, index),
+            c: common_vendor.p({
+              placeholder: "可以多填,用以查同学会",
+              modelValue: schoolsList.value[index]
+            })
+          }, schoolsList.value.length > 1 ? {
+            d: common_vendor.o(($event) => removeSchool(index), index)
+          } : {}, {
+            e: index
+          });
+        }),
+        P: schoolsList.value.length > 1,
+        Q: common_vendor.o(($event) => form.value.mobile = $event),
+        R: common_vendor.p({
           disabled: true,
           modelValue: form.value.mobile
         }),
-        P: common_vendor.p({
+        S: common_vendor.p({
           label: "手机号码",
           name: "mobile"
         }),
-        Q: common_vendor.o(($event) => form.value.contactEmail = $event),
-        R: common_vendor.p({
+        T: common_vendor.o(($event) => form.value.contactEmail = $event),
+        U: common_vendor.p({
           placeholder: "请输入邮箱",
           modelValue: form.value.contactEmail
         }),
-        S: common_vendor.p({
+        V: common_vendor.p({
           label: "邮箱",
           name: "contactEmail"
         }),
-        T: form.value.wechatQrCodeUrl
+        W: form.value.wechatQrCodeUrl
       }, form.value.wechatQrCodeUrl ? {
-        U: form.value.wechatQrCodeUrl,
-        V: common_vendor.o(($event) => previewImage(form.value.wechatQrCodeUrl))
+        X: form.value.wechatQrCodeUrl,
+        Y: common_vendor.o(($event) => previewImage(form.value.wechatQrCodeUrl))
       } : {}, {
-        W: common_vendor.t(form.value.wechatQrCodeUrl ? "更换二维码" : "上传二维码"),
-        X: common_vendor.o(chooseWechatQr),
-        Y: common_vendor.p({
+        Z: common_vendor.t(form.value.wechatQrCodeUrl ? "更换二维码" : "上传二维码"),
+        aa: common_vendor.o(chooseWechatQr),
+        ab: common_vendor.p({
           label: "微信二维码",
           name: "wechatQrCodeUrl"
         }),
-        Z: common_vendor.o(($event) => form.value.hobby = $event),
-        aa: common_vendor.p({
-          placeholder: "请输入爱好",
-          modelValue: form.value.hobby
+        ac: common_vendor.o(onHobbyChange),
+        ad: common_vendor.o(($event) => selectedHobbies.value = $event),
+        ae: common_vendor.p({
+          localdata: hobbyOptions.value,
+          multiple: true,
+          modelValue: selectedHobbies.value
         }),
-        ab: common_vendor.p({
+        af: isOtherHobbySelected.value
+      }, isOtherHobbySelected.value ? {
+        ag: common_vendor.o(($event) => otherHobbyText.value = $event),
+        ah: common_vendor.p({
+          placeholder: "请输入您的其他爱好",
+          modelValue: otherHobbyText.value
+        })
+      } : {}, {
+        ai: common_vendor.p({
           label: "爱好",
           name: "hobby"
         }),
-        ac: common_vendor.o(($event) => form.value.personalBio = $event),
-        ad: common_vendor.p({
+        aj: common_vendor.o(($event) => form.value.signature = $event),
+        ak: common_vendor.p({
+          placeholder: "设置一个独特的个性签名吧",
+          modelValue: form.value.signature
+        }),
+        al: common_vendor.p({
+          label: "个性签名&理念",
+          name: "signature"
+        }),
+        am: common_vendor.o(($event) => form.value.personalBio = $event),
+        an: common_vendor.p({
           type: "textarea",
           placeholder: "介绍一下自己...",
           modelValue: form.value.personalBio
         }),
-        ae: common_vendor.p({
-          label: "个人简介",
+        ao: common_vendor.p({
+          label: "个人简介&资源",
           name: "personalBio"
         }),
-        af: common_vendor.sr(formRef, "13622257-0", {
+        ap: common_vendor.sr(formRef, "13622257-0", {
           "k": "formRef"
         }),
-        ag: common_vendor.p({
+        aq: common_vendor.p({
           modelValue: form.value,
           rules
         }),
-        ah: common_vendor.o(submitForm),
-        ai: common_vendor.o(goToLabelEditPage),
-        aj: form.value.idCard
+        ar: common_vendor.o(submitForm),
+        as: common_vendor.o(goToLabelEditPage),
+        at: form.value.idCard
       }, form.value.idCard ? {
-        ak: common_vendor.t(maskedName.value),
-        al: common_vendor.t(maskedIdCard.value),
-        am: common_vendor.p({
+        av: common_vendor.t(maskedName.value),
+        aw: common_vendor.t(maskedIdCard.value),
+        ax: common_vendor.p({
           type: "checkbox-filled",
           color: "#00C777",
           size: "18"
         })
       } : {
-        an: common_vendor.o(goToAuthPage)
+        ay: common_vendor.o(goToAuthPage)
       });
     };
   }

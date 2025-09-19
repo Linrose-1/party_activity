@@ -71,7 +71,7 @@ const _sfc_main = {
     });
     const membershipLevels = common_vendor.ref([
       {
-        name: "游客会员",
+        name: "玄铁会员",
         threshold: 0
       },
       {
@@ -351,7 +351,7 @@ const _sfc_main = {
         }),
         x: common_vendor.t(currentMembershipLevel.value.name),
         y: common_vendor.t(userInfo.value.topUpExperience || 0),
-        z: userInfo.value.topUpLevel.name === "游客会员" ? 1 : "",
+        z: userInfo.value.topUpLevel.name === "玄铁会员" ? 1 : "",
         A: userInfo.value.topUpLevel.name === "青铜会员" ? 1 : "",
         B: userInfo.value.topUpLevel.name === "白银会员" ? 1 : "",
         C: userInfo.value.topUpLevel.name === "黄金会员" ? 1 : "",

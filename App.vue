@@ -7,9 +7,17 @@
 				locationTimer: null
 			}
 		},
-		onLaunch: function() {
+		onLaunch: function(options) {
 			console.warn('当前组件仅支持 uni_modules 目录结构 ，请升级 HBuilderX 到 3.1.0 版本以上！')
 			console.log('App Launch')
+
+			if (options && options.query && options.query.inviteCode) {
+				const inviteCode = options.query.inviteCode;
+				console.log('✅ [App.vue] 全局捕获到启动参数中的邀请码:', inviteCode);
+
+				// 将邀请码暂存到本地存储，以便登录页或其他页面使用
+				uni.setStorageSync('pendingInviteCode', inviteCode);
+			}
 		},
 		onShow: function() {
 			console.log('App Show');

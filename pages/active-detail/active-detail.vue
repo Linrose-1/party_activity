@@ -243,6 +243,9 @@
 		onShareTimeline
 	} from '@dcloudio/uni-app'
 	import request from '../../utils/request.js';
+	import {
+		getInviteCode
+	} from '../../utils/user.js';
 
 	const activityId = ref(null);
 	// 【新增】创建一个 ref 来存储整个聚会详情对象
@@ -264,6 +267,12 @@
 	const participantTotal = ref(0);
 
 	onLoad((options) => {
+		if (options && options.inviteCode) {
+			const inviteCode = options.inviteCode;
+			console.log(`✅ [活动详情页] 在 onLoad 中捕获到邀请码: ${inviteCode}`);
+			uni.setStorageSync('pendingInviteCode', inviteCode);
+		}
+
 		loggedInUserId.value = uni.getStorageSync('userId');
 
 		if (options.id) {
@@ -601,19 +610,26 @@
 		}
 	};
 
-	// 【重大修改】升级 onShareAppMessage 逻辑
+	// 【升级 onShareAppMessage 逻辑
 	onShareAppMessage((res) => {
 		console.log("触发分享给好友", res);
 		closeSharePopup();
 
-		// 【新增】获取分享者自己的用户ID
+		// 获取分享者自己的用户ID
 		const sharerId = uni.getStorageSync('userId');
 		const finalTitle = customShareTitle.value || activityDetail.value.activityTitle || '发现一个很棒的聚会，快来看看吧！';
 
-		// 【修改】在路径中添加 sharerId 参数
+		const inviteCode = getInviteCode();
+
+
+		// 在路径中添加 sharerId 参数
 		let sharePath = `/pages/active-detail/active-detail?id=${activityDetail.value.id}`;
 		if (sharerId) {
 			sharePath += `&sharerId=${sharerId}`;
+		}
+
+		if (inviteCode) {
+			sharePath += `&inviteCode=${inviteCode}`;
 		}
 
 		return {
@@ -631,10 +647,16 @@
 		const sharerId = uni.getStorageSync('userId');
 		const finalTitle = customShareTitle.value || activityDetail.value.activityTitle || '发现一个很棒的聚会，快来看看吧！';
 
+		const inviteCode = getInviteCode();
+
 		// 【修改】在 query 中添加 sharerId 参数
 		let queryString = `id=${activityDetail.value.id}&from=timeline`;
 		if (sharerId) {
 			queryString += `&sharerId=${sharerId}`;
+		}
+
+		if (inviteCode) {
+			queryString += `&inviteCode=${inviteCode}`;
 		}
 
 		return {

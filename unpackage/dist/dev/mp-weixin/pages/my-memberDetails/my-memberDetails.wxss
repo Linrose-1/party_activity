@@ -1,0 +1,292 @@
+/* 水平间距 */
+/* 水平间距 */
+/* --- CSS变量定义 --- */
+.data-v-abc533c5:root {
+  --c-iron: #8d99ae;
+  --g-iron: linear-gradient(135deg, #e0e0e0, #b0bec5);
+  --c-bronze: #d08c60;
+  --g-bronze: linear-gradient(135deg, #f8c291, #e59866);
+  --c-silver: #a7b4c2;
+  --g-silver: linear-gradient(135deg, #e2e8f0, #d6dde5);
+  --c-gold: #ffc107;
+  --g-gold: linear-gradient(135deg, #fff3cd, #ffe082);
+  --c-diamond: #9b59b6;
+  --g-diamond: linear-gradient(135deg, #34495e, #2c3e50);
+  --c-diamond-accent: #a78bfa;
+}
+
+/* --- 基础与布局 --- */
+.page-container.data-v-abc533c5 {
+  background-color: #f4f7f9;
+  color: #34495e;
+}
+.content-wrapper.data-v-abc533c5 {
+  padding: 40rpx;
+}
+.header.data-v-abc533c5 {
+  text-align: center;
+  margin-bottom: 80rpx;
+}
+.header .title.data-v-abc533c5 {
+  display: block;
+  font-size: 56rpx;
+  font-weight: 800;
+  color: #2c3e50;
+  margin-bottom: 10rpx;
+  letter-spacing: -2rpx;
+}
+.header .subtitle.data-v-abc533c5 {
+  display: block;
+  font-size: 28rpx;
+  color: #7f8c8d;
+}
+
+/* --- 吸顶导航 --- */
+.main-nav.data-v-abc533c5 {
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0;
+  /* H5和小程序中，如果顶部有原生导航，可能需要 var(--window-top) */
+  background-color: rgba(255, 255, 255, 0.85);
+  -webkit-backdrop-filter: blur(10px);
+          backdrop-filter: blur(10px);
+  z-index: 100;
+  padding: 15rpx 40rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
+  display: flex;
+  justify-content: center;
+  gap: 30rpx;
+}
+.nav-link.data-v-abc533c5 {
+  text-decoration: none;
+  color: #34495e;
+  font-weight: 600;
+  font-size: 26rpx;
+  padding: 10rpx 0;
+  position: relative;
+  transition: color 0.3s ease;
+}
+
+/* --- 会员卡片 --- */
+.membership-tiers.data-v-abc533c5 {
+  display: flex;
+  flex-direction: column;
+  gap: 40rpx;
+}
+.card.data-v-abc533c5 {
+  background-color: #ffffff;
+  border-radius: 32rpx;
+  box-shadow: 0 10rpx 30rpx rgba(0, 0, 0, 0.07);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1rpx solid #e5e7eb;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.card.data-v-abc533c5:active {
+  transform: translateY(-10rpx);
+  box-shadow: 0 20rpx 50rpx rgba(0, 0, 0, 0.1);
+}
+.card-header.data-v-abc533c5 {
+  padding: 40rpx 30rpx;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.card-icon.data-v-abc533c5 {
+  margin: 0 auto 30rpx;
+  width: 128rpx;
+  height: 128rpx;
+}
+.card-title.data-v-abc533c5 {
+  display: block;
+  font-size: 48rpx;
+  font-weight: 700;
+}
+.card-price.data-v-abc533c5 {
+  font-size: 32rpx;
+  font-weight: 500;
+  margin-top: 10rpx;
+}
+.card-price .term.data-v-abc533c5 {
+  font-size: 26rpx;
+  font-weight: 400;
+  opacity: 0.8;
+}
+.card-body.data-v-abc533c5 {
+  padding: 30rpx;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+.benefits-title.data-v-abc533c5 {
+  display: block;
+  font-size: 32rpx;
+  font-weight: 600;
+  border-bottom: 1rpx solid #eee;
+  padding-bottom: 15rpx;
+  margin-top: 20rpx;
+  margin-bottom: 20rpx;
+  color: #2c3e50;
+}
+.benefits-list.data-v-abc533c5 {
+  padding: 0;
+  margin: 0;
+}
+.benefits-list li.data-v-abc533c5 {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 16rpx;
+  font-size: 28rpx;
+  line-height: 1.6;
+}
+.benefits-list li.data-v-abc533c5::before {
+  content: "✓";
+  color: #2ecc71;
+  margin-right: 15rpx;
+  font-weight: bold;
+  flex-shrink: 0;
+  margin-top: 6rpx;
+}
+.initial-values.data-v-abc533c5 {
+  list-style: none;
+  padding: 20rpx;
+  margin: 0 0 20rpx 0;
+  background-color: #f8f9fa;
+  border-radius: 16rpx;
+  border: 1rpx solid #e9ecef;
+}
+.initial-values li.data-v-abc533c5 {
+  font-size: 28rpx;
+  margin-bottom: 10rpx;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.initial-values li.data-v-abc533c5:last-child {
+  margin-bottom: 0;
+}
+.initial-values .value.data-v-abc533c5 {
+  font-weight: 600;
+}
+.initial-values .calc.data-v-abc533c5 {
+  font-size: 24rpx;
+  color: #7f8c8d;
+}
+.card-footer.data-v-abc533c5 {
+  padding: 30rpx;
+  margin-top: auto;
+}
+.btn.data-v-abc533c5 {
+  display: block;
+  width: 100%;
+  padding: 24rpx 20rpx;
+  border-radius: 16rpx;
+  font-size: 32rpx;
+  font-weight: 700;
+  text-align: center;
+  text-decoration: none;
+}
+.btn.data-v-abc533c5::after {
+  border: none;
+}
+
+/* --- 各等级颜色 --- */
+.card-iron .card-header.data-v-abc533c5 {
+  background: var(--g-iron);
+}
+.card-iron .card-title.data-v-abc533c5,
+.card-iron .card-price.data-v-abc533c5 {
+  color: #37474f;
+}
+.card-iron .btn.data-v-abc533c5 {
+  background-color: var(--c-iron);
+  color: #fff;
+}
+.card-bronze .card-header.data-v-abc533c5 {
+  background: var(--g-bronze);
+}
+.card-bronze .card-title.data-v-abc533c5,
+.card-bronze .card-price.data-v-abc533c5 {
+  color: #8c5a3c;
+}
+.card-bronze .btn.data-v-abc533c5 {
+  background-color: var(--c-bronze);
+  color: #fff;
+}
+.card-silver .card-header.data-v-abc533c5 {
+  background: var(--g-silver);
+}
+.card-silver .card-title.data-v-abc533c5,
+.card-silver .card-price.data-v-abc533c5 {
+  color: #546e7a;
+}
+.card-silver .btn.data-v-abc533c5 {
+  background-color: var(--c-silver);
+  color: #fff;
+}
+.card-gold .card-header.data-v-abc533c5 {
+  background: var(--g-gold);
+}
+.card-gold .card-title.data-v-abc533c5,
+.card-gold .card-price.data-v-abc533c5 {
+  color: #b58900;
+}
+.card-gold .btn.data-v-abc533c5 {
+  background-color: var(--c-gold);
+  color: #111;
+}
+.card-diamond.data-v-abc533c5 {
+  border-color: var(--c-diamond-accent);
+  border-width: 4rpx;
+}
+.card-diamond .card-header.data-v-abc533c5 {
+  background: var(--g-diamond);
+}
+.card-diamond .card-title.data-v-abc533c5,
+.card-diamond .card-price.data-v-abc533c5 {
+  color: #fff;
+}
+.card-diamond .btn.data-v-abc533c5 {
+  background: var(--c-diamond-accent);
+  color: #fff;
+}
+.card-diamond .benefits-list li.data-v-abc533c5::before {
+  color: var(--c-diamond-accent);
+}
+
+/* --- 黑钻特殊权益 --- */
+.special-benefit.data-v-abc533c5 {
+  background-color: #f8f7fc;
+  border-left: 8rpx solid var(--c-diamond-accent);
+  padding: 20rpx;
+  margin-top: 30rpx;
+  border-radius: 0 16rpx 16rpx 0;
+}
+.special-benefit .special-title.data-v-abc533c5 {
+  display: block;
+  margin: 0 0 10rpx 0;
+  color: var(--c-diamond);
+  font-size: 28rpx;
+  font-weight: bold;
+}
+.special-benefit .special-desc.data-v-abc533c5 {
+  display: block;
+  font-size: 26rpx;
+}
+.special-benefit .sub-list.data-v-abc533c5 {
+  font-size: 26rpx;
+  margin: 10rpx 0 0 0;
+  padding: 0;
+}
+.special-benefit .sub-list li.data-v-abc533c5 {
+  margin-bottom: 8rpx;
+}
+.special-benefit .sub-list .strong.data-v-abc533c5 {
+  font-weight: 600;
+}
+
+/* 移除HTML特有的ul/li默认样式 */
+ul.data-v-abc533c5 {
+  list-style: none;
+}

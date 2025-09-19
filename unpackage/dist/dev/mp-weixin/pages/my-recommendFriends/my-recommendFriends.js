@@ -32,7 +32,10 @@ const _sfc_main = {
         loadStatus.value = "more";
       }
       loadStatus.value = "loading";
-      const { data, error } = await utils_request.request("/app-api/member/user/share-user-list", {
+      const {
+        data,
+        error
+      } = await utils_request.request("/app-api/member/user/share-user-list", {
         method: "GET",
         data: {
           pageNo: pageNo.value,
@@ -44,7 +47,10 @@ const _sfc_main = {
       }
       if (error) {
         loadStatus.value = "more";
-        common_vendor.index.showToast({ title: error, icon: "none" });
+        common_vendor.index.showToast({
+          title: error,
+          icon: "none"
+        });
         return;
       }
       if (data && data.list) {
@@ -115,8 +121,27 @@ const _sfc_main = {
         isFollowActionInProgress.value = false;
       }
     };
+    const navigateToBusinessCard = (user) => {
+      if (!user || !user.id) {
+        common_vendor.index.showToast({
+          title: "无法查看该用户主页",
+          icon: "none"
+        });
+        return;
+      }
+      const defaultAvatar = "/static/images/default-avatar.png";
+      const name = user.nickname || user.realName || "匿名用户";
+      const avatarUrl = user.avatar || defaultAvatar;
+      const url = `/pages/applicationBusinessCard/applicationBusinessCard?id=${user.id}&name=${encodeURIComponent(name)}&avatar=${encodeURIComponent(avatarUrl)}&fromShare=1`;
+      common_vendor.index.__f__("log", "at pages/my-recommendFriends/my-recommendFriends.vue:212", "从推荐商友页跳转到名片申请页, URL:", url);
+      common_vendor.index.navigateTo({
+        url
+      });
+    };
     common_vendor.onLoad(() => {
-      common_vendor.index.showLoading({ title: "正在加载..." });
+      common_vendor.index.showLoading({
+        title: "正在加载..."
+      });
       getShareUserList(true).finally(() => {
         common_vendor.index.hideLoading();
       });
@@ -141,7 +166,8 @@ const _sfc_main = {
             h: common_vendor.t(friend.followFlag === 1 ? "取关" : "关注"),
             i: friend.followFlag === 1 ? 1 : "",
             j: common_vendor.o(($event) => handleFollowAction(friend), friend.id),
-            k: friend.id
+            k: friend.id,
+            l: common_vendor.o(($event) => navigateToBusinessCard(friend), friend.id)
           };
         }),
         b: common_vendor.p({

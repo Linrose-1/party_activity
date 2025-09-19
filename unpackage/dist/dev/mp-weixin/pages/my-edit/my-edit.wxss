@@ -1,5 +1,6 @@
 /* 水平间距 */
 /* 水平间距 */
+/* --- 1. 页面基础与布局 --- */
 .container.data-v-13622257 {
   padding: 20rpx 30rpx 40rpx;
   background-color: #f9f9f9;
@@ -16,73 +17,160 @@
   margin-bottom: 30rpx;
   display: block;
 }
+
+/* --- 2. 【【【核心修复】】】表单项通用布局 --- */
 .data-v-13622257 .uni-forms-item {
+  display: flex;
+  align-items: center;
   margin-bottom: 20rpx;
-  /* 让label和内容区在垂直方向上顶部对齐，以适应多行内容 */
-  align-items: flex-start;
 }
 .data-v-13622257 .uni-forms-item .uni-forms-item__label {
-  width: 180rpx !important;
+  width: 160rpx !important;
   font-size: 28rpx;
   color: #333;
-  /* 给label一个上边距，使其与多行文本的顶部在视觉上更协调 */
-  padding-top: 10rpx;
-}
-.data-v-13622257 .uni-data-tree-input {
-  font-size: 28rpx !important;
-}
-
-/* 1. 限制选择器组件本身的最大宽度为100% */
-.data-v-13622257 .industry-picker {
-  width: 450rpx !important;
-  box-sizing: border-box;
-  /* 确保 padding 不会撑大宽度 */
-}
-
-/* 2. 深入组件内部，控制显示文本的区域 */
-.data-v-13622257 .industry-picker .uni-data-tree-input {
-  /* 同样限制宽度，并设置自动换行和美化样式 */
-  width: 450rpx !important;
-  white-space: normal !important;
-  /* 允许换行 */
-  height: auto !important;
-  /* 高度自适应 */
-  line-height: 1.5;
-  /* 舒适的行高 */
-  /* 增加内边距，让文本不贴着边框，看起来更像输入框 */
-  padding-top: 10rpx;
-  padding-bottom: 10rpx;
+  flex-shrink: 0;
+  padding-right: 20rpx;
   box-sizing: border-box;
 }
+.data-v-13622257 .uni-forms-item .uni-forms-item__content {
+  flex: 1;
+  min-width: 0;
+}
+.data-v-13622257 .uni-easyinput,.data-v-13622257 .uni-data-select,.data-v-13622257 .uni-datetime-picker,.data-v-13622257 .uni-data-picker {
+  width: 100% !important;
+}
 
-/* 3. （可选，但推荐）如果希望文本最多显示两行，然后出现省略号 */
-/* 如果不需要省略号，可以注释或删除下面这段 */
-.data-v-13622257 .industry-picker .uni-data-tree-input .input-value {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  /* 最多显示2行 */
-  -webkit-box-orient: vertical;
+/* --- 3. 【【【核心修复】】】 DataPicker 文本溢出终极解决方案 --- */
+.data-v-13622257 .uni-data-picker .uni-data-tree-input {
+  display: flex !important;
+  align-items: center;
+  width: 100% !important;
+  height: 36px;
+  border: 1px solid #e5e5e5;
+  border-radius: 4px;
+  padding: 0 10px;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+.data-v-13622257 .uni-data-picker .uni-data-tree-input .input-value {
+  flex: 1;
+  min-width: 0;
+  display: block;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: normal !important;
-  /* 必须再次声明以覆盖内联样式 */
+  white-space: nowrap;
 }
+
+/* --- 4. 动态增删区块样式 (布局重构) --- */
+.dynamic-section.data-v-13622257 {
+  margin-top: 40rpx;
+  margin-bottom: 20rpx;
+  padding-top: 30rpx;
+  border-top: 1px solid #f0f0f0;
+}
+.dynamic-header.data-v-13622257 {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+.dynamic-label.data-v-13622257 {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+}
+.add-btn-small.data-v-13622257 {
+  display: flex;
+  align-items: center;
+  font-size: 24rpx;
+  height: 50rpx;
+  line-height: 50rpx;
+  padding: 0 20rpx;
+  margin: 0;
+  background-color: #f0f7ff;
+  color: #007bff;
+  border: 1px solid #d2e7ff;
+}
+.add-btn-small.data-v-13622257::after {
+  border: none;
+}
+.add-btn-small uni-icons.data-v-13622257 {
+  margin-right: 8rpx;
+}
+.dynamic-item.data-v-13622257 {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20rpx;
+  gap: 20rpx;
+}
+.dynamic-item .uni-easyinput.data-v-13622257 {
+  flex: 1;
+}
+.remove-btn-small.data-v-13622257 {
+  width: 50rpx;
+  height: 50rpx;
+  line-height: 50rpx;
+  padding: 0;
+  margin: 0;
+  border-radius: 50%;
+  background-color: #fef0f0;
+  color: #f56c6c;
+  font-size: 28rpx;
+  font-weight: bold;
+  border: none;
+  flex-shrink: 0;
+}
+.remove-btn-small.data-v-13622257::after {
+  border: none;
+}
+.dynamic-group.data-v-13622257 {
+  background-color: #f9f9f9;
+  padding: 30rpx;
+  border-radius: 12rpx;
+  margin-bottom: 20rpx;
+  border: 1px solid #eee;
+}
+.dynamic-group .group-header.data-v-13622257 {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30rpx;
+}
+.dynamic-group .group-title.data-v-13622257 {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #555;
+}
+.dynamic-group .remove-btn.data-v-13622257 {
+  font-size: 24rpx;
+  height: 50rpx;
+  line-height: 50rpx;
+  padding: 0 20rpx;
+  margin: 0;
+  background-color: #fef0f0;
+  color: #f56c6c;
+  border: 1px solid #fde2e2;
+}
+.dynamic-group .remove-btn.data-v-13622257::after {
+  border: none;
+}
+
+/* --- 5. 其他组件与通用样式 (保持不变) --- */
 .avatar-uploader.data-v-13622257,
 .qr-uploader.data-v-13622257 {
   display: flex;
   align-items: center;
   gap: 30rpx;
 }
-.avatar-img.data-v-13622257,
+.avatar-img.data-v-13622257 {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 50%;
+}
 .qr-img.data-v-13622257 {
   width: 120rpx;
   height: 120rpx;
   border-radius: 8rpx;
-}
-.avatar-img.data-v-13622257 {
-  border-radius: 50%;
-}
-.qr-img.data-v-13622257 {
   border: 1px solid #eee;
 }
 .upload-btn.data-v-13622257 {
@@ -100,8 +188,14 @@
 .phone-text.data-v-13622257 .uni-easyinput__content-input {
   color: #999 !important;
 }
+.other-hobby-input.data-v-13622257 {
+  margin-top: 20rpx;
+}
+
+/* --- 6. 底部按钮与认证区 (保持不变) --- */
 .save-btn.data-v-13622257,
-.label-btn.data-v-13622257 {
+.label-btn.data-v-13622257,
+.auth-btn.data-v-13622257 {
   width: 100%;
   height: 88rpx;
   line-height: 88rpx;
@@ -111,7 +205,8 @@
   color: white;
 }
 .save-btn.data-v-13622257::after,
-.label-btn.data-v-13622257::after {
+.label-btn.data-v-13622257::after,
+.auth-btn.data-v-13622257::after {
   border: none;
 }
 .save-btn.data-v-13622257 {
@@ -119,26 +214,10 @@
   background: linear-gradient(to right, #FF8C00, #FF6B00);
 }
 .label-btn.data-v-13622257 {
-  height: 80rpx;
-  line-height: 80rpx;
-  font-size: 30rpx;
   background: linear-gradient(to right, #007bff, #0056b3);
 }
-.digital-label-section.data-v-13622257 {
-  /* 可根据需要为数字标签区域添加特定样式 */
-}
 .auth-btn.data-v-13622257 {
-  width: 100%;
-  height: 80rpx;
-  line-height: 80rpx;
-  font-size: 30rpx;
-  color: white;
   background: linear-gradient(to right, #00C777, #00A362);
-  border: none;
-  border-radius: 40rpx;
-}
-.auth-btn.data-v-13622257::after {
-  border: none;
 }
 .auth-info.data-v-13622257 {
   font-size: 28rpx;

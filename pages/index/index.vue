@@ -24,13 +24,9 @@
 			<view class="form-item">
 				<uni-icons type="person-filled" size="22" color="#FF7600"></uni-icons>
 				<text class="label">用户名</text>
-				<button v-if="!userInfo.nickName" class="get-name-btn" @tap="getUserProfile">
-					授权获取微信昵称
-				</button>
-				<view v-else class="user-profile-display">
-					<image :src="userInfo.avatarUrl" class="mini-avatar"></image>
-					<text class="input-display">{{ userInfo.nickName }}</text>
-				</view>
+				<!-- 【修改】将按钮改为输入框 -->
+				<input v-model="nickname" class="input" type="nickname" placeholder="请输入您的昵称"
+					placeholder-class="placeholder" />
 			</view>
 
 			<!-- 真实姓名 (暂时注释) -->
@@ -89,6 +85,7 @@
 	const loginCode = ref(''); // 【新增】用于存储 uni.login 返回的 code
 	const phoneCode = ref(''); // 用于存储 getPhoneNumber 返回的 code
 	const userInfo = ref({}); // 存储微信用户信息 (保持不变，用于UI显示)
+	const nickname = ref(''); //用于绑定昵称输入框的 ref
 	// const realName = ref(''); // 【注释】真实姓名暂时不用
 	const inviteCode = ref(''); // 邀请码 (shardCode)
 	const agreed = ref(false); // 是否同意协议
@@ -97,12 +94,19 @@
 	// 【修改】控制登录按钮是否可用的计算属性
 	const isLoginDisabled = computed(() => {
 		// 登录按钮的可用条件现在是：已获取手机号code，并同意了协议
-		return !phoneCode.value || !agreed.value;
+		return !phoneCode.value || !nickname.value.trim() || !agreed.value;
 	});
 
 	// --- 【新增】页面加载时，预获取 loginCode ---
 	onLoad(() => {
 		getLoginCode();
+		const pendingInviteCode = uni.getStorageSync('pendingInviteCode');
+		if (pendingInviteCode) {
+			console.log('✅ [登录页] 读取到暂存的邀请码:', pendingInviteCode);
+			inviteCode.value = pendingInviteCode;
+			// （可选）为了防止重复使用，可以在填充后立即清除
+			uni.removeStorageSync('pendingInviteCode');
+		}
 	});
 
 	// --- 方法 ---
@@ -150,19 +154,10 @@
 	 * @description 获取用户微信昵称和头像 (保持不变)
 	 */
 	const getUserProfile = () => {
-		uni.getUserProfile({
-			desc: '用于完善会员资料',
-			success: (res) => {
-				console.log('✅ 获取用户信息成功:', res.userInfo);
-				userInfo.value = res.userInfo;
-				uni.showToast({
-					title: '昵称授权成功',
-					icon: 'none'
-				});
-			},
-			fail: (err) => {
-				console.error('❌ 用户拒绝了信息授权:', err);
-			}
+		// 提示用户：现在需要手动输入昵称
+		uni.showToast({
+			title: '请在输入框中设置您的昵称',
+			icon: 'none'
 		});
 	};
 
@@ -176,7 +171,13 @@
 	 */
 	const handleLogin = async () => {
 		if (isLoginDisabled.value) {
-			// ... 省略原有的禁用提示逻辑 ...
+			if (!nickname.value.trim()) {
+				uni.showToast({
+					title: '请输入您的昵称',
+					icon: 'none'
+				});
+				return;
+			}
 			if (!agreed.value) {
 				uni.showToast({
 					title: '请先阅读并同意用户协议',
@@ -200,7 +201,8 @@
 				loginCode: loginCode.value,
 				phoneCode: phoneCode.value,
 				state: 'default',
-				shardCode: inviteCode.value
+				shardCode: inviteCode.value,
+				nickname: nickname.value
 			};
 
 			console.log('🚀 准备提交的一键登录数据:', payload);
@@ -218,7 +220,40 @@
 				uni.setStorageSync('token', result.data.accessToken);
 				uni.setStorageSync('userId', result.data.userId);
 
-				// ==================== 新增：检查并处理分享奖励 ====================
+				// ========================================
+				uni.showLoading({
+					title: '正在获取用户信息...'
+				}); // 更新提示
+
+				// 1. 调用获取用户信息的接口
+				const {
+					data: fullUserInfo,
+					error: infoError
+				} = await request('/app-api/member/user/get', {
+					method: 'GET'
+				});
+
+				if (infoError) {
+					// 如果获取用户信息失败，也提示错误并终止
+					uni.hideLoading();
+					uni.showToast({
+						title: `获取用户信息失败: ${infoError}`,
+						icon: 'none'
+					});
+					return;
+				}
+
+				// 2. 打印用户信息，方便您调试
+				console.log('✅ [登录后] 成功获取到的完整用户信息:', JSON.parse(JSON.stringify(fullUserInfo)));
+
+				// 3. 将完整的用户信息存入本地缓存，方便其他页面使用
+				// 注意：最好存字符串，避免小程序对存储对象的限制
+				uni.setStorageSync('userInfo', JSON.stringify(fullUserInfo));
+				// =============================================================
+
+
+
+				// ==================== 检查并处理分享奖励 ====================
 				// 这里我们定义一个立即执行的异步函数来处理，这样可以让代码块更清晰
 				await (async () => {
 					const pendingReward = uni.getStorageSync('pendingShareReward');

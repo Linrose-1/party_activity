@@ -1,6 +1,7 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
 const utils_request = require("../../utils/request.js");
+const utils_user = require("../../utils/user.js");
 if (!Array) {
   const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
   const _easycom_uni_load_more2 = common_vendor.resolveComponent("uni-load-more");
@@ -34,11 +35,15 @@ const _sfc_main = {
       latitude: ""
     });
     common_vendor.onShow(() => {
-      common_vendor.index.__f__("log", "at pages/home/home.vue:192", "页面显示，执行 onShow 钩子");
+      common_vendor.index.__f__("log", "at pages/home/home.vue:199", "页面显示，执行 onShow 钩子");
       loggedInUserId.value = common_vendor.index.getStorageSync("userId");
       isLogin.value = !!loggedInUserId.value;
-      common_vendor.index.__f__("log", "at pages/home/home.vue:196", "当前登录状态 isLogin:", isLogin.value);
+      common_vendor.index.__f__("log", "at pages/home/home.vue:203", "当前登录状态 isLogin:", isLogin.value);
       getBusinessOpportunitiesList(true);
+      common_vendor.index.showShareMenu({
+        withShareTicket: true,
+        menus: ["shareAppMessage", "shareTimeline"]
+      });
     });
     common_vendor.onReachBottom(() => {
       if (loadingStatus.value === "more") {
@@ -46,7 +51,7 @@ const _sfc_main = {
       }
     });
     common_vendor.onPullDownRefresh(() => {
-      common_vendor.index.__f__("log", "at pages/home/home.vue:209", "用户触发了下拉刷新");
+      common_vendor.index.__f__("log", "at pages/home/home.vue:221", "用户触发了下拉刷新");
       getBusinessOpportunitiesList(true);
     });
     function formatTimestamp(timestamp) {
@@ -60,6 +65,49 @@ const _sfc_main = {
       const m = date.getMinutes().toString().padStart(2, "0");
       return `${Y}-${M}-${D} ${h}:${m}`;
     }
+    common_vendor.onShareAppMessage((res) => {
+      common_vendor.index.__f__("log", "at pages/home/home.vue:243", "触发首页分享给好友");
+      const sharerId = common_vendor.index.getStorageSync("userId");
+      const inviteCode = utils_user.getInviteCode();
+      let sharePath = "/pages/home/home";
+      const params = [];
+      if (sharerId) {
+        params.push(`sharerId=${sharerId}`);
+      }
+      if (inviteCode) {
+        params.push(`inviteCode=${inviteCode}`);
+      }
+      if (params.length > 0) {
+        sharePath += `?${params.join("&")}`;
+      }
+      const shareContent = {
+        title: "发现一个超棒的商友圈，快来看看吧！",
+        path: sharePath,
+        imageUrl: "https://img.gofor.club/logo_share.jpg"
+      };
+      common_vendor.index.__f__("log", "at pages/home/home.vue:273", "首页分享内容:", JSON.stringify(shareContent));
+      return shareContent;
+    });
+    common_vendor.onShareTimeline(() => {
+      common_vendor.index.__f__("log", "at pages/home/home.vue:282", "触发首页分享到朋友圈");
+      const sharerId = common_vendor.index.getStorageSync("userId");
+      const inviteCode = utils_user.getInviteCode();
+      const params = [];
+      if (sharerId) {
+        params.push(`sharerId=${sharerId}`);
+      }
+      if (inviteCode) {
+        params.push(`inviteCode=${inviteCode}`);
+      }
+      const queryString = params.join("&");
+      const shareContent = {
+        title: "发现一个超棒的商友圈，快来看看吧！",
+        query: queryString,
+        imageUrl: "https://img.gofor.club/logo_share.jpg"
+      };
+      common_vendor.index.__f__("log", "at pages/home/home.vue:307", "首页分享到朋友圈内容:", JSON.stringify(shareContent));
+      return shareContent;
+    });
     const getBusinessOpportunitiesList = async (isRefresh = false) => {
       if (loadingStatus.value === "loading" && !isRefresh)
         return;
@@ -141,7 +189,7 @@ const _sfc_main = {
           pageNo.value++;
         }
       } catch (err) {
-        common_vendor.index.__f__("error", "at pages/home/home.vue:319", "getBusinessOpportunitiesList 逻辑异常:", err);
+        common_vendor.index.__f__("error", "at pages/home/home.vue:408", "getBusinessOpportunitiesList 逻辑异常:", err);
         loadingStatus.value = "more";
         common_vendor.index.showToast({
           title: "页面逻辑异常，请稍后重试",
@@ -289,7 +337,7 @@ const _sfc_main = {
           method: "POST",
           data: requestData
         });
-        common_vendor.index.__f__("log", "at pages/home/home.vue:486", "触发收藏", result);
+        common_vendor.index.__f__("log", "at pages/home/home.vue:575", "触发收藏", result);
         if (result && result.error) {
           post.isSaved = originalStatus;
           common_vendor.index.showToast({
@@ -433,7 +481,7 @@ const _sfc_main = {
       const defaultAvatar = "/static/images/default-avatar.png";
       const avatarUrl = user.avatar || defaultAvatar;
       const url = `/pages/applicationBusinessCard/applicationBusinessCard?id=${user.id}&name=${encodeURIComponent(user.name)}&avatar=${encodeURIComponent(avatarUrl)}`;
-      common_vendor.index.__f__("log", "at pages/home/home.vue:684", "从商机列表页跳转，URL:", url);
+      common_vendor.index.__f__("log", "at pages/home/home.vue:773", "从商机列表页跳转，URL:", url);
       common_vendor.index.navigateTo({
         url
       });
@@ -575,5 +623,6 @@ const _sfc_main = {
   }
 };
 const MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["__scopeId", "data-v-07e72d3c"]]);
+_sfc_main.__runtimeHooks = 6;
 wx.createPage(MiniProgramPage);
 //# sourceMappingURL=../../../.sourcemap/mp-weixin/pages/home/home.js.map

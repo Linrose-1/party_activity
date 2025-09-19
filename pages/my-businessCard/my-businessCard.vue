@@ -101,6 +101,12 @@
 
 	// --- 2. 页面生命周期与初始化 ---
 	onLoad((options) => {
+		if (options && options.inviteCode) {
+			const inviteCode = options.inviteCode;
+			console.log(`✅ [名片页] 在 onLoad 中捕获到邀请码: ${inviteCode}`);
+			uni.setStorageSync('pendingInviteCode', inviteCode);
+		}
+
 		console.log('[my-businessCard] onLoad 触发。已收到的选项:', JSON.stringify(options));
 
 		const loggedInUserId = uni.getStorageSync('userId');
@@ -314,10 +320,16 @@
 		const loggedInUserId = uni.getStorageSync('userId');
 		const cardOwnerId = userInfo.value.id; // 分享路径中的ID应始终是名片所有者的ID
 
+		const inviteCode = userInfo.value.shardCode;
+
 		let sharePath = `/pages/my-businessCard/my-businessCard?id=${cardOwnerId}&fromShare=1`;
 		// 分享者ID是当前登录用户的ID
 		if (loggedInUserId) {
 			sharePath += `&sharerId=${loggedInUserId}`;
+		}
+
+		if (inviteCode) {
+			sharePath += `&inviteCode=${inviteCode}`;
 		}
 
 		const finalTitle = customShareTitle.value ||
@@ -346,10 +358,17 @@
 		const loggedInUserId = uni.getStorageSync('userId');
 		const cardOwnerId = userInfo.value.id;
 
+		const inviteCode = userInfo.value.shardCode;
+
 		let queryString = `id=${cardOwnerId}&fromShare=1`;
 		if (loggedInUserId) {
 			queryString += `&sharerId=${loggedInUserId}`;
 		}
+
+		if (inviteCode) {
+			queryString += `&inviteCode=${inviteCode}`;
+		}
+
 
 		const finalTitle = customShareTitle.value ||
 			`这是 ${userInfo.value.realName || userInfo.value.nickname} 的名片`;

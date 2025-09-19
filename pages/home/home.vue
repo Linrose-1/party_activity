@@ -2,7 +2,6 @@
 	<view class="business-opportunity-app">
 		<!-- 顶部区域 -->
 		<view class="header wechat-style">
-			<!-- ... header部分内容保持不变 ... -->
 			<view class="app-title">猩聚社</view>
 			<view class="app-subtitle">商友连接·商机分享</view>
 			<view class="app-description">连接全球精英商友</view>
@@ -162,6 +161,14 @@
 		onShow
 	} from '@dcloudio/uni-app';
 	import request from '../../utils/request.js';
+	import {
+		onShareAppMessage,
+		onShareTimeline
+	} from '@dcloudio/uni-app'; // 导入分享钩子
+	import {
+		getInviteCode
+	} from '../../utils/user.js'; // 导入我们之前创建的工具函数
+
 
 	const loggedInUserId = ref(null);
 	const isLogin = ref(false);
@@ -197,6 +204,11 @@
 
 		// 刷新列表数据
 		getBusinessOpportunitiesList(true);
+
+		uni.showShareMenu({
+			withShareTicket: true,
+			menus: ["shareAppMessage", "shareTimeline"]
+		});
 	});
 
 	onReachBottom(() => {
@@ -221,6 +233,83 @@
 		const m = date.getMinutes().toString().padStart(2, '0');
 		return `${Y}-${M}-${D} ${h}:${m}`;
 	}
+
+	// ==================== 【分享】 ====================
+
+	/**
+	 * @description 监听用户点击右上角“分享”按钮的行为，并自定义分享内容
+	 */
+	onShareAppMessage((res) => {
+		console.log("触发首页分享给好友");
+
+		// 1. 获取分享者（即当前登录用户）的信息
+		const sharerId = uni.getStorageSync('userId');
+		const inviteCode = getInviteCode(); // 使用工具函数获取邀请码
+
+		// 2. 定义分享出去的基础路径 (首页路径)
+		let sharePath = '/pages/home/home'; // 请确保这是您首页的正确路径
+
+		// --- 【核心修正】手动拼接参数 ---
+		const params = [];
+		if (sharerId) {
+			params.push(`sharerId=${sharerId}`);
+		}
+		if (inviteCode) {
+			params.push(`inviteCode=${inviteCode}`);
+		}
+
+		if (params.length > 0) {
+			sharePath += `?${params.join('&')}`;
+		}
+		// --- 修正结束 ---
+
+		// 4. 返回最终的分享对象
+		const shareContent = {
+			title: '发现一个超棒的商友圈，快来看看吧！',
+			path: sharePath,
+			imageUrl: 'https://img.gofor.club/logo_share.jpg'
+		};
+
+		console.log('首页分享内容:', JSON.stringify(shareContent));
+
+		return shareContent;
+	});
+
+	/**
+	 * @description 监听用户分享到朋友圈的行为
+	 */
+	onShareTimeline(() => {
+		console.log("触发首页分享到朋友圈");
+
+		// 1. 获取分享者信息
+		const sharerId = uni.getStorageSync('userId');
+		const inviteCode = getInviteCode();
+
+		// --- 【核心修正】手动拼接参数 ---
+		const params = [];
+		if (sharerId) {
+			params.push(`sharerId=${sharerId}`);
+		}
+		if (inviteCode) {
+			params.push(`inviteCode=${inviteCode}`);
+		}
+
+		const queryString = params.join('&');
+		// --- 修正结束 ---
+
+		// 3. 返回分享对象
+		const shareContent = {
+			title: '发现一个超棒的商友圈，快来看看吧！',
+			query: queryString,
+			imageUrl: 'https://img.gofor.club/logo_share.jpg'
+		};
+
+		console.log('首页分享到朋友圈内容:', JSON.stringify(shareContent));
+
+		return shareContent;
+	});
+
+	// =============================================================
 
 	const getBusinessOpportunitiesList = async (isRefresh = false) => {
 		if (loadingStatus.value === 'loading' && !isRefresh) return; // 防止重复加载，但允许下拉刷新
@@ -1054,7 +1143,7 @@
 	.action-group {
 		display: flex;
 		gap: 40rpx;
-		align-items: center; 
+		align-items: center;
 	}
 
 	.action {

@@ -113,9 +113,10 @@
 				</view>
 
 				<!-- 底部添加评论区域 -->
-				<view class="add-comment">
-					<input type="text" v-model="newCommentText" :placeholder="commentInputPlaceholder"
-						@confirm="addComment" confirm-type="send" />
+				<view class="add-comment" :style="{ bottom: keyboardHeight + 'px' }">
+					<textarea auto-height maxlength="200" v-model="newCommentText"
+						:placeholder="commentInputPlaceholder" :adjust-position="false"
+						class="comment-textarea"></textarea>
 					<button @click="addComment">发送</button>
 				</view>
 			</template>
@@ -166,7 +167,8 @@
 		ref,
 		reactive,
 		onMounted,
-		computed
+		computed,
+		onUnmounted
 	} from 'vue';
 	import {
 		onLoad,
@@ -174,6 +176,9 @@
 		onShareTimeline
 	} from '@dcloudio/uni-app';
 	import request from '../../utils/request.js';
+	import {
+		getInviteCode
+	} from '../../utils/user.js';
 
 	const isLoading = ref(true);
 	const postId = ref(null);
@@ -210,6 +215,8 @@
 	const customShareTitle = ref(''); // 用于存储用户自定义的分享标题
 	const showTimelineGuide = ref(false);
 
+	const keyboardHeight = ref(0);
+
 	const commentInputPlaceholder = computed(() => {
 		return replyToNickname.value ? `回复 @${replyToNickname.value}` : '发表你的评论...';
 	});
@@ -226,6 +233,14 @@
 	}
 
 	onLoad((options) => {
+		console.log(`✅ [商机详情页] 在 onLoad 中捕获到 options: ${JSON.stringify(options)}`);
+		if (options && options.inviteCode) {
+			const inviteCode = options.inviteCode;
+			console.log(`✅ [商机详情页] 在 onLoad 中捕获到邀请码: ${inviteCode}`);
+			uni.setStorageSync('pendingInviteCode', inviteCode);
+		}
+
+
 		loggedInUserId.value = uni.getStorageSync('userId');
 		if (options && options.id) {
 			postId.value = options.id;
@@ -273,7 +288,18 @@
 		});
 	});
 
-	onMounted(() => {});
+	onMounted(() => {
+		// 监听键盘高度变化
+		uni.onKeyboardHeightChange(res => {
+			console.log('键盘高度变化:', res.height);
+			keyboardHeight.value = res.height;
+		});
+	});
+
+	onUnmounted(() => {
+		// 页面卸载时，取消监听，避免内存泄漏
+		uni.offKeyboardHeightChange();
+	});
 
 	// 【新增】打开分享弹窗的方法
 	const openSharePopup = () => {
@@ -312,17 +338,25 @@
 		// 分享时，关闭弹窗
 		closeSharePopup();
 
-		// 新增：获取分享者自己的用户ID
+		// 获取分享者自己的用户ID
 		const sharerId = uni.getStorageSync('userId');
 
 		// 优先使用用户自定义的标题，如果为空，则使用商机标题作为备选
 		const finalTitle = customShareTitle.value || postDetail.postTitle || '发现一个商机，快来看看吧！';
 
-		// 修改：在路径中添加 sharerId 参数
+		const inviteCode = getInviteCode();
+
+		//在路径中添加 sharerId 参数
 		let sharePath = `/pages/home-commercialDetail/home-commercialDetail?id=${postDetail.id}`;
 		if (sharerId) {
 			sharePath += `&sharerId=${sharerId}`;
 		}
+
+		if (inviteCode) {
+			sharePath += `&inviteCode=${inviteCode}`;
+		}
+
+		console.log('分享商机（好友），携带邀请码:', inviteCode);
 
 		return {
 			title: finalTitle,
@@ -341,6 +375,8 @@
 		// 1. 优先使用用户在弹窗中编辑的自定义标题
 		const finalTitle = customShareTitle.value || postDetail.postTitle || '发现一个商机，快来看看吧！';
 
+		const inviteCode = getInviteCode();
+
 		// 2. 封面图片逻辑
 		const finalImageUrl = postDetail.images.length > 0 ? postDetail.images[0] : '/static/logo.png';
 
@@ -348,6 +384,10 @@
 		let queryString = `id=${postDetail.id}&from=timeline`;
 		if (sharerId) {
 			queryString += `&sharerId=${sharerId}`;
+		}
+
+		if (inviteCode) {
+			queryString += `&inviteCode=${inviteCode}`;
 		}
 
 		// 4. 返回最终的分享对象
@@ -1255,7 +1295,7 @@
 		align-items: center;
 		background: white;
 		padding: 20rpx 30rpx;
-		padding-bottom: calc(20rpx + env(safe-area-inset-bottom));
+		padding-bottom: calc(10rpx + env(safe-area-inset-bottom));
 		box-shadow: 0 -10rpx 30rpx rgba(0, 0, 0, 0.05);
 		border-top: 2rpx solid #e0e0e0;
 		z-index: 99;
@@ -1300,6 +1340,30 @@
 
 	.add-comment button:active {
 		background: #e05a00;
+	}
+
+	.comment-textarea {
+		flex-grow: 1;
+		background: #f5f5f5;
+		border: 2rpx solid #e0e0e0;
+		border-radius: 40rpx;
+		/* 保持圆角 */
+		padding: 18rpx 40rpx;
+		/* 调整内边距使其垂直居中 */
+		font-size: 30rpx;
+		outline: none;
+		transition: all 0.3s;
+		margin-right: 24rpx;
+		line-height: 1.5;
+		/* 设置合适的行高 */
+		box-sizing: border-box;
+		min-height: 80rpx;
+		/* 与按钮高度保持一致 */
+	}
+
+	.comment-textarea:focus {
+		border-color: #FF6A00;
+		box-shadow: 0 0 0 4rpx rgba(255, 106, 0, 0.2);
 	}
 
 	/* --- 自定义分享弹窗 --- */

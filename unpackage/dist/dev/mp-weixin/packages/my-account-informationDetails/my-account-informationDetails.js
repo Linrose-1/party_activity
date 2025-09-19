@@ -100,7 +100,7 @@ const _sfc_main = {
         g: common_vendor.t(formatBirthday(userInfo.value.birthday)),
         h: common_vendor.t(userInfo.value.locationAddressStr || "未填写"),
         i: common_vendor.t(userInfo.value.birthplaceStr || "未填写"),
-        j: common_vendor.t(userInfo.value.nativePlace || "未填写"),
+        j: common_vendor.t(userInfo.value.nativePlaceStr || "未填写"),
         k: common_vendor.p({
           type: "flag-filled",
           size: "24",

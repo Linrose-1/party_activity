@@ -28,7 +28,12 @@ const _sfc_main = {
     const customShareTitle = common_vendor.ref("");
     const showTimelineGuide = common_vendor.ref(false);
     common_vendor.onLoad((options) => {
-      common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:104", "[my-businessCard] onLoad 触发。已收到的选项:", JSON.stringify(options));
+      if (options && options.inviteCode) {
+        const inviteCode = options.inviteCode;
+        common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:106", `✅ [名片页] 在 onLoad 中捕获到邀请码: ${inviteCode}`);
+        common_vendor.index.setStorageSync("pendingInviteCode", inviteCode);
+      }
+      common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:110", "[my-businessCard] onLoad 触发。已收到的选项:", JSON.stringify(options));
       const loggedInUserId = common_vendor.index.getStorageSync("userId");
       if (options.fromShare && options.fromShare === "1") {
         fromShare.value = true;
@@ -53,7 +58,7 @@ const _sfc_main = {
         userInfo.value = adaptUserInfo(rawData);
       } catch (err) {
         errorMsg.value = err.message || "加载失败，请稍后重试";
-        common_vendor.index.__f__("error", "at pages/my-businessCard/my-businessCard.vue:145", "页面初始化失败:", err);
+        common_vendor.index.__f__("error", "at pages/my-businessCard/my-businessCard.vue:151", "页面初始化失败:", err);
       } finally {
         isLoading.value = false;
       }
@@ -76,7 +81,7 @@ const _sfc_main = {
       if (fromShare.value) {
         requestData.notPay = 1;
       }
-      common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:181", "[my-businessCard] 准备使用参数调用 /read-card:", JSON.stringify(requestData));
+      common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:187", "[my-businessCard] 准备使用参数调用 /read-card:", JSON.stringify(requestData));
       const {
         data,
         error
@@ -146,14 +151,14 @@ const _sfc_main = {
       } = options;
       const loggedInUserId = common_vendor.index.getStorageSync("userId");
       if (sharerId == loggedInUserId) {
-        common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:265", "用户点击了自己的分享链接，不计分。");
+        common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:271", "用户点击了自己的分享链接，不计分。");
         return;
       }
       if (loggedInUserId) {
-        common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:271", "其他已登录用户点击，准备为分享者加分。");
+        common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:277", "其他已登录用户点击，准备为分享者加分。");
         triggerShareHitApi(sharerId, bizId);
       } else {
-        common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:276", "未登录用户点击，暂存分享信息。");
+        common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:282", "未登录用户点击，暂存分享信息。");
         common_vendor.index.setStorageSync("pendingShareReward", {
           sharerId,
           bizId,
@@ -176,9 +181,9 @@ const _sfc_main = {
         }
       });
       if (error) {
-        common_vendor.index.__f__("error", "at pages/my-businessCard/my-businessCard.vue:301", "调用分享名片加分接口失败:", error);
+        common_vendor.index.__f__("error", "at pages/my-businessCard/my-businessCard.vue:307", "调用分享名片加分接口失败:", error);
       } else {
-        common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:303", `成功为分享者(ID: ${sharerId})触发贡分增加`);
+        common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:309", `成功为分享者(ID: ${sharerId})触发贡分增加`);
       }
     };
     common_vendor.onShareAppMessage(() => {
@@ -189,9 +194,13 @@ const _sfc_main = {
         };
       const loggedInUserId = common_vendor.index.getStorageSync("userId");
       const cardOwnerId = userInfo.value.id;
+      const inviteCode = userInfo.value.shardCode;
       let sharePath = `/pages/my-businessCard/my-businessCard?id=${cardOwnerId}&fromShare=1`;
       if (loggedInUserId) {
         sharePath += `&sharerId=${loggedInUserId}`;
+      }
+      if (inviteCode) {
+        sharePath += `&inviteCode=${inviteCode}`;
       }
       const finalTitle = customShareTitle.value || `这是 ${userInfo.value.realName || userInfo.value.nickname} 的名片`;
       const shareContent = {
@@ -199,7 +208,7 @@ const _sfc_main = {
         path: sharePath,
         imageUrl: userInfo.value.avatar
       };
-      common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:333", "[my-businessCard] 分享好友内容:", JSON.stringify(shareContent));
+      common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:345", "[my-businessCard] 分享好友内容:", JSON.stringify(shareContent));
       return shareContent;
     });
     common_vendor.onShareTimeline(() => {
@@ -210,9 +219,13 @@ const _sfc_main = {
         };
       const loggedInUserId = common_vendor.index.getStorageSync("userId");
       const cardOwnerId = userInfo.value.id;
+      const inviteCode = userInfo.value.shardCode;
       let queryString = `id=${cardOwnerId}&fromShare=1`;
       if (loggedInUserId) {
         queryString += `&sharerId=${loggedInUserId}`;
+      }
+      if (inviteCode) {
+        queryString += `&inviteCode=${inviteCode}`;
       }
       const finalTitle = customShareTitle.value || `这是 ${userInfo.value.realName || userInfo.value.nickname} 的名片`;
       const shareContent = {
@@ -220,7 +233,7 @@ const _sfc_main = {
         query: queryString,
         imageUrl: userInfo.value.avatar
       };
-      common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:364", "[my-businessCard] 生成时间轴共享内容:", JSON.stringify(shareContent));
+      common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:383", "[my-businessCard] 生成时间轴共享内容:", JSON.stringify(shareContent));
       return shareContent;
     });
     const goToEdit = () => common_vendor.index.navigateTo({

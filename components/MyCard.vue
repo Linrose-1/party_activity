@@ -20,8 +20,15 @@
 
 			<!-- 2. 中部：公司信息 -->
 			<view class="company-section">
-				<view class="company-main">{{ companyName }} <text v-if="department">{{ department }}</text></view>
-				<view class="company-full">{{ fullCompanyName }}</view>
+				<!-- 公司名称：只显示第一个 -->
+				<view class="company-main">
+					{{ (companyName || '').split(',')[0] }}
+					<text v-if="department">{{ department }}</text>
+				</view>
+				<!-- 职务：只显示第一个 -->
+				<view class="company-full">
+					{{ (fullCompanyName || '').split(',')[0] }}
+				</view>
 			</view>
 
 			<!-- 3. 底部：联系方式列表 -->

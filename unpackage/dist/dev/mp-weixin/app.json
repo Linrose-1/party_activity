@@ -105,5 +105,6 @@
     "chooseLocation",
     "getLocation"
   ],
+  "__usePrivacyCheck__": true,
   "usingComponents": {}
 }

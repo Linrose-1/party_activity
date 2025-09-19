@@ -38,7 +38,7 @@
 				</view>
 				<view class="info-item">
 					<text class="label">籍贯</text>
-					<text class="value">{{ userInfo.nativePlace || '未填写' }}</text>
+					<text class="value">{{ userInfo.nativePlaceStr || '未填写' }}</text>
 				</view>
 			</view>
 		</view>

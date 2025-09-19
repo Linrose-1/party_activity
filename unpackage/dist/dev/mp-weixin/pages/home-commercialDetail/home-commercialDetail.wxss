@@ -390,7 +390,7 @@
 		align-items: center;
 		background: white;
 		padding: 20rpx 30rpx;
-		padding-bottom: calc(20rpx + env(safe-area-inset-bottom));
+		padding-bottom: calc(10rpx + env(safe-area-inset-bottom));
 		box-shadow: 0 -10rpx 30rpx rgba(0, 0, 0, 0.05);
 		border-top: 2rpx solid #e0e0e0;
 		z-index: 99;
@@ -430,6 +430,28 @@
 }
 .add-comment button.data-v-361e9b2c:active {
 		background: #e05a00;
+}
+.comment-textarea.data-v-361e9b2c {
+		flex-grow: 1;
+		background: #f5f5f5;
+		border: 2rpx solid #e0e0e0;
+		border-radius: 40rpx;
+		/* 保持圆角 */
+		padding: 18rpx 40rpx;
+		/* 调整内边距使其垂直居中 */
+		font-size: 30rpx;
+		outline: none;
+		transition: all 0.3s;
+		margin-right: 24rpx;
+		line-height: 1.5;
+		/* 设置合适的行高 */
+		box-sizing: border-box;
+		min-height: 80rpx;
+		/* 与按钮高度保持一致 */
+}
+.comment-textarea.data-v-361e9b2c:focus {
+		border-color: #FF6A00;
+		box-shadow: 0 0 0 4rpx rgba(255, 106, 0, 0.2);
 }
 
 	/* --- 自定义分享弹窗 --- */

@@ -77,14 +77,16 @@
 		border-radius: 40rpx;
 		font-weight: 500;
 		font-size: 26rpx;
-		margin-left: 20rpx; /* 与左侧信息区拉开距离 */
+		margin-left: 20rpx;
+		/* 与左侧信息区拉开距离 */
 		white-space: nowrap;
-		flex-shrink: 0; /* 防止按钮被压缩 */
+		flex-shrink: 0;
+		/* 防止按钮被压缩 */
 }
 .follow-btn.data-v-41a0c04c::after {
 		border: none;
 }
-	
+
 	/* 【新增】已关注状态的样式 */
 .follow-btn.followed.data-v-41a0c04c {
 		background: #f0f2f5;

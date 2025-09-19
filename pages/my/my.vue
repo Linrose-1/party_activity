@@ -1,106 +1,83 @@
 <template>
 	<view class="container">
-		<!-- 用户信息 -->
+		<!-- ==================== 数字身份模块 ==================== -->
 		<view class="user-header">
-			<!-- 如果已登录，显示用户信息 -->
+			<!-- 模块标题与操作按钮 -->
+			<view class="section-header">
+				<text class="section-title-main white-text">数字身份</text>
+				<!-- 只有登录后才显示操作按钮 -->
+				<view class="header-actions" v-if="isLogin">
+					<text class="header-action-btn" @tap="onEdit">编辑 ›</text>
+					<text class="header-action-btn" @tap="onViewAccountDetail">查看 ›</text>
+				</view>
+			</view>
+
+			<!-- 根据登录状态显示不同内容 -->
 			<template v-if="isLogin">
-				<view class="user-info" @tap="onEdit">
-					<view class="avatar">
-						<image class="avatar-img" :src="userInfo.avatar || '../../static/images/default-avatar.png'" />
+				<!-- 用户信息主体 -->
+				<!-- 整个区域可点击，跳转到账户详情 -->
+				<view class="user-info-wrapper" @tap="onViewAccountDetail">
+					<view class="user-info-main">
+						<!-- 头像区域，阻止事件冒泡，单独处理编辑跳转 -->
+						<view class="avatar" @click.stop="onEdit">
+							<image class="avatar-img"
+								:src="userInfo.avatar || '../../static/images/default-avatar.png'" />
+						</view>
+						<view class="user-details">
+							<view class="user-name">
+								{{ userInfo.nickname || '未设置昵称' }}
+								<text class="badge"
+									v-if="userInfo.topUpLevel && userInfo.topUpLevel.name">{{ userInfo.topUpLevel.name }}</text>
+							</view>
+							<view v-if="userInfo.nickname === '微信用户'" class="edit-prompt-tip" @click="onEdit">
+								点击设置个性化昵称 >
+							</view>
+							<view class="user-title">{{ userTitleAndCompany }}</view>
+							<view class="user-company">
+								我的邀请人：<span style="font-weight: bold;">{{ userInfo.parentName || '无' }}</span>
+							</view>
+						</view>
 					</view>
-					<view class="user-details">
-						<view class="user-name">
-							{{ userInfo.nickname || '未设置昵称' }}
-							<text class="badge"
-								v-if="userInfo.topUpLevel && userInfo.topUpLevel.name">{{ userInfo.topUpLevel.name }}</text>
-						</view>
-						<view class="user-title">{{ userTitleAndCompany }}</view>
-						<view class="user-company">
-							我的邀请人：<span style="font-weight: bold;">{{ userInfo.parentName || '无' }}</span>
-						</view>
+					<text v-if="userInfo.id" class="user-id-display">ID: {{ userInfo.virtualId }}</text>
+				</view>
+
+				<!-- 账户信息网格 -->
+				<view class="account-grid">
+					<view class="account-item" v-for="item in accountList" :key="item.label"
+						@tap.stop="navigateToAccountDetail(item)">
+						<view class="account-value">{{ item.value }}</view>
+						<view class="account-label">{{ item.label }}</view>
 					</view>
 				</view>
-				<view class="edit-btn" @tap="onEdit">编辑</view>
-
-				<text v-if="userInfo.id" class="user-id-display">ID: {{ userInfo.virtualId }}</text>
 			</template>
 
-			<!-- 如果未登录，显示 "去登录" -->
+			<!-- 如果未登录，显示登录提示 -->
 			<template v-else>
 				<view class="login-prompt" @click="skipToLogin">
 					<view class="login-prompt-avatar">
 						<uni-icons type="person-filled" size="30" color="#FF8C00"></uni-icons>
 					</view>
-					<view class="login-prompt-text">
-						点击去登录
-					</view>
-					<view class="login-prompt-arrow">
-						›
-					</view>
+					<view class="login-prompt-text">点击去登录</view>
+					<view class="login-prompt-arrow">›</view>
 				</view>
 			</template>
 		</view>
 
-		<!-- 账户信息 -->
-		<view class="account-section">
-			<view class="section-header">
-				<text class="section-title-main">账户信息</text>
-				<text class="view-all" @tap="onViewAll">查看 ›</text>
-			</view>
-			<view class="account-grid">
-				<!-- v-for 循环使用计算属性 accountList -->
-				<view class="account-item" v-for="item in accountList" :key="item.label"
-					@tap="navigateToAccountDetail(item)">
-					<view class="account-value">{{ item.value }}</view>
-					<view class="account-label">{{ item.label }}</view>
-				</view>
-			</view>
-		</view>
-
-		<!-- AI名片 -->
+		<!-- ==================== 名片分享模块 ==================== -->
 		<view class="card-section">
 			<view class="section-header">
 				<text class="section-title-main">名片分享</text>
 				<text class="view-all" @tap="onViewDetail">分享 ›</text>
 			</view>
-
 			<view class="ai-card">
-				<!-- <view class="card-top">
-					<view class="card-avatar">
-						<image class="avatar-img" :src="userInfo.avatar || '../../static/images/default-avatar.png'" />
-					</view>
-					<view class="card-details">
-						<view class="card-name">
-							{{ userInfo.nickname|| userInfo.realName  }}
-							<text class="vip-badge"
-								v-if="userInfo.topUpLevel && userInfo.topUpLevel.name">{{ userInfo.topUpLevel.name }}</text>
-						</view>
-						<view class="card-position" v-if="userInfo.professionalTitle"><text class="iconfont">👤</text>
-							{{ userInfo.professionalTitle }}
-						</view>
-						<view class="card-company" v-if="userInfo.companyName"><text class="iconfont">🏢</text>
-							{{ userInfo.companyName }}
-						</view>
-					</view>
-				</view> -->
-
-
-
 				<view class="qrcode-section" @tap="onViewDetail">
 					<text class="qrcode-title">微信二维码 - 扫码添加好友</text>
 					<view class="qrcode-container">
-						<!-- 动态绑定微信二维码，提供一个默认图 -->
 						<image class="qrcode-img"
 							:src="userInfo.wechatQrCodeUrl || '../../static/images/default-qrcode.png'" />
 					</view>
-					<!-- <view class="qrcode-actions">
-						<button class="qrcode-btn" @tap="saveQrcode">保存</button>
-						<button class="qrcode-btn" @tap="onViewDetail">分享名片</button>
-					</view> -->
 				</view>
-
 				<view class="contact-info">
-					<!-- 动态绑定邀请码并传入复制函数 -->
 					<view class="contact-item" @tap="copyToClipboard(userInfo.shardCode)">
 						<text class="iconfont">我的邀请码：</text>
 						<text style="font-weight: bold;">{{ userInfo.shardCode || '暂无' }}</text>
@@ -110,7 +87,7 @@
 			</view>
 		</view>
 
-		<!-- 功能列表 -->
+		<!-- ==================== 功能中心模块 ==================== -->
 		<view class="features-section">
 			<view class="section-header">
 				<text class="section-title-main">功能中心</text>
@@ -127,8 +104,6 @@
 				</view>
 			</view>
 		</view>
-
-		<!-- 		<button style="margin-top: 30rpx;background-color: red;color: white;" @click="skipToLogin">退出登录</button> -->
 	</view>
 </template>
 
@@ -231,30 +206,33 @@
 	// 使用 computed 优雅地处理职位和公司的显示逻辑
 	// 【优化】处理未登录时的情况
 	const userTitleAndCompany = computed(() => {
-		// 【新增】如果未登录，直接返回提示
+		// 1. 未登录时的判断保持不变
 		if (!isLogin.value) return '登录后查看';
 
-		const title = userInfo.value.professionalTitle;
-		const company = userInfo.value.companyName;
-		if (title && company) {
-			return `${title} | ${company}`;
+		// 2. 【核心修改】从完整的字符串中提取第一项
+		const titlesString = userInfo.value.professionalTitle; // e.g., "XXX协会会长,it工作者"
+		const companiesString = userInfo.value.companyName; // e.g., "公司一,公司2"
+
+		let firstTitle = '';
+		// 如果 professionalTitle 存在，则分割字符串并取第一个元素
+		if (titlesString) {
+			firstTitle = titlesString.split(',')[0].trim();
 		}
-		return title || company || '暂未设置职位和公司';
+
+		let firstCompany = '';
+		// 如果 companyName 存在，则分割字符串并取第一个元素
+		if (companiesString) {
+			firstCompany = companiesString.split(',')[0].trim();
+		}
+
+		// 3. 根据提取出的第一项进行拼接
+		if (firstTitle && firstCompany) {
+			return `${firstTitle} | ${firstCompany}`;
+		}
+
+		// 4. 如果只有一个存在，或都为空，则返回存在的那个或默认文本
+		return firstTitle || firstCompany || '暂未设置职位和公司';
 	});
-
-	/**
-	 * 【新增】处理账户信息区域点击跳转的方法
-	 * @param {object} item - 被点击的账户项，包含 path 属性
-	 */
-	const navigateToAccountDetail = (item) => {
-		// 确保路径存在再跳转
-		if (item && item.path) {
-			uni.navigateTo({
-				url: item.path
-			});
-		}
-	};
-
 
 	const featureList = ref([{
 			name: '我的订单',
@@ -324,11 +302,20 @@
 		})
 	}
 
-	const onViewAll = () => {
+	const onViewAccountDetail = () => {
 		uni.navigateTo({
 			url: '/pages/my-account/my-account'
-		})
+		});
 	}
+
+	const navigateToAccountDetail = (item) => {
+		if (item && item.path) {
+			uni.navigateTo({
+				url: item.path
+			});
+		}
+	};
+
 
 	const copyToClipboard = (text) => {
 		if (!text) {
@@ -378,29 +365,69 @@
 </script>
 
 <style scoped>
-	/* 主页面样式 */
-
+	/* --- 页面基础 --- */
 	.container {
 		padding: 30rpx;
+		background-color: #f9f9f9;
 	}
 
+	/* --- 1. 数字身份模块 (user-header) --- */
 	.user-header {
 		background: linear-gradient(135deg, #FF8C00, #FF6B00);
-		padding: 40rpx;
+		padding: 30rpx;
 		border-radius: 20rpx;
 		color: white;
-		position: relative;
+		display: flex;
+		flex-direction: column;
+		margin-bottom: 30rpx;
 	}
 
-	.user-id-display {
-		position: absolute;
-		bottom: 20rpx;
-		right: 30rpx;
-		font-size: 22rpx;
-		color: rgba(255, 255, 255, 0.7);
-		background-color: rgba(0, 0, 0, 0.1);
-		padding: 4rpx 12rpx;
-		border-radius: 10rpx;
+	/* 1.1 模块头部：标题与操作按钮 */
+	.section-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 30rpx;
+		width: 100%;
+	}
+
+	.section-title-main {
+		font-size: 32rpx;
+		font-weight: bold;
+		color: #FF8000;
+	}
+
+	.white-text {
+		color: white;
+	}
+
+	.header-actions {
+		display: flex;
+		gap: 20rpx;
+	}
+
+	.header-action-btn {
+		font-size: 26rpx;
+		color: rgba(255, 255, 255, 0.9);
+		background: rgba(255, 255, 255, 0.2);
+		padding: 8rpx 18rpx;
+		border-radius: 30rpx;
+	}
+
+	/* ==================== 【【【核心修复】】】 ==================== */
+	/* 1.2 用户信息主体 */
+	.user-info-wrapper {
+		width: 100%;
+		display: flex;
+		flex-direction: column;
+		/* (1) 关键：改为垂直堆叠 */
+	}
+
+	.user-info-main {
+		display: flex;
+		align-items: center;
+		width: 100%;
+		/* 确保 main 部分撑满宽度 */
 	}
 
 	.avatar {
@@ -408,8 +435,9 @@
 		height: 140rpx;
 		border-radius: 10rpx;
 		overflow: hidden;
-		margin-right: 20rpx;
+		margin-right: 30rpx;
 		flex-shrink: 0;
+		border: 4rpx solid rgba(255, 255, 255, 0.3);
 	}
 
 	.avatar-img {
@@ -418,10 +446,9 @@
 		object-fit: cover;
 	}
 
-	.user-info {
-		display: flex;
-		align-items: center;
-		margin-bottom: 20rpx;
+	.user-details {
+		flex: 1;
+		min-width: 0;
 	}
 
 	.user-name {
@@ -438,55 +465,41 @@
 		border-radius: 20rpx;
 		margin-left: 10rpx;
 		font-size: 22rpx;
+		flex-shrink: 0;
 	}
 
 	.user-title,
 	.user-company {
 		font-size: 24rpx;
 		margin-top: 6rpx;
+		opacity: 0.9;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
 	}
 
-	.edit-btn {
-		position: absolute;
-		right: 30rpx;
-		top: 30rpx;
-		font-size: 28rpx;
-		background: rgba(255, 255, 255, 0.2);
-		padding: 10rpx 20rpx;
-		border-radius: 30rpx;
-		cursor: pointer;
+	.user-id-display {
+		font-size: 22rpx;
+		color: rgba(255, 255, 255, 0.7);
+		background-color: rgba(0, 0, 0, 0.1);
+		padding: 4rpx 12rpx;
+		border-radius: 10rpx;
+		align-self: flex-end;
+		/* (2) 关键：使其在自己的行内靠右 */
+		margin-top: 10rpx;
+		/* (3) 关键：与上方信息拉开距离 */
 	}
 
-	.section-header {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		margin-bottom: 20rpx;
-	}
+	/* ========================================================== */
 
-	.section-title-main {
-		font-size: 32rpx;
-		font-weight: bold;
-	}
-
-	.view-all {
-		font-size: 28rpx;
-		color: #3a7bd5;
-		cursor: pointer;
-	}
-
-	.account-section,
-	.features-section {
-		background: #fff;
-		padding: 30rpx;
-		border-radius: 20rpx;
-		margin-top: 50rpx;
-	}
-
+	/* 1.3 账户信息网格 */
 	.account-grid {
 		display: grid;
 		grid-template-columns: repeat(4, 1fr);
 		gap: 20rpx;
+		margin-top: 30rpx;
+		padding-top: 30rpx;
+		border-top: 1rpx solid rgba(255, 255, 255, 0.2);
 	}
 
 	.account-item {
@@ -497,60 +510,51 @@
 	}
 
 	.account-item:active {
-		background-color: #f5f5f5;
+		background-color: rgba(0, 0, 0, 0.1);
 	}
-
 
 	.account-value {
 		font-size: 36rpx;
-		color: #FF6B00;
+		color: #fff;
 		font-weight: bold;
 	}
 
 	.account-label {
 		font-size: 24rpx;
-		color: #666;
+		color: rgba(255, 255, 255, 0.8);
 	}
 
-	.feature-item {
+	/* 1.4 未登录状态 */
+	.login-prompt {
 		display: flex;
 		align-items: center;
-		background: #f9f9f9;
-		padding: 20rpx;
-		border-radius: 20rpx;
-		margin-bottom: 20rpx;
+		padding: 20rpx 0;
 	}
 
-	.feature-icon {
-		width: 60rpx;
-		height: 60rpx;
-		font-size: 32rpx;
-		color: #FF6B00;
-		margin-right: 20rpx;
+	.login-prompt-avatar {
+		width: 140rpx;
+		height: 140rpx;
+		border-radius: 50%;
+		background-color: rgba(255, 255, 255, 0.9);
 		display: flex;
 		align-items: center;
 		justify-content: center;
+		margin-right: 20rpx;
 	}
 
-	.feature-name {
-		font-size: 28rpx;
+	.login-prompt-text {
+		font-size: 36rpx;
 		font-weight: bold;
-		color: #333;
+		color: white;
 	}
 
-	.feature-desc {
-		font-size: 24rpx;
-		color: #999;
-	}
-
-	.chevron-icon {
-		font-size: 30rpx;
-		color: #ccc;
+	.login-prompt-arrow {
 		margin-left: auto;
+		font-size: 40rpx;
+		color: rgba(255, 255, 255, 0.7);
 	}
 
-	/* MyCard部分样式 */
-
+	/* --- 2. 名片分享模块 (card-section) --- */
 	.card-section {
 		background: #fff;
 		padding: 30rpx;
@@ -558,75 +562,23 @@
 		margin-top: 30rpx;
 	}
 
+	.card-section .section-header {
+		margin-bottom: 20rpx;
+	}
+
+	.view-all {
+		font-size: 26rpx;
+		padding: 8rpx 18rpx;
+		border-radius: 30rpx;
+		background: #f5f5f5;
+		color: #666;
+	}
+
 	.ai-card {
 		background: linear-gradient(135deg, #FF8C00, #FF6B00);
 		padding: 30rpx;
 		border-radius: 20rpx;
 		color: white;
-	}
-
-	.card-top {
-		display: flex;
-		align-items: center;
-		margin-bottom: 30rpx;
-	}
-
-	.card-avatar {
-		width: 160rpx;
-		height: 160rpx;
-		border-radius: 30rpx;
-		overflow: hidden;
-		margin-right: 20rpx;
-	}
-
-	.card-name {
-		font-size: 36rpx;
-		font-weight: bold;
-		display: flex;
-		align-items: center;
-		margin-bottom: 10rpx;
-	}
-
-	.vip-badge {
-		background: #ffd700;
-		color: #8a6d00;
-		padding: 6rpx 14rpx;
-		border-radius: 20rpx;
-		font-size: 20rpx;
-		margin-left: 10rpx;
-	}
-
-	.card-position,
-	.card-company {
-		font-size: 26rpx;
-		margin-bottom: 5rpx;
-		opacity: 0.95;
-	}
-
-	.contact-info {
-		display: grid;
-		grid-template-columns: 1fr;
-		gap: 15rpx;
-		background: rgba(255, 255, 255, 0.2);
-		padding: 20rpx;
-		border-radius: 20rpx;
-		margin: 30rpx 0;
-	}
-
-	.contact-item {
-		display: flex;
-		align-items: center;
-		font-size: 26rpx;
-		cursor: pointer;
-	}
-
-	.copy-btn {
-		margin-left: auto;
-		font-size: 24rpx;
-		color: #fff;
-		background: rgba(255, 255, 255, 0.3);
-		padding: 6rpx 16rpx;
-		border-radius: 30rpx;
 	}
 
 	.qrcode-section {
@@ -655,49 +607,85 @@
 		object-fit: contain;
 	}
 
-	/* .qrcode-actions {
-		display: flex;
-		justify-content: center;
-		margin: 20rpx 0;
+	.contact-info {
+		display: grid;
+		grid-template-columns: 1fr;
+		gap: 15rpx;
+		background: rgba(255, 255, 255, 0.2);
+		padding: 20rpx;
+		border-radius: 20rpx;
+		margin: 30rpx 0;
 	}
 
-	.qrcode-btn {
-		background-color: #FF8F3D;
-		color: white;
-		padding: 10rpx 150rpx;
-		border-radius: 30rpx;
+	.contact-item {
+		display: flex;
+		align-items: center;
+		font-size: 26rpx;
+	}
+
+	.copy-btn {
+		margin-left: auto;
 		font-size: 24rpx;
-		cursor: pointer;
-	} */
-
-	.login-prompt {
-		display: flex;
-		align-items: center;
-		padding: 20rpx 0;
-		/* 调整内边距以匹配原始布局 */
-		cursor: pointer;
+		color: #fff;
+		background: rgba(255, 255, 255, 0.3);
+		padding: 6rpx 16rpx;
+		border-radius: 30rpx;
+		flex-shrink: 0;
 	}
 
-	.login-prompt-avatar {
-		width: 140rpx;
-		height: 140rpx;
-		border-radius: 50%;
-		background-color: rgba(255, 255, 255, 0.9);
+	/* --- 3. 功能中心模块 (features-section) --- */
+	.features-section {
+		background: #fff;
+		padding: 30rpx;
+		border-radius: 20rpx;
+		margin-top: 30rpx;
+	}
+
+	.features-list {
+		margin-top: 20rpx;
+	}
+
+	.feature-item {
 		display: flex;
 		align-items: center;
-		justify-content: center;
+		background: #f9f9f5;
+		padding: 20rpx;
+		border-radius: 20rpx;
+		margin-bottom: 20rpx;
+	}
+
+	.feature-item:last-child {
+		margin-bottom: 0;
+	}
+
+	.feature-icon {
+		width: 60rpx;
+		height: 60rpx;
 		margin-right: 20rpx;
 	}
 
-	.login-prompt-text {
-		font-size: 36rpx;
-		font-weight: bold;
-		color: white;
+	.feature-content {
+		flex: 1;
+		min-width: 0;
 	}
 
-	.login-prompt-arrow {
+	.feature-name {
+		font-size: 28rpx;
+		font-weight: bold;
+		color: #333;
+	}
+
+	.feature-desc {
+		font-size: 24rpx;
+		color: #999;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+	.chevron-icon {
+		font-size: 30rpx;
+		color: #ccc;
 		margin-left: auto;
-		font-size: 40rpx;
-		color: rgba(255, 255, 255, 0.7);
 	}
 </style>

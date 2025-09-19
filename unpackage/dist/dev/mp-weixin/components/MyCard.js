@@ -112,12 +112,12 @@ const _sfc_main = {
         b: common_vendor.t(__props.name),
         c: common_vendor.t(__props.pinyinName),
         d: common_vendor.t(__props.title),
-        e: common_vendor.t(__props.companyName),
+        e: common_vendor.t((__props.companyName || "").split(",")[0]),
         f: __props.department
       }, __props.department ? {
         g: common_vendor.t(__props.department)
       } : {}, {
-        h: common_vendor.t(__props.fullCompanyName),
+        h: common_vendor.t((__props.fullCompanyName || "").split(",")[0]),
         i: common_vendor.f(__props.contactInfo, (item, index, i0) => {
           return {
             a: "0262bca8-0-" + i0,

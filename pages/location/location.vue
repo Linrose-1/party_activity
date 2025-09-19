@@ -37,10 +37,10 @@
 						<view class="business-info">
 							<view class="business-name">{{ business.nickname }}</view>
 							<view class="card-position" v-if="business.professionalTitle">
-								<text class="iconfont">??</text> {{ business.professionalTitle }}
+								<text class="iconfont"></text> {{ business.professionalTitle }}
 							</view>
 							<view class="card-company" v-if="business.companyName">
-								<text class="iconfont">??</text> {{ business.companyName }}
+								<text class="iconfont"></text> {{ business.companyName }}
 							</view>
 						</view>
 						<!-- 【核心修改】按钮状态绑定到 followFlag，并调用统一的 handleFollowAction 方法 -->

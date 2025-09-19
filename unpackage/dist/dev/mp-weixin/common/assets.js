@@ -1,10 +1,20 @@
 "use strict";
-const _imports_0$3 = "/static/icons/share-guide-arrow.png";
-const _imports_0$2 = "/static/images/empty-box.png";
-const _imports_0$1 = "/static/fake-qrcode.png";
+const _imports_0$4 = "/static/icons/share-guide-arrow.png";
+const _imports_0$3 = "/static/images/empty-box.png";
+const _imports_0$2 = "/static/fake-qrcode.png";
+const _imports_0$1 = "/static/membership-icons/iron.svg";
+const _imports_1 = "/static/membership-icons/bronze.svg";
+const _imports_2 = "/static/membership-icons/silver.svg";
+const _imports_3 = "/static/membership-icons/gold.svg";
+const _imports_4 = "/static/membership-icons/diamond.svg";
 const _imports_0 = "/static/connections-bg.png";
-exports._imports_0 = _imports_0$3;
-exports._imports_0$1 = _imports_0$2;
-exports._imports_0$2 = _imports_0$1;
-exports._imports_0$3 = _imports_0;
+exports._imports_0 = _imports_0$4;
+exports._imports_0$1 = _imports_0$3;
+exports._imports_0$2 = _imports_0$2;
+exports._imports_0$3 = _imports_0$1;
+exports._imports_0$4 = _imports_0;
+exports._imports_1 = _imports_1;
+exports._imports_2 = _imports_2;
+exports._imports_3 = _imports_3;
+exports._imports_4 = _imports_4;
 //# sourceMappingURL=../../.sourcemap/mp-weixin/common/assets.js.map
