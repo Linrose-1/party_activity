@@ -356,43 +356,44 @@ const _sfc_main = {
         B: userInfo.value.topUpLevel.name === "白银会员" ? 1 : "",
         C: userInfo.value.topUpLevel.name === "黄金会员" ? 1 : "",
         D: userInfo.value.topUpLevel.name === "黑钻会员" ? 1 : "",
-        E: common_vendor.p({
+        E: common_vendor.o(navigateToMemberDetails),
+        F: common_vendor.p({
           type: "list",
           size: "20",
           color: "#fff"
         }),
-        F: common_vendor.o(navigateToMemberDetails),
-        G: common_vendor.p({
+        G: common_vendor.o(navigateToMemberDetails),
+        H: common_vendor.p({
           type: "wallet",
           size: "20",
           color: "#fff"
         }),
-        H: common_vendor.o(navigateToMembershipRecharge),
-        I: common_vendor.p({
+        I: common_vendor.o(navigateToMembershipRecharge),
+        J: common_vendor.p({
           type: "wallet",
           size: "24",
           color: "#FF6B00"
         }),
-        J: common_vendor.t(userInfo.value.point),
-        K: common_vendor.p({
+        K: common_vendor.t(userInfo.value.point),
+        L: common_vendor.p({
           type: "forward",
           size: "20",
           color: "#fff"
         }),
-        L: common_vendor.o(handleExchangeSmartRice),
-        M: common_vendor.p({
+        M: common_vendor.o(handleExchangeSmartRice),
+        N: common_vendor.p({
           type: "wallet",
           size: "20",
           color: "#fff"
         }),
-        N: common_vendor.o(handleRechargeSmartRice),
-        O: common_vendor.p({
+        O: common_vendor.o(handleRechargeSmartRice),
+        P: common_vendor.p({
           type: "compose",
           size: "24",
           color: "#FF6B00"
         }),
-        P: common_vendor.t(userInfo.value.currExperience),
-        Q: common_vendor.f(tasks.value, (task, index, i0) => {
+        Q: common_vendor.t(userInfo.value.currExperience),
+        R: common_vendor.f(tasks.value, (task, index, i0) => {
           return {
             a: "04e670bd-14-" + i0,
             b: common_vendor.p({
@@ -408,25 +409,25 @@ const _sfc_main = {
             h: index
           };
         }),
-        R: common_vendor.p({
+        S: common_vendor.p({
           type: "plus",
           size: "20",
           color: "#fff"
         }),
-        S: common_vendor.p({
+        T: common_vendor.p({
           type: "bars",
           size: "24",
           color: "#FF6B00"
         }),
-        T: historyList.value.length === 0 && historyLoadStatus.value === "noMore"
+        U: historyList.value.length === 0 && historyLoadStatus.value === "noMore"
       }, historyList.value.length === 0 && historyLoadStatus.value === "noMore" ? {
-        U: common_vendor.p({
+        V: common_vendor.p({
           type: "info-filled",
           size: "40",
           color: "#ccc"
         })
       } : {
-        V: common_vendor.f(historyList.value, (record, index, i0) => {
+        W: common_vendor.f(historyList.value, (record, index, i0) => {
           return {
             a: "04e670bd-18-" + i0,
             b: common_vendor.p({
@@ -446,9 +447,9 @@ const _sfc_main = {
           };
         })
       }, {
-        W: historyList.value.length > 0
+        X: historyList.value.length > 0
       }, historyList.value.length > 0 ? {
-        X: common_vendor.p({
+        Y: common_vendor.p({
           status: historyLoadStatus.value
         })
       } : {}) : {});

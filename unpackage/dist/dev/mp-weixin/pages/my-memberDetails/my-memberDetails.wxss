@@ -71,21 +71,56 @@
 .membership-tiers.data-v-abc533c5 {
   display: flex;
   flex-direction: column;
-  gap: 40rpx;
+  gap: 50rpx;
+  /* 稍微增大卡片间距，给阴影留出更多空间 */
 }
 .card.data-v-abc533c5 {
   background-color: #ffffff;
   border-radius: 32rpx;
-  box-shadow: 0 10rpx 30rpx rgba(0, 0, 0, 0.07);
   display: flex;
   flex-direction: column;
   overflow: hidden;
   border: 1rpx solid #e5e7eb;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+  /* ==================== 【【【核心修改点：替换阴影】】】 ==================== */
+  /* 这是一个由两层组成的柔和阴影，比原来更细腻 */
+  box-shadow: 0 4rpx 10rpx rgba(0, 0, 0, 0.04), 0 12rpx 30rpx rgba(0, 0, 0, 0.08);
+  /* 更弥散的基础阴影 */
+  /* ==================================================================== */
 }
+
+/* 鼠标悬浮或触摸时的效果 */
 .card.data-v-abc533c5:active {
-  transform: translateY(-10rpx);
-  box-shadow: 0 20rpx 50rpx rgba(0, 0, 0, 0.1);
+  transform: translateY(-10rpx) scale(1.02);
+  /* 增加一点点放大效果 */
+  /* ==================== 【【【核心修改点：替换激活阴影】】】 ==================== */
+  /* 激活时的阴影更深、更广，悬浮感更强 */
+  box-shadow: 0 8rpx 15rpx rgba(0, 0, 0, 0.06), 0 25rpx 50rpx rgba(0, 0, 0, 0.12);
+  /* ==================================================================== */
+}
+
+/* ... (card-header, card-body 等其他样式保持不变) ... */
+/* --- 【可选但推荐】为不同等级的卡片添加彩色辉光阴影 --- */
+/* 这会让每个卡片在激活时散发出与其主题色相匹配的光晕，效果非常棒 */
+.card-iron.data-v-abc533c5:active {
+  box-shadow: 0 8rpx 15rpx rgba(0, 0, 0, 0.06), 0 25rpx 50rpx rgba(144, 164, 174, 0.2);
+  /* 铁灰色辉光 */
+}
+.card-bronze.data-v-abc533c5:active {
+  box-shadow: 0 8rpx 15rpx rgba(0, 0, 0, 0.06), 0 25rpx 50rpx rgba(210, 140, 96, 0.3);
+  /* 青铜色辉光 */
+}
+.card-silver.data-v-abc533c5:active {
+  box-shadow: 0 8rpx 15rpx rgba(0, 0, 0, 0.06), 0 25rpx 50rpx rgba(167, 180, 194, 0.3);
+  /* 银色辉光 */
+}
+.card-gold.data-v-abc533c5:active {
+  box-shadow: 0 8rpx 15rpx rgba(0, 0, 0, 0.06), 0 25rpx 50rpx rgba(255, 193, 7, 0.25);
+  /* 金色辉光 */
+}
+.card-diamond.data-v-abc533c5:active {
+  box-shadow: 0 8rpx 15rpx rgba(0, 0, 0, 0.06), 0 25rpx 50rpx rgba(155, 89, 182, 0.3);
+  /* 钻石紫色辉光 */
 }
 .card-header.data-v-abc533c5 {
   padding: 40rpx 30rpx;

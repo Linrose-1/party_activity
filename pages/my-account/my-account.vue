@@ -83,27 +83,27 @@
 					<view class="level-step">
 						<view class="step-icon" style="background: #E0E0E0;">☆</view>
 						<view class="step-name">联合流猩人</view>
-						<view class="step-points">0-99分</view>
+						<view class="step-points">>5000</view>
 					</view>
 					<view class="level-step">
 						<view class="step-icon" style="background: #A5D6A7;">★</view>
 						<view class="step-name">联合月猩人</view>
-						<view class="step-points">100-499分</view>
+						<view class="step-points">>50000</view>
 					</view>
 					<view class="level-step">
 						<view class="step-icon" style="background: #4FC3F7;">✯</view>
 						<view class="step-name">联合伙猩人</view>
-						<view class="step-points">500-999分</view>
+						<view class="step-points">>150000</view>
 					</view>
 					<view class="level-step">
 						<view class="step-icon" style="background: #BA68C8;">✪</view>
 						<view class="step-name">联合创猩人</view>
-						<view class="step-points">1000-2000分</view>
+						<view class="step-points">>500000</view>
 					</view>
 					<view class="level-step">
 						<view class="step-icon" style="background: #FFD54F;">✦</view>
 						<view class="step-name">联合创始猿</view>
-						<view class="step-points">2000+分</view>
+						<view class="step-points">2000000+</view>
 					</view>
 				</view>
 			</view>
@@ -137,7 +137,7 @@
 					会员等级根据累计充值金额进行晋升
 				</p>
 
-				<view class="membership-levels">
+				<view class="membership-levels" @click="navigateToMemberDetails">
 					<view class="membership-level-item visitor"
 						:class="{'current-member-highlight': userInfo.topUpLevel.name === '玄铁会员'}">
 						<view class="level-icon">👤</view>

@@ -226,7 +226,8 @@ const _sfc_main = {
           success: (res) => {
             if (res.confirm) {
               common_vendor.index.navigateTo({
-                url: "/pages/login/login"
+                // url: '/pages/login/login'
+                url: "/pages/index/index"
               });
             }
           }
@@ -240,7 +241,7 @@ const _sfc_main = {
     common_vendor.watch(
       [searchKeyword, selectedCategory, statusIndex, selectedLocationInfo],
       (newValue, oldValue) => {
-        common_vendor.index.__f__("log", "at pages/active/active.vue:428", "筛选条件变化，重新搜索...");
+        common_vendor.index.__f__("log", "at pages/active/active.vue:429", "筛选条件变化，重新搜索...");
         getActiveList(false);
       },
       {
