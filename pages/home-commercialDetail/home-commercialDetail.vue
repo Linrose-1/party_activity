@@ -1036,6 +1036,7 @@
 
 	/* --- 商机内容、图片、标签 --- */
 	.opportunity-content {
+		white-space: pre-line;
 		margin: 20rpx 0;
 		font-size: 32rpx;
 		color: #444;

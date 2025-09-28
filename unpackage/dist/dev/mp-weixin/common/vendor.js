@@ -7297,9 +7297,9 @@ function initOnError() {
   };
 }
 function initRuntimeSocketService() {
-  const hosts = "172.20.10.4,127.0.0.1";
+  const hosts = "172.20.10.6,127.0.0.1";
   const port = "8090";
-  const id = "mp-weixin_as2bdO";
+  const id = "mp-weixin_XUbdpQ";
   const lazy = typeof swan !== "undefined";
   let restoreError = lazy ? () => {
   } : initOnError();
@@ -8253,7 +8253,7 @@ const pages = [
   {
     path: "pages/home/home",
     style: {
-      navigationBarTitleText: "首页",
+      navigationBarTitleText: "商友圈",
       enablePullDownRefresh: true
     }
   },
@@ -8279,7 +8279,7 @@ const pages = [
   {
     path: "pages/my/my",
     style: {
-      navigationBarTitleText: "我的"
+      navigationBarTitleText: "猩世界"
     }
   },
   {
@@ -8532,7 +8532,7 @@ const tabBar = {
   list: [
     {
       pagePath: "pages/home/home",
-      text: "首页",
+      text: "商友圈",
       iconPath: "static/tabbar/home.png",
       selectedIconPath: "static/tabbar/home-active.png"
     },
@@ -8544,7 +8544,7 @@ const tabBar = {
     },
     {
       pagePath: "pages/relation/relation",
-      text: "人脉",
+      text: "六度人脉",
       iconPath: "/static/tabbar/location.png",
       selectedIconPath: "/static/tabbar/location-active.png"
     },
@@ -8556,7 +8556,7 @@ const tabBar = {
     },
     {
       pagePath: "pages/my/my",
-      text: "我的",
+      text: "猩世界",
       iconPath: "static/tabbar/me.png",
       selectedIconPath: "static/tabbar/me-active.png"
     }

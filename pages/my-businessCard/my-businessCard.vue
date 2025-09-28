@@ -93,16 +93,40 @@
 	const isViewingOwnCard = ref(true); // 默认是查看自己的名片
 	const targetUserId = ref(null); // 仅在查看他人名片时有值
 	const fromShare = ref(false);
+	const promotionQrCodeUrl = ref('');
 
 	// 分享UI相关的状态
 	const sharePopup = ref(null);
 	const customShareTitle = ref('');
 	const showTimelineGuide = ref(false);
 
+
 	// --- 2. 页面生命周期与初始化 ---
 	onLoad((options) => {
-		if (options && options.inviteCode) {
-			const inviteCode = options.inviteCode;
+		let finalOptions = options || {};
+
+		// 1. 检查是否存在 scene 参数 (扫码进入)
+		if (options && options.scene) {
+			const sceneStr = decodeURIComponent(options.scene);
+			console.log(`✅ [名片页] 在 onLoad 中检测到 scene: ${sceneStr}`);
+			const sceneParams = {};
+			sceneStr.split('&').forEach(item => {
+				const parts = item.split('=');
+				if (parts[0] && parts[1]) {
+					sceneParams[parts[0]] = parts[1];
+				}
+			});
+			console.log('✅ [名片页] scene 解析结果:', sceneParams);
+			// 2. 将解析后的参数合并到 finalOptions 中
+			finalOptions = {
+				...finalOptions,
+				...sceneParams
+			};
+		}
+
+		// 3. 后续所有逻辑都从 finalOptions 中取值
+		const inviteCode = finalOptions.c || finalOptions.inviteCode;
+		if (inviteCode) {
 			console.log(`✅ [名片页] 在 onLoad 中捕获到邀请码: ${inviteCode}`);
 			uni.setStorageSync('pendingInviteCode', inviteCode);
 		}
@@ -111,14 +135,14 @@
 
 		const loggedInUserId = uni.getStorageSync('userId');
 
-		if (options.fromShare && options.fromShare === '1') {
+		if (finalOptions.fromShare && finalOptions.fromShare === '1') {
 			fromShare.value = true;
 		}
 
-		// 判断当前是查看自己还是他人名片
-		if (options && options.id && options.id != loggedInUserId) {
+		const targetId = finalOptions.i || finalOptions.id;
+		if (targetId && targetId != loggedInUserId) {
 			isViewingOwnCard.value = false;
-			targetUserId.value = options.id;
+			targetUserId.value = targetId;
 		} else {
 			isViewingOwnCard.value = true;
 		}
@@ -127,7 +151,7 @@
 		initializePage();
 
 		// 处理分享点击带来的奖励逻辑
-		handleShareReward(options);
+		handleShareReward(finalOptions);
 	});
 
 	/**
@@ -146,6 +170,11 @@
 			if (!rawData) throw new Error('未能获取到名片信息');
 
 			userInfo.value = adaptUserInfo(rawData);
+
+			if (isViewingOwnCard.value) {
+				generateSceneString();
+			}
+
 		} catch (err) {
 			errorMsg.value = err.message || '加载失败，请稍后重试';
 			console.error('页面初始化失败:', err);
@@ -169,6 +198,46 @@
 		if (error) throw new Error(error);
 		return data;
 	};
+
+
+	/**
+	 * @description 生成携带所有参数的小程序页面路径
+	 * @returns {string} - 返回拼接好的完整路径，例如 "pages/my-businessCard/my-businessCard?id=123&..."
+	 */
+	const generateSceneString = () => {
+		if (!userInfo.value) return '';
+
+		// 参数源
+		const cardOwnerId = userInfo.value.id;
+		const inviteCode = userInfo.value.shardCode;
+		const sharerId = uni.getStorageSync('userId');
+
+		// 使用数组和 join 的方式手动拼接，确保兼容性
+		const params = [];
+		// 注意：这里的 key 必须与后端解码时使用的 key 完全一致
+		if (cardOwnerId) params.push(`i=${cardOwnerId}`); // id -> i
+		if (sharerId) params.push(`s=${sharerId}`); // sharerId -> s
+		if (inviteCode) params.push(`c=${inviteCode}`); // inviteCode -> c
+		params.push('fs=1'); // fromShare=1 -> fs=1 (这个值是固定的)
+
+		const scene = params.join('&');
+
+		// 【关键】检查长度，如果超长，则需要进一步优化（例如省略某些参数）
+		if (scene.length > 32) {
+			console.warn(`生成的 scene 字符串长度为 ${scene.length}，超过了32个字符的限制！Scene: ${scene}`);
+			// 这里可以根据业务优先级决定省略哪个参数，例如，如果邀请码最重要，可以考虑去掉 sharerId
+			// 这是一个降级策略，需要您根据业务来定
+			// const simplifiedParams = [];
+			// if (cardOwnerId) simplifiedParams.push(`i=${cardOwnerId}`);
+			// if (inviteCode) simplifiedParams.push(`c=${inviteCode}`);
+			// return simplifiedParams.join('&');
+		}
+
+		console.log(scene)
+
+		return scene;
+	};
+
 
 	/**
 	 * @description 获取他人的名片信息
@@ -258,12 +327,14 @@
 	 * @description 处理分享链接被点击后的奖励逻辑
 	 */
 	const handleShareReward = (options) => {
-		if (!options || !options.sharerId) return;
+		// 【核心修改】兼容 sharerId 和缩写 s
+		const sharerId = options.s || options.sharerId;
 
-		const {
-			sharerId,
-			id: bizId
-		} = options;
+		if (!options || !sharerId) return;
+
+		// 【核心修改】兼容 id 和缩写 i
+		const bizId = options.i || options.id;
+
 		const loggedInUserId = uni.getStorageSync('userId');
 
 		// 本人点击，不处理

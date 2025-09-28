@@ -57,18 +57,36 @@ const _sfc_main = {
   onLaunch: function(options) {
     common_vendor.index.__f__("warn", "at App.vue:11", "当前组件仅支持 uni_modules 目录结构 ，请升级 HBuilderX 到 3.1.0 版本以上！");
     common_vendor.index.__f__("log", "at App.vue:12", "App Launch");
-    if (options && options.query && options.query.inviteCode) {
-      const inviteCode = options.query.inviteCode;
-      common_vendor.index.__f__("log", "at App.vue:16", "✅ [App.vue] 全局捕获到启动参数中的邀请码:", inviteCode);
+    common_vendor.index.__f__("log", "at App.vue:14", "App Launch, 启动参数 options:", options);
+    let finalQuery = options.query || {};
+    if (options.scene) {
+      const sceneStr = decodeURIComponent(options.scene);
+      common_vendor.index.__f__("log", "at App.vue:21", "✅ [App.vue] 检测到 scene 参数:", sceneStr);
+      const sceneParams = {};
+      sceneStr.split("&").forEach((item) => {
+        const parts = item.split("=");
+        if (parts[0] && parts[1]) {
+          sceneParams[parts[0]] = parts[1];
+        }
+      });
+      common_vendor.index.__f__("log", "at App.vue:30", "✅ [App.vue] scene 解析结果:", sceneParams);
+      finalQuery = {
+        ...finalQuery,
+        ...sceneParams
+      };
+    }
+    const inviteCode = finalQuery.c || finalQuery.inviteCode;
+    if (inviteCode) {
+      common_vendor.index.__f__("log", "at App.vue:41", "✅ [App.vue] 全局捕获到邀请码:", inviteCode);
       common_vendor.index.setStorageSync("pendingInviteCode", inviteCode);
     }
   },
   onShow: function() {
-    common_vendor.index.__f__("log", "at App.vue:23", "App Show");
+    common_vendor.index.__f__("log", "at App.vue:46", "App Show");
     this.startLocationUpdates();
   },
   onHide: function() {
-    common_vendor.index.__f__("log", "at App.vue:28", "App Hide");
+    common_vendor.index.__f__("log", "at App.vue:51", "App Hide");
     this.stopLocationUpdates();
   },
   methods: {
@@ -85,15 +103,15 @@ const _sfc_main = {
     startLocationUpdates() {
       this.stopLocationUpdates();
       if (!this.isLoggedIn()) {
-        common_vendor.index.__f__("log", "at App.vue:53", "用户未登录，不启动位置上传定时器");
+        common_vendor.index.__f__("log", "at App.vue:76", "用户未登录，不启动位置上传定时器");
         return;
       }
       const updateTask = () => {
-        common_vendor.index.__f__("log", "at App.vue:58", "正在获取并上传用户当前位置...");
+        common_vendor.index.__f__("log", "at App.vue:81", "正在获取并上传用户当前位置...");
         common_vendor.index.getLocation({
           type: "gcj02",
           success: async (res) => {
-            common_vendor.index.__f__("log", "at App.vue:62", `获取位置成功: ${res.longitude}, ${res.latitude}`);
+            common_vendor.index.__f__("log", "at App.vue:85", `获取位置成功: ${res.longitude}, ${res.latitude}`);
             const {
               error
             } = await utils_request.request("/app-api/member/user/upload-location", {
@@ -104,19 +122,19 @@ const _sfc_main = {
               }
             });
             if (error) {
-              common_vendor.index.__f__("error", "at App.vue:76", "自动上传位置信息失败:", error);
+              common_vendor.index.__f__("error", "at App.vue:99", "自动上传位置信息失败:", error);
             } else {
-              common_vendor.index.__f__("log", "at App.vue:78", "用户当前位置上传成功！");
+              common_vendor.index.__f__("log", "at App.vue:101", "用户当前位置上传成功！");
             }
           },
           fail: (err) => {
-            common_vendor.index.__f__("error", "at App.vue:82", "获取位置信息失败:", err);
+            common_vendor.index.__f__("error", "at App.vue:105", "获取位置信息失败:", err);
           }
         });
       };
       updateTask();
       this.locationTimer = setInterval(updateTask, 6e5);
-      common_vendor.index.__f__("log", "at App.vue:92", "位置上传定时器已启动");
+      common_vendor.index.__f__("log", "at App.vue:115", "位置上传定时器已启动");
     },
     /**
      * 停止位置上传
@@ -125,7 +143,7 @@ const _sfc_main = {
       if (this.locationTimer) {
         clearInterval(this.locationTimer);
         this.locationTimer = null;
-        common_vendor.index.__f__("log", "at App.vue:102", "位置上传定时器已停止");
+        common_vendor.index.__f__("log", "at App.vue:125", "位置上传定时器已停止");
       }
     }
   }

@@ -1,15 +1,19 @@
 /* 水平间距 */
 /* 水平间距 */
+/* --- 1. 页面整体布局 --- */
 .login-container.data-v-1cf27b2a {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
+  /* 内容从顶部开始排列 */
   min-height: 100vh;
   background: #f8f9fa;
   padding: 80rpx 50rpx 50rpx;
   box-sizing: border-box;
 }
+
+/* --- 2. 顶部 Header 区域 --- */
 .header.data-v-1cf27b2a {
   text-align: center;
   margin-bottom: 60rpx;
@@ -33,6 +37,8 @@
   color: #999;
   margin-top: 10rpx;
 }
+
+/* --- 3. 表单容器 --- */
 .form-wrapper.data-v-1cf27b2a {
   width: 100%;
   background-color: #fff;
@@ -40,6 +46,8 @@
   padding: 20rpx 40rpx;
   box-shadow: 0 8rpx 30rpx rgba(0, 0, 0, 0.05);
 }
+
+/* --- 4. 表单项通用样式 --- */
 .form-item.data-v-1cf27b2a {
   display: flex;
   align-items: center;
@@ -54,11 +62,15 @@
   font-size: 30rpx;
   color: #333;
   margin-left: 20rpx;
+  flex-shrink: 0;
+  /* 防止标签被压缩 */
 }
 .form-item .input.data-v-1cf27b2a {
   flex: 1;
   font-size: 30rpx;
   color: #333;
+  min-width: 0;
+  /* flex 布局下防止溢出 */
 }
 .form-item .placeholder.data-v-1cf27b2a {
   color: #ccc;
@@ -67,8 +79,7 @@
   font-size: 30rpx;
   color: #333;
 }
-.form-item .get-phone-btn.data-v-1cf27b2a,
-.form-item .get-name-btn.data-v-1cf27b2a {
+.form-item .get-phone-btn.data-v-1cf27b2a {
   flex: 1;
   background: none;
   border: none;
@@ -79,20 +90,49 @@
   color: #007aff;
   line-height: 1.5;
 }
-.form-item .get-phone-btn.data-v-1cf27b2a::after,
-.form-item .get-name-btn.data-v-1cf27b2a::after {
+.form-item .get-phone-btn.data-v-1cf27b2a::after {
   border: none;
 }
-.form-item .user-profile-display.data-v-1cf27b2a {
+
+/* --- 5. 【核心】头像与昵称的特定样式 --- */
+.profile-section.data-v-1cf27b2a {
   display: flex;
+  flex-direction: column;
   align-items: center;
+  padding: 30rpx 0;
+  border-bottom: 1rpx solid #f0f0f0;
 }
-.form-item .user-profile-display .mini-avatar.data-v-1cf27b2a {
-  width: 50rpx;
-  height: 50rpx;
+.avatar-wrapper.data-v-1cf27b2a {
+  width: 160rpx;
+  height: 160rpx;
   border-radius: 50%;
-  margin-right: 15rpx;
+  padding: 0;
+  margin: 0;
+  border: 4rpx solid #eee;
+  overflow: hidden;
+  background-color: #f7f7f7;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.08);
 }
+.avatar-wrapper.data-v-1cf27b2a::after {
+  border: none;
+}
+.avatar-wrapper .avatar.data-v-1cf27b2a {
+  width: 100%;
+  height: 100%;
+}
+.avatar-hint.data-v-1cf27b2a {
+  font-size: 24rpx;
+  color: #999;
+  margin-top: 15rpx;
+  margin-bottom: 30rpx;
+}
+.nickName-item.data-v-1cf27b2a {
+  width: 100%;
+  padding: 0 !important;
+  border-bottom: none !important;
+}
+
+/* --- 6. 底部操作区 --- */
 .actions-wrapper.data-v-1cf27b2a {
   width: 100%;
   margin-top: 60rpx;
@@ -102,24 +142,20 @@
   justify-content: center;
   align-items: center;
   margin-bottom: 40rpx;
-  /* 【新增】为 checkbox 创建一个稍大的点击区域，提升体验 */
 }
 .agreement-section .checkbox-wrapper.data-v-1cf27b2a {
   display: flex;
   align-items: center;
   padding-right: 10rpx;
-  /* 与右侧文字的间距 */
 }
 .agreement-section .agreement-text.data-v-1cf27b2a {
   font-size: 24rpx;
   color: #999;
   line-height: 1.5;
-  /* 增加行高，避免文字太挤 */
 }
 .agreement-section .link.data-v-1cf27b2a {
   color: #FF7600;
   text-decoration: underline;
-  /* 在链接之间添加一点点空间，视觉上更好看 */
   margin: 0 4rpx;
 }
 .login-btn.data-v-1cf27b2a {

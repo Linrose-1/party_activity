@@ -5,7 +5,7 @@
 			<view class="form-card">
 				<view class="form-group">
 					<view class="form-label">标题</view>
-					<input v-model="title" class="form-input" placeholder="请输入标题（最多20字）" maxlength="20" />
+					<input v-model="title" class="form-input" placeholder="请输入标题（最多50字）" maxlength="50" />
 					<!-- <text class="hint">清晰明了的标题能吸引更多关注</text> -->
 				</view>
 
