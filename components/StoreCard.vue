@@ -64,7 +64,7 @@
 	const handleInitiateParty = () => {
 		// 跳转到发起聚会页面，并通过 query 参数传递店铺 ID
 		uni.navigateTo({
-			url: `/pages/active-publish/active-publish?storeId=${props.store.id}`
+			url: `/packages/active-publish/active-publish?storeId=${props.store.id}`
 		});
 	};
 </script>

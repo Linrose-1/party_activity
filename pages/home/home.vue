@@ -782,7 +782,7 @@
 
 	const skipCommercialDetail = (postId) => {
 		uni.navigateTo({
-			url: `/pages/home-commercialDetail/home-commercialDetail?id=${postId}`
+			url: `/packages/home-commercialDetail/home-commercialDetail?id=${postId}`
 		});
 	}
 

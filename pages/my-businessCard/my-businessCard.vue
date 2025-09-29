@@ -458,7 +458,7 @@
 
 	// --- 6. 事件处理器 ---
 	const goToEdit = () => uni.navigateTo({
-		url: '/pages/my-edit/my-edit'
+		url: '/packages/my-edit/my-edit'
 	});
 	const openSharePopup = () => {
 		customShareTitle.value = `这是 ${userInfo.value.realName || userInfo.value.nickname} 的名片`;

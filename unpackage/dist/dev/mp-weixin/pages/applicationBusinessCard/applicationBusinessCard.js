@@ -148,7 +148,7 @@ const _sfc_main = {
     };
     const goToEarnPoints = () => {
       common_vendor.index.navigateTo({
-        url: "/pages/my-account/my-account"
+        url: "/packages/my-account/my-account"
       });
     };
     const formattedFriendRequestMessage = common_vendor.computed(() => {

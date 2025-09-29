@@ -1,5 +1,6 @@
 /* 水平间距 */
 /* 水平间距 */
+/* --- 全局与基础 --- */
 .page-container.data-v-991800d7 {
   background-color: #f9f9fa;
   padding: 24rpx;
@@ -25,6 +26,24 @@
   color: #303133;
   margin-left: 16rpx;
 }
+.label.data-v-991800d7 {
+  font-size: 26rpx;
+  color: #909399;
+  margin-bottom: 12rpx;
+  display: block;
+}
+.value.data-v-991800d7 {
+  font-size: 28rpx;
+  color: #303133;
+  font-weight: 500;
+  word-break: break-all;
+}
+.value-placeholder.data-v-991800d7 {
+  font-size: 28rpx;
+  color: #c0c4cc;
+}
+
+/* --- 1. 基本资料 (Grid 布局) --- */
 .info-grid.data-v-991800d7 {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -37,39 +56,146 @@
   padding: 20rpx;
   border-radius: 12rpx;
 }
-.info-item.wide.data-v-991800d7 {
-  grid-column: 1/-1;
-}
-.label.data-v-991800d7 {
-  font-size: 26rpx;
-  color: #909399;
-  margin-bottom: 12rpx;
-}
-.value.data-v-991800d7 {
-  font-size: 28rpx;
-  color: #303133;
-  font-weight: 500;
-  word-break: break-all;
-}
-.bio.data-v-991800d7 {
-  line-height: 1.6;
-}
 .avatar-value.data-v-991800d7 {
   width: 100rpx;
   height: 100rpx;
   border-radius: 50%;
 }
+
+/* --- 2. 职业与社交 (全新 List 布局) --- */
+.list-container.data-v-991800d7 {
+  display: flex;
+  flex-direction: column;
+  gap: 30rpx;
+}
+.list-item.data-v-991800d7 {
+  background-color: #f5f7fa;
+  padding: 20rpx;
+  border-radius: 12rpx;
+}
+.tag-group.data-v-991800d7 {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+}
+.tag.data-v-991800d7 {
+  background-color: #e8f3ff;
+  color: #409eff;
+  padding: 8rpx 20rpx;
+  border-radius: 8rpx;
+  font-size: 26rpx;
+}
+.tag.school.data-v-991800d7 {
+  background-color: #f0f9eb;
+  color: #67c23a;
+}
+.tag.hobby.data-v-991800d7 {
+  background-color: #fdf6ec;
+  color: #e6a23c;
+}
+.company-group.data-v-991800d7 {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+.company-card.data-v-991800d7 {
+  background-color: #fff;
+  border: 1rpx solid #eef;
+  padding: 24rpx;
+  border-radius: 12rpx;
+}
+.company-name.data-v-991800d7 {
+  font-size: 30rpx;
+  font-weight: bold;
+  color: #303133;
+  margin-bottom: 12rpx;
+}
+.company-details.data-v-991800d7 {
+  display: flex;
+  align-items: center;
+  font-size: 26rpx;
+  color: #606266;
+}
+.detail-separator.data-v-991800d7 {
+  margin: 0 16rpx;
+  color: #dcdfe6;
+}
 .qrcode-value.data-v-991800d7 {
-  width: 200rpx;
-  height: 200rpx;
+  width: 120rpx;
+  height: 120rpx;
   border-radius: 12rpx;
   border: 1rpx solid #e6e6e6;
 }
+
+/* --- 3. 简介与资源 --- */
+.signature-item.data-v-991800d7 {
+  background-color: #fafafa;
+  text-align: center;
+  font-style: italic;
+  color: #606266;
+  padding: 30rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.signature-text.data-v-991800d7 {
+  margin: 0 20rpx;
+  font-size: 28rpx;
+}
+.bio.data-v-991800d7 {
+  line-height: 1.6;
+}
+.resource-item .label.data-v-991800d7 {
+  font-weight: bold;
+  font-size: 28rpx;
+}
+.resource-item .label.have-resource.data-v-991800d7 {
+  color: #67c23a;
+}
+.resource-item .label.need-resource.data-v-991800d7 {
+  color: #e6a23c;
+}
+.resource-list.data-v-991800d7 {
+  display: flex;
+  flex-direction: column;
+  gap: 10rpx;
+}
+.resource-line.data-v-991800d7 {
+  font-size: 28rpx;
+  color: #303133;
+  padding-left: 20rpx;
+  position: relative;
+}
+.resource-line.data-v-991800d7::before {
+  content: "·";
+  position: absolute;
+  left: 0;
+  color: #909399;
+}
+.match-button-wrapper.data-v-991800d7 {
+  margin-top: 20rpx;
+}
+.match-button.data-v-991800d7 {
+  background: linear-gradient(135deg, #FF8C00, #FF6B00);
+  color: #fff;
+  border: none;
+  border-radius: 40rpx;
+  font-size: 30rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 80rpx;
+  line-height: 80rpx;
+}
+.match-button.data-v-991800d7::after {
+  border: none;
+}
+
+/* --- 4. 雷达图 (样式不变) --- */
 .chart-wrapper.data-v-991800d7 {
   position: relative;
   width: 100%;
   height: 600rpx;
-  /* 适当增加高度，给文字标签留出空间 */
   display: flex;
   justify-content: center;
   align-items: center;

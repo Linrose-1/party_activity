@@ -8,14 +8,9 @@ if (!Math) {
   "./pages/active/active.js";
   "./pages/shop/shop.js";
   "./pages/my/my.js";
-  "./pages/active-detail/active-detail.js";
-  "./pages/active-publish/active-publish.js";
   "./pages/active-enroll/active-enroll.js";
-  "./pages/my-edit/my-edit.js";
-  "./pages/my-account/my-account.js";
   "./pages/my-businessCard/my-businessCard.js";
   "./pages/shop-detail/shop-detail.js";
-  "./pages/home-commercialDetail/home-commercialDetail.js";
   "./pages/applicationBusinessCard/applicationBusinessCard.js";
   "./pages/shop-recommend/shop-recommend.js";
   "./pages/home-opportunitiesPublish/home-opportunitiesPublish.js";
@@ -47,6 +42,11 @@ if (!Math) {
   "./pages/my-systemSuggestions/my-systemSuggestions.js";
   "./pages/my-auth/my-auth.js";
   "./packages/my-account-informationDetails/my-account-informationDetails.js";
+  "./packages/my-account/my-account.js";
+  "./packages/home-commercialDetail/home-commercialDetail.js";
+  "./packages/my-edit/my-edit.js";
+  "./packages/active-publish/active-publish.js";
+  "./packages/active-detail/active-detail.js";
 }
 const _sfc_main = {
   data() {

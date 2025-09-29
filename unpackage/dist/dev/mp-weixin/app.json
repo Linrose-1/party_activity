@@ -5,14 +5,9 @@
     "pages/active/active",
     "pages/shop/shop",
     "pages/my/my",
-    "pages/active-detail/active-detail",
-    "pages/active-publish/active-publish",
     "pages/active-enroll/active-enroll",
-    "pages/my-edit/my-edit",
-    "pages/my-account/my-account",
     "pages/my-businessCard/my-businessCard",
     "pages/shop-detail/shop-detail",
-    "pages/home-commercialDetail/home-commercialDetail",
     "pages/applicationBusinessCard/applicationBusinessCard",
     "pages/shop-recommend/shop-recommend",
     "pages/home-opportunitiesPublish/home-opportunitiesPublish",
@@ -48,9 +43,13 @@
     {
       "root": "packages",
       "pages": [
-        "my-account-informationDetails/my-account-informationDetails"
-      ],
-      "independent": true
+        "my-account-informationDetails/my-account-informationDetails",
+        "my-account/my-account",
+        "home-commercialDetail/home-commercialDetail",
+        "my-edit/my-edit",
+        "active-publish/active-publish",
+        "active-detail/active-detail"
+      ]
     }
   ],
   "window": {

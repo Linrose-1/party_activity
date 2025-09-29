@@ -416,7 +416,7 @@
 			return;
 		}
 		uni.navigateTo({
-			url: '/pages/active-publish/active-publish'
+			url: '/packages/active-publish/active-publish'
 		});
 	};
 

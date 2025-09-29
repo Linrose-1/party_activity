@@ -275,7 +275,7 @@
 	// --- 辅助功能 ---
 	const goToEarnPoints = () => {
 		uni.navigateTo({
-			url: '/pages/my-account/my-account'
+			url: '/packages/my-account/my-account'
 		});
 	};
 

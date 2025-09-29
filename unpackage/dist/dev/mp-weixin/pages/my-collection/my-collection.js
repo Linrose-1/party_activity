@@ -199,13 +199,13 @@ const _sfc_main = {
       current
     });
     const skipActivityDetail = (id) => common_vendor.index.navigateTo({
-      url: `/pages/active-detail/active-detail?id=${id}`
+      url: `/packages/active-detail/active-detail?id=${id}`
     });
     const navigateToDiscoverActivities = () => common_vendor.index.switchTab({
       url: "/pages/active/active"
     });
     const skipCommercialDetail = (id) => common_vendor.index.navigateTo({
-      url: `/pages/home-commercialDetail/home-commercialDetail?id=${id}`
+      url: `/packages/home-commercialDetail/home-commercialDetail?id=${id}`
     });
     const navigateToDiscoverOpportunities = () => common_vendor.index.switchTab({
       url: "/pages/home/home"

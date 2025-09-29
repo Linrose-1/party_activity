@@ -32,7 +32,7 @@ const _sfc_main = {
     };
     const handleInitiateParty = () => {
       common_vendor.index.navigateTo({
-        url: `/pages/active-publish/active-publish?storeId=${props.store.id}`
+        url: `/packages/active-publish/active-publish?storeId=${props.store.id}`
       });
     };
     return (_ctx, _cache) => {

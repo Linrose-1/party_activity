@@ -63,7 +63,7 @@ const _sfc_main = {
         {
           value: user.currExperience || 0,
           label: "我的贡分",
-          path: "/pages/my-account/my-account"
+          path: "/packages/my-account/my-account"
         },
         {
           value: user.activityCount || 0,
@@ -78,7 +78,7 @@ const _sfc_main = {
         {
           value: user.point || 0,
           label: "我的智米",
-          path: "/pages/my-account/my-account"
+          path: "/packages/my-account/my-account"
         }
       ];
     });
@@ -163,12 +163,12 @@ const _sfc_main = {
     };
     const onEdit = () => {
       common_vendor.index.navigateTo({
-        url: "/pages/my-edit/my-edit"
+        url: "/packages/my-edit/my-edit"
       });
     };
     const onViewAccountDetail = () => {
       common_vendor.index.navigateTo({
-        url: "/pages/my-account/my-account"
+        url: "/packages/my-account/my-account"
       });
     };
     const navigateToAccountDetail = (item) => {

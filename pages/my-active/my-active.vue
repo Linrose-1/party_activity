@@ -346,13 +346,13 @@
 	// --- 页面跳转与操作 (保持不变) ---
 	const handleActivityClick = (activityId) => {
 		uni.navigateTo({
-			url: `/pages/active-detail/active-detail?id=${activityId}`
+			url: `/packages/active-detail/active-detail?id=${activityId}`
 		});
 	};
 
 	const viewDetail = (activityId) => {
 		uni.navigateTo({
-			url: `/pages/active-detail/active-detail?id=${activityId}`
+			url: `/packages/active-detail/active-detail?id=${activityId}`
 		});
 	};
 
@@ -475,7 +475,7 @@
 
 	const navigateToCreate = () => {
 		uni.navigateTo({
-			url: '/pages/active-publish/active-publish'
+			url: '/packages/active-publish/active-publish'
 		});
 	};
 </script>

@@ -1,0 +1,384 @@
+/* 水平间距 */
+/* 水平间距 */
+/* ==================================================================
+ * 页面主体与全局样式
+ * ================================================================== */
+.page.data-v-9217aa1c {
+  padding-bottom: 120rpx;
+  background-color: #f8f8f8;
+}
+.section-title.data-v-9217aa1c {
+  font-size: 32rpx;
+  font-weight: bold;
+  margin: 30rpx 0 20rpx;
+  border-left: 10rpx solid #FF6B00;
+  padding-left: 20rpx;
+}
+
+/* ==================================================================
+ * 页面内容模块
+ * ================================================================== */
+/* --- 聚会封面 --- */
+.event-cover.data-v-9217aa1c {
+  height: 400rpx;
+  background: linear-gradient(45deg, #ff9a9e, #fad0c4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 36rpx;
+  font-weight: bold;
+  text-align: center;
+  padding: 20rpx;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+/* --- 状态与提示横幅 --- */
+.status-banner.data-v-9217aa1c {
+  color: #fff;
+  padding: 10rpx 30rpx;
+  text-align: center;
+  font-size: 28rpx;
+  font-weight: bold;
+}
+.limit-slots-tip.data-v-9217aa1c {
+  background-color: #fdf6ec;
+  color: #e6a23c;
+  padding: 20rpx 30rpx;
+  font-size: 26rpx;
+  display: flex;
+  align-items: center;
+}
+
+/* --- 通用内容卡片样式 --- */
+.event-header.data-v-9217aa1c,
+.event-content.data-v-9217aa1c,
+.organizer-section.data-v-9217aa1c,
+.business-section.data-v-9217aa1c,
+.participants-section.data-v-9217aa1c,
+.sponsor-section.data-v-9217aa1c {
+  background: #fff;
+  margin: 30rpx;
+  padding: 30rpx;
+  border-radius: 20rpx;
+  box-shadow: 0 10rpx 20rpx rgba(0, 0, 0, 0.05);
+}
+
+/* --- 聚会头部信息 (Header Card) --- */
+.event-title.data-v-9217aa1c {
+  font-size: 36rpx;
+  font-weight: bold;
+  margin-bottom: 20rpx;
+}
+.event-meta.data-v-9217aa1c {
+  display: flex;
+  align-items: center;
+  font-size: 26rpx;
+  color: #666;
+  margin: 10rpx;
+  gap: 10rpx;
+}
+.event-stats.data-v-9217aa1c {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20rpx;
+}
+.stat-item.data-v-9217aa1c {
+  flex: 1;
+  text-align: center;
+}
+.stat-value.data-v-9217aa1c {
+  font-size: 32rpx;
+  color: #FF6B00;
+  font-weight: bold;
+}
+.stat-label.data-v-9217aa1c {
+  font-size: 24rpx;
+  color: #888;
+}
+
+/* --- 聚会介绍 (Content Card) --- */
+.event-description.data-v-9217aa1c {
+  font-size: 28rpx;
+  color: #555;
+  line-height: 1.8;
+  margin-bottom: 20rpx;
+}
+.activity-grid.data-v-9217aa1c {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30rpx;
+  margin-top: 20rpx;
+}
+.activity-item.data-v-9217aa1c {
+  background: #f9f9f9;
+  border-radius: 20rpx;
+  padding: 30rpx;
+  text-align: center;
+}
+.activity-title.data-v-9217aa1c {
+  color: #FF6B00;
+  font-weight: bold;
+  font-size: 32rpx;
+  margin-bottom: 10rpx;
+}
+.activity-desc.data-v-9217aa1c {
+  font-size: 24rpx;
+  color: #666;
+}
+
+/* --- 组织者、商圈、赞助商通用样式 --- */
+.organizer-title.data-v-9217aa1c,
+.business-title.data-v-9217aa1c,
+.participants-title.data-v-9217aa1c,
+.sponsor-title.data-v-9217aa1c {
+  font-weight: bold;
+  margin-bottom: 20rpx;
+}
+.organizer-info.data-v-9217aa1c,
+.business-info.data-v-9217aa1c,
+.sponsor-info.data-v-9217aa1c {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+}
+.organizer-avatar.data-v-9217aa1c,
+.business-logo.data-v-9217aa1c {
+  width: 100rpx;
+  height: 100rpx;
+  background: linear-gradient(45deg, #ffb347, #ffcc33);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.store-logo-image.data-v-9217aa1c {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+}
+.sponsor-logo.data-v-9217aa1c {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 10rpx;
+  object-fit: contain;
+  background-color: #f0f0f0;
+  border: 1rpx solid #eee;
+}
+.organizer-name.data-v-9217aa1c,
+.business-name.data-v-9217aa1c,
+.sponsor-name.data-v-9217aa1c {
+  font-weight: bold;
+  font-size: 28rpx;
+}
+.organizer-company.data-v-9217aa1c,
+.business-meta text.data-v-9217aa1c,
+.sponsor-description.data-v-9217aa1c {
+  font-size: 24rpx;
+  color: #666;
+}
+
+/* --- 参与用户 --- */
+.participants-header.data-v-9217aa1c {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10rpx;
+}
+.participants-body.data-v-9217aa1c {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+  margin-left: 10rpx;
+}
+.view-all-link.data-v-9217aa1c {
+  font-size: 24rpx;
+  color: #3a7bd5;
+  cursor: pointer;
+}
+.avatar-group.data-v-9217aa1c {
+  display: flex;
+  position: relative;
+}
+.avatar-item.data-v-9217aa1c {
+  width: 60rpx;
+  height: 60rpx;
+  border-radius: 50%;
+  border: 4rpx solid #fff;
+  box-shadow: 0 2rpx 5rpx rgba(0, 0, 0, 0.1);
+  object-fit: cover;
+  margin-left: -20rpx;
+  background: #f0f0f0;
+}
+.more-avatars.data-v-9217aa1c {
+  background: #FF6B00;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+.total-registered-info.data-v-9217aa1c {
+  font-size: 26rpx;
+  color: #666;
+}
+.registered-count.data-v-9217aa1c {
+  color: #FF6B00;
+  font-weight: bold;
+}
+
+/* ==================================================================
+ * 浮动与弹窗元素 (最高层级)
+ * ================================================================== */
+/* --- 底部固定操作栏 --- */
+.action-bar.data-v-9217aa1c {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #fff;
+  display: flex;
+  padding: 20rpx;
+  padding-bottom: calc(20rpx + env(safe-area-inset-bottom));
+  box-shadow: 0 -5rpx 10rpx rgba(0, 0, 0, 0.05);
+  z-index: 100;
+}
+.action-btn.data-v-9217aa1c {
+  flex: 1;
+  padding: 24rpx;
+  margin: 0 10rpx;
+  text-align: center;
+  border-radius: 16rpx;
+  font-weight: bold;
+  font-size: 32rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.action-btn.share-btn.data-v-9217aa1c {
+  background: #f0f0f0;
+  color: #333;
+}
+.action-btn.register-btn.data-v-9217aa1c {
+  background: linear-gradient(to right, #FF8C00, #FF6B00);
+  color: #fff;
+}
+.action-btn.register-btn.disabled.data-v-9217aa1c {
+  background: #c8c9cc;
+  color: #fff;
+  pointer-events: none;
+}
+
+/* --- 自定义分享弹窗 --- */
+.share-popup-content.data-v-9217aa1c {
+  padding: 30rpx;
+  padding-bottom: calc(30rpx + env(safe-area-inset-bottom));
+  background-color: #fff;
+  border-top-left-radius: 24rpx;
+  border-top-right-radius: 24rpx;
+}
+.share-popup-title.data-v-9217aa1c {
+  text-align: center;
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 40rpx;
+}
+.share-title-editor.data-v-9217aa1c {
+  display: flex;
+  align-items: center;
+  background-color: #f7f7f7;
+  border-radius: 16rpx;
+  padding: 20rpx;
+  margin-bottom: 40rpx;
+}
+.editor-label.data-v-9217aa1c {
+  font-size: 28rpx;
+  color: #666;
+  margin-right: 20rpx;
+}
+.editor-input.data-v-9217aa1c {
+  flex: 1;
+  font-size: 28rpx;
+  color: #333;
+}
+.share-channels.data-v-9217aa1c {
+  display: flex;
+  justify-content: space-around;
+  padding: 20rpx 0;
+  margin-bottom: 40rpx;
+}
+.share-channel-btn.data-v-9217aa1c {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: transparent;
+  padding: 0;
+  margin: 0;
+  border: none;
+  line-height: 1.5;
+}
+.share-channel-btn.data-v-9217aa1c::after {
+  border: none;
+}
+.channel-icon-image.data-v-9217aa1c {
+  width: 60rpx;
+  height: 60rpx;
+}
+.share-channel-btn text.data-v-9217aa1c {
+  font-size: 24rpx;
+  color: #666;
+  margin-top: 10rpx;
+}
+.share-popup-cancel.data-v-9217aa1c {
+  width: 100%;
+  height: 90rpx;
+  line-height: 90rpx;
+  text-align: center;
+  background-color: #f0f0f0;
+  border-radius: 45rpx;
+  font-size: 30rpx;
+  color: #333;
+}
+
+/* --- 朋友圈引导蒙层 --- */
+.timeline-guide-mask.data-v-9217aa1c {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.7);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  padding-right: 20rpx;
+  box-sizing: border-box;
+}
+.guide-arrow.data-v-9217aa1c {
+  width: 150rpx;
+  height: 150rpx;
+  margin-top: 10rpx;
+  margin-right: 20rpx;
+}
+.guide-text.data-v-9217aa1c {
+  color: #fff;
+  font-size: 32rpx;
+  font-weight: bold;
+  text-align: center;
+  margin-top: 20rpx;
+}
+.guide-text text.data-v-9217aa1c {
+  display: block;
+  margin-bottom: 10rpx;
+}
+
+/* --- 参与用户 --- */
+.no-participants.data-v-9217aa1c {
+  padding: 20rpx 0;
+  text-align: center;
+  color: #999;
+  font-size: 26rpx;
+}

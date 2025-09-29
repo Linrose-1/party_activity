@@ -235,7 +235,7 @@ const _sfc_main = {
         return;
       }
       common_vendor.index.navigateTo({
-        url: "/pages/active-publish/active-publish"
+        url: "/packages/active-publish/active-publish"
       });
     };
     common_vendor.watch(

@@ -380,13 +380,13 @@
 		current
 	});
 	const skipActivityDetail = (id) => uni.navigateTo({
-		url: `/pages/active-detail/active-detail?id=${id}`
+		url: `/packages/active-detail/active-detail?id=${id}`
 	});
 	const navigateToDiscoverActivities = () => uni.switchTab({
 		url: '/pages/active/active'
 	});
 	const skipCommercialDetail = (id) => uni.navigateTo({
-		url: `/pages/home-commercialDetail/home-commercialDetail?id=${id}`
+		url: `/packages/home-commercialDetail/home-commercialDetail?id=${id}`
 	});
 	const navigateToDiscoverOpportunities = () => uni.switchTab({
 		url: '/pages/home/home'

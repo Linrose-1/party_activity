@@ -134,12 +134,12 @@ const _sfc_main = {
     };
     const handleActivityClick = (activityId) => {
       common_vendor.index.navigateTo({
-        url: `/pages/active-detail/active-detail?id=${activityId}`
+        url: `/packages/active-detail/active-detail?id=${activityId}`
       });
     };
     const viewDetail = (activityId) => {
       common_vendor.index.navigateTo({
-        url: `/pages/active-detail/active-detail?id=${activityId}`
+        url: `/packages/active-detail/active-detail?id=${activityId}`
       });
     };
     const cancelEnroll = (activityId) => {
@@ -242,7 +242,7 @@ const _sfc_main = {
     };
     const navigateToCreate = () => {
       common_vendor.index.navigateTo({
-        url: "/pages/active-publish/active-publish"
+        url: "/packages/active-publish/active-publish"
       });
     };
     return (_ctx, _cache) => {

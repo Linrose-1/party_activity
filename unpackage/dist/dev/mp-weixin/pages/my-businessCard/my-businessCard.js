@@ -278,7 +278,7 @@ const _sfc_main = {
       return shareContent;
     });
     const goToEdit = () => common_vendor.index.navigateTo({
-      url: "/pages/my-edit/my-edit"
+      url: "/packages/my-edit/my-edit"
     });
     const openSharePopup = () => {
       customShareTitle.value = `这是 ${userInfo.value.realName || userInfo.value.nickname} 的名片`;

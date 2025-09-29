@@ -489,7 +489,7 @@ const _sfc_main = {
     };
     const skipCommercialDetail = (postId) => {
       common_vendor.index.navigateTo({
-        url: `/pages/home-commercialDetail/home-commercialDetail?id=${postId}`
+        url: `/packages/home-commercialDetail/home-commercialDetail?id=${postId}`
       });
     };
     return (_ctx, _cache) => {

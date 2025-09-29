@@ -151,7 +151,7 @@
 		requireLogin(() => {
 			// 登录后要执行的操作
 			uni.navigateTo({
-				url: `/pages/active-detail/active-detail?id=${props.activity.id}`
+				url: `/packages/active-detail/active-detail?id=${props.activity.id}`
 			});
 		}, '登录后才能查看聚会详情，是否立即登录？');
 	};
@@ -227,7 +227,7 @@
 
 	const detailActivity = (activityId) => {
 		uni.navigateTo({
-			url: `/pages/active-detail/active-detail?id=${activityId}`
+			url: `/packages/active-detail/active-detail?id=${activityId}`
 		});
 	};
 </script>

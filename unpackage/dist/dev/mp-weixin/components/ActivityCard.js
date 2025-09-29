@@ -79,7 +79,7 @@ const _sfc_main = {
     const handleCardClick = () => {
       requireLogin(() => {
         common_vendor.index.navigateTo({
-          url: `/pages/active-detail/active-detail?id=${props.activity.id}`
+          url: `/packages/active-detail/active-detail?id=${props.activity.id}`
         });
       }, "登录后才能查看聚会详情，是否立即登录？");
     };

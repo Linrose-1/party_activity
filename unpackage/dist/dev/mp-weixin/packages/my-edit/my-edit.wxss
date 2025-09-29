@@ -1,0 +1,248 @@
+/* 水平间距 */
+/* 水平间距 */
+/* --- 1. 页面基础与布局 --- */
+.container.data-v-2d637515 {
+  padding: 20rpx 30rpx 40rpx;
+  background-color: #f9f9f9;
+}
+.form-section.data-v-2d637515 {
+  background-color: #fff;
+  padding: 30rpx;
+  border-radius: 20rpx;
+  margin-bottom: 20rpx;
+}
+.section-title.data-v-2d637515 {
+  font-size: 36rpx;
+  font-weight: bold;
+  margin-bottom: 30rpx;
+  display: block;
+}
+
+/* --- 2. 【【【核心修复】】】表单项通用布局 --- */
+.data-v-2d637515 .uni-forms-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+.data-v-2d637515 .uni-forms-item .uni-forms-item__label {
+  width: 160rpx !important;
+  font-size: 28rpx;
+  color: #333;
+  flex-shrink: 0;
+  padding-right: 20rpx;
+  box-sizing: border-box;
+}
+.data-v-2d637515 .uni-forms-item .uni-forms-item__content {
+  flex: 1;
+  min-width: 0;
+}
+.data-v-2d637515 .uni-easyinput,.data-v-2d637515 .uni-data-select,.data-v-2d637515 .uni-datetime-picker,.data-v-2d637515 .uni-data-picker {
+  width: 100% !important;
+}
+
+/* --- 3. 【【【核心修复】】】 DataPicker 文本溢出终极解决方案 --- */
+.data-v-2d637515 .uni-data-picker .uni-data-tree-input {
+  display: flex !important;
+  align-items: center;
+  width: 100% !important;
+  height: 36px;
+  border: 1px solid #e5e5e5;
+  border-radius: 4px;
+  padding: 0 10px;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+.data-v-2d637515 .uni-data-picker .uni-data-tree-input .input-value {
+  flex: 1;
+  min-width: 0;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* --- 4. 动态增删区块样式 (布局重构) --- */
+.dynamic-section.data-v-2d637515 {
+  margin-top: 40rpx;
+  margin-bottom: 20rpx;
+  padding-top: 30rpx;
+  border-top: 1px solid #f0f0f0;
+}
+.dynamic-header.data-v-2d637515 {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+.dynamic-label.data-v-2d637515 {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+}
+.add-btn-small.data-v-2d637515 {
+  display: flex;
+  align-items: center;
+  font-size: 24rpx;
+  height: 50rpx;
+  line-height: 50rpx;
+  padding: 0 20rpx;
+  margin: 0;
+  background-color: #f0f7ff;
+  color: #007bff;
+  border: 1px solid #d2e7ff;
+}
+.add-btn-small.data-v-2d637515::after {
+  border: none;
+}
+.add-btn-small uni-icons.data-v-2d637515 {
+  margin-right: 8rpx;
+}
+.dynamic-item.data-v-2d637515 {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20rpx;
+  gap: 20rpx;
+}
+.dynamic-item .uni-easyinput.data-v-2d637515 {
+  flex: 1;
+}
+.remove-btn-small.data-v-2d637515 {
+  width: 50rpx;
+  height: 50rpx;
+  line-height: 50rpx;
+  padding: 0;
+  margin: 0;
+  border-radius: 50%;
+  background-color: #fef0f0;
+  color: #f56c6c;
+  font-size: 28rpx;
+  font-weight: bold;
+  border: none;
+  flex-shrink: 0;
+}
+.remove-btn-small.data-v-2d637515::after {
+  border: none;
+}
+.dynamic-group.data-v-2d637515 {
+  background-color: #f9f9f9;
+  padding: 30rpx;
+  border-radius: 12rpx;
+  margin-bottom: 20rpx;
+  border: 1px solid #eee;
+}
+.dynamic-group .group-header.data-v-2d637515 {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30rpx;
+}
+.dynamic-group .group-title.data-v-2d637515 {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #555;
+}
+.dynamic-group .remove-btn.data-v-2d637515 {
+  font-size: 24rpx;
+  height: 50rpx;
+  line-height: 50rpx;
+  padding: 0 20rpx;
+  margin: 0;
+  background-color: #fef0f0;
+  color: #f56c6c;
+  border: 1px solid #fde2e2;
+}
+.dynamic-group .remove-btn.data-v-2d637515::after {
+  border: none;
+}
+
+/* --- 5. 其他组件与通用样式 (保持不变) --- */
+.avatar-uploader.data-v-2d637515,
+.qr-uploader.data-v-2d637515 {
+  display: flex;
+  align-items: center;
+  gap: 30rpx;
+}
+.avatar-img.data-v-2d637515 {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 50%;
+}
+.qr-img.data-v-2d637515 {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 8rpx;
+  border: 1px solid #eee;
+}
+.upload-btn.data-v-2d637515 {
+  font-size: 26rpx;
+  padding: 0 30rpx;
+  height: 60rpx;
+  line-height: 60rpx;
+  background-color: #f5f5f5;
+  color: #333;
+  margin: 0;
+}
+.upload-btn.data-v-2d637515::after {
+  border: none;
+}
+.phone-text.data-v-2d637515 .uni-easyinput__content-input {
+  color: #999 !important;
+}
+.other-hobby-input.data-v-2d637515 {
+  margin-top: 20rpx;
+}
+
+/* --- 6. 底部按钮与认证区 (保持不变) --- */
+.save-btn.data-v-2d637515,
+.label-btn.data-v-2d637515,
+.auth-btn.data-v-2d637515 {
+  width: 100%;
+  height: 88rpx;
+  line-height: 88rpx;
+  border-radius: 44rpx;
+  font-size: 32rpx;
+  border: none;
+  color: white;
+}
+.save-btn.data-v-2d637515::after,
+.label-btn.data-v-2d637515::after,
+.auth-btn.data-v-2d637515::after {
+  border: none;
+}
+.save-btn.data-v-2d637515 {
+  margin-top: 40rpx;
+  background: linear-gradient(to right, #FF8C00, #FF6B00);
+}
+.label-btn.data-v-2d637515 {
+  background: linear-gradient(to right, #007bff, #0056b3);
+}
+.auth-btn.data-v-2d637515 {
+  background: linear-gradient(to right, #00C777, #00A362);
+}
+.auth-info.data-v-2d637515 {
+  font-size: 28rpx;
+  color: #666;
+}
+.auth-info .auth-item.data-v-2d637515 {
+  display: flex;
+  justify-content: space-between;
+  padding: 20rpx 0;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+.auth-info .auth-item .auth-label.data-v-2d637515 {
+  color: #333;
+}
+.auth-info .auth-item .auth-value.data-v-2d637515 {
+  font-weight: bold;
+}
+.auth-info .auth-status.data-v-2d637515 {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-top: 20rpx;
+  color: #00C777;
+  font-size: 26rpx;
+}
+.auth-info .auth-status uni-icons.data-v-2d637515 {
+  margin-right: 8rpx;
+}

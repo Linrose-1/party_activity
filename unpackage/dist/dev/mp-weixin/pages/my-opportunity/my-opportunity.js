@@ -192,7 +192,7 @@ const _sfc_main = {
     };
     const skipCommercialDetail = (id) => {
       common_vendor.index.navigateTo({
-        url: `/pages/home-commercialDetail/home-commercialDetail?id=${id}`
+        url: `/packages/home-commercialDetail/home-commercialDetail?id=${id}`
       });
     };
     const goToPublishPage = () => {

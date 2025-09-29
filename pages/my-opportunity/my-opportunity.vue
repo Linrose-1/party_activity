@@ -289,7 +289,7 @@
 	// ... skip* 和 previewImage 函数保持不变 ...
 	const skipCommercialDetail = (id) => {
 		uni.navigateTo({
-			url: `/pages/home-commercialDetail/home-commercialDetail?id=${id}`
+			url: `/packages/home-commercialDetail/home-commercialDetail?id=${id}`
 		})
 	};
 

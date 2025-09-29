@@ -7299,7 +7299,7 @@ function initOnError() {
 function initRuntimeSocketService() {
   const hosts = "172.20.10.4,127.0.0.1";
   const port = "8090";
-  const id = "mp-weixin_F2NzIf";
+  const id = "mp-weixin_NNcgOg";
   const lazy = typeof swan !== "undefined";
   let restoreError = lazy ? () => {
   } : initOnError();
@@ -8284,33 +8284,9 @@ const pages = [
     }
   },
   {
-    path: "pages/active-detail/active-detail",
-    style: {
-      navigationBarTitleText: "聚会详情"
-    }
-  },
-  {
-    path: "pages/active-publish/active-publish",
-    style: {
-      navigationBarTitleText: "发起聚会"
-    }
-  },
-  {
     path: "pages/active-enroll/active-enroll",
     style: {
       navigationBarTitleText: "聚会报名"
-    }
-  },
-  {
-    path: "pages/my-edit/my-edit",
-    style: {
-      navigationBarTitleText: "编辑资料"
-    }
-  },
-  {
-    path: "pages/my-account/my-account",
-    style: {
-      navigationBarTitleText: "账户详情"
     }
   },
   {
@@ -8323,12 +8299,6 @@ const pages = [
     path: "pages/shop-detail/shop-detail",
     style: {
       navigationBarTitleText: "聚店详情"
-    }
-  },
-  {
-    path: "pages/home-commercialDetail/home-commercialDetail",
-    style: {
-      navigationBarTitleText: "商机详情"
     }
   },
   {
@@ -8515,12 +8485,41 @@ const pages = [
 const subPackages = [
   {
     root: "packages",
-    independent: true,
     pages: [
       {
         path: "my-account-informationDetails/my-account-informationDetails",
         style: {
           navigationBarTitleText: "用户详情"
+        }
+      },
+      {
+        path: "my-account/my-account",
+        style: {
+          navigationBarTitleText: "账户详情"
+        }
+      },
+      {
+        path: "home-commercialDetail/home-commercialDetail",
+        style: {
+          navigationBarTitleText: "商机详情"
+        }
+      },
+      {
+        path: "my-edit/my-edit",
+        style: {
+          navigationBarTitleText: "编辑资料"
+        }
+      },
+      {
+        path: "active-publish/active-publish",
+        style: {
+          navigationBarTitleText: "聚会发布"
+        }
+      },
+      {
+        path: "active-detail/active-detail",
+        style: {
+          navigationBarTitleText: "聚会详情"
         }
       }
     ]
