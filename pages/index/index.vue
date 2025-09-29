@@ -38,7 +38,7 @@
 			<view class="form-item">
 				<uni-icons type="paperplane-filled" size="22" color="#FF7600"></uni-icons>
 				<text class="label">邀请码</text>
-				<input v-model="inviteCode" class="input" type="text" placeholder="请输入邀请码(非必填)"
+				<input v-model="inviteCode" class="input" type="text" placeholder="请输入邀请码(首次登录需要填写)"
 					placeholder-class="placeholder" />
 			</view>
 		</view>

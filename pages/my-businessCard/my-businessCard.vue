@@ -429,6 +429,7 @@
 		const loggedInUserId = uni.getStorageSync('userId');
 		const cardOwnerId = userInfo.value.id;
 
+		// 【确认】此逻辑已存在且正确：从名片信息中获取邀请码
 		const inviteCode = userInfo.value.shardCode;
 
 		let queryString = `id=${cardOwnerId}&fromShare=1`;
@@ -436,10 +437,10 @@
 			queryString += `&sharerId=${loggedInUserId}`;
 		}
 
+		// 【确认】此逻辑已存在且正确：将邀请码拼接到 query 字符串中
 		if (inviteCode) {
 			queryString += `&inviteCode=${inviteCode}`;
 		}
-
 
 		const finalTitle = customShareTitle.value ||
 			`这是 ${userInfo.value.realName || userInfo.value.nickname} 的名片`;
@@ -450,9 +451,7 @@
 			imageUrl: userInfo.value.avatar,
 		};
 
-		// ===================== LOG START: 分享数据 =====================
 		console.log('[my-businessCard] 生成时间轴共享内容:', JSON.stringify(shareContent));
-		// ===================== LOG END ===============================
 
 		return shareContent;
 	});

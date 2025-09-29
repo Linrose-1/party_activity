@@ -23,7 +23,7 @@
 				</uni-forms-item>
 
 				<!-- coverImageUrl -->
-				<uni-forms-item label="聚会封面" required>
+				<uni-forms-item label="聚会封面">
 					<view class="cover-upload" @click="uploadCover">
 						<image v-if="form.coverImageUrl" :src="form.coverImageUrl" mode="aspectFill"></image>
 						<text v-else>点击上传封面图片</text>
@@ -59,7 +59,7 @@
 					</view>
 				</uni-forms-item>
 
-				<uni-forms-item label="合作聚店" required :label-width="80">
+				<uni-forms-item label="合作聚店" :label-width="80">
 					<view class="uni-list-cell-db">
 						<view @click="goToSelectShop" class="uni-input">
 							<text v-if="associatedStoreName">{{ associatedStoreName }}</text>
@@ -141,7 +141,7 @@
 				</uni-forms-item>
 
 				<!-- organizerPaymentQrCodeUrl -->
-				<uni-forms-item label="收款码" required>
+				<uni-forms-item label="收款码" :required="form.activityFunds === 1">
 					<view class="cover-upload" @click="uploadCode">
 						<image v-if="form.organizerPaymentQrCodeUrl" :src="form.organizerPaymentQrCodeUrl"
 							mode="aspectFit"></image>
@@ -395,7 +395,6 @@
 		});
 	}
 
-	// 监听店铺选择结果
 	onLoad(() => {
 		// 1. 尝试从本地存储加载草稿数据
 		try {
@@ -415,9 +414,16 @@
 				});
 				console.log('草稿已加载:', parsedDraft);
 			} else {
-				// 如果没有草稿，设置一些默认值
-				timeRange.value = ['2025-01-01 14:00:00', '2025-01-01 17:00:00'];
-				enrollTimeRange.value = ['2025-01-01 14:00:00', '2025-01-01 17:00:00'];
+				const now = new Date();
+				const year = now.getFullYear();
+				const month = (now.getMonth() + 1).toString().padStart(2, '0');
+				const day = now.getDate().toString().padStart(2, '0');
+				const todayStr = `${year}-${month}-${day}`;
+
+				// 默认报名时间为当天 09:00 至 18:00
+				enrollTimeRange.value = [`${todayStr} 09:00:00`, `${todayStr} 18:00:00`];
+				// 默认聚会时间为当天 19:00 至 21:00
+				timeRange.value = [`${todayStr} 19:00:00`, `${todayStr} 21:00:00`];
 			}
 		} catch (error) {
 			console.error("加载草稿失败:", error);
@@ -492,13 +498,13 @@
 			});
 			return;
 		}
-		if (!form.value.coverImageUrl) {
-			uni.showToast({
-				title: '请上传聚会封面',
-				icon: 'none'
-			});
-			return;
-		}
+		// if (!form.value.coverImageUrl) {
+		// 	uni.showToast({
+		// 		title: '请上传聚会封面',
+		// 		icon: 'none'
+		// 	});
+		// 	return;
+		// }
 		if (!timeRange.value || timeRange.value.length !== 2) {
 			uni.showToast({
 				title: '请选择聚会时间',
@@ -587,20 +593,21 @@
 			});
 			return;
 		}
-		if (!form.value.organizerPaymentQrCodeUrl) {
+		if (form.value.activityFunds === 1 && !form.value.organizerPaymentQrCodeUrl) {
 			uni.showToast({
-				title: '请上传收款码',
+				title: 'AA制聚会请上传收款码',
 				icon: 'none'
 			});
 			return;
 		}
-		if (!form.value.associatedStoreId) {
-			uni.showToast({
-				title: '请选择合作店铺',
-				icon: 'none'
-			});
-			return;
-		}
+
+		// if (!form.value.associatedStoreId) {
+		// 	uni.showToast({
+		// 		title: '请选择合作店铺',
+		// 		icon: 'none'
+		// 	});
+		// 	return;
+		// }
 
 		uni.showModal({
 			title: '确认发布',

@@ -105,13 +105,13 @@
 					<!-- 【修改】动态绑定聚店信息 -->
 					<text class="business-name">{{ activityDetail.memberStoreRespVO.storeName }}</text>
 					<view class="business-meta">
-						<view style="font-size: 25rpx;margin: 10rpx 0;">??
+						<view style="font-size: 25rpx;margin: 10rpx 0;">
 							{{ activityDetail.memberStoreRespVO.fullAddress }}
 						</view>
 						<view style="font-size: 25rpx;margin: 10rpx 0;">??
 							{{ activityDetail.memberStoreRespVO.contactPhone }}
 						</view>
-						<!-- <view style="font-size: 25rpx;margin: 10rpx 0;">??
+						<!-- <view style="font-size: 25rpx;margin: 10rpx 0;">
 							<view v-for="(line, index) in formattedOperatingHours" :key="index" style="display: block;">
 								{{ line }}
 							</view>
@@ -639,7 +639,6 @@
 		};
 	});
 
-	// 【重大修改】升级 onShareTimeline 逻辑
 	onShareTimeline(() => {
 		console.log("触发分享到朋友圈");
 
@@ -647,14 +646,15 @@
 		const sharerId = uni.getStorageSync('userId');
 		const finalTitle = customShareTitle.value || activityDetail.value.activityTitle || '发现一个很棒的聚会，快来看看吧！';
 
+		// 【新增】获取邀请码
 		const inviteCode = getInviteCode();
 
-		// 【修改】在 query 中添加 sharerId 参数
+		// 【核心修改】在 query 中添加 sharerId 和 inviteCode 参数
 		let queryString = `id=${activityDetail.value.id}&from=timeline`;
 		if (sharerId) {
 			queryString += `&sharerId=${sharerId}`;
 		}
-
+		// 【新增】如果邀请码存在，则拼接到 query 中
 		if (inviteCode) {
 			queryString += `&inviteCode=${inviteCode}`;
 		}

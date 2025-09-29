@@ -12,7 +12,7 @@
 				<!-- 右侧新的摇一摇入口 -->
 				<view class="shake-entry-new">
 					<!-- 单个图标 -->
-					<uni-icons type="personadd" size="36" color="#fff" class="entry-icon"></uni-icons>
+					<uni-icons type="personadd" size="42" color="#fff" class="entry-icon"></uni-icons>
 					<!-- 文字组合 -->
 					<view class="entry-text-group">
 						<text class="entry-text">摇一摇</text>
@@ -26,12 +26,12 @@
 		<view class="main-content">
 			<!-- 【修改后】的选择器区域 -->
 			<view class="selectors-card">
-				<!-- 到达城市：使用地图选点 -->
+				<!-- 访友地点：使用地图选点 -->
 				<view class="selector-item" @click="handleChooseLocation">
 					<uni-icons type="paperplane" size="20" color="#999"></uni-icons>
 					<view class="picker-view">
-						<text class="label">到达城市：</text>
-						<text class="value">{{ destination.name || '请选择目的地' }}</text>
+						<text class="label">访友地点：</text>
+						<text class="value">{{ destination.name || '请选择拟访友地点' }}</text>
 					</view>
 					<uni-icons type="right" size="16" color="#999"></uni-icons>
 				</view>
@@ -41,7 +41,7 @@
 					<!-- 使用 uni-datetime-picker 组件 -->
 					<uni-datetime-picker v-model="timeRange" type="datetimerange" @change="handleTimeChange">
 						<view class="picker-view">
-							<text class="label">到达时段：</text>
+							<text class="label">访友时段：</text>
 							<text class="value">{{ timeRangeText }}</text>
 						</view>
 					</uni-datetime-picker>
@@ -54,11 +54,11 @@
 				<view class="tab-item" :class="{ 'active': activeTab === 0 }" @click="switchTab(0)">
 					<uni-icons type="paperplane-filled" size="18"
 						:color="activeTab === 0 ? themeColor : '#666'"></uni-icons>
-					目的地人脉
+					当地商友
 				</view>
 				<view class="tab-item" :class="{ 'active': activeTab === 1 }" @click="switchTab(1)">
 					<uni-icons type="heart-filled" size="18" :color="activeTab === 1 ? themeColor : '#666'"></uni-icons>
-					关注的人
+					当地关注
 				</view>
 			</view>
 
@@ -90,8 +90,9 @@
 				<!-- 列表为空的提示 (无变化) -->
 				<view v-if="isListEmpty" class="empty-state">
 					<uni-icons type="staff" size="60" color="#e0e0e0"></uni-icons>
-					<text class="empty-text">暂无相关人脉</text>
-					<text class="empty-subtext">尝试更换筛选条件吧</text>
+					<text class="empty-text">暂无相关商友</text>
+					<text class="empty-subtext">请填写访友地点与访友时段</text>
+					<text class="empty-subtext">查找您需要的商友</text>
 				</view>
 
 				<!-- 加载更多组件 (无变化) -->
@@ -163,7 +164,7 @@
 			const end = timeRange.value[1].slice(5, 16);
 			return `${start} - ${end}`;
 		}
-		return '请选择时间范围';
+		return '请选择拟访友时段';
 	});
 	const isListEmpty = computed(() => userList.value.length === 0 && loadingStatus.value !== 'loading');
 
@@ -450,7 +451,7 @@
 		opacity: 0.9;
 	}
 
-	/* 【核心修改】新的右侧入口样式 */
+	/* 右侧入口样式 */
 	.shake-entry-new {
 		display: flex;
 		align-items: center;
@@ -475,7 +476,7 @@
 	}
 
 	.entry-text {
-		font-size: 32rpx;
+		font-size: 38rpx;
 		font-weight: 900;
 		line-height: 1.4;
 		/* 调整行高，让两行文字更紧凑 */

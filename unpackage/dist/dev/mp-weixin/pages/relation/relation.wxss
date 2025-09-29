@@ -47,7 +47,7 @@
   opacity: 0.9;
 }
 
-/* 【核心修改】新的右侧入口样式 */
+/* 右侧入口样式 */
 .shake-entry-new.data-v-85e55c19 {
   display: flex;
   align-items: center;
@@ -69,7 +69,7 @@
   /* 让文字垂直排列 */
 }
 .entry-text.data-v-85e55c19 {
-  font-size: 32rpx;
+  font-size: 38rpx;
   font-weight: 900;
   line-height: 1.4;
   /* 调整行高，让两行文字更紧凑 */

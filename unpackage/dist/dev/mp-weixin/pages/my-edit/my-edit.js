@@ -25,6 +25,7 @@ if (!Math) {
 const _sfc_main = {
   __name: "my-edit",
   setup(__props) {
+    const initialDataState = common_vendor.ref("");
     const watchAndSanitize = (target, key = null) => {
       common_vendor.watch(target, (newValue) => {
         if (Array.isArray(newValue)) {
@@ -72,10 +73,12 @@ const _sfc_main = {
       cardName: "",
       era: null,
       // 出生年代
-      nativePlace: null,
-      //  籍贯 (与地区同构)
-      signature: ""
+      signature: "",
       // 个性签名
+      haveResources: "",
+      // 我有资源
+      needResources: ""
+      // 我需资源
     });
     const areaTree = common_vendor.ref([]);
     const industryTree = common_vendor.ref([]);
@@ -106,7 +109,8 @@ const _sfc_main = {
     const schoolsList = common_vendor.ref([""]);
     const companyAndIndustryList = common_vendor.ref([{
       name: "",
-      industryName: ""
+      industryName: "",
+      positionTitle: ""
     }]);
     const genderOptions = [{
       value: 1,
@@ -174,13 +178,38 @@ const _sfc_main = {
       await fetchUserInfoAndPopulateForm();
       common_vendor.index.hideLoading();
     });
+    common_vendor.onBackPress((options) => {
+      const currentState = JSON.stringify({
+        form: form.value,
+        professionsList: professionsList.value,
+        schoolsList: schoolsList.value,
+        companyAndIndustryList: companyAndIndustryList.value,
+        selectedHobbies: selectedHobbies.value,
+        otherHobbyText: otherHobbyText.value
+      });
+      if (currentState !== initialDataState.value) {
+        common_vendor.index.showModal({
+          title: "提示",
+          content: "您的修改尚未保存，确定要退出吗？",
+          confirmText: "直接退出",
+          cancelText: "继续编辑",
+          success: (res) => {
+            if (res.confirm) {
+              common_vendor.index.navigateBack();
+            }
+          }
+        });
+        return true;
+      }
+      return false;
+    });
     const getAreaTreeData = async () => {
       const {
         data,
         error
       } = await Api.getAreaTree();
       if (error) {
-        common_vendor.index.__f__("error", "at pages/my-edit/my-edit.vue:362", "获取地区树失败:", error);
+        common_vendor.index.__f__("error", "at pages/my-edit/my-edit.vue:419", "获取地区树失败:", error);
       } else {
         areaTree.value = data || [];
       }
@@ -191,7 +220,7 @@ const _sfc_main = {
         error
       } = await Api.getIndustryTree();
       if (error) {
-        common_vendor.index.__f__("error", "at pages/my-edit/my-edit.vue:374", "获取行业树失败:", error);
+        common_vendor.index.__f__("error", "at pages/my-edit/my-edit.vue:431", "获取行业树失败:", error);
       } else {
         industryTree.value = data || [];
       }
@@ -253,24 +282,45 @@ const _sfc_main = {
         } else {
           schoolsList.value = [""];
         }
-        if (userInfo.companyName && userInfo.industry) {
-          const companyNames = userInfo.companyName.split(",");
-          const industryNames = userInfo.industry.split(",");
-          companyAndIndustryList.value = companyNames.map((name, index) => ({
-            name: name || "",
-            industryName: industryNames[index] || ""
-            // 直接赋值中文字符串
-          }));
+        if (userInfo.companyName || userInfo.industry || userInfo.positionTitle) {
+          const companyNames = (userInfo.companyName || "").split(",");
+          const industryNames = (userInfo.industry || "").split(",");
+          const positionTitles = (userInfo.positionTitle || "").split(",");
+          const maxLength = Math.max(companyNames.length, industryNames.length, positionTitles.length);
+          const newList = [];
+          for (let i = 0; i < maxLength; i++) {
+            if (companyNames[i] || industryNames[i] || positionTitles[i]) {
+              newList.push({
+                name: companyNames[i] || "",
+                industryName: industryNames[i] || "",
+                positionTitle: positionTitles[i] || ""
+              });
+            }
+          }
+          companyAndIndustryList.value = newList.length > 0 ? newList : [{
+            name: "",
+            industryName: "",
+            positionTitle: ""
+          }];
         } else {
           companyAndIndustryList.value = [{
             name: "",
-            industryName: ""
+            industryName: "",
+            positionTitle: ""
           }];
         }
         if (userInfo.birthday && typeof userInfo.birthday === "number") {
           const date = new Date(userInfo.birthday);
           form.value.birthday = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, "0")}-${date.getDate().toString().padStart(2, "0")}`;
         }
+        initialDataState.value = JSON.stringify({
+          form: form.value,
+          professionsList: professionsList.value,
+          schoolsList: schoolsList.value,
+          companyAndIndustryList: companyAndIndustryList.value,
+          selectedHobbies: selectedHobbies.value,
+          otherHobbyText: otherHobbyText.value
+        });
       }
     };
     const maskedName = common_vendor.computed(() => {
@@ -314,10 +364,11 @@ const _sfc_main = {
       }
     };
     const addCompany = () => {
-      if (companyAndIndustryList.value.length < 6) {
+      if (companyAndIndustryList.value.length < 3) {
         companyAndIndustryList.value.push({
           name: "",
-          industry: null
+          industryName: "",
+          positionTitle: ""
         });
       }
     };
@@ -348,7 +399,7 @@ const _sfc_main = {
             src: tempFilePath,
             cropScale: "1:1",
             success: (cropRes) => uploadAvatar(cropRes.tempFilePath),
-            fail: (err) => common_vendor.index.__f__("log", "at pages/my-edit/my-edit.vue:594", "用户取消裁剪或裁剪失败:", err)
+            fail: (err) => common_vendor.index.__f__("log", "at pages/my-edit/my-edit.vue:679", "用户取消裁剪或裁剪失败:", err)
           });
         }
       });
@@ -438,6 +489,7 @@ const _sfc_main = {
         payload.school = schoolsList.value.map((s) => s.trim()).filter((s) => s).join(",");
         payload.companyName = companyAndIndustryList.value.map((item) => (item.name || "").trim()).filter((name) => name).join(",");
         payload.industry = companyAndIndustryList.value.map((item) => (item.industryName || "").trim()).join(",");
+        payload.positionTitle = companyAndIndustryList.value.map((item) => (item.positionTitle || "").trim()).filter((title) => title).join(",");
         if (payload.birthday && typeof payload.birthday === "string") {
           const dateStr = payload.birthday.replace(/-/g, "/");
           payload.birthday = new Date(dateStr).getTime();
@@ -452,6 +504,14 @@ const _sfc_main = {
             icon: "none"
           });
         } else {
+          initialDataState.value = JSON.stringify({
+            form: form.value,
+            professionsList: professionsList.value,
+            schoolsList: schoolsList.value,
+            companyAndIndustryList: companyAndIndustryList.value,
+            selectedHobbies: selectedHobbies.value,
+            otherHobbyText: otherHobbyText.value
+          });
           common_vendor.index.showToast({
             title: "保存成功",
             icon: "success"
@@ -459,7 +519,7 @@ const _sfc_main = {
           setTimeout(() => common_vendor.index.navigateBack(), 1500);
         }
       }).catch((err) => {
-        common_vendor.index.__f__("log", "at pages/my-edit/my-edit.vue:738", "表单验证失败：", err);
+        common_vendor.index.__f__("log", "at pages/my-edit/my-edit.vue:838", "表单验证失败：", err);
       });
     };
     const goToLabelEditPage = () => {
@@ -634,7 +694,18 @@ const _sfc_main = {
               label: `公司`,
               name: `company_${index}`
             }),
-            m: index
+            m: "13622257-24-" + i0 + "," + ("13622257-23-" + i0),
+            n: common_vendor.o(($event) => company.positionTitle = $event, index),
+            o: common_vendor.p({
+              placeholder: "请输入您的职务",
+              modelValue: company.positionTitle
+            }),
+            p: "13622257-23-" + i0 + ",13622257-0",
+            q: common_vendor.p({
+              label: `职务`,
+              name: `position_${index}`
+            }),
+            r: index
           });
         }),
         K: companyAndIndustryList.value.length > 1,
@@ -649,7 +720,7 @@ const _sfc_main = {
       } : {}, {
         O: common_vendor.f(schoolsList.value, (school, index, i0) => {
           return common_vendor.e({
-            a: "13622257-24-" + i0 + ",13622257-0",
+            a: "13622257-26-" + i0 + ",13622257-0",
             b: common_vendor.o(($event) => schoolsList.value[index] = $event, index),
             c: common_vendor.p({
               placeholder: "可以多填,用以查同学会",
@@ -716,7 +787,7 @@ const _sfc_main = {
           modelValue: form.value.signature
         }),
         al: common_vendor.p({
-          label: "个性签名&理念",
+          label: "个性签名",
           name: "signature"
         }),
         am: common_vendor.o(($event) => form.value.personalBio = $event),
@@ -726,29 +797,49 @@ const _sfc_main = {
           modelValue: form.value.personalBio
         }),
         ao: common_vendor.p({
-          label: "个人简介&资源",
+          label: "个人简介",
           name: "personalBio"
         }),
-        ap: common_vendor.sr(formRef, "13622257-0", {
+        ap: common_vendor.o(($event) => form.value.haveResources = $event),
+        aq: common_vendor.p({
+          type: "textarea",
+          placeholder: "用来智能匹配商友资源",
+          modelValue: form.value.haveResources
+        }),
+        ar: common_vendor.p({
+          label: "我有资源",
+          name: "haveResources"
+        }),
+        as: common_vendor.o(($event) => form.value.needResources = $event),
+        at: common_vendor.p({
+          type: "textarea",
+          placeholder: "用来智能匹配商友资源",
+          modelValue: form.value.needResources
+        }),
+        av: common_vendor.p({
+          label: "我需资源",
+          name: "needResources"
+        }),
+        aw: common_vendor.sr(formRef, "13622257-0", {
           "k": "formRef"
         }),
-        aq: common_vendor.p({
+        ax: common_vendor.p({
           modelValue: form.value,
           rules
         }),
-        ar: common_vendor.o(submitForm),
-        as: common_vendor.o(goToLabelEditPage),
-        at: form.value.idCard
+        ay: common_vendor.o(submitForm),
+        az: common_vendor.o(goToLabelEditPage),
+        aA: form.value.idCard
       }, form.value.idCard ? {
-        av: common_vendor.t(maskedName.value),
-        aw: common_vendor.t(maskedIdCard.value),
-        ax: common_vendor.p({
+        aB: common_vendor.t(maskedName.value),
+        aC: common_vendor.t(maskedIdCard.value),
+        aD: common_vendor.p({
           type: "checkbox-filled",
           color: "#00C777",
           size: "18"
         })
       } : {
-        ay: common_vendor.o(goToAuthPage)
+        aE: common_vendor.o(goToAuthPage)
       });
     };
   }

@@ -50,7 +50,7 @@ const _sfc_main = {
         const end = timeRange.value[1].slice(5, 16);
         return `${start} - ${end}`;
       }
-      return "请选择时间范围";
+      return "请选择拟访友时段";
     });
     const isListEmpty = common_vendor.computed(() => userList.value.length === 0 && loadingStatus.value !== "loading");
     const fetchUserList = async (isRefresh = false) => {
@@ -184,7 +184,7 @@ const _sfc_main = {
       const name = user.nickname || "匿名用户";
       const avatarUrl = user.avatar || defaultAvatar;
       const url = `/pages/applicationBusinessCard/applicationBusinessCard?id=${user.id}&name=${encodeURIComponent(name)}&avatar=${encodeURIComponent(avatarUrl)}`;
-      common_vendor.index.__f__("log", "at pages/relation/relation.vue:335", "从人脉列表页跳转，URL:", url);
+      common_vendor.index.__f__("log", "at pages/relation/relation.vue:336", "从人脉列表页跳转，URL:", url);
       common_vendor.index.navigateTo({
         url
       });
@@ -200,19 +200,19 @@ const _sfc_main = {
     common_vendor.watch([destination, timeRange], updateNextLocation);
     common_vendor.watch(activeTab, () => fetchUserList(true));
     common_vendor.onShow(() => {
-      common_vendor.index.__f__("log", "at pages/relation/relation.vue:362", "人脉页 onShow: 开始监听摇一摇");
+      common_vendor.index.__f__("log", "at pages/relation/relation.vue:363", "人脉页 onShow: 开始监听摇一摇");
       common_vendor.index.onAccelerometerChange((res) => {
         if (Math.abs(res.x) > 1.5 || Math.abs(res.y) > 1.5 || Math.abs(res.z) > 1.5) {
           if (!isShakeLocked.value) {
             lockShake();
-            common_vendor.index.__f__("log", "at pages/relation/relation.vue:374", "检测到摇一摇，准备跳转...");
+            common_vendor.index.__f__("log", "at pages/relation/relation.vue:375", "检测到摇一摇，准备跳转...");
             goToShakePage();
           }
         }
       });
     });
     common_vendor.onHide(() => {
-      common_vendor.index.__f__("log", "at pages/relation/relation.vue:385", "人脉页 onHide: 停止监听摇一摇");
+      common_vendor.index.__f__("log", "at pages/relation/relation.vue:386", "人脉页 onHide: 停止监听摇一摇");
       common_vendor.index.stopAccelerometer();
     });
     common_vendor.onLoad(() => {
@@ -229,7 +229,7 @@ const _sfc_main = {
         a: common_assets._imports_0$4,
         b: common_vendor.p({
           type: "personadd",
-          size: "36",
+          size: "42",
           color: "#fff"
         }),
         c: common_vendor.o(goToShakePage),
@@ -238,7 +238,7 @@ const _sfc_main = {
           size: "20",
           color: "#999"
         }),
-        e: common_vendor.t(destination.value.name || "请选择目的地"),
+        e: common_vendor.t(destination.value.name || "请选择拟访友地点"),
         f: common_vendor.p({
           type: "right",
           size: "16",

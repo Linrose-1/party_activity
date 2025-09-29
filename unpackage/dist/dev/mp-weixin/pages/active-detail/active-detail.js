@@ -319,7 +319,7 @@ const _sfc_main = {
       };
     });
     common_vendor.onShareTimeline(() => {
-      common_vendor.index.__f__("log", "at pages/active-detail/active-detail.vue:644", "触发分享到朋友圈");
+      common_vendor.index.__f__("log", "at pages/active-detail/active-detail.vue:643", "触发分享到朋友圈");
       const sharerId = common_vendor.index.getStorageSync("userId");
       const finalTitle = customShareTitle.value || activityDetail.value.activityTitle || "发现一个很棒的聚会，快来看看吧！";
       const inviteCode = utils_user.getInviteCode();

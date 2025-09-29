@@ -207,17 +207,22 @@ const _sfc_main = {
             title: "已成功加载草稿",
             icon: "none"
           });
-          common_vendor.index.__f__("log", "at pages/active-publish/active-publish.vue:416", "草稿已加载:", parsedDraft);
+          common_vendor.index.__f__("log", "at pages/active-publish/active-publish.vue:415", "草稿已加载:", parsedDraft);
         } else {
-          timeRange.value = ["2025-01-01 14:00:00", "2025-01-01 17:00:00"];
-          enrollTimeRange.value = ["2025-01-01 14:00:00", "2025-01-01 17:00:00"];
+          const now = /* @__PURE__ */ new Date();
+          const year = now.getFullYear();
+          const month = (now.getMonth() + 1).toString().padStart(2, "0");
+          const day = now.getDate().toString().padStart(2, "0");
+          const todayStr = `${year}-${month}-${day}`;
+          enrollTimeRange.value = [`${todayStr} 09:00:00`, `${todayStr} 18:00:00`];
+          timeRange.value = [`${todayStr} 19:00:00`, `${todayStr} 21:00:00`];
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/active-publish/active-publish.vue:423", "加载草稿失败:", error);
+        common_vendor.index.__f__("error", "at pages/active-publish/active-publish.vue:429", "加载草稿失败:", error);
         common_vendor.index.removeStorageSync(DRAFT_STORAGE_KEY);
       }
       common_vendor.index.$on("shopSelected", (shop) => {
-        common_vendor.index.__f__("log", "at pages/active-publish/active-publish.vue:429", "接收到选择的店铺信息:", shop);
+        common_vendor.index.__f__("log", "at pages/active-publish/active-publish.vue:435", "接收到选择的店铺信息:", shop);
         form.value.associatedStoreId = shop.id;
         associatedStoreName.value = shop.storeName;
       });
@@ -239,13 +244,13 @@ const _sfc_main = {
           icon: "success"
           // 使用成功图标
         });
-        common_vendor.index.__f__("log", "at pages/active-publish/active-publish.vue:455", "草稿已保存:", draftData);
+        common_vendor.index.__f__("log", "at pages/active-publish/active-publish.vue:461", "草稿已保存:", draftData);
       } catch (e) {
         common_vendor.index.showToast({
           title: "草稿保存失败",
           icon: "none"
         });
-        common_vendor.index.__f__("error", "at pages/active-publish/active-publish.vue:461", "保存草稿到本地存储失败:", e);
+        common_vendor.index.__f__("error", "at pages/active-publish/active-publish.vue:467", "保存草稿到本地存储失败:", e);
       }
     }
     async function publish() {
@@ -268,13 +273,6 @@ const _sfc_main = {
       if (!form.value.tag) {
         common_vendor.index.showToast({
           title: "请选择聚会类型",
-          icon: "none"
-        });
-        return;
-      }
-      if (!form.value.coverImageUrl) {
-        common_vendor.index.showToast({
-          title: "请上传聚会封面",
           icon: "none"
         });
         return;
@@ -366,16 +364,9 @@ const _sfc_main = {
         });
         return;
       }
-      if (!form.value.organizerPaymentQrCodeUrl) {
+      if (form.value.activityFunds === 1 && !form.value.organizerPaymentQrCodeUrl) {
         common_vendor.index.showToast({
-          title: "请上传收款码",
-          icon: "none"
-        });
-        return;
-      }
-      if (!form.value.associatedStoreId) {
-        common_vendor.index.showToast({
-          title: "请选择合作店铺",
+          title: "AA制聚会请上传收款码",
           icon: "none"
         });
         return;
@@ -421,14 +412,14 @@ const _sfc_main = {
         } else {
           delete payload.registrationFee;
         }
-        common_vendor.index.__f__("log", "at pages/active-publish/active-publish.vue:653", "发布聚会 - 最终Payload:", payload);
+        common_vendor.index.__f__("log", "at pages/active-publish/active-publish.vue:660", "发布聚会 - 最终Payload:", payload);
         const {
           success,
           error
         } = await createActive(payload);
         if (success) {
           common_vendor.index.removeStorageSync(DRAFT_STORAGE_KEY);
-          common_vendor.index.__f__("log", "at pages/active-publish/active-publish.vue:662", "聚会发布成功，草稿已清除。");
+          common_vendor.index.__f__("log", "at pages/active-publish/active-publish.vue:669", "聚会发布成功，草稿已清除。");
           common_vendor.index.showModal({
             title: "发布成功",
             content: "可在【我的】-【我的聚会】中查看您发布的聚会。",
@@ -470,7 +461,7 @@ const _sfc_main = {
           });
         }
       } catch (e) {
-        common_vendor.index.__f__("error", "at pages/active-publish/active-publish.vue:710", "发布流程中发生未知错误:", e);
+        common_vendor.index.__f__("error", "at pages/active-publish/active-publish.vue:717", "发布流程中发生未知错误:", e);
         common_vendor.index.showToast({
           title: "操作失败，请检查网络",
           icon: "none"
@@ -481,19 +472,19 @@ const _sfc_main = {
       }
     }
     const createActive = async (payload) => {
-      common_vendor.index.__f__("log", "at pages/active-publish/active-publish.vue:723", "payload", payload);
+      common_vendor.index.__f__("log", "at pages/active-publish/active-publish.vue:730", "payload", payload);
       const result = await utils_request.request("/app-api/member/activity/create", {
         method: "POST",
         data: payload
       });
       if (result && !result.error) {
-        common_vendor.index.__f__("log", "at pages/active-publish/active-publish.vue:731", "createActive result:", result);
+        common_vendor.index.__f__("log", "at pages/active-publish/active-publish.vue:738", "createActive result:", result);
         return {
           success: true,
           error: null
         };
       } else {
-        common_vendor.index.__f__("log", "at pages/active-publish/active-publish.vue:740", "请求失败:", result.error);
+        common_vendor.index.__f__("log", "at pages/active-publish/active-publish.vue:747", "请求失败:", result.error);
         return {
           success: false,
           error: result.error
@@ -536,8 +527,7 @@ const _sfc_main = {
       } : {}, {
         l: common_vendor.o(uploadCover),
         m: common_vendor.p({
-          label: "聚会封面",
-          required: true
+          label: "聚会封面"
         }),
         n: common_vendor.o(($event) => isPickerOpen.value = false),
         o: common_vendor.o(($event) => isPickerOpen.value = false),
@@ -581,7 +571,6 @@ const _sfc_main = {
         G: common_vendor.o(goToSelectShop),
         H: common_vendor.p({
           label: "合作聚店",
-          required: true,
           ["label-width"]: 80
         }),
         I: common_vendor.o(($event) => form.value.totalSlots = $event),
@@ -716,7 +705,7 @@ const _sfc_main = {
         at: common_vendor.o(uploadCode),
         av: common_vendor.p({
           label: "收款码",
-          required: true
+          required: form.value.activityFunds === 1
         }),
         aw: common_vendor.p({
           ["label-width"]: 80

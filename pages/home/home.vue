@@ -274,7 +274,7 @@
 
 		return shareContent;
 	});
-
+	
 	/**
 	 * @description 监听用户分享到朋友圈的行为
 	 */
@@ -283,24 +283,26 @@
 
 		// 1. 获取分享者信息
 		const sharerId = uni.getStorageSync('userId');
+		// 【新增】获取邀请码
 		const inviteCode = getInviteCode();
 
-		// --- 【核心修正】手动拼接参数 ---
+		// --- 【核心修改】将邀请码加入参数列表 ---
 		const params = [];
 		if (sharerId) {
 			params.push(`sharerId=${sharerId}`);
 		}
+		// 【新增】如果邀请码存在，则添加到参数中
 		if (inviteCode) {
 			params.push(`inviteCode=${inviteCode}`);
 		}
 
 		const queryString = params.join('&');
-		// --- 修正结束 ---
+		// --- 修改结束 ---
 
 		// 3. 返回分享对象
 		const shareContent = {
 			title: '发现一个超棒的商友圈，快来看看吧！',
-			query: queryString,
+			query: queryString, // 使用拼接后的 query
 			imageUrl: 'https://img.gofor.club/logo_share.jpg'
 		};
 

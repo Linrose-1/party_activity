@@ -47,32 +47,41 @@ const _sfc_main = {
           pageSize,
           storeName: searchKeyword.value.trim()
         };
-        const { data: result, error } = await utils_request.request("/app-api/member/store/list", {
+        const {
+          data: result,
+          error
+        } = await utils_request.request("/app-api/member/store/list", {
           method: "GET",
           data: params
         });
-        common_vendor.index.__f__("log", "at pages/shop-list/shop-list.vue:108", "123", result.list);
+        common_vendor.index.__f__("log", "at pages/shop-list/shop-list.vue:106", "123", result.list);
         if (error) {
-          common_vendor.index.__f__("error", "at pages/shop-list/shop-list.vue:111", "获取店铺列表失败:", error);
-          common_vendor.index.showToast({ title: "获取店铺列表失败", icon: "none" });
+          common_vendor.index.__f__("error", "at pages/shop-list/shop-list.vue:109", "获取店铺列表失败:", error);
+          common_vendor.index.showToast({
+            title: "获取店铺列表失败",
+            icon: "none"
+          });
           return;
         }
         const newList = (result == null ? void 0 : result.list) || [];
         const total = (result == null ? void 0 : result.total) || 0;
         if (pageNo.value === 1) {
           storeList.value = newList;
-          common_vendor.index.__f__("log", "at pages/shop-list/shop-list.vue:121", "storeList", storeList.value);
+          common_vendor.index.__f__("log", "at pages/shop-list/shop-list.vue:122", "storeList", storeList.value);
         } else {
           storeList.value = [...storeList.value, ...newList];
-          common_vendor.index.__f__("log", "at pages/shop-list/shop-list.vue:124", "storeList2", storeList.value);
+          common_vendor.index.__f__("log", "at pages/shop-list/shop-list.vue:125", "storeList2", storeList.value);
         }
         hasMore.value = storeList.value.length < total;
         if (hasMore.value) {
           pageNo.value++;
         }
       } catch (e) {
-        common_vendor.index.__f__("error", "at pages/shop-list/shop-list.vue:135", "请求异常:", e);
-        common_vendor.index.showToast({ title: "网络请求异常", icon: "none" });
+        common_vendor.index.__f__("error", "at pages/shop-list/shop-list.vue:136", "请求异常:", e);
+        common_vendor.index.showToast({
+          title: "网络请求异常",
+          icon: "none"
+        });
       } finally {
         loading.value = false;
       }
@@ -106,7 +115,7 @@ const _sfc_main = {
         c: common_vendor.o(($event) => searchKeyword.value = $event),
         d: common_vendor.p({
           prefixIcon: "search",
-          placeholder: "搜索店铺名称或地址",
+          placeholder: "搜索聚店名称或地址",
           inputBorder: false,
           modelValue: searchKeyword.value
         }),
@@ -125,12 +134,15 @@ const _sfc_main = {
           size: "16",
           color: "#999"
         }),
-        h: common_vendor.p({
+        h: storeList.value.length > 0
+      }, storeList.value.length > 0 ? {
+        i: common_vendor.p({
           status: loadStatus.value
-        }),
-        i: isEmpty.value
+        })
+      } : {}, {
+        j: isEmpty.value
       }, isEmpty.value ? {
-        j: common_vendor.p({
+        k: common_vendor.p({
           type: "shop-filled",
           size: "60",
           color: "#e0e0e0"

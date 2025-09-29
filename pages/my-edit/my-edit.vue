@@ -78,6 +78,10 @@
 							<uni-forms-item :label="`公司`" :name="`company_${index}`">
 								<uni-easyinput v-model="company.name" placeholder="请输入公司或机构名称" />
 							</uni-forms-item>
+							<uni-forms-item :label="`职务`" :name="`position_${index}`">
+								<uni-easyinput v-model="company.positionTitle" placeholder="请输入您的职务" />
+							</uni-forms-item>
+
 						</view>
 					</view>
 					<view class="dynamic-section">
@@ -117,11 +121,21 @@
 						<uni-easyinput v-if="isOtherHobbySelected" v-model="otherHobbyText" placeholder="请输入您的其他爱好"
 							class="other-hobby-input" />
 					</uni-forms-item>
-					<uni-forms-item label="个性签名&理念" name="signature">
+					<uni-forms-item label="个性签名" name="signature">
 						<uni-easyinput v-model="form.signature" placeholder="设置一个独特的个性签名吧" />
 					</uni-forms-item>
-					<uni-forms-item label="个人简介&资源" name="personalBio"><uni-easyinput type="textarea"
+					<uni-forms-item label="个人简介" name="personalBio"><uni-easyinput type="textarea"
 							v-model="form.personalBio" placeholder="介绍一下自己..." /></uni-forms-item>
+
+					<!-- 我有资源 -->
+					<uni-forms-item label="我有资源" name="haveResources">
+						<uni-easyinput type="textarea" v-model="form.haveResources" placeholder="用来智能匹配商友资源" />
+					</uni-forms-item>
+
+					<!-- 我需资源 -->
+					<uni-forms-item label="我需资源" name="needResources">
+						<uni-easyinput type="textarea" v-model="form.needResources" placeholder="用来智能匹配商友资源" />
+					</uni-forms-item>
 				</uni-forms>
 
 				<button class="save-btn" @click="submitForm">保存资料</button>
@@ -170,10 +184,14 @@
 		computed,
 		watch
 	} from 'vue';
+	import {
+		onBackPress
+	} from '@dcloudio/uni-app';
 	import request from '../../utils/request.js';
 	import uploadFile from '../../utils/upload.js';
 
 	// --- 1. 响应式状态定义 ---
+	const initialDataState = ref('');
 
 	/**
 	 * @description 创建一个通用的侦听器来处理输入限制
@@ -230,8 +248,9 @@
 		idCard: '',
 		cardName: '',
 		era: null, // 出生年代
-		nativePlace: null, //  籍贯 (与地区同构)
 		signature: '', // 个性签名
+		haveResources: '', // 我有资源
+		needResources: '' // 我需资源
 	});
 
 	// 数据源
@@ -267,7 +286,8 @@
 	// 动态公司/行业列表
 	const companyAndIndustryList = ref([{
 		name: '',
-		industryName: ''
+		industryName: '',
+		positionTitle: ''
 	}]);
 
 	// 静态选项和计算属性
@@ -348,6 +368,43 @@
 		// 再获取用户信息并填充
 		await fetchUserInfoAndPopulateForm();
 		uni.hideLoading();
+	});
+
+	onBackPress((options) => {
+		// options.from === 'navigateBack' 表示是代码调用 uni.navigateBack()
+		// options.from === 'backbutton' 表示是用户点击物理返回键或左上角返回按钮
+
+		// 计算当前表单状态
+		const currentState = JSON.stringify({
+			form: form.value,
+			professionsList: professionsList.value,
+			schoolsList: schoolsList.value,
+			companyAndIndustryList: companyAndIndustryList.value,
+			selectedHobbies: selectedHobbies.value,
+			otherHobbyText: otherHobbyText.value
+		});
+
+		// 如果当前状态与初始状态不同，说明有未保存的修改
+		if (currentState !== initialDataState.value) {
+			uni.showModal({
+				title: '提示',
+				content: '您的修改尚未保存，确定要退出吗？',
+				confirmText: '直接退出',
+				cancelText: '继续编辑',
+				success: (res) => {
+					if (res.confirm) {
+						// 用户选择“直接退出”，允许返回
+						uni.navigateBack();
+					}
+					// 如果用户选择“继续编辑”，则什么都不做，停留在当前页
+				}
+			});
+			// 【关键】返回 true 表示我们自己处理了返回事件，阻止默认的返回行为
+			return true;
+		}
+
+		// 如果没有修改，正常返回
+		return false;
 	});
 
 
@@ -474,19 +531,36 @@
 				schoolsList.value = ['']; // 保证至少有一个空输入框
 			}
 
-			// 公司/行业反显 (修改点6)
-			if (userInfo.companyName && userInfo.industry) {
-				const companyNames = userInfo.companyName.split(',');
-				const industryNames = userInfo.industry.split(',');
+			// 公司/行业/职务 反显
+			if (userInfo.companyName || userInfo.industry || userInfo.positionTitle) {
+				const companyNames = (userInfo.companyName || '').split(',');
+				const industryNames = (userInfo.industry || '').split(',');
+				const positionTitles = (userInfo.positionTitle || '').split(',');
 
-				companyAndIndustryList.value = companyNames.map((name, index) => ({
-					name: name || '',
-					industryName: industryNames[index] || '' // 直接赋值中文字符串
-				}));
+				// 以最长的数组为基准进行映射，避免数据丢失
+				const maxLength = Math.max(companyNames.length, industryNames.length, positionTitles.length);
+				const newList = [];
+				for (let i = 0; i < maxLength; i++) {
+					// 确保即使某个字段为空也能正确映射
+					if (companyNames[i] || industryNames[i] || positionTitles[i]) {
+						newList.push({
+							name: companyNames[i] || '',
+							industryName: industryNames[i] || '',
+							positionTitle: positionTitles[i] || ''
+						});
+					}
+				}
+				companyAndIndustryList.value = newList.length > 0 ? newList : [{
+					name: '',
+					industryName: '',
+					positionTitle: ''
+				}];
+
 			} else {
 				companyAndIndustryList.value = [{
 					name: '',
-					industryName: ''
+					industryName: '',
+					positionTitle: ''
 				}];
 			}
 
@@ -496,6 +570,16 @@
 				form.value.birthday =
 					`${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
 			}
+
+			// 在所有数据填充完毕后，记录初始状态
+			initialDataState.value = JSON.stringify({
+				form: form.value,
+				professionsList: professionsList.value,
+				schoolsList: schoolsList.value,
+				companyAndIndustryList: companyAndIndustryList.value,
+				selectedHobbies: selectedHobbies.value,
+				otherHobbyText: otherHobbyText.value
+			});
 		}
 	};
 
@@ -555,10 +639,11 @@
 
 	// 动态增删公司/行业
 	const addCompany = () => {
-		if (companyAndIndustryList.value.length < 6) {
+		if (companyAndIndustryList.value.length < 3) {
 			companyAndIndustryList.value.push({
 				name: '',
-				industry: null
+				industryName: '',
+				positionTitle: ''
 			});
 		}
 	};
@@ -711,6 +796,11 @@
 				.map(item => (item.industryName || '').trim()) // 直接使用 industryName
 				.join(',');
 
+			payload.positionTitle = companyAndIndustryList.value
+				.map(item => (item.positionTitle || '').trim())
+				.filter(title => title)
+				.join(',');
+
 			// 处理生日提交：YYYY-MM-DD -> 时间戳
 			if (payload.birthday && typeof payload.birthday === 'string') {
 				const dateStr = payload.birthday.replace(/-/g, '/');
@@ -728,6 +818,16 @@
 					icon: 'none'
 				});
 			} else {
+				// 保存成功后，更新初始状态为当前状态
+				initialDataState.value = JSON.stringify({
+					form: form.value,
+					professionsList: professionsList.value,
+					schoolsList: schoolsList.value,
+					companyAndIndustryList: companyAndIndustryList.value,
+					selectedHobbies: selectedHobbies.value,
+					otherHobbyText: otherHobbyText.value
+				});
+
 				uni.showToast({
 					title: '保存成功',
 					icon: 'success'

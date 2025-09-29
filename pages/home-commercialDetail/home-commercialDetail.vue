@@ -375,17 +375,18 @@
 		// 1. 优先使用用户在弹窗中编辑的自定义标题
 		const finalTitle = customShareTitle.value || postDetail.postTitle || '发现一个商机，快来看看吧！';
 
+		// 【新增】获取邀请码
 		const inviteCode = getInviteCode();
 
 		// 2. 封面图片逻辑
 		const finalImageUrl = postDetail.images.length > 0 ? postDetail.images[0] : '/static/logo.png';
 
-		// 3. 修改：在 query 中添加 sharerId 参数
+		// 3. 【核心修改】在 query 中添加 sharerId 和 inviteCode 参数
 		let queryString = `id=${postDetail.id}&from=timeline`;
 		if (sharerId) {
 			queryString += `&sharerId=${sharerId}`;
 		}
-
+		// 【新增】如果邀请码存在，则拼接到 query 中
 		if (inviteCode) {
 			queryString += `&inviteCode=${inviteCode}`;
 		}

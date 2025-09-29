@@ -103,9 +103,10 @@ const _sfc_main = {
       const shareContent = {
         title: "发现一个超棒的商友圈，快来看看吧！",
         query: queryString,
+        // 使用拼接后的 query
         imageUrl: "https://img.gofor.club/logo_share.jpg"
       };
-      common_vendor.index.__f__("log", "at pages/home/home.vue:307", "首页分享到朋友圈内容:", JSON.stringify(shareContent));
+      common_vendor.index.__f__("log", "at pages/home/home.vue:309", "首页分享到朋友圈内容:", JSON.stringify(shareContent));
       return shareContent;
     });
     const getBusinessOpportunitiesList = async (isRefresh = false) => {
@@ -189,7 +190,7 @@ const _sfc_main = {
           pageNo.value++;
         }
       } catch (err) {
-        common_vendor.index.__f__("error", "at pages/home/home.vue:408", "getBusinessOpportunitiesList 逻辑异常:", err);
+        common_vendor.index.__f__("error", "at pages/home/home.vue:410", "getBusinessOpportunitiesList 逻辑异常:", err);
         loadingStatus.value = "more";
         common_vendor.index.showToast({
           title: "页面逻辑异常，请稍后重试",
@@ -337,7 +338,7 @@ const _sfc_main = {
           method: "POST",
           data: requestData
         });
-        common_vendor.index.__f__("log", "at pages/home/home.vue:575", "触发收藏", result);
+        common_vendor.index.__f__("log", "at pages/home/home.vue:577", "触发收藏", result);
         if (result && result.error) {
           post.isSaved = originalStatus;
           common_vendor.index.showToast({
@@ -481,7 +482,7 @@ const _sfc_main = {
       const defaultAvatar = "/static/images/default-avatar.png";
       const avatarUrl = user.avatar || defaultAvatar;
       const url = `/pages/applicationBusinessCard/applicationBusinessCard?id=${user.id}&name=${encodeURIComponent(user.name)}&avatar=${encodeURIComponent(avatarUrl)}`;
-      common_vendor.index.__f__("log", "at pages/home/home.vue:773", "从商机列表页跳转，URL:", url);
+      common_vendor.index.__f__("log", "at pages/home/home.vue:775", "从商机列表页跳转，URL:", url);
       common_vendor.index.navigateTo({
         url
       });
