@@ -32,7 +32,7 @@ const _sfc_main = {
       type: String,
       default: ""
     },
-    // 新增：年代
+    // 年代
     // --- 职业与社会信息 ---
     companyName: {
       type: String,
@@ -42,39 +42,39 @@ const _sfc_main = {
       type: String,
       default: "总裁"
     },
-    // 新增：职务
+    // 职务
     industry: {
       type: String,
       default: "互联网"
     },
-    // 新增：行业
+    // 行业
     professionalTitle: {
       type: String,
       default: ""
     },
-    // 新增：社会职务
+    // 社会职务
     // --- 资源信息 ---
     haveResources: {
       type: String,
       default: ""
     },
-    // 新增：我有资源
+    // 我有资源
     needResources: {
       type: String,
       default: ""
     },
-    // 新增：我需资源
+    // 我需资源
     // --- 个人展示信息 ---
     signature: {
       type: String,
       default: ""
     },
-    // 新增：个性签名
+    // 个性签名
     personalBio: {
       type: String,
       default: ""
     },
-    // 新增：个人简介
+    // 个人简介
     // --- 联系方式 ---
     contactInfo: {
       type: Array,

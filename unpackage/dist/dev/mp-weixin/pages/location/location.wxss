@@ -126,6 +126,43 @@
   flex: 1;
   min-width: 0;
 }
+.business-card .business-info .name-line.data-v-4d9b4fcb {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10rpx;
+}
+.business-card .business-info .business-name.data-v-4d9b4fcb {
+  font-size: 32rpx;
+  font-weight: 600;
+  flex-shrink: 0;
+  margin-right: 16rpx;
+}
+.business-card .business-info .relation-tags.data-v-4d9b4fcb {
+  display: flex;
+  gap: 10rpx;
+}
+.business-card .business-info .tag.data-v-4d9b4fcb {
+  font-size: 16rpx;
+  padding: 3rpx 12rpx;
+  border-radius: 6rpx;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.business-card .business-info .fellow-townsman.data-v-4d9b4fcb {
+  background-color: #e8f5e9;
+  color: #388e3c;
+  border: 1rpx solid #a5d6a7;
+}
+.business-card .business-info .peer.data-v-4d9b4fcb {
+  background-color: #e3f2fd;
+  color: #1976d2;
+  border: 1rpx solid #90caf9;
+}
+.business-card .business-info .classmate.data-v-4d9b4fcb {
+  background-color: #fff3e0;
+  color: #ef6c00;
+  border: 1rpx solid #ffcc80;
+}
 .business-card .business-name.data-v-4d9b4fcb {
   font-size: 32rpx;
   font-weight: 600;

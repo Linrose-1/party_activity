@@ -83,27 +83,27 @@
 					<view class="level-step">
 						<view class="step-icon" style="background: #E0E0E0;">☆</view>
 						<view class="step-name">联合流猩人</view>
-						<view class="step-points">>5000</view>
+						<view class="step-points">≥5000</view>
 					</view>
 					<view class="level-step">
 						<view class="step-icon" style="background: #A5D6A7;">★</view>
 						<view class="step-name">联合月猩人</view>
-						<view class="step-points">>50000</view>
+						<view class="step-points">≥50000</view>
 					</view>
 					<view class="level-step">
 						<view class="step-icon" style="background: #4FC3F7;">✯</view>
 						<view class="step-name">联合伙猩人</view>
-						<view class="step-points">>150000</view>
+						<view class="step-points">≥150000</view>
 					</view>
 					<view class="level-step">
 						<view class="step-icon" style="background: #BA68C8;">✪</view>
 						<view class="step-name">联合创猩人</view>
-						<view class="step-points">>500000</view>
+						<view class="step-points">≥500000</view>
 					</view>
 					<view class="level-step">
 						<view class="step-icon" style="background: #FFD54F;">✦</view>
 						<view class="step-name">联合创始猿</view>
-						<view class="step-points">2000000+</view>
+						<view class="step-points">≥2000000</view>
 					</view>
 				</view>
 			</view>

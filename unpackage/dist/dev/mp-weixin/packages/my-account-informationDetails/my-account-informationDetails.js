@@ -97,7 +97,7 @@ const _sfc_main = {
           (data == null ? void 0 : data.avg4) || 0
         ];
       } catch (e) {
-        common_vendor.index.__f__("error", "at packages/my-account-informationDetails/my-account-informationDetails.vue:289", e.message);
+        common_vendor.index.__f__("error", "at packages/my-account-informationDetails/my-account-informationDetails.vue:285", e.message);
         radarSeriesData.value = [0, 0, 0, 0];
       }
     };
@@ -109,7 +109,7 @@ const _sfc_main = {
       return "未设置";
     };
     const goToResourceMatch = () => {
-      common_vendor.index.__f__("log", "at packages/my-account-informationDetails/my-account-informationDetails.vue:301", "跳转到资源匹配页面");
+      common_vendor.index.__f__("log", "at packages/my-account-informationDetails/my-account-informationDetails.vue:297", "跳转到资源匹配页面");
       common_vendor.index.showToast({
         title: "资源匹配功能即将上线",
         icon: "none"
@@ -201,22 +201,14 @@ const _sfc_main = {
           color: "#666"
         }),
         C: common_vendor.t(userInfo.value.personalBio || "未填写"),
-        D: common_vendor.f(splitToArray(userInfo.value.haveResources), (item, index, i0) => {
-          return {
-            a: common_vendor.t(item),
-            b: index
-          };
-        }),
-        E: !userInfo.value.haveResources
-      }, !userInfo.value.haveResources ? {} : {}, {
-        F: common_vendor.f(splitToArray(userInfo.value.needResources), (item, index, i0) => {
-          return {
-            a: common_vendor.t(item),
-            b: index
-          };
-        }),
-        G: !userInfo.value.needResources
-      }, !userInfo.value.needResources ? {} : {}, {
+        D: userInfo.value.haveResources
+      }, userInfo.value.haveResources ? {
+        E: common_vendor.t(userInfo.value.haveResources)
+      } : {}, {
+        F: userInfo.value.needResources
+      }, userInfo.value.needResources ? {
+        G: common_vendor.t(userInfo.value.needResources)
+      } : {}, {
         H: common_vendor.p({
           type: "link",
           size: "20",

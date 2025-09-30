@@ -155,22 +155,15 @@
 .resource-item .label.need-resource.data-v-991800d7 {
   color: #e6a23c;
 }
-.resource-list.data-v-991800d7 {
-  display: flex;
-  flex-direction: column;
-  gap: 10rpx;
-}
-.resource-line.data-v-991800d7 {
+.resource-content.data-v-991800d7 {
   font-size: 28rpx;
   color: #303133;
-  padding-left: 20rpx;
-  position: relative;
-}
-.resource-line.data-v-991800d7::before {
-  content: "·";
-  position: absolute;
-  left: 0;
-  color: #909399;
+  line-height: 1.7;
+  /* 增加行高，让多行文本更易读 */
+  white-space: pre-wrap;
+  /* 核心属性：保留空格和换行符，并允许自动换行 */
+  word-break: break-all;
+  /* 防止超长单词溢出 */
 }
 .match-button-wrapper.data-v-991800d7 {
   margin-top: 20rpx;

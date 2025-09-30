@@ -18,7 +18,7 @@
 				</view>
 			</view>
 
-			<!-- 2. 基础资料区 (新顺序) -->
+			<!-- 2. 基础资料区-->
 			<view class="section-block basic-info-section">
 				<view class="info-item">
 					<uni-icons type="calendar-filled" size="18" color="#888" />
@@ -32,18 +32,18 @@
 				</view>
 			</view>
 
-			<!-- 3. 社会职务区 (突出显示) -->
+			<!-- 3. 社会职务区 -->
 			<view class="section-block professional-section" v-if="professionalTitles.length > 0">
 				<view class="section-title">
 					<uni-icons type="staff-filled" size="18" color="#C9A063"></uni-icons>
-					<text>社会职务</text>
+					<text>商协会职务</text>
 				</view>
 				<view class="tag-list">
 					<text class="tag" v-for="(item, index) in professionalTitles" :key="index">{{ item }}</text>
 				</view>
 			</view>
 
-			<!-- 4. 职业信息区 (按组显示) -->
+			<!-- 4. 职业信息区  -->
 			<view class="section-block career-section" v-if="careerGroups.length > 0">
 				<view class="section-title">
 					<uni-icons type="flag-filled" size="18" color="#F78C2F"></uni-icons>
@@ -105,7 +105,7 @@
 				<view class="qr-hint">扫码或长按识别添加微信</view>
 			</view>
 
-			<!-- 8. 邀请码 (样式保留) -->
+			<!-- 8. 邀请码  -->
 			<view v-if="shardCode" class="shard-code-section" @click="copyShardCode">
 				<view class="shard-code-value">
 					<text>邀请码：</text>
@@ -117,14 +117,14 @@
 				</view>
 			</view>
 
-			<!-- 9. 底部 Slogan (样式保留) -->
+			<!-- 9. 底部 Slogan  -->
 			<view class="value-slogan">
 				<view class="line"></view>
 				<text>价值连接·生态共创</text>
 			</view>
 		</view>
 
-		<!-- 名片背面 - 品牌/平台信息 (优化视觉) -->
+		<!-- 名片背面 - 品牌/平台信息  -->
 		<view class="card-back">
 			<view class="slogan-primary">连接全球精英商友</view>
 			<view class="slogan-secondary">GO FOR PARTNERS • GO FOR FUTURE</view>
@@ -166,7 +166,7 @@
 		era: {
 			type: String,
 			default: ''
-		}, // 新增：年代
+		}, // 年代
 
 		// --- 职业与社会信息 ---
 		companyName: {
@@ -176,35 +176,35 @@
 		positionTitle: {
 			type: String,
 			default: '总裁'
-		}, // 新增：职务
+		}, // 职务
 		industry: {
 			type: String,
 			default: '互联网'
-		}, // 新增：行业
+		}, // 行业
 		professionalTitle: {
 			type: String,
 			default: ''
-		}, // 新增：社会职务
+		}, // 社会职务
 
 		// --- 资源信息 ---
 		haveResources: {
 			type: String,
 			default: ''
-		}, // 新增：我有资源
+		}, // 我有资源
 		needResources: {
 			type: String,
 			default: ''
-		}, // 新增：我需资源
+		}, // 我需资源
 
 		// --- 个人展示信息 ---
 		signature: {
 			type: String,
 			default: ''
-		}, // 新增：个性签名
+		}, // 个性签名
 		personalBio: {
 			type: String,
 			default: ''
-		}, // 新增：个人简介
+		}, // 个人简介
 
 		// --- 联系方式 ---
 		contactInfo: {

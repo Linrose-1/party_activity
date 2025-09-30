@@ -265,7 +265,7 @@
 
 		// 4. 返回最终的分享对象
 		const shareContent = {
-			title: '发现一个超棒的商友圈，快来看看吧！',
+			title: '创业者们每天都要打开的商友社交小工具！商机上线，点戳进入……',
 			path: sharePath,
 			imageUrl: 'https://img.gofor.club/logo_share.jpg'
 		};
@@ -274,7 +274,7 @@
 
 		return shareContent;
 	});
-	
+
 	/**
 	 * @description 监听用户分享到朋友圈的行为
 	 */
@@ -301,7 +301,7 @@
 
 		// 3. 返回分享对象
 		const shareContent = {
-			title: '发现一个超棒的商友圈，快来看看吧！',
+			title: '创业者们每天都要打开的商友社交小工具！商机上线，点戳进入……',
 			query: queryString, // 使用拼接后的 query
 			imageUrl: 'https://img.gofor.club/logo_share.jpg'
 		};

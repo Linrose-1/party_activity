@@ -35,12 +35,21 @@
 						<image :src="business.avatar || '/static/images/default-avatar.png'" mode="aspectFill"
 							class="business-avatar" @click.stop="navigateToBusinessCard(business)" />
 						<view class="business-info">
-							<view class="business-name">{{ business.nickname }}</view>
+							<view class="name-line">
+								<text class="business-name">{{ business.nickname }}</text>
+								<!-- 新增：关系标签容器 -->
+								<view class="relation-tags">
+									<text v-if="business.fellowTownspeopleCityFlag === 1"
+										class="tag fellow-townsman">同乡</text>
+									<text v-if="business.peerFlag === 1" class="tag peer">同行</text>
+									<text v-if="business.classmateFlag === 1" class="tag classmate">同学</text>
+								</view>
+							</view>
 							<view class="card-position" v-if="business.professionalTitle">
-								<text class="iconfont"></text> {{ business.professionalTitle }}
+								{{ business.professionalTitle }}
 							</view>
 							<view class="card-company" v-if="business.companyName">
-								<text class="iconfont"></text> {{ business.companyName }}
+								{{ business.companyName }}
 							</view>
 						</view>
 						<!-- 【核心修改】按钮状态绑定到 followFlag，并调用统一的 handleFollowAction 方法 -->
@@ -574,6 +583,55 @@
 		.business-info {
 			flex: 1;
 			min-width: 0;
+
+			// 【新增】名字和标签行的样式
+			.name-line {
+				display: flex;
+				align-items: center;
+				margin-bottom: 10rpx;
+			}
+
+			.business-name {
+				font-size: 32rpx;
+				font-weight: 600;
+				// 【修改】名字不占满整行，以便标签跟随
+				flex-shrink: 0;
+				margin-right: 16rpx;
+			}
+
+			// 【新增】关系标签的容器样式
+			.relation-tags {
+				display: flex;
+				gap: 10rpx; // 标签之间的间距
+			}
+
+			// 【新增】通用标签样式
+			.tag {
+				font-size: 16rpx;
+				padding: 3rpx 12rpx;
+				border-radius: 6rpx;
+				font-weight: 500;
+				white-space: nowrap;
+			}
+
+			// 【新增】不同类型标签的颜色
+			.fellow-townsman {
+				background-color: #e8f5e9; // 淡绿色背景
+				color: #388e3c; // 深绿色文字
+				border: 1rpx solid #a5d6a7;
+			}
+
+			.peer {
+				background-color: #e3f2fd; // 淡蓝色背景
+				color: #1976d2; // 深蓝色文字
+				border: 1rpx solid #90caf9;
+			}
+
+			.classmate {
+				background-color: #fff3e0; // 淡橙色背景
+				color: #ef6c00; // 深橙色文字
+				border: 1rpx solid #ffcc80;
+			}
 		}
 
 		.business-name {

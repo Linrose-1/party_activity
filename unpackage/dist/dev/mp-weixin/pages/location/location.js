@@ -39,7 +39,7 @@ const _sfc_main = {
     const activities = common_vendor.ref([]);
     const businesses = common_vendor.ref([]);
     const resetState = () => {
-      common_vendor.index.__f__("log", "at pages/location/location.vue:127", "页面状态已重置");
+      common_vendor.index.__f__("log", "at pages/location/location.vue:136", "页面状态已重置");
       shaken.value = false;
       loading.value = false;
       activities.value = [];
@@ -86,7 +86,7 @@ const _sfc_main = {
               getNearbyBusinesses(true)
             ]);
           } catch (error) {
-            common_vendor.index.__f__("error", "at pages/location/location.vue:189", "加载初始数据时发生错误:", error);
+            common_vendor.index.__f__("error", "at pages/location/location.vue:198", "加载初始数据时发生错误:", error);
           } finally {
             loading.value = false;
           }
@@ -230,14 +230,14 @@ const _sfc_main = {
       const name = user.nickname || "匿名用户";
       const avatarUrl = user.avatar || defaultAvatar;
       const url = `/pages/applicationBusinessCard/applicationBusinessCard?id=${user.id}&name=${encodeURIComponent(name)}&avatar=${encodeURIComponent(avatarUrl)}`;
-      common_vendor.index.__f__("log", "at pages/location/location.vue:366", "从摇一摇页跳转，URL:", url);
+      common_vendor.index.__f__("log", "at pages/location/location.vue:375", "从摇一摇页跳转，URL:", url);
       common_vendor.index.navigateTo({
         url
       });
     };
     common_vendor.onLoad((options) => {
       if (options.autoShake === "true") {
-        common_vendor.index.__f__("log", "at pages/location/location.vue:378", "onLoad: 接收到自动摇一摇指令");
+        common_vendor.index.__f__("log", "at pages/location/location.vue:387", "onLoad: 接收到自动摇一摇指令");
         autoShakeOnLoad.value = true;
       }
     });
@@ -247,11 +247,11 @@ const _sfc_main = {
       shakeAudioContext.src = "https://img.gofor.club/wechat_shake.mp3";
       resetState();
       if (autoShakeOnLoad.value) {
-        common_vendor.index.__f__("log", "at pages/location/location.vue:397", "onShow: 执行自动摇一摇流程");
+        common_vendor.index.__f__("log", "at pages/location/location.vue:406", "onShow: 执行自动摇一摇流程");
         triggerShakeSequence();
         autoShakeOnLoad.value = false;
       } else {
-        common_vendor.index.__f__("log", "at pages/location/location.vue:403", "onShow: 正常进入，等待用户手动触发");
+        common_vendor.index.__f__("log", "at pages/location/location.vue:412", "onShow: 正常进入，等待用户手动触发");
       }
       common_vendor.index.onAccelerometerChange((res) => {
         if (Math.abs(res.x) > 1.2 && Math.abs(res.y) > 1.2) {
@@ -303,18 +303,24 @@ const _sfc_main = {
             a: business.avatar || "/static/images/default-avatar.png",
             b: common_vendor.o(($event) => navigateToBusinessCard(business), business.id),
             c: common_vendor.t(business.nickname),
-            d: business.professionalTitle
+            d: business.fellowTownspeopleCityFlag === 1
+          }, business.fellowTownspeopleCityFlag === 1 ? {} : {}, {
+            e: business.peerFlag === 1
+          }, business.peerFlag === 1 ? {} : {}, {
+            f: business.classmateFlag === 1
+          }, business.classmateFlag === 1 ? {} : {}, {
+            g: business.professionalTitle
           }, business.professionalTitle ? {
-            e: common_vendor.t(business.professionalTitle)
+            h: common_vendor.t(business.professionalTitle)
           } : {}, {
-            f: business.companyName
+            i: business.companyName
           }, business.companyName ? {
-            g: common_vendor.t(business.companyName)
+            j: common_vendor.t(business.companyName)
           } : {}, {
-            h: common_vendor.t(business.followFlag === 1 ? "取关" : "关注"),
-            i: business.followFlag === 1 ? 1 : "",
-            j: common_vendor.o(($event) => handleFollowAction(business), business.id),
-            k: business.id
+            k: common_vendor.t(business.followFlag === 1 ? "取关" : "关注"),
+            l: business.followFlag === 1 ? 1 : "",
+            m: common_vendor.o(($event) => handleFollowAction(business), business.id),
+            n: business.id
           });
         }),
         i: common_vendor.p({

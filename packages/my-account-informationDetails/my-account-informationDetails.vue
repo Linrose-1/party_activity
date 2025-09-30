@@ -135,20 +135,16 @@
 				<!-- 我有资源 -->
 				<view class="list-item wide-item resource-item">
 					<text class="label have-resource">我有的资源</text>
-					<view class="resource-list">
-						<view v-for="(item, index) in splitToArray(userInfo.haveResources)" :key="index"
-							class="resource-line">{{ item }}</view>
-						<text v-if="!userInfo.haveResources" class="value-placeholder">未填写</text>
-					</view>
+					<!-- 直接显示原始文本，并用新样式类处理换行 -->
+					<view v-if="userInfo.haveResources" class="resource-content">{{ userInfo.haveResources }}</view>
+					<text v-else class="value-placeholder">未填写</text>
 				</view>
 				<!-- 我需资源 -->
 				<view class="list-item wide-item resource-item">
 					<text class="label need-resource">我需的资源</text>
-					<view class="resource-list">
-						<view v-for="(item, index) in splitToArray(userInfo.needResources)" :key="index"
-							class="resource-line">{{ item }}</view>
-						<text v-if="!userInfo.needResources" class="value-placeholder">未填写</text>
-					</view>
+					<!-- 直接显示原始文本，并用新样式类处理换行 -->
+					<view v-if="userInfo.needResources" class="resource-content">{{ userInfo.needResources }}</view>
+					<text v-else class="value-placeholder">未填写</text>
 				</view>
 				<!-- 资源匹配按钮 -->
 				<view class="match-button-wrapper">
@@ -500,24 +496,15 @@
 		}
 	}
 
-	.resource-list {
-		display: flex;
-		flex-direction: column;
-		gap: 10rpx;
-	}
-
-	.resource-line {
+	.resource-content {
 		font-size: 28rpx;
 		color: #303133;
-		padding-left: 20rpx;
-		position: relative;
-
-		&::before {
-			content: '·';
-			position: absolute;
-			left: 0;
-			color: #909399;
-		}
+		line-height: 1.7;
+		/* 增加行高，让多行文本更易读 */
+		white-space: pre-wrap;
+		/* 核心属性：保留空格和换行符，并允许自动换行 */
+		word-break: break-all;
+		/* 防止超长单词溢出 */
 	}
 
 	.match-button-wrapper {
