@@ -32,7 +32,7 @@ const _sfc_main = {
       let finalOptions = options || {};
       if (options && options.scene) {
         const sceneStr = decodeURIComponent(options.scene);
-        common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:111", `✅ [名片页] 在 onLoad 中检测到 scene: ${sceneStr}`);
+        common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:113", `✅ [名片页] 在 onLoad 中检测到 scene: ${sceneStr}`);
         const sceneParams = {};
         sceneStr.split("&").forEach((item) => {
           const parts = item.split("=");
@@ -40,7 +40,7 @@ const _sfc_main = {
             sceneParams[parts[0]] = parts[1];
           }
         });
-        common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:119", "✅ [名片页] scene 解析结果:", sceneParams);
+        common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:121", "✅ [名片页] scene 解析结果:", sceneParams);
         finalOptions = {
           ...finalOptions,
           ...sceneParams
@@ -48,10 +48,10 @@ const _sfc_main = {
       }
       const inviteCode = finalOptions.c || finalOptions.inviteCode;
       if (inviteCode) {
-        common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:130", `✅ [名片页] 在 onLoad 中捕获到邀请码: ${inviteCode}`);
+        common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:132", `✅ [名片页] 在 onLoad 中捕获到邀请码: ${inviteCode}`);
         common_vendor.index.setStorageSync("pendingInviteCode", inviteCode);
       }
-      common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:134", "[my-businessCard] onLoad 触发。已收到的选项:", JSON.stringify(options));
+      common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:136", "[my-businessCard] onLoad 触发。已收到的选项:", JSON.stringify(options));
       const loggedInUserId = common_vendor.index.getStorageSync("userId");
       if (finalOptions.fromShare && finalOptions.fromShare === "1") {
         fromShare.value = true;
@@ -80,7 +80,7 @@ const _sfc_main = {
         }
       } catch (err) {
         errorMsg.value = err.message || "加载失败，请稍后重试";
-        common_vendor.index.__f__("error", "at pages/my-businessCard/my-businessCard.vue:180", "页面初始化失败:", err);
+        common_vendor.index.__f__("error", "at pages/my-businessCard/my-businessCard.vue:182", "页面初始化失败:", err);
       } finally {
         isLoading.value = false;
       }
@@ -112,9 +112,9 @@ const _sfc_main = {
       params.push("fs=1");
       const scene = params.join("&");
       if (scene.length > 32) {
-        common_vendor.index.__f__("warn", "at pages/my-businessCard/my-businessCard.vue:227", `生成的 scene 字符串长度为 ${scene.length}，超过了32个字符的限制！Scene: ${scene}`);
+        common_vendor.index.__f__("warn", "at pages/my-businessCard/my-businessCard.vue:229", `生成的 scene 字符串长度为 ${scene.length}，超过了32个字符的限制！Scene: ${scene}`);
       }
-      common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:236", scene);
+      common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:238", scene);
       return scene;
     };
     const fetchTargetUserInfo = async (userId) => {
@@ -124,7 +124,7 @@ const _sfc_main = {
       if (fromShare.value) {
         requestData.notPay = 1;
       }
-      common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:256", "[my-businessCard] 准备使用参数调用 /read-card:", JSON.stringify(requestData));
+      common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:258", "[my-businessCard] 准备使用参数调用 /read-card:", JSON.stringify(requestData));
       const {
         data,
         error
@@ -153,18 +153,41 @@ const _sfc_main = {
         return null;
       return {
         id: rawUserData.id,
-        mobile: rawUserData.mobile,
-        nickname: rawUserData.nickname,
+        // --- 身份核心信息 ---
         avatar: rawUserData.avatar,
         realName: rawUserData.realName,
-        locationAddressStr: rawUserData.locationAddressStr,
-        professionalTitle: rawUserData.professionalTitle,
-        companyName: rawUserData.companyName,
-        contactEmail: rawUserData.contactEmail,
-        wechatQrCodeUrl: rawUserData.wechatQrCodeUrl,
-        shardCode: rawUserData.shardCode,
+        nickname: rawUserData.nickname,
         pinyinName: ((_a = rawUserData.topUpLevel) == null ? void 0 : _a.name) || rawUserData.topUpLevelName || "",
-        titleName: ((_b = rawUserData.level) == null ? void 0 : _b.name) || rawUserData.levelName || ""
+        // 会员等级
+        titleName: ((_b = rawUserData.level) == null ? void 0 : _b.name) || rawUserData.levelName || "",
+        // 身份头衔
+        era: rawUserData.era,
+        // 新增：年代
+        // --- 职业与社会信息 ---
+        companyName: rawUserData.companyName,
+        positionTitle: rawUserData.positionTitle,
+        // 新增：职务
+        industry: rawUserData.industry,
+        // 新增：行业
+        professionalTitle: rawUserData.professionalTitle,
+        // 新增：社会职务
+        // --- 资源信息 ---
+        haveResources: rawUserData.haveResources,
+        // 新增：我有资源
+        needResources: rawUserData.needResources,
+        // 新增：我需资源
+        // --- 个人展示信息 ---
+        signature: rawUserData.signature,
+        // 新增：个性签名
+        personalBio: rawUserData.personalBio,
+        // 新增：个人简介
+        // --- 联系方式 (保持不变) ---
+        mobile: rawUserData.mobile,
+        contactEmail: rawUserData.contactEmail,
+        locationAddressStr: rawUserData.locationAddressStr,
+        // --- 二维码与邀请码 ---
+        wechatQrCodeUrl: rawUserData.wechatQrCodeUrl,
+        shardCode: rawUserData.shardCode
       };
     };
     const formattedContactInfo = common_vendor.computed(() => {
@@ -173,14 +196,17 @@ const _sfc_main = {
       return [
         {
           icon: "phone-filled",
+          label: "手机",
           value: userInfo.value.mobile || "未设置"
         },
         {
           icon: "email-filled",
+          label: "邮箱",
           value: userInfo.value.contactEmail || "未设置"
         },
         {
           icon: "location-filled",
+          label: "地址",
           value: userInfo.value.locationAddressStr || "未设置"
         }
       ];
@@ -192,14 +218,14 @@ const _sfc_main = {
       const bizId = options.i || options.id;
       const loggedInUserId = common_vendor.index.getStorageSync("userId");
       if (sharerId == loggedInUserId) {
-        common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:342", "用户点击了自己的分享链接，不计分。");
+        common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:365", "用户点击了自己的分享链接，不计分。");
         return;
       }
       if (loggedInUserId) {
-        common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:348", "其他已登录用户点击，准备为分享者加分。");
+        common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:371", "其他已登录用户点击，准备为分享者加分。");
         triggerShareHitApi(sharerId, bizId);
       } else {
-        common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:353", "未登录用户点击，暂存分享信息。");
+        common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:376", "未登录用户点击，暂存分享信息。");
         common_vendor.index.setStorageSync("pendingShareReward", {
           sharerId,
           bizId,
@@ -222,9 +248,9 @@ const _sfc_main = {
         }
       });
       if (error) {
-        common_vendor.index.__f__("error", "at pages/my-businessCard/my-businessCard.vue:378", "调用分享名片加分接口失败:", error);
+        common_vendor.index.__f__("error", "at pages/my-businessCard/my-businessCard.vue:401", "调用分享名片加分接口失败:", error);
       } else {
-        common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:380", `成功为分享者(ID: ${sharerId})触发贡分增加`);
+        common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:403", `成功为分享者(ID: ${sharerId})触发贡分增加`);
       }
     };
     common_vendor.onShareAppMessage(() => {
@@ -249,7 +275,7 @@ const _sfc_main = {
         path: sharePath,
         imageUrl: userInfo.value.avatar
       };
-      common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:416", "[my-businessCard] 分享好友内容:", JSON.stringify(shareContent));
+      common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:439", "[my-businessCard] 分享好友内容:", JSON.stringify(shareContent));
       return shareContent;
     });
     common_vendor.onShareTimeline(() => {
@@ -274,7 +300,7 @@ const _sfc_main = {
         query: queryString,
         imageUrl: userInfo.value.avatar
       };
-      common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:454", "[my-businessCard] 生成时间轴共享内容:", JSON.stringify(shareContent));
+      common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:477", "[my-businessCard] 生成时间轴共享内容:", JSON.stringify(shareContent));
       return shareContent;
     });
     const goToEdit = () => common_vendor.index.navigateTo({
@@ -321,15 +347,20 @@ const _sfc_main = {
           name: userInfo.value.realName || userInfo.value.nickname,
           ["pinyin-name"]: userInfo.value.pinyinName,
           title: userInfo.value.titleName,
+          era: userInfo.value.era,
           ["company-name"]: userInfo.value.companyName,
-          department: "",
-          ["full-company-name"]: userInfo.value.professionalTitle,
+          ["position-title"]: userInfo.value.positionTitle,
+          industry: userInfo.value.industry,
+          ["professional-title"]: userInfo.value.professionalTitle,
+          ["have-resources"]: userInfo.value.haveResources,
+          ["need-resources"]: userInfo.value.needResources,
+          signature: userInfo.value.signature,
+          ["personal-bio"]: userInfo.value.personalBio,
           ["contact-info"]: formattedContactInfo.value,
           ["show-user-qr-code"]: !!userInfo.value.wechatQrCodeUrl,
           ["user-we-chat-qr-code-url"]: userInfo.value.wechatQrCodeUrl,
           ["shard-code"]: userInfo.value.shardCode,
-          ["platform-qr-code-url"]: "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=platform-info",
-          ["logo-url"]: "https://gitee.com/image_store/repo_1/raw/master/go-for-planet-logo.png"
+          ["platform-qr-code-url"]: "https://img.gofor.club/mmexport1759211962539.jpg"
         }),
         l: isViewingOwnCard.value
       }, isViewingOwnCard.value ? {

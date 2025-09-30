@@ -27,12 +27,14 @@
 			</view>
 
 			<MyCard :avatar="userInfo.avatar" :name="userInfo.realName || userInfo.nickname"
-				:pinyin-name="userInfo.pinyinName" :title="userInfo.titleName" :company-name="userInfo.companyName"
-				department="" :full-company-name="userInfo.professionalTitle" :contact-info="formattedContactInfo"
-				:show-user-qr-code="!!userInfo.wechatQrCodeUrl" :user-we-chat-qr-code-url="userInfo.wechatQrCodeUrl"
-				:shard-code="userInfo.shardCode"
-				platform-qr-code-url="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=platform-info"
-				logo-url="https://gitee.com/image_store/repo_1/raw/master/go-for-planet-logo.png" />
+				:pinyin-name="userInfo.pinyinName" :title="userInfo.titleName" :era="userInfo.era"
+				:company-name="userInfo.companyName" :position-title="userInfo.positionTitle"
+				:industry="userInfo.industry" :professional-title="userInfo.professionalTitle"
+				:have-resources="userInfo.haveResources" :need-resources="userInfo.needResources"
+				:signature="userInfo.signature" :personal-bio="userInfo.personalBio"
+				:contact-info="formattedContactInfo" :show-user-qr-code="!!userInfo.wechatQrCodeUrl"
+				:user-we-chat-qr-code-url="userInfo.wechatQrCodeUrl" :shard-code="userInfo.shardCode"
+				platform-qr-code-url="https://img.gofor.club/mmexport1759211962539.jpg" />
 
 			<!-- 编辑提示：仅在查看自己的名片时显示 -->
 			<view v-if="isViewingOwnCard" class="edit-hint">
@@ -288,18 +290,36 @@
 		if (!rawUserData) return null;
 		return {
 			id: rawUserData.id,
-			mobile: rawUserData.mobile,
-			nickname: rawUserData.nickname,
+			// --- 身份核心信息 ---
 			avatar: rawUserData.avatar,
 			realName: rawUserData.realName,
-			locationAddressStr: rawUserData.locationAddressStr,
-			professionalTitle: rawUserData.professionalTitle,
+			nickname: rawUserData.nickname,
+			pinyinName: rawUserData.topUpLevel?.name || rawUserData.topUpLevelName || '', // 会员等级
+			titleName: rawUserData.level?.name || rawUserData.levelName || '', // 身份头衔
+			era: rawUserData.era, // 新增：年代
+
+			// --- 职业与社会信息 ---
 			companyName: rawUserData.companyName,
+			positionTitle: rawUserData.positionTitle, // 新增：职务
+			industry: rawUserData.industry, // 新增：行业
+			professionalTitle: rawUserData.professionalTitle, // 新增：社会职务
+
+			// --- 资源信息 ---
+			haveResources: rawUserData.haveResources, // 新增：我有资源
+			needResources: rawUserData.needResources, // 新增：我需资源
+
+			// --- 个人展示信息 ---
+			signature: rawUserData.signature, // 新增：个性签名
+			personalBio: rawUserData.personalBio, // 新增：个人简介
+
+			// --- 联系方式 (保持不变) ---
+			mobile: rawUserData.mobile,
 			contactEmail: rawUserData.contactEmail,
+			locationAddressStr: rawUserData.locationAddressStr,
+
+			// --- 二维码与邀请码 ---
 			wechatQrCodeUrl: rawUserData.wechatQrCodeUrl,
 			shardCode: rawUserData.shardCode,
-			pinyinName: rawUserData.topUpLevel?.name || rawUserData.topUpLevelName || '',
-			titleName: rawUserData.level?.name || rawUserData.levelName || ''
 		};
 	};
 
@@ -308,14 +328,17 @@
 		if (!userInfo.value) return [];
 		return [{
 				icon: 'phone-filled',
+				label: '手机',
 				value: userInfo.value.mobile || '未设置'
 			},
 			{
 				icon: 'email-filled',
+				label: '邮箱',
 				value: userInfo.value.contactEmail || '未设置'
 			},
 			{
 				icon: 'location-filled',
+				label: '地址',
 				value: userInfo.value.locationAddressStr || '未设置'
 			}
 		];

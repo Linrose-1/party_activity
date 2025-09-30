@@ -108,7 +108,7 @@
 						<view style="font-size: 25rpx;margin: 10rpx 0;">
 							{{ activityDetail.memberStoreRespVO.fullAddress }}
 						</view>
-						<view style="font-size: 25rpx;margin: 10rpx 0;">??
+						<view style="font-size: 25rpx;margin: 10rpx 0;">
 							{{ activityDetail.memberStoreRespVO.contactPhone }}
 						</view>
 						<!-- <view style="font-size: 25rpx;margin: 10rpx 0;">

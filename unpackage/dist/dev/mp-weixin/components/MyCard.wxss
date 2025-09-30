@@ -8,85 +8,217 @@
   border-radius: 20rpx;
   overflow: hidden;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background-color: #f9f9f9;
 }
 .card-front.data-v-0262bca8 {
-  background-color: #ffffff;
+  background: linear-gradient(to bottom, #ffffff, #fdfdfd);
   padding: 40rpx;
 }
 .header-section.data-v-0262bca8 {
   display: flex;
   align-items: center;
-  margin-bottom: 40rpx;
+  margin-bottom: 50rpx;
 }
-.avatar.data-v-0262bca8 {
+.header-section .avatar.data-v-0262bca8 {
   width: 140rpx;
   height: 140rpx;
   border-radius: 50%;
   overflow: hidden;
   margin-right: 30rpx;
   flex-shrink: 0;
-  border: 4rpx solid #f0f0f0;
+  border: 6rpx solid #fff;
+  box-shadow: 0 4rpx 15rpx rgba(0, 0, 0, 0.1);
 }
-.avatar image.data-v-0262bca8 {
+.header-section .avatar image.data-v-0262bca8 {
   width: 100%;
   height: 100%;
 }
-.identity .name-line.data-v-0262bca8 {
+.header-section .identity .name-line.data-v-0262bca8 {
   display: flex;
   align-items: baseline;
   margin-bottom: 10rpx;
 }
-.identity .name.data-v-0262bca8 {
+.header-section .identity .name.data-v-0262bca8 {
   font-size: 48rpx;
   font-weight: bold;
-  color: #333;
+  color: #2c3e50;
   margin-right: 20rpx;
 }
-.identity .pinyin.data-v-0262bca8 {
+.header-section .identity .pinyin.data-v-0262bca8 {
   font-size: 26rpx;
-  color: #888;
+  color: #95a5a6;
   font-weight: 300;
 }
-.identity .title-line.data-v-0262bca8 {
+.header-section .identity .title-line.data-v-0262bca8 {
   font-size: 28rpx;
-  color: #555;
+  color: #34495e;
 }
-.identity .group.data-v-0262bca8 {
-  margin-right: 16rpx;
+.section-block.data-v-0262bca8 {
+  background-color: #ffffff;
+  border: 1rpx solid #f0f0f0;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  margin-bottom: 30rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.04);
 }
-.company-section.data-v-0262bca8 {
-  margin-bottom: 40rpx;
-}
-.company-section .company-main.data-v-0262bca8 {
-  font-size: 32rpx;
-  font-weight: 600;
-  color: #333;
-  margin-bottom: 8rpx;
-}
-.company-section .company-full.data-v-0262bca8 {
-  font-size: 26rpx;
-  color: #666;
-}
-.info-list.data-v-0262bca8 {
+.basic-info-section.data-v-0262bca8 {
   display: flex;
   flex-direction: column;
   gap: 25rpx;
-  padding-bottom: 40rpx;
 }
-.info-item.data-v-0262bca8 {
+.basic-info-section .info-item.data-v-0262bca8 {
   display: flex;
   align-items: center;
-}
-.info-item .info-text.data-v-0262bca8 {
-  margin-left: 20rpx;
   font-size: 28rpx;
+}
+.basic-info-section .info-label.data-v-0262bca8 {
+  color: #888;
+  margin-left: 20rpx;
+  flex-shrink: 0;
+}
+.basic-info-section .info-value.data-v-0262bca8 {
   color: #333;
+  word-break: break-all;
+}
+.basic-info-section .era-value.data-v-0262bca8 {
+  background-color: #ecf0f1;
+  color: #7f8c8d;
+  font-size: 26rpx;
+  padding: 4rpx 16rpx;
+  border-radius: 8rpx;
+}
+.professional-section.data-v-0262bca8 {
+  background: linear-gradient(135deg, #FFFBF5, #FFF3E6);
+  border: 1px solid #FDE4C9;
+}
+.professional-section .section-title.data-v-0262bca8 {
+  display: flex;
+  align-items: center;
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #A37E4A;
+  margin-bottom: 25rpx;
+}
+.professional-section .section-title text.data-v-0262bca8 {
+  margin-left: 15rpx;
+}
+.professional-section .tag-list.data-v-0262bca8 {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20rpx;
+}
+.professional-section .tag.data-v-0262bca8 {
+  background-color: #fff;
+  border: 1rpx solid #FADDC2;
+  color: #BF915B;
+  font-size: 26rpx;
+  padding: 8rpx 20rpx;
+  border-radius: 30rpx;
+}
+.career-section .section-title.data-v-0262bca8 {
+  display: flex;
+  align-items: center;
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #F78C2F;
+  margin-bottom: 25rpx;
+}
+.career-section .section-title text.data-v-0262bca8 {
+  margin-left: 15rpx;
+}
+.career-section .career-group.data-v-0262bca8 {
+  padding: 25rpx;
+  border: 1rpx solid #f5f5f5;
+  border-radius: 12rpx;
+  background-color: #fafafa;
+}
+.career-section .career-group.data-v-0262bca8:not(:last-child) {
+  margin-bottom: 25rpx;
+}
+.career-section .career-item.data-v-0262bca8 {
+  display: flex;
+  font-size: 28rpx;
+}
+.career-section .career-item.data-v-0262bca8:not(:last-child) {
+  margin-bottom: 15rpx;
+}
+.career-section .career-label.data-v-0262bca8 {
+  color: #888;
+  width: 120rpx;
+  flex-shrink: 0;
+}
+.career-section .career-value.data-v-0262bca8 {
+  color: #333;
+  font-weight: 500;
+  word-break: break-all;
+}
+.resource-section .resource-item.data-v-0262bca8:not(:last-child) {
+  margin-bottom: 30rpx;
+  padding-bottom: 30rpx;
+  border-bottom: 1rpx dashed #eee;
+}
+.resource-section .resource-title.data-v-0262bca8 {
+  display: flex;
+  align-items: center;
+  font-size: 28rpx;
+  font-weight: 600;
+  margin-bottom: 15rpx;
+}
+.resource-section .resource-title text.data-v-0262bca8 {
+  margin-left: 15rpx;
+}
+.resource-section .resource-title.have-title.data-v-0262bca8 {
+  color: #28a745;
+}
+.resource-section .resource-title.need-title.data-v-0262bca8 {
+  color: #007bff;
+}
+.resource-section .resource-content.data-v-0262bca8 {
+  font-size: 28rpx;
+  color: #555;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+.personal-bio-section .signature-item.data-v-0262bca8 {
+  font-style: italic;
+  color: #777;
+  margin-bottom: 30rpx;
+  padding-bottom: 30rpx;
+  border-bottom: 1rpx dashed #eee;
+  position: relative;
+  padding: 0 20rpx;
+}
+.personal-bio-section .signature-item .signature-text.data-v-0262bca8 {
+  font-size: 28rpx;
+}
+.personal-bio-section .signature-item .quote-start.data-v-0262bca8,
+.personal-bio-section .signature-item .quote-end.data-v-0262bca8 {
+  font-size: 40rpx;
+  color: #F78C2F;
+  position: absolute;
+}
+.personal-bio-section .signature-item .quote-start.data-v-0262bca8 {
+  top: -10rpx;
+  left: -10rpx;
+}
+.personal-bio-section .signature-item .quote-end.data-v-0262bca8 {
+  bottom: -10rpx;
+  right: -10rpx;
+}
+.personal-bio-section .bio-item .bio-title.data-v-0262bca8 {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #555;
+  margin-bottom: 15rpx;
+}
+.personal-bio-section .bio-item .bio-content.data-v-0262bca8 {
+  font-size: 28rpx;
+  color: #555;
+  line-height: 1.6;
 }
 .user-qr-section.data-v-0262bca8 {
   text-align: center;
   padding: 40rpx 0;
-  border-top: 1rpx solid #f0f0f0;
-  border-bottom: 1rpx solid #f0f0f0;
 }
 .user-qr-section .qr-title.data-v-0262bca8 {
   font-size: 32rpx;
@@ -118,87 +250,92 @@
   justify-content: space-between;
   align-items: center;
   cursor: pointer;
-  transition: background-color 0.2s;
 }
 .shard-code-section.data-v-0262bca8:active {
   background-color: #fff0e0;
 }
-.shard-code-value.data-v-0262bca8 {
+.shard-code-section .shard-code-value.data-v-0262bca8 {
   font-size: 30rpx;
   color: #555;
 }
-.shard-code-value .code.data-v-0262bca8 {
+.shard-code-section .shard-code-value .code.data-v-0262bca8 {
   font-size: 32rpx;
   font-weight: bold;
-  color: #FF7B00;
+  color: #F78C2F;
   margin-left: 10rpx;
   letter-spacing: 2rpx;
 }
-.copy-action.data-v-0262bca8 {
+.shard-code-section .copy-action.data-v-0262bca8 {
   display: flex;
   align-items: center;
-  color: #FF7B00;
+  color: #F78C2F;
   font-size: 26rpx;
 }
-.copy-action .uni-icons.data-v-0262bca8 {
+.shard-code-section .copy-action .uni-icons.data-v-0262bca8 {
   margin-right: 8rpx;
 }
 .value-slogan.data-v-0262bca8 {
   display: flex;
   align-items: center;
-  margin-top: 40rpx;
+  justify-content: center;
+  margin-top: 60rpx;
+  padding-top: 40rpx;
+  border-top: 1rpx solid #f0f0f0;
 }
 .value-slogan .line.data-v-0262bca8 {
   width: 60rpx;
   height: 4rpx;
-  background-color: #FF7B00;
+  background-color: #F78C2F;
   margin-right: 20rpx;
 }
 .value-slogan text.data-v-0262bca8 {
   font-size: 30rpx;
   font-weight: 500;
-  color: #FF7B00;
+  color: #F78C2F;
 }
 .card-back.data-v-0262bca8 {
-  background-color: #F78C2F;
-  background-image: radial-gradient(circle at center, rgba(255, 255, 255, 0.05) 5%, transparent 5.5%), radial-gradient(circle at center, rgba(255, 255, 255, 0.05) 15%, transparent 15.5%), radial-gradient(circle at center, rgba(255, 255, 255, 0.05) 25%, transparent 25.5%);
+  background: linear-gradient(135deg, #F9A825, #F78C2F);
   color: white;
   padding: 60rpx 40rpx;
   text-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 30rpx;
 }
-.slogan-primary.data-v-0262bca8 {
+.card-back .slogan-primary.data-v-0262bca8 {
   font-size: 44rpx;
   font-weight: bold;
   letter-spacing: 2rpx;
+  margin-bottom: 15rpx;
 }
-.slogan-secondary.data-v-0262bca8 {
+.card-back .slogan-secondary.data-v-0262bca8 {
   font-size: 24rpx;
   opacity: 0.9;
   letter-spacing: 1rpx;
-  margin-top: -15rpx;
+  margin-bottom: 40rpx;
 }
-.platform-qr-code.data-v-0262bca8 {
+.card-back .platform-qr-code.data-v-0262bca8 {
   width: 280rpx;
   height: 280rpx;
   background-color: white;
   padding: 20rpx;
   border-radius: 20rpx;
-  margin-top: 20rpx;
-  margin-bottom: 20rpx;
 }
-.platform-qr-code image.data-v-0262bca8 {
+.card-back .platform-qr-code image.data-v-0262bca8 {
   width: 100%;
   height: 100%;
 }
-.logo.data-v-0262bca8 {
+.card-back .qr-hint-back.data-v-0262bca8 {
+  font-size: 26rpx;
+  color: rgba(255, 255, 255, 0.9);
+  margin-top: 30rpx;
+  margin-bottom: 40rpx;
+}
+.card-back .logo.data-v-0262bca8 {
   width: 250rpx;
   height: 80rpx;
 }
-.logo image.data-v-0262bca8 {
+.card-back .logo image.data-v-0262bca8 {
   width: 100%;
   height: 100%;
 }

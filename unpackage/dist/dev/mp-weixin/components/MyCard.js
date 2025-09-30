@@ -11,7 +11,7 @@ if (!Math) {
 const _sfc_main = {
   __name: "MyCard",
   props: {
-    // --- 顶部个人信息 ---
+    // --- 身份核心信息 ---
     avatar: {
       type: String,
       default: "https://randomuser.me/api/portraits/men/41.jpg"
@@ -24,49 +24,83 @@ const _sfc_main = {
       type: String,
       default: "ZHANG SAN"
     },
-    groupName: {
-      type: String,
-      default: "伙猩人"
-    },
     title: {
       type: String,
       default: "首席运营官"
     },
-    // --- 公司与联系方式 ---
+    era: {
+      type: String,
+      default: ""
+    },
+    // 新增：年代
+    // --- 职业与社会信息 ---
     companyName: {
       type: String,
       default: "高伙猩球"
     },
-    department: {
+    positionTitle: {
       type: String,
-      default: "数字化运营中心"
+      default: "总裁"
     },
-    fullCompanyName: {
+    // 新增：职务
+    industry: {
       type: String,
-      default: "广东智米云科技有限公司"
+      default: "互联网"
     },
+    // 新增：行业
+    professionalTitle: {
+      type: String,
+      default: ""
+    },
+    // 新增：社会职务
+    // --- 资源信息 ---
+    haveResources: {
+      type: String,
+      default: ""
+    },
+    // 新增：我有资源
+    needResources: {
+      type: String,
+      default: ""
+    },
+    // 新增：我需资源
+    // --- 个人展示信息 ---
+    signature: {
+      type: String,
+      default: ""
+    },
+    // 新增：个性签名
+    personalBio: {
+      type: String,
+      default: ""
+    },
+    // 新增：个人简介
+    // --- 联系方式 ---
     contactInfo: {
       type: Array,
       default: () => [
         {
           icon: "phone-filled",
+          label: "手机",
           value: "18888888888"
         },
         {
           icon: "email-filled",
+          label: "邮箱",
           value: "ZHANGSAN@foxmail.com"
         },
         {
           icon: "location-filled",
-          value: "广东省广州市天河区珠江新城潭村路328号二楼"
+          label: "地址",
+          value: "广东省广州市天河区珠江新城"
         }
       ]
     },
+    // --- 二维码与邀请码 ---
     shardCode: {
       type: String,
       default: ""
     },
-    // --- 用户个人二维码 ---
     showUserQrCode: {
       type: Boolean,
       default: true
@@ -75,7 +109,7 @@ const _sfc_main = {
       type: String,
       default: "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=user-wechat"
     },
-    // --- 底部平台信息 ---
+    // --- 平台信息 ---
     platformQrCodeUrl: {
       type: String,
       default: "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=platform-info"
@@ -83,68 +117,164 @@ const _sfc_main = {
     logoUrl: {
       type: String,
       default: "https://gitee.com/image_store/repo_1/raw/master/go-for-planet-logo.png"
+    },
+    // --- 以下为旧版兼容，新版已不再直接使用 ---
+    department: {
+      type: String,
+      default: ""
+    },
+    fullCompanyName: {
+      type: String,
+      default: ""
     }
   },
   setup(__props) {
     const props = __props;
+    const professionalTitles = common_vendor.computed(() => {
+      return props.professionalTitle ? props.professionalTitle.split(",").filter((item) => item.trim()) : [];
+    });
+    const careerGroups = common_vendor.computed(() => {
+      const companies = props.companyName ? props.companyName.split(",") : [];
+      const positions = props.positionTitle ? props.positionTitle.split(",") : [];
+      const industries = props.industry ? props.industry.split(",") : [];
+      const maxLength = Math.max(companies.length, positions.length, industries.length);
+      const groups = [];
+      for (let i = 0; i < maxLength; i++) {
+        groups.push({
+          company: (companies[i] || "未填写").trim(),
+          position: (positions[i] || "未填写").trim(),
+          industry: (industries[i] || "未填写").trim()
+        });
+      }
+      return groups;
+    });
     const copyShardCode = () => {
       if (!props.shardCode)
         return;
       common_vendor.index.setClipboardData({
         data: props.shardCode,
-        success: () => {
-          common_vendor.index.showToast({
-            title: "邀请码已复制",
-            icon: "success"
-          });
-        },
-        fail: () => {
-          common_vendor.index.showToast({
-            title: "复制失败",
-            icon: "none"
-          });
-        }
+        success: () => common_vendor.index.showToast({
+          title: "邀请码已复制",
+          icon: "success"
+        }),
+        fail: () => common_vendor.index.showToast({
+          title: "复制失败",
+          icon: "none"
+        })
+      });
+    };
+    const previewImage = (url) => {
+      if (!url)
+        return;
+      common_vendor.index.previewImage({
+        urls: [url],
+        current: url
       });
     };
     return (_ctx, _cache) => {
       return common_vendor.e({
         a: __props.avatar,
-        b: common_vendor.t(__props.name),
-        c: common_vendor.t(__props.pinyinName),
-        d: common_vendor.t(__props.title),
-        e: common_vendor.t((__props.companyName || "").split(",")[0]),
-        f: __props.department
-      }, __props.department ? {
-        g: common_vendor.t(__props.department)
-      } : {}, {
-        h: common_vendor.t((__props.fullCompanyName || "").split(",")[0]),
-        i: common_vendor.f(__props.contactInfo, (item, index, i0) => {
+        b: common_vendor.o(($event) => previewImage(__props.avatar)),
+        c: common_vendor.t(__props.name),
+        d: common_vendor.t(__props.pinyinName),
+        e: common_vendor.t(__props.title),
+        f: common_vendor.p({
+          type: "calendar-filled",
+          size: "18",
+          color: "#888"
+        }),
+        g: common_vendor.t(__props.era || "未设置"),
+        h: common_vendor.f(__props.contactInfo, (item, index, i0) => {
           return {
-            a: "0262bca8-0-" + i0,
+            a: "0262bca8-1-" + i0,
             b: common_vendor.p({
               type: item.icon,
               size: "18",
-              color: "#FF7B00"
+              color: "#888"
             }),
-            c: common_vendor.t(item.value),
-            d: index
+            c: common_vendor.t(item.label),
+            d: common_vendor.t(item.value),
+            e: index
           };
         }),
-        j: __props.showUserQrCode
-      }, __props.showUserQrCode ? {
-        k: __props.userWeChatQrCodeUrl
+        i: professionalTitles.value.length > 0
+      }, professionalTitles.value.length > 0 ? {
+        j: common_vendor.p({
+          type: "staff-filled",
+          size: "18",
+          color: "#C9A063"
+        }),
+        k: common_vendor.f(professionalTitles.value, (item, index, i0) => {
+          return {
+            a: common_vendor.t(item),
+            b: index
+          };
+        })
       } : {}, {
-        l: __props.shardCode
+        l: careerGroups.value.length > 0
+      }, careerGroups.value.length > 0 ? {
+        m: common_vendor.p({
+          type: "flag-filled",
+          size: "18",
+          color: "#F78C2F"
+        }),
+        n: common_vendor.f(careerGroups.value, (group, index, i0) => {
+          return {
+            a: common_vendor.t(group.company),
+            b: common_vendor.t(group.position),
+            c: common_vendor.t(group.industry),
+            d: index
+          };
+        })
+      } : {}, {
+        o: __props.haveResources || __props.needResources
+      }, __props.haveResources || __props.needResources ? common_vendor.e({
+        p: __props.haveResources
+      }, __props.haveResources ? {
+        q: common_vendor.p({
+          type: "hand-up-filled",
+          size: "18",
+          color: "#28a745"
+        }),
+        r: common_vendor.t(__props.haveResources)
+      } : {}, {
+        s: __props.needResources
+      }, __props.needResources ? {
+        t: common_vendor.p({
+          type: "paperplane-filled",
+          size: "18",
+          color: "#007bff"
+        }),
+        v: common_vendor.t(__props.needResources)
+      } : {}) : {}, {
+        w: __props.signature || __props.personalBio
+      }, __props.signature || __props.personalBio ? common_vendor.e({
+        x: __props.signature
+      }, __props.signature ? {
+        y: common_vendor.t(__props.signature)
+      } : {}, {
+        z: __props.personalBio
+      }, __props.personalBio ? {
+        A: common_vendor.t(__props.personalBio)
+      } : {}) : {}, {
+        B: __props.showUserQrCode
+      }, __props.showUserQrCode ? {
+        C: __props.userWeChatQrCodeUrl,
+        D: common_vendor.o(($event) => previewImage(__props.userWeChatQrCodeUrl))
+      } : {}, {
+        E: __props.shardCode
       }, __props.shardCode ? {
-        m: common_vendor.t(__props.shardCode),
-        n: common_vendor.p({
+        F: common_vendor.t(__props.shardCode),
+        G: common_vendor.p({
           type: "paperclip",
           size: "16",
-          color: "#FF7B00"
+          color: "#F78C2F"
         }),
-        o: common_vendor.o(copyShardCode)
+        H: common_vendor.o(copyShardCode)
       } : {}, {
-        p: __props.logoUrl
+        I: __props.platformQrCodeUrl,
+        J: common_vendor.o(($event) => previewImage(__props.platformQrCodeUrl)),
+        K: __props.logoUrl
       });
     };
   }
