@@ -69,7 +69,7 @@
 			</button>
 			<button class="action-btn register-btn" @click="skipToNewShop">
 				<uni-icons type="plus-filled" size="20" color="#fff"></uni-icons>
-				<text>申请上榜</text>
+				<text>申请入驻</text>
 			</button>
 		</view>
 	</view>

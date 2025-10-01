@@ -160,7 +160,7 @@
 		<view class="info-section">
 			<view class="section-header">
 				<uni-icons type="map-filled" size="24" :color="themeColor"></uni-icons>
-				<text class="section-title">数字标签 (自我评价)</text>
+				<text class="section-title">数字标签 (商友评价)</text>
 			</view>
 			<view class="chart-wrapper">
 				<MyRadarChart v-if="radarSeriesData.length > 0" :categories="radarCategories"
