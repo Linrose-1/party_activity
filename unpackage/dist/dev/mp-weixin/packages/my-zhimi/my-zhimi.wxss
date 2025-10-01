@@ -1,0 +1,112 @@
+
+	/* 页面整体容器 */
+.container.data-v-7da666c3 {
+		background-color: #f7f8fa;
+		min-height: 100vh;
+		padding: 30rpx;
+}
+
+	/* 加载占位符样式 */
+.loading-placeholder.data-v-7da666c3 {
+		padding-top: 200rpx;
+}
+
+	/* --- 我的智米模块核心样式 (从原页面抽取) --- */
+.smart-rice-section.data-v-7da666c3 {
+		background: linear-gradient(to right, #fefefe, #f9f9f9);
+		border-radius: 40rpx;
+		padding: 50rpx;
+		margin-bottom: 40rpx;
+		box-shadow: 0 10rpx 30rpx rgba(0, 0, 0, 0.05);
+		border: 2rpx solid #eee;
+}
+.smart-rice-header.data-v-7da666c3 {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 40rpx;
+}
+.smart-rice-title.data-v-7da666c3 {
+		font-size: 36rpx;
+		font-weight: bold;
+		color: #333;
+		display: flex;
+		align-items: center;
+}
+.smart-rice-title uni-icons.data-v-7da666c3 {
+		margin-right: 12rpx;
+}
+.smart-rice-value.data-v-7da666c3 {
+		font-size: 48rpx;
+		font-weight: bold;
+		color: #FF6B00;
+}
+.smart-rice-info.data-v-7da666c3 {
+		font-size: 28rpx;
+		color: #666;
+		line-height: 1.6;
+		margin-bottom: 60rpx;
+}
+.smart-rice-actions.data-v-7da666c3 {
+		display: flex;
+		justify-content: space-around;
+		gap: 30rpx;
+		margin-bottom: 20rpx;
+		/* 调整与底部的距离 */
+}
+.action-button.data-v-7da666c3 {
+		flex: 1;
+		height: 90rpx;
+		border-radius: 50rpx;
+		border: none;
+		color: white;
+		font-size: 32rpx;
+		font-weight: bold;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		cursor: pointer;
+		transition: all 0.3s;
+		box-shadow: 0 8rpx 20rpx rgba(0, 0, 0, 0.1);
+}
+
+	/* 移除 button 默认边框，uni-app 中需要这样写 */
+.action-button.data-v-7da666c3::after {
+		border: none;
+}
+.exchange-button.data-v-7da666c3 {
+		background: linear-gradient(to right, #FF8C00, #FF6B00);
+}
+.recharge-button.data-v-7da666c3 {
+		background: linear-gradient(to right, #007bff, #0056b3);
+}
+.action-button uni-icons.data-v-7da666c3 {
+		margin-right: 15rpx;
+}
+.action-button.data-v-7da666c3:hover {
+		transform: translateY(-5rpx);
+		box-shadow: 0 12rpx 25rpx rgba(0, 0, 0, 0.2);
+}
+
+	/* --- 新增的相关功能模块样式 --- */
+.related-section.data-v-7da666c3 {
+		background-color: #fff;
+		border-radius: 20rpx;
+		overflow: hidden;
+}
+.related-item.data-v-7da666c3 {
+		display: flex;
+		align-items: center;
+		padding: 30rpx;
+		font-size: 30rpx;
+		color: #333;
+}
+.related-item.data-v-7da666c3:not(:last-child) {
+		border-bottom: 1rpx solid #f0f0f0;
+}
+.related-item uni-icons.data-v-7da666c3:first-child {
+		margin-right: 20rpx;
+}
+.related-item text.data-v-7da666c3 {
+		flex: 1;
+}

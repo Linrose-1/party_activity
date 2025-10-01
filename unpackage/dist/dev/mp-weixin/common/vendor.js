@@ -8521,6 +8521,24 @@ const subPackages = [
         style: {
           navigationBarTitleText: "聚会详情"
         }
+      },
+      {
+        path: "my-points/my-points",
+        style: {
+          navigationBarTitleText: "我的贡分"
+        }
+      },
+      {
+        path: "my-zhimi/my-zhimi",
+        style: {
+          navigationBarTitleText: "我的智米"
+        }
+      },
+      {
+        path: "getPoints/getPoints",
+        style: {
+          navigationBarTitleText: "获取贡分"
+        }
       }
     ]
   }

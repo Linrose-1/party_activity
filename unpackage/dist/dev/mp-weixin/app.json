@@ -48,7 +48,10 @@
         "home-commercialDetail/home-commercialDetail",
         "my-edit/my-edit",
         "active-publish/active-publish",
-        "active-detail/active-detail"
+        "active-detail/active-detail",
+        "my-points/my-points",
+        "my-zhimi/my-zhimi",
+        "getPoints/getPoints"
       ]
     }
   ],

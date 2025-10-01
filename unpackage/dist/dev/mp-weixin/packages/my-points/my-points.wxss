@@ -1,0 +1,205 @@
+
+	/* ... 其他样式无变化 ... */
+.container.data-v-0c26d269 {
+		background-color: #f7f8fa;
+		min-height: 100vh;
+		padding: 30rpx;
+}
+
+	/* --- 【【【核心修复】】】 --- */
+.loading-placeholder.data-v-0c26d269 {
+		padding-top: 200rpx;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+}
+.loading-text.data-v-0c26d269 {
+		color: #999;
+		font-size: 28rpx;
+		margin-top: 10rpx;
+}
+.points-section.data-v-0c26d269 {
+		background: white;
+		border-radius: 40rpx;
+		padding: 40rpx;
+		margin-bottom: 40rpx;
+		box-shadow: 0 10rpx 30rpx rgba(0, 0, 0, 0.05);
+}
+.points-header.data-v-0c26d269 {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 20rpx;
+}
+.points-title.data-v-0c26d269 {
+		font-size: 36rpx;
+		font-weight: bold;
+		color: #333;
+		display: flex;
+		align-items: center;
+}
+.points-title uni-icons.data-v-0c26d269 {
+		margin-right: 12rpx;
+}
+.points-value.data-v-0c26d269 {
+		font-size: 48rpx;
+		font-weight: bold;
+		color: #FF6B00;
+}
+.section-desc.data-v-0c26d269 {
+		font-size: 28rpx;
+		color: #666;
+		margin-bottom: 40rpx;
+}
+.task-grid.data-v-0c26d269 {
+		display: grid;
+		grid-template-columns: repeat(2, 1fr);
+		gap: 30rpx;
+}
+.task-card.data-v-0c26d269 {
+		background: #f9f9f9;
+		border-radius: 30rpx;
+		padding: 30rpx;
+		transition: all 0.2s ease-in-out;
+		border: 2rpx solid #eee;
+		display: flex;
+		flex-direction: column;
+}
+.task-card.data-v-0c26d269:active {
+		transform: scale(0.98);
+		background-color: #f0f0f0;
+}
+.task-header.data-v-0c26d269 {
+		display: flex;
+		align-items: center;
+		margin-bottom: 20rpx;
+}
+.task-icon.data-v-0c26d269 {
+		width: 60rpx;
+		height: 60rpx;
+		border-radius: 20rpx;
+		background: #fff5e6;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		margin-right: 20rpx;
+		flex-shrink: 0;
+}
+.task-name.data-v-0c26d269 {
+		font-size: 30rpx;
+		font-weight: 600;
+		color: #333;
+}
+.task-desc.data-v-0c26d269 {
+		font-size: 26rpx;
+		color: #666;
+		margin-bottom: 30rpx;
+		line-height: 1.4;
+		flex-grow: 1;
+}
+.task-footer.data-v-0c26d269 {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-top: auto;
+}
+.task-points.data-v-0c26d269 {
+		display: inline-block;
+		background: rgba(255, 107, 0, 0.1);
+		color: #FF6B00;
+		padding: 8rpx 20rpx;
+		border-radius: 40rpx;
+		font-size: 26rpx;
+		font-weight: 600;
+}
+.task-action-icon.data-v-0c26d269 {
+		width: 60rpx;
+		height: 60rpx;
+		border-radius: 50%;
+		background-color: #fff;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		margin-left: auto;
+}
+.history-section.data-v-0c26d269 {
+		background: white;
+		border-radius: 40rpx;
+		padding: 40rpx;
+		box-shadow: 0 10rpx 30rpx rgba(0, 0, 0, 0.05);
+}
+.history-title.data-v-0c26d269 {
+		font-size: 36rpx;
+		font-weight: bold;
+		margin-bottom: 30rpx;
+		color: #333;
+		display: flex;
+		align-items: center;
+}
+.history-title uni-icons.data-v-0c26d269 {
+		margin-right: 20rpx;
+}
+.history-list.data-v-0c26d269 {}
+.history-item.data-v-0c26d269 {
+		display: flex;
+		padding: 30rpx 0;
+		border-bottom: 2rpx solid #f0f0f0;
+		align-items: center;
+}
+.history-item.data-v-0c26d269:last-child {
+		border-bottom: none;
+}
+.history-icon.data-v-0c26d269 {
+		width: 80rpx;
+		height: 80rpx;
+		border-radius: 20rpx;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		margin-right: 30rpx;
+}
+.history-icon.positive-bg.data-v-0c26d269 {
+		background-color: #e8f5e9;
+}
+.history-icon.negative-bg.data-v-0c26d269 {
+		background-color: #fce4e4;
+}
+.history-details.data-v-0c26d269 {
+		flex: 1;
+		min-width: 0;
+}
+.history-task.data-v-0c26d269 {
+		font-size: 30rpx;
+		font-weight: 500;
+		margin-bottom: 10rpx;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+}
+.history-date.data-v-0c26d269 {
+		font-size: 26rpx;
+		color: #888;
+}
+.history-points.data-v-0c26d269 {
+		font-weight: bold;
+		font-size: 32rpx;
+}
+.history-points.positive.data-v-0c26d269 {
+		color: #28a745;
+}
+.history-points.negative.data-v-0c26d269 {
+		color: #dc3545;
+}
+.history-empty.data-v-0c26d269 {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		padding: 80rpx 40rpx;
+		color: #999;
+		font-size: 28rpx;
+}
+.history-empty text.data-v-0c26d269 {
+		margin-top: 20rpx;
+}

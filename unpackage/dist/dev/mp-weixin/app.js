@@ -47,6 +47,9 @@ if (!Math) {
   "./packages/my-edit/my-edit.js";
   "./packages/active-publish/active-publish.js";
   "./packages/active-detail/active-detail.js";
+  "./packages/my-points/my-points.js";
+  "./packages/my-zhimi/my-zhimi.js";
+  "./packages/getPoints/getPoints.js";
 }
 const _sfc_main = {
   data() {

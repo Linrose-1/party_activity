@@ -65,12 +65,12 @@ const _sfc_main = {
         {
           value: user.currExperience || 0,
           label: "我的贡分",
-          path: "/packages/my-account/my-account"
+          path: "/packages/my-points/my-points"
         },
         {
           value: user.point || 0,
           label: "我的智米",
-          path: "/packages/my-account/my-account"
+          path: "/packages/my-zhimi/my-zhimi"
         },
         {
           value: "--",
@@ -235,9 +235,9 @@ const _sfc_main = {
         path: "/pages/my-order/my-order"
       },
       {
-        name: "互动信息",
-        desc: "查看对您猎伙感兴趣的商友",
-        icon: "../../static/icon/互动.png",
+        name: "我的评论",
+        desc: "查看对您发布的评论信息",
+        icon: "../../static/icon/我的评论.png",
         path: null
       },
       // 新增
@@ -245,14 +245,14 @@ const _sfc_main = {
       {
         name: "精准投放",
         desc: "将商机、聚会、聚店等精准推送",
-        icon: "../../static/icon/投放.png",
+        icon: "../../static/icon/精准投放.png",
         path: null
       },
       // 新增
       {
         name: "资源匹配",
         desc: "智能匹配供需资源对应的商友",
-        icon: "../../static/icon/匹配.png",
+        icon: "../../static/icon/资源匹配.png",
         path: null
       },
       // 新增
@@ -273,8 +273,8 @@ const _sfc_main = {
       {
         name: "平台认证",
         desc: "通过认证，开启更多功能",
-        icon: "../../static/icon/认证.png",
-        path: null,
+        icon: "../../static/icon/平台认证.png",
+        path: "/pages/my-auth/my-auth",
         fullWidth: true
       }
       // 新增，带特殊标记
