@@ -286,7 +286,7 @@
   width: 60rpx;
   height: 4rpx;
   background-color: #F78C2F;
-  margin-right: 20rpx;
+  margin: 0 20rpx;
 }
 .value-slogan text.data-v-0262bca8 {
   font-size: 30rpx;

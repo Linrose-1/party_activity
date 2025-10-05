@@ -140,7 +140,7 @@ const _sfc_main = {
             // 更优化的方案是在跳转前先请求一个简单的用户信息接口。
             // 但根据现有代码，我们直接跳转。
           });
-          throw new Error("Redirecting to apply page");
+          throw new Error("请点击左上角的“屋子”图标，注册或登陆，即可完美体验“猩聚社”商友社交工具！");
         } else {
           throw new Error(error);
         }

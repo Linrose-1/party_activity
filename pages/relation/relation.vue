@@ -96,7 +96,12 @@
 				</view>
 
 				<!-- 加载更多组件 (无变化) -->
-				<!-- <uni-load-more :status="loadingStatus"></uni-load-more> -->
+				<uni-load-more :status="loadingStatus" v-if="userList.length > 0 || loadingStatus === 'loading'"
+					:contentText="{
+									contentdown: '上拉加载更多',
+									contentrefresh: '正在加载...',
+									contentnomore: '—— 我是有底线的 ——'
+								}"></uni-load-more>
 			</view>
 		</view>
 	</view>
@@ -170,17 +175,30 @@
 
 	// --- API 调用与数据处理 ---
 	const fetchUserList = async (isRefresh = false) => {
+		// 1. 如果是刷新操作，先停止之前的下拉动画（以防万一）
+		if (isRefresh) {
+			uni.stopPullDownRefresh();
+		}
+
+		// 2. 检查筛选条件是否满足
 		if (!destination.value.longitude || timeRange.value.length < 2) {
 			userList.value = [];
-			loadingStatus.value = 'no-more';
-			return;
+			// 当筛选条件不满足时，状态应为 'noMore' 而不是 'no-more'
+			loadingStatus.value = 'noMore';
+			return; // 提前返回
 		}
-		if (loadingStatus.value === 'loading') return;
-		loadingStatus.value = 'loading';
+
+		// 3. 防止重复加载
+		if (loadingStatus.value === 'loading' && !isRefresh) return;
+
+		// 4. 重置状态
 		if (isRefresh) {
 			queryParams.pageNo = 1;
 			userList.value = [];
+			loadingStatus.value = 'more'; // 准备重新加载
 		}
+
+		loadingStatus.value = 'loading';
 
 		try {
 			const {
@@ -199,17 +217,19 @@
 
 			if (error) throw new Error(error);
 
-			userList.value = [...userList.value, ...data.list];
+			const newList = data.list || [];
+			userList.value = isRefresh ? newList : [...userList.value, ...newList];
 			total.value = data.total;
-			loadingStatus.value = userList.value.length >= total.value ? 'no-more' : 'more';
+
+			// uni-load-more 的状态应该是 'noMore'
+			loadingStatus.value = userList.value.length >= total.value ? 'noMore' : 'more';
+
 		} catch (err) {
-			loadingStatus.value = 'more';
+			loadingStatus.value = 'more'; // 失败时允许重试
 			uni.showToast({
-				title: err.message,
+				title: err.message || '加载失败',
 				icon: 'none'
 			});
-		} finally {
-			if (isRefresh) uni.stopPullDownRefresh();
 		}
 	};
 
@@ -387,7 +407,9 @@
 		uni.stopAccelerometer();
 	});
 	onLoad(() => {});
-	onPullDownRefresh(() => fetchUserList(true));
+	onPullDownRefresh(() => {
+		fetchUserList(true); // 直接调用即可，内部已处理 stopPullDownRefresh
+	});
 	onReachBottom(() => {
 		if (loadingStatus.value === 'more') {
 			queryParams.pageNo++;

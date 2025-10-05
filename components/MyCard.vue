@@ -121,6 +121,7 @@
 			<view class="value-slogan">
 				<view class="line"></view>
 				<text>价值连接·生态共创</text>
+				<view class="line"></view>
 			</view>
 		</view>
 
@@ -683,7 +684,7 @@
 			width: 60rpx;
 			height: 4rpx;
 			background-color: #F78C2F;
-			margin-right: 20rpx;
+			margin:0 20rpx;
 		}
 
 		text {

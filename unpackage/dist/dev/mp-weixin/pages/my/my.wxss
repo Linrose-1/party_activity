@@ -147,6 +147,7 @@
 }
 
 	/* 1.4 未登录状态 */
+	/* 1.4 未登录状态 */
 .login-prompt.data-v-2f1ef635 {
 		display: flex;
 		align-items: center;
@@ -154,19 +155,27 @@
 }
 .login-prompt-avatar.data-v-2f1ef635 {
 		width: 140rpx;
+		/* 保持原样 */
 		height: 140rpx;
+		/* 保持原样 */
 		border-radius: 50%;
 		background-color: rgba(255, 255, 255, 0.9);
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		margin-right: 20rpx;
+		flex-shrink: 0;
+		/* 防止被压缩 */
 }
+
+	/* 【修改】登录提示文字样式 */
 .login-prompt-text.data-v-2f1ef635 {
 		font-size: 36rpx;
 		font-weight: bold;
 		color: white;
 }
+
+	/* 【修改】右箭头样式，使用 margin-left: auto 自动推到最右侧 */
 .login-prompt-arrow.data-v-2f1ef635 {
 		margin-left: auto;
 		font-size: 40rpx;
@@ -267,30 +276,23 @@
 .core-features-grid.data-v-2f1ef635 {
 		display: grid;
 		grid-template-columns: repeat(5, 1fr);
-		/* 创建一个五列的网格 */
 		gap: 20rpx;
-		/* 网格项之间的间距 */
 }
 
 	/* 单个网格项 */
 .core-feature-grid-item.data-v-2f1ef635 {
 		display: flex;
 		flex-direction: column;
-		/* 垂直排列内部元素 */
 		align-items: center;
-		/* 水平居中 */
 		justify-content: center;
-		/* 垂直居中 */
 		padding: 20rpx 0;
 		border-radius: 18rpx;
 		background-color: #f8f9fa;
-		/* 一个非常浅的背景色，增加层次感 */
 		text-align: center;
 		transition: transform 0.2s ease-in-out;
 }
 .core-feature-grid-item.data-v-2f1ef635:active {
 		transform: scale(0.95);
-		/* 点击时的缩小效果 */
 }
 
 	/* 上：标题 */
@@ -300,30 +302,31 @@
 		font-weight: 800;
 }
 
-	/* 中：图标 */
+	/* 【核心修改 ①】: 图标的父容器，现在只负责定义尺寸和形状 */
 .core-feature-grid-item .icon-wrapper.data-v-2f1ef635 {
 		width: 90rpx;
 		height: 90rpx;
-		border-radius: 50%;
-		/* 圆形背景 */
-		display: flex;
-		justify-content: center;
-		align-items: center;
 		margin: 16rpx 0;
-		/* 上下边距 */
 		flex-shrink: 0;
-		box-shadow: 0 6rpx 12rpx rgba(0, 0, 0, 0.1);
-		/* 给图标背景加一点阴影，更立体 */
+		/* 移除所有背景和阴影相关的样式 */
+		/* background: ...; (已删除) */
+		/* box-shadow: ...; (已删除) */
+		/* border-radius: 50%; (保留或删除均可，因为 image 会覆盖它) */
 }
+
+	/* 【核心修改 ②】: 图标本身，让它撑满父容器 */
 .core-feature-grid-item .feature-icon.data-v-2f1ef635 {
-		width: 48rpx;
-		height: 48rpx;
+		width: 100%;
+		/* 宽度撑满父容器 */
+		height: 100%;
+		/* 高度撑满父容器 */
+		/* object-fit: contain;  在 uni-app 的 image 组件中，通常由 template 里的 mode="aspectFit" 控制，
+			                            但加上这行可以作为双重保险，确保在 web 端也表现一致 */
 }
 
 	/* 下：描述 */
 .grid-item-desc.data-v-2f1ef635 {
 		font-size: 18rpx;
-		/* 较小的字体 */
 		color: #999;
 }
 

@@ -1,0 +1,100 @@
+/* 水平间距 */
+/* 水平间距 */
+.page-container.data-v-9bb03283 {
+  background-color: #f7f8fa;
+  min-height: 100vh;
+}
+.header.data-v-9bb03283 {
+  background: linear-gradient(135deg, var(--67d32381), #FF6B00);
+  color: white;
+  padding: 60rpx 40rpx 80rpx;
+  text-align: center;
+  border-bottom-left-radius: 60rpx;
+  border-bottom-right-radius: 60rpx;
+}
+.header .title.data-v-9bb03283 {
+  display: block;
+  font-size: 48rpx;
+  font-weight: bold;
+  text-shadow: 0 4rpx 10rpx rgba(0, 0, 0, 0.2);
+}
+.header .subtitle.data-v-9bb03283 {
+  display: block;
+  font-size: 28rpx;
+  margin-top: 10rpx;
+  opacity: 0.9;
+}
+.task-list-wrapper.data-v-9bb03283 {
+  padding: 30rpx;
+  position: relative;
+}
+.task-category.data-v-9bb03283 {
+  margin-bottom: 40rpx;
+}
+.category-title.data-v-9bb03283 {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+.category-title .uni-icons.data-v-9bb03283 {
+  margin-right: 15rpx;
+}
+.category-title text.data-v-9bb03283 {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+}
+.task-items.data-v-9bb03283 {
+  background-color: #fff;
+  border-radius: 20rpx;
+  overflow: hidden;
+  box-shadow: 0 8rpx 30rpx rgba(0, 0, 0, 0.06);
+}
+.task-card.data-v-9bb03283 {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 30rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+.task-card.data-v-9bb03283:last-child {
+  border-bottom: none;
+}
+.task-info.data-v-9bb03283 {
+  flex: 1;
+  min-width: 0;
+}
+.task-name.data-v-9bb03283 {
+  display: block;
+  font-size: 30rpx;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 10rpx;
+}
+.task-rewards.data-v-9bb03283 {
+  display: flex;
+  align-items: center;
+  gap: 30rpx;
+  font-size: 24rpx;
+  color: #999;
+}
+.reward-value.data-v-9bb03283 {
+  color: var(--67d32381);
+  font-weight: bold;
+  margin-left: 8rpx;
+}
+.action-btn.data-v-9bb03283 {
+  height: 60rpx;
+  line-height: 60rpx;
+  padding: 0 30rpx;
+  margin: 0 0 0 20rpx;
+  font-size: 26rpx;
+  font-weight: 500;
+  color: #fff;
+  background-color: var(--67d32381);
+  border-radius: 30rpx;
+  flex-shrink: 0;
+}
+.action-btn.data-v-9bb03283::after {
+  border: none;
+}

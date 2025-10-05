@@ -168,10 +168,12 @@
 		reactive,
 		onMounted,
 		computed,
-		onUnmounted
+		onUnmounted,
+		nextTick
 	} from 'vue';
 	import {
 		onLoad,
+		onReady,
 		onShareAppMessage,
 		onShareTimeline
 	} from '@dcloudio/uni-app';
@@ -233,6 +235,14 @@
 	}
 
 	onLoad((options) => {
+		if (options.scrollTo === 'comments') {
+			// 由于页面渲染需要时间，我们不能在 onLoad 中立即滚动
+			// onReady 钩子会在页面初次渲染完成后触发
+			onReady(() => {
+				scrollToCommentsSection();
+			});
+		}
+
 		console.log(`✅ [商机详情页] 在 onLoad 中捕获到 options: ${JSON.stringify(options)}`);
 		if (options && options.inviteCode) {
 			const inviteCode = options.inviteCode;
@@ -330,6 +340,34 @@
 	// 【新增】隐藏引导遮罩的方法
 	const hideTimelineGuide = () => {
 		showTimelineGuide.value = false;
+	};
+
+	const scrollToCommentsSection = () => {
+		// 使用 nextTick 确保 DOM 已经更新
+		// Vue 3 Composition API 中需要从 'vue' 导入 nextTick
+		// import { nextTick } from 'vue';
+
+		// 如果没有导入 nextTick, 可以用 setTimeout 替代，效果类似但 nextTick 更精确
+		setTimeout(() => {
+			const query = uni.createSelectorQuery();
+			query.select('.comments-section').boundingClientRect();
+			query.selectViewport().scrollOffset(); // 获取页面总滚动距离
+			query.exec(res => {
+				if (res && res[0] && res[1]) {
+					const elementTop = res[0].top; // 元素距离视口顶部的距离
+					const scrollTop = res[1].scrollTop; // 当前页面的滚动距离
+					const finalScrollTop = scrollTop + elementTop;
+
+					console.log(`准备滚动到评论区, 计算位置: ${finalScrollTop}`);
+					uni.pageScrollTo({
+						scrollTop: finalScrollTop,
+						duration: 300
+					});
+				} else {
+					console.warn('无法找到 .comments-section 元素进行滚动');
+				}
+			});
+		}, 100); // 延迟100毫秒，给页面渲染留出更充足的时间
 	};
 
 	// ==================== 定义分享给好友的内容 ====================
@@ -965,6 +1003,8 @@
 	.author-details {
 		margin-left: 30rpx;
 		flex: 1;
+		/* 1. 【关键】让此容器能够被压缩，防止溢出父容器 */
+		min-width: 0;
 	}
 
 	.author-name {
@@ -972,6 +1012,14 @@
 		font-size: 36rpx;
 		color: #333;
 		margin-bottom: 6rpx;
+
+		/* 2. 【关键】添加单行溢出省略样式 */
+		white-space: nowrap;
+		/* 强制不换行 */
+		overflow: hidden;
+		/* 隐藏溢出的内容 */
+		text-overflow: ellipsis;
+		/* 显示省略号 */
 	}
 
 	.post-time {

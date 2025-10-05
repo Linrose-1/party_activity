@@ -5,25 +5,24 @@
 			<view class="form-card">
 				<view class="form-group">
 					<view class="form-label">标题</view>
-					<input v-model="title" class="form-input" placeholder="请输入标题（最多50字）" maxlength="50" />
-					<!-- <text class="hint">清晰明了的标题能吸引更多关注</text> -->
+					<input v-model="form.title" class="form-input" placeholder="请输入标题（最多50字）" maxlength="50" />
 				</view>
 
 				<view class="form-group">
 					<view class="form-label">内容</view>
-					<textarea v-model="content" class="form-textarea" placeholder="详细描述您的项目/商机、需求或经验分享..." />
-					<!-- <text class="hint">内容需大于20字</text> -->
+					<!-- placeholder 已绑定到计算属性 -->
+					<textarea v-model="form.content" class="form-textarea" :placeholder="contentPlaceholder" />
 				</view>
 
 				<view class="form-group">
 					<view class="form-label">选择分类</view>
 					<radio-group @change="topicChange" class="radio-group-container">
 						<label class="radio-item">
-							<radio value="普通商机" :checked="topic === '普通商机'" color="#FF6A00" />
+							<radio value="普通商机" :checked="form.topic === '普通商机'" color="#FF6A00" />
 							<text>普通商机</text>
 						</label>
 						<label class="radio-item">
-							<radio value="创业猎伙" :checked="topic === '创业猎伙'" color="#FF6A00" />
+							<radio value="创业猎伙" :checked="form.topic === '创业猎伙'" color="#FF6A00" />
 							<text>创业猎伙🔥</text>
 						</label>
 					</radio-group>
@@ -31,14 +30,16 @@
 
 				<view class="form-group">
 					<view class="form-label">添加标签</view>
+					<!-- v-for 循环 form.tags -->
 					<view class="tags-container">
-						<view v-for="(tag, index) in tags" :key="index" class="tag">
+						<view v-for="(tag, index) in form.tags" :key="index" class="tag">
 							{{ tag }}
 							<text class="tag-remove" @click="removeTag(index)">×</text>
 						</view>
 					</view>
+					<!-- v-model 绑定到 form.tagInput -->
 					<view class="tag-input-container">
-						<input v-model="tagInput" class="tag-input" placeholder="输入标签（如,合作/需求/经验/创业灵感...）" />
+						<input v-model="form.tagInput" class="tag-input" placeholder="输入标签（如,合作/需求/经验/创业灵感...）" />
 						<button class="add-tag-btn" @click="addTag">添加</button>
 					</view>
 					<text class="hint">添加精准标签让更多人发现您的商机</text>
@@ -47,14 +48,14 @@
 				<view class="form-group">
 					<view class="form-label">上传图片</view>
 					<view class="image-preview">
-						<!-- 图片预览区域 -->
-						<view v-for="(img, i) in images" :key="i" class="image-wrapper">
+						<!-- v-for 循环 form.images -->
+						<view v-for="(img, i) in form.images" :key="i" class="image-wrapper">
 							<image :src="img" mode="aspectFill" class="preview-img" @click="replaceImage(i)" />
 							<view class="delete-image-btn" @click.stop="deleteImage(i)">×</view>
 						</view>
-						<!-- 添加图片按钮占位符 -->
-						<view class="add-img-placeholder" @click="handleChooseImage" v-if="images.length < 9">
-							<i class="fas fa-plus"></i> <!-- 假设已引入Font Awesome -->
+						<!-- v-if 判断 form.images.length -->
+						<view class="add-img-placeholder" @click="handleChooseImage" v-if="form.images.length < 9">
+							<uni-icons type="plusempty" size="24" color="#ccc"></uni-icons>
 							<text>添加图片</text>
 						</view>
 					</view>
@@ -66,12 +67,10 @@
 				<text class="section-title">其他设置</text>
 				<view class="setting-item">
 					<text class="setting-label">允许他人查看我的名片</text>
-					<switch :checked="showProfile" @change="e => showProfile = e.detail.value" color="#FF6A00" />
+					<!-- :checked 绑定 form.showProfile -->
+					<switch :checked="form.showProfile" @change="e => form.showProfile = e.detail.value"
+						color="#FF6A00" />
 				</view>
-				<!-- <view class="setting-item">
-					<text class="setting-label">允许他人评论</text>
-					<switch :checked="allowComments" @change="e => allowComments = e.detail.value" color="#FF6A00" />
-				</view> -->
 			</view>
 
 			<button class="submit-btn" @click="submitPost">发布帖子</button>
@@ -81,74 +80,146 @@
 
 <script setup>
 	import {
-		ref
-	} from 'vue'
+		reactive,
+		computed,
+		watch
+	} from 'vue'; // ref 已被移除，引入 reactive
+	import {
+		onLoad
+	} from '@dcloudio/uni-app';
 	import request from '../../utils/request.js';
-	// 【核心】从我们新建的模块中导入 uploadFile 函数
 	import uploadFile from '../../utils/upload.js';
 
-	// --- 页面表单数据 (与之前相同) ---
-	const title = ref('')
-	const content = ref('')
-	const topic = ref('普通商机')
-	const tags = ref([])
-	const tagInput = ref('')
-	const images = ref([]) // 这个数组将存储上传成功后返回的【URL】
-	const showProfile = ref(true)
-	// const allowComments = ref(true)
+	// --- 【核心】统一使用 reactive 管理所有表单状态 ---
+	const form = reactive({
+		title: '',
+		content: '',
+		topic: '普通商机',
+		tags: [],
+		tagInput: '', // 将 tagInput 也纳入管理
+		images: [],
+		showProfile: true,
+	});
 
-	// --- 【删除】这里不再需要本地的 uploadFile 函数了！---
-	// const uploadFile = async (...) => { ... } // <= 这段代码被删除
+	// --- 计算属性 ---
+	const contentPlaceholder = computed(() => {
+		if (form.topic === '创业猎伙') {
+			return '发布寻找创业项目合伙人需求。';
+		}
+		return '描述您的项目/商机、需求/经验分享。';
+	});
 
-	// --- 表单交互函数 (与之前相同) ---
+	// --- 生命周期钩子 ---
+	onLoad(() => {
+		const token = uni.getStorageSync('token');
+		if (!token) {
+			uni.showModal({
+				title: '请先登录',
+				content: '发布商机需要登录后才能操作',
+				confirmText: '去登录',
+				cancelText: '取消',
+				success: (res) => {
+					if (res.confirm) {
+						uni.navigateTo({
+							url: '/pages/index/index'
+						});
+					} else {
+						uni.navigateBack();
+					}
+				}
+			});
+			return;
+		}
+		checkDraft();
+	});
+
+	// --- 草稿功能 (逻辑不变，已适配 reactive) ---
+	const DRAFT_KEY = 'post_draft_v2'; // 建议更新key，避免旧格式草稿的干扰
+	let debounceTimer = null;
+
+	watch(form, (newValue) => {
+		clearTimeout(debounceTimer);
+		debounceTimer = setTimeout(() => {
+			saveDraft(newValue);
+		}, 1500);
+	}, {
+		deep: true
+	});
+
+	const saveDraft = (data) => {
+		if (data.title || data.content || data.tags.length > 0 || data.images.length > 0) {
+			uni.setStorageSync(DRAFT_KEY, JSON.stringify(data));
+			console.log('📝 草稿已自动保存');
+		}
+	};
+
+	const checkDraft = () => {
+		const draft = uni.getStorageSync(DRAFT_KEY);
+		if (draft) {
+			uni.showModal({
+				title: '发现未完成的草稿',
+				content: '是否恢复上次编辑的内容？',
+				confirmText: '恢复',
+				cancelText: '放弃',
+				success: (res) => {
+					if (res.confirm) {
+						const draftData = JSON.parse(draft);
+						Object.assign(form, draftData);
+					} else {
+						uni.removeStorageSync(DRAFT_KEY);
+					}
+				}
+			});
+		}
+	};
+
+	const clearDraft = () => {
+		uni.removeStorageSync(DRAFT_KEY);
+		console.log('🧹 草稿已清除');
+	};
+
+	// --- 表单交互函数 (现在都操作 form 对象) ---
 	function topicChange(e) {
-		topic.value = e.detail.value
+		form.topic = e.detail.value;
 	}
 
 	function addTag() {
-		// ... 逻辑不变 ...
-		let val = tagInput.value.trim()
+		let val = form.tagInput.trim();
 		if (!val) return uni.showToast({
 			title: '请输入标签',
 			icon: 'none'
-		})
-		if (tags.value.length >= 5) return uni.showToast({
+		});
+		if (form.tags.length >= 5) return uni.showToast({
 			title: '最多添加5个标签',
 			icon: 'none'
-		})
-		if (!val.startsWith('#')) val = '#' + val
-		if (tags.value.includes(val)) return uni.showToast({
+		});
+		if (!val.startsWith('#')) val = '#' + val;
+		if (form.tags.includes(val)) return uni.showToast({
 			title: '标签已存在',
 			icon: 'none'
-		})
-		tags.value.push(val)
-		tagInput.value = ''
+		});
+
+		form.tags.push(val);
+		form.tagInput = '';
 	}
 
 	function removeTag(index) {
-		tags.value.splice(index, 1)
+		form.tags.splice(index, 1);
 	}
 
-	// --- 【核心修改】图片处理函数，现在调用导入的 uploadFile ---
-
-	// 处理多图片选择和上传
+	// --- 图片处理函数 (现在都操作 form.images) ---
 	async function handleChooseImage() {
 		uni.chooseImage({
-			count: 9 - images.value.length,
+			count: 9 - form.images.length,
 			sourceType: ['album', 'camera'],
 			success: async (res) => {
-				const filesToUpload = res.tempFiles;
-				const validFiles = filesToUpload.filter(file => {
-					if (file.size > 5 * 1024 * 1024) {
-						uni.showToast({
-							title: `文件 ${file.name || ''} 过大，已忽略`,
-							icon: 'none'
-						});
-						return false;
-					}
-					return true;
-				});
-
+				const validFiles = res.tempFiles.filter(file => file.size <= 5 * 1024 * 1024);
+				if (res.tempFiles.length > validFiles.length) {
+					uni.showToast({
+						title: '部分文件过大(>5MB)，已忽略',
+						icon: 'none'
+					});
+				}
 				if (validFiles.length === 0) return;
 
 				uni.showLoading({
@@ -156,30 +227,22 @@
 					mask: true
 				});
 
-				// 【关键】使用 Promise.all 并发上传，调用的是导入的 uploadFile 工具
 				const uploadPromises = validFiles.map(file => uploadFile(file, {
 					directory: 'post'
 				}));
 				const results = await Promise.all(uploadPromises);
-
 				uni.hideLoading();
 
 				const successfulUrls = [];
-				let failedCount = 0;
 				results.forEach(result => {
-					if (result.data) {
-						successfulUrls.push(result.data);
-					} else {
-						failedCount++;
-						console.error('上传失败:', result.error); // 在控制台打印详细错误
-					}
+					if (result.data) successfulUrls.push(result.data);
+					else console.error('上传失败:', result.error);
 				});
 
-				images.value = images.value.concat(successfulUrls);
-
-				if (failedCount > 0) {
+				form.images.push(...successfulUrls);
+				if (successfulUrls.length < validFiles.length) {
 					uni.showToast({
-						title: `${failedCount} 张图片上传失败`,
+						title: `${validFiles.length - successfulUrls.length} 张图片上传失败`,
 						icon: 'none'
 					});
 				}
@@ -187,39 +250,34 @@
 		});
 	}
 
-	// 替换单张图片
 	function replaceImage(index) {
 		uni.chooseImage({
 			count: 1,
 			success: async (res) => {
 				const file = res.tempFiles[0];
-				if (file.size > 5 * 1024 * 1024) {
-					return uni.showToast({
-						title: '文件大小不能超过5MB',
-						icon: 'none'
-					});
-				}
+				if (file.size > 5 * 1024 * 1024) return uni.showToast({
+					title: '文件大小不能超过5MB',
+					icon: 'none'
+				});
 
 				uni.showLoading({
 					title: '正在替换...',
 					mask: true
 				});
-
-				// 【关键】调用导入的 uploadFile 工具
 				const result = await uploadFile(file, {
 					directory: 'post'
 				});
 				uni.hideLoading();
 
 				if (result.data) {
-					images.value[index] = result.data;
+					form.images[index] = result.data;
 					uni.showToast({
 						title: '图片已替换',
 						icon: 'none'
 					});
 				} else {
 					uni.showToast({
-						title: result.error,
+						title: result.error || '替换失败',
 						icon: 'error'
 					});
 				}
@@ -227,53 +285,43 @@
 		});
 	}
 
-	// 删除图片
 	function deleteImage(index) {
 		uni.showModal({
 			title: '提示',
 			content: '确定要删除这张图片吗？',
 			success: (res) => {
 				if (res.confirm) {
-					images.value.splice(index, 1);
+					form.images.splice(index, 1);
 				}
 			}
 		});
 	}
 
-	// --- 提交表单 (逻辑无需改动) ---
+	// --- 提交表单 ---
 	function submitPost() {
-		// ... 您的验证逻辑非常完善，无需改动 ...
-		if (!title.value.trim() || title.value.length > 50) return uni.showToast({
+		if (!form.title.trim() || form.title.length > 50) return uni.showToast({
 			title: '请检查标题',
 			icon: 'none'
-		})
-		if (!content.value.trim() || content.value.length < 20) return uni.showToast({
+		});
+		if (!form.content.trim() || form.content.length < 20) return uni.showToast({
 			title: '内容不能少于20字',
 			icon: 'none'
-		})
-		if (!topic.value) return uni.showToast({
+		});
+		if (!form.topic) return uni.showToast({
 			title: '请选择一个专题',
 			icon: 'none'
-		})
-		// if (tags.value.length === 0) return uni.showToast({
-		// 	title: '请至少添加一个标签',
-		// 	icon: 'none'
-		// })
-		// if (images.value.length === 0) return uni.showToast({
-		// 	title: '请至少上传一张图片',
-		// 	icon: 'none'
-		// })
+		});
 
 		const postData = {
-			userId: 247,
-			postTitle: title.value,
-			postType: topic.value === '普通商机' ? '0' : '1',
-			postContent: content.value,
-			postImg: images.value.join(','),
+			userId: uni.getStorageSync('userId') || 0, // 从缓存获取 userId
+			postTitle: form.title,
+			postType: form.topic === '普通商机' ? '0' : '1',
+			postContent: form.content,
+			postImg: form.images.join(','),
 			postedAt: new Date().toISOString(),
 			commentFlag: 1,
-			cardFlag: showProfile.value,
-			tags: tags.value,
+			cardFlag: form.showProfile,
+			tags: form.tags,
 			status: 'active'
 		};
 
@@ -282,8 +330,6 @@
 			content: '请确认您填写的内容无误。',
 			success: (res) => {
 				if (res.confirm) {
-					// 用户点击确认后，才执行真正的发布操作
-					console.log('--- 准备提交到后端的帖子数据 ---', postData);
 					createOpportunities(postData);
 				}
 			}
@@ -302,14 +348,14 @@
 		uni.hideLoading();
 
 		if (result.data !== null) {
+			clearDraft();
 			uni.showModal({
 				title: '发布成功',
 				content: '可在【我的】-【我的商机】中查看您发布的商机。',
-				showCancel: false, // 隐藏取消按钮
-				confirmText: '知道了', // 自定义确认按钮文字
+				showCancel: false,
+				confirmText: '知道了',
 				success: (res) => {
 					if (res.confirm) {
-						// 用户点击“知道了”之后，再返回上一页
 						uni.navigateBack();
 					}
 				}
@@ -324,7 +370,6 @@
 </script>
 
 <style scoped>
-	/* 原有样式保持不变 */
 	.page {
 		padding: 20rpx;
 		background-color: #f9f9f9;

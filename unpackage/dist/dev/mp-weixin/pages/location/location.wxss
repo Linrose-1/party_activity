@@ -125,21 +125,29 @@
 .business-card .business-info.data-v-4d9b4fcb {
   flex: 1;
   min-width: 0;
+  /* 为移动后的标签容器添加样式 */
 }
 .business-card .business-info .name-line.data-v-4d9b4fcb {
-  display: flex;
-  align-items: center;
   margin-bottom: 10rpx;
 }
 .business-card .business-info .business-name.data-v-4d9b4fcb {
   font-size: 32rpx;
   font-weight: 600;
-  flex-shrink: 0;
-  margin-right: 16rpx;
+}
+.business-card .business-info .card-position.data-v-4d9b4fcb,
+.business-card .business-info .card-company.data-v-4d9b4fcb {
+  font-size: 26rpx;
+  color: #666;
+  margin-top: 8rpx;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .business-card .business-info .relation-tags.data-v-4d9b4fcb {
   display: flex;
   gap: 10rpx;
+  margin-top: 16rpx;
+  /* 与上方的公司信息拉开距离 */
 }
 .business-card .business-info .tag.data-v-4d9b4fcb {
   font-size: 16rpx;

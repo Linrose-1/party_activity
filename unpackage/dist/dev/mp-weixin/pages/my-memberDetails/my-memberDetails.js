@@ -1,51 +1,91 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
-const common_assets = require("../../common/assets.js");
+const utils_request = require("../../utils/request.js");
 const _sfc_main = {
   __name: "my-memberDetails",
   setup(__props) {
-    const scrollTo = (elementId) => {
-      common_vendor.index.pageScrollTo({
-        selector: `#${elementId}`,
-        duration: 300
-        // 滚动动画时长
+    const membershipLevels = common_vendor.ref([]);
+    const currentTab = common_vendor.ref(0);
+    const screenWidth = common_vendor.index.getSystemInfoSync().windowWidth;
+    const imageHeights = common_vendor.ref([]);
+    const initialTargetLevel = common_vendor.ref(null);
+    const currentSwiperHeight = common_vendor.computed(() => {
+      const height = imageHeights.value[currentTab.value];
+      if (height) {
+        return `${height}px`;
+      }
+      return "300px";
+    });
+    common_vendor.onLoad((options) => {
+      if (options && options.level) {
+        initialTargetLevel.value = Number(options.level);
+      }
+    });
+    common_vendor.onMounted(() => {
+      fetchMembershipLevels();
+    });
+    const fetchMembershipLevels = async () => {
+      common_vendor.index.showLoading({
+        title: "加载中..."
       });
-    };
-    const showContactModal = () => {
-      common_vendor.index.showModal({
-        title: "联系我们",
-        // content 使用 \n 进行换行
-        content: "本阶段属于会员需求测试期，请扫码添加猩聚社创始猿微信交流！",
-        showCancel: false,
-        // 只显示一个“确定”按钮
-        confirmText: "知道了",
-        success: (res) => {
-          if (res.confirm) {
-            common_vendor.index.previewImage({
-              urls: ["https://img.gofor.club/index1.png"]
-              // 将二维码URL放入数组
-            });
+      const {
+        data,
+        error
+      } = await utils_request.request("/app-api/member/top-up-level/list");
+      common_vendor.index.hideLoading();
+      if (error) {
+        common_vendor.index.showToast({
+          title: `加载失败: ${error}`,
+          icon: "none"
+        });
+        return;
+      }
+      if (data && data.length > 0) {
+        membershipLevels.value = data.sort((a, b) => a.level - b.level);
+        if (initialTargetLevel.value !== null) {
+          const targetIndex = membershipLevels.value.findIndex((item) => item.level === initialTargetLevel.value);
+          if (targetIndex !== -1) {
+            currentTab.value = targetIndex;
           }
         }
-      });
+      }
+    };
+    const switchTab = (index) => {
+      if (currentTab.value !== index) {
+        currentTab.value = index;
+      }
+    };
+    const onSwiperChange = (e) => {
+      currentTab.value = e.detail.current;
+    };
+    const onImageLoad = (e, index) => {
+      const originalWidth = e.detail.width;
+      const originalHeight = e.detail.height;
+      const imagePaddingInPx = 80 * (screenWidth / 750);
+      const imageDisplayWidth = screenWidth - imagePaddingInPx;
+      const imageDisplayHeight = imageDisplayWidth / originalWidth * originalHeight;
+      imageHeights.value[index] = imageDisplayHeight;
     };
     return (_ctx, _cache) => {
       return {
-        a: common_vendor.o(($event) => scrollTo("xuantie")),
-        b: common_vendor.o(($event) => scrollTo("qingtong")),
-        c: common_vendor.o(($event) => scrollTo("baiyin")),
-        d: common_vendor.o(($event) => scrollTo("huangjin")),
-        e: common_vendor.o(($event) => scrollTo("heizhuan")),
-        f: common_assets._imports_0$3,
-        g: common_vendor.o(showContactModal),
-        h: common_assets._imports_1,
-        i: common_vendor.o(showContactModal),
-        j: common_assets._imports_2,
-        k: common_vendor.o(showContactModal),
-        l: common_assets._imports_3,
-        m: common_vendor.o(showContactModal),
-        n: common_assets._imports_4,
-        o: common_vendor.o(showContactModal)
+        a: common_vendor.f(membershipLevels.value, (level, index, i0) => {
+          return {
+            a: common_vendor.t(level.name.replace("会员", "")),
+            b: level.level,
+            c: currentTab.value === index ? 1 : "",
+            d: common_vendor.o(($event) => switchTab(index), level.level)
+          };
+        }),
+        b: common_vendor.f(membershipLevels.value, (level, index, i0) => {
+          return {
+            a: level.backgroundUrl,
+            b: common_vendor.o(($event) => onImageLoad($event, index), level.level),
+            c: level.level
+          };
+        }),
+        c: currentTab.value,
+        d: currentSwiperHeight.value,
+        e: common_vendor.o(onSwiperChange)
       };
     };
   }

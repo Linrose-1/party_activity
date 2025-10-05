@@ -274,7 +274,7 @@
 					// 但根据现有代码，我们直接跳转。
 				});
 				// 抛出一个特定错误，避免在当前页面显示错误信息
-				throw new Error('Redirecting to apply page');
+				throw new Error('请点击左上角的“屋子”图标，注册或登陆，即可完美体验“猩聚社”商友社交工具！');
 			} else {
 				// 如果是查看自己的卡片出错，则正常抛出错误
 				throw new Error(error);

@@ -188,7 +188,7 @@ const _sfc_main = {
       } : {}, {
         f: friendList.value.length === 0 && loadStatus.value === "noMore"
       }, friendList.value.length === 0 && loadStatus.value === "noMore" ? {
-        g: common_assets._imports_0$1
+        g: common_assets._imports_1
       } : {});
     };
   }

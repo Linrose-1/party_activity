@@ -6,12 +6,14 @@ const utils_shakeLock = require("../../utils/shakeLock.js");
 if (!Array) {
   const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
   const _easycom_uni_datetime_picker2 = common_vendor.resolveComponent("uni-datetime-picker");
-  (_easycom_uni_icons2 + _easycom_uni_datetime_picker2)();
+  const _easycom_uni_load_more2 = common_vendor.resolveComponent("uni-load-more");
+  (_easycom_uni_icons2 + _easycom_uni_datetime_picker2 + _easycom_uni_load_more2)();
 }
 const _easycom_uni_icons = () => "../../uni_modules/uni-icons/components/uni-icons/uni-icons.js";
 const _easycom_uni_datetime_picker = () => "../../uni_modules/uni-datetime-picker/components/uni-datetime-picker/uni-datetime-picker.js";
+const _easycom_uni_load_more = () => "../../uni_modules/uni-load-more/components/uni-load-more/uni-load-more.js";
 if (!Math) {
-  (_easycom_uni_icons + _easycom_uni_datetime_picker)();
+  (_easycom_uni_icons + _easycom_uni_datetime_picker + _easycom_uni_load_more)();
 }
 const themeColor = "#FF7500";
 const _sfc_main = {
@@ -54,18 +56,22 @@ const _sfc_main = {
     });
     const isListEmpty = common_vendor.computed(() => userList.value.length === 0 && loadingStatus.value !== "loading");
     const fetchUserList = async (isRefresh = false) => {
+      if (isRefresh) {
+        common_vendor.index.stopPullDownRefresh();
+      }
       if (!destination.value.longitude || timeRange.value.length < 2) {
         userList.value = [];
-        loadingStatus.value = "no-more";
+        loadingStatus.value = "noMore";
         return;
       }
-      if (loadingStatus.value === "loading")
+      if (loadingStatus.value === "loading" && !isRefresh)
         return;
-      loadingStatus.value = "loading";
       if (isRefresh) {
         queryParams.pageNo = 1;
         userList.value = [];
+        loadingStatus.value = "more";
       }
+      loadingStatus.value = "loading";
       try {
         const {
           data,
@@ -82,18 +88,16 @@ const _sfc_main = {
         });
         if (error)
           throw new Error(error);
-        userList.value = [...userList.value, ...data.list];
+        const newList = data.list || [];
+        userList.value = isRefresh ? newList : [...userList.value, ...newList];
         total.value = data.total;
-        loadingStatus.value = userList.value.length >= total.value ? "no-more" : "more";
+        loadingStatus.value = userList.value.length >= total.value ? "noMore" : "more";
       } catch (err) {
         loadingStatus.value = "more";
         common_vendor.index.showToast({
-          title: err.message,
+          title: err.message || "加载失败",
           icon: "none"
         });
-      } finally {
-        if (isRefresh)
-          common_vendor.index.stopPullDownRefresh();
       }
     };
     const updateNextLocation = async () => {
@@ -184,7 +188,7 @@ const _sfc_main = {
       const name = user.nickname || "匿名用户";
       const avatarUrl = user.avatar || defaultAvatar;
       const url = `/pages/applicationBusinessCard/applicationBusinessCard?id=${user.id}&name=${encodeURIComponent(name)}&avatar=${encodeURIComponent(avatarUrl)}`;
-      common_vendor.index.__f__("log", "at pages/relation/relation.vue:336", "从人脉列表页跳转，URL:", url);
+      common_vendor.index.__f__("log", "at pages/relation/relation.vue:356", "从人脉列表页跳转，URL:", url);
       common_vendor.index.navigateTo({
         url
       });
@@ -200,24 +204,26 @@ const _sfc_main = {
     common_vendor.watch([destination, timeRange], updateNextLocation);
     common_vendor.watch(activeTab, () => fetchUserList(true));
     common_vendor.onShow(() => {
-      common_vendor.index.__f__("log", "at pages/relation/relation.vue:363", "人脉页 onShow: 开始监听摇一摇");
+      common_vendor.index.__f__("log", "at pages/relation/relation.vue:383", "人脉页 onShow: 开始监听摇一摇");
       common_vendor.index.onAccelerometerChange((res) => {
         if (Math.abs(res.x) > 1.5 || Math.abs(res.y) > 1.5 || Math.abs(res.z) > 1.5) {
           if (!isShakeLocked.value) {
             lockShake();
-            common_vendor.index.__f__("log", "at pages/relation/relation.vue:375", "检测到摇一摇，准备跳转...");
+            common_vendor.index.__f__("log", "at pages/relation/relation.vue:395", "检测到摇一摇，准备跳转...");
             goToShakePage();
           }
         }
       });
     });
     common_vendor.onHide(() => {
-      common_vendor.index.__f__("log", "at pages/relation/relation.vue:386", "人脉页 onHide: 停止监听摇一摇");
+      common_vendor.index.__f__("log", "at pages/relation/relation.vue:406", "人脉页 onHide: 停止监听摇一摇");
       common_vendor.index.stopAccelerometer();
     });
     common_vendor.onLoad(() => {
     });
-    common_vendor.onPullDownRefresh(() => fetchUserList(true));
+    common_vendor.onPullDownRefresh(() => {
+      fetchUserList(true);
+    });
     common_vendor.onReachBottom(() => {
       if (loadingStatus.value === "more") {
         queryParams.pageNo++;
@@ -226,7 +232,7 @@ const _sfc_main = {
     });
     return (_ctx, _cache) => {
       return common_vendor.e({
-        a: common_assets._imports_0$4,
+        a: common_assets._imports_0$2,
         b: common_vendor.p({
           type: "personadd",
           size: "42",
@@ -300,6 +306,17 @@ const _sfc_main = {
           type: "staff",
           size: "60",
           color: "#e0e0e0"
+        })
+      } : {}, {
+        x: userList.value.length > 0 || loadingStatus.value === "loading"
+      }, userList.value.length > 0 || loadingStatus.value === "loading" ? {
+        y: common_vendor.p({
+          status: loadingStatus.value,
+          contentText: {
+            contentdown: "上拉加载更多",
+            contentrefresh: "正在加载...",
+            contentnomore: "—— 我是有底线的 ——"
+          }
         })
       } : {});
     };

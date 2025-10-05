@@ -51,7 +51,9 @@
         "active-detail/active-detail",
         "my-points/my-points",
         "my-zhimi/my-zhimi",
-        "getPoints/getPoints"
+        "getPoints/getPoints",
+        "my-member/my-member",
+        "my-friendInvitation/my-friendInvitation"
       ]
     }
   ],

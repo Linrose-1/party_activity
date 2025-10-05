@@ -1,6 +1,14 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
 const utils_request = require("../../utils/request.js");
+if (!Array) {
+  const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
+  _easycom_uni_icons2();
+}
+const _easycom_uni_icons = () => "../../uni_modules/uni-icons/components/uni-icons/uni-icons.js";
+if (!Math) {
+  _easycom_uni_icons();
+}
 const _sfc_main = {
   __name: "my",
   setup(__props) {
@@ -37,14 +45,14 @@ const _sfc_main = {
         });
         if (!error && data) {
           userInfo.value = data;
-          common_vendor.index.__f__("log", "at pages/my/my.vue:189", "getUserInfo userInfo:", userInfo.value);
+          common_vendor.index.__f__("log", "at pages/my/my.vue:199", "getUserInfo userInfo:", userInfo.value);
         } else {
-          common_vendor.index.__f__("log", "at pages/my/my.vue:191", "获取用户信息失败:", error);
+          common_vendor.index.__f__("log", "at pages/my/my.vue:201", "获取用户信息失败:", error);
           isLogin.value = false;
           userInfo.value = {};
         }
       } catch (err) {
-        common_vendor.index.__f__("log", "at pages/my/my.vue:197", "请求异常:", err);
+        common_vendor.index.__f__("log", "at pages/my/my.vue:207", "请求异常:", err);
         isLogin.value = false;
         userInfo.value = {};
       }
@@ -122,37 +130,38 @@ const _sfc_main = {
     };
     const coreFeatures = common_vendor.ref([
       {
-        name: "会员中心",
-        desc: "您的会员等级",
-        icon: "../../static/icon/core-membership.png",
-        iconBg: "linear-gradient(135deg, #FFD700, #FFA500)",
-        key: "membershipCenter"
+        name: "商友邀请",
+        desc: "您的商脉金库",
+        icon: "../../static/icon/商友邀请.png",
+        iconBg: "linear-gradient(135deg, #00DBDE, #FC00FF)",
+        path: "/packages/my-friendInvitation/my-friendInvitation"
       },
       {
         name: "数字身份",
         desc: "详细身份信息",
-        icon: "../../static/icon/core-identity.png",
+        icon: "../../static/icon/数字身份.png",
         iconBg: "linear-gradient(135deg, #4158D0, #C850C0)",
         key: "digitalIdentity"
       },
       {
         name: "名片分享",
         desc: "您的电子名片",
-        icon: "../../static/icon/core-card.png",
+        icon: "../../static/icon/我的名片.png",
         iconBg: "linear-gradient(135deg, #30CFD0, #330867)",
         path: "/pages/my-businessCard/my-businessCard"
       },
       {
-        name: "商友邀请",
-        desc: "邀请好友加入",
-        icon: "../../static/icon/core-invite.png",
-        iconBg: "linear-gradient(135deg, #00DBDE, #FC00FF)",
-        path: "/packages/my-account/my-account"
+        name: "用户中心",
+        desc: "您的用户等级",
+        icon: "../../static/icon/会员中心.png",
+        iconBg: "linear-gradient(135deg, #FFD700, #FFA500)",
+        // key: 'membershipCenter'
+        path: "/packages/my-member/my-member"
       },
       {
         name: "精准投放",
         desc: "广告精准触达",
-        icon: "../../static/icon/core-target.png",
+        icon: "../../static/icon/广告投放.png",
         iconBg: "linear-gradient(135deg, #FAD961, #F76B1C)",
         key: "precisionTargeting"
       }
@@ -298,7 +307,7 @@ const _sfc_main = {
     };
     const onViewAccountDetail = () => {
       common_vendor.index.navigateTo({
-        url: "/packages/my-account/my-account"
+        url: "/packages/my-edit/my-edit"
       });
     };
     const skipToLogin = () => {
@@ -343,19 +352,23 @@ const _sfc_main = {
           };
         })
       }) : {
-        r: common_vendor.o(skipToLogin)
+        r: common_vendor.p({
+          type: "person-filled",
+          size: "30",
+          color: "#FF8C00"
+        }),
+        s: common_vendor.o(skipToLogin)
       }, {
-        s: common_vendor.f(coreFeatures.value, (item, k0, i0) => {
+        t: common_vendor.f(coreFeatures.value, (item, k0, i0) => {
           return {
             a: common_vendor.t(item.name),
             b: item.icon,
-            c: item.iconBg,
-            d: common_vendor.t(item.desc),
-            e: item.name,
-            f: common_vendor.o(($event) => navigateToCoreFeature(item), item.name)
+            c: common_vendor.t(item.desc),
+            d: item.name,
+            e: common_vendor.o(($event) => navigateToCoreFeature(item), item.name)
           };
         }),
-        t: common_vendor.f(featureList.value, (item, k0, i0) => {
+        v: common_vendor.f(featureList.value, (item, k0, i0) => {
           return {
             a: item.icon,
             b: common_vendor.t(item.name),

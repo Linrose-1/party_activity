@@ -19,10 +19,6 @@ const _sfc_main = {
     const loggedInUserId = common_vendor.ref(null);
     const isLogin = common_vendor.ref(false);
     const member = common_vendor.ref("白银");
-    const hasPaidMembership = common_vendor.computed(() => {
-      const paidLevels = ["青铜", "白银", "黄金", "黑钻"];
-      return paidLevels.includes(member.value);
-    });
     const postList = common_vendor.ref([]);
     const activeTab = common_vendor.ref(1);
     const searchQuery = common_vendor.ref("");
@@ -34,11 +30,13 @@ const _sfc_main = {
       longitude: "",
       latitude: ""
     });
+    const hasPaidMembership = common_vendor.computed(() => {
+      const paidLevels = ["青铜", "白银", "黄金", "黑钻"];
+      return paidLevels.includes(member.value);
+    });
     common_vendor.onShow(() => {
-      common_vendor.index.__f__("log", "at pages/home/home.vue:199", "页面显示，执行 onShow 钩子");
       loggedInUserId.value = common_vendor.index.getStorageSync("userId");
       isLogin.value = !!loggedInUserId.value;
-      common_vendor.index.__f__("log", "at pages/home/home.vue:203", "当前登录状态 isLogin:", isLogin.value);
       getBusinessOpportunitiesList(true);
       common_vendor.index.showShareMenu({
         withShareTicket: true,
@@ -51,63 +49,37 @@ const _sfc_main = {
       }
     });
     common_vendor.onPullDownRefresh(() => {
-      common_vendor.index.__f__("log", "at pages/home/home.vue:221", "用户触发了下拉刷新");
       getBusinessOpportunitiesList(true);
     });
-    function formatTimestamp(timestamp) {
-      if (!timestamp)
-        return "";
-      const date = new Date(timestamp);
-      const Y = date.getFullYear();
-      const M = (date.getMonth() + 1).toString().padStart(2, "0");
-      const D = date.getDate().toString().padStart(2, "0");
-      const h = date.getHours().toString().padStart(2, "0");
-      const m = date.getMinutes().toString().padStart(2, "0");
-      return `${Y}-${M}-${D} ${h}:${m}`;
-    }
-    common_vendor.onShareAppMessage((res) => {
-      common_vendor.index.__f__("log", "at pages/home/home.vue:243", "触发首页分享给好友");
+    common_vendor.onShareAppMessage(() => {
       const sharerId = common_vendor.index.getStorageSync("userId");
       const inviteCode = utils_user.getInviteCode();
-      let sharePath = "/pages/home/home";
       const params = [];
-      if (sharerId) {
+      if (sharerId)
         params.push(`sharerId=${sharerId}`);
-      }
-      if (inviteCode) {
+      if (inviteCode)
         params.push(`inviteCode=${inviteCode}`);
-      }
-      if (params.length > 0) {
-        sharePath += `?${params.join("&")}`;
-      }
-      const shareContent = {
+      const sharePath = `/pages/home/home${params.length > 0 ? "?" + params.join("&") : ""}`;
+      return {
         title: "发现了一个每天都想打开的商友社交小工具！点戳进入☞☞",
         path: sharePath,
         imageUrl: "https://img.gofor.club/logo_share.jpg"
       };
-      common_vendor.index.__f__("log", "at pages/home/home.vue:273", "首页分享内容:", JSON.stringify(shareContent));
-      return shareContent;
     });
     common_vendor.onShareTimeline(() => {
-      common_vendor.index.__f__("log", "at pages/home/home.vue:282", "触发首页分享到朋友圈");
       const sharerId = common_vendor.index.getStorageSync("userId");
       const inviteCode = utils_user.getInviteCode();
       const params = [];
-      if (sharerId) {
+      if (sharerId)
         params.push(`sharerId=${sharerId}`);
-      }
-      if (inviteCode) {
+      if (inviteCode)
         params.push(`inviteCode=${inviteCode}`);
-      }
       const queryString = params.join("&");
-      const shareContent = {
+      return {
         title: "发现了一个每天都想打开的商友社交小工具！点戳进入☞☞",
         query: queryString,
-        // 使用拼接后的 query
         imageUrl: "https://img.gofor.club/logo_share.jpg"
       };
-      common_vendor.index.__f__("log", "at pages/home/home.vue:309", "首页分享到朋友圈内容:", JSON.stringify(shareContent));
-      return shareContent;
     });
     const getBusinessOpportunitiesList = async (isRefresh = false) => {
       if (loadingStatus.value === "loading" && !isRefresh)
@@ -123,9 +95,8 @@ const _sfc_main = {
         pageSize: pageSize.value,
         tabIndex: activeTab.value
       };
-      if (searchQuery.value) {
+      if (searchQuery.value)
         params.searchKey = searchQuery.value;
-      }
       if (activeTab.value === 2 && location.longitude && location.latitude) {
         params.longitude = location.longitude;
         params.latitude = location.latitude;
@@ -138,51 +109,40 @@ const _sfc_main = {
           method: "GET",
           data: params
         });
-        if (error) {
-          loadingStatus.value = "more";
-          common_vendor.index.showToast({
-            title: `加载失败: ${error}`,
-            icon: "none"
-          });
-          return;
-        }
-        if (!apiData || !apiData.list) {
-          loadingStatus.value = "noMore";
-          if (isRefresh) {
+        if (error || !apiData || !apiData.list) {
+          loadingStatus.value = error ? "more" : "noMore";
+          if (error)
+            common_vendor.index.showToast({
+              title: `加载失败: ${error}`,
+              icon: "none"
+            });
+          if (isRefresh)
             postList.value = [];
-          }
           return;
         }
         const mappedData = apiData.list.map((item) => {
           var _a, _b, _c;
           return {
             id: item.id,
-            content: item.postContent,
             title: item.postTitle,
+            contentPreview: generateContentPreview(item.postContent),
             images: item.postImg ? String(item.postImg).split(",").filter((img) => img) : [],
             tags: item.tags ? Array.isArray(item.tags) ? item.tags : String(item.tags).split(",").filter((tag) => tag) : [],
             likes: item.likesCount || 0,
             dislikes: item.dislikesCount || 0,
-            // 【关键】未登录时 userLikeStr 为 null，这是正确的
+            comments: item.commentsCount || 0,
             userAction: item.userLikeStr || null,
-            // 【关键】未登录时 followFlag 为 0 或 null，这样 isSaved 就是 false，这是正确的
             isSaved: item.followFlag === 1,
-            // 【关键】未登录时 followUserFlag 为 0 或 null，isFollowedUser 就是 false，这是正确的
             isFollowedUser: item.followUserFlag === 1,
             time: formatTimestamp(item.createTime),
             user: {
-              // 【关键】处理 memberUser 可能为 null 的情况
               id: ((_a = item.memberUser) == null ? void 0 : _a.id) || item.userId,
               name: ((_b = item.memberUser) == null ? void 0 : _b.nickname) || "匿名用户",
               avatar: ((_c = item.memberUser) == null ? void 0 : _c.avatar) || defaultAvatarUrl
             }
           };
         });
-        if (isRefresh) {
-          postList.value = mappedData;
-        } else {
-          postList.value = [...postList.value, ...mappedData];
-        }
+        postList.value = isRefresh ? mappedData : [...postList.value, ...mappedData];
         if (postList.value.length >= apiData.total) {
           loadingStatus.value = "noMore";
         } else {
@@ -190,7 +150,7 @@ const _sfc_main = {
           pageNo.value++;
         }
       } catch (err) {
-        common_vendor.index.__f__("error", "at pages/home/home.vue:410", "getBusinessOpportunitiesList 逻辑异常:", err);
+        common_vendor.index.__f__("error", "at pages/home/home.vue:312", "getBusinessOpportunitiesList 逻辑异常:", err);
         loadingStatus.value = "more";
         common_vendor.index.showToast({
           title: "页面逻辑异常，请稍后重试",
@@ -208,29 +168,30 @@ const _sfc_main = {
         return;
       activeTab.value = tabIndex;
       if (tabIndex === 2) {
-        common_vendor.index.getSetting({
-          success: (res) => {
-            if (res.authSetting["scope.userLocation"]) {
-              getLocationAndFetchData();
-            } else {
-              common_vendor.index.authorize({
-                scope: "scope.userLocation",
-                success: () => getLocationAndFetchData(),
-                fail: () => {
-                  common_vendor.index.showModal({
-                    title: "温馨提示",
-                    content: "您已拒绝获取位置信息，无法查看附近商机。请在设置中开启位置权限。",
-                    showCancel: false,
-                    confirmText: "我知道了"
-                  });
-                }
-              });
-            }
-          }
-        });
+        checkAndGetLocation();
       } else {
         getBusinessOpportunitiesList(true);
       }
+    };
+    const checkAndGetLocation = () => {
+      common_vendor.index.getSetting({
+        success: (res) => {
+          if (res.authSetting["scope.userLocation"]) {
+            getLocationAndFetchData();
+          } else {
+            common_vendor.index.authorize({
+              scope: "scope.userLocation",
+              success: () => getLocationAndFetchData(),
+              fail: () => common_vendor.index.showModal({
+                title: "温馨提示",
+                content: "您已拒绝获取位置信息，无法查看附近商机。请在设置中开启位置权限。",
+                showCancel: false,
+                confirmText: "我知道了"
+              })
+            });
+          }
+        }
+      });
     };
     const getLocationAndFetchData = () => {
       common_vendor.index.showLoading({
@@ -241,24 +202,16 @@ const _sfc_main = {
         success: (res) => {
           location.longitude = res.longitude.toString();
           location.latitude = res.latitude.toString();
-          getBusinessOpportunitiesList(true);
         },
-        fail: (err) => {
+        complete: () => {
+          common_vendor.index.hideLoading();
           getBusinessOpportunitiesList(true);
-        },
-        complete: () => common_vendor.index.hideLoading()
+        }
       });
     };
     const toggleAction = async (post, clickedAction) => {
-      if (isActionInProgress.value)
+      if (isActionInProgress.value || !isLogin.value)
         return;
-      if (!loggedInUserId.value) {
-        common_vendor.index.showToast({
-          title: "请先登录",
-          icon: "none"
-        });
-        return;
-      }
       isActionInProgress.value = true;
       const originalAction = post.userAction;
       const originalLikes = post.likes;
@@ -270,7 +223,6 @@ const _sfc_main = {
         else
           post.dislikes--;
       } else {
-        post.userAction = clickedAction;
         if (clickedAction === "like") {
           post.likes++;
           if (originalAction === "dislike")
@@ -280,20 +232,20 @@ const _sfc_main = {
           if (originalAction === "like")
             post.likes--;
         }
+        post.userAction = clickedAction;
       }
       try {
-        const requestData = {
-          userId: loggedInUserId.value,
-          targetId: post.id,
-          targetType: "post",
-          action: post.userAction
-          // 发送更新后的action ('like', 'dislike' 或 null)
-        };
-        const result = await utils_request.request("/app-api/member/like-action/add", {
+        const {
+          error
+        } = await utils_request.request("/app-api/member/like-action/add", {
           method: "POST",
-          data: requestData
+          data: {
+            targetId: post.id,
+            targetType: "post",
+            action: post.userAction
+          }
         });
-        if (result && result.error) {
+        if (error) {
           post.userAction = originalAction;
           post.likes = originalLikes;
           post.dislikes = originalDislikes;
@@ -302,7 +254,7 @@ const _sfc_main = {
             icon: "none"
           });
         }
-      } catch (error) {
+      } catch (err) {
         post.userAction = originalAction;
         post.likes = originalLikes;
         post.dislikes = originalDislikes;
@@ -314,45 +266,37 @@ const _sfc_main = {
         isActionInProgress.value = false;
       }
     };
-    const toggleSave = async (post) => {
-      if (isActionInProgress.value)
+    const toggleGenericFollow = async (post, type, targetId, statusKey, successMsg, failureMsg) => {
+      if (isActionInProgress.value || !isLogin.value)
         return;
-      if (!loggedInUserId.value) {
-        common_vendor.index.showToast({
-          title: "请先登录",
-          icon: "none"
-        });
-        return;
-      }
       isActionInProgress.value = true;
-      const originalStatus = post.isSaved;
-      post.isSaved = !originalStatus;
-      const apiUrl = post.isSaved ? "/app-api/member/follow/add" : "/app-api/member/follow/del";
+      const originalStatus = post[statusKey];
+      post[statusKey] = !originalStatus;
+      const apiUrl = post[statusKey] ? "/app-api/member/follow/add" : "/app-api/member/follow/del";
       try {
-        const requestData = {
-          userId: loggedInUserId.value,
-          targetId: post.id,
-          targetType: "post"
-        };
-        const result = await utils_request.request(apiUrl, {
+        const {
+          error
+        } = await utils_request.request(apiUrl, {
           method: "POST",
-          data: requestData
+          data: {
+            targetId,
+            targetType: type
+          }
         });
-        common_vendor.index.__f__("log", "at pages/home/home.vue:577", "触发收藏", result);
-        if (result && result.error) {
-          post.isSaved = originalStatus;
+        if (error) {
+          post[statusKey] = originalStatus;
           common_vendor.index.showToast({
-            title: "操作失败",
+            title: failureMsg,
             icon: "none"
           });
         } else {
           common_vendor.index.showToast({
-            title: post.isSaved ? "已收藏" : "已取消收藏",
+            title: post[statusKey] ? successMsg.add : successMsg.remove,
             icon: "none"
           });
         }
-      } catch (error) {
-        post.isSaved = originalStatus;
+      } catch (err) {
+        post[statusKey] = originalStatus;
         common_vendor.index.showToast({
           title: "操作失败，请重试",
           icon: "none"
@@ -360,6 +304,32 @@ const _sfc_main = {
       } finally {
         isActionInProgress.value = false;
       }
+    };
+    const toggleSave = (post) => {
+      toggleGenericFollow(
+        post,
+        "post",
+        post.id,
+        "isSaved",
+        {
+          add: "已收藏",
+          remove: "已取消收藏"
+        },
+        "收藏失败"
+      );
+    };
+    const toggleFollow = (post) => {
+      toggleGenericFollow(
+        post,
+        "post_user",
+        post.user.id,
+        "isFollowedUser",
+        {
+          add: "已关注",
+          remove: "已取消关注"
+        },
+        "关注失败"
+      );
     };
     const deletePost = (postToDelete) => {
       common_vendor.index.showModal({
@@ -376,13 +346,12 @@ const _sfc_main = {
               method: "POST",
               data: {
                 id: postToDelete.id
-                // 使用传入的 post 对象的 ID
               }
             });
             common_vendor.index.hideLoading();
             if (error) {
               common_vendor.index.showToast({
-                title: "删除失败: " + error,
+                title: `删除失败: ${error}`,
                 icon: "none"
               });
               return;
@@ -399,76 +368,24 @@ const _sfc_main = {
         }
       });
     };
-    const toggleFollow = async (post) => {
-      if (isActionInProgress.value)
-        return;
-      if (!loggedInUserId.value) {
-        common_vendor.index.showToast({
-          title: "请先登录",
-          icon: "none"
-        });
-        return;
-      }
-      isActionInProgress.value = true;
-      const originalStatus = post.isFollowedUser;
-      post.isFollowedUser = !originalStatus;
-      const apiUrl = post.isFollowedUser ? "/app-api/member/follow/add" : "/app-api/member/follow/del";
-      try {
-        const requestData = {
-          userId: loggedInUserId.value,
-          targetId: post.user.id,
-          targetType: "post_user"
-        };
-        const result = await utils_request.request(apiUrl, {
-          method: "POST",
-          data: requestData
-        });
-        if (result && result.error) {
-          post.isFollowedUser = originalStatus;
-          common_vendor.index.showToast({
-            title: "操作失败",
-            icon: "none"
-          });
-        } else {
-          common_vendor.index.showToast({
-            title: post.isFollowedUser ? "已关注" : "已取消关注",
-            icon: "none"
-          });
-        }
-      } catch (error) {
-        post.isFollowedUser = originalStatus;
-        common_vendor.index.showToast({
-          title: "操作失败，请重试",
-          icon: "none"
-        });
-      } finally {
-        isActionInProgress.value = false;
-      }
-    };
-    const postNew = () => {
-      common_vendor.index.navigateTo({
-        url: "/pages/home-opportunitiesPublish/home-opportunitiesPublish"
-      });
-    };
-    const goToLogin = () => {
-      common_vendor.index.navigateTo({
-        url: "/pages/index/index"
-        // url: '/pages/login/login' 
-      });
-    };
-    const goToMembership = () => {
-      common_vendor.index.showToast({
-        title: "正在前往会员中心...",
-        icon: "none"
-      });
-    };
     const handlePostClick = (post) => {
-      if (isLogin.value && hasPaidMembership.value) {
-        skipCommercialDetail(post.id);
-      } else if (isLogin.value && !hasPaidMembership.value) {
+      if (!isLogin.value) {
+        goToLogin();
+      } else if (!hasPaidMembership.value) {
         goToMembership();
       } else {
+        skipCommercialDetail(post.id);
+      }
+    };
+    const navigateToComments = (post) => {
+      if (!isLogin.value) {
         goToLogin();
+      } else if (!hasPaidMembership.value) {
+        goToMembership();
+      } else {
+        common_vendor.index.navigateTo({
+          url: `/packages/home-commercialDetail/home-commercialDetail?id=${post.id}&scrollTo=comments`
+        });
       }
     };
     const navigateToBusinessCard = (user) => {
@@ -479,18 +396,41 @@ const _sfc_main = {
         });
         return;
       }
-      const defaultAvatar = "/static/images/default-avatar.png";
-      const avatarUrl = user.avatar || defaultAvatar;
+      const avatarUrl = user.avatar || defaultAvatarUrl;
       const url = `/pages/applicationBusinessCard/applicationBusinessCard?id=${user.id}&name=${encodeURIComponent(user.name)}&avatar=${encodeURIComponent(avatarUrl)}`;
-      common_vendor.index.__f__("log", "at pages/home/home.vue:775", "从商机列表页跳转，URL:", url);
       common_vendor.index.navigateTo({
         url
       });
     };
-    const skipCommercialDetail = (postId) => {
-      common_vendor.index.navigateTo({
-        url: `/packages/home-commercialDetail/home-commercialDetail?id=${postId}`
-      });
+    const postNew = () => common_vendor.index.navigateTo({
+      url: "/pages/home-opportunitiesPublish/home-opportunitiesPublish"
+    });
+    const goToLogin = () => common_vendor.index.navigateTo({
+      url: "/pages/index/index"
+    });
+    const goToMembership = () => common_vendor.index.showToast({
+      title: "正在前往会员中心...",
+      icon: "none"
+    });
+    const skipCommercialDetail = (postId) => common_vendor.index.navigateTo({
+      url: `/packages/home-commercialDetail/home-commercialDetail?id=${postId}`
+    });
+    const formatTimestamp = (timestamp) => {
+      if (!timestamp)
+        return "";
+      const date = new Date(timestamp);
+      const Y = date.getFullYear();
+      const M = (date.getMonth() + 1).toString().padStart(2, "0");
+      const D = date.getDate().toString().padStart(2, "0");
+      const h = date.getHours().toString().padStart(2, "0");
+      const m = date.getMinutes().toString().padStart(2, "0");
+      return `${Y}-${M}-${D} ${h}:${m}`;
+    };
+    const generateContentPreview = (content) => {
+      if (!content)
+        return "";
+      const plainText = content.replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
+      return plainText.length > 50 ? plainText.substring(0, 50) + "..." : plainText;
     };
     return (_ctx, _cache) => {
       return common_vendor.e({
@@ -530,75 +470,75 @@ const _sfc_main = {
             h: common_vendor.o(($event) => toggleFollow(post), post.id)
           } : {}, {
             i: common_vendor.t(post.title),
-            j: post.images && post.images.length
+            j: post.contentPreview
+          }, post.contentPreview ? {
+            k: common_vendor.t(post.contentPreview)
+          } : {}, {
+            l: post.images && post.images.length
           }, post.images && post.images.length ? {
-            k: common_vendor.f(post.images, (image, imgIndex, i1) => {
+            m: common_vendor.f(post.images, (image, imgIndex, i1) => {
               return {
                 a: image,
                 b: imgIndex
               };
             })
           } : {}, {
-            l: post.tags && post.tags.length
+            n: post.tags && post.tags.length
           }, post.tags && post.tags.length ? {
-            m: common_vendor.f(post.tags, (tag, tagIndex, i1) => {
+            o: common_vendor.f(post.tags, (tag, tagIndex, i1) => {
               return {
                 a: common_vendor.t(tag),
                 b: tagIndex
               };
             })
           } : {}, isLogin.value ? common_vendor.e({
-            n: "07e72d3c-2-" + i0,
-            o: common_vendor.p({
-              type: "hand-up-filled",
-              size: "18",
-              color: "#e74c3c"
-            }),
-            p: common_vendor.t(post.likes),
-            q: "07e72d3c-3-" + i0,
-            r: common_vendor.p({
-              type: "hand-down-filled",
-              size: "18",
-              color: "#3498db"
-            }),
-            s: common_vendor.t(post.dislikes),
-            t: "07e72d3c-4-" + i0,
-            v: common_vendor.p({
+            p: "07e72d3c-2-" + i0,
+            q: common_vendor.p({
               type: post.userAction === "like" ? "hand-up-filled" : "hand-up",
               size: "20",
               color: post.userAction === "like" ? "#e74c3c" : "#666"
             }),
-            w: post.userAction === "like" ? 1 : "",
-            x: common_vendor.o(($event) => toggleAction(post, "like"), post.id),
-            y: "07e72d3c-5-" + i0,
-            z: common_vendor.p({
+            r: common_vendor.t(post.likes),
+            s: post.userAction === "like" ? 1 : "",
+            t: common_vendor.o(($event) => toggleAction(post, "like"), post.id),
+            v: "07e72d3c-3-" + i0,
+            w: common_vendor.p({
               type: post.userAction === "dislike" ? "hand-down-filled" : "hand-down",
               size: "20",
               color: post.userAction === "dislike" ? "#3498db" : "#666"
             }),
-            A: post.userAction === "dislike" ? 1 : "",
-            B: common_vendor.o(($event) => toggleAction(post, "dislike"), post.id),
-            C: "07e72d3c-6-" + i0,
-            D: common_vendor.p({
+            x: common_vendor.t(post.dislikes),
+            y: post.userAction === "dislike" ? 1 : "",
+            z: common_vendor.o(($event) => toggleAction(post, "dislike"), post.id),
+            A: "07e72d3c-4-" + i0,
+            B: common_vendor.p({
+              type: "chatbubble",
+              size: "20",
+              color: "#666"
+            }),
+            C: common_vendor.t(post.comments),
+            D: common_vendor.o(($event) => navigateToComments(post), post.id),
+            E: "07e72d3c-5-" + i0,
+            F: common_vendor.p({
               type: post.isSaved ? "star-filled" : "star",
               size: "20",
               color: post.isSaved ? "#FF6A00" : "#666"
             }),
-            E: common_vendor.t(post.isSaved ? "已收藏" : "收藏"),
-            F: post.isSaved ? 1 : "",
-            G: common_vendor.o(($event) => toggleSave(post), post.id),
-            H: isLogin.value && loggedInUserId.value === post.user.id
+            G: common_vendor.t(post.isSaved ? "已收藏" : "收藏"),
+            H: post.isSaved ? 1 : "",
+            I: common_vendor.o(($event) => toggleSave(post), post.id),
+            J: isLogin.value && loggedInUserId.value === post.user.id
           }, isLogin.value && loggedInUserId.value === post.user.id ? {
-            I: "07e72d3c-7-" + i0,
-            J: common_vendor.p({
+            K: "07e72d3c-6-" + i0,
+            L: common_vendor.p({
               type: "trash",
               size: "20",
               color: "#e74c3c"
             }),
-            K: common_vendor.o(($event) => deletePost(post), post.id)
+            M: common_vendor.o(($event) => deletePost(post), post.id)
           } : {}) : {}, {
-            L: post.id,
-            M: common_vendor.o(($event) => handlePostClick(post), post.id)
+            N: post.id,
+            O: common_vendor.o(($event) => handlePostClick(post), post.id)
           });
         }),
         q: isLogin.value,

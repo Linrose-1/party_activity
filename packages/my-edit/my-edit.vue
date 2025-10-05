@@ -1,179 +1,179 @@
 <template>
-	<view class="container">
-		<!-- 基本资料表单 -->
-		<view class="form-section">
-			<view class="section-header">
-				<text class="section-title">编辑基本资料</text>
-			</view>
+	<view class="page-container">
+		<view class="tabs-container">
+			<uni-segmented-control :current="currentTab" :values="tabItems" @clickItem="handleTabClick"
+				style-type="button" active-color="#FF6B00" />
+		</view>
 
-			<view class="form-content">
-				<uni-forms ref="formRef" :modelValue="form" :rules="rules">
-					<!-- 头像 -->
-					<uni-forms-item label="头像" name="avatar">
-						<view class="avatar-uploader">
-							<image v-if="form.avatar" :src="form.avatar" class="avatar-img" mode="aspectFill" />
-							<button class="upload-btn"
-								@click="chooseAvatar">{{ form.avatar ? '更换头像' : '上传头像' }}</button>
-						</view>
-					</uni-forms-item>
 
-					<!-- 其他简单输入项 -->
-					<uni-forms-item label="用户昵称" name="nickname"><uni-easyinput v-model="form.nickname"
-							placeholder="请输入用户昵称" /></uni-forms-item>
-					<uni-forms-item label="真实姓名" name="realName"><uni-easyinput v-model="form.realName"
-							placeholder="请输入真实姓名" /></uni-forms-item>
-					<uni-forms-item label="性别" name="sex"><uni-data-select v-model="form.sex" :localdata="genderOptions"
-							placeholder="请选择性别" /></uni-forms-item>
-					<uni-forms-item label="出生年代" name="era">
-						<uni-data-select v-model="form.era" :localdata="eraOptions" placeholder="请选择出生年代" />
-					</uni-forms-item>
+		<view class="content-area">
+			<view v-show="currentTab === 0">
+				<!-- 基本资料表单 -->
+				<view class="form-section">
 
-					<!-- 地区选择器 -->
-					<uni-forms-item label="常住地" name="locationAddress"><uni-data-picker placeholder="请选择常住地"
-							popup-title="请选择省市区" :localdata="areaTree" :map="{text: 'name', value: 'id'}"
-							v-model="form.locationAddress" /></uni-forms-item>
-					<uni-forms-item label="出生地" name="birthplace"><uni-data-picker placeholder="请选择出生地"
-							popup-title="请选择省市区" :localdata="areaTree" :map="{text: 'name', value: 'id'}"
-							v-model="form.birthplace" /></uni-forms-item>
+					<view class="form-content">
+						<uni-forms ref="formRef" :modelValue="form" :rules="rules">
+							<!-- 头像 -->
+							<uni-forms-item label="头像" name="avatar">
+								<view class="avatar-uploader">
+									<image v-if="form.avatar" :src="form.avatar" class="avatar-img" mode="aspectFill" />
+									<button class="upload-btn"
+										@click="chooseAvatar">{{ form.avatar ? '更换头像' : '上传头像' }}</button>
+								</view>
+							</uni-forms-item>
 
-					<!-- 更多简单输入项 -->
-					<uni-forms-item label="籍贯" name="nativePlace">
-						<uni-data-picker placeholder="请选择籍贯" popup-title="请选择省市区" :localdata="areaTree"
-							:map="{text: 'name', value: 'id'}" v-model="form.nativePlace" />
-					</uni-forms-item>
-					<view class="dynamic-section">
-						<view class="dynamic-header">
-							<text class="dynamic-label">商会/协会与职务</text>
-							<button v-if="professionsList.length < 3" class="add-btn-small" @click="addProfession">
-								<uni-icons type="plusempty" size="14" color="#007bff"></uni-icons>
-								添加
-							</button>
-						</view>
-						<view v-for="(profession, index) in professionsList" :key="index" class="dynamic-item">
-							<uni-easyinput v-model="professionsList[index]" placeholder="示例：XXX商会/会长，XXX协会/理事" />
-							<button v-if="professionsList.length > 1" class="remove-btn-small"
-								@click="removeProfession(index)">×</button>
-						</view>
-					</view>
-					<view class="dynamic-section">
-						<view class="dynamic-header">
-							<text class="dynamic-label">公司/机构与行业</text>
-							<button v-if="companyAndIndustryList.length < 3" class="add-btn-small" @click="addCompany">
-								<uni-icons type="plusempty" size="14" color="#007bff"></uni-icons>
-								添加
-							</button>
-						</view>
-						<view v-for="(company, index) in companyAndIndustryList" :key="index" class="dynamic-group">
-							<view class="group-header">
-								<text class="group-title">第 {{ index + 1 }} 组</text>
-								<button v-if="companyAndIndustryList.length > 1" class="remove-btn"
-									@click="removeCompany(index)">删除</button>
+							<!-- 其他简单输入项 -->
+							<uni-forms-item label="用户昵称" name="nickname"><uni-easyinput v-model="form.nickname"
+									placeholder="请输入用户昵称" /></uni-forms-item>
+							<uni-forms-item label="真实姓名" name="realName"><uni-easyinput v-model="form.realName"
+									placeholder="请输入真实姓名" /></uni-forms-item>
+							<uni-forms-item label="性别" name="sex"><uni-data-select v-model="form.sex"
+									:localdata="genderOptions" placeholder="请选择性别" /></uni-forms-item>
+							<uni-forms-item label="出生年代" name="era">
+								<uni-data-select v-model="form.era" :localdata="eraOptions" placeholder="请选择出生年代" />
+							</uni-forms-item>
+
+							<!-- 地区选择器 -->
+							<uni-forms-item label="常住地" name="locationAddress"><uni-data-picker placeholder="请选择常住地"
+									popup-title="请选择省市区" :localdata="areaTree" :map="{text: 'name', value: 'id'}"
+									v-model="form.locationAddress" /></uni-forms-item>
+							<uni-forms-item label="出生地" name="birthplace"><uni-data-picker placeholder="请选择出生地"
+									popup-title="请选择省市区" :localdata="areaTree" :map="{text: 'name', value: 'id'}"
+									v-model="form.birthplace" /></uni-forms-item>
+
+							<!-- 更多简单输入项 -->
+							<uni-forms-item label="籍贯" name="nativePlace">
+								<uni-data-picker placeholder="请选择籍贯" popup-title="请选择省市区" :localdata="areaTree"
+									:map="{text: 'name', value: 'id'}" v-model="form.nativePlace" />
+							</uni-forms-item>
+							<view class="dynamic-section">
+								<view class="dynamic-header">
+									<text class="dynamic-label">商会/协会与职务</text>
+									<button v-if="professionsList.length < 3" class="add-btn-small"
+										@click="addProfession">
+										<uni-icons type="plusempty" size="14" color="#007bff"></uni-icons>
+										添加
+									</button>
+								</view>
+								<view v-for="(profession, index) in professionsList" :key="index" class="dynamic-item">
+									<uni-easyinput v-model="professionsList[index]"
+										placeholder="示例：XXX商会/会长，XXX协会/理事" />
+									<button v-if="professionsList.length > 1" class="remove-btn-small"
+										@click="removeProfession(index)">×</button>
+								</view>
 							</view>
-							<!-- 【样式修复关键】uni-forms-item 放在循环内，并使用动态 name -->
-							<uni-forms-item :label="`行业`" :name="`industry_${index}`">
-								<uni-data-picker class="dynamic-picker" placeholder="请选择所在行业" popup-title="请选择行业"
-									:localdata="industryTree" :map="{text: 'name', value: 'name'}"
-									v-model="company.industryName" />
-							</uni-forms-item>
-							<uni-forms-item :label="`公司`" :name="`company_${index}`">
-								<uni-easyinput v-model="company.name" placeholder="请输入公司或机构名称" />
-							</uni-forms-item>
-							<uni-forms-item :label="`职务`" :name="`position_${index}`">
-								<uni-easyinput v-model="company.positionTitle" placeholder="请输入您的职务" />
+							<view class="dynamic-section">
+								<view class="dynamic-header">
+									<text class="dynamic-label">公司/机构与行业</text>
+									<button v-if="companyAndIndustryList.length < 3" class="add-btn-small"
+										@click="addCompany">
+										<uni-icons type="plusempty" size="14" color="#007bff"></uni-icons>
+										添加
+									</button>
+								</view>
+								<view v-for="(company, index) in companyAndIndustryList" :key="index"
+									class="dynamic-group">
+									<view class="group-header">
+										<text class="group-title">第 {{ index + 1 }} 组</text>
+										<button v-if="companyAndIndustryList.length > 1" class="remove-btn"
+											@click="removeCompany(index)">删除</button>
+									</view>
+									<!-- 【样式修复关键】uni-forms-item 放在循环内，并使用动态 name -->
+									<uni-forms-item :label="`行业`" :name="`industry_${index}`">
+										<uni-data-picker class="dynamic-picker" placeholder="请选择所在行业"
+											popup-title="请选择行业" :localdata="industryTree"
+											:map="{text: 'name', value: 'name'}" v-model="company.industryName" />
+									</uni-forms-item>
+									<uni-forms-item :label="`公司`" :name="`company_${index}`">
+										<uni-easyinput v-model="company.name" placeholder="请输入公司或机构名称" />
+									</uni-forms-item>
+									<uni-forms-item :label="`职务`" :name="`position_${index}`">
+										<uni-easyinput v-model="company.positionTitle" placeholder="请输入您的职务" />
+									</uni-forms-item>
+
+								</view>
+							</view>
+							<view class="dynamic-section">
+								<view class="dynamic-header">
+									<text class="dynamic-label">毕业学校</text>
+									<button v-if="schoolsList.length < 6" class="add-btn-small" @click="addSchool">
+										<uni-icons type="plusempty" size="14" color="#007bff"></uni-icons>
+										添加
+									</button>
+								</view>
+								<view v-for="(school, index) in schoolsList" :key="index" class="dynamic-item">
+									<uni-easyinput v-model="schoolsList[index]" placeholder="可以多填,用以查同学会" />
+									<button v-if="schoolsList.length > 1" class="remove-btn-small"
+										@click="removeSchool(index)">×</button>
+								</view>
+							</view>
+							<uni-forms-item label="手机号码" name="mobile"><uni-easyinput class="phone-text"
+									v-model="form.mobile" :disabled="true" /></uni-forms-item>
+							<uni-forms-item label="邮箱" name="contactEmail"><uni-easyinput v-model="form.contactEmail"
+									placeholder="请输入邮箱" /></uni-forms-item>
+
+							<!-- 微信二维码 -->
+							<uni-forms-item label="微信二维码" name="wechatQrCodeUrl">
+								<view class="qr-uploader">
+									<image v-if="form.wechatQrCodeUrl" :src="form.wechatQrCodeUrl" class="qr-img"
+										mode="aspectFit" @click="previewImage(form.wechatQrCodeUrl)" />
+									<button class="upload-btn"
+										@click="chooseWechatQr">{{ form.wechatQrCodeUrl ? '更换二维码' : '上传二维码' }}</button>
+								</view>
 							</uni-forms-item>
 
-						</view>
+							<!-- 爱好和简介 -->
+							<uni-forms-item label="爱好" name="hobby">
+								<uni-data-checkbox v-model="selectedHobbies" :localdata="hobbyOptions" multiple
+									@change="onHobbyChange" />
+								<!-- 当“其他”被选中时，显示输入框 -->
+								<uni-easyinput v-if="isOtherHobbySelected" v-model="otherHobbyText"
+									placeholder="请输入您的其他爱好" class="other-hobby-input" />
+							</uni-forms-item>
+							<uni-forms-item label="个性签名" name="signature">
+								<uni-easyinput v-model="form.signature" placeholder="设置一个独特的个性签名吧" />
+							</uni-forms-item>
+							<uni-forms-item label="个人简介" name="personalBio"><uni-easyinput type="textarea"
+									v-model="form.personalBio" placeholder="介绍一下自己..." /></uni-forms-item>
+
+							<!-- 我有资源 -->
+							<uni-forms-item label="我有资源" name="haveResources">
+								<uni-easyinput type="textarea" v-model="form.haveResources" placeholder="用来智能匹配商友资源" />
+							</uni-forms-item>
+
+							<!-- 我需资源 -->
+							<uni-forms-item label="我需资源" name="needResources">
+								<uni-easyinput type="textarea" v-model="form.needResources" placeholder="用来智能匹配商友资源" />
+							</uni-forms-item>
+						</uni-forms>
+
+						<button class="save-btn" @click="submitForm">保存资料</button>
 					</view>
-					<view class="dynamic-section">
-						<view class="dynamic-header">
-							<text class="dynamic-label">毕业学校</text>
-							<button v-if="schoolsList.length < 6" class="add-btn-small" @click="addSchool">
-								<uni-icons type="plusempty" size="14" color="#007bff"></uni-icons>
-								添加
-							</button>
-						</view>
-						<view v-for="(school, index) in schoolsList" :key="index" class="dynamic-item">
-							<uni-easyinput v-model="schoolsList[index]" placeholder="可以多填,用以查同学会" />
-							<button v-if="schoolsList.length > 1" class="remove-btn-small"
-								@click="removeSchool(index)">×</button>
-						</view>
+				</view>
+			</view>
+
+			<view v-show="currentTab === 1">
+				<view class="form-section digital-label-section">
+					<view class="section-header">
+						<text class="section-title">什么是数字标签？</text>
 					</view>
-					<uni-forms-item label="手机号码" name="mobile"><uni-easyinput class="phone-text" v-model="form.mobile"
-							:disabled="true" /></uni-forms-item>
-					<uni-forms-item label="邮箱" name="contactEmail"><uni-easyinput v-model="form.contactEmail"
-							placeholder="请输入邮箱" /></uni-forms-item>
-
-					<!-- 微信二维码 -->
-					<uni-forms-item label="微信二维码" name="wechatQrCodeUrl">
-						<view class="qr-uploader">
-							<image v-if="form.wechatQrCodeUrl" :src="form.wechatQrCodeUrl" class="qr-img"
-								mode="aspectFit" @click="previewImage(form.wechatQrCodeUrl)" />
-							<button class="upload-btn"
-								@click="chooseWechatQr">{{ form.wechatQrCodeUrl ? '更换二维码' : '上传二维码' }}</button>
-						</view>
-					</uni-forms-item>
-
-					<!-- 爱好和简介 -->
-					<uni-forms-item label="爱好" name="hobby">
-						<uni-data-checkbox v-model="selectedHobbies" :localdata="hobbyOptions" multiple
-							@change="onHobbyChange" />
-						<!-- 当“其他”被选中时，显示输入框 -->
-						<uni-easyinput v-if="isOtherHobbySelected" v-model="otherHobbyText" placeholder="请输入您的其他爱好"
-							class="other-hobby-input" />
-					</uni-forms-item>
-					<uni-forms-item label="个性签名" name="signature">
-						<uni-easyinput v-model="form.signature" placeholder="设置一个独特的个性签名吧" />
-					</uni-forms-item>
-					<uni-forms-item label="个人简介" name="personalBio"><uni-easyinput type="textarea"
-							v-model="form.personalBio" placeholder="介绍一下自己..." /></uni-forms-item>
-
-					<!-- 我有资源 -->
-					<uni-forms-item label="我有资源" name="haveResources">
-						<uni-easyinput type="textarea" v-model="form.haveResources" placeholder="用来智能匹配商友资源" />
-					</uni-forms-item>
-
-					<!-- 我需资源 -->
-					<uni-forms-item label="我需资源" name="needResources">
-						<uni-easyinput type="textarea" v-model="form.needResources" placeholder="用来智能匹配商友资源" />
-					</uni-forms-item>
-				</uni-forms>
-
-				<button class="save-btn" @click="submitForm">保存资料</button>
+					<view class="label-info-card">
+						<p class="info-text">数字标签是您在平台上的个性化身份标识，它们能帮助其他商友快速了解您的专业领域、资源优势和合作需求。</p>
+						<p class="info-text">通过精心设置您的数字标签，您可以：</p>
+						<ul class="info-list">
+							<li><uni-icons type="checkmarkempty" color="#00C777"></uni-icons> 提高个人辨识度</li>
+							<li><uni-icons type="checkmarkempty" color="#00C777"></uni-icons> 吸引潜在的合作伙伴</li>
+							<li><uni-icons type="checkmarkempty" color="#00C777"></uni-icons> 获得更精准的资源匹配</li>
+						</ul>
+						<button class="label-btn" @click="goToLabelEditPage">
+							<uni-icons type="compose" color="#fff" size="20" style="margin-right: 10rpx;"></uni-icons>
+							前往编辑数字标签
+						</button>
+					</view>
+				</view>
 			</view>
 		</view>
 
-		<!-- 数字标签 -->
-		<view class="form-section digital-label-section">
-			<view class="section-header"><text class="section-title">数字标签</text></view>
-			<view class="form-content"><button class="label-btn" @click="goToLabelEditPage">编辑数字标签</button></view>
-		</view>
-
-
-		<view class="form-section">
-			<view class="section-header"><text class="section-title">实名认证</text></view>
-			<view class="form-content">
-				<!-- 如果用户已实名 (我们通过 idCard 字段判断) -->
-				<view v-if="form.idCard" class="auth-info">
-					<view class="auth-item">
-						<text class="auth-label">真实姓名</text>
-						<text class="auth-value">{{ maskedName }}</text>
-					</view>
-					<view class="auth-item">
-						<text class="auth-label">身份证号</text>
-						<text class="auth-value">{{ maskedIdCard }}</text>
-					</view>
-					<view class="auth-status">
-						<uni-icons type="checkbox-filled" color="#00C777" size="18"></uni-icons>
-						<text>已认证</text>
-					</view>
-				</view>
-
-				<!-- 如果用户未实名 -->
-				<view v-else>
-					<button class="auth-btn" @click="goToAuthPage">去认证</button>
-				</view>
-			</view>
-		</view>
 	</view>
 </template>
 
@@ -191,6 +191,8 @@
 	import uploadFile from '../../utils/upload.js';
 
 	// --- 1. 响应式状态定义 ---
+	const currentTab = ref(0);
+	const tabItems = ['普通资料', '数字标签'];
 	const initialDataState = ref('');
 
 	/**
@@ -371,41 +373,38 @@
 	});
 
 	onBackPress((options) => {
-		// options.from === 'navigateBack' 表示是代码调用 uni.navigateBack()
-		// options.from === 'backbutton' 表示是用户点击物理返回键或左上角返回按钮
-
-		// 计算当前表单状态
-		const currentState = JSON.stringify({
-			form: form.value,
-			professionsList: professionsList.value,
-			schoolsList: schoolsList.value,
-			companyAndIndustryList: companyAndIndustryList.value,
-			selectedHobbies: selectedHobbies.value,
-			otherHobbyText: otherHobbyText.value
-		});
-
-		// 如果当前状态与初始状态不同，说明有未保存的修改
-		if (currentState !== initialDataState.value) {
-			uni.showModal({
-				title: '提示',
-				content: '您的修改尚未保存，确定要退出吗？',
-				confirmText: '直接退出',
-				cancelText: '继续编辑',
-				success: (res) => {
-					if (res.confirm) {
-						// 用户选择“直接退出”，允许返回
-						uni.navigateBack();
-					}
-					// 如果用户选择“继续编辑”，则什么都不做，停留在当前页
-				}
-			});
-			// 【关键】返回 true 表示我们自己处理了返回事件，阻止默认的返回行为
-			return true;
+		// 检查是否是从代码层面调用的返回 (例如保存成功后的跳转)
+		// 如果是，则直接允许返回，不弹出任何提示
+		if (options.from === 'navigateBack') {
+			return false;
 		}
 
-		// 如果没有修改，正常返回
-		return false;
+		// 对于用户手动触发的返回（物理键或左上角按钮），统一弹出提示
+		uni.showModal({
+			title: '提示',
+			content: '若有更改资料，请记得保存',
+			confirmText: '确认退出',
+			cancelText: '取消',
+			success: (res) => {
+				if (res.confirm) {
+					// 用户确认退出，手动执行返回操作
+					uni.navigateBack();
+				}
+				// 如果用户点击“取消”，则 success 回调结束，什么也不做，页面保持不变
+			}
+		});
+
+		// 【关键】必须返回 true 来阻止默认的返回行为。
+		// 因为 uni.showModal 是异步的，我们不能等待它的结果。
+		// 我们在这里阻止默认行为，然后在 modal 的回调中自己决定是否要调用 uni.navigateBack()。
+		return true;
 	});
+
+	// --- 页面切换方法 ---
+	const handleTabClick = (e) => {
+		currentTab.value = e.currentIndex;
+	};
+
 
 
 	// --- 4. 数据获取与处理方法 ---
@@ -422,6 +421,41 @@
 		}
 	};
 
+	/**
+	 * @description 预处理行业树数据，解决“父子同名”导致的无限循环问题
+	 * @param {Array} tree - 原始行业树
+	 * @returns {Array} - 处理后的行业树
+	 */
+	const processIndustryTree = (tree) => {
+		if (!Array.isArray(tree)) return [];
+
+		// 使用 map 创建一个新数组，避免直接修改原始数据
+		return tree.map(node => {
+			// 检查当前节点是否满足“父子同名且只有一个子节点”的条件
+			if (
+				node.children &&
+				node.children.length === 1 &&
+				node.children[0].name === node.name
+			) {
+				// 如果满足条件，用子节点替换父节点
+				// 【重要】替换后，需要将这个“新父节点”的 children 设置为 null，因为它就是最终的叶子节点
+				return {
+					...node.children[0],
+					children: null
+				};
+			} else if (node.children) {
+				// 如果不满足条件，但有子节点，则递归处理它的子节点
+				return {
+					...node,
+					children: processIndustryTree(node.children)
+				};
+			}
+
+			// 如果没有子节点，直接返回原节点
+			return node;
+		});
+	};
+
 	const getIndustryTreeData = async () => {
 		const {
 			data,
@@ -430,7 +464,9 @@
 		if (error) {
 			console.error('获取行业树失败:', error);
 		} else {
-			industryTree.value = data || [];
+			// 在将数据赋值给 industryTree.value 之前，先进行预处理
+			industryTree.value = processIndustryTree(data || []);
+			console.log("处理后的行业树:", industryTree.value);
 		}
 	};
 
@@ -855,11 +891,27 @@
 
 <style scoped lang="scss">
 	/* --- 1. 页面基础与布局 --- */
-	.container {
-		padding: 20rpx 30rpx 40rpx;
+	.page-container {
+		display: flex;
+		flex-direction: column;
+		min-height: 100vh;
 		background-color: #f9f9f9;
 	}
 
+	.tabs-container {
+		background-color: #fff;
+		padding: 20rpx 30rpx;
+		border-bottom: 1rpx solid #eee;
+		flex-shrink: 0;
+	}
+
+	.content-area {
+		padding: 20rpx 30rpx 40rpx;
+		flex: 1;
+		overflow-y: auto;
+	}
+
+	/* --- 2. 表单通用样式 --- */
 	.form-section {
 		background-color: #fff;
 		padding: 30rpx;
@@ -867,37 +919,39 @@
 		margin-bottom: 20rpx;
 	}
 
-	.section-title {
-		font-size: 36rpx;
-		font-weight: bold;
-		margin-bottom: 30rpx;
-		display: block;
+	.section-header {
+		.section-title {
+			font-size: 36rpx;
+			font-weight: bold;
+			margin-bottom: 30rpx;
+			display: block;
+		}
 	}
 
-	/* --- 2. 【【【核心修复】】】表单项通用布局 --- */
+	/* --- 3. uni-forms 组件深度样式修复 --- */
 
-	// 统一所有表单项的布局和标签样式
+	/* 统一所有表单项的标签与内容布局 */
 	::v-deep .uni-forms-item {
 		display: flex;
-		align-items: center; // 垂直居中对齐
+		align-items: center;
 		margin-bottom: 20rpx;
 
 		.uni-forms-item__label {
 			width: 160rpx !important;
 			font-size: 28rpx;
 			color: #333;
-			flex-shrink: 0; // 防止标签被压缩
-			padding-right: 20rpx; // 标签和内容之间的距离
+			flex-shrink: 0;
+			padding-right: 20rpx;
 			box-sizing: border-box;
 		}
 
 		.uni-forms-item__content {
-			flex: 1; // 内容区占据所有剩余空间
-			min-width: 0; // 允许内容区在flex布局中被压缩，防止溢出
+			flex: 1;
+			min-width: 0;
 		}
 	}
 
-	// 让内容区里的组件（输入框、选择器）真正撑满
+	/* 强制内容区组件撑满 */
 	::v-deep .uni-easyinput,
 	::v-deep .uni-data-select,
 	::v-deep .uni-datetime-picker,
@@ -905,12 +959,17 @@
 		width: 100% !important;
 	}
 
-	/* --- 3. 【【【核心修复】】】 DataPicker 文本溢出终极解决方案 --- */
+	/* 禁用状态的手机号输入框样式 */
+	.phone-text ::v-deep .uni-easyinput__content-input {
+		color: #999 !important;
+	}
+
+	/* 修复 uni-data-picker 文本溢出问题 */
 	::v-deep .uni-data-picker .uni-data-tree-input {
 		display: flex !important;
 		align-items: center;
 		width: 100% !important;
-		height: 36px; // 与 easyinput 保持一致
+		height: 36px;
 		border: 1px solid #e5e5e5;
 		border-radius: 4px;
 		padding: 0 10px;
@@ -919,7 +978,7 @@
 
 		.input-value {
 			flex: 1;
-			min-width: 0; // 关键！
+			min-width: 0;
 			display: block;
 			overflow: hidden;
 			text-overflow: ellipsis;
@@ -927,125 +986,7 @@
 		}
 	}
 
-
-	/* --- 4. 动态增删区块样式 (布局重构) --- */
-
-	.dynamic-section {
-		// 动态区块现在是一个独立的视觉单元
-		margin-top: 40rpx;
-		margin-bottom: 20rpx;
-		padding-top: 30rpx;
-		border-top: 1px solid #f0f0f0;
-	}
-
-	.dynamic-header {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		margin-bottom: 20rpx;
-	}
-
-	.dynamic-label {
-		// 大标题，如“职业”、“毕业学校”
-		font-size: 32rpx;
-		font-weight: bold;
-		color: #333;
-	}
-
-	.add-btn-small {
-		display: flex;
-		align-items: center;
-		font-size: 24rpx;
-		height: 50rpx;
-		line-height: 50rpx;
-		padding: 0 20rpx;
-		margin: 0;
-		background-color: #f0f7ff;
-		color: #007bff;
-		border: 1px solid #d2e7ff;
-
-		&::after {
-			border: none;
-		}
-
-		uni-icons {
-			margin-right: 8rpx;
-		}
-	}
-
-	// 单行动态项 (用于职业、学校) - 【布局重构】
-	.dynamic-item {
-		display: flex;
-		align-items: center;
-		margin-bottom: 20rpx;
-		gap: 20rpx;
-
-		.uni-easyinput {
-			flex: 1;
-		}
-	}
-
-	.remove-btn-small {
-		width: 50rpx;
-		height: 50rpx;
-		line-height: 50rpx;
-		padding: 0;
-		margin: 0;
-		border-radius: 50%;
-		background-color: #fef0f0;
-		color: #f56c6c;
-		font-size: 28rpx;
-		font-weight: bold;
-		border: none;
-		flex-shrink: 0;
-
-		&::after {
-			border: none;
-		}
-	}
-
-	// 多行动态组 (用于公司/行业) - 【布局重构】
-	.dynamic-group {
-		background-color: #f9f9f9;
-		padding: 30rpx;
-		border-radius: 12rpx;
-		margin-bottom: 20rpx;
-		border: 1px solid #eee;
-		// 【关键】移除了所有 margin-left
-
-		.group-header {
-			display: flex;
-			justify-content: space-between;
-			align-items: center;
-			margin-bottom: 30rpx;
-		}
-
-		.group-title {
-			font-size: 28rpx;
-			font-weight: bold;
-			color: #555;
-		}
-
-		.remove-btn {
-			font-size: 24rpx;
-			height: 50rpx;
-			line-height: 50rpx;
-			padding: 0 20rpx;
-			margin: 0;
-			background-color: #fef0f0;
-			color: #f56c6c;
-			border: 1px solid #fde2e2;
-
-			&::after {
-				border: none;
-			}
-		}
-
-		// 组内的表单项会自动继承第2部分的通用样式，无需特殊处理
-	}
-
-
-	/* --- 5. 其他组件与通用样式 (保持不变) --- */
+	/* --- 4. 特定表单项样式 (头像、二维码、爱好) --- */
 	.avatar-uploader,
 	.qr-uploader {
 		display: flex;
@@ -1067,39 +1008,176 @@
 	}
 
 	.upload-btn {
-		font-size: 26rpx;
-		padding: 0 30rpx;
 		height: 60rpx;
 		line-height: 60rpx;
+		margin: 0;
+		padding: 0 30rpx;
 		background-color: #f5f5f5;
 		color: #333;
-		margin: 0;
+		font-size: 26rpx;
 
 		&::after {
 			border: none;
 		}
 	}
 
-	.phone-text ::v-deep .uni-easyinput__content-input {
-		color: #999 !important;
-	}
-
 	.other-hobby-input {
 		margin-top: 20rpx;
 	}
 
+	/* --- 5. 动态增删区块样式 --- */
+	.dynamic-section {
+		margin-top: 40rpx;
+		margin-bottom: 20rpx;
+		padding-top: 30rpx;
+		border-top: 1px solid #f0f0f0;
+	}
 
-	/* --- 6. 底部按钮与认证区 (保持不变) --- */
+	.dynamic-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 20rpx;
+	}
+
+	.dynamic-label {
+		font-size: 32rpx;
+		font-weight: bold;
+		color: #333;
+	}
+
+	/* 动态项 - 单行 (职业、学校) */
+	.dynamic-item {
+		display: flex;
+		align-items: center;
+		gap: 20rpx;
+		margin-bottom: 20rpx;
+
+		.uni-easyinput {
+			flex: 1;
+		}
+	}
+
+	/* 动态项 - 分组 (公司/行业) */
+	.dynamic-group {
+		margin-bottom: 20rpx;
+		padding: 30rpx;
+		background-color: #f9f9f9;
+		border: 1px solid #eee;
+		border-radius: 12rpx;
+
+		.group-header {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			margin-bottom: 30rpx;
+		}
+
+		.group-title {
+			font-size: 28rpx;
+			font-weight: bold;
+			color: #555;
+		}
+	}
+
+	/* 动态项 - 添加/删除按钮 */
+	.add-btn-small {
+		display: flex;
+		align-items: center;
+		height: 50rpx;
+		line-height: 50rpx;
+		margin: 0;
+		padding: 0 20rpx;
+		background-color: #f0f7ff;
+		color: #007bff;
+		font-size: 24rpx;
+		border: 1px solid #d2e7ff;
+
+		&::after {
+			border: none;
+		}
+
+		uni-icons {
+			margin-right: 8rpx;
+		}
+	}
+
+	.remove-btn-small {
+		width: 50rpx;
+		height: 50rpx;
+		line-height: 50rpx;
+		margin: 0;
+		padding: 0;
+		background-color: #fef0f0;
+		color: #f56c6c;
+		font-size: 28rpx;
+		font-weight: bold;
+		border: none;
+		border-radius: 50%;
+		flex-shrink: 0;
+
+		&::after {
+			border: none;
+		}
+	}
+
+	.remove-btn {
+		height: 50rpx;
+		line-height: 50rpx;
+		margin: 0;
+		padding: 0 20rpx;
+		background-color: #fef0f0;
+		color: #f56c6c;
+		font-size: 24rpx;
+		border: 1px solid #fde2e2;
+
+		&::after {
+			border: none;
+		}
+	}
+
+	/* --- 6. 数字标签页面样式 --- */
+	.digital-label-section {
+		/* 继承 .form-section 的基础样式 */
+	}
+
+	.label-info-card {
+		.info-text {
+			font-size: 28rpx;
+			color: #666;
+			line-height: 1.7;
+			margin-bottom: 20rpx;
+		}
+
+		.info-list {
+			list-style: none;
+			padding-left: 0;
+			margin: 30rpx 0;
+
+			li {
+				display: flex;
+				align-items: center;
+				margin-bottom: 15rpx;
+				font-size: 28rpx;
+				color: #333;
+
+				.uni-icons {
+					margin-right: 15rpx;
+				}
+			}
+		}
+	}
+
+	/* --- 7. 页面底部操作按钮 --- */
 	.save-btn,
-	.label-btn,
-	.auth-btn {
+	.label-btn {
 		width: 100%;
 		height: 88rpx;
 		line-height: 88rpx;
 		border-radius: 44rpx;
 		font-size: 32rpx;
-		border: none;
 		color: white;
+		border: none;
 
 		&::after {
 			border: none;
@@ -1112,43 +1190,10 @@
 	}
 
 	.label-btn {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		margin-top: 50rpx;
 		background: linear-gradient(to right, #007bff, #0056b3);
-	}
-
-	.auth-btn {
-		background: linear-gradient(to right, #00C777, #00A362);
-	}
-
-	.auth-info {
-		font-size: 28rpx;
-		color: #666;
-
-		.auth-item {
-			display: flex;
-			justify-content: space-between;
-			padding: 20rpx 0;
-			border-bottom: 1rpx solid #f0f0f0;
-
-			.auth-label {
-				color: #333;
-			}
-
-			.auth-value {
-				font-weight: bold;
-			}
-		}
-
-		.auth-status {
-			display: flex;
-			align-items: center;
-			justify-content: flex-end;
-			padding-top: 20rpx;
-			color: #00C777;
-			font-size: 26rpx;
-
-			uni-icons {
-				margin-right: 8rpx;
-			}
-		}
 	}
 </style>

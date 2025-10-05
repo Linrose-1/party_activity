@@ -1,0 +1,264 @@
+
+	/* 页面基础样式 */
+.container.data-v-e6bd0326 {
+		background-color: #f7f8fa;
+		min-height: 100vh;
+		padding: 30rpx;
+}
+.loading-placeholder.data-v-e6bd0326 {
+		padding-top: 200rpx;
+}
+
+	/* 通用卡片样式 */
+.section-card.data-v-e6bd0326 {
+		background: #ffffff;
+		border-radius: 40rpx;
+		padding: 40rpx;
+		margin-bottom: 40rpx;
+		box-shadow: 0 10rpx 30rpx rgba(0, 0, 0, 0.05);
+}
+.section-title.data-v-e6bd0326 {
+		font-size: 36rpx;
+		font-weight: bold;
+		margin-bottom: 40rpx;
+		color: #333;
+		display: flex;
+		align-items: center;
+}
+.section-title uni-icons.data-v-e6bd0326 {
+		margin-right: 16rpx;
+}
+
+	/* 高亮文本样式 */
+.highlight-orange.data-v-e6bd0326 {
+		color: #ff7707;
+		font-weight: 600;
+		margin: 0 8rpx;
+}
+.highlight-red.data-v-e6bd0326 {
+		color: #ff0000;
+		font-weight: 600;
+		margin: 0 8rpx;
+}
+
+	/* --- 社交等级系统样式 --- */
+.level-system.data-v-e6bd0326 {
+		/* background: linear-gradient(to right, #f9f9f9, #f0f0f0); */
+		/* ... (原有的伪元素装饰可以保留或移除) ... */
+}
+.current-level.data-v-e6bd0326 {
+		display: flex;
+		align-items: center;
+		margin-bottom: 50rpx;
+}
+.level-badge.data-v-e6bd0326 {
+		width: 140rpx;
+		height: 140rpx;
+		border-radius: 50%;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		font-weight: bold;
+		color: white;
+		margin-right: 30rpx;
+		flex-shrink: 0;
+		box-shadow: 0 10rpx 20rpx rgba(0, 0, 0, 0.1);
+		background: linear-gradient(to bottom, #CD7F32, #8C6B46);
+}
+.level-badge .level-name.data-v-e6bd0326 {
+		font-size: 26rpx;
+		margin-bottom: 6rpx;
+}
+.level-badge .level-points.data-v-e6bd0326 {
+		font-size: 24rpx;
+}
+.level-info h3.data-v-e6bd0326 {
+		font-size: 32rpx;
+		margin-bottom: 12rpx;
+}
+.level-info .info-text.data-v-e6bd0326 {
+		font-size: 26rpx;
+		color: #666;
+		line-height: 1.5;
+}
+.level-actions.data-v-e6bd0326 {
+		margin-top: 50rpx;
+		/* 与下方的等级阶梯拉开距离 */
+}
+.level-up-btn.data-v-e6bd0326 {
+		/* 复用 .action-button 的基础样式，并添加渐变背景 */
+		background: linear-gradient(to right, #FF8C00, #FF6E00);
+}
+.level-steps.data-v-e6bd0326 {
+		display: flex;
+		justify-content: space-around;
+		margin-top: 40rpx;
+}
+.level-step.data-v-e6bd0326 {
+		text-align: center;
+		flex: 1;
+}
+.step-icon.data-v-e6bd0326 {
+		width: 70rpx;
+		height: 70rpx;
+		border-radius: 50%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		margin: 0 auto 16rpx;
+		font-size: 32rpx;
+		color: white;
+}
+.step-name.data-v-e6bd0326 {
+		font-size: 24rpx;
+		font-weight: 500;
+		margin-bottom: 8rpx;
+}
+.step-points.data-v-e6bd0326 {
+		font-size: 22rpx;
+		color: #999;
+}
+
+	/* --- 会员等级系统样式 --- */
+.membership-status.data-v-e6bd0326 {
+		background: linear-gradient(135deg, #fffaf2, #fff5e6);
+		border-radius: 30rpx;
+		padding: 30rpx;
+		margin-bottom: 30rpx;
+		border: 2rpx solid #ffe8cc;
+}
+.status-text.data-v-e6bd0326 {
+		font-size: 28rpx;
+		color: #664d03;
+		margin-bottom: 16rpx;
+		line-height: 1.5;
+}
+.status-text.data-v-e6bd0326:last-child {
+		margin-bottom: 0;
+}
+.status-highlight.data-v-e6bd0326 {
+		font-weight: 700;
+		color: #e67e22;
+}
+.next-level-progress.data-v-e6bd0326 {
+		font-size: 28rpx;
+}
+.next-level-name.data-v-e6bd0326 {
+		font-weight: bold;
+		color: #d35400;
+}
+.amount-needed.data-v-e6bd0326 {
+		font-size: 32rpx;
+		font-weight: bold;
+		color: #ff0000;
+		margin: 0 8rpx;
+}
+.status-max-level.data-v-e6bd0326 {
+		font-size: 28rpx;
+		font-weight: bold;
+		color: #28a745;
+		display: flex;
+		align-items: center;
+}
+.status-max-level uni-icons.data-v-e6bd0326 {
+		margin-right: 12rpx;
+}
+.membership-description.data-v-e6bd0326 {
+		font-size: 26rpx;
+		color: #666;
+		margin-bottom: 40rpx;
+		text-align: center;
+}
+.membership-levels.data-v-e6bd0326 {
+		display: grid;
+		grid-template-columns: repeat(3, 1fr);
+		gap: 20rpx;
+}
+.membership-level-item.data-v-e6bd0326 {
+		border-radius: 20rpx;
+		padding: 20rpx 10rpx;
+		text-align: center;
+		transition: transform 0.2s, box-shadow 0.2s;
+		border: 2rpx solid #eee;
+}
+.current-member-highlight.data-v-e6bd0326 {
+		transform: translateY(-8rpx);
+		box-shadow: 0 12rpx 30rpx rgba(0, 0, 0, 0.1) !important;
+		border: 4rpx solid #FF6B00 !important;
+}
+.level-icon.data-v-e6bd0326 {
+		font-size: 40rpx;
+		margin-bottom: 12rpx;
+}
+.level-name.data-v-e6bd0326 {
+		font-size: 26rpx;
+		font-weight: 600;
+		margin-bottom: 8rpx;
+}
+.level-price.data-v-e6bd0326 {
+		font-size: 24rpx;
+}
+
+	/* 不同等级的颜色 */
+.visitor.data-v-e6bd0326 {
+		background-color: #f8f9fa;
+}
+.visitor .level-name.data-v-e6bd0326 {
+		color: #6c757d;
+}
+.bronze-member.data-v-e6bd0326 {
+		background-color: #fff4e6;
+}
+.bronze-member .level-name.data-v-e6bd0326 {
+		color: #CD7F32;
+}
+.silver-member.data-v-e6bd0326 {
+		background-color: #f1f3f5;
+}
+.silver-member .level-name.data-v-e6bd0326 {
+		color: #868e96;
+}
+.gold-member.data-v-e6bd0326 {
+		background-color: #fff9db;
+}
+.gold-member .level-name.data-v-e6bd0326 {
+		color: #e6a23c;
+}
+.diamond-member.data-v-e6bd0326 {
+		background-color: #343a40;
+		color: white;
+}
+.diamond-member .level-name.data-v-e6bd0326 {
+		color: #f8f9fa;
+}
+.membership-actions.data-v-e6bd0326 {
+		display: flex;
+		gap: 30rpx;
+		margin-top: 40rpx;
+}
+.action-button.data-v-e6bd0326 {
+		flex: 1;
+		height: 88rpx;
+		border-radius: 44rpx;
+		border: none;
+		color: white;
+		font-size: 30rpx;
+		font-weight: bold;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		box-shadow: 0 8rpx 20rpx rgba(0, 0, 0, 0.1);
+}
+.action-button.data-v-e6bd0326::after {
+		border: none;
+}
+.details-btn.data-v-e6bd0326 {
+		background: linear-gradient(to right, #FF8C00, #FF6B00);
+}
+.recharge-btn.data-v-e6bd0326 {
+		background: linear-gradient(to right, #007bff, #0056b3);
+}
+.action-button uni-icons.data-v-e6bd0326 {
+		margin-right: 12rpx;
+}

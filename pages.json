@@ -97,7 +97,7 @@
 		{
 			"path": "pages/home-opportunitiesPublish/home-opportunitiesPublish",
 			"style": {
-				"navigationBarTitleText": "商机发布"
+				"navigationBarTitleText": "发布帖子"
 			}
 		},
 		{
@@ -330,6 +330,20 @@
 				"style" : 
 				{
 					"navigationBarTitleText" : "获取贡分"
+				}
+			},
+			{
+				"path" : "my-member/my-member",
+				"style" : 
+				{
+					"navigationBarTitleText" : "会员中心"
+				}
+			},
+			{
+				"path" : "my-friendInvitation/my-friendInvitation",
+				"style" : 
+				{
+					"navigationBarTitleText" : "商友邀请"
 				}
 			}
 			// 如果还有其他页面要放进这个分包，继续在这里加

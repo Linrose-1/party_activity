@@ -1,4 +1,34 @@
 
+.loading-container.data-v-f0843d79 {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		height: 100vh;
+		background-color: #f8f9fa;
+}
+.loading-spinner.data-v-f0843d79 {
+		width: 50rpx;
+		height: 50rpx;
+		border: 4rpx solid #e0e0e0;
+		border-top-color: #ff6b00;
+		border-radius: 50%;
+		animation: spin-f0843d79 1s linear infinite;
+		margin-bottom: 20rpx;
+}
+.loading-text.data-v-f0843d79 {
+		font-size: 28rpx;
+		color: #666;
+}
+@keyframes spin-f0843d79 {
+0% {
+			transform: rotate(0deg);
+}
+100% {
+			transform: rotate(360deg);
+}
+}
+
 	/* 在原有样式基础上，新增和修改以下样式 */
 .target-avatar-image.data-v-f0843d79 {
 		width: 180rpx;

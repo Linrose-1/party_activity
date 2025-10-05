@@ -37,19 +37,19 @@
 						<view class="business-info">
 							<view class="name-line">
 								<text class="business-name">{{ business.nickname }}</text>
-								<!-- 新增：关系标签容器 -->
-								<view class="relation-tags">
-									<text v-if="business.fellowTownspeopleCityFlag === 1"
-										class="tag fellow-townsman">同乡</text>
-									<text v-if="business.peerFlag === 1" class="tag peer">同行</text>
-									<text v-if="business.classmateFlag === 1" class="tag classmate">同学</text>
-								</view>
 							</view>
 							<view class="card-position" v-if="business.professionalTitle">
 								{{ business.professionalTitle }}
 							</view>
 							<view class="card-company" v-if="business.companyName">
 								{{ business.companyName }}
+							</view>
+							<view class="relation-tags"
+								v-if="business.fellowTownspeopleCityFlag === 1 || business.peerFlag === 1 || business.classmateFlag === 1">
+								<text v-if="business.fellowTownspeopleCityFlag === 1"
+									class="tag fellow-townsman">同乡</text>
+								<text v-if="business.peerFlag === 1" class="tag peer">同行</text>
+								<text v-if="business.classmateFlag === 1" class="tag classmate">同学</text>
 							</view>
 						</view>
 						<!-- 【核心修改】按钮状态绑定到 followFlag，并调用统一的 handleFollowAction 方法 -->
@@ -430,11 +430,26 @@
 		}
 	});
 
+	/**
+	 * @description 页面滚动到底部时触发加载更多
+	 */
 	onReachBottom(() => {
-		if (currentTab.value === 0 && activityLoadingStatus.value === 'more') {
-			getNearbyActivities();
-		} else if (currentTab.value === 1 && businessLoadingStatus.value === 'more') {
-			getNearbyBusinesses();
+		// 检查当前激活的 Tab 是哪个
+		switch (currentTab.value) {
+			case 0: // 当前是 "商友" (Businesses) Tab
+				// 检查商友列表是否还有更多数据可加载
+				if (businessLoadingStatus.value === 'more') {
+					console.log("触底加载更多商友...");
+					getNearbyBusinesses(); // 【修复】调用正确的加载商友方法
+				}
+				break;
+			case 1: // 当前是 "聚会" (Activities) Tab
+				// 检查聚会列表是否还有更多数据可加载
+				if (activityLoadingStatus.value === 'more') {
+					console.log("触底加载更多聚会...");
+					getNearbyActivities(); // 【修复】调用正确的加载聚会方法
+				}
+				break;
 		}
 	});
 </script>
@@ -586,23 +601,30 @@
 
 			// 【新增】名字和标签行的样式
 			.name-line {
-				display: flex;
-				align-items: center;
 				margin-bottom: 10rpx;
 			}
 
 			.business-name {
 				font-size: 32rpx;
 				font-weight: 600;
-				// 【修改】名字不占满整行，以便标签跟随
-				flex-shrink: 0;
-				margin-right: 16rpx;
 			}
 
-			// 【新增】关系标签的容器样式
+			.card-position,
+			.card-company {
+				font-size: 26rpx;
+				color: #666;
+				margin-top: 8rpx;
+				white-space: nowrap;
+				overflow: hidden;
+				text-overflow: ellipsis;
+			}
+
+			/* 为移动后的标签容器添加样式 */
 			.relation-tags {
 				display: flex;
-				gap: 10rpx; // 标签之间的间距
+				gap: 10rpx;
+				margin-top: 16rpx;
+				/* 与上方的公司信息拉开距离 */
 			}
 
 			// 【新增】通用标签样式

@@ -1,6 +1,11 @@
 <template>
 	<view class="business-card-apply-page">
-		<view class="container">
+		<view v-if="isLoading" class="loading-container">
+			<view class="loading-spinner"></view>
+			<text class="loading-text">正在加载信息，请稍候...</text>
+		</view>
+
+		<view class="container" v-else>
 			<!-- 申请卡片 -->
 			<!-- 使用 v-if 确保在目标用户信息加载后再显示 -->
 			<view class="application-card" v-if="targetUserInfo">
@@ -113,36 +118,39 @@
 	const fromShare = ref(false);
 	const isPaying = ref(false);
 	const showInsufficient = ref(false);
+	const isReadyForDisplay = ref(false);
+	const isLoading = ref(true);
 
 	// --- 页面生命周期 ---
 	onLoad((options) => {
-		console.log('[business-card-apply] onLoad 触发。收到的选项：', JSON.stringify(options));
+		console.log('[business-card-apply] onLoad 触发。收到的选项：', options);
 
+		// 1. 快速的同步操作
 		if (options.id && options.name) {
 			targetUserId.value = parseInt(options.id, 10);
-			// 1. 立即使用URL参数填充目标用户信息，实现UI即时响应
+			fromShare.value = options.fromShare === '1';
+
+			// 预填充UI，提供即时反馈，但此时页面还被loading覆盖
 			targetUserInfo.value = {
 				id: targetUserId.value,
 				nickname: decodeURIComponent(options.name),
-				realName: decodeURIComponent(options.name), // 预填充，后续可能被API覆盖
+				realName: decodeURIComponent(options.name),
 				avatar: options.avatar ? decodeURIComponent(options.avatar) :
 					'/static/images/default-avatar.png'
 			};
-			console.log('已预填充目标用户信息:', targetUserInfo.value);
 
-			if (options.fromShare && options.fromShare === '1') {
-				fromShare.value = true;
-				console.log('访问来源：免费分享链接');
-			}
-
-			// 2. 开始页面初始化流程
+			// 2.【核心修复】启动异步任务，但【不使用 await】！
+			// 让 onLoad 立即结束，页面得以成功加载
 			initializePage();
+
 		} else {
+			// 参数错误，快速失败
+			isLoading.value = false; // 隐藏加载
 			uni.showToast({
 				title: '缺少必要的用户信息',
 				icon: 'error'
 			});
-			setTimeout(() => uni.navigateBack(), 1000);
+			setTimeout(() => uni.navigateBack(), 1500);
 		}
 	});
 
@@ -150,42 +158,53 @@
 
 	// 页面初始化总函数
 	const initializePage = async () => {
-		// 【核心修正】并行执行两个独立的任务：检查权限 和 获取当前用户信息
-		// 因为无论权限如何，好友申请语和余额都需要当前用户信息。
-		await Promise.all([
-			checkAccessPermission(),
-			fetchCurrentUserInfo()
-		]);
+		try {
+			// 步骤一：首先进行权限检查
+			const hasPermission = await checkAccessPermission();
+
+			// 如果权限检查通过，函数会直接跳转，当前页面实例后续会被销毁
+			if (hasPermission) {
+				return;
+			}
+
+			// 步骤二：如果权限检查未通过（即需要支付），再获取当前用户信息
+			await fetchCurrentUserInfo();
+
+		} catch (e) {
+			console.error("初始化页面时发生错误:", e);
+			// 即使出错，也要结束加载状态，让用户能看到页面
+		} finally {
+			// 步骤三：无论成功与否，所有异步操作完成后，结束加载状态，显示页面内容
+			isLoading.value = false;
+		}
 	};
 
 	// 任务一：检查权限，如果成功则直接跳转
 	const checkAccessPermission = async () => {
-
 		const requestData = {
 			readUserId: targetUserId.value
 		};
-
-		// 如果是通过免费分享链接进来的，就加上 notPay: 1
 		if (fromShare.value) {
 			requestData.notPay = 1;
 		}
 
-		console.log('[business-card-apply] 准备使用参数调用 /read-card:', JSON.stringify(
-			requestData));
-
-		const checkResult = await request('/app-api/member/user/read-card', {
+		const {
+			data,
+			error
+		} = await request('/app-api/member/user/read-card', {
 			method: 'POST',
 			data: requestData
 		});
 
-		if (checkResult && checkResult.data && !checkResult.error) {
+		if (data && !error) {
 			console.log("权限检查成功，直接跳转到名片页。");
 			uni.redirectTo({
 				url: `/pages/my-businessCard/my-businessCard?id=${targetUserId.value}&fromShare=${fromShare.value ? '1' : '0'}`
 			});
+			return true;
 		} else {
-			// 权限检查失败，什么都不做，让页面停留在支付流程
-			console.log("权限检查失败，显示支付页面。", checkResult.error);
+			console.log("权限检查失败，显示支付页面。", error);
+			return false;
 		}
 	};
 
@@ -199,13 +218,8 @@
 		});
 		if (data) {
 			currentUserInfo.value = data;
-			console.log('已获取当前登录用户信息:', currentUserInfo.value);
 		} else {
 			console.error('获取当前用户信息失败:', error);
-			uni.showToast({
-				title: '获取您的账户信息失败',
-				icon: 'none'
-			});
 		}
 	};
 
@@ -307,6 +321,40 @@
 </script>
 
 <style scoped>
+	.loading-container {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		height: 100vh;
+		background-color: #f8f9fa;
+	}
+
+	.loading-spinner {
+		width: 50rpx;
+		height: 50rpx;
+		border: 4rpx solid #e0e0e0;
+		border-top-color: #ff6b00;
+		border-radius: 50%;
+		animation: spin 1s linear infinite;
+		margin-bottom: 20rpx;
+	}
+
+	.loading-text {
+		font-size: 28rpx;
+		color: #666;
+	}
+
+	@keyframes spin {
+		0% {
+			transform: rotate(0deg);
+		}
+
+		100% {
+			transform: rotate(360deg);
+		}
+	}
+
 	/* 在原有样式基础上，新增和修改以下样式 */
 	.target-avatar-image {
 		width: 180rpx;

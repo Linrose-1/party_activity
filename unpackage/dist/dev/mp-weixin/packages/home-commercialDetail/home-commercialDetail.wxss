@@ -95,12 +95,22 @@
 .author-details.data-v-8303b14f {
 		margin-left: 30rpx;
 		flex: 1;
+		/* 1. 【关键】让此容器能够被压缩，防止溢出父容器 */
+		min-width: 0;
 }
 .author-name.data-v-8303b14f {
 		font-weight: 700;
 		font-size: 36rpx;
 		color: #333;
 		margin-bottom: 6rpx;
+
+		/* 2. 【关键】添加单行溢出省略样式 */
+		white-space: nowrap;
+		/* 强制不换行 */
+		overflow: hidden;
+		/* 隐藏溢出的内容 */
+		text-overflow: ellipsis;
+		/* 显示省略号 */
 }
 .post-time.data-v-8303b14f {
 		font-size: 26rpx;

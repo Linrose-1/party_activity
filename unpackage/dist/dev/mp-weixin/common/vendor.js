@@ -7297,9 +7297,9 @@ function initOnError() {
   };
 }
 function initRuntimeSocketService() {
-  const hosts = "172.20.10.4,127.0.0.1";
+  const hosts = "192.168.110.17,127.0.0.1";
   const port = "8090";
-  const id = "mp-weixin_-Sx98w";
+  const id = "mp-weixin_qYRLno";
   const lazy = typeof swan !== "undefined";
   let restoreError = lazy ? () => {
   } : initOnError();
@@ -8244,6 +8244,7 @@ const createHook = (lifecycle) => (hook, target = getCurrentInstance()) => {
 const onShow = /* @__PURE__ */ createHook(ON_SHOW);
 const onHide = /* @__PURE__ */ createHook(ON_HIDE);
 const onLoad = /* @__PURE__ */ createHook(ON_LOAD);
+const onReady = /* @__PURE__ */ createHook(ON_READY);
 const onUnload = /* @__PURE__ */ createHook(ON_UNLOAD);
 const onBackPress = /* @__PURE__ */ createHook(ON_BACK_PRESS);
 const onReachBottom = /* @__PURE__ */ createHook(ON_REACH_BOTTOM);
@@ -8316,7 +8317,7 @@ const pages = [
   {
     path: "pages/home-opportunitiesPublish/home-opportunitiesPublish",
     style: {
-      navigationBarTitleText: "商机发布"
+      navigationBarTitleText: "发布帖子"
     }
   },
   {
@@ -8538,6 +8539,18 @@ const subPackages = [
         path: "getPoints/getPoints",
         style: {
           navigationBarTitleText: "获取贡分"
+        }
+      },
+      {
+        path: "my-member/my-member",
+        style: {
+          navigationBarTitleText: "会员中心"
+        }
+      },
+      {
+        path: "my-friendInvitation/my-friendInvitation",
+        style: {
+          navigationBarTitleText: "商友邀请"
         }
       }
     ]
@@ -11452,6 +11465,7 @@ exports.onLoad = onLoad;
 exports.onMounted = onMounted;
 exports.onPullDownRefresh = onPullDownRefresh;
 exports.onReachBottom = onReachBottom;
+exports.onReady = onReady;
 exports.onShareAppMessage = onShareAppMessage;
 exports.onShareTimeline = onShareTimeline;
 exports.onShow = onShow;

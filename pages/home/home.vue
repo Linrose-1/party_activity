@@ -1,147 +1,110 @@
 <template>
 	<view class="business-opportunity-app">
-		<!-- 顶部区域 -->
+		<!-- ==================== 1. 顶部区域 ==================== -->
 		<view class="header wechat-style">
 			<view class="app-title">猩聚社</view>
 			<view class="app-subtitle">商友连接·商机分享</view>
 			<view class="app-description">连接全球精英商友</view>
-
 			<view class="search-section">
 				<view class="search-container">
 					<uni-icons type="search" size="20" color="#FF6A00"></uni-icons>
-					<!-- v-model绑定到新的searchQuery ref -->
-					<input type="text" v-model="searchQuery" class="search-input" placeholder="搜索聚会、商友或商机"
+					<input type="text" v-model="searchQuery" class="search-input" placeholder="搜索商友或商机"
 						confirm-type="search" @confirm="handleSearch" />
 					<button class="search-button" @click="handleSearch">搜索</button>
 				</view>
 			</view>
 		</view>
 
-		<!-- 商机发现标题 -->
+		<!-- ==================== 2. 导航与操作区 ==================== -->
 		<view class="section-title">商友圈</view>
-
-		<!-- 导航标签栏 -->
 		<view class="tabs">
-			<!-- activeTab的key值与后端tabIndex对应，方便管理 -->
-			<view class="tab" :class="{ active: activeTab === 1 }" @click="handleTabClick(1)">
-				推荐
-			</view>
-			<view class="tab" :class="{ active: activeTab === 2 }" @click="handleTabClick(2)">
-				附近
-			</view>
-			<view class="tab" :class="{ active: activeTab === 3 }" @click="handleTabClick(3)">
-				关注
-			</view>
-			<view class="tab" :class="{ active: activeTab === 4 }" @click="handleTabClick(4)">
-				֍猎伙
-			</view>
+			<view class="tab" :class="{ active: activeTab === 1 }" @click="handleTabClick(1)">推荐</view>
+			<view class="tab" :class="{ active: activeTab === 2 }" @click="handleTabClick(2)">附近</view>
+			<view class="tab" :class="{ active: activeTab === 3 }" @click="handleTabClick(3)">关注</view>
+			<view class="tab" :class="{ active: activeTab === 4 }" @click="handleTabClick(4)">֍猎伙</view>
 			<button class="post-button" @click="postNew">
 				<uni-icons type="compose" size="18" color="#FFFFFF"></uni-icons>
 				发帖
 			</button>
 		</view>
 
-		<!-- 帖子列表 -->
+		<!-- ==================== 3. 帖子列表 ==================== -->
 		<view class="post-list">
-			<!-- 帖子卡片 - 循环改为 postList -->
-			<!-- 【请用这个已修正的 post-card 块替换掉原来的】 -->
 			<view v-for="post in postList" :key="post.id" class="post-card" @click="handlePostClick(post)">
+				<!-- 3.1 卡片头部 -->
 				<view class="post-header">
 					<image :src="post.user.avatar" mode="aspectFill" class="avatar"
-						@click.stop="navigateToBusinessCard(post.user)">
-					</image>
+						@click.stop="navigateToBusinessCard(post.user)" />
 					<view class="user-info">
 						<view class="user-name">{{ post.user.name }}</view>
 						<view class="post-time">{{ post.time }}</view>
 					</view>
-					<!-- 【优化】只有登录后才可能显示关注按钮 -->
 					<button v-if="isLogin && loggedInUserId !== post.user.id" class="follow-button"
 						:class="{ 'followed': post.isFollowedUser }" @click.stop="toggleFollow(post)">
 						{{ post.isFollowedUser ? '已关注' : '关注' }}
 					</button>
 				</view>
 
-				<!-- ==================== 内容权限控制逻辑（已修正） ==================== -->
-
-				<!-- 1. 公开内容：这部分移出 v-if，所有人都能看到 -->
-				<view class="post-content">
-					{{ post.title }}
-				</view>
+				<!-- 3.2 卡片内容 (公开) -->
+				<view class="post-content-title">{{ post.title }}</view>
+				<view v-if="post.contentPreview" class="post-content-preview">{{ post.contentPreview }}</view>
 				<view class="post-images" v-if="post.images && post.images.length">
 					<view v-for="(image, imgIndex) in post.images" :key="imgIndex" class="image-wrapper">
-						<!-- 【优化】uniapp 中推荐使用 image 标签 -->
 						<image :src="image" alt="商机图片" class="post-image" mode="aspectFill" />
 					</view>
 				</view>
 				<view class="tags" v-if="post.tags && post.tags.length">
-					<view v-for="(tag, tagIndex) in post.tags" :key="tagIndex" class="tag">
-						{{ tag }}
-					</view>
+					<view v-for="(tag, tagIndex) in post.tags" :key="tagIndex" class="tag">{{ tag }}</view>
 				</view>
 
-				<!-- 2. 私有/交互内容：这部分保留在 v-if 内，仅登录用户可见 -->
+				<!-- 3.3 卡片交互 (登录后可见) -->
 				<template v-if="isLogin">
-					<view class="feedback-stats">
-						<view class="like-count">
-							<uni-icons type="hand-up-filled" size="18" color="#e74c3c"></uni-icons>
+					<view class="post-actions">
+						<view class="action like" :class="{ active: post.userAction === 'like' }"
+							@click.stop="toggleAction(post, 'like')">
+							<uni-icons :type="post.userAction === 'like' ? 'hand-up-filled' : 'hand-up'" size="20"
+								:color="post.userAction === 'like' ? '#e74c3c' : '#666'" />
 							<span>{{ post.likes }}</span>
 						</view>
-						<view class="dislike-count">
-							<uni-icons type="hand-down-filled" size="18" color="#3498db"></uni-icons>
+						<view class="action dislike" :class="{ active: post.userAction === 'dislike' }"
+							@click.stop="toggleAction(post, 'dislike')">
+							<uni-icons :type="post.userAction === 'dislike' ? 'hand-down-filled' : 'hand-down'"
+								size="20" :color="post.userAction === 'dislike' ? '#3498db' : '#666'" />
 							<span>{{ post.dislikes }}</span>
 						</view>
-					</view>
-					<view class="post-actions">
-						<view class="action-group">
-							<view class="action like" :class="{ active: post.userAction === 'like' }"
-								@click.stop="toggleAction(post, 'like')">
-								<uni-icons :type="post.userAction === 'like' ? 'hand-up-filled' : 'hand-up'" size="20"
-									:color="post.userAction === 'like' ? '#e74c3c' : '#666'"></uni-icons>
-								<span>赞</span>
-							</view>
-							<view class="action dislike" :class="{ active: post.userAction === 'dislike' }"
-								@click.stop="toggleAction(post, 'dislike')">
-								<uni-icons :type="post.userAction === 'dislike' ? 'hand-down-filled' : 'hand-down'"
-									size="20" :color="post.userAction === 'dislike' ? '#3498db' : '#666'"></uni-icons>
-								<span>踩</span>
-							</view>
+						<view class="action comment" @click.stop="navigateToComments(post)">
+							<uni-icons type="chatbubble" size="20" color="#666" />
+							<span>{{ post.comments }}</span>
 						</view>
-						<view class="action-group">
-							<view class="action comment" :class="{ active: post.isSaved }"
-								@click.stop="toggleSave(post)">
-								<uni-icons :type="post.isSaved ? 'star-filled' : 'star'" size="20"
-									:color="post.isSaved ? '#FF6A00' : '#666'"></uni-icons>
-								<span>{{ post.isSaved ? '已收藏' : '收藏' }}</span>
-							</view>
-
-							<view class="action delete-btn" v-if="isLogin && loggedInUserId === post.user.id"
-								@click.stop="deletePost(post)">
-								<uni-icons type="trash" size="20" color="#e74c3c"></uni-icons>
-								<!-- 这里不放文字 -->
-							</view>
+						<view class="action save" :class="{ active: post.isSaved }" @click.stop="toggleSave(post)">
+							<uni-icons :type="post.isSaved ? 'star-filled' : 'star'" size="20"
+								:color="post.isSaved ? '#FF6A00' : '#666'" />
+							<span>{{ post.isSaved ? '已收藏' : '收藏' }}</span>
+						</view>
+						<view class="action delete-btn" v-if="isLogin && loggedInUserId === post.user.id"
+							@click.stop="deletePost(post)">
+							<uni-icons type="trash" size="20" color="#e74c3c" />
 						</view>
 					</view>
 				</template>
 			</view>
 
-			<!-- 加载状态提示 -->
+			<!-- 3.4 列表加载状态 -->
 			<view class="loading-status">
 				<view v-if="!isLogin && postList.length === 0" class="content-placeholder"
 					style="margin-top: 40rpx; border: none; background: transparent;">
 					<view class="placeholder-text">登录后查看更多精彩内容</view>
 					<button class="placeholder-button" @click.stop="goToLogin">立即登录</button>
 				</view>
-
 				<view v-else-if="isLogin && postList.length === 0 && loadingStatus === 'noMore'"
 					class="no-posts-message">
 					暂无相关商机！
 				</view>
-
 				<view v-else-if="loadingStatus === 'loading'">
-					<uni-load-more status="loading" contentText.loading="正在加载..."></uni-load-more>
+					<uni-load-more status="loading" contentText.loading="正在加载..." />
 				</view>
 				<view v-else-if="loadingStatus === 'noMore'">
-					<uni-load-more status="noMore" contentText.noMore="暂无更多内容"></uni-load-more>
+					<uni-load-more status="noMore" contentText.noMore="暂无更多内容" />
 				</view>
 			</view>
 		</view>
@@ -152,59 +115,72 @@
 	import {
 		ref,
 		reactive,
-		computed,
-		onMounted,
+		computed
 	} from 'vue';
 	import {
 		onReachBottom,
 		onPullDownRefresh,
-		onShow
+		onShow,
+		onShareAppMessage,
+		onShareTimeline
 	} from '@dcloudio/uni-app';
 	import request from '../../utils/request.js';
 	import {
-		onShareAppMessage,
-		onShareTimeline
-	} from '@dcloudio/uni-app'; // 导入分享钩子
-	import {
 		getInviteCode
-	} from '../../utils/user.js'; // 导入我们之前创建的工具函数
+	} from '../../utils/user.js';
 
 
+	// ============================
+	// 1. 响应式状态定义 (Refs & Reactives)
+	// ============================
+
+	// 用户与权限状态
 	const loggedInUserId = ref(null);
 	const isLogin = ref(false);
-	const member = ref('白银');
-	const hasPaidMembership = computed(() => {
-		const paidLevels = ['青铜', '白银', '黄金', '黑钻'];
-		return paidLevels.includes(member.value);
-	});
-	const defaultAvatarUrl = '/static/icon/default-avatar.png';
+	const member = ref('白银'); // 示例会员等级
 
+	// 列表与筛选状态
 	const postList = ref([]);
 	const activeTab = ref(1);
 	const searchQuery = ref('');
 
+	// 分页与加载状态
 	const pageNo = ref(1);
 	const pageSize = ref(10);
-	const loadingStatus = ref('more');
+	const loadingStatus = ref('more'); // 'more', 'loading', 'noMore'
 
-	// ==================== 新增：状态锁，防止用户快速重复点击 ====================
+	// 操作锁定状态
 	const isActionInProgress = ref(false);
 
+	// 地理位置状态
 	const location = reactive({
 		longitude: '',
 		latitude: ''
 	});
 
+	const defaultAvatarUrl = '/static/icon/default-avatar.png';
+
+
+	// ============================
+	// 2. 计算属性 (Computed)
+	// ============================
+
+	const hasPaidMembership = computed(() => {
+		const paidLevels = ['青铜', '白银', '黄金', '黑钻'];
+		return paidLevels.includes(member.value);
+	});
+
+	// ============================
+	// 3. 生命周期钩子 (Lifecycle Hooks)
+	// ============================
+
 	onShow(() => {
-		console.log('页面显示，执行 onShow 钩子');
-		// 每次页面显示时，都重新检查登录状态
+		// 每次进入页面时检查登录状态并刷新数据
 		loggedInUserId.value = uni.getStorageSync('userId');
 		isLogin.value = !!loggedInUserId.value;
-		console.log('当前登录状态 isLogin:', isLogin.value);
-
-		// 刷新列表数据
 		getBusinessOpportunitiesList(true);
 
+		// 确保分享菜单总是可用
 		uni.showShareMenu({
 			withShareTicket: true,
 			menus: ["shareAppMessage", "shareTimeline"]
@@ -218,103 +194,53 @@
 	});
 
 	onPullDownRefresh(() => {
-		console.log('用户触发了下拉刷新');
 		getBusinessOpportunitiesList(true);
 	});
 
+	// ============================
+	// 4. 分享逻辑 (Sharing Logic)
+	// ============================
 
-	function formatTimestamp(timestamp) {
-		if (!timestamp) return '';
-		const date = new Date(timestamp);
-		const Y = date.getFullYear();
-		const M = (date.getMonth() + 1).toString().padStart(2, '0');
-		const D = date.getDate().toString().padStart(2, '0');
-		const h = date.getHours().toString().padStart(2, '0');
-		const m = date.getMinutes().toString().padStart(2, '0');
-		return `${Y}-${M}-${D} ${h}:${m}`;
-	}
-
-	// ==================== 【分享】 ====================
-
-	/**
-	 * @description 监听用户点击右上角“分享”按钮的行为，并自定义分享内容
-	 */
-	onShareAppMessage((res) => {
-		console.log("触发首页分享给好友");
-
-		// 1. 获取分享者（即当前登录用户）的信息
+	onShareAppMessage(() => {
 		const sharerId = uni.getStorageSync('userId');
-		const inviteCode = getInviteCode(); // 使用工具函数获取邀请码
+		const inviteCode = getInviteCode();
 
-		// 2. 定义分享出去的基础路径 (首页路径)
-		let sharePath = '/pages/home/home'; // 请确保这是您首页的正确路径
-
-		// --- 【核心修正】手动拼接参数 ---
 		const params = [];
-		if (sharerId) {
-			params.push(`sharerId=${sharerId}`);
-		}
-		if (inviteCode) {
-			params.push(`inviteCode=${inviteCode}`);
-		}
+		if (sharerId) params.push(`sharerId=${sharerId}`);
+		if (inviteCode) params.push(`inviteCode=${inviteCode}`);
 
-		if (params.length > 0) {
-			sharePath += `?${params.join('&')}`;
-		}
-		// --- 修正结束 ---
+		const sharePath = `/pages/home/home${params.length > 0 ? '?' + params.join('&') : ''}`;
 
-		// 4. 返回最终的分享对象
-		const shareContent = {
+		return {
 			title: '发现了一个每天都想打开的商友社交小工具！点戳进入☞☞',
 			path: sharePath,
 			imageUrl: 'https://img.gofor.club/logo_share.jpg'
 		};
-
-		console.log('首页分享内容:', JSON.stringify(shareContent));
-
-		return shareContent;
 	});
 
-	/**
-	 * @description 监听用户分享到朋友圈的行为
-	 */
 	onShareTimeline(() => {
-		console.log("触发首页分享到朋友圈");
-
-		// 1. 获取分享者信息
 		const sharerId = uni.getStorageSync('userId');
-		// 【新增】获取邀请码
 		const inviteCode = getInviteCode();
 
-		// --- 【核心修改】将邀请码加入参数列表 ---
 		const params = [];
-		if (sharerId) {
-			params.push(`sharerId=${sharerId}`);
-		}
-		// 【新增】如果邀请码存在，则添加到参数中
-		if (inviteCode) {
-			params.push(`inviteCode=${inviteCode}`);
-		}
+		if (sharerId) params.push(`sharerId=${sharerId}`);
+		if (inviteCode) params.push(`inviteCode=${inviteCode}`);
 
 		const queryString = params.join('&');
-		// --- 修改结束 ---
 
-		// 3. 返回分享对象
-		const shareContent = {
+		return {
 			title: '发现了一个每天都想打开的商友社交小工具！点戳进入☞☞',
-			query: queryString, // 使用拼接后的 query
+			query: queryString,
 			imageUrl: 'https://img.gofor.club/logo_share.jpg'
 		};
-
-		console.log('首页分享到朋友圈内容:', JSON.stringify(shareContent));
-
-		return shareContent;
 	});
 
-	// =============================================================
+	// ============================
+	// 5. 主要业务方法 (Business Methods)
+	// ============================
 
 	const getBusinessOpportunitiesList = async (isRefresh = false) => {
-		if (loadingStatus.value === 'loading' && !isRefresh) return; // 防止重复加载，但允许下拉刷新
+		if (loadingStatus.value === 'loading' && !isRefresh) return;
 		loadingStatus.value = 'loading';
 
 		if (isRefresh) {
@@ -328,11 +254,7 @@
 			pageSize: pageSize.value,
 			tabIndex: activeTab.value,
 		};
-
-		if (searchQuery.value) {
-			params.searchKey = searchQuery.value;
-		}
-
+		if (searchQuery.value) params.searchKey = searchQuery.value;
 		if (activeTab.value === 2 && location.longitude && location.latitude) {
 			params.longitude = location.longitude;
 			params.latitude = location.latitude;
@@ -347,56 +269,38 @@
 				data: params
 			});
 
-			// 【核心修改】直接处理成功和失败两种情况
-			if (error) {
-				// 如果请求真的发生错误（网络问题、服务器500等）
-				loadingStatus.value = 'more'; // 允许用户重试
-				uni.showToast({
+			if (error || !apiData || !apiData.list) {
+				loadingStatus.value = error ? 'more' : 'noMore';
+				if (error) uni.showToast({
 					title: `加载失败: ${error}`,
 					icon: 'none'
 				});
-				return; // 终止
-			}
-
-			// 如果请求成功 (error为null)，但后端返回的业务数据为空或格式不对
-			if (!apiData || !apiData.list) {
-				loadingStatus.value = 'noMore'; // 没有数据了
-				if (isRefresh) {
-					postList.value = []; // 刷新时清空
-				}
+				if (isRefresh) postList.value = [];
 				return;
 			}
 
-			// 【核心修改】数据映射逻辑保持不变，但要确保它能处理 memberUser 为 null 的情况
 			const mappedData = apiData.list.map(item => ({
 				id: item.id,
-				content: item.postContent,
 				title: item.postTitle,
+				contentPreview: generateContentPreview(item.postContent),
 				images: item.postImg ? String(item.postImg).split(',').filter(img => img) : [],
 				tags: item.tags ? (Array.isArray(item.tags) ? item.tags : String(item.tags).split(',')
 					.filter(tag => tag)) : [],
 				likes: item.likesCount || 0,
 				dislikes: item.dislikesCount || 0,
-				// 【关键】未登录时 userLikeStr 为 null，这是正确的
+				comments: item.commentsCount || 0,
 				userAction: item.userLikeStr || null,
-				// 【关键】未登录时 followFlag 为 0 或 null，这样 isSaved 就是 false，这是正确的
 				isSaved: item.followFlag === 1,
-				// 【关键】未登录时 followUserFlag 为 0 或 null，isFollowedUser 就是 false，这是正确的
 				isFollowedUser: item.followUserFlag === 1,
 				time: formatTimestamp(item.createTime),
 				user: {
-					// 【关键】处理 memberUser 可能为 null 的情况
 					id: item.memberUser?.id || item.userId,
 					name: item.memberUser?.nickname || '匿名用户',
 					avatar: item.memberUser?.avatar || defaultAvatarUrl
 				}
 			}));
 
-			if (isRefresh) {
-				postList.value = mappedData;
-			} else {
-				postList.value = [...postList.value, ...mappedData];
-			}
+			postList.value = isRefresh ? mappedData : [...postList.value, ...mappedData];
 
 			if (postList.value.length >= apiData.total) {
 				loadingStatus.value = 'noMore';
@@ -404,11 +308,9 @@
 				loadingStatus.value = 'more';
 				pageNo.value++;
 			}
-
 		} catch (err) {
-			// 捕获 try...catch 的异常，比如代码本身写的有问题
 			console.error('getBusinessOpportunitiesList 逻辑异常:', err);
-			loadingStatus.value = 'more'; // 允许用户重试
+			loadingStatus.value = 'more';
 			uni.showToast({
 				title: '页面逻辑异常，请稍后重试',
 				icon: 'none'
@@ -425,30 +327,33 @@
 	const handleTabClick = (tabIndex) => {
 		if (activeTab.value === tabIndex) return;
 		activeTab.value = tabIndex;
+
 		if (tabIndex === 2) {
-			uni.getSetting({
-				success: (res) => {
-					if (res.authSetting['scope.userLocation']) {
-						getLocationAndFetchData();
-					} else {
-						uni.authorize({
-							scope: 'scope.userLocation',
-							success: () => getLocationAndFetchData(),
-							fail: () => {
-								uni.showModal({
-									title: '温馨提示',
-									content: '您已拒绝获取位置信息，无法查看附近商机。请在设置中开启位置权限。',
-									showCancel: false,
-									confirmText: '我知道了'
-								});
-							}
-						});
-					}
-				}
-			});
+			checkAndGetLocation();
 		} else {
 			getBusinessOpportunitiesList(true);
 		}
+	};
+
+	const checkAndGetLocation = () => {
+		uni.getSetting({
+			success: (res) => {
+				if (res.authSetting['scope.userLocation']) {
+					getLocationAndFetchData();
+				} else {
+					uni.authorize({
+						scope: 'scope.userLocation',
+						success: () => getLocationAndFetchData(),
+						fail: () => uni.showModal({
+							title: '温馨提示',
+							content: '您已拒绝获取位置信息，无法查看附近商机。请在设置中开启位置权限。',
+							showCancel: false,
+							confirmText: '我知道了'
+						}),
+					});
+				}
+			}
+		});
 	};
 
 	const getLocationAndFetchData = () => {
@@ -460,42 +365,32 @@
 			success: (res) => {
 				location.longitude = res.longitude.toString();
 				location.latitude = res.latitude.toString();
-				getBusinessOpportunitiesList(true);
 			},
-			fail: (err) => {
+			complete: () => {
+				uni.hideLoading();
 				getBusinessOpportunitiesList(true);
-			},
-			complete: () => uni.hideLoading()
+			}
 		});
 	};
 
+	// ============================
+	// 6. 卡片交互方法 (Card Interaction Methods)
+	// ============================
 
-	/**
-	 * 切换点赞/踩状态
-	 */
 	const toggleAction = async (post, clickedAction) => {
-		if (isActionInProgress.value) return;
-		if (!loggedInUserId.value) {
-			uni.showToast({
-				title: '请先登录',
-				icon: 'none'
-			});
-			return;
-		}
-
+		if (isActionInProgress.value || !isLogin.value) return;
 		isActionInProgress.value = true;
 
 		const originalAction = post.userAction;
 		const originalLikes = post.likes;
 		const originalDislikes = post.dislikes;
 
-		// 乐观更新UI
+		// 乐观更新 UI
 		if (post.userAction === clickedAction) {
 			post.userAction = null;
 			if (clickedAction === 'like') post.likes--;
 			else post.dislikes--;
 		} else {
-			post.userAction = clickedAction;
 			if (clickedAction === 'like') {
 				post.likes++;
 				if (originalAction === 'dislike') post.dislikes--;
@@ -503,22 +398,22 @@
 				post.dislikes++;
 				if (originalAction === 'like') post.likes--;
 			}
+			post.userAction = clickedAction;
 		}
 
 		try {
-			const requestData = {
-				userId: loggedInUserId.value,
-				targetId: post.id,
-				targetType: 'post',
-				action: post.userAction, // 发送更新后的action ('like', 'dislike' 或 null)
-			};
-
-			const result = await request('/app-api/member/like-action/add', {
+			const {
+				error
+			} = await request('/app-api/member/like-action/add', {
 				method: 'POST',
-				data: requestData,
+				data: {
+					targetId: post.id,
+					targetType: 'post',
+					action: post.userAction,
+				},
 			});
 
-			if (result && result.error) {
+			if (error) {
 				// API失败，回滚UI
 				post.userAction = originalAction;
 				post.likes = originalLikes;
@@ -528,8 +423,7 @@
 					icon: 'none'
 				});
 			}
-
-		} catch (error) {
+		} catch (err) {
 			// 网络异常，回滚UI
 			post.userAction = originalAction;
 			post.likes = originalLikes;
@@ -543,55 +437,40 @@
 		}
 	};
 
-	/**
-	 * 切换收藏状态
-	 */
-	const toggleSave = async (post) => {
-		if (isActionInProgress.value) return;
-		if (!loggedInUserId.value) {
-			uni.showToast({
-				title: '请先登录',
-				icon: 'none'
-			});
-			return;
-		}
-
+	const toggleGenericFollow = async (post, type, targetId, statusKey, successMsg, failureMsg) => {
+		if (isActionInProgress.value || !isLogin.value) return;
 		isActionInProgress.value = true;
-		const originalStatus = post.isSaved;
 
-		// 乐观更新
-		post.isSaved = !originalStatus;
+		const originalStatus = post[statusKey];
+		post[statusKey] = !originalStatus;
 
-		const apiUrl = post.isSaved ? '/app-api/member/follow/add' : '/app-api/member/follow/del';
+		const apiUrl = post[statusKey] ? '/app-api/member/follow/add' : '/app-api/member/follow/del';
 
 		try {
-			const requestData = {
-				userId: loggedInUserId.value,
-				targetId: post.id,
-				targetType: 'post'
-			};
-			const result = await request(apiUrl, {
+			const {
+				error
+			} = await request(apiUrl, {
 				method: 'POST',
-				data: requestData
+				data: {
+					targetId: targetId,
+					targetType: type
+				}
 			});
-			console.log("触发收藏", result)
 
-			if (result && result.error) {
-				// 失败回滚
-				post.isSaved = originalStatus;
+			if (error) {
+				post[statusKey] = originalStatus; // 回滚
 				uni.showToast({
-					title: '操作失败',
+					title: failureMsg,
 					icon: 'none'
 				});
 			} else {
 				uni.showToast({
-					title: post.isSaved ? '已收藏' : '已取消收藏',
+					title: post[statusKey] ? successMsg.add : successMsg.remove,
 					icon: 'none'
 				});
 			}
-		} catch (error) {
-			// 失败回滚
-			post.isSaved = originalStatus;
+		} catch (err) {
+			post[statusKey] = originalStatus; // 回滚
 			uni.showToast({
 				title: '操作失败，请重试',
 				icon: 'none'
@@ -601,9 +480,32 @@
 		}
 	};
 
-	/**
-	 * 删除商机
-	 */
+	const toggleSave = (post) => {
+		toggleGenericFollow(
+			post,
+			'post',
+			post.id,
+			'isSaved', {
+				add: '已收藏',
+				remove: '已取消收藏'
+			},
+			'收藏失败'
+		);
+	};
+
+	const toggleFollow = (post) => {
+		toggleGenericFollow(
+			post,
+			'post_user',
+			post.user.id,
+			'isFollowedUser', {
+				add: '已关注',
+				remove: '已取消关注'
+			},
+			'关注失败'
+		);
+	};
+
 	const deletePost = (postToDelete) => {
 		uni.showModal({
 			title: '确认删除',
@@ -613,21 +515,19 @@
 					uni.showLoading({
 						title: '删除中...'
 					});
-
 					const {
 						error
 					} = await request('/app-api/member/business-opportunities/delete', {
 						method: 'POST',
 						data: {
-							id: postToDelete.id // 使用传入的 post 对象的 ID
+							id: postToDelete.id
 						}
 					});
-
 					uni.hideLoading();
 
 					if (error) {
 						uni.showToast({
-							title: '删除失败: ' + error,
+							title: `删除失败: ${error}`,
 							icon: 'none'
 						});
 						return;
@@ -637,8 +537,6 @@
 						title: '删除成功',
 						icon: 'success'
 					});
-
-					// 【关键】从前端列表中移除该项，实现即时更新
 					const index = postList.value.findIndex(p => p.id === postToDelete.id);
 					if (index !== -1) {
 						postList.value.splice(index, 1);
@@ -648,113 +546,34 @@
 		});
 	};
 
-	/**
-	 * 切换关注用户状态
-	 */
-	const toggleFollow = async (post) => {
-		if (isActionInProgress.value) return;
-		if (!loggedInUserId.value) {
-			uni.showToast({
-				title: '请先登录',
-				icon: 'none'
-			});
-			return;
-		}
-
-		isActionInProgress.value = true;
-		const originalStatus = post.isFollowedUser;
-
-		// 乐观更新
-		post.isFollowedUser = !originalStatus;
-
-		const apiUrl = post.isFollowedUser ? '/app-api/member/follow/add' : '/app-api/member/follow/del';
-
-		try {
-			const requestData = {
-				userId: loggedInUserId.value,
-				targetId: post.user.id,
-				targetType: 'post_user'
-			};
-			const result = await request(apiUrl, {
-				method: 'POST',
-				data: requestData
-			});
-
-			if (result && result.error) {
-				// 失败回滚
-				post.isFollowedUser = originalStatus;
-				uni.showToast({
-					title: '操作失败',
-					icon: 'none'
-				});
-			} else {
-				uni.showToast({
-					title: post.isFollowedUser ? '已关注' : '已取消关注',
-					icon: 'none'
-				});
-			}
-		} catch (error) {
-			// 失败回滚
-			post.isFollowedUser = originalStatus;
-			uni.showToast({
-				title: '操作失败，请重试',
-				icon: 'none'
-			});
-		} finally {
-			isActionInProgress.value = false;
-		}
-	};
-
-	const sharePost = (post) => {
-		uni.showToast({
-			title: '分享功能即将上线',
-			icon: 'none'
-		});
-	};
-
-	const postNew = () => {
-		uni.navigateTo({
-			url: '/pages/home-opportunitiesPublish/home-opportunitiesPublish'
-		});
-	};
-
-	const goToLogin = () => {
-		// 4. 【修改】实现真正的跳转逻辑
-		uni.navigateTo({
-			url: '/pages/index/index'
-			// url: '/pages/login/login' 
-		});
-	};
-
-	const goToMembership = () => {
-		uni.showToast({
-			title: '正在前往会员中心...',
-			icon: 'none'
-		});
-	};
+	// ============================
+	// 7. 导航方法 (Navigation Methods)
+	// ============================
 
 	const handlePostClick = (post) => {
-		if (isLogin.value && hasPaidMembership.value) {
-			skipCommercialDetail(post.id);
-		} else if (isLogin.value && !hasPaidMembership.value) {
+		if (!isLogin.value) {
+			goToLogin();
+		} else if (!hasPaidMembership.value) {
 			goToMembership();
 		} else {
-			goToLogin();
+			skipCommercialDetail(post.id);
 		}
 	};
 
-	const skipApplicationBusinessCard = (userId) => {
-		uni.navigateTo({
-			url: `/pages/applicationBusinessCard/applicationBusinessCard?id=${userId}`
-		});
-	}
+	const navigateToComments = (post) => {
+		// 复用卡片点击的权限检查逻辑
+		if (!isLogin.value) {
+			goToLogin();
+		} else if (!hasPaidMembership.value) {
+			goToMembership();
+		} else {
+			uni.navigateTo({
+				url: `/packages/home-commercialDetail/home-commercialDetail?id=${post.id}&scrollTo=comments`
+			});
+		}
+	};
 
 	const navigateToBusinessCard = (user) => {
-		// 1. 【修正】移除对 `postDetail` 的引用，因为它在列表页不存在。
-		//    在列表页，我们通常假设名片都是可以尝试查看的。
-		//    真正的权限检查（如 cardFlag）应该在详情页或由后端接口处理。
-
-		// 2. 检查传入的 user 对象和 user.id 是否有效
 		if (!user || !user.id) {
 			uni.showToast({
 				title: '无法查看该用户主页',
@@ -762,34 +581,55 @@
 			});
 			return;
 		}
-
-		// 3. 【核心】为 avatar 提供一个默认值，防止空字符串导致的问题
-		const defaultAvatar = '/static/images/default-avatar.png'; // 请确保这个默认头像图片存在
-		const avatarUrl = user.avatar || defaultAvatar;
-
-		// 4. 构建带有多参数的URL，并使用 encodeURIComponent 编码
+		const avatarUrl = user.avatar || defaultAvatarUrl;
 		const url = `/pages/applicationBusinessCard/applicationBusinessCard?id=${user.id}` +
 			`&name=${encodeURIComponent(user.name)}` +
 			`&avatar=${encodeURIComponent(avatarUrl)}`;
-
-		console.log('从商机列表页跳转，URL:', url);
-
-		// 5. 执行跳转
 		uni.navigateTo({
-			url: url
+			url
 		});
 	};
 
-	const skipCommercialDetail = (postId) => {
-		uni.navigateTo({
-			url: `/packages/home-commercialDetail/home-commercialDetail?id=${postId}`
-		});
-	}
+	const postNew = () => uni.navigateTo({
+		url: '/pages/home-opportunitiesPublish/home-opportunitiesPublish'
+	});
+	const goToLogin = () => uni.navigateTo({
+		url: '/pages/index/index'
+	}); // 指向登录页
+	const goToMembership = () => uni.showToast({
+		title: '正在前往会员中心...',
+		icon: 'none'
+	});
+	const skipCommercialDetail = (postId) => uni.navigateTo({
+		url: `/packages/home-commercialDetail/home-commercialDetail?id=${postId}`
+	});
 
-	const getLogin = () => {}
+	// ============================
+	// 8. 辅助/工具函数 (Helper/Util Functions)
+	// ============================
+
+	const formatTimestamp = (timestamp) => {
+		if (!timestamp) return '';
+		const date = new Date(timestamp);
+		const Y = date.getFullYear();
+		const M = (date.getMonth() + 1).toString().padStart(2, '0');
+		const D = date.getDate().toString().padStart(2, '0');
+		const h = date.getHours().toString().padStart(2, '0');
+		const m = date.getMinutes().toString().padStart(2, '0');
+		return `${Y}-${M}-${D} ${h}:${m}`;
+	};
+
+	const generateContentPreview = (content) => {
+		if (!content) return '';
+		const plainText = content.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+		return plainText.length > 50 ? plainText.substring(0, 50) + '...' : plainText;
+	};
 </script>
 
 <style scoped>
+	/* =========================
+	 * 1. 页面通用与头部样式
+	 * ========================= */
 	.header {
 		background: linear-gradient(135deg, #FF6A00, #FF8C37);
 		color: white;
@@ -841,19 +681,13 @@
 
 	.search-container uni-icons {
 		margin-right: 20rpx;
-		display: flex;
-		align-items: center;
 	}
 
 	.search-input {
-		border: none;
-		outline: none;
 		flex: 1;
 		font-size: 28rpx;
 		color: #555;
 		background: transparent;
-		padding: 0;
-		min-height: 40rpx;
 	}
 
 	.search-button {
@@ -865,31 +699,26 @@
 		font-size: 28rpx;
 		font-weight: bold;
 		margin-left: 20rpx;
-		-webkit-appearance: none;
-		background-color: transparent;
 		line-height: 1;
-		height: auto;
-		display: flex;
-		align-items: center;
-		justify-content: center;
 		box-shadow: 0 4rpx 10rpx rgba(255, 106, 0, 0.2);
 		transition: all 0.2s ease;
 	}
 
-	.search-button::after {
-		border: none;
-	}
-
 	.search-button:active {
-		background: linear-gradient(135deg, #e05a00, #e07a00);
 		transform: translateY(2rpx);
 		box-shadow: 0 2rpx 6rpx rgba(255, 106, 0, 0.3);
 	}
 
-	.uni-icons {
-		vertical-align: middle;
+	.search-button::after,
+	.post-button::after,
+	.follow-button::after,
+	.placeholder-button::after {
+		border: none;
 	}
 
+	/* =========================
+	 * 2. 导航栏 (Tabs) 样式
+	 * ========================= */
 	.section-title {
 		font-size: 40rpx;
 		font-weight: 700;
@@ -926,7 +755,7 @@
 		font-size: 28rpx;
 		color: #666;
 		position: relative;
-		transition: all 0.3s;
+		transition: color 0.3s, font-weight 0.3s;
 	}
 
 	.tab.active {
@@ -959,22 +788,17 @@
 		display: flex;
 		align-items: center;
 		margin-left: 30rpx;
-		-webkit-appearance: none;
-		background-color: transparent;
-	}
-
-	.post-button::after {
-		border: none;
 	}
 
 	.post-button uni-icons {
 		margin-right: 10rpx;
 	}
 
+	/* =========================
+	 * 3. 帖子卡片 (Post Card) 样式
+	 * ========================= */
 	.post-list {
 		padding: 20rpx 30rpx;
-		flex: 1;
-		overflow-y: auto;
 	}
 
 	.post-card {
@@ -991,6 +815,7 @@
 		box-shadow: 0 10rpx 30rpx rgba(0, 0, 0, 0.1);
 	}
 
+	/* 3.1 卡片头部 */
 	.post-header {
 		display: flex;
 		align-items: center;
@@ -1000,24 +825,21 @@
 		width: 90rpx;
 		height: 90rpx;
 		border-radius: 10rpx;
-		background: linear-gradient(135deg, #FF6A00, #FF8C37);
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		color: white;
-		font-weight: bold;
-		font-size: 36rpx;
 		margin-right: 24rpx;
 	}
 
 	.user-info {
 		flex: 1;
+		min-width: 0;
 	}
 
 	.user-name {
 		font-weight: 600;
 		font-size: 32rpx;
 		margin-bottom: 6rpx;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
 	}
 
 	.post-time {
@@ -1035,23 +857,12 @@
 		font-weight: 500;
 		margin-left: 20rpx;
 		white-space: nowrap;
-		-webkit-appearance: none;
-		line-height: 1;
-		height: auto;
+		line-height: 1.5;
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		transition: all 0.2s ease;
 		box-shadow: 0 2rpx 8rpx rgba(255, 106, 0, 0.2);
-	}
-
-	.follow-button::after {
-		border: none;
-	}
-
-	.follow-button:active {
-		opacity: 0.8;
-		transform: translateY(1rpx);
 	}
 
 	.follow-button.followed {
@@ -1060,29 +871,39 @@
 		box-shadow: none;
 	}
 
-	.post-content {
+	/* 3.2 卡片内容 */
+	.post-content-title {
 		font-size: 30rpx;
 		line-height: 1.5;
 		margin-top: 30rpx;
-		margin-bottom: 30rpx;
 		color: #444;
 		font-weight: 700;
 	}
 
-	.post-images {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 16rpx;
-		margin-bottom: 30rpx;
+	.post-content-preview {
+		font-size: 28rpx;
+		line-height: 1.6;
+		margin-top: 16rpx;
+		color: #666;
+		display: -webkit-box;
+		-webkit-box-orient: vertical;
+		-webkit-line-clamp: 2;
 		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+	.post-images {
+		display: grid;
+		grid-template-columns: repeat(3, 1fr);
+		gap: 16rpx;
+		margin-top: 30rpx;
 	}
 
 	.image-wrapper {
-		width: calc((100% - 32rpx) / 3);
+		width: 100%;
 		aspect-ratio: 1 / 1;
 		border-radius: 12rpx;
 		overflow: hidden;
-		box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.08);
 	}
 
 	.post-image {
@@ -1096,7 +917,7 @@
 		display: flex;
 		flex-wrap: wrap;
 		gap: 16rpx;
-		margin-bottom: 30rpx;
+		margin-top: 30rpx;
 	}
 
 	.tag {
@@ -1107,75 +928,57 @@
 		font-size: 26rpx;
 	}
 
-	.feedback-stats {
-		display: flex;
-		align-items: center;
-		background: #f8f8f8;
-		border-radius: 30rpx;
-		padding: 16rpx 30rpx;
-		font-size: 28rpx;
-		color: #666;
-		margin-bottom: 30rpx;
-	}
-
-	.feedback-stats .like-count {
-		display: flex;
-		align-items: center;
-		margin-right: 30rpx;
-		color: #e74c3c;
-	}
-
-	.feedback-stats .dislike-count {
-		display: flex;
-		align-items: center;
-		color: #3498db;
-	}
-
-	.feedback-stats uni-icons {
-		margin-right: 10rpx;
-	}
-
+	/* 3.3 卡片交互 */
 	.post-actions {
 		display: flex;
-		justify-content: space-between;
+		justify-content: space-around;
+		align-items: center;
 		border-top: 2rpx solid #f0f0f0;
 		padding-top: 30rpx;
-	}
-
-	.action-group {
-		display: flex;
-		gap: 40rpx;
-		align-items: center;
+		margin-top: 30rpx;
 	}
 
 	.action {
 		display: flex;
 		align-items: center;
 		color: #666;
-		transition: all 0.2s;
+		font-size: 28rpx;
+		transition: color 0.2s;
 	}
 
 	.action uni-icons {
 		margin-right: 12rpx;
 	}
 
+	.action span {
+		line-height: 1;
+	}
+
 	.action:active {
 		opacity: 0.7;
+	}
+
+	.action.active {
+		/* 激活状态的通用样式，具体颜色由内联 color 属性控制 */
+		font-weight: 500;
 	}
 
 	.action.delete-btn {
 		padding: 0 10rpx;
 	}
 
+	/* =========================
+	 * 4. 列表状态提示样式
+	 * ========================= */
+	.loading-status {
+		width: 100%;
+		padding: 20rpx 0;
+	}
+
 	.content-placeholder {
 		margin-top: 30rpx;
 		padding: 60rpx 40rpx;
-		background: rgba(249, 249, 249, 0.8);
-		border: 2rpx dashed #ddd;
-		border-radius: 20rpx;
 		text-align: center;
-		backdrop-filter: blur(4rpx);
-		-webkit-backdrop-filter: blur(4rpx);
 	}
 
 	.placeholder-text {
@@ -1193,23 +996,7 @@
 		font-size: 28rpx;
 		font-weight: 600;
 		box-shadow: 0 4rpx 12rpx rgba(255, 106, 0, 0.3);
-		-webkit-appearance: none;
-		line-height: 1;
-	}
-
-	.placeholder-button::after {
-		border: none;
-	}
-
-	.placeholder-button:active {
-		opacity: 0.9;
-		transform: scale(0.98);
-	}
-
-	/* 新增或修改的样式 */
-	.loading-status {
-		width: 100%;
-		padding: 20rpx 0;
+		line-height: 1.5;
 	}
 
 	.no-posts-message {
@@ -1217,13 +1004,5 @@
 		padding: 60rpx;
 		color: #999;
 		font-size: 32rpx;
-	}
-
-	.no-more-content-message {
-		text-align: center;
-		padding: 40rpx 0;
-		color: #999;
-		font-size: 28rpx;
-		margin-top: 20rpx;
 	}
 </style>

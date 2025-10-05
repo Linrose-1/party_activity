@@ -1,6 +1,7 @@
 {
   "navigationBarTitleText": "编辑资料",
   "usingComponents": {
+    "uni-segmented-control": "../../uni_modules/uni-segmented-control/components/uni-segmented-control/uni-segmented-control",
     "uni-forms-item": "../../uni_modules/uni-forms/components/uni-forms-item/uni-forms-item",
     "uni-easyinput": "../../uni_modules/uni-easyinput/components/uni-easyinput/uni-easyinput",
     "uni-data-select": "../../uni_modules/uni-data-select/components/uni-data-select/uni-data-select",

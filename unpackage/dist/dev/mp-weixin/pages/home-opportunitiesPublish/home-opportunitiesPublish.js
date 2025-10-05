@@ -2,60 +2,134 @@
 const common_vendor = require("../../common/vendor.js");
 const utils_request = require("../../utils/request.js");
 const utils_upload = require("../../utils/upload.js");
+if (!Array) {
+  const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
+  _easycom_uni_icons2();
+}
+const _easycom_uni_icons = () => "../../uni_modules/uni-icons/components/uni-icons/uni-icons.js";
+if (!Math) {
+  _easycom_uni_icons();
+}
+const DRAFT_KEY = "post_draft_v2";
 const _sfc_main = {
   __name: "home-opportunitiesPublish",
   setup(__props) {
-    const title = common_vendor.ref("");
-    const content = common_vendor.ref("");
-    const topic = common_vendor.ref("普通商机");
-    const tags = common_vendor.ref([]);
-    const tagInput = common_vendor.ref("");
-    const images = common_vendor.ref([]);
-    const showProfile = common_vendor.ref(true);
+    const form = common_vendor.reactive({
+      title: "",
+      content: "",
+      topic: "普通商机",
+      tags: [],
+      tagInput: "",
+      // 将 tagInput 也纳入管理
+      images: [],
+      showProfile: true
+    });
+    const contentPlaceholder = common_vendor.computed(() => {
+      if (form.topic === "创业猎伙") {
+        return "发布寻找创业项目合伙人需求。";
+      }
+      return "描述您的项目/商机、需求/经验分享。";
+    });
+    common_vendor.onLoad(() => {
+      const token = common_vendor.index.getStorageSync("token");
+      if (!token) {
+        common_vendor.index.showModal({
+          title: "请先登录",
+          content: "发布商机需要登录后才能操作",
+          confirmText: "去登录",
+          cancelText: "取消",
+          success: (res) => {
+            if (res.confirm) {
+              common_vendor.index.navigateTo({
+                url: "/pages/index/index"
+              });
+            } else {
+              common_vendor.index.navigateBack();
+            }
+          }
+        });
+        return;
+      }
+      checkDraft();
+    });
+    let debounceTimer = null;
+    common_vendor.watch(form, (newValue) => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        saveDraft(newValue);
+      }, 1500);
+    }, {
+      deep: true
+    });
+    const saveDraft = (data) => {
+      if (data.title || data.content || data.tags.length > 0 || data.images.length > 0) {
+        common_vendor.index.setStorageSync(DRAFT_KEY, JSON.stringify(data));
+        common_vendor.index.__f__("log", "at pages/home-opportunitiesPublish/home-opportunitiesPublish.vue:152", "📝 草稿已自动保存");
+      }
+    };
+    const checkDraft = () => {
+      const draft = common_vendor.index.getStorageSync(DRAFT_KEY);
+      if (draft) {
+        common_vendor.index.showModal({
+          title: "发现未完成的草稿",
+          content: "是否恢复上次编辑的内容？",
+          confirmText: "恢复",
+          cancelText: "放弃",
+          success: (res) => {
+            if (res.confirm) {
+              const draftData = JSON.parse(draft);
+              Object.assign(form, draftData);
+            } else {
+              common_vendor.index.removeStorageSync(DRAFT_KEY);
+            }
+          }
+        });
+      }
+    };
+    const clearDraft = () => {
+      common_vendor.index.removeStorageSync(DRAFT_KEY);
+      common_vendor.index.__f__("log", "at pages/home-opportunitiesPublish/home-opportunitiesPublish.vue:178", "🧹 草稿已清除");
+    };
     function topicChange(e) {
-      topic.value = e.detail.value;
+      form.topic = e.detail.value;
     }
     function addTag() {
-      let val = tagInput.value.trim();
+      let val = form.tagInput.trim();
       if (!val)
         return common_vendor.index.showToast({
           title: "请输入标签",
           icon: "none"
         });
-      if (tags.value.length >= 5)
+      if (form.tags.length >= 5)
         return common_vendor.index.showToast({
           title: "最多添加5个标签",
           icon: "none"
         });
       if (!val.startsWith("#"))
         val = "#" + val;
-      if (tags.value.includes(val))
+      if (form.tags.includes(val))
         return common_vendor.index.showToast({
           title: "标签已存在",
           icon: "none"
         });
-      tags.value.push(val);
-      tagInput.value = "";
+      form.tags.push(val);
+      form.tagInput = "";
     }
     function removeTag(index) {
-      tags.value.splice(index, 1);
+      form.tags.splice(index, 1);
     }
     async function handleChooseImage() {
       common_vendor.index.chooseImage({
-        count: 9 - images.value.length,
+        count: 9 - form.images.length,
         sourceType: ["album", "camera"],
         success: async (res) => {
-          const filesToUpload = res.tempFiles;
-          const validFiles = filesToUpload.filter((file) => {
-            if (file.size > 5 * 1024 * 1024) {
-              common_vendor.index.showToast({
-                title: `文件 ${file.name || ""} 过大，已忽略`,
-                icon: "none"
-              });
-              return false;
-            }
-            return true;
-          });
+          const validFiles = res.tempFiles.filter((file) => file.size <= 5 * 1024 * 1024);
+          if (res.tempFiles.length > validFiles.length) {
+            common_vendor.index.showToast({
+              title: "部分文件过大(>5MB)，已忽略",
+              icon: "none"
+            });
+          }
           if (validFiles.length === 0)
             return;
           common_vendor.index.showLoading({
@@ -68,19 +142,16 @@ const _sfc_main = {
           const results = await Promise.all(uploadPromises);
           common_vendor.index.hideLoading();
           const successfulUrls = [];
-          let failedCount = 0;
           results.forEach((result) => {
-            if (result.data) {
+            if (result.data)
               successfulUrls.push(result.data);
-            } else {
-              failedCount++;
-              common_vendor.index.__f__("error", "at pages/home-opportunitiesPublish/home-opportunitiesPublish.vue:174", "上传失败:", result.error);
-            }
+            else
+              common_vendor.index.__f__("error", "at pages/home-opportunitiesPublish/home-opportunitiesPublish.vue:239", "上传失败:", result.error);
           });
-          images.value = images.value.concat(successfulUrls);
-          if (failedCount > 0) {
+          form.images.push(...successfulUrls);
+          if (successfulUrls.length < validFiles.length) {
             common_vendor.index.showToast({
-              title: `${failedCount} 张图片上传失败`,
+              title: `${validFiles.length - successfulUrls.length} 张图片上传失败`,
               icon: "none"
             });
           }
@@ -92,12 +163,11 @@ const _sfc_main = {
         count: 1,
         success: async (res) => {
           const file = res.tempFiles[0];
-          if (file.size > 5 * 1024 * 1024) {
+          if (file.size > 5 * 1024 * 1024)
             return common_vendor.index.showToast({
               title: "文件大小不能超过5MB",
               icon: "none"
             });
-          }
           common_vendor.index.showLoading({
             title: "正在替换...",
             mask: true
@@ -107,14 +177,14 @@ const _sfc_main = {
           });
           common_vendor.index.hideLoading();
           if (result.data) {
-            images.value[index] = result.data;
+            form.images[index] = result.data;
             common_vendor.index.showToast({
               title: "图片已替换",
               icon: "none"
             });
           } else {
             common_vendor.index.showToast({
-              title: result.error,
+              title: result.error || "替换失败",
               icon: "error"
             });
           }
@@ -127,37 +197,38 @@ const _sfc_main = {
         content: "确定要删除这张图片吗？",
         success: (res) => {
           if (res.confirm) {
-            images.value.splice(index, 1);
+            form.images.splice(index, 1);
           }
         }
       });
     }
     function submitPost() {
-      if (!title.value.trim() || title.value.length > 50)
+      if (!form.title.trim() || form.title.length > 50)
         return common_vendor.index.showToast({
           title: "请检查标题",
           icon: "none"
         });
-      if (!content.value.trim() || content.value.length < 20)
+      if (!form.content.trim() || form.content.length < 20)
         return common_vendor.index.showToast({
           title: "内容不能少于20字",
           icon: "none"
         });
-      if (!topic.value)
+      if (!form.topic)
         return common_vendor.index.showToast({
           title: "请选择一个专题",
           icon: "none"
         });
       const postData = {
-        userId: 247,
-        postTitle: title.value,
-        postType: topic.value === "普通商机" ? "0" : "1",
-        postContent: content.value,
-        postImg: images.value.join(","),
+        userId: common_vendor.index.getStorageSync("userId") || 0,
+        // 从缓存获取 userId
+        postTitle: form.title,
+        postType: form.topic === "普通商机" ? "0" : "1",
+        postContent: form.content,
+        postImg: form.images.join(","),
         postedAt: (/* @__PURE__ */ new Date()).toISOString(),
         commentFlag: 1,
-        cardFlag: showProfile.value,
-        tags: tags.value,
+        cardFlag: form.showProfile,
+        tags: form.tags,
         status: "active"
       };
       common_vendor.index.showModal({
@@ -165,7 +236,6 @@ const _sfc_main = {
         content: "请确认您填写的内容无误。",
         success: (res) => {
           if (res.confirm) {
-            common_vendor.index.__f__("log", "at pages/home-opportunitiesPublish/home-opportunitiesPublish.vue:286", "--- 准备提交到后端的帖子数据 ---", postData);
             createOpportunities(postData);
           }
         }
@@ -182,13 +252,12 @@ const _sfc_main = {
       });
       common_vendor.index.hideLoading();
       if (result.data !== null) {
+        clearDraft();
         common_vendor.index.showModal({
           title: "发布成功",
           content: "可在【我的】-【我的商机】中查看您发布的商机。",
           showCancel: false,
-          // 隐藏取消按钮
           confirmText: "知道了",
-          // 自定义确认按钮文字
           success: (res) => {
             if (res.confirm) {
               common_vendor.index.navigateBack();
@@ -204,24 +273,25 @@ const _sfc_main = {
     };
     return (_ctx, _cache) => {
       return common_vendor.e({
-        a: title.value,
-        b: common_vendor.o(($event) => title.value = $event.detail.value),
-        c: content.value,
-        d: common_vendor.o(($event) => content.value = $event.detail.value),
-        e: topic.value === "普通商机",
-        f: topic.value === "创业猎伙",
-        g: common_vendor.o(topicChange),
-        h: common_vendor.f(tags.value, (tag, index, i0) => {
+        a: form.title,
+        b: common_vendor.o(($event) => form.title = $event.detail.value),
+        c: contentPlaceholder.value,
+        d: form.content,
+        e: common_vendor.o(($event) => form.content = $event.detail.value),
+        f: form.topic === "普通商机",
+        g: form.topic === "创业猎伙",
+        h: common_vendor.o(topicChange),
+        i: common_vendor.f(form.tags, (tag, index, i0) => {
           return {
             a: common_vendor.t(tag),
             b: common_vendor.o(($event) => removeTag(index), index),
             c: index
           };
         }),
-        i: tagInput.value,
-        j: common_vendor.o(($event) => tagInput.value = $event.detail.value),
-        k: common_vendor.o(addTag),
-        l: common_vendor.f(images.value, (img, i, i0) => {
+        j: form.tagInput,
+        k: common_vendor.o(($event) => form.tagInput = $event.detail.value),
+        l: common_vendor.o(addTag),
+        m: common_vendor.f(form.images, (img, i, i0) => {
           return {
             a: img,
             b: common_vendor.o(($event) => replaceImage(i), i),
@@ -229,13 +299,18 @@ const _sfc_main = {
             d: i
           };
         }),
-        m: images.value.length < 9
-      }, images.value.length < 9 ? {
-        n: common_vendor.o(handleChooseImage)
+        n: form.images.length < 9
+      }, form.images.length < 9 ? {
+        o: common_vendor.p({
+          type: "plusempty",
+          size: "24",
+          color: "#ccc"
+        }),
+        p: common_vendor.o(handleChooseImage)
       } : {}, {
-        o: showProfile.value,
-        p: common_vendor.o((e) => showProfile.value = e.detail.value),
-        q: common_vendor.o(submitPost)
+        q: form.showProfile,
+        r: common_vendor.o((e) => form.showProfile = e.detail.value),
+        s: common_vendor.o(submitPost)
       });
     };
   }

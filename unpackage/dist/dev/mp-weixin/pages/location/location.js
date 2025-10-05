@@ -269,10 +269,19 @@ const _sfc_main = {
       }
     });
     common_vendor.onReachBottom(() => {
-      if (currentTab.value === 0 && activityLoadingStatus.value === "more") {
-        getNearbyActivities();
-      } else if (currentTab.value === 1 && businessLoadingStatus.value === "more") {
-        getNearbyBusinesses();
+      switch (currentTab.value) {
+        case 0:
+          if (businessLoadingStatus.value === "more") {
+            common_vendor.index.__f__("log", "at pages/location/location.vue:442", "触底加载更多商友...");
+            getNearbyBusinesses();
+          }
+          break;
+        case 1:
+          if (activityLoadingStatus.value === "more") {
+            common_vendor.index.__f__("log", "at pages/location/location.vue:449", "触底加载更多聚会...");
+            getNearbyActivities();
+          }
+          break;
       }
     });
     return (_ctx, _cache) => {
@@ -303,24 +312,26 @@ const _sfc_main = {
             a: business.avatar || "/static/images/default-avatar.png",
             b: common_vendor.o(($event) => navigateToBusinessCard(business), business.id),
             c: common_vendor.t(business.nickname),
-            d: business.fellowTownspeopleCityFlag === 1
-          }, business.fellowTownspeopleCityFlag === 1 ? {} : {}, {
-            e: business.peerFlag === 1
-          }, business.peerFlag === 1 ? {} : {}, {
-            f: business.classmateFlag === 1
-          }, business.classmateFlag === 1 ? {} : {}, {
-            g: business.professionalTitle
+            d: business.professionalTitle
           }, business.professionalTitle ? {
-            h: common_vendor.t(business.professionalTitle)
+            e: common_vendor.t(business.professionalTitle)
           } : {}, {
-            i: business.companyName
+            f: business.companyName
           }, business.companyName ? {
-            j: common_vendor.t(business.companyName)
+            g: common_vendor.t(business.companyName)
           } : {}, {
-            k: common_vendor.t(business.followFlag === 1 ? "取关" : "关注"),
-            l: business.followFlag === 1 ? 1 : "",
-            m: common_vendor.o(($event) => handleFollowAction(business), business.id),
-            n: business.id
+            h: business.fellowTownspeopleCityFlag === 1 || business.peerFlag === 1 || business.classmateFlag === 1
+          }, business.fellowTownspeopleCityFlag === 1 || business.peerFlag === 1 || business.classmateFlag === 1 ? common_vendor.e({
+            i: business.fellowTownspeopleCityFlag === 1
+          }, business.fellowTownspeopleCityFlag === 1 ? {} : {}, {
+            j: business.peerFlag === 1
+          }, business.peerFlag === 1 ? {} : {}, {
+            k: business.classmateFlag === 1
+          }, business.classmateFlag === 1 ? {} : {}) : {}, {
+            l: common_vendor.t(business.followFlag === 1 ? "取关" : "关注"),
+            m: business.followFlag === 1 ? 1 : "",
+            n: common_vendor.o(($event) => handleFollowAction(business), business.id),
+            o: business.id
           });
         }),
         i: common_vendor.p({

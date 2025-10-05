@@ -50,6 +50,8 @@ if (!Math) {
   "./packages/my-points/my-points.js";
   "./packages/my-zhimi/my-zhimi.js";
   "./packages/getPoints/getPoints.js";
+  "./packages/my-member/my-member.js";
+  "./packages/my-friendInvitation/my-friendInvitation.js";
 }
 const _sfc_main = {
   data() {

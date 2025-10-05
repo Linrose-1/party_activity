@@ -14,7 +14,7 @@
 			<!-- 根据登录状态显示不同内容 -->
 			<template v-if="isLogin">
 				<!-- 用户信息主体 -->
-				<!-- 整个区域可点击，跳转到账户详情 -->
+				<!-- 整个区域可点击，跳转到编辑资料 -->
 				<view class="user-info-wrapper" @tap="onViewAccountDetail">
 					<view class="user-info-main">
 						<!-- 头像区域 -->
@@ -54,8 +54,18 @@
 
 			<!-- 如果未登录，显示登录提示 (此部分无变化) -->
 			<template v-else>
+				<!-- 将点击事件移动到最外层容器上 -->
 				<view class="login-prompt" @click="skipToLogin">
-					<!-- ... 省略未变化内容 ... -->
+					<!-- 头像图标 -->
+					<view class="login-prompt-avatar">
+						<uni-icons type="person-filled" size="30" color="#FF8C00"></uni-icons>
+					</view>
+
+					<!-- 【新增】登录提示文字 -->
+					<view class="login-prompt-text">点击去登录</view>
+
+					<!-- 右侧箭头 -->
+					<view class="login-prompt-arrow">›</view>
 				</view>
 			</template>
 		</view>
@@ -84,10 +94,10 @@
 			</view>
 		</view> -->
 
-		<!-- ==================== 人脉金库模块 ==================== -->
+		<!-- ==================== 社交资产模块 ==================== -->
 		<view class="core-features-section">
 			<view class="section-header">
-				<text class="section-title-main">人脉金库</text>
+				<text class="section-title-main">社交资产</text>
 			</view>
 			<!-- 网格容器 -->
 			<view class="core-features-grid">
@@ -97,8 +107,8 @@
 					<!-- 上：标题 -->
 					<view class="grid-item-name">{{ item.name }}</view>
 					<!-- 中：图标 -->
-					<view class="icon-wrapper" :style="{ background: item.iconBg }">
-						<image :src="item.icon" class="feature-icon" />
+					<view class="icon-wrapper">
+						<image :src="item.icon" class="feature-icon" mode="aspectFit" />
 					</view>
 					<!-- 下：描述 -->
 					<view class="grid-item-desc">{{ item.desc }}</view>
@@ -314,37 +324,38 @@
 	// });
 
 	const coreFeatures = ref([{
-			name: '会员中心',
-			desc: '您的会员等级',
-			icon: '../../static/icon/core-membership.png',
-			iconBg: 'linear-gradient(135deg, #FFD700, #FFA500)',
-			key: 'membershipCenter'
+			name: '商友邀请',
+			desc: '您的商脉金库',
+			icon: '../../static/icon/商友邀请.png',
+			iconBg: 'linear-gradient(135deg, #00DBDE, #FC00FF)',
+			path: '/packages/my-friendInvitation/my-friendInvitation'
 		},
 		{
 			name: '数字身份',
 			desc: '详细身份信息',
-			icon: '../../static/icon/core-identity.png',
+			icon: '../../static/icon/数字身份.png',
 			iconBg: 'linear-gradient(135deg, #4158D0, #C850C0)',
 			key: 'digitalIdentity'
 		},
 		{
 			name: '名片分享',
 			desc: '您的电子名片',
-			icon: '../../static/icon/core-card.png',
+			icon: '../../static/icon/我的名片.png',
 			iconBg: 'linear-gradient(135deg, #30CFD0, #330867)',
 			path: '/pages/my-businessCard/my-businessCard'
 		},
 		{
-			name: '商友邀请',
-			desc: '邀请好友加入',
-			icon: '../../static/icon/core-invite.png',
-			iconBg: 'linear-gradient(135deg, #00DBDE, #FC00FF)',
-			path: '/packages/my-account/my-account'
+			name: '用户中心',
+			desc: '您的用户等级',
+			icon: '../../static/icon/会员中心.png',
+			iconBg: 'linear-gradient(135deg, #FFD700, #FFA500)',
+			// key: 'membershipCenter'
+			path: '/packages/my-member/my-member'
 		},
 		{
 			name: '精准投放',
 			desc: '广告精准触达',
-			icon: '../../static/icon/core-target.png',
+			icon: '../../static/icon/广告投放.png',
 			iconBg: 'linear-gradient(135deg, #FAD961, #F76B1C)',
 			key: 'precisionTargeting'
 		}
@@ -498,7 +509,7 @@
 
 	const onViewAccountDetail = () => {
 		uni.navigateTo({
-			url: '/packages/my-account/my-account'
+			url: '/packages/my-edit/my-edit'
 		});
 	}
 
@@ -715,6 +726,7 @@
 	}
 
 	/* 1.4 未登录状态 */
+	/* 1.4 未登录状态 */
 	.login-prompt {
 		display: flex;
 		align-items: center;
@@ -723,21 +735,27 @@
 
 	.login-prompt-avatar {
 		width: 140rpx;
+		/* 保持原样 */
 		height: 140rpx;
+		/* 保持原样 */
 		border-radius: 50%;
 		background-color: rgba(255, 255, 255, 0.9);
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		margin-right: 20rpx;
+		flex-shrink: 0;
+		/* 防止被压缩 */
 	}
 
+	/* 【修改】登录提示文字样式 */
 	.login-prompt-text {
 		font-size: 36rpx;
 		font-weight: bold;
 		color: white;
 	}
 
+	/* 【修改】右箭头样式，使用 margin-left: auto 自动推到最右侧 */
 	.login-prompt-arrow {
 		margin-left: auto;
 		font-size: 40rpx;
@@ -839,31 +857,24 @@
 	.core-features-grid {
 		display: grid;
 		grid-template-columns: repeat(5, 1fr);
-		/* 创建一个五列的网格 */
 		gap: 20rpx;
-		/* 网格项之间的间距 */
 	}
 
 	/* 单个网格项 */
 	.core-feature-grid-item {
 		display: flex;
 		flex-direction: column;
-		/* 垂直排列内部元素 */
 		align-items: center;
-		/* 水平居中 */
 		justify-content: center;
-		/* 垂直居中 */
 		padding: 20rpx 0;
 		border-radius: 18rpx;
 		background-color: #f8f9fa;
-		/* 一个非常浅的背景色，增加层次感 */
 		text-align: center;
 		transition: transform 0.2s ease-in-out;
 	}
 
 	.core-feature-grid-item:active {
 		transform: scale(0.95);
-		/* 点击时的缩小效果 */
 	}
 
 	/* 上：标题 */
@@ -873,31 +884,31 @@
 		font-weight: 800;
 	}
 
-	/* 中：图标 */
+	/* 【核心修改 ①】: 图标的父容器，现在只负责定义尺寸和形状 */
 	.core-feature-grid-item .icon-wrapper {
 		width: 90rpx;
 		height: 90rpx;
-		border-radius: 50%;
-		/* 圆形背景 */
-		display: flex;
-		justify-content: center;
-		align-items: center;
 		margin: 16rpx 0;
-		/* 上下边距 */
 		flex-shrink: 0;
-		box-shadow: 0 6rpx 12rpx rgba(0, 0, 0, 0.1);
-		/* 给图标背景加一点阴影，更立体 */
+		/* 移除所有背景和阴影相关的样式 */
+		/* background: ...; (已删除) */
+		/* box-shadow: ...; (已删除) */
+		/* border-radius: 50%; (保留或删除均可，因为 image 会覆盖它) */
 	}
 
+	/* 【核心修改 ②】: 图标本身，让它撑满父容器 */
 	.core-feature-grid-item .feature-icon {
-		width: 48rpx;
-		height: 48rpx;
+		width: 100%;
+		/* 宽度撑满父容器 */
+		height: 100%;
+		/* 高度撑满父容器 */
+		/* object-fit: contain;  在 uni-app 的 image 组件中，通常由 template 里的 mode="aspectFit" 控制，
+			                            但加上这行可以作为双重保险，确保在 web 端也表现一致 */
 	}
 
 	/* 下：描述 */
 	.grid-item-desc {
 		font-size: 18rpx;
-		/* 较小的字体 */
 		color: #999;
 	}
 
