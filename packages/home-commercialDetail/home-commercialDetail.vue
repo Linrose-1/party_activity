@@ -6,34 +6,37 @@
 				<!-- ... 此处省略商机卡片的所有内容，保持原样即可 ... -->
 				<view class="author-info">
 					<view class="author-avatar-wrapper">
-						<!-- <view class="author-avatar" @click="navigateToBusinessCard(postDetail.userId)">
-							{{ postDetail.user.charAt(0) }}
-						</view> -->
 						<image :src="postDetail.avatar" mode="" class="author-avatar"
 							@click="navigateToBusinessCard({ id: postDetail.userId, name: postDetail.user, avatar: postDetail.avatar })">
 						</image>
-						<view class="avatar-tooltip">点击获取联系方式</view>
 					</view>
 					<view class="author-details">
+						<!-- 用户名现在可以自由换行 -->
 						<view class="author-name">{{ postDetail.user }}</view>
-						<view class="post-time">
-							<uni-icons type="redo" size="14" color="#888"></uni-icons> {{ postDetail.time }}
+						<!-- 将时间和按钮包裹在一个新的容器中，方便横向布局 -->
+						<view class="time-and-actions">
+							<view class="post-time">
+								<uni-icons type="redo" size="14" color="#888"></uni-icons> {{ postDetail.time }}
+							</view>
+							<!-- 按钮移动到这里 -->
+							<button v-if="showFollowButton" class="follow-button mini-style"
+								:class="{ 'followed': postDetail.isFollowedUser }"
+								@click.stop="toggleFollow(postDetail)">
+								{{ postDetail.isFollowedUser ? '已关注' : '关注' }} <!-- 建议用“已取关”或直接显示“关注”-->
+							</button>
+							<button v-else-if="loggedInUserId && loggedInUserId === postDetail.userId"
+								class="follow-button delete-post-button mini-style" @click.stop="deletePost">
+								<uni-icons type="trash" size="12" color="#e74c3c"></uni-icons>
+								删除
+							</button>
 						</view>
 					</view>
-					<!-- 如果是访客，显示关注按钮 -->
-					<button v-if="showFollowButton" class="follow-button"
-						:class="{ 'followed': postDetail.isFollowedUser }" @click.stop="toggleFollow(postDetail)">
-						{{ postDetail.isFollowedUser ? '已关注' : '关注' }}
-					</button>
-					<!-- 如果是作者本人，显示删除按钮 -->
-					<button v-else-if="loggedInUserId && loggedInUserId === postDetail.userId"
-						class="follow-button delete-post-button" @click.stop="deletePost">
-						<uni-icons type="trash" size="14" color="#e74c3c"></uni-icons>
-						删除
-					</button>
 				</view>
-				<view style="font-weight: 700;font-size: 36rpx;">{{postDetail.postTitle}}</view>
-				<view class="opportunity-content">
+				<view style="font-weight: 700;font-size: 36rpx;"
+					@longpress.stop="handleLongPress(postDetail.postTitle)">
+					{{postDetail.postTitle}}
+				</view>
+				<view class="opportunity-content" @longpress.stop="handleLongPress(postDetail.content)">
 					{{ postDetail.content }}
 				</view>
 				<view class="post-images" v-if="postDetail.images && postDetail.images.length"
@@ -157,6 +160,13 @@
 			<view class="guide-text">
 				<text>点击右上角</text>
 				<text>分享到朋友圈</text>
+			</view>
+		</view>
+
+		<!-- ==================== 9. 居中长按复制菜单 ==================== -->
+		<view v-if="copyMenu.show" class="copy-menu-mask" @click="hideCopyMenu">
+			<view class="copy-menu-content" @click.stop>
+				<view class="copy-menu-item" @click="executeCopy">复制</view>
 			</view>
 		</view>
 	</view>
@@ -896,6 +906,51 @@
 			}
 		});
 	};
+
+
+	// 【修改】简化长按复制菜单的状态，不再需要坐标
+	const copyMenu = reactive({
+		show: false,
+		text: '', // 准备要复制的文本
+	});
+
+	// 【修改】长按处理函数，现在它只负责显示菜单
+	const handleLongPress = (textToCopy) => {
+		if (!textToCopy) return;
+		copyMenu.text = textToCopy;
+		copyMenu.show = true;
+	};
+
+	// 【executeCopy 函数保持不变】
+	const executeCopy = () => {
+		if (!copyMenu.text) return;
+		uni.setClipboardData({
+			data: copyMenu.text,
+			success: () => {
+				uni.showToast({
+					title: '已复制',
+					icon: 'none'
+				});
+			},
+			fail: (err) => {
+				console.error('setClipboardData failed in detail page:', err);
+				uni.showToast({
+					title: '复制失败',
+					icon: 'none'
+				});
+			},
+			complete: () => {
+				// 复制完成后隐藏菜单
+				hideCopyMenu();
+			}
+		});
+	};
+
+	// 【新增】点击遮罩层或取消按钮隐藏菜单
+	const hideCopyMenu = () => {
+		copyMenu.show = false;
+		copyMenu.text = ''; // 清空文本
+	};
 </script>
 
 <style scoped>
@@ -1003,8 +1058,13 @@
 	.author-details {
 		margin-left: 30rpx;
 		flex: 1;
-		/* 1. 【关键】让此容器能够被压缩，防止溢出父容器 */
 		min-width: 0;
+		overflow: hidden;
+		/* 【新增】让内部元素垂直排列 */
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		/* 垂直居中 */
 	}
 
 	.author-name {
@@ -1013,13 +1073,20 @@
 		color: #333;
 		margin-bottom: 6rpx;
 
-		/* 2. 【关键】添加单行溢出省略样式 */
-		white-space: nowrap;
-		/* 强制不换行 */
-		overflow: hidden;
-		/* 隐藏溢出的内容 */
-		text-overflow: ellipsis;
-		/* 显示省略号 */
+		/* 【修改】移除单行省略样式，允许换行 */
+		white-space: normal;
+		/* 允许正常换行 */
+		word-break: break-all;
+		/* 允许在任意字符处换行，防止长英文单词溢出 */
+		/* 移除 overflow: hidden 和 text-overflow: ellipsis */
+	}
+
+	/* 【新增】时间和按钮的容器样式 */
+	.time-and-actions {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		/* 让时间和按钮分别靠两边 */
 	}
 
 	.post-time {
@@ -1041,7 +1108,7 @@
 		padding: 10rpx 28rpx;
 		font-size: 26rpx;
 		font-weight: 500;
-		margin-left: 20rpx;
+		/* margin-left: 20rpx; */
 		white-space: nowrap;
 		-webkit-appearance: none;
 		line-height: 1.5;
@@ -1052,6 +1119,18 @@
 		transition: all 0.2s ease;
 		box-shadow: 0 2rpx 8rpx rgba(255, 106, 0, 0.2);
 		flex-shrink: 0;
+	}
+
+	.follow-button.mini-style {
+		padding: 6rpx 20rpx;
+		/* 减小内边距 */
+		font-size: 24rpx;
+		/* 减小字体大小 */
+		height: auto;
+		/* 高度自适应 */
+		line-height: 1.4;
+		/* 调整行高 */
+		/* 减小删除按钮的图标大小 */
 	}
 
 	.follow-button::after {
@@ -1532,5 +1611,47 @@
 	.guide-text text {
 		display: block;
 		margin-bottom: 10rpx;
+	}
+
+	/* =========================
+	 * 9. 居中长按复制菜单样式
+	 * ========================= */
+	.copy-menu-mask {
+		position: fixed;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		background: rgba(0, 0, 0, 0.3);
+		/* 半透明遮罩 */
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		z-index: 999;
+		/* 确保在最上层 */
+	}
+
+	.copy-menu-content {
+		background-color: white;
+		border-radius: 20rpx;
+		overflow: hidden;
+		box-shadow: 0 5rpx 20rpx rgba(0, 0, 0, 0.1);
+	}
+
+	.copy-menu-item {
+		padding: 24rpx 80rpx;
+		font-size: 32rpx;
+		color: #333;
+		text-align: center;
+		border-bottom: 1rpx solid #f0f0f0;
+	}
+
+	.copy-menu-item:last-child {
+		border-bottom: none;
+	}
+
+	/* 增加一个点击效果 */
+	.copy-menu-item:active {
+		background-color: #f7f7f7;
 	}
 </style>

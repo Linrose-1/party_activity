@@ -95,8 +95,13 @@
 .author-details.data-v-8303b14f {
 		margin-left: 30rpx;
 		flex: 1;
-		/* 1. 【关键】让此容器能够被压缩，防止溢出父容器 */
 		min-width: 0;
+		overflow: hidden;
+		/* 【新增】让内部元素垂直排列 */
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		/* 垂直居中 */
 }
 .author-name.data-v-8303b14f {
 		font-weight: 700;
@@ -104,13 +109,20 @@
 		color: #333;
 		margin-bottom: 6rpx;
 
-		/* 2. 【关键】添加单行溢出省略样式 */
-		white-space: nowrap;
-		/* 强制不换行 */
-		overflow: hidden;
-		/* 隐藏溢出的内容 */
-		text-overflow: ellipsis;
-		/* 显示省略号 */
+		/* 【修改】移除单行省略样式，允许换行 */
+		white-space: normal;
+		/* 允许正常换行 */
+		word-break: break-all;
+		/* 允许在任意字符处换行，防止长英文单词溢出 */
+		/* 移除 overflow: hidden 和 text-overflow: ellipsis */
+}
+
+	/* 【新增】时间和按钮的容器样式 */
+.time-and-actions.data-v-8303b14f {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		/* 让时间和按钮分别靠两边 */
 }
 .post-time.data-v-8303b14f {
 		font-size: 26rpx;
@@ -129,7 +141,7 @@
 		padding: 10rpx 28rpx;
 		font-size: 26rpx;
 		font-weight: 500;
-		margin-left: 20rpx;
+		/* margin-left: 20rpx; */
 		white-space: nowrap;
 		-webkit-appearance: none;
 		line-height: 1.5;
@@ -140,6 +152,17 @@
 		transition: all 0.2s ease;
 		box-shadow: 0 2rpx 8rpx rgba(255, 106, 0, 0.2);
 		flex-shrink: 0;
+}
+.follow-button.mini-style.data-v-8303b14f {
+		padding: 6rpx 20rpx;
+		/* 减小内边距 */
+		font-size: 24rpx;
+		/* 减小字体大小 */
+		height: auto;
+		/* 高度自适应 */
+		line-height: 1.4;
+		/* 调整行高 */
+		/* 减小删除按钮的图标大小 */
 }
 .follow-button.data-v-8303b14f::after {
 		border: none;
@@ -568,4 +591,43 @@
 .guide-text text.data-v-8303b14f {
 		display: block;
 		margin-bottom: 10rpx;
+}
+
+	/* =========================
+	 * 9. 居中长按复制菜单样式
+	 * ========================= */
+.copy-menu-mask.data-v-8303b14f {
+		position: fixed;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		background: rgba(0, 0, 0, 0.3);
+		/* 半透明遮罩 */
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		z-index: 999;
+		/* 确保在最上层 */
+}
+.copy-menu-content.data-v-8303b14f {
+		background-color: white;
+		border-radius: 20rpx;
+		overflow: hidden;
+		box-shadow: 0 5rpx 20rpx rgba(0, 0, 0, 0.1);
+}
+.copy-menu-item.data-v-8303b14f {
+		padding: 24rpx 80rpx;
+		font-size: 32rpx;
+		color: #333;
+		text-align: center;
+		border-bottom: 1rpx solid #f0f0f0;
+}
+.copy-menu-item.data-v-8303b14f:last-child {
+		border-bottom: none;
+}
+
+	/* 增加一个点击效果 */
+.copy-menu-item.data-v-8303b14f:active {
+		background-color: #f7f7f7;
 }

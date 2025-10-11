@@ -13,13 +13,13 @@
 				<button class="avatar-wrapper" open-type="chooseAvatar" @chooseavatar="onChooseAvatar">
 					<image class="avatar" :src="avatarUrl || '/static/images/default-avatar.png'"></image>
 				</button>
-				<text class="avatar-hint">点击上传头像</text>
+				<text class="avatar-hint">点击上传头像(首次登录需要填写)</text>
 
 				<!-- 昵称输入框 -->
 				<view class="form-item nickName-item">
 					<uni-icons type="person-filled" size="22" color="#FF7600"></uni-icons>
 					<text class="label">用户名</text>
-					<input class="input" type="nickName" placeholder="请输入昵称" v-model="nickName" />
+					<input class="input" type="nickName" placeholder="请输入昵称(首次登录需要填写)" v-model="nickName" />
 				</view>
 			</view>
 
@@ -75,8 +75,8 @@
 	// --- 1. 状态管理 ---
 	const loginCode = ref(''); // uni.login 获取的登录凭证
 	const phoneCode = ref(''); // 微信手机号授权凭证
-	const nickName = ref(''); // 用户昵称，可由用户输入或授权填充
-	const avatarUrl = ref(''); // 用户头像URL，通过授权获取
+	const nickName = ref(null); // 用户昵称，可由用户输入或授权填充
+	const avatarUrl = ref(null); // 用户头像URL，通过授权获取
 	const inviteCode = ref(''); // 邀请码
 	const agreed = ref(false); // 是否同意协议
 
@@ -84,7 +84,7 @@
 	const isLoginDisabled = computed(() => {
 		// 登录按钮的可用条件：已授权手机号、已填写昵称、已同意协议
 		// return !avatarUrl.value || !phoneCode.value || !nickName.value.trim() || !agreed.value;
-		return  !phoneCode.value || !nickName.value.trim() || !agreed.value;
+		return !phoneCode.value || !agreed.value;
 	});
 
 	// --- 3. 生命周期钩子 ---
@@ -201,29 +201,43 @@
 	const handleLogin = async () => {
 		// 前端校验
 		if (isLoginDisabled.value) {
-			if (!avatarUrl.value) {
-				uni.showToast({
-					title: '请上传头像',
-					icon: 'none'
-				});
-			} else if (!phoneCode.value) {
+			if (!phoneCode.value) {
 				uni.showToast({
 					title: '请授权手机号',
 					icon: 'none'
 				});
-			} else if (!nickName.value.trim()) {
-				uni.showToast({
-					title: '请输入昵称',
-					icon: 'none'
-				});
 			} else if (!agreed.value) {
 				uni.showToast({
-					title: '请同意协议',
+					title: '请同意用户协议和隐私政策',
 					icon: 'none'
 				});
 			}
 			return;
 		}
+		// if (isLoginDisabled.value) {
+		// 	if (!avatarUrl.value) {
+		// 		uni.showToast({
+		// 			title: '请上传头像',
+		// 			icon: 'none'
+		// 		});
+		// 	} else if (!phoneCode.value) {
+		// 		uni.showToast({
+		// 			title: '请授权手机号',
+		// 			icon: 'none'
+		// 		});
+		// 	} else if (!nickName.value.trim()) {
+		// 		uni.showToast({
+		// 			title: '请输入昵称',
+		// 			icon: 'none'
+		// 		});
+		// 	} else if (!agreed.value) {
+		// 		uni.showToast({
+		// 			title: '请同意协议',
+		// 			icon: 'none'
+		// 		});
+		// 	}
+		// 	return;
+		// }
 
 		uni.showLoading({
 			title: '正在登录...'
@@ -248,7 +262,19 @@
 			});
 
 			if (loginResult.error || !loginResult.data?.accessToken) {
-				throw new Error(loginResult.error || '登录失败，请重试');
+				// 特殊处理453错误码
+				if (loginResult.error && loginResult.error.code === 453) {
+					uni.showToast({
+						title: loginResult.error.msg,
+						icon: 'none',
+						duration: 3000
+					});
+				} else {
+					throw new Error(loginResult.error || '登录失败，请重试');
+				}
+				// 无论如何，453之后需要重新获取code
+				getLoginCode();
+				return;
 			}
 
 			// 登录成功，存储 token 和 userId
@@ -432,7 +458,14 @@
 			/* flex 布局下防止溢出 */
 		}
 
-		.placeholder {
+		::v-deep .input-placeholder {
+			text-align: left;
+			color: #ccc;
+		}
+
+		// 如果上面不生效，可以尝试下面这个
+		.input::placeholder {
+			text-align: left;
 			color: #ccc;
 		}
 

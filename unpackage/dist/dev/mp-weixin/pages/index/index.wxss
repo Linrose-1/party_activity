@@ -72,7 +72,16 @@
   min-width: 0;
   /* flex 布局下防止溢出 */
 }
-.form-item .placeholder.data-v-1cf27b2a {
+.form-item.data-v-1cf27b2a .input-placeholder {
+  text-align: left;
+  color: #ccc;
+}
+.form-item .input.data-v-1cf27b2a::-webkit-input-placeholder {
+  text-align: left;
+  color: #ccc;
+}
+.form-item .input.data-v-1cf27b2a::placeholder {
+  text-align: left;
   color: #ccc;
 }
 .form-item .input-display.data-v-1cf27b2a {

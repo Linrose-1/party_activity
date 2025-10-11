@@ -203,14 +203,14 @@ const _sfc_main = {
       });
     }
     function submitPost() {
-      if (!form.title.trim() || form.title.length > 50)
+      if (!form.title.trim() || form.title.length > 100)
         return common_vendor.index.showToast({
-          title: "请检查标题",
+          title: "标题不能为空且不能超过100字",
           icon: "none"
         });
-      if (!form.content.trim() || form.content.length < 20)
+      if (form.content.length > 5e3)
         return common_vendor.index.showToast({
-          title: "内容不能少于20字",
+          title: "内容不能超过5000字",
           icon: "none"
         });
       if (!form.topic)

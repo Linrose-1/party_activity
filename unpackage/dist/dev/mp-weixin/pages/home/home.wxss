@@ -232,11 +232,18 @@
 		line-height: 1.6;
 		margin-top: 16rpx;
 		color: #666;
-		display: -webkit-box;
-		-webkit-box-orient: vertical;
-		-webkit-line-clamp: 2;
-		overflow: hidden;
-		text-overflow: ellipsis;
+		/* 允许内容按空格或换行符自动换行 */
+		white-space: pre-wrap;
+		word-break: break-all;
+}
+
+	/* 【新增】“展开”链接的样式 */
+.expand-link.data-v-07e72d3c {
+		color: #007AFF;
+		/* 蓝色，类似于微信的链接颜色 */
+		margin-left: 8rpx;
+		display: inline-block;
+		/* 确保它像个按钮一样可交互 */
 }
 .post-images.data-v-07e72d3c {
 		display: grid;
@@ -336,4 +343,44 @@
 		padding: 60rpx;
 		color: #999;
 		font-size: 32rpx;
+}
+
+
+	/* =========================
+	 * 9. 长按复制菜单样式
+	 * ========================= */
+.copy-menu-mask.data-v-07e72d3c {
+		position: fixed;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		background: rgba(0, 0, 0, 0.3);
+		/* 半透明遮罩 */
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		z-index: 999;
+		/* 确保在最上层 */
+}
+.copy-menu-content.data-v-07e72d3c {
+		background-color: white;
+		border-radius: 20rpx;
+		overflow: hidden;
+		box-shadow: 0 5rpx 20rpx rgba(0, 0, 0, 0.1);
+}
+.copy-menu-item.data-v-07e72d3c {
+		padding: 24rpx 80rpx;
+		font-size: 32rpx;
+		color: #333;
+		text-align: center;
+		border-bottom: 1rpx solid #f0f0f0;
+}
+.copy-menu-item.data-v-07e72d3c:last-child {
+		border-bottom: none;
+}
+
+	/* 增加一个点击效果 */
+.copy-menu-item.data-v-07e72d3c:active {
+		background-color: #f7f7f7;
 }

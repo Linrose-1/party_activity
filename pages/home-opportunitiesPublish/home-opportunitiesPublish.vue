@@ -5,13 +5,13 @@
 			<view class="form-card">
 				<view class="form-group">
 					<view class="form-label">标题</view>
-					<input v-model="form.title" class="form-input" placeholder="请输入标题（最多50字）" maxlength="50" />
+					<input v-model="form.title" class="form-input" placeholder="请输入标题（最多100字）" maxlength="100" />
 				</view>
 
 				<view class="form-group">
 					<view class="form-label">内容</view>
 					<!-- placeholder 已绑定到计算属性 -->
-					<textarea v-model="form.content" class="form-textarea" :placeholder="contentPlaceholder" />
+					<textarea v-model="form.content" class="form-textarea" :placeholder="contentPlaceholder" maxlength="5000" />
 				</view>
 
 				<view class="form-group">
@@ -299,12 +299,12 @@
 
 	// --- 提交表单 ---
 	function submitPost() {
-		if (!form.title.trim() || form.title.length > 50) return uni.showToast({
-			title: '请检查标题',
+		if (!form.title.trim() || form.title.length > 100) return uni.showToast({
+			title: '标题不能为空且不能超过100字',
 			icon: 'none'
 		});
-		if (!form.content.trim() || form.content.length < 20) return uni.showToast({
-			title: '内容不能少于20字',
+		if (form.content.length > 5000) return uni.showToast({
+			title: '内容不能超过5000字',
 			icon: 'none'
 		});
 		if (!form.topic) return uni.showToast({

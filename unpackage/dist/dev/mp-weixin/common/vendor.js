@@ -7297,9 +7297,9 @@ function initOnError() {
   };
 }
 function initRuntimeSocketService() {
-  const hosts = "192.168.110.17,127.0.0.1";
+  const hosts = "172.20.10.4,127.0.0.1";
   const port = "8090";
-  const id = "mp-weixin_qYRLno";
+  const id = "mp-weixin_ZxTh6w";
   const lazy = typeof swan !== "undefined";
   let restoreError = lazy ? () => {
   } : initOnError();
@@ -8544,7 +8544,7 @@ const subPackages = [
       {
         path: "my-member/my-member",
         style: {
-          navigationBarTitleText: "会员中心"
+          navigationBarTitleText: "用户中心"
         }
       },
       {

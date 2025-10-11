@@ -15,12 +15,12 @@ const _sfc_main = {
   setup(__props) {
     const loginCode = common_vendor.ref("");
     const phoneCode = common_vendor.ref("");
-    const nickName = common_vendor.ref("");
-    const avatarUrl = common_vendor.ref("");
+    const nickName = common_vendor.ref(null);
+    const avatarUrl = common_vendor.ref(null);
     const inviteCode = common_vendor.ref("");
     const agreed = common_vendor.ref(false);
     const isLoginDisabled = common_vendor.computed(() => {
-      return !phoneCode.value || !nickName.value.trim() || !agreed.value;
+      return !phoneCode.value || !agreed.value;
     });
     common_vendor.onLoad(() => {
       getLoginCode();
@@ -99,24 +99,14 @@ const _sfc_main = {
     const handleLogin = async () => {
       var _a;
       if (isLoginDisabled.value) {
-        if (!avatarUrl.value) {
-          common_vendor.index.showToast({
-            title: "请上传头像",
-            icon: "none"
-          });
-        } else if (!phoneCode.value) {
+        if (!phoneCode.value) {
           common_vendor.index.showToast({
             title: "请授权手机号",
             icon: "none"
           });
-        } else if (!nickName.value.trim()) {
-          common_vendor.index.showToast({
-            title: "请输入昵称",
-            icon: "none"
-          });
         } else if (!agreed.value) {
           common_vendor.index.showToast({
-            title: "请同意协议",
+            title: "请同意用户协议和隐私政策",
             icon: "none"
           });
         }
@@ -135,13 +125,23 @@ const _sfc_main = {
           shardCode: inviteCode.value,
           state: "default"
         };
-        common_vendor.index.__f__("log", "at pages/index/index.vue:242", "🚀 准备提交的登录数据:", payload);
+        common_vendor.index.__f__("log", "at pages/index/index.vue:256", "🚀 准备提交的登录数据:", payload);
         const loginResult = await utils_request.request("/app-api/member/auth/weixin-mini-app-login", {
           method: "POST",
           data: payload
         });
         if (loginResult.error || !((_a = loginResult.data) == null ? void 0 : _a.accessToken)) {
-          throw new Error(loginResult.error || "登录失败，请重试");
+          if (loginResult.error && loginResult.error.code === 453) {
+            common_vendor.index.showToast({
+              title: loginResult.error.msg,
+              icon: "none",
+              duration: 3e3
+            });
+          } else {
+            throw new Error(loginResult.error || "登录失败，请重试");
+          }
+          getLoginCode();
+          return;
         }
         const {
           accessToken,
@@ -161,7 +161,7 @@ const _sfc_main = {
         });
       } catch (error) {
         common_vendor.index.hideLoading();
-        common_vendor.index.__f__("error", "at pages/index/index.vue:281", "登录流程异常:", error);
+        common_vendor.index.__f__("error", "at pages/index/index.vue:307", "登录流程异常:", error);
         common_vendor.index.showToast({
           title: error.message,
           icon: "none"
@@ -180,20 +180,20 @@ const _sfc_main = {
         method: "GET"
       });
       if (error) {
-        common_vendor.index.__f__("error", "at pages/index/index.vue:305", "❌ [登录后] 获取用户信息失败:", error);
+        common_vendor.index.__f__("error", "at pages/index/index.vue:331", "❌ [登录后] 获取用户信息失败:", error);
         common_vendor.index.showToast({
           title: "用户信息同步失败",
           icon: "none"
         });
         return;
       }
-      common_vendor.index.__f__("log", "at pages/index/index.vue:312", "✅ [登录后] 成功获取并缓存用户信息:", JSON.parse(JSON.stringify(fullUserInfo)));
+      common_vendor.index.__f__("log", "at pages/index/index.vue:338", "✅ [登录后] 成功获取并缓存用户信息:", JSON.parse(JSON.stringify(fullUserInfo)));
       common_vendor.index.setStorageSync("userInfo", JSON.stringify(fullUserInfo));
     };
     const handlePendingShareReward = async (currentUserId) => {
       const pendingReward = common_vendor.index.getStorageSync("pendingShareReward");
       if (pendingReward && pendingReward.sharerId && pendingReward.bizId && pendingReward.type && pendingReward.sharerId !== currentUserId) {
-        common_vendor.index.__f__("log", "at pages/index/index.vue:324", `✅ [登录后] 检测到待处理分享奖励`, pendingReward);
+        common_vendor.index.__f__("log", "at pages/index/index.vue:350", `✅ [登录后] 检测到待处理分享奖励`, pendingReward);
         const {
           error
         } = await utils_request.request("/app-api/member/experience-record/share-experience-hit", {
@@ -205,9 +205,9 @@ const _sfc_main = {
           }
         });
         if (error) {
-          common_vendor.index.__f__("error", "at pages/index/index.vue:336", "❌ [登录后] 调用分享加分接口失败:", error);
+          common_vendor.index.__f__("error", "at pages/index/index.vue:362", "❌ [登录后] 调用分享加分接口失败:", error);
         } else {
-          common_vendor.index.__f__("log", "at pages/index/index.vue:338", `✅ [登录后] 成功为分享者(ID: ${pendingReward.sharerId})触发奖励`);
+          common_vendor.index.__f__("log", "at pages/index/index.vue:364", `✅ [登录后] 成功为分享者(ID: ${pendingReward.sharerId})触发奖励`);
         }
         common_vendor.index.removeStorageSync("pendingShareReward");
       }

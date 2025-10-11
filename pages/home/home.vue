@@ -46,8 +46,16 @@
 				</view>
 
 				<!-- 3.2 卡片内容 (公开) -->
-				<view class="post-content-title">{{ post.title }}</view>
-				<view v-if="post.contentPreview" class="post-content-preview">{{ post.contentPreview }}</view>
+				<!-- 【修改】为标题添加新的 longpress 事件 -->
+				<view class="post-content-title" @longpress.stop="handleLongPress(post.title)">{{ post.title }}</view>
+
+				<!-- 【修改】为内容预览区域添加新的 longpress 事件 -->
+				<view v-if="post.displayContent" class="post-content-preview"
+					@longpress.stop="handleLongPress(post.fullContent)">
+					{{ post.displayContent }}<span v-if="post.isTruncated">...
+						<span class="expand-link" @click.stop="handlePostClick(post)">展开</span>
+					</span>
+				</view>
 				<view class="post-images" v-if="post.images && post.images.length">
 					<view v-for="(image, imgIndex) in post.images" :key="imgIndex" class="image-wrapper">
 						<image :src="image" alt="商机图片" class="post-image" mode="aspectFill" />
@@ -106,6 +114,13 @@
 				<view v-else-if="loadingStatus === 'noMore'">
 					<uni-load-more status="noMore" contentText.noMore="暂无更多内容" />
 				</view>
+			</view>
+		</view>
+
+		<!-- ==================== 9. 长按复制菜单 ==================== -->
+		<view v-if="copyMenu.show" class="copy-menu-mask" @click="hideCopyMenu">
+			<view class="copy-menu-content" @click.stop>
+				<view class="copy-menu-item" @click="executeCopy">复制</view>
 			</view>
 		</view>
 	</view>
@@ -279,26 +294,38 @@
 				return;
 			}
 
-			const mappedData = apiData.list.map(item => ({
-				id: item.id,
-				title: item.postTitle,
-				contentPreview: generateContentPreview(item.postContent),
-				images: item.postImg ? String(item.postImg).split(',').filter(img => img) : [],
-				tags: item.tags ? (Array.isArray(item.tags) ? item.tags : String(item.tags).split(',')
-					.filter(tag => tag)) : [],
-				likes: item.likesCount || 0,
-				dislikes: item.dislikesCount || 0,
-				comments: item.commentsCount || 0,
-				userAction: item.userLikeStr || null,
-				isSaved: item.followFlag === 1,
-				isFollowedUser: item.followUserFlag === 1,
-				time: formatTimestamp(item.createTime),
-				user: {
-					id: item.memberUser?.id || item.userId,
-					name: item.memberUser?.nickname || '匿名用户',
-					avatar: item.memberUser?.avatar || defaultAvatarUrl
+			const mappedData = apiData.list.map(item => {
+				// 【新增】处理内容的逻辑
+				const plainText = (item.postContent || '').replace(/<[^>]+>/g, '').trim();
+				const isTruncated = plainText.length > 100;
+				const displayContent = isTruncated ? plainText.substring(0, 100) : plainText;
+
+				return {
+					id: item.id,
+					title: item.postTitle,
+					// 【修改】使用新的内容变量
+					fullContent: plainText, // 完整纯文本内容，为长按复制做准备
+					displayContent: displayContent, // 用于显示的内容
+					isTruncated: isTruncated, // 是否被截断的标志
+					// 【旧代码】 contentPreview: generateContentPreview(item.postContent),
+					images: item.postImg ? String(item.postImg).split(',').filter(img => img) : [],
+					// ... 其他字段保持不变
+					tags: item.tags ? (Array.isArray(item.tags) ? item.tags : String(item.tags).split(',')
+						.filter(tag => tag)) : [],
+					likes: item.likesCount || 0,
+					dislikes: item.dislikesCount || 0,
+					comments: item.commentsCount || 0,
+					userAction: item.userLikeStr || null,
+					isSaved: item.followFlag === 1,
+					isFollowedUser: item.followUserFlag === 1,
+					time: formatTimestamp(item.createTime),
+					user: {
+						id: item.memberUser?.id || item.userId,
+						name: item.memberUser?.nickname || '匿名用户',
+						avatar: item.memberUser?.avatar || defaultAvatarUrl
+					}
 				}
-			}));
+			});
 
 			postList.value = isRefresh ? mappedData : [...postList.value, ...mappedData];
 
@@ -619,11 +646,57 @@
 		return `${Y}-${M}-${D} ${h}:${m}`;
 	};
 
-	const generateContentPreview = (content) => {
-		if (!content) return '';
-		const plainText = content.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
-		return plainText.length > 50 ? plainText.substring(0, 50) + '...' : plainText;
+	// 长按复制文本的方法
+	// 【新增】用于长按复制菜单的状态
+	const copyMenu = reactive({
+		show: false,
+		text: '', // 准备要复制的文本
+	});
+
+	// 【修改】长按处理函数，现在它只负责显示菜单
+	const handleLongPress = (textToCopy) => {
+		if (!textToCopy) return;
+		copyMenu.text = textToCopy;
+		copyMenu.show = true;
 	};
+
+	// 【新增】点击“复制”按钮后真正执行复制操作的函数
+	const executeCopy = () => {
+		if (!copyMenu.text) return;
+		uni.setClipboardData({
+			data: copyMenu.text,
+			success: () => {
+				uni.showToast({
+					title: '已复制',
+					icon: 'none'
+				});
+			},
+			fail: (err) => {
+				// 在真机上，如果这里还失败，可以加一些调试信息
+				console.error('setClipboardData failed:', err);
+				uni.showToast({
+					title: '复制失败',
+					icon: 'none'
+				});
+			},
+			complete: () => {
+				// 复制完成后隐藏菜单
+				copyMenu.show = false;
+				copyMenu.text = '';
+			}
+		});
+	};
+
+	// 【新增】点击遮罩层隐藏菜单
+	const hideCopyMenu = () => {
+		copyMenu.show = false;
+	};
+
+	// const generateContentPreview = (content) => {
+	// 	if (!content) return '';
+	// 	const plainText = content.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+	// 	return plainText.length > 50 ? plainText.substring(0, 50) + '...' : plainText;
+	// };
 </script>
 
 <style scoped>
@@ -885,11 +958,18 @@
 		line-height: 1.6;
 		margin-top: 16rpx;
 		color: #666;
-		display: -webkit-box;
-		-webkit-box-orient: vertical;
-		-webkit-line-clamp: 2;
-		overflow: hidden;
-		text-overflow: ellipsis;
+		/* 允许内容按空格或换行符自动换行 */
+		white-space: pre-wrap;
+		word-break: break-all;
+	}
+
+	/* 【新增】“展开”链接的样式 */
+	.expand-link {
+		color: #007AFF;
+		/* 蓝色，类似于微信的链接颜色 */
+		margin-left: 8rpx;
+		display: inline-block;
+		/* 确保它像个按钮一样可交互 */
 	}
 
 	.post-images {
@@ -1004,5 +1084,48 @@
 		padding: 60rpx;
 		color: #999;
 		font-size: 32rpx;
+	}
+
+
+	/* =========================
+	 * 9. 长按复制菜单样式
+	 * ========================= */
+	.copy-menu-mask {
+		position: fixed;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		background: rgba(0, 0, 0, 0.3);
+		/* 半透明遮罩 */
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		z-index: 999;
+		/* 确保在最上层 */
+	}
+
+	.copy-menu-content {
+		background-color: white;
+		border-radius: 20rpx;
+		overflow: hidden;
+		box-shadow: 0 5rpx 20rpx rgba(0, 0, 0, 0.1);
+	}
+
+	.copy-menu-item {
+		padding: 24rpx 80rpx;
+		font-size: 32rpx;
+		color: #333;
+		text-align: center;
+		border-bottom: 1rpx solid #f0f0f0;
+	}
+
+	.copy-menu-item:last-child {
+		border-bottom: none;
+	}
+
+	/* 增加一个点击效果 */
+	.copy-menu-item:active {
+		background-color: #f7f7f7;
 	}
 </style>

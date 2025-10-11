@@ -24,7 +24,8 @@
 						</view>
 						<view class="user-details">
 							<view class="user-name">
-								{{ userInfo.nickname || '未设置昵称' }}
+								<!-- 将昵称文本包裹起来 -->
+								<text class="nickname-text">{{ userInfo.nickname || '未设置昵称' }}</text>
 								<text class="badge"
 									v-if="userInfo.topUpLevel && userInfo.topUpLevel.name">{{ userInfo.topUpLevel.name }}</text>
 							</view>
@@ -653,6 +654,19 @@
 		font-weight: bold;
 		display: flex;
 		align-items: center;
+		/* 【新增】确保父容器也能处理溢出 */
+		overflow: hidden;
+	}
+
+	/* 【新增】专门为昵称文本添加截断样式 */
+	.nickname-text {
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		/* 【关键】让它可以被压缩，给徽章留出空间 */
+		flex-shrink: 1;
+		min-width: 0;
+		/* 配合 flex-shrink */
 	}
 
 	.badge {

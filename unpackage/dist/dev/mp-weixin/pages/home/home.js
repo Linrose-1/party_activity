@@ -122,11 +122,22 @@ const _sfc_main = {
         }
         const mappedData = apiData.list.map((item) => {
           var _a, _b, _c;
+          const plainText = (item.postContent || "").replace(/<[^>]+>/g, "").trim();
+          const isTruncated = plainText.length > 100;
+          const displayContent = isTruncated ? plainText.substring(0, 100) : plainText;
           return {
             id: item.id,
             title: item.postTitle,
-            contentPreview: generateContentPreview(item.postContent),
+            // 【修改】使用新的内容变量
+            fullContent: plainText,
+            // 完整纯文本内容，为长按复制做准备
+            displayContent,
+            // 用于显示的内容
+            isTruncated,
+            // 是否被截断的标志
+            // 【旧代码】 contentPreview: generateContentPreview(item.postContent),
             images: item.postImg ? String(item.postImg).split(",").filter((img) => img) : [],
+            // ... 其他字段保持不变
             tags: item.tags ? Array.isArray(item.tags) ? item.tags : String(item.tags).split(",").filter((tag) => tag) : [],
             likes: item.likesCount || 0,
             dislikes: item.dislikesCount || 0,
@@ -150,7 +161,7 @@ const _sfc_main = {
           pageNo.value++;
         }
       } catch (err) {
-        common_vendor.index.__f__("error", "at pages/home/home.vue:312", "getBusinessOpportunitiesList 逻辑异常:", err);
+        common_vendor.index.__f__("error", "at pages/home/home.vue:339", "getBusinessOpportunitiesList 逻辑异常:", err);
         loadingStatus.value = "more";
         common_vendor.index.showToast({
           title: "页面逻辑异常，请稍后重试",
@@ -426,11 +437,43 @@ const _sfc_main = {
       const m = date.getMinutes().toString().padStart(2, "0");
       return `${Y}-${M}-${D} ${h}:${m}`;
     };
-    const generateContentPreview = (content) => {
-      if (!content)
-        return "";
-      const plainText = content.replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
-      return plainText.length > 50 ? plainText.substring(0, 50) + "..." : plainText;
+    const copyMenu = common_vendor.reactive({
+      show: false,
+      text: ""
+      // 准备要复制的文本
+    });
+    const handleLongPress = (textToCopy) => {
+      if (!textToCopy)
+        return;
+      copyMenu.text = textToCopy;
+      copyMenu.show = true;
+    };
+    const executeCopy = () => {
+      if (!copyMenu.text)
+        return;
+      common_vendor.index.setClipboardData({
+        data: copyMenu.text,
+        success: () => {
+          common_vendor.index.showToast({
+            title: "已复制",
+            icon: "none"
+          });
+        },
+        fail: (err) => {
+          common_vendor.index.__f__("error", "at pages/home/home.vue:676", "setClipboardData failed:", err);
+          common_vendor.index.showToast({
+            title: "复制失败",
+            icon: "none"
+          });
+        },
+        complete: () => {
+          copyMenu.show = false;
+          copyMenu.text = "";
+        }
+      });
+    };
+    const hideCopyMenu = () => {
+      copyMenu.show = false;
     };
     return (_ctx, _cache) => {
       return common_vendor.e({
@@ -470,75 +513,81 @@ const _sfc_main = {
             h: common_vendor.o(($event) => toggleFollow(post), post.id)
           } : {}, {
             i: common_vendor.t(post.title),
-            j: post.contentPreview
-          }, post.contentPreview ? {
-            k: common_vendor.t(post.contentPreview)
+            j: common_vendor.o(($event) => handleLongPress(post.title), post.id),
+            k: post.displayContent
+          }, post.displayContent ? common_vendor.e({
+            l: common_vendor.t(post.displayContent),
+            m: post.isTruncated
+          }, post.isTruncated ? {
+            n: common_vendor.o(($event) => handlePostClick(post), post.id)
           } : {}, {
-            l: post.images && post.images.length
+            o: common_vendor.o(($event) => handleLongPress(post.fullContent), post.id)
+          }) : {}, {
+            p: post.images && post.images.length
           }, post.images && post.images.length ? {
-            m: common_vendor.f(post.images, (image, imgIndex, i1) => {
+            q: common_vendor.f(post.images, (image, imgIndex, i1) => {
               return {
                 a: image,
                 b: imgIndex
               };
             })
           } : {}, {
-            n: post.tags && post.tags.length
+            r: post.tags && post.tags.length
           }, post.tags && post.tags.length ? {
-            o: common_vendor.f(post.tags, (tag, tagIndex, i1) => {
+            s: common_vendor.f(post.tags, (tag, tagIndex, i1) => {
               return {
                 a: common_vendor.t(tag),
                 b: tagIndex
               };
             })
           } : {}, isLogin.value ? common_vendor.e({
-            p: "07e72d3c-2-" + i0,
-            q: common_vendor.p({
+            t: "07e72d3c-2-" + i0,
+            v: common_vendor.p({
               type: post.userAction === "like" ? "hand-up-filled" : "hand-up",
               size: "20",
               color: post.userAction === "like" ? "#e74c3c" : "#666"
             }),
-            r: common_vendor.t(post.likes),
-            s: post.userAction === "like" ? 1 : "",
-            t: common_vendor.o(($event) => toggleAction(post, "like"), post.id),
-            v: "07e72d3c-3-" + i0,
-            w: common_vendor.p({
+            w: common_vendor.t(post.likes),
+            x: post.userAction === "like" ? 1 : "",
+            y: common_vendor.o(($event) => toggleAction(post, "like"), post.id),
+            z: "07e72d3c-3-" + i0,
+            A: common_vendor.p({
               type: post.userAction === "dislike" ? "hand-down-filled" : "hand-down",
               size: "20",
               color: post.userAction === "dislike" ? "#3498db" : "#666"
             }),
-            x: common_vendor.t(post.dislikes),
-            y: post.userAction === "dislike" ? 1 : "",
-            z: common_vendor.o(($event) => toggleAction(post, "dislike"), post.id),
-            A: "07e72d3c-4-" + i0,
-            B: common_vendor.p({
+            B: common_vendor.t(post.dislikes),
+            C: post.userAction === "dislike" ? 1 : "",
+            D: common_vendor.o(($event) => toggleAction(post, "dislike"), post.id),
+            E: "07e72d3c-4-" + i0,
+            F: common_vendor.p({
               type: "chatbubble",
               size: "20",
               color: "#666"
             }),
-            C: common_vendor.t(post.comments),
-            D: common_vendor.o(($event) => navigateToComments(post), post.id),
-            E: "07e72d3c-5-" + i0,
-            F: common_vendor.p({
+            G: common_vendor.t(post.comments),
+            H: common_vendor.o(($event) => navigateToComments(post), post.id),
+            I: "07e72d3c-5-" + i0,
+            J: common_vendor.p({
               type: post.isSaved ? "star-filled" : "star",
               size: "20",
               color: post.isSaved ? "#FF6A00" : "#666"
             }),
-            G: common_vendor.t(post.isSaved ? "已收藏" : "收藏"),
-            H: post.isSaved ? 1 : "",
-            I: common_vendor.o(($event) => toggleSave(post), post.id),
-            J: isLogin.value && loggedInUserId.value === post.user.id
+            K: common_vendor.t(post.isSaved ? "已收藏" : "收藏"),
+            L: post.isSaved ? 1 : "",
+            M: common_vendor.o(($event) => toggleSave(post), post.id),
+            N: isLogin.value && loggedInUserId.value === post.user.id
           }, isLogin.value && loggedInUserId.value === post.user.id ? {
-            K: "07e72d3c-6-" + i0,
-            L: common_vendor.p({
+            O: "07e72d3c-6-" + i0,
+            P: common_vendor.p({
               type: "trash",
               size: "20",
               color: "#e74c3c"
             }),
-            M: common_vendor.o(($event) => deletePost(post), post.id)
+            Q: common_vendor.o(($event) => deletePost(post), post.id)
           } : {}) : {}, {
-            N: post.id,
-            O: common_vendor.o(($event) => handlePostClick(post), post.id)
+            R: post.id,
+            S: common_vendor.o(($event) => handlePostClick(post), post.id)
           });
         }),
         q: isLogin.value,
@@ -558,8 +607,14 @@ const _sfc_main = {
       } : {}, {
         t: isLogin.value && postList.value.length === 0 && loadingStatus.value === "noMore",
         v: loadingStatus.value === "loading",
-        x: loadingStatus.value === "noMore"
-      });
+        x: loadingStatus.value === "noMore",
+        z: copyMenu.show
+      }, copyMenu.show ? {
+        A: common_vendor.o(executeCopy),
+        B: common_vendor.o(() => {
+        }),
+        C: common_vendor.o(hideCopyMenu)
+      } : {});
     };
   }
 };

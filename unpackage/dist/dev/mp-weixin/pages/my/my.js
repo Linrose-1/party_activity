@@ -45,14 +45,14 @@ const _sfc_main = {
         });
         if (!error && data) {
           userInfo.value = data;
-          common_vendor.index.__f__("log", "at pages/my/my.vue:199", "getUserInfo userInfo:", userInfo.value);
+          common_vendor.index.__f__("log", "at pages/my/my.vue:200", "getUserInfo userInfo:", userInfo.value);
         } else {
-          common_vendor.index.__f__("log", "at pages/my/my.vue:201", "获取用户信息失败:", error);
+          common_vendor.index.__f__("log", "at pages/my/my.vue:202", "获取用户信息失败:", error);
           isLogin.value = false;
           userInfo.value = {};
         }
       } catch (err) {
-        common_vendor.index.__f__("log", "at pages/my/my.vue:207", "请求异常:", err);
+        common_vendor.index.__f__("log", "at pages/my/my.vue:208", "请求异常:", err);
         isLogin.value = false;
         userInfo.value = {};
       }
