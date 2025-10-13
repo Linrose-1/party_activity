@@ -352,6 +352,13 @@
 				{
 					"navigationBarTitleText" : "系统共建"
 				}
+			},
+			{
+				"path" : "user-opportunities/user-opportunities",
+				"style" : 
+				{
+					"navigationBarTitleText" : "商友圈"
+				}
 			}
 			// 如果还有其他页面要放进这个分包，继续在这里加
 		]

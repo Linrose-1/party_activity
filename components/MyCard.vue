@@ -96,6 +96,18 @@
 				</view>
 			</view>
 
+			<!-- ==================== 商友圈模块 ==================== -->
+			<view class="section-block user-opportunities-section" @click="$emit('goToOpportunities')">
+				<view class="section-title">
+					<uni-icons type="pyq" size="18" color="#FF6A00"></uni-icons>
+					<text>Ta的商友圈</text>
+				</view>
+				<view class="section-content">
+					<text class="content-text">查看Ta发布的所有商机</text>
+					<uni-icons type="right" size="16" color="#bbb"></uni-icons>
+				</view>
+			</view>
+
 			<!-- 7. 用户个人微信二维码 -->
 			<view class="user-qr-section" v-if="showUserQrCode">
 				<view class="qr-title">我的微信二维码</view>
@@ -145,6 +157,9 @@
 	import {
 		computed
 	} from 'vue';
+
+	const emit = defineEmits(['goToOpportunities']);
+
 
 	const props = defineProps({
 		// --- 身份核心信息 ---
@@ -596,6 +611,41 @@
 		}
 	}
 
+	/* 商友圈模块样式 */
+	.user-opportunities-section {
+		cursor: pointer;
+		transition: background-color 0.2s ease;
+	}
+
+	.user-opportunities-section:active {
+		background-color: #f9f9f9;
+	}
+
+	.user-opportunities-section .section-title {
+		display: flex;
+		align-items: center;
+		font-size: 30rpx;
+		font-weight: 600;
+		color: #333;
+		/* 主色调 */
+	}
+
+	.user-opportunities-section .section-title text {
+		margin-left: 15rpx;
+	}
+
+	.user-opportunities-section .section-content {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-top: 20rpx;
+	}
+
+	.user-opportunities-section .content-text {
+		font-size: 28rpx;
+		color: #666;
+	}
+
 
 	// 7. 用户二维码
 	.user-qr-section {
@@ -684,7 +734,7 @@
 			width: 60rpx;
 			height: 4rpx;
 			background-color: #F78C2F;
-			margin:0 20rpx;
+			margin: 0 20rpx;
 		}
 
 		text {

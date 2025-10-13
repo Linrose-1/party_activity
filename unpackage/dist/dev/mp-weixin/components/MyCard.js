@@ -128,7 +128,8 @@ const _sfc_main = {
       default: ""
     }
   },
-  setup(__props) {
+  emits: ["goToOpportunities"],
+  setup(__props, { emit: __emit }) {
     const props = __props;
     const professionalTitles = common_vendor.computed(() => {
       return props.professionalTitle ? props.professionalTitle.split(",").filter((item) => item.trim()) : [];
@@ -257,24 +258,35 @@ const _sfc_main = {
       }, __props.personalBio ? {
         A: common_vendor.t(__props.personalBio)
       } : {}) : {}, {
-        B: __props.showUserQrCode
+        B: common_vendor.p({
+          type: "pyq",
+          size: "18",
+          color: "#FF6A00"
+        }),
+        C: common_vendor.p({
+          type: "right",
+          size: "16",
+          color: "#bbb"
+        }),
+        D: common_vendor.o(($event) => _ctx.$emit("goToOpportunities")),
+        E: __props.showUserQrCode
       }, __props.showUserQrCode ? {
-        C: __props.userWeChatQrCodeUrl,
-        D: common_vendor.o(($event) => previewImage(__props.userWeChatQrCodeUrl))
+        F: __props.userWeChatQrCodeUrl,
+        G: common_vendor.o(($event) => previewImage(__props.userWeChatQrCodeUrl))
       } : {}, {
-        E: __props.shardCode
+        H: __props.shardCode
       }, __props.shardCode ? {
-        F: common_vendor.t(__props.shardCode),
-        G: common_vendor.p({
+        I: common_vendor.t(__props.shardCode),
+        J: common_vendor.p({
           type: "paperclip",
           size: "16",
           color: "#F78C2F"
         }),
-        H: common_vendor.o(copyShardCode)
+        K: common_vendor.o(copyShardCode)
       } : {}, {
-        I: __props.platformQrCodeUrl,
-        J: common_vendor.o(($event) => previewImage(__props.platformQrCodeUrl)),
-        K: __props.logoUrl
+        L: __props.platformQrCodeUrl,
+        M: common_vendor.o(($event) => previewImage(__props.platformQrCodeUrl)),
+        N: __props.logoUrl
       });
     };
   }

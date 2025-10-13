@@ -54,7 +54,8 @@
         "getPoints/getPoints",
         "my-member/my-member",
         "my-friendInvitation/my-friendInvitation",
-        "my-systemConstruction/my-systemConstruction"
+        "my-systemConstruction/my-systemConstruction",
+        "user-opportunities/user-opportunities"
       ]
     }
   ],

@@ -82,7 +82,7 @@
 						</view>
 						<view class="action comment" @click.stop="navigateToComments(post)">
 							<uni-icons type="chatbubble" size="20" color="#666" />
-							<span>{{ post.comments }}</span>
+							<span>{{ post.commonCount }}</span>
 						</view>
 						<view class="action save" :class="{ active: post.isSaved }" @click.stop="toggleSave(post)">
 							<uni-icons :type="post.isSaved ? 'star-filled' : 'star'" size="20"
@@ -314,7 +314,7 @@
 						.filter(tag => tag)) : [],
 					likes: item.likesCount || 0,
 					dislikes: item.dislikesCount || 0,
-					comments: item.commentsCount || 0,
+					commonCount: item.commonCount || 0,
 					userAction: item.userLikeStr || null,
 					isSaved: item.followFlag === 1,
 					isFollowedUser: item.followUserFlag === 1,

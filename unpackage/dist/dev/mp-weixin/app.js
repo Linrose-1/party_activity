@@ -53,6 +53,7 @@ if (!Math) {
   "./packages/my-member/my-member.js";
   "./packages/my-friendInvitation/my-friendInvitation.js";
   "./packages/my-systemConstruction/my-systemConstruction.js";
+  "./packages/user-opportunities/user-opportunities.js";
 }
 const _sfc_main = {
   data() {

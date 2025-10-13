@@ -216,6 +216,36 @@
   color: #555;
   line-height: 1.6;
 }
+
+/* 商友圈模块样式 */
+.user-opportunities-section.data-v-0262bca8 {
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+.user-opportunities-section.data-v-0262bca8:active {
+  background-color: #f9f9f9;
+}
+.user-opportunities-section .section-title.data-v-0262bca8 {
+  display: flex;
+  align-items: center;
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #333;
+  /* 主色调 */
+}
+.user-opportunities-section .section-title text.data-v-0262bca8 {
+  margin-left: 15rpx;
+}
+.user-opportunities-section .section-content.data-v-0262bca8 {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20rpx;
+}
+.user-opportunities-section .content-text.data-v-0262bca8 {
+  font-size: 28rpx;
+  color: #666;
+}
 .user-qr-section.data-v-0262bca8 {
   text-align: center;
   padding: 40rpx 0;

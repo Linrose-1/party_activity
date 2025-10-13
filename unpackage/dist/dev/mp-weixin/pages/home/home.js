@@ -141,7 +141,7 @@ const _sfc_main = {
             tags: item.tags ? Array.isArray(item.tags) ? item.tags : String(item.tags).split(",").filter((tag) => tag) : [],
             likes: item.likesCount || 0,
             dislikes: item.dislikesCount || 0,
-            comments: item.commentsCount || 0,
+            commonCount: item.commonCount || 0,
             userAction: item.userLikeStr || null,
             isSaved: item.followFlag === 1,
             isFollowedUser: item.followUserFlag === 1,
@@ -565,7 +565,7 @@ const _sfc_main = {
               size: "20",
               color: "#666"
             }),
-            G: common_vendor.t(post.comments),
+            G: common_vendor.t(post.commonCount),
             H: common_vendor.o(($event) => navigateToComments(post), post.id),
             I: "07e72d3c-5-" + i0,
             J: common_vendor.p({

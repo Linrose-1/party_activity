@@ -34,7 +34,8 @@
 				:signature="userInfo.signature" :personal-bio="userInfo.personalBio"
 				:contact-info="formattedContactInfo" :show-user-qr-code="!!userInfo.wechatQrCodeUrl"
 				:user-we-chat-qr-code-url="userInfo.wechatQrCodeUrl" :shard-code="userInfo.shardCode"
-				platform-qr-code-url="https://img.gofor.club/mmexport1759211962539.jpg" />
+				platform-qr-code-url="https://img.gofor.club/mmexport1759211962539.jpg"
+				@goToOpportunities="handleGoToOpportunities" />
 
 			<!-- 编辑提示：仅在查看自己的名片时显示 -->
 			<view v-if="isViewingOwnCard" class="edit-hint">
@@ -493,6 +494,27 @@
 		showTimelineGuide.value = true;
 	};
 	const hideTimelineGuide = () => showTimelineGuide.value = false;
+
+	/**
+	 * 【新增】处理跳转到商友圈页面的事件
+	 */
+	const handleGoToOpportunities = () => {
+		if (!userInfo.value || !userInfo.value.id) {
+			uni.showToast({
+				title: '无法获取用户信息',
+				icon: 'none'
+			});
+			return;
+		}
+
+		// 携带用户ID和名字进行跳转
+		const url =
+			`/packages/user-opportunities/user-opportunities?userId=${userInfo.value.id}&userName=${encodeURIComponent(userInfo.value.realName || userInfo.value.nickname)}`;
+
+		uni.navigateTo({
+			url
+		});
+	};
 </script>
 
 <style lang="scss" scoped>

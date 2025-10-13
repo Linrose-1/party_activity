@@ -8558,6 +8558,12 @@ const subPackages = [
         style: {
           navigationBarTitleText: "系统共建"
         }
+      },
+      {
+        path: "user-opportunities/user-opportunities",
+        style: {
+          navigationBarTitleText: "商友圈"
+        }
       }
     ]
   }
