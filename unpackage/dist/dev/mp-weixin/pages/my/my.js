@@ -267,10 +267,10 @@ const _sfc_main = {
       // 新增
       // 第 6 行
       {
-        name: "系统建议",
+        name: "系统共建",
         desc: "提供您对本平台的建议",
         icon: "../../static/icon/系统建议.png",
-        path: "/pages/my-systemSuggestions/my-systemSuggestions"
+        path: "/packages/my-systemConstruction/my-systemConstruction"
       },
       {
         name: "用户协议",

@@ -53,7 +53,8 @@
         "my-zhimi/my-zhimi",
         "getPoints/getPoints",
         "my-member/my-member",
-        "my-friendInvitation/my-friendInvitation"
+        "my-friendInvitation/my-friendInvitation",
+        "my-systemConstruction/my-systemConstruction"
       ]
     }
   ],

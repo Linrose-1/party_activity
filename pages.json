@@ -345,6 +345,13 @@
 				{
 					"navigationBarTitleText" : "商友邀请"
 				}
+			},
+			{
+				"path" : "my-systemConstruction/my-systemConstruction",
+				"style" : 
+				{
+					"navigationBarTitleText" : "系统共建"
+				}
 			}
 			// 如果还有其他页面要放进这个分包，继续在这里加
 		]

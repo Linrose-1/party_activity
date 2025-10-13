@@ -52,6 +52,7 @@ if (!Math) {
   "./packages/getPoints/getPoints.js";
   "./packages/my-member/my-member.js";
   "./packages/my-friendInvitation/my-friendInvitation.js";
+  "./packages/my-systemConstruction/my-systemConstruction.js";
 }
 const _sfc_main = {
   data() {
