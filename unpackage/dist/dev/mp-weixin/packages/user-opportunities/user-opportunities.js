@@ -76,6 +76,7 @@ const _sfc_main = {
         id: item.id,
         title: item.postTitle,
         contentPreview: generateContentPreview(item.postContent),
+        video: item.postVideo || "",
         images: item.postImg ? item.postImg.split(",").filter((img) => img) : [],
         time: formatTimestamp(item.createTime)
       }));
@@ -125,20 +126,26 @@ const _sfc_main = {
           }, post.contentPreview ? {
             e: common_vendor.t(post.contentPreview)
           } : {}, {
-            f: post.images && post.images.length > 0
-          }, post.images && post.images.length > 0 ? {
-            g: common_vendor.f(post.images, (image, imgIndex, i1) => {
+            f: post.video
+          }, post.video ? {
+            g: "video-" + post.id,
+            h: post.video,
+            i: common_vendor.o(() => {
+            }, post.id)
+          } : post.images && post.images.length > 0 ? {
+            k: common_vendor.f(post.images, (image, imgIndex, i1) => {
               return {
                 a: image,
                 b: common_vendor.o(($event) => previewImage(post.images, imgIndex), imgIndex),
                 c: imgIndex
               };
             }),
-            h: post.images.length === 1 ? "widthFix" : "aspectFill",
-            i: common_vendor.n("images-count-" + post.images.length)
+            l: post.images.length === 1 ? "widthFix" : "aspectFill",
+            m: common_vendor.n("images-count-" + post.images.length)
           } : {}, {
-            j: post.id,
-            k: common_vendor.o(($event) => goToDetail(post.id), post.id)
+            j: post.images && post.images.length > 0,
+            n: post.id,
+            o: common_vendor.o(($event) => goToDetail(post.id), post.id)
           });
         }),
         c: common_vendor.p({

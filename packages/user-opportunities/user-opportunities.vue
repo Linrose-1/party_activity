@@ -20,15 +20,25 @@
 				<view class="post-content-title">{{ post.title }}</view>
 				<view v-if="post.contentPreview" class="post-content-preview">{{ post.contentPreview }}</view>
 
-				<!-- 图片网格 -->
-				<view class="post-images" v-if="post.images && post.images.length > 0"
-					:class="['images-count-' + post.images.length]">
+				<!-- ==================== 【视频/图片】 ==================== -->
+
+				<!-- Case 1: 如果存在视频，则优先渲染视频播放器 -->
+				<view v-if="post.video" class="post-video-container">
+					<video :id="'video-' + post.id" :src="post.video" class="post-video" :show-center-play-btn="true"
+						@click.stop object-fit="cover"></video>
+				</view>
+
+				<!-- Case 2: 如果没有视频，但存在图片，则渲染图片网格 -->
+				<view v-else-if="post.images && post.images.length > 0"
+					:class="['post-images', 'images-count-' + post.images.length]">
 					<view v-for="(image, imgIndex) in post.images" :key="imgIndex" class="image-wrapper">
 						<image :src="image" class="post-image"
 							:mode="post.images.length === 1 ? 'widthFix' : 'aspectFill'"
 							@click.stop="previewImage(post.images, imgIndex)" />
 					</view>
 				</view>
+
+				<!-- ============================================================ -->
 			</view>
 
 			<!-- 3. 加载状态 -->
@@ -128,6 +138,7 @@
 			id: item.id,
 			title: item.postTitle,
 			contentPreview: generateContentPreview(item.postContent),
+			video: item.postVideo || '',
 			images: item.postImg ? item.postImg.split(',').filter(img => img) : [],
 			time: formatTimestamp(item.createTime),
 		}));
@@ -260,6 +271,26 @@
 	.images-count-4 {
 		grid-template-columns: repeat(2, 1fr);
 	}
+
+	/* ==================== 【新增】视频容器和播放器样式 ==================== */
+	.post-video-container {
+		width: 100%;
+		aspect-ratio: 16 / 9;
+		/* 保持16:9的宽高比 */
+		max-height: 400rpx;
+		border-radius: 8rpx;
+		overflow: hidden;
+		margin-bottom: 20rpx;
+		background-color: #000;
+	}
+
+	.post-video {
+		width: 100%;
+		height: 100%;
+		display: block;
+	}
+
+	/* ===================================================================== */
 
 	.empty-state {
 		display: flex;

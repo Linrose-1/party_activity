@@ -123,17 +123,23 @@
 		font-size: 26rpx;
 }
 .image-preview.data-v-90e28424 {
-		display: flex;
-		flex-wrap: wrap;
+		display: grid;
+		/* 1. 声明为 grid 布局 */
+		grid-template-columns: repeat(3, 1fr);
+		/* 2. 创建一个三列的网格，每列宽度平分剩余空间 */
 		gap: 16rpx;
+		/* 3. 设置网格项之间的间距 */
 		margin-top: 10rpx;
 }
 .image-wrapper.data-v-90e28424 {
 		position: relative;
-		width: 150rpx;
-		height: 150rpx;
+		/* 【修改】移除固定的宽高，让它自适应 grid 容器分配的空间 */
+		/* width: 150rpx; */
+		/* height: 150rpx; */
 		border-radius: 12rpx;
 		overflow: hidden;
+		/* 【新增】强制设置宽高比为1:1，确保是正方形 */
+		aspect-ratio: 1 / 1;
 }
 .preview-img.data-v-90e28424 {
 		width: 100%;
@@ -160,8 +166,13 @@
 		background-color: rgba(0, 0, 0, 0.7);
 }
 .add-img-placeholder.data-v-90e28424 {
-		width: 150rpx;
-		height: 150rpx;
+		/* 【修改】移除固定的宽高，让它自适应 grid 容器 */
+		/* width: 150rpx; */
+		/* height: 150rpx; */
+		/* 【新增】确保它也是一个正方形 */
+		aspect-ratio: 1 / 1;
+
+		/* 其他样式保持不变 */
 		border: 2rpx dashed #ccc;
 		border-radius: 12rpx;
 		display: flex;
@@ -170,7 +181,6 @@
 		justify-content: center;
 		color: #999;
 		font-size: 24rpx;
-		transition: border-color 0.2s ease, color 0.2s ease;
 }
 .add-img-placeholder i.data-v-90e28424 {
 		font-size: 48rpx;
@@ -213,3 +223,64 @@
 		margin-top: 20rpx;
 		box-shadow: 0 6rpx 16rpx rgba(255, 106, 0, 0.3);
 }
+
+	/* ==================== 【新增】媒体选择器和视频预览样式 ==================== */
+.media-selector.data-v-90e28424 {
+		display: flex;
+		gap: 30rpx;
+		margin-top: 10rpx;
+}
+.selector-btn.data-v-90e28424 {
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		height: 180rpx;
+		border: 2rpx dashed #ccc;
+		border-radius: 12rpx;
+		color: #666;
+		font-size: 26rpx;
+		transition: all 0.2s ease;
+}
+.selector-btn.data-v-90e28424:active {
+		border-color: #FF6A00;
+		color: #FF6A00;
+}
+.selector-btn text.data-v-90e28424 {
+		margin-top: 10rpx;
+}
+.video-preview-wrapper.data-v-90e28424 {
+		position: relative;
+		width: 60%;
+		/* 视频预览不需要占满整行 */
+		margin-top: 10rpx;
+		border-radius: 12rpx;
+		overflow: hidden;
+}
+.preview-video.data-v-90e28424 {
+		width: 100%;
+		display: block;
+}
+.delete-video-btn.data-v-90e28424 {
+		/* 复用删除图片的按钮样式 */
+		position: absolute;
+		top: 0rpx;
+		right: 0rpx;
+		width: 40rpx;
+		height: 40rpx;
+		background-color: rgba(0, 0, 0, 0.5);
+		color: white;
+		border-radius: 0 12rpx 0 12rpx;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 28rpx;
+		font-weight: bold;
+		z-index: 10;
+}
+.delete-video-btn.data-v-90e28424:active {
+		background-color: rgba(0, 0, 0, 0.7);
+}
+
+	/* ===================================================================== */

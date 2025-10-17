@@ -26,15 +26,25 @@
 					{{ post.postContent }}
 				</view>
 
-				<view class="post-images" v-if="post.postImg"
-					:class="['images-count-' + post.postImg.split(',').length]">
-					<view v-for="(image, imgIndex) in post.postImg.split(',')" :key="imgIndex" class="image-wrapper">
-						<!-- 核心改动：使用 image 标签并动态绑定 mode -->
+				<!-- ==================== 【核心替换/新增区域】 ==================== -->
+
+				<!-- Case 1: 如果存在视频，则优先渲染视频播放器 -->
+				<view v-if="post.video" class="post-video-container">
+					<video :id="'video-' + post.id" :src="post.video" class="post-video" :show-center-play-btn="true"
+						@click.stop object-fit="cover"></video>
+				</view>
+
+				<!-- Case 2: 如果没有视频，但存在图片，则渲染图片网格 -->
+				<view v-else-if="post.images && post.images.length > 0"
+					:class="['post-images', 'images-count-' + post.images.length]">
+					<view v-for="(image, imgIndex) in post.images" :key="imgIndex" class="image-wrapper">
 						<image :src="image" class="post-image"
-							:mode="post.postImg.split(',').length === 1 ? 'widthFix' : 'aspectFill'"
-							@click.stop="previewImage(post.postImg.split(','), imgIndex)" />
+							:mode="post.images.length === 1 ? 'widthFix' : 'aspectFill'"
+							@click.stop="previewImage(post.images, imgIndex)" />
 					</view>
 				</view>
+
+				<!-- ============================================================ -->
 
 				<view class="tags" v-if="post.tags && post.tags.length > 0">
 					<!-- ... -->
@@ -174,8 +184,17 @@
 			return;
 		}
 		if (data && data.list && data.list.length > 0) {
-			postList.value = [...postList.value, ...data.list];
-			total.value = data.total;
+			const mappedList = data.list.map(item => {
+				// 返回一个新对象，包含我们处理过的 video 和 images 字段
+				return {
+					...item, // 复制原始 item 的所有属性
+					video: item.postVideo || '', // 提取视频URL
+					images: item.postImg ? String(item.postImg).split(',').filter(img => img) :
+					[] // 提取图片URL数组
+				};
+			});
+
+			postList.value = [...postList.value, ...mappedList]; // 将映射后的数据合并			total.value = data.total;
 			loadStatus.value = postList.value.length >= total.value ? 'noMore' : 'more';
 			if (loadStatus.value === 'more') pageNo.value++;
 		} else {
@@ -186,11 +205,11 @@
 		}
 	};
 
-	// 【新增】图片预览函数
+	// 图片预览函数
 	const previewImage = (urls, current) => {
 		uni.previewImage({
 			urls: urls,
-			current: urls[current]
+			current: urls[current] // 直接使用索引，而不是再次查找
 		});
 	};
 
@@ -417,6 +436,27 @@
 		display: block;
 		/* 消除 image 标签底部空隙 */
 	}
+
+	/* ==================== 【新增】视频容器和播放器样式 ==================== */
+	.post-video-container {
+		width: 100%;
+		aspect-ratio: 16 / 9;
+		/* 保持16:9的宽高比 */
+		max-height: 400rpx;
+		border-radius: 8rpx;
+		overflow: hidden;
+		margin-bottom: 20rpx;
+		background-color: #000;
+	}
+
+	.post-video {
+		width: 100%;
+		height: 100%;
+		display: block;
+	}
+
+	/* ===================================================================== */
+
 
 	/* --- 核心：根据图片数量调整网格布局 --- */
 

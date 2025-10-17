@@ -135,9 +135,12 @@ const _sfc_main = {
             // 用于显示的内容
             isTruncated,
             // 是否被截断的标志
-            // 【旧代码】 contentPreview: generateContentPreview(item.postContent),
+            // ==================== 【核心修改点】 ====================
+            // 1. 检查并赋值 postVideo 字段
+            video: item.postVideo || "",
+            // 2. 将 postImg 的处理结果赋值给 images 字段
             images: item.postImg ? String(item.postImg).split(",").filter((img) => img) : [],
-            // ... 其他字段保持不变
+            // =======================================================
             tags: item.tags ? Array.isArray(item.tags) ? item.tags : String(item.tags).split(",").filter((tag) => tag) : [],
             likes: item.likesCount || 0,
             dislikes: item.dislikesCount || 0,
@@ -161,7 +164,7 @@ const _sfc_main = {
           pageNo.value++;
         }
       } catch (err) {
-        common_vendor.index.__f__("error", "at pages/home/home.vue:339", "getBusinessOpportunitiesList 逻辑异常:", err);
+        common_vendor.index.__f__("error", "at pages/home/home.vue:361", "getBusinessOpportunitiesList 逻辑异常:", err);
         loadingStatus.value = "more";
         common_vendor.index.showToast({
           title: "页面逻辑异常，请稍后重试",
@@ -460,7 +463,7 @@ const _sfc_main = {
           });
         },
         fail: (err) => {
-          common_vendor.index.__f__("error", "at pages/home/home.vue:676", "setClipboardData failed:", err);
+          common_vendor.index.__f__("error", "at pages/home/home.vue:698", "setClipboardData failed:", err);
           common_vendor.index.showToast({
             title: "复制失败",
             icon: "none"
@@ -523,71 +526,77 @@ const _sfc_main = {
           } : {}, {
             o: common_vendor.o(($event) => handleLongPress(post.fullContent), post.id)
           }) : {}, {
-            p: post.images && post.images.length
-          }, post.images && post.images.length ? {
-            q: common_vendor.f(post.images, (image, imgIndex, i1) => {
+            p: post.video
+          }, post.video ? {
+            q: "video-" + post.id,
+            r: post.video,
+            s: common_vendor.o(() => {
+            }, post.id)
+          } : post.images && post.images.length > 0 ? {
+            v: common_vendor.f(post.images, (image, imgIndex, i1) => {
               return {
                 a: image,
                 b: imgIndex
               };
             })
           } : {}, {
-            r: post.tags && post.tags.length
+            t: post.images && post.images.length > 0,
+            w: post.tags && post.tags.length
           }, post.tags && post.tags.length ? {
-            s: common_vendor.f(post.tags, (tag, tagIndex, i1) => {
+            x: common_vendor.f(post.tags, (tag, tagIndex, i1) => {
               return {
                 a: common_vendor.t(tag),
                 b: tagIndex
               };
             })
           } : {}, isLogin.value ? common_vendor.e({
-            t: "07e72d3c-2-" + i0,
-            v: common_vendor.p({
+            y: "07e72d3c-2-" + i0,
+            z: common_vendor.p({
               type: post.userAction === "like" ? "hand-up-filled" : "hand-up",
               size: "20",
               color: post.userAction === "like" ? "#e74c3c" : "#666"
             }),
-            w: common_vendor.t(post.likes),
-            x: post.userAction === "like" ? 1 : "",
-            y: common_vendor.o(($event) => toggleAction(post, "like"), post.id),
-            z: "07e72d3c-3-" + i0,
-            A: common_vendor.p({
+            A: common_vendor.t(post.likes),
+            B: post.userAction === "like" ? 1 : "",
+            C: common_vendor.o(($event) => toggleAction(post, "like"), post.id),
+            D: "07e72d3c-3-" + i0,
+            E: common_vendor.p({
               type: post.userAction === "dislike" ? "hand-down-filled" : "hand-down",
               size: "20",
               color: post.userAction === "dislike" ? "#3498db" : "#666"
             }),
-            B: common_vendor.t(post.dislikes),
-            C: post.userAction === "dislike" ? 1 : "",
-            D: common_vendor.o(($event) => toggleAction(post, "dislike"), post.id),
-            E: "07e72d3c-4-" + i0,
-            F: common_vendor.p({
+            F: common_vendor.t(post.dislikes),
+            G: post.userAction === "dislike" ? 1 : "",
+            H: common_vendor.o(($event) => toggleAction(post, "dislike"), post.id),
+            I: "07e72d3c-4-" + i0,
+            J: common_vendor.p({
               type: "chatbubble",
               size: "20",
               color: "#666"
             }),
-            G: common_vendor.t(post.commonCount),
-            H: common_vendor.o(($event) => navigateToComments(post), post.id),
-            I: "07e72d3c-5-" + i0,
-            J: common_vendor.p({
+            K: common_vendor.t(post.commonCount),
+            L: common_vendor.o(($event) => navigateToComments(post), post.id),
+            M: "07e72d3c-5-" + i0,
+            N: common_vendor.p({
               type: post.isSaved ? "star-filled" : "star",
               size: "20",
               color: post.isSaved ? "#FF6A00" : "#666"
             }),
-            K: common_vendor.t(post.isSaved ? "已收藏" : "收藏"),
-            L: post.isSaved ? 1 : "",
-            M: common_vendor.o(($event) => toggleSave(post), post.id),
-            N: isLogin.value && loggedInUserId.value === post.user.id
+            O: common_vendor.t(post.isSaved ? "已收藏" : "收藏"),
+            P: post.isSaved ? 1 : "",
+            Q: common_vendor.o(($event) => toggleSave(post), post.id),
+            R: isLogin.value && loggedInUserId.value === post.user.id
           }, isLogin.value && loggedInUserId.value === post.user.id ? {
-            O: "07e72d3c-6-" + i0,
-            P: common_vendor.p({
+            S: "07e72d3c-6-" + i0,
+            T: common_vendor.p({
               type: "trash",
               size: "20",
               color: "#e74c3c"
             }),
-            Q: common_vendor.o(($event) => deletePost(post), post.id)
+            U: common_vendor.o(($event) => deletePost(post), post.id)
           } : {}) : {}, {
-            R: post.id,
-            S: common_vendor.o(($event) => handlePostClick(post), post.id)
+            V: post.id,
+            W: common_vendor.o(($event) => handlePostClick(post), post.id)
           });
         }),
         q: isLogin.value,

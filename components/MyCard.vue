@@ -36,7 +36,7 @@
 			<view class="section-block professional-section" v-if="professionalTitles.length > 0">
 				<view class="section-title">
 					<uni-icons type="staff-filled" size="18" color="#C9A063"></uni-icons>
-					<text>商协会职务</text>
+					<text>社会职务</text>
 				</view>
 				<view class="tag-list">
 					<text class="tag" v-for="(item, index) in professionalTitles" :key="index">{{ item }}</text>

@@ -56,11 +56,29 @@
 						<span class="expand-link" @click.stop="handlePostClick(post)">展开</span>
 					</span>
 				</view>
-				<view class="post-images" v-if="post.images && post.images.length">
+				<!-- ==================== 【视频/图片】 ==================== -->
+
+				<!-- Case 1: 如果存在视频 (post.video)，则优先渲染视频播放器 -->
+				<view v-if="post.video" class="post-video-container">
+					<video :id="'video-' + post.id" :src="post.video" class="post-video" :show-center-play-btn="true"
+						:show-play-btn="true" @click.stop object-fit="cover" poster=""></video>
+				</view>
+
+				<!-- Case 2: 如果没有视频，但存在图片，则渲染图片网格 (保持原有逻辑) -->
+				<view v-else-if="post.images && post.images.length > 0" class="post-images">
 					<view v-for="(image, imgIndex) in post.images" :key="imgIndex" class="image-wrapper">
 						<image :src="image" alt="商机图片" class="post-image" mode="aspectFill" />
 					</view>
 				</view>
+
+				<!-- <video :src="post.video" controls autoplay="false"
+					style="width: 100%; height: 400rpx; background: #000;" @error="onVideoError"></video> -->
+
+				<!-- <view style="font-size: 20rpx; color: red; word-break: break-all;">
+					调试信息: {{ JSON.stringify(post) }}
+				</view> -->
+
+				<!-- ============================================================ -->
 				<view class="tags" v-if="post.tags && post.tags.length">
 					<view v-for="(tag, tagIndex) in post.tags" :key="tagIndex" class="tag">{{ tag }}</view>
 				</view>
@@ -307,9 +325,13 @@
 					fullContent: plainText, // 完整纯文本内容，为长按复制做准备
 					displayContent: displayContent, // 用于显示的内容
 					isTruncated: isTruncated, // 是否被截断的标志
-					// 【旧代码】 contentPreview: generateContentPreview(item.postContent),
+					// ==================== 【核心修改点】 ====================
+					// 1. 检查并赋值 postVideo 字段
+					video: item.postVideo || '',
+
+					// 2. 将 postImg 的处理结果赋值给 images 字段
 					images: item.postImg ? String(item.postImg).split(',').filter(img => img) : [],
-					// ... 其他字段保持不变
+					// =======================================================
 					tags: item.tags ? (Array.isArray(item.tags) ? item.tags : String(item.tags).split(',')
 						.filter(tag => tag)) : [],
 					likes: item.likesCount || 0,
@@ -992,6 +1014,30 @@
 		object-fit: cover;
 		display: block;
 	}
+
+	/* ==================== 视频容器和播放器样式 ==================== */
+	.post-video-container {
+		width: 100%;
+		/* 建议给视频一个最大高度，防止视频比例过高导致页面过长 */
+		/* max-height: 400rpx; */
+		aspect-ratio: 16 / 9; 
+		border-radius: 12rpx;
+		overflow: hidden;
+		margin-top: 30rpx;
+		background-color: #000;
+		/* 视频加载时的背景色 */
+		position: relative;
+		/* 用于可能的封面图或播放按钮定位 */
+	}
+
+	.post-video {
+		width: 100%;
+		height: 100%;
+		/* 视频将填充容器 */
+		display: block;
+	}
+
+	/* ===================================================================== */
 
 	.tags {
 		display: flex;

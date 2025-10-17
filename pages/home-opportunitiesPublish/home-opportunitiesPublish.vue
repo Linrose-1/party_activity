@@ -11,7 +11,8 @@
 				<view class="form-group">
 					<view class="form-label">内容</view>
 					<!-- placeholder 已绑定到计算属性 -->
-					<textarea v-model="form.content" class="form-textarea" :placeholder="contentPlaceholder" maxlength="5000" />
+					<textarea v-model="form.content" class="form-textarea" :placeholder="contentPlaceholder"
+						maxlength="5000" />
 				</view>
 
 				<view class="form-group">
@@ -46,20 +47,38 @@
 				</view>
 
 				<view class="form-group">
-					<view class="form-label">上传图片</view>
-					<view class="image-preview">
-						<!-- v-for 循环 form.images -->
+					<view class="form-label">上传图片或者视频</view>
+					<!-- Case 1: 还未选择任何媒体 -->
+					<view class="media-selector" v-if="form.images.length === 0 && !form.postVideo">
+						<view class="selector-btn" @click="handleChooseImage">
+							<uni-icons type="image-filled" size="30" color="#4CAF50"></uni-icons>
+							<text>发布图片</text>
+						</view>
+						<view class="selector-btn" @click="handleChooseVideo">
+							<uni-icons type="videocam-filled" size="30" color="#2196F3"></uni-icons>
+							<text>发布视频</text>
+						</view>
+					</view>
+
+					<!-- Case 2: 已经选择了图片 -->
+					<view v-else-if="form.mediaType === 'image'" class="image-preview">
+						<!-- 图片的 3x3 网格布局 (代码保持不变) -->
 						<view v-for="(img, i) in form.images" :key="i" class="image-wrapper">
 							<image :src="img" mode="aspectFill" class="preview-img" @click="replaceImage(i)" />
 							<view class="delete-image-btn" @click.stop="deleteImage(i)">×</view>
 						</view>
-						<!-- v-if 判断 form.images.length -->
 						<view class="add-img-placeholder" @click="handleChooseImage" v-if="form.images.length < 9">
 							<uni-icons type="plusempty" size="24" color="#ccc"></uni-icons>
 							<text>添加图片</text>
 						</view>
 					</view>
-					<text class="hint">最多可上传9张图片</text>
+
+					<!-- Case 3: 已经选择了视频 -->
+					<view v-else-if="form.mediaType === 'video' && form.postVideo" class="video-preview-wrapper">
+						<video :src="form.postVideo" class="preview-video" controls></video>
+						<view class="delete-video-btn" @click.stop="deleteVideo">×</view>
+					</view>
+					<text class="hint">{{ form.mediaType === 'image' ? '最多可上传9张图片' : '仅支持上传一个视频' }}</text>
 				</view>
 			</view>
 
@@ -96,8 +115,10 @@
 		content: '',
 		topic: '普通商机',
 		tags: [],
-		tagInput: '', // 将 tagInput 也纳入管理
+		tagInput: '',
+		mediaType: 'image',
 		images: [],
+		postVideo: '',
 		showProfile: true,
 	});
 
@@ -207,6 +228,33 @@
 		form.tags.splice(index, 1);
 	}
 
+	/**
+	 * 【新增】选择媒体类型
+	 * @param {string} type - 'image' 或 'video'
+	 */
+	function selectMediaType(type) {
+		if (form.images.length > 0 || form.postVideo) {
+			uni.showModal({
+				title: '提示',
+				content: '切换类型将清空已上传的图片或视频，是否继续？',
+				success: (res) => {
+					if (res.confirm) {
+						form.mediaType = type;
+						form.images = [];
+						form.postVideo = '';
+						// 切换后立即打开选择器
+						if (type === 'image') handleChooseImage();
+						if (type === 'video') handleChooseVideo();
+					}
+				}
+			});
+		} else {
+			form.mediaType = type;
+			if (type === 'image') handleChooseImage();
+			if (type === 'video') handleChooseVideo();
+		}
+	}
+
 	// --- 图片处理函数 (现在都操作 form.images) ---
 	async function handleChooseImage() {
 		uni.chooseImage({
@@ -297,6 +345,76 @@
 		});
 	}
 
+	// --- 【新增】视频处理函数 ---
+	async function handleChooseVideo() {
+		// 确保 mediaType 是 video
+		form.mediaType = 'video';
+
+		uni.chooseVideo({
+			sourceType: ['album', 'camera'],
+			maxDuration: 60, // 限制最长60秒
+			compressed: true, // 建议压缩
+			success: async (res) => {
+				const videoFile = {
+					path: res.tempFilePath,
+					size: res.size,
+					name: res.tempFilePath.substring(res.tempFilePath.lastIndexOf('/') + 1)
+				};
+
+				// 前端校验视频大小 (例如：限制50MB)
+				if (videoFile.size > 50 * 1024 * 1024) {
+					return uni.showToast({
+						title: '视频大小不能超过50MB',
+						icon: 'none'
+					});
+				}
+
+				uni.showLoading({
+					title: '视频上传中...',
+					mask: true
+				});
+
+				// 调用 uploadFile (它应该也能处理视频文件)
+				const result = await uploadFile(videoFile, {
+					directory: 'post_videos'
+				});
+
+				uni.hideLoading();
+
+				if (result.data) {
+					form.postVideo = result.data; // 将返回的URL存入 postVideo
+					uni.showToast({
+						title: '视频上传成功',
+						icon: 'success'
+					});
+				} else {
+					uni.showToast({
+						title: result.error || '视频上传失败',
+						icon: 'none'
+					});
+				}
+			},
+			fail: (err) => {
+				// 用户取消选择时，不提示错误
+				if (err.errMsg.indexOf('cancel') === -1) {
+					console.error('选择视频失败:', err);
+				}
+			}
+		});
+	}
+
+	function deleteVideo() {
+		uni.showModal({
+			title: '提示',
+			content: '确定要删除这个视频吗？',
+			success: (res) => {
+				if (res.confirm) {
+					form.postVideo = '';
+				}
+			}
+		});
+	}
+
 	// --- 提交表单 ---
 	function submitPost() {
 		if (!form.title.trim() || form.title.length > 100) return uni.showToast({
@@ -317,7 +435,8 @@
 			postTitle: form.title,
 			postType: form.topic === '普通商机' ? '0' : '1',
 			postContent: form.content,
-			postImg: form.images.join(','),
+			postImg: form.mediaType === 'image' ? form.images.join(',') : '',
+			postVideo: form.mediaType === 'video' ? form.postVideo : '',
 			postedAt: new Date().toISOString(),
 			commentFlag: 1,
 			cardFlag: form.showProfile,
@@ -513,18 +632,24 @@
 	}
 
 	.image-preview {
-		display: flex;
-		flex-wrap: wrap;
+		display: grid;
+		/* 1. 声明为 grid 布局 */
+		grid-template-columns: repeat(3, 1fr);
+		/* 2. 创建一个三列的网格，每列宽度平分剩余空间 */
 		gap: 16rpx;
+		/* 3. 设置网格项之间的间距 */
 		margin-top: 10rpx;
 	}
 
 	.image-wrapper {
 		position: relative;
-		width: 150rpx;
-		height: 150rpx;
+		/* 【修改】移除固定的宽高，让它自适应 grid 容器分配的空间 */
+		/* width: 150rpx; */
+		/* height: 150rpx; */
 		border-radius: 12rpx;
 		overflow: hidden;
+		/* 【新增】强制设置宽高比为1:1，确保是正方形 */
+		aspect-ratio: 1 / 1;
 	}
 
 	.preview-img {
@@ -555,8 +680,13 @@
 	}
 
 	.add-img-placeholder {
-		width: 150rpx;
-		height: 150rpx;
+		/* 【修改】移除固定的宽高，让它自适应 grid 容器 */
+		/* width: 150rpx; */
+		/* height: 150rpx; */
+		/* 【新增】确保它也是一个正方形 */
+		aspect-ratio: 1 / 1;
+
+		/* 其他样式保持不变 */
 		border: 2rpx dashed #ccc;
 		border-radius: 12rpx;
 		display: flex;
@@ -565,7 +695,6 @@
 		justify-content: center;
 		color: #999;
 		font-size: 24rpx;
-		transition: border-color 0.2s ease, color 0.2s ease;
 	}
 
 	.add-img-placeholder i {
@@ -615,4 +744,73 @@
 		margin-top: 20rpx;
 		box-shadow: 0 6rpx 16rpx rgba(255, 106, 0, 0.3);
 	}
+
+	/* ==================== 【新增】媒体选择器和视频预览样式 ==================== */
+	.media-selector {
+		display: flex;
+		gap: 30rpx;
+		margin-top: 10rpx;
+	}
+
+	.selector-btn {
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		height: 180rpx;
+		border: 2rpx dashed #ccc;
+		border-radius: 12rpx;
+		color: #666;
+		font-size: 26rpx;
+		transition: all 0.2s ease;
+	}
+
+	.selector-btn:active {
+		border-color: #FF6A00;
+		color: #FF6A00;
+	}
+
+	.selector-btn text {
+		margin-top: 10rpx;
+	}
+
+
+	.video-preview-wrapper {
+		position: relative;
+		width: 60%;
+		/* 视频预览不需要占满整行 */
+		margin-top: 10rpx;
+		border-radius: 12rpx;
+		overflow: hidden;
+	}
+
+	.preview-video {
+		width: 100%;
+		display: block;
+	}
+
+	.delete-video-btn {
+		/* 复用删除图片的按钮样式 */
+		position: absolute;
+		top: 0rpx;
+		right: 0rpx;
+		width: 40rpx;
+		height: 40rpx;
+		background-color: rgba(0, 0, 0, 0.5);
+		color: white;
+		border-radius: 0 12rpx 0 12rpx;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 28rpx;
+		font-weight: bold;
+		z-index: 10;
+	}
+
+	.delete-video-btn:active {
+		background-color: rgba(0, 0, 0, 0.7);
+	}
+
+	/* ===================================================================== */
 </style>

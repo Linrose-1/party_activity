@@ -99,8 +99,17 @@ const _sfc_main = {
         return;
       }
       if (data && data.list && data.list.length > 0) {
-        postList.value = [...postList.value, ...data.list];
-        total.value = data.total;
+        const mappedList = data.list.map((item) => {
+          return {
+            ...item,
+            // 复制原始 item 的所有属性
+            video: item.postVideo || "",
+            // 提取视频URL
+            images: item.postImg ? String(item.postImg).split(",").filter((img) => img) : []
+            // 提取图片URL数组
+          };
+        });
+        postList.value = [...postList.value, ...mappedList];
         loadStatus.value = postList.value.length >= total.value ? "noMore" : "more";
         if (loadStatus.value === "more")
           pageNo.value++;
@@ -115,6 +124,7 @@ const _sfc_main = {
       common_vendor.index.previewImage({
         urls,
         current: urls[current]
+        // 直接使用索引，而不是再次查找
       });
     };
     const deleteOpportunity = (id) => {
@@ -215,33 +225,39 @@ const _sfc_main = {
             f: common_vendor.t(getStatusInfo(post).text),
             g: common_vendor.n(getStatusInfo(post).class),
             h: common_vendor.t(post.postContent),
-            i: post.postImg
-          }, post.postImg ? {
-            j: common_vendor.f(post.postImg.split(","), (image, imgIndex, i1) => {
+            i: post.video
+          }, post.video ? {
+            j: "video-" + post.id,
+            k: post.video,
+            l: common_vendor.o(() => {
+            }, post.id)
+          } : post.images && post.images.length > 0 ? {
+            n: common_vendor.f(post.images, (image, imgIndex, i1) => {
               return {
                 a: image,
-                b: common_vendor.o(($event) => previewImage(post.postImg.split(","), imgIndex), imgIndex),
+                b: common_vendor.o(($event) => previewImage(post.images, imgIndex), imgIndex),
                 c: imgIndex
               };
             }),
-            k: post.postImg.split(",").length === 1 ? "widthFix" : "aspectFill",
-            l: common_vendor.n("images-count-" + post.postImg.split(",").length)
+            o: post.images.length === 1 ? "widthFix" : "aspectFill",
+            p: common_vendor.n("images-count-" + post.images.length)
           } : {}, {
-            m: post.tags && post.tags.length > 0
+            m: post.images && post.images.length > 0,
+            q: post.tags && post.tags.length > 0
           }, post.tags && post.tags.length > 0 ? {} : {}, {
-            n: "481e0091-1-" + i0,
-            o: common_vendor.o(($event) => deleteOpportunity(post.id), post.id),
-            p: "481e0091-2-" + i0,
-            q: common_vendor.p({
+            r: "481e0091-1-" + i0,
+            s: common_vendor.o(($event) => deleteOpportunity(post.id), post.id),
+            t: "481e0091-2-" + i0,
+            v: common_vendor.p({
               type: "chat-filled",
               size: "16",
               color: post.status === "hidden" ? "#3498db" : "#ccc"
             }),
-            r: post.status !== "hidden" ? 1 : "",
-            s: post.status !== "hidden",
-            t: common_vendor.o(($event) => openAppealModal(post), post.id),
-            v: post.id,
-            w: common_vendor.o(($event) => skipCommercialDetail(post.id), post.id)
+            w: post.status !== "hidden" ? 1 : "",
+            x: post.status !== "hidden",
+            y: common_vendor.o(($event) => openAppealModal(post), post.id),
+            z: post.id,
+            A: common_vendor.o(($event) => skipCommercialDetail(post.id), post.id)
           });
         }),
         b: common_vendor.p({

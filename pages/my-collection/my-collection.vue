@@ -71,7 +71,7 @@
 		<scroll-view v-show="currentTab === 1" scroll-y class="content-scroll" refresher-enabled
 			:refresher-triggered="refreshing" @refresherrefresh="onRefresh" @scrolltolower="loadMore">
 			<view class="section-header">
-				<text class="section-title">?? 收藏的商机</text>
+				<text class="section-title">⭐ 收藏的商机</text>
 			</view>
 
 			<view v-if="favoriteOpportunities.length > 0" class="post-list">

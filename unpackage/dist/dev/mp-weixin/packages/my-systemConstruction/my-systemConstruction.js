@@ -76,7 +76,7 @@ const _sfc_main = {
             id: item.id,
             title: item.title,
             content: item.content,
-            img: item.img,
+            images: item.img ? item.img.split(",").filter(Boolean) : [],
             time: formatTimestamp(item.createTime),
             user: {
               id: ((_a = item.memberUser) == null ? void 0 : _a.id) || item.creator,
@@ -93,7 +93,7 @@ const _sfc_main = {
           pageNo.value++;
         }
       } catch (err) {
-        common_vendor.index.__f__("error", "at packages/my-systemConstruction/my-systemConstruction.vue:169", "getSuggestionList 逻辑异常:", err);
+        common_vendor.index.__f__("error", "at packages/my-systemConstruction/my-systemConstruction.vue:177", "getSuggestionList 逻辑异常:", err);
         loadingStatus.value = "more";
         common_vendor.index.showToast({
           title: "页面加载异常",
@@ -118,10 +118,12 @@ const _sfc_main = {
         // 请确认此路径是否正确
       });
     };
-    const previewImage = (imageUrl) => {
+    const previewImage = (images, currentIndex) => {
       common_vendor.index.previewImage({
-        urls: [imageUrl],
-        current: 0
+        urls: images,
+        // 传入图片数组
+        current: currentIndex
+        // 传入当前点击的图片索引
       });
     };
     const formatTimestamp = (timestamp) => {
@@ -160,10 +162,16 @@ const _sfc_main = {
           }, suggestion.content ? {
             f: common_vendor.t(suggestion.content)
           } : {}, {
-            g: suggestion.img
-          }, suggestion.img ? {
-            h: suggestion.img,
-            i: common_vendor.o(($event) => previewImage(suggestion.img), suggestion.id)
+            g: suggestion.images && suggestion.images.length > 0
+          }, suggestion.images && suggestion.images.length > 0 ? {
+            h: common_vendor.f(suggestion.images, (image, imgIndex, i1) => {
+              return {
+                a: image,
+                b: common_vendor.o(($event) => previewImage(suggestion.images, imgIndex), imgIndex),
+                c: imgIndex
+              };
+            }),
+            i: common_vendor.n("images-count-" + suggestion.images.length)
           } : {}, {
             j: suggestion.id
           });

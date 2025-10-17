@@ -11,9 +11,8 @@
 
 		<!-- 【新增】轮播图区域 -->
 		<view v-if="bannerList.length > 0" class="swiper-section">
-			<swiper class="swiper" circular :indicator-dots="true" :autoplay="true" :interval="3000"
-				:duration="500">
-				<swiper-item v-for="banner in bannerList" :key="banner.id">
+			<swiper class="swiper" circular :indicator-dots="true" :autoplay="true" :interval="3000" :duration="500">
+				<swiper-item v-for="banner in bannerList" :key="banner.id" @click="handleBannerClick(banner)">
 					<view class="swiper-item">
 						<!-- 轮播图图片 -->
 						<image :src="banner.imageUrl" mode="aspectFill" class="swiper-image"></image>
@@ -205,7 +204,7 @@
 
 			// 并行获取类型和状态列表，提高效率
 			await Promise.all([
-				fetchBanners(), 
+				fetchBanners(),
 				fetchActivityTypeList(),
 				fetchActivityStatusList()
 			]);
@@ -420,6 +419,30 @@
 		});
 	};
 
+	/**
+	 * 【新增】处理轮播图点击事件的函数
+	 * @param {object} banner - 被点击的轮播图数据对象
+	 */
+	const handleBannerClick = (banner) => {
+		// 1. 检查 banner 对象和 targetUrl 是否存在
+		if (!banner || !banner.targetUrl) {
+			console.log('该轮播图没有配置跳转链接，不执行任何操作。');
+			return; // 如果没有 targetUrl，则不执行任何操作
+		}
+
+		// 2. 从 targetUrl 中获取聚会ID
+		const activityId = banner.targetUrl;
+		console.log(`用户点击了轮播图，准备跳转到聚会详情页，ID: ${activityId}`);
+
+		// 3. 执行页面跳转
+		uni.navigateTo({
+			// 【重要】请根据您的项目结构，确认聚会详情页的正确路径
+			// 假设路径为 /packages/active/active-detail
+			url: `/packages/active-detail/active-detail?id=${activityId}`
+		});
+	};
+
+
 	// --- 监听器 ---
 
 	// 监听所有筛选条件的变化，自动重新搜索
@@ -472,6 +495,19 @@
 		border-radius: 40rpx;
 		padding: 10rpx 30rpx;
 		align-items: center;
+
+		border: 1rpx solid rgba(255, 255, 255, 0.3);
+		/* 1. 添加一个半透明的白色边框 */
+		box-shadow: inset 0 2rpx 6rpx rgba(0, 0, 0, 0.1);
+		/* 2. 添加一个轻微的内阴影，增加凹陷感 */
+		transition: background 0.3s, box-shadow 0.3s;
+		/* 3. 添加过渡效果 */
+
+		/* (可选) 用户聚焦输入框时，给一点反馈 */
+		&:focus-within {
+			background: rgba(255, 255, 255, 0.3);
+			box-shadow: inset 0 2rpx 8rpx rgba(0, 0, 0, 0.15);
+		}
 
 		input {
 			flex: 1;

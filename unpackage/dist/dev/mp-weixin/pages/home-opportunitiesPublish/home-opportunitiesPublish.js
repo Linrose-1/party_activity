@@ -20,8 +20,9 @@ const _sfc_main = {
       topic: "普通商机",
       tags: [],
       tagInput: "",
-      // 将 tagInput 也纳入管理
+      mediaType: "image",
       images: [],
+      postVideo: "",
       showProfile: true
     });
     const contentPlaceholder = common_vendor.computed(() => {
@@ -64,7 +65,7 @@ const _sfc_main = {
     const saveDraft = (data) => {
       if (data.title || data.content || data.tags.length > 0 || data.images.length > 0) {
         common_vendor.index.setStorageSync(DRAFT_KEY, JSON.stringify(data));
-        common_vendor.index.__f__("log", "at pages/home-opportunitiesPublish/home-opportunitiesPublish.vue:152", "📝 草稿已自动保存");
+        common_vendor.index.__f__("log", "at pages/home-opportunitiesPublish/home-opportunitiesPublish.vue:173", "📝 草稿已自动保存");
       }
     };
     const checkDraft = () => {
@@ -88,7 +89,7 @@ const _sfc_main = {
     };
     const clearDraft = () => {
       common_vendor.index.removeStorageSync(DRAFT_KEY);
-      common_vendor.index.__f__("log", "at pages/home-opportunitiesPublish/home-opportunitiesPublish.vue:178", "🧹 草稿已清除");
+      common_vendor.index.__f__("log", "at pages/home-opportunitiesPublish/home-opportunitiesPublish.vue:199", "🧹 草稿已清除");
     };
     function topicChange(e) {
       form.topic = e.detail.value;
@@ -146,7 +147,7 @@ const _sfc_main = {
             if (result.data)
               successfulUrls.push(result.data);
             else
-              common_vendor.index.__f__("error", "at pages/home-opportunitiesPublish/home-opportunitiesPublish.vue:239", "上传失败:", result.error);
+              common_vendor.index.__f__("error", "at pages/home-opportunitiesPublish/home-opportunitiesPublish.vue:287", "上传失败:", result.error);
           });
           form.images.push(...successfulUrls);
           if (successfulUrls.length < validFiles.length) {
@@ -202,6 +203,65 @@ const _sfc_main = {
         }
       });
     }
+    async function handleChooseVideo() {
+      form.mediaType = "video";
+      common_vendor.index.chooseVideo({
+        sourceType: ["album", "camera"],
+        maxDuration: 60,
+        // 限制最长60秒
+        compressed: true,
+        // 建议压缩
+        success: async (res) => {
+          const videoFile = {
+            path: res.tempFilePath,
+            size: res.size,
+            name: res.tempFilePath.substring(res.tempFilePath.lastIndexOf("/") + 1)
+          };
+          if (videoFile.size > 50 * 1024 * 1024) {
+            return common_vendor.index.showToast({
+              title: "视频大小不能超过50MB",
+              icon: "none"
+            });
+          }
+          common_vendor.index.showLoading({
+            title: "视频上传中...",
+            mask: true
+          });
+          const result = await utils_upload.uploadFile(videoFile, {
+            directory: "post_videos"
+          });
+          common_vendor.index.hideLoading();
+          if (result.data) {
+            form.postVideo = result.data;
+            common_vendor.index.showToast({
+              title: "视频上传成功",
+              icon: "success"
+            });
+          } else {
+            common_vendor.index.showToast({
+              title: result.error || "视频上传失败",
+              icon: "none"
+            });
+          }
+        },
+        fail: (err) => {
+          if (err.errMsg.indexOf("cancel") === -1) {
+            common_vendor.index.__f__("error", "at pages/home-opportunitiesPublish/home-opportunitiesPublish.vue:400", "选择视频失败:", err);
+          }
+        }
+      });
+    }
+    function deleteVideo() {
+      common_vendor.index.showModal({
+        title: "提示",
+        content: "确定要删除这个视频吗？",
+        success: (res) => {
+          if (res.confirm) {
+            form.postVideo = "";
+          }
+        }
+      });
+    }
     function submitPost() {
       if (!form.title.trim() || form.title.length > 100)
         return common_vendor.index.showToast({
@@ -224,7 +284,8 @@ const _sfc_main = {
         postTitle: form.title,
         postType: form.topic === "普通商机" ? "0" : "1",
         postContent: form.content,
-        postImg: form.images.join(","),
+        postImg: form.mediaType === "image" ? form.images.join(",") : "",
+        postVideo: form.mediaType === "video" ? form.postVideo : "",
         postedAt: (/* @__PURE__ */ new Date()).toISOString(),
         commentFlag: 1,
         cardFlag: form.showProfile,
@@ -291,7 +352,22 @@ const _sfc_main = {
         j: form.tagInput,
         k: common_vendor.o(($event) => form.tagInput = $event.detail.value),
         l: common_vendor.o(addTag),
-        m: common_vendor.f(form.images, (img, i, i0) => {
+        m: form.images.length === 0 && !form.postVideo
+      }, form.images.length === 0 && !form.postVideo ? {
+        n: common_vendor.p({
+          type: "image-filled",
+          size: "30",
+          color: "#4CAF50"
+        }),
+        o: common_vendor.o(handleChooseImage),
+        p: common_vendor.p({
+          type: "videocam-filled",
+          size: "30",
+          color: "#2196F3"
+        }),
+        q: common_vendor.o(handleChooseVideo)
+      } : form.mediaType === "image" ? common_vendor.e({
+        s: common_vendor.f(form.images, (img, i, i0) => {
           return {
             a: img,
             b: common_vendor.o(($event) => replaceImage(i), i),
@@ -299,18 +375,24 @@ const _sfc_main = {
             d: i
           };
         }),
-        n: form.images.length < 9
+        t: form.images.length < 9
       }, form.images.length < 9 ? {
-        o: common_vendor.p({
+        v: common_vendor.p({
           type: "plusempty",
           size: "24",
           color: "#ccc"
         }),
-        p: common_vendor.o(handleChooseImage)
+        w: common_vendor.o(handleChooseImage)
+      } : {}) : form.mediaType === "video" && form.postVideo ? {
+        y: form.postVideo,
+        z: common_vendor.o(deleteVideo)
       } : {}, {
-        q: form.showProfile,
-        r: common_vendor.o((e) => form.showProfile = e.detail.value),
-        s: common_vendor.o(submitPost)
+        r: form.mediaType === "image",
+        x: form.mediaType === "video" && form.postVideo,
+        A: common_vendor.t(form.mediaType === "image" ? "最多可上传9张图片" : "仅支持上传一个视频"),
+        B: form.showProfile,
+        C: common_vendor.o((e) => form.showProfile = e.detail.value),
+        D: common_vendor.o(submitPost)
       });
     };
   }

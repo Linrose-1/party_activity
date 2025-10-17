@@ -33,8 +33,16 @@
 				<view class="card-body">
 					<view class="suggestion-title">{{ suggestion.title }}</view>
 					<view v-if="suggestion.content" class="suggestion-content">{{ suggestion.content }}</view>
-					<image v-if="suggestion.img" :src="suggestion.img" class="suggestion-image" mode="widthFix"
-						@click.stop="previewImage(suggestion.img)" />
+					<!-- 使用 v-if 判断是否存在图片 -->
+					<view class="suggestion-images" v-if="suggestion.images && suggestion.images.length > 0"
+						:class="['images-count-' + suggestion.images.length]">
+
+						<!-- 使用 v-for 循环渲染图片 -->
+						<view v-for="(image, imgIndex) in suggestion.images" :key="imgIndex" class="image-wrapper">
+							<image :src="image" class="suggestion-image" mode="aspectFill"
+								@click.stop="previewImage(suggestion.images, imgIndex)" />
+						</view>
+					</view>
 				</view>
 			</view>
 
@@ -146,7 +154,7 @@
 				id: item.id,
 				title: item.title,
 				content: item.content,
-				img: item.img,
+				images: item.img ? item.img.split(',').filter(Boolean) : [],
 				time: formatTimestamp(item.createTime),
 				user: {
 					id: item.memberUser?.id || item.creator,
@@ -198,10 +206,10 @@
 		});
 	};
 
-	const previewImage = (imageUrl) => {
+	const previewImage = (images, currentIndex) => {
 		uni.previewImage({
-			urls: [imageUrl],
-			current: 0
+			urls: images, // 传入图片数组
+			current: currentIndex // 传入当前点击的图片索引
 		});
 	};
 
@@ -371,11 +379,56 @@
 		white-space: pre-wrap;
 	}
 
-	.suggestion-image {
+	/* .suggestion-image {
 		width: 100%;
 		border-radius: 12rpx;
 		margin-top: 10rpx;
+	} */
+	/* ==================== 【新增】3x3 网格布局样式 ==================== */
+	.suggestion-images {
+		display: grid;
+		grid-template-columns: repeat(3, 1fr);
+		/* 创建3列等宽网格 */
+		gap: 10rpx;
+		/* 图片之间的间距 */
+		margin-top: 20rpx;
 	}
+
+	.image-wrapper {
+		width: 100%;
+		border-radius: 12rpx;
+		overflow: hidden;
+		aspect-ratio: 1 / 1;
+		/* 保持1:1的正方形比例 */
+	}
+
+	.suggestion-image {
+		width: 100%;
+		height: 100%;
+		display: block;
+	}
+
+	/* 为1张图片时做特殊处理，让它横向撑满，高度自适应 */
+	.images-count-1 .image-wrapper {
+		grid-column: 1 / -1;
+		/* 占据所有列 */
+		aspect-ratio: unset;
+		/* 取消正方形比例限制 */
+	}
+
+	.images-count-1 .suggestion-image {
+		/* 1张图时，使用 widthFix 模式效果更好 */
+		/* 我们可以在 template 中动态绑定 mode，这里先用 css 模拟 */
+		height: auto;
+	}
+
+	/* 为2张或4张图片时使用2列布局，更美观 */
+	.images-count-2,
+	.images-count-4 {
+		grid-template-columns: repeat(2, 1fr);
+	}
+
+	/* ============================================================== */
 
 	.loading-status {
 		padding: 20rpx 0;

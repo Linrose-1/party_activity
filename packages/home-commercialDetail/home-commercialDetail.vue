@@ -39,15 +39,24 @@
 				<view class="opportunity-content" @longpress.stop="handleLongPress(postDetail.content)">
 					{{ postDetail.content }}
 				</view>
-				<view class="post-images" v-if="postDetail.images && postDetail.images.length"
-					:class="['images-count-' + postDetail.images.length]">
-					<!-- 直接遍历所有图片 -->
+				<!-- ==================== 【视频/图片】 ==================== -->
+
+				<!-- Case 1: 如果存在视频，则优先渲染视频播放器 -->
+				<view v-if="postDetail.video" class="post-video-container">
+					<video :src="postDetail.video" class="post-video" controls object-fit="contain"></video>
+				</view>
+
+				<!-- Case 2: 如果没有视频，但存在图片，则渲染图片网格 (保持原有逻辑) -->
+				<view v-else-if="postDetail.images && postDetail.images.length"
+					:class="['post-images', 'images-count-' + postDetail.images.length]">
 					<view v-for="(image, imgIndex) in postDetail.images" :key="imgIndex" class="image-wrapper"
 						@click.stop="previewImage(postDetail.images, imgIndex)">
 						<image :src="image" class="post-image"
 							:mode="postDetail.images.length === 1 ? 'widthFix' : 'aspectFill'" />
 					</view>
 				</view>
+
+				<!-- ============================================================ -->
 				<view class="tags">
 					<view class="tag" v-for="(tag, index) in postDetail.tags" :key="index">
 						{{ tag }}
@@ -208,6 +217,7 @@
 		time: '',
 		content: '',
 		images: [],
+		video: '',
 		tags: [],
 		likes: 0,
 		dislikes: 0,
@@ -488,6 +498,7 @@
 				postDetail.id = item.id;
 				postDetail.content = item.postContent;
 				postDetail.postTitle = item.postTitle;
+				postDetail.video = item.postVideo || '';
 				postDetail.images = item.postImg ? String(item.postImg).split(',').filter(img => img) : [];
 				postDetail.likes = item.likesCount || 0;
 				postDetail.dislikes = item.dislikesCount || 0;
@@ -1192,6 +1203,24 @@
 		display: block;
 		/* 消除 image 标签底部空隙 */
 	}
+
+	/* ==================== 【新增】视频容器和播放器样式 ==================== */
+	.post-video-container {
+		width: 100%;
+		border-radius: 12rpx;
+		overflow: hidden;
+		margin: 30rpx 0;
+		background-color: #000;
+		/* 视频加载时的背景色 */
+	}
+
+	.post-video {
+		width: 100%;
+		display: block;
+		/* 移除 video 标签底部可能存在的空隙 */
+	}
+
+	/* ===================================================================== */
 
 	/* --- 核心：根据图片数量调整网格布局 --- */
 

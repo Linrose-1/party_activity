@@ -130,11 +130,54 @@
 		margin-bottom: 20rpx;
 		white-space: pre-wrap;
 }
-.suggestion-image.data-v-d9b70221 {
+
+	/* .suggestion-image {
 		width: 100%;
 		border-radius: 12rpx;
 		margin-top: 10rpx;
+	} */
+	/* ==================== 【新增】3x3 网格布局样式 ==================== */
+.suggestion-images.data-v-d9b70221 {
+		display: grid;
+		grid-template-columns: repeat(3, 1fr);
+		/* 创建3列等宽网格 */
+		gap: 10rpx;
+		/* 图片之间的间距 */
+		margin-top: 20rpx;
 }
+.image-wrapper.data-v-d9b70221 {
+		width: 100%;
+		border-radius: 12rpx;
+		overflow: hidden;
+		aspect-ratio: 1 / 1;
+		/* 保持1:1的正方形比例 */
+}
+.suggestion-image.data-v-d9b70221 {
+		width: 100%;
+		height: 100%;
+		display: block;
+}
+
+	/* 为1张图片时做特殊处理，让它横向撑满，高度自适应 */
+.images-count-1 .image-wrapper.data-v-d9b70221 {
+		grid-column: 1 / -1;
+		/* 占据所有列 */
+		aspect-ratio: unset;
+		/* 取消正方形比例限制 */
+}
+.images-count-1 .suggestion-image.data-v-d9b70221 {
+		/* 1张图时，使用 widthFix 模式效果更好 */
+		/* 我们可以在 template 中动态绑定 mode，这里先用 css 模拟 */
+		height: auto;
+}
+
+	/* 为2张或4张图片时使用2列布局，更美观 */
+.images-count-2.data-v-d9b70221,
+	.images-count-4.data-v-d9b70221 {
+		grid-template-columns: repeat(2, 1fr);
+}
+
+	/* ============================================================== */
 .loading-status.data-v-d9b70221 {
 		padding: 20rpx 0;
 }
