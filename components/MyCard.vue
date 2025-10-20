@@ -142,7 +142,7 @@
 			<view class="slogan-primary">连接全球精英商友</view>
 			<view class="slogan-secondary">GO FOR PARTNERS • GO FOR FUTURE</view>
 			<view class="platform-qr-code" @click="previewImage(platformQrCodeUrl)">
-				<image :src="platformQrCodeUrl" mode="aspectFit" show-menu-by-longpress />
+				<image :src="dynamicQrCodeUrl || platformQrCodeUrl" mode="aspectFit" show-menu-by-longpress />
 			</view>
 			<!-- 新增：平台二维码下方的提示文字 -->
 			<view class="qr-hint-back">扫码或长按识别加入平台</view>
@@ -265,6 +265,11 @@
 		logoUrl: {
 			type: String,
 			default: 'https://gitee.com/image_store/repo_1/raw/master/go-for-planet-logo.png'
+		},
+
+		dynamicQrCodeUrl: {
+			type: String,
+			default: '' // 默认是空字符串
 		},
 
 		// --- 以下为旧版兼容，新版已不再直接使用 ---

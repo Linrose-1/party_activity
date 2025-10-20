@@ -118,6 +118,11 @@ const _sfc_main = {
       type: String,
       default: "https://gitee.com/image_store/repo_1/raw/master/go-for-planet-logo.png"
     },
+    dynamicQrCodeUrl: {
+      type: String,
+      default: ""
+      // 默认是空字符串
+    },
     // --- 以下为旧版兼容，新版已不再直接使用 ---
     department: {
       type: String,
@@ -284,7 +289,7 @@ const _sfc_main = {
         }),
         K: common_vendor.o(copyShardCode)
       } : {}, {
-        L: __props.platformQrCodeUrl,
+        L: __props.dynamicQrCodeUrl || __props.platformQrCodeUrl,
         M: common_vendor.o(($event) => previewImage(__props.platformQrCodeUrl)),
         N: __props.logoUrl
       });

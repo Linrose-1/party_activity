@@ -34,6 +34,7 @@
 				:signature="userInfo.signature" :personal-bio="userInfo.personalBio"
 				:contact-info="formattedContactInfo" :show-user-qr-code="!!userInfo.wechatQrCodeUrl"
 				:user-we-chat-qr-code-url="userInfo.wechatQrCodeUrl" :shard-code="userInfo.shardCode"
+				:dynamic-qr-code-url="promotionQrCodeBase64"
 				platform-qr-code-url="https://img.gofor.club/mmexport1759211962539.jpg"
 				@goToOpportunities="handleGoToOpportunities" />
 
@@ -97,6 +98,7 @@
 	const targetUserId = ref(null); // 仅在查看他人名片时有值
 	const fromShare = ref(false);
 	const promotionQrCodeUrl = ref('');
+	const promotionQrCodeBase64 = ref('');
 
 	// 分享UI相关的状态
 	const sharePopup = ref(null);
@@ -174,9 +176,7 @@
 
 			userInfo.value = adaptUserInfo(rawData);
 
-			if (isViewingOwnCard.value) {
-				generateSceneString();
-			}
+			await fetchPromotionQrCode();
 
 		} catch (err) {
 			errorMsg.value = err.message || '加载失败，请稍后重试';
@@ -201,6 +201,69 @@
 		if (error) throw new Error(error);
 		return data;
 	};
+
+	/**
+	 * @description 【新增】获取推广小程序码的函数
+	 */
+	const fetchPromotionQrCode = async () => {
+		// 确保在调用此函数时，userInfo 已经加载完毕
+		if (!userInfo.value) {
+			console.warn('无法生成小程序码，因为用户信息尚未加载。');
+			return;
+		}
+
+		console.log('🚀 [二维码生成] 开始生成小程序码...');
+
+		// 1. 获取 scene 字符串
+		const scene = generateSceneString();
+		if (!scene) {
+			console.error('❌ [二维码生成] 生成 scene 失败，无法继续。');
+			return;
+		}
+		console.log(`✅ [二维码生成] 使用的 scene: ${scene}`);
+
+
+		// 2. 准备请求体
+		const payload = {
+			scene: scene,
+			path: "pages/my-businessCard/my-businessCard",
+			width: 430,
+			autoColor: true,
+			checkPath: true,
+			hyaline: true
+		};
+
+		// 3. 调用接口
+		const {
+			data: base64Image,
+			error
+		} = await request('/app-api/member/social-user/wxa-qrcode', {
+			method: 'POST',
+			data: payload
+		});
+
+		// 4. 处理返回结果
+		if (error) {
+			console.error('❌ [二维码生成] 调用接口失败:', error);
+			uni.showToast({
+				title: '生成分享码失败',
+				icon: 'none'
+			});
+			return;
+		}
+
+		// 5. 存储并打印
+		// 检查并添加 Base64 前缀，以便可以直接在 image 标签中使用
+		const finalBase64 = base64Image.startsWith('data:image') ?
+			base64Image :
+			`data:image/png;base64,${base64Image}`;
+
+		promotionQrCodeBase64.value = finalBase64;
+
+		console.log('✅ [二维码生成] 成功获取并存储了小程序码 Base64 数据:');
+		console.log(promotionQrCodeBase64.value); // 按您的要求打印出来
+	};
+
 
 
 	/**
@@ -236,7 +299,7 @@
 			// return simplifiedParams.join('&');
 		}
 
-		console.log(scene)
+		console.log("scene", scene)
 
 		return scene;
 	};
