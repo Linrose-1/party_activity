@@ -38,10 +38,18 @@
 							<text class="tag-remove" @click="removeTag(index)">×</text>
 						</view>
 					</view>
+
+					<scroll-view class="tag-suggestions-scroll" scroll-x="true" v-if="tagSuggestions.length > 0">
+						<view class="suggestion-tag" v-for="(suggestion, index) in tagSuggestions" :key="index"
+							@click="selectSuggestion(suggestion)">
+							{{ suggestion }}
+						</view>
+					</scroll-view>
+
 					<!-- v-model 绑定到 form.tagInput -->
 					<view class="tag-input-container">
 						<input v-model="form.tagInput" class="tag-input" placeholder="输入标签（如,合作/需求/经验/创业灵感...）" />
-						<button class="add-tag-btn" @click="addTag">添加</button>
+						<button class="add-tag-btn" @click="handleAddTagManually">添加</button>
 					</view>
 					<text class="hint">添加精准标签让更多人发现您的商机</text>
 				</view>
@@ -101,7 +109,8 @@
 	import {
 		reactive,
 		computed,
-		watch
+		watch,
+		ref
 	} from 'vue'; // ref 已被移除，引入 reactive
 	import {
 		onLoad
@@ -121,6 +130,9 @@
 		postVideo: '',
 		showProfile: true,
 	});
+
+	const tagSuggestions = ref([]); // 用于存储从API获取的标签建议
+	let tagSearchTimer = null; // 用于输入防抖
 
 	// --- 计算属性 ---
 	const contentPlaceholder = computed(() => {
@@ -204,24 +216,165 @@
 		form.topic = e.detail.value;
 	}
 
-	function addTag() {
-		let val = form.tagInput.trim();
-		if (!val) return uni.showToast({
-			title: '请输入标签',
-			icon: 'none'
-		});
+	// function addTag() {
+	// 	let val = form.tagInput.trim();
+	// 	if (!val) return uni.showToast({
+	// 		title: '请输入标签',
+	// 		icon: 'none'
+	// 	});
+	// 	if (form.tags.length >= 5) return uni.showToast({
+	// 		title: '最多添加5个标签',
+	// 		icon: 'none'
+	// 	});
+	// 	if (!val.startsWith('#')) val = '#' + val;
+	// 	if (form.tags.includes(val)) return uni.showToast({
+	// 		title: '标签已存在',
+	// 		icon: 'none'
+	// 	});
+
+	// 	form.tags.push(val);
+	// 	form.tagInput = '';
+	// 	tagSuggestions.value = []; // 添加后清空建议
+
+	// 	// 调用接口，静默记录本次添加的标签
+	// 	logTagSearch(val, 1); // type: 1 代表商机
+
+	// }
+
+	/**
+	 * 【新增】处理点击建议标签的函数
+	 * @param {string} tagName - 被点击的建议标签名
+	 */
+	function selectSuggestion(tagName) {
+		if (!tagName) return;
+
+		// 1. 格式化标签名 (确保带 '#')
+		let val = tagName.trim();
+		if (!val.startsWith('#')) val = '#' + val;
+
+		// 2. 校验是否已存在或超出数量
 		if (form.tags.length >= 5) return uni.showToast({
 			title: '最多添加5个标签',
 			icon: 'none'
 		});
-		if (!val.startsWith('#')) val = '#' + val;
 		if (form.tags.includes(val)) return uni.showToast({
 			title: '标签已存在',
 			icon: 'none'
 		});
 
+		// 3. 将建议添加到表单的 tags 数组中
 		form.tags.push(val);
+
+		// 4. 清空输入框和建议列表
 		form.tagInput = '';
+		tagSuggestions.value = [];
+	}
+
+	function handleAddTagManually() {
+		let val = form.tagInput.trim();
+		if (!val) return uni.showToast({
+			title: '请输入标签',
+			icon: 'none'
+		});
+
+		// 1. 格式化标签名
+		if (!val.startsWith('#')) val = '#' + val;
+
+		// 2. 校验
+		if (form.tags.length >= 5) return uni.showToast({
+			title: '最多添加5个标签',
+			icon: 'none'
+		});
+		if (form.tags.includes(val)) return uni.showToast({
+			title: '标签已存在',
+			icon: 'none'
+		});
+
+		// 3. 添加到表单
+		form.tags.push(val);
+
+		// 4. 【核心】只有在手动添加时，才记录到历史
+		logTagSearch(val, 1); // type: 1 代表商机
+
+		// 5. 清空输入框和建议
+		form.tagInput = '';
+		tagSuggestions.value = [];
+	}
+
+
+
+	/**
+	 * 【新增】静默记录标签搜索历史
+	 * @param {string} name - 标签名
+	 * @param {number} type - 类型 (1: 商机)
+	 */
+	async function logTagSearch(name, type) {
+		// 移除 '#' 前缀再记录
+		const tagName = name.startsWith('#') ? name.substring(1) : name;
+
+		try {
+			await request('/app-api/member/tags-search-history/create', {
+				method: 'POST',
+				data: {
+					id: 0,
+					name: tagName,
+					type: type
+				}
+			});
+			console.log(`标签历史 "${tagName}" 已记录`);
+		} catch (error) {
+			console.error('记录标签历史失败:', error);
+		}
+	}
+
+	/**
+	 * 【新增】监听标签输入框的变化，触发模糊搜索
+	 */
+	watch(() => form.tagInput, (newValue) => {
+		clearTimeout(tagSearchTimer);
+		if (newValue && newValue.trim()) {
+			// 使用防抖，延迟300ms触发搜索
+			tagSearchTimer = setTimeout(() => {
+				fetchTagSuggestions(newValue.trim());
+			}, 300);
+		} else {
+			// 如果输入框为空，清空建议
+			tagSuggestions.value = [];
+		}
+	});
+
+	/**
+	 * 【新增】从API获取标签建议
+	 * @param {string} keyword - 用户输入的关键词
+	 */
+	async function fetchTagSuggestions(keyword) {
+		try {
+			const {
+				data,
+				error
+			} = await request('/app-api/member/tags-search-history/page', {
+				method: 'GET',
+				data: {
+					pageNo: 1,
+					pageSize: 20,
+					name: keyword,
+					type: 1 // 只搜索商机相关的历史标签
+				}
+			});
+
+			if (error || !data || !data.list) {
+				tagSuggestions.value = [];
+				return;
+			}
+
+			// 将返回的列表处理成字符串数组，并去重
+			const suggestions = data.list.map(item => item.name);
+			tagSuggestions.value = [...new Set(suggestions)];
+
+		} catch (e) {
+			console.error('获取标签建议失败:', e);
+			tagSuggestions.value = [];
+		}
 	}
 
 	function removeTag(index) {
@@ -630,6 +783,43 @@
 		border-bottom-right-radius: 20rpx;
 		font-size: 26rpx;
 	}
+
+	/* ==================== 【新增】标签建议区域样式 ==================== */
+	.tag-suggestions-scroll {
+		white-space: nowrap;
+		/* 关键：让内部元素不换行，从而可以横向滚动 */
+		padding: 10rpx 0;
+		margin-bottom: 10rpx;
+		width: 100%;
+	}
+
+	/* 隐藏滚动条 */
+	.tag-suggestions-scroll ::-webkit-scrollbar {
+		display: none;
+		width: 0 !important;
+		height: 0 !important;
+		-webkit-appearance: none;
+		background: transparent;
+	}
+
+	.suggestion-tag {
+		display: inline-block;
+		/* 关键：让标签在同一行排列 */
+		background-color: #f0f0f0;
+		color: #555;
+		padding: 8rpx 20rpx;
+		border-radius: 20rpx;
+		font-size: 26rpx;
+		margin-right: 16rpx;
+		cursor: pointer;
+		transition: background-color 0.2s;
+	}
+
+	.suggestion-tag:active {
+		background-color: #e0e0e0;
+	}
+
+	/* ============================================================ */
 
 	.image-preview {
 		display: grid;

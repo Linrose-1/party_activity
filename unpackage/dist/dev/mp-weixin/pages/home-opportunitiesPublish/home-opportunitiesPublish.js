@@ -25,6 +25,8 @@ const _sfc_main = {
       postVideo: "",
       showProfile: true
     });
+    const tagSuggestions = common_vendor.ref([]);
+    let tagSearchTimer = null;
     const contentPlaceholder = common_vendor.computed(() => {
       if (form.topic === "创业猎伙") {
         return "发布寻找创业项目合伙人需求。";
@@ -65,7 +67,7 @@ const _sfc_main = {
     const saveDraft = (data) => {
       if (data.title || data.content || data.tags.length > 0 || data.images.length > 0) {
         common_vendor.index.setStorageSync(DRAFT_KEY, JSON.stringify(data));
-        common_vendor.index.__f__("log", "at pages/home-opportunitiesPublish/home-opportunitiesPublish.vue:173", "📝 草稿已自动保存");
+        common_vendor.index.__f__("log", "at pages/home-opportunitiesPublish/home-opportunitiesPublish.vue:185", "📝 草稿已自动保存");
       }
     };
     const checkDraft = () => {
@@ -89,25 +91,22 @@ const _sfc_main = {
     };
     const clearDraft = () => {
       common_vendor.index.removeStorageSync(DRAFT_KEY);
-      common_vendor.index.__f__("log", "at pages/home-opportunitiesPublish/home-opportunitiesPublish.vue:199", "🧹 草稿已清除");
+      common_vendor.index.__f__("log", "at pages/home-opportunitiesPublish/home-opportunitiesPublish.vue:211", "🧹 草稿已清除");
     };
     function topicChange(e) {
       form.topic = e.detail.value;
     }
-    function addTag() {
-      let val = form.tagInput.trim();
-      if (!val)
-        return common_vendor.index.showToast({
-          title: "请输入标签",
-          icon: "none"
-        });
+    function selectSuggestion(tagName) {
+      if (!tagName)
+        return;
+      let val = tagName.trim();
+      if (!val.startsWith("#"))
+        val = "#" + val;
       if (form.tags.length >= 5)
         return common_vendor.index.showToast({
           title: "最多添加5个标签",
           icon: "none"
         });
-      if (!val.startsWith("#"))
-        val = "#" + val;
       if (form.tags.includes(val))
         return common_vendor.index.showToast({
           title: "标签已存在",
@@ -115,6 +114,83 @@ const _sfc_main = {
         });
       form.tags.push(val);
       form.tagInput = "";
+      tagSuggestions.value = [];
+    }
+    function handleAddTagManually() {
+      let val = form.tagInput.trim();
+      if (!val)
+        return common_vendor.index.showToast({
+          title: "请输入标签",
+          icon: "none"
+        });
+      if (!val.startsWith("#"))
+        val = "#" + val;
+      if (form.tags.length >= 5)
+        return common_vendor.index.showToast({
+          title: "最多添加5个标签",
+          icon: "none"
+        });
+      if (form.tags.includes(val))
+        return common_vendor.index.showToast({
+          title: "标签已存在",
+          icon: "none"
+        });
+      form.tags.push(val);
+      logTagSearch(val, 1);
+      form.tagInput = "";
+      tagSuggestions.value = [];
+    }
+    async function logTagSearch(name, type) {
+      const tagName = name.startsWith("#") ? name.substring(1) : name;
+      try {
+        await utils_request.request("/app-api/member/tags-search-history/create", {
+          method: "POST",
+          data: {
+            id: 0,
+            name: tagName,
+            type
+          }
+        });
+        common_vendor.index.__f__("log", "at pages/home-opportunitiesPublish/home-opportunitiesPublish.vue:324", `标签历史 "${tagName}" 已记录`);
+      } catch (error) {
+        common_vendor.index.__f__("error", "at pages/home-opportunitiesPublish/home-opportunitiesPublish.vue:326", "记录标签历史失败:", error);
+      }
+    }
+    common_vendor.watch(() => form.tagInput, (newValue) => {
+      clearTimeout(tagSearchTimer);
+      if (newValue && newValue.trim()) {
+        tagSearchTimer = setTimeout(() => {
+          fetchTagSuggestions(newValue.trim());
+        }, 300);
+      } else {
+        tagSuggestions.value = [];
+      }
+    });
+    async function fetchTagSuggestions(keyword) {
+      try {
+        const {
+          data,
+          error
+        } = await utils_request.request("/app-api/member/tags-search-history/page", {
+          method: "GET",
+          data: {
+            pageNo: 1,
+            pageSize: 20,
+            name: keyword,
+            type: 1
+            // 只搜索商机相关的历史标签
+          }
+        });
+        if (error || !data || !data.list) {
+          tagSuggestions.value = [];
+          return;
+        }
+        const suggestions = data.list.map((item) => item.name);
+        tagSuggestions.value = [...new Set(suggestions)];
+      } catch (e) {
+        common_vendor.index.__f__("error", "at pages/home-opportunitiesPublish/home-opportunitiesPublish.vue:375", "获取标签建议失败:", e);
+        tagSuggestions.value = [];
+      }
     }
     function removeTag(index) {
       form.tags.splice(index, 1);
@@ -147,7 +223,7 @@ const _sfc_main = {
             if (result.data)
               successfulUrls.push(result.data);
             else
-              common_vendor.index.__f__("error", "at pages/home-opportunitiesPublish/home-opportunitiesPublish.vue:287", "上传失败:", result.error);
+              common_vendor.index.__f__("error", "at pages/home-opportunitiesPublish/home-opportunitiesPublish.vue:440", "上传失败:", result.error);
           });
           form.images.push(...successfulUrls);
           if (successfulUrls.length < validFiles.length) {
@@ -246,7 +322,7 @@ const _sfc_main = {
         },
         fail: (err) => {
           if (err.errMsg.indexOf("cancel") === -1) {
-            common_vendor.index.__f__("error", "at pages/home-opportunitiesPublish/home-opportunitiesPublish.vue:400", "选择视频失败:", err);
+            common_vendor.index.__f__("error", "at pages/home-opportunitiesPublish/home-opportunitiesPublish.vue:553", "选择视频失败:", err);
           }
         }
       });
@@ -349,25 +425,35 @@ const _sfc_main = {
             c: index
           };
         }),
-        j: form.tagInput,
-        k: common_vendor.o(($event) => form.tagInput = $event.detail.value),
-        l: common_vendor.o(addTag),
-        m: form.images.length === 0 && !form.postVideo
+        j: tagSuggestions.value.length > 0
+      }, tagSuggestions.value.length > 0 ? {
+        k: common_vendor.f(tagSuggestions.value, (suggestion, index, i0) => {
+          return {
+            a: common_vendor.t(suggestion),
+            b: index,
+            c: common_vendor.o(($event) => selectSuggestion(suggestion), index)
+          };
+        })
+      } : {}, {
+        l: form.tagInput,
+        m: common_vendor.o(($event) => form.tagInput = $event.detail.value),
+        n: common_vendor.o(handleAddTagManually),
+        o: form.images.length === 0 && !form.postVideo
       }, form.images.length === 0 && !form.postVideo ? {
-        n: common_vendor.p({
+        p: common_vendor.p({
           type: "image-filled",
           size: "30",
           color: "#4CAF50"
         }),
-        o: common_vendor.o(handleChooseImage),
-        p: common_vendor.p({
+        q: common_vendor.o(handleChooseImage),
+        r: common_vendor.p({
           type: "videocam-filled",
           size: "30",
           color: "#2196F3"
         }),
-        q: common_vendor.o(handleChooseVideo)
+        s: common_vendor.o(handleChooseVideo)
       } : form.mediaType === "image" ? common_vendor.e({
-        s: common_vendor.f(form.images, (img, i, i0) => {
+        v: common_vendor.f(form.images, (img, i, i0) => {
           return {
             a: img,
             b: common_vendor.o(($event) => replaceImage(i), i),
@@ -375,24 +461,24 @@ const _sfc_main = {
             d: i
           };
         }),
-        t: form.images.length < 9
+        w: form.images.length < 9
       }, form.images.length < 9 ? {
-        v: common_vendor.p({
+        x: common_vendor.p({
           type: "plusempty",
           size: "24",
           color: "#ccc"
         }),
-        w: common_vendor.o(handleChooseImage)
+        y: common_vendor.o(handleChooseImage)
       } : {}) : form.mediaType === "video" && form.postVideo ? {
-        y: form.postVideo,
-        z: common_vendor.o(deleteVideo)
+        A: form.postVideo,
+        B: common_vendor.o(deleteVideo)
       } : {}, {
-        r: form.mediaType === "image",
-        x: form.mediaType === "video" && form.postVideo,
-        A: common_vendor.t(form.mediaType === "image" ? "最多可上传9张图片" : "仅支持上传一个视频"),
-        B: form.showProfile,
-        C: common_vendor.o((e) => form.showProfile = e.detail.value),
-        D: common_vendor.o(submitPost)
+        t: form.mediaType === "image",
+        z: form.mediaType === "video" && form.postVideo,
+        C: common_vendor.t(form.mediaType === "image" ? "最多可上传9张图片" : "仅支持上传一个视频"),
+        D: form.showProfile,
+        E: common_vendor.o((e) => form.showProfile = e.detail.value),
+        F: common_vendor.o(submitPost)
       });
     };
   }

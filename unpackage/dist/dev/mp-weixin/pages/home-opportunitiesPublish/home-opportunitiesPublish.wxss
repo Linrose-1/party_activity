@@ -122,6 +122,41 @@
 		border-bottom-right-radius: 20rpx;
 		font-size: 26rpx;
 }
+
+	/* ==================== 【新增】标签建议区域样式 ==================== */
+.tag-suggestions-scroll.data-v-90e28424 {
+		white-space: nowrap;
+		/* 关键：让内部元素不换行，从而可以横向滚动 */
+		padding: 10rpx 0;
+		margin-bottom: 10rpx;
+		width: 100%;
+}
+
+	/* 隐藏滚动条 */
+.tag-suggestions-scroll.data-v-90e28424 ::-webkit-scrollbar {
+		display: none;
+		width: 0 !important;
+		height: 0 !important;
+		-webkit-appearance: none;
+		background: transparent;
+}
+.suggestion-tag.data-v-90e28424 {
+		display: inline-block;
+		/* 关键：让标签在同一行排列 */
+		background-color: #f0f0f0;
+		color: #555;
+		padding: 8rpx 20rpx;
+		border-radius: 20rpx;
+		font-size: 26rpx;
+		margin-right: 16rpx;
+		cursor: pointer;
+		transition: background-color 0.2s;
+}
+.suggestion-tag.data-v-90e28424:active {
+		background-color: #e0e0e0;
+}
+
+	/* ============================================================ */
 .image-preview.data-v-90e28424 {
 		display: grid;
 		/* 1. 声明为 grid 布局 */
