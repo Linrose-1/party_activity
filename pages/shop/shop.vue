@@ -57,7 +57,7 @@
 				<text>附近3公里暂无合适的“聚店”</text>
 				<text>请在下方猛击 “聚店推荐” </text>
 				<text>(推荐成功可获贡分)</text>
-			
+
 			</view>
 		</scroll-view>
 
@@ -83,10 +83,15 @@
 		watch
 	} from 'vue';
 	import {
-		onShow
+		onShow,
+		onShareAppMessage,
+		onShareTimeline
 	} from '@dcloudio/uni-app';
 	import StoreCard from '../../components/StoreCard.vue';
 	import request from '../../utils/request.js';
+	import {
+		getInviteCode
+	} from '../../utils/user.js';
 
 	// --- 状态变量 ---
 	const searchTerm = ref('');
@@ -104,6 +109,7 @@
 		value: 'all'
 	}]);
 	const bannerList = ref([]);
+
 
 	/**
 	 * 获取实时位置的 Promise 函数
@@ -437,6 +443,67 @@
 			url: '/pages/myStore-edit/myStore-edit'
 		});
 	};
+
+
+	// ==========================================================
+	// --- 【新增】分享功能逻辑 ---
+	// ==========================================================
+
+	/**
+	 * @description 监听用户点击“分享给好友”
+	 */
+	onShareAppMessage(() => {
+		// 1. 获取当前用户的邀请码
+		const inviteCode = getInviteCode();
+		console.log(`[分享] 准备分享聚店页面给好友，邀请码: ${inviteCode}`);
+
+		// 2. 构建分享路径
+		// 基础路径是当前页面
+		let sharePath = '/pages/store-list/store-list'; // 请确保这个路径是正确的
+		if (inviteCode) {
+			sharePath += `?inviteCode=${inviteCode}`;
+		}
+
+		// 3. 返回分享对象
+		const shareContent = {
+			title: '我发现了很多宝藏“聚店”，快来一起看看吧！',
+			path: sharePath,
+			imageUrl: bannerList.value.length > 0 ? bannerList.value[0].imageUrl :
+				'https://img.gofor.club/logo.png' // 优先使用第一张轮播图作为分享封面
+		};
+
+		console.log('[分享] 分享给好友的内容:', JSON.stringify(shareContent));
+
+		return shareContent;
+	});
+
+
+	/**
+	 * @description 监听用户点击“分享到朋友圈”
+	 */
+	onShareTimeline(() => {
+		// 1. 获取邀请码
+		const inviteCode = getInviteCode();
+		console.log(`[分享] 准备分享聚店页面到朋友圈，邀请码: ${inviteCode}`);
+
+		// 2. 构建 query 字符串
+		let queryString = '';
+		if (inviteCode) {
+			queryString = `inviteCode=${inviteCode}`;
+		}
+
+		// 3. 返回分享对象
+		const shareContent = {
+			title: '我发现了很多宝藏“聚店”，快来一起看看吧！',
+			query: queryString,
+			imageUrl: bannerList.value.length > 0 ? bannerList.value[0].imageUrl :
+				'https://img.gofor.club/logo.png'
+		};
+
+		console.log('[分享] 分享到朋友圈的内容:', JSON.stringify(shareContent));
+
+		return shareContent;
+	});
 </script>
 
 <style lang="scss">

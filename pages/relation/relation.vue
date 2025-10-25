@@ -119,12 +119,17 @@
 		onPullDownRefresh,
 		onReachBottom,
 		onShow,
-		onHide
+		onHide,
+		onShareAppMessage,
+		onShareTimeline
 	} from '@dcloudio/uni-app';
 	import request from '@/utils/request.js';
 	import {
 		useShakeLock
 	} from '@/utils/shakeLock.js';
+	import {
+		getInviteCode
+	} from '@/utils/user.js';
 
 	const themeColor = '#FF7500';
 
@@ -415,6 +420,64 @@
 			queryParams.pageNo++;
 			fetchUserList(false);
 		}
+	});
+
+	// ==========================================================
+	// --- 【新增】分享功能逻辑 ---
+	// ==========================================================
+
+	/**
+	 * @description 监听用户点击“分享给好友”
+	 */
+	onShareAppMessage(() => {
+		// 1. 获取当前用户的邀请码
+		const inviteCode = getInviteCode();
+		console.log(`[分享] 准备分享人脉页面给好友，邀请码: ${inviteCode}`);
+
+		// 2. 构建分享路径
+		// 基础路径是当前页面
+		let sharePath = '/pages/connections/connections'; // 请确保这个路径是正确的
+		if (inviteCode) {
+			sharePath += `?inviteCode=${inviteCode}`;
+		}
+
+		// 3. 返回分享对象
+		const shareContent = {
+			title: '来这里拓展你的人脉圈，发现无限商机！',
+			path: sharePath,
+			imageUrl: '/static/connections-bg.png' // 使用页面头部的背景图作为分享封面
+		};
+
+		console.log('[分享] 分享给好友的内容:', JSON.stringify(shareContent));
+
+		return shareContent;
+	});
+
+
+	/**
+	 * @description 监听用户点击“分享到朋友圈”
+	 */
+	onShareTimeline(() => {
+		// 1. 获取邀请码
+		const inviteCode = getInviteCode();
+		console.log(`[分享] 准备分享人脉页面到朋友圈，邀请码: ${inviteCode}`);
+
+		// 2. 构建 query 字符串
+		let queryString = '';
+		if (inviteCode) {
+			queryString = `inviteCode=${inviteCode}`;
+		}
+
+		// 3. 返回分享对象
+		const shareContent = {
+			title: '来这里拓展你的人脉圈，发现无限商机！',
+			query: queryString,
+			imageUrl: '/static/connections-bg.png' // 使用页面头部的背景图作为分享封面
+		};
+
+		console.log('[分享] 分享到朋友圈的内容:', JSON.stringify(shareContent));
+
+		return shareContent;
 	});
 </script>
 

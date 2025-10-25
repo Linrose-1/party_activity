@@ -3,6 +3,7 @@ const common_vendor = require("../../common/vendor.js");
 const common_assets = require("../../common/assets.js");
 const utils_request = require("../../utils/request.js");
 const utils_shakeLock = require("../../utils/shakeLock.js");
+const utils_user = require("../../utils/user.js");
 if (!Array) {
   const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
   const _easycom_uni_datetime_picker2 = common_vendor.resolveComponent("uni-datetime-picker");
@@ -188,7 +189,7 @@ const _sfc_main = {
       const name = user.nickname || "匿名用户";
       const avatarUrl = user.avatar || defaultAvatar;
       const url = `/pages/applicationBusinessCard/applicationBusinessCard?id=${user.id}&name=${encodeURIComponent(name)}&avatar=${encodeURIComponent(avatarUrl)}`;
-      common_vendor.index.__f__("log", "at pages/relation/relation.vue:356", "从人脉列表页跳转，URL:", url);
+      common_vendor.index.__f__("log", "at pages/relation/relation.vue:361", "从人脉列表页跳转，URL:", url);
       common_vendor.index.navigateTo({
         url
       });
@@ -204,19 +205,19 @@ const _sfc_main = {
     common_vendor.watch([destination, timeRange], updateNextLocation);
     common_vendor.watch(activeTab, () => fetchUserList(true));
     common_vendor.onShow(() => {
-      common_vendor.index.__f__("log", "at pages/relation/relation.vue:383", "人脉页 onShow: 开始监听摇一摇");
+      common_vendor.index.__f__("log", "at pages/relation/relation.vue:388", "人脉页 onShow: 开始监听摇一摇");
       common_vendor.index.onAccelerometerChange((res) => {
         if (Math.abs(res.x) > 1.5 || Math.abs(res.y) > 1.5 || Math.abs(res.z) > 1.5) {
           if (!isShakeLocked.value) {
             lockShake();
-            common_vendor.index.__f__("log", "at pages/relation/relation.vue:395", "检测到摇一摇，准备跳转...");
+            common_vendor.index.__f__("log", "at pages/relation/relation.vue:400", "检测到摇一摇，准备跳转...");
             goToShakePage();
           }
         }
       });
     });
     common_vendor.onHide(() => {
-      common_vendor.index.__f__("log", "at pages/relation/relation.vue:406", "人脉页 onHide: 停止监听摇一摇");
+      common_vendor.index.__f__("log", "at pages/relation/relation.vue:411", "人脉页 onHide: 停止监听摇一摇");
       common_vendor.index.stopAccelerometer();
     });
     common_vendor.onLoad(() => {
@@ -229,6 +230,38 @@ const _sfc_main = {
         queryParams.pageNo++;
         fetchUserList(false);
       }
+    });
+    common_vendor.onShareAppMessage(() => {
+      const inviteCode = utils_user.getInviteCode();
+      common_vendor.index.__f__("log", "at pages/relation/relation.vue:435", `[分享] 准备分享人脉页面给好友，邀请码: ${inviteCode}`);
+      let sharePath = "/pages/connections/connections";
+      if (inviteCode) {
+        sharePath += `?inviteCode=${inviteCode}`;
+      }
+      const shareContent = {
+        title: "来这里拓展你的人脉圈，发现无限商机！",
+        path: sharePath,
+        imageUrl: "/static/connections-bg.png"
+        // 使用页面头部的背景图作为分享封面
+      };
+      common_vendor.index.__f__("log", "at pages/relation/relation.vue:451", "[分享] 分享给好友的内容:", JSON.stringify(shareContent));
+      return shareContent;
+    });
+    common_vendor.onShareTimeline(() => {
+      const inviteCode = utils_user.getInviteCode();
+      common_vendor.index.__f__("log", "at pages/relation/relation.vue:463", `[分享] 准备分享人脉页面到朋友圈，邀请码: ${inviteCode}`);
+      let queryString = "";
+      if (inviteCode) {
+        queryString = `inviteCode=${inviteCode}`;
+      }
+      const shareContent = {
+        title: "来这里拓展你的人脉圈，发现无限商机！",
+        query: queryString,
+        imageUrl: "/static/connections-bg.png"
+        // 使用页面头部的背景图作为分享封面
+      };
+      common_vendor.index.__f__("log", "at pages/relation/relation.vue:478", "[分享] 分享到朋友圈的内容:", JSON.stringify(shareContent));
+      return shareContent;
     });
     return (_ctx, _cache) => {
       return common_vendor.e({
@@ -323,5 +356,6 @@ const _sfc_main = {
   }
 };
 const MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["__scopeId", "data-v-85e55c19"]]);
+_sfc_main.__runtimeHooks = 6;
 wx.createPage(MiniProgramPage);
 //# sourceMappingURL=../../../.sourcemap/mp-weixin/pages/relation/relation.js.map

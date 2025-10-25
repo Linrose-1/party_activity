@@ -116,10 +116,15 @@
 	import {
 		onReachBottom,
 		onPullDownRefresh,
-		onShow
+		onShow,
+		onShareAppMessage,
+		onShareTimeline
 	} from '@dcloudio/uni-app';
 	import ActivityCard from '@/components/ActivityCard.vue';
 	import request from '../../utils/request.js';
+	import {
+		getInviteCode
+	} from '../../utils/user.js';
 
 	// --- 核心状态 ---
 	const loading = ref(false); // 是否正在加载中
@@ -456,6 +461,66 @@
 			deep: true // deep: true 对监听 selectedLocationInfo 对象变化是必需的
 		}
 	);
+
+	// ==========================================================
+	// --- 分享功能逻辑 ---
+	// ==========================================================
+
+	/**
+	 * @description 监听用户点击右上角“分享给好友”
+	 */
+	onShareAppMessage(() => {
+		// 1. 获取当前用户的邀请码
+		const inviteCode = getInviteCode(); // 使用我们封装好的工具函数
+		console.log(`[分享] 准备分享给好友，获取到邀请码: ${inviteCode}`);
+
+		// 2. 构建分享路径
+		// 基础路径是当前页面
+		let sharePath = '/pages/activity-list/activity-list';
+		// 如果邀请码存在，就拼接到路径参数中
+		if (inviteCode) {
+			sharePath += `?inviteCode=${inviteCode}`;
+		}
+
+		// 3. 返回分享对象
+		const shareContent = {
+			title: '发现一个超棒的商友聚会平台，快来看看吧！', // 自定义分享标题
+			path: sharePath, // 用户点击后进入的页面路径及参数
+			imageUrl: 'https://img.gofor.club/logo.png' // 自定义分享封面图，建议使用一个有代表性的图片URL
+		};
+
+		console.log('[分享] 分享给好友的内容:', JSON.stringify(shareContent));
+
+		return shareContent;
+	});
+
+
+	/**
+	 * @description 监听用户点击右上角“分享到朋友圈”
+	 */
+	onShareTimeline(() => {
+		// 1. 获取当前用户的邀请码
+		const inviteCode = getInviteCode();
+		console.log(`[分享] 准备分享到朋友圈，获取到邀请码: ${inviteCode}`);
+
+		// 2. 构建朋友圈分享的 query 字符串
+		// 朋友圈分享不接受 path，只能用 query
+		let queryString = '';
+		if (inviteCode) {
+			queryString = `inviteCode=${inviteCode}`;
+		}
+
+		// 3. 返回分享对象
+		const shareContent = {
+			title: '发现一个超棒的商友聚会平台，快来看看吧！', // 朋友圈分享的标题
+			query: queryString, // 传递的参数
+			imageUrl: 'https://img.gofor.club/logo.png' // 朋友圈分享的封面图
+		};
+
+		console.log('[分享] 分享到朋友圈的内容:', JSON.stringify(shareContent));
+
+		return shareContent;
+	});
 </script>
 
 <style lang="scss" scoped>

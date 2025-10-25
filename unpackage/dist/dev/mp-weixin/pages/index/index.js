@@ -26,7 +26,7 @@ const _sfc_main = {
       getLoginCode();
       const pendingInviteCode = common_vendor.index.getStorageSync("pendingInviteCode");
       if (pendingInviteCode) {
-        common_vendor.index.__f__("log", "at pages/index/index.vue:98", "✅ [登录页] 读取到暂存的邀请码:", pendingInviteCode);
+        common_vendor.index.__f__("log", "at pages/index/index.vue:100", "✅ [登录页] 读取到暂存的邀请码:", pendingInviteCode);
         inviteCode.value = pendingInviteCode;
         common_vendor.index.removeStorageSync("pendingInviteCode");
       }
@@ -34,10 +34,10 @@ const _sfc_main = {
     const onChooseAvatar = (e) => {
       const tempAvatarPath = e.detail.avatarUrl;
       if (tempAvatarPath) {
-        common_vendor.index.__f__("log", "at pages/index/index.vue:113", "✅ 用户选择了头像，临时路径:", tempAvatarPath);
+        common_vendor.index.__f__("log", "at pages/index/index.vue:115", "✅ 用户选择了头像，临时路径:", tempAvatarPath);
         uploadAvatar(tempAvatarPath);
       } else {
-        common_vendor.index.__f__("error", "at pages/index/index.vue:117", "❌ 获取头像临时路径失败");
+        common_vendor.index.__f__("error", "at pages/index/index.vue:119", "❌ 获取头像临时路径失败");
       }
     };
     const uploadAvatar = async (filePath) => {
@@ -70,9 +70,9 @@ const _sfc_main = {
           provider: "weixin"
         });
         loginCode.value = res.code;
-        common_vendor.index.__f__("log", "at pages/index/index.vue:160", "✅ 获取 loginCode 成功:", loginCode.value);
+        common_vendor.index.__f__("log", "at pages/index/index.vue:162", "✅ 获取 loginCode 成功:", loginCode.value);
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/index/index.vue:162", "❌ 获取 loginCode 失败", error);
+        common_vendor.index.__f__("error", "at pages/index/index.vue:164", "❌ 获取 loginCode 失败", error);
         common_vendor.index.showToast({
           title: "登录准备失败，请重试",
           icon: "none"
@@ -125,7 +125,7 @@ const _sfc_main = {
           shardCode: inviteCode.value,
           state: "default"
         };
-        common_vendor.index.__f__("log", "at pages/index/index.vue:256", "🚀 准备提交的登录数据:", payload);
+        common_vendor.index.__f__("log", "at pages/index/index.vue:258", "🚀 准备提交的登录数据:", payload);
         const loginResult = await utils_request.request("/app-api/member/auth/weixin-mini-app-login", {
           method: "POST",
           data: payload
@@ -161,7 +161,7 @@ const _sfc_main = {
         });
       } catch (error) {
         common_vendor.index.hideLoading();
-        common_vendor.index.__f__("error", "at pages/index/index.vue:307", "登录流程异常:", error);
+        common_vendor.index.__f__("error", "at pages/index/index.vue:309", "登录流程异常:", error);
         common_vendor.index.showToast({
           title: error.message,
           icon: "none"
@@ -180,20 +180,20 @@ const _sfc_main = {
         method: "GET"
       });
       if (error) {
-        common_vendor.index.__f__("error", "at pages/index/index.vue:331", "❌ [登录后] 获取用户信息失败:", error);
+        common_vendor.index.__f__("error", "at pages/index/index.vue:333", "❌ [登录后] 获取用户信息失败:", error);
         common_vendor.index.showToast({
           title: "用户信息同步失败",
           icon: "none"
         });
         return;
       }
-      common_vendor.index.__f__("log", "at pages/index/index.vue:338", "✅ [登录后] 成功获取并缓存用户信息:", JSON.parse(JSON.stringify(fullUserInfo)));
+      common_vendor.index.__f__("log", "at pages/index/index.vue:340", "✅ [登录后] 成功获取并缓存用户信息:", JSON.parse(JSON.stringify(fullUserInfo)));
       common_vendor.index.setStorageSync("userInfo", JSON.stringify(fullUserInfo));
     };
     const handlePendingShareReward = async (currentUserId) => {
       const pendingReward = common_vendor.index.getStorageSync("pendingShareReward");
       if (pendingReward && pendingReward.sharerId && pendingReward.bizId && pendingReward.type && pendingReward.sharerId !== currentUserId) {
-        common_vendor.index.__f__("log", "at pages/index/index.vue:350", `✅ [登录后] 检测到待处理分享奖励`, pendingReward);
+        common_vendor.index.__f__("log", "at pages/index/index.vue:352", `✅ [登录后] 检测到待处理分享奖励`, pendingReward);
         const {
           error
         } = await utils_request.request("/app-api/member/experience-record/share-experience-hit", {
@@ -205,9 +205,9 @@ const _sfc_main = {
           }
         });
         if (error) {
-          common_vendor.index.__f__("error", "at pages/index/index.vue:362", "❌ [登录后] 调用分享加分接口失败:", error);
+          common_vendor.index.__f__("error", "at pages/index/index.vue:364", "❌ [登录后] 调用分享加分接口失败:", error);
         } else {
-          common_vendor.index.__f__("log", "at pages/index/index.vue:364", `✅ [登录后] 成功为分享者(ID: ${pendingReward.sharerId})触发奖励`);
+          common_vendor.index.__f__("log", "at pages/index/index.vue:366", `✅ [登录后] 成功为分享者(ID: ${pendingReward.sharerId})触发奖励`);
         }
         common_vendor.index.removeStorageSync("pendingShareReward");
       }
@@ -217,6 +217,30 @@ const _sfc_main = {
         url: `/pages/user-agreement/user-agreement?tab=${type}`
       });
     };
+    common_vendor.onShareAppMessage(() => {
+      common_vendor.index.__f__("log", "at pages/index/index.vue:392", "[分享] 用户在登录页发起了分享");
+      const shareContent = {
+        title: "猩聚社 - 链接商机，共创未来，快来加入我们！",
+        // 通用推荐文案
+        path: "/pages/login/login",
+        // 直接分享到登录页，请确保路径正确
+        imageUrl: "https://img.gofor.club/logo.png"
+        // 使用应用的Logo作为封面
+      };
+      common_vendor.index.__f__("log", "at pages/index/index.vue:402", "[分享] 分享给好友的内容:", JSON.stringify(shareContent));
+      return shareContent;
+    });
+    common_vendor.onShareTimeline(() => {
+      common_vendor.index.__f__("log", "at pages/index/index.vue:412", "[分享] 用户在登录页分享到朋友圈");
+      const shareContent = {
+        title: "猩聚社 - 链接商机，共创未来，快来加入我们！",
+        query: "",
+        // 朋友圈分享不带参数
+        imageUrl: "https://img.gofor.club/logo.png"
+      };
+      common_vendor.index.__f__("log", "at pages/index/index.vue:421", "[分享] 分享到朋友圈的内容:", JSON.stringify(shareContent));
+      return shareContent;
+    });
     return (_ctx, _cache) => {
       return common_vendor.e({
         a: avatarUrl.value || "/static/images/default-avatar.png",
@@ -255,5 +279,6 @@ const _sfc_main = {
   }
 };
 const MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["__scopeId", "data-v-1cf27b2a"]]);
+_sfc_main.__runtimeHooks = 6;
 wx.createPage(MiniProgramPage);
 //# sourceMappingURL=../../../.sourcemap/mp-weixin/pages/index/index.js.map

@@ -67,7 +67,9 @@
 		computed
 	} from 'vue';
 	import {
-		onLoad
+		onLoad,
+		onShareAppMessage,
+		onShareTimeline
 	} from '@dcloudio/uni-app';
 	import request from '../../utils/request.js';
 	import uploadFile from '../../utils/upload.js';
@@ -377,6 +379,49 @@
 			url: `/pages/user-agreement/user-agreement?tab=${type}`
 		});
 	};
+
+
+	// ==========================================================
+	// --- 【新增】分享功能逻辑 ---
+	// ==========================================================
+
+	/**
+	 * @description 监听用户点击“分享给好友”
+	 */
+	onShareAppMessage(() => {
+		console.log('[分享] 用户在登录页发起了分享');
+
+		// 因为用户此时未登录，所以不携带任何邀请码
+		// 这是一个通用的应用推荐分享
+		const shareContent = {
+			title: '猩聚社 - 链接商机，共创未来，快来加入我们！', // 通用推荐文案
+			path: '/pages/login/login', // 直接分享到登录页，请确保路径正确
+			imageUrl: 'https://img.gofor.club/logo.png' // 使用应用的Logo作为封面
+		};
+
+		console.log('[分享] 分享给好友的内容:', JSON.stringify(shareContent));
+
+		return shareContent;
+	});
+
+
+	/**
+	 * @description 监听用户点击“分享到朋友圈”
+	 */
+	onShareTimeline(() => {
+		console.log('[分享] 用户在登录页分享到朋友圈');
+
+		// 同样，不携带任何邀请码
+		const shareContent = {
+			title: '猩聚社 - 链接商机，共创未来，快来加入我们！',
+			query: '', // 朋友圈分享不带参数
+			imageUrl: 'https://img.gofor.club/logo.png'
+		};
+
+		console.log('[分享] 分享到朋友圈的内容:', JSON.stringify(shareContent));
+
+		return shareContent;
+	});
 </script>
 
 <style lang="scss" scoped>
