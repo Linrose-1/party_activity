@@ -1,5 +1,7 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
+const utils_request = require("../../utils/request.js");
+const utils_upload = require("../../utils/upload.js");
 if (!Array) {
   const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
   _easycom_uni_icons2();
@@ -68,23 +70,89 @@ const _sfc_main = {
       });
     };
     const uploadProof = (user) => {
+      common_vendor.index.__f__("log", "at pages/my-active-approval/my-active-approval.vue:171", "✅✅✅ [SMOKE TEST] uploadProof function has been TRIGGERED! ✅✅✅");
+      common_vendor.index.__f__("log", "at pages/my-active-approval/my-active-approval.vue:172", "User object received:", user);
+      common_vendor.index.showModal({
+        title: "测试",
+        content: "您点击了上传按钮，函数已成功触发！",
+        showCancel: false
+      });
       common_vendor.index.chooseImage({
         count: 1,
-        success: (res) => {
-          const tempFilePath = res.tempFilePaths[0];
-          common_vendor.index.showLoading({ title: "正在上传" });
-          setTimeout(() => {
-            const targetUser = refundList.value.find((u) => u.id === user.id);
-            if (targetUser) {
-              targetUser.refundProofUrl = tempFilePath;
-              targetUser.refundStatus = "completed";
+        sizeType: ["original", "compressed"],
+        sourceType: ["album", "camera"],
+        success: async (res) => {
+          common_vendor.index.__f__("log", "at pages/my-active-approval/my-active-approval.vue:186", "【调试信息】 uni.chooseImage 返回的原始 res 对象是：", res);
+          let tempFilePath = "";
+          if (res.tempFilePaths && res.tempFilePaths.length > 0) {
+            tempFilePath = res.tempFilePaths[0];
+          } else if (res.tempFiles && res.tempFiles.length > 0 && res.tempFiles[0].path) {
+            tempFilePath = res.tempFiles[0].path;
+          }
+          if (!tempFilePath) {
+            common_vendor.index.showToast({
+              title: "未能获取到图片文件，请重试",
+              icon: "none",
+              duration: 3e3
+            });
+            common_vendor.index.__f__("error", "at pages/my-active-approval/my-active-approval.vue:205", "【严重错误】 无法从 chooseImage 的返回值中提取任何有效路径!", res);
+            return;
+          }
+          common_vendor.index.__f__("log", "at pages/my-active-approval/my-active-approval.vue:209", "【最终提取路径】", tempFilePath);
+          common_vendor.index.showLoading({
+            title: "凭证上传中...",
+            mask: true
+          });
+          try {
+            const uploadResult = await utils_upload.uploadFile({
+              path: tempFilePath
+            }, {
+              directory: "refund-proof"
+            });
+            if (uploadResult.error) {
+              const errorMsg = typeof uploadResult.error === "object" ? uploadResult.error.msg : uploadResult.error;
+              throw new Error(errorMsg || "上传失败");
+            }
+            const proofUrlFromServer = uploadResult.data;
+            const confirmResult = await utils_request.request("/app-api/member/activity/confirm-refund", {
+              method: "POST",
+              data: {
+                activityId: activityInfo.value.id,
+                applyUserId: user.id,
+                refundProofUrl: proofUrlFromServer
+              }
+            });
+            if (confirmResult.error) {
+              const errorMsg = typeof confirmResult.error === "object" ? confirmResult.error.msg : confirmResult.error;
+              throw new Error(errorMsg || "确认退款失败");
             }
             common_vendor.index.hideLoading();
+            const targetUser = refundList.value.find((u) => u.id === user.id);
+            if (targetUser) {
+              targetUser.refundProofUrl = proofUrlFromServer;
+              targetUser.refundStatus = "completed";
+            }
             common_vendor.index.showToast({
-              title: "凭证上传成功",
+              title: "操作成功",
               icon: "success"
             });
-          }, 1e3);
+          } catch (err) {
+            common_vendor.index.hideLoading();
+            common_vendor.index.showToast({
+              title: err.message || "操作失败，请重试",
+              icon: "none",
+              duration: 3e3
+            });
+          }
+        },
+        fail: (err) => {
+          common_vendor.index.__f__("error", "at pages/my-active-approval/my-active-approval.vue:273", "【调试信息】 uni.chooseImage 的 fail 回调触发！", err);
+          if (err.errMsg && !err.errMsg.includes("cancel")) {
+            common_vendor.index.showToast({
+              title: "选择图片失败",
+              icon: "none"
+            });
+          }
         }
       });
     };

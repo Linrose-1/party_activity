@@ -148,7 +148,9 @@
 	import {
 		ref,
 		reactive,
-		computed
+		computed,
+		onMounted,
+		onUnmounted
 	} from 'vue';
 	import {
 		onReachBottom,
@@ -193,6 +195,9 @@
 
 	const defaultAvatarUrl = '/static/icon/default-avatar.png';
 
+	// 标志位，用于控制 onShow 是否需要强制刷新
+	const isInitialLoad = ref(true);
+
 
 	// ============================
 	// 2. 计算属性 (Computed)
@@ -207,11 +212,40 @@
 	// 3. 生命周期钩子 (Lifecycle Hooks)
 	// ============================
 
+	onMounted(() => {
+		console.log('首页 onMounted: 开始监听 postUpdated 事件');
+		uni.$on('postUpdated', handlePostUpdate);
+	});
+
+	onUnmounted(() => {
+		console.log('首页 onUnmounted: 移除 postUpdated 事件监听');
+		uni.$off('postUpdated', handlePostUpdate);
+	});
+
 	onShow(() => {
 		// 每次进入页面时检查登录状态并刷新数据
-		loggedInUserId.value = uni.getStorageSync('userId');
-		isLogin.value = !!loggedInUserId.value;
-		getBusinessOpportunitiesList(true);
+		const currentUserId = uni.getStorageSync('userId');
+		const currentUserIsLogin = !!currentUserId;
+
+		// 只有在以下三种情况时才强制刷新列表：
+		// 1. 首次进入页面 (isInitialLoad.value 为 true)
+		// 2. 登录状态发生了变化 (例如，从未登录变为登录，或切换了账号)
+		// 3. 帖子列表为空 (作为一种保险措施，防止白屏)
+		if (isInitialLoad.value || isLogin.value !== currentUserIsLogin || postList.value.length === 0) {
+			console.log('触发刷新: 首次加载或登录状态变更');
+
+			// 更新登录状态
+			loggedInUserId.value = currentUserId;
+			isLogin.value = currentUserIsLogin;
+
+			// 执行强制刷新
+			getBusinessOpportunitiesList(true);
+
+			// 首次加载完成后，将标志位置为 false
+			isInitialLoad.value = false;
+		} else {
+			console.log('从详情页返回，不刷新列表，保持滚动位置。');
+		}
 
 		// 确保分享菜单总是可用
 		uni.showShareMenu({
@@ -267,6 +301,14 @@
 			imageUrl: 'https://img.gofor.club/logo_share.jpg'
 		};
 	});
+
+	/**
+	 * 一个处理刷新事件的函数
+	 */
+	const handlePostUpdate = () => {
+		console.log('接收到 postUpdated 通知，强制刷新首页列表...');
+		getBusinessOpportunitiesList(true); // 调用强制刷新
+	};
 
 	// ============================
 	// 5. 主要业务方法 (Business Methods)
@@ -451,6 +493,17 @@
 		}
 
 		try {
+			// 1. 计算要发送给后端的 action 值
+			let apiActionToSend;
+			if (originalAction === clickedAction) {
+				// 如果操作前的状态和当前点击的按钮一致，说明是“取消”操作
+				apiActionToSend = 'cancel';
+			} else {
+				// 否则，是新增或切换操作
+				apiActionToSend = clickedAction;
+			}
+
+			// 2. 在请求中发送计算好的 action 值
 			const {
 				error
 			} = await request('/app-api/member/like-action/add', {
@@ -458,7 +511,7 @@
 				data: {
 					targetId: post.id,
 					targetType: 'post',
-					action: post.userAction,
+					action: apiActionToSend, // 【关键】使用新的变量
 				},
 			});
 
@@ -468,7 +521,7 @@
 				post.likes = originalLikes;
 				post.dislikes = originalDislikes;
 				uni.showToast({
-					title: '操作失败',
+					title: `操作失败: ${error}`,
 					icon: 'none'
 				});
 			}
@@ -1020,7 +1073,7 @@
 		width: 100%;
 		/* 建议给视频一个最大高度，防止视频比例过高导致页面过长 */
 		/* max-height: 400rpx; */
-		aspect-ratio: 16 / 9; 
+		aspect-ratio: 16 / 9;
 		border-radius: 12rpx;
 		overflow: hidden;
 		margin-top: 30rpx;

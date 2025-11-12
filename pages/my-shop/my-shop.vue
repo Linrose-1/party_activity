@@ -32,7 +32,7 @@
 			    <uni-icons type="shop" size="60" color="#ffd8c1"></uni-icons>
 			    <text class="empty-text">您还没有自己的聚店</text>
 			    <text class="empty-subtext">立即申请，让更多人发现您的店铺</text>
-			    <button class="apply-button" @click="goToApplyPage">申请上榜</button>
+			    <button class="apply-button" @click="goToApplyPage">申请入驻</button>
 			</view>
 		</scroll-view>
 	</view>

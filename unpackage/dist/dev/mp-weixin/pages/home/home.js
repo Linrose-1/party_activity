@@ -30,14 +30,31 @@ const _sfc_main = {
       longitude: "",
       latitude: ""
     });
+    const isInitialLoad = common_vendor.ref(true);
     const hasPaidMembership = common_vendor.computed(() => {
       const paidLevels = ["青铜", "白银", "黄金", "黑钻"];
       return paidLevels.includes(member.value);
     });
+    common_vendor.onMounted(() => {
+      common_vendor.index.__f__("log", "at pages/home/home.vue:216", "首页 onMounted: 开始监听 postUpdated 事件");
+      common_vendor.index.$on("postUpdated", handlePostUpdate);
+    });
+    common_vendor.onUnmounted(() => {
+      common_vendor.index.__f__("log", "at pages/home/home.vue:221", "首页 onUnmounted: 移除 postUpdated 事件监听");
+      common_vendor.index.$off("postUpdated", handlePostUpdate);
+    });
     common_vendor.onShow(() => {
-      loggedInUserId.value = common_vendor.index.getStorageSync("userId");
-      isLogin.value = !!loggedInUserId.value;
-      getBusinessOpportunitiesList(true);
+      const currentUserId = common_vendor.index.getStorageSync("userId");
+      const currentUserIsLogin = !!currentUserId;
+      if (isInitialLoad.value || isLogin.value !== currentUserIsLogin || postList.value.length === 0) {
+        common_vendor.index.__f__("log", "at pages/home/home.vue:235", "触发刷新: 首次加载或登录状态变更");
+        loggedInUserId.value = currentUserId;
+        isLogin.value = currentUserIsLogin;
+        getBusinessOpportunitiesList(true);
+        isInitialLoad.value = false;
+      } else {
+        common_vendor.index.__f__("log", "at pages/home/home.vue:247", "从详情页返回，不刷新列表，保持滚动位置。");
+      }
       common_vendor.index.showShareMenu({
         withShareTicket: true,
         menus: ["shareAppMessage", "shareTimeline"]
@@ -81,6 +98,10 @@ const _sfc_main = {
         imageUrl: "https://img.gofor.club/logo_share.jpg"
       };
     });
+    const handlePostUpdate = () => {
+      common_vendor.index.__f__("log", "at pages/home/home.vue:309", "接收到 postUpdated 通知，强制刷新首页列表...");
+      getBusinessOpportunitiesList(true);
+    };
     const getBusinessOpportunitiesList = async (isRefresh = false) => {
       if (loadingStatus.value === "loading" && !isRefresh)
         return;
@@ -164,7 +185,7 @@ const _sfc_main = {
           pageNo.value++;
         }
       } catch (err) {
-        common_vendor.index.__f__("error", "at pages/home/home.vue:361", "getBusinessOpportunitiesList 逻辑异常:", err);
+        common_vendor.index.__f__("error", "at pages/home/home.vue:403", "getBusinessOpportunitiesList 逻辑异常:", err);
         loadingStatus.value = "more";
         common_vendor.index.showToast({
           title: "页面逻辑异常，请稍后重试",
@@ -249,6 +270,12 @@ const _sfc_main = {
         post.userAction = clickedAction;
       }
       try {
+        let apiActionToSend;
+        if (originalAction === clickedAction) {
+          apiActionToSend = "cancel";
+        } else {
+          apiActionToSend = clickedAction;
+        }
         const {
           error
         } = await utils_request.request("/app-api/member/like-action/add", {
@@ -256,7 +283,8 @@ const _sfc_main = {
           data: {
             targetId: post.id,
             targetType: "post",
-            action: post.userAction
+            action: apiActionToSend
+            // 【关键】使用新的变量
           }
         });
         if (error) {
@@ -264,7 +292,7 @@ const _sfc_main = {
           post.likes = originalLikes;
           post.dislikes = originalDislikes;
           common_vendor.index.showToast({
-            title: "操作失败",
+            title: `操作失败: ${error}`,
             icon: "none"
           });
         }
@@ -463,7 +491,7 @@ const _sfc_main = {
           });
         },
         fail: (err) => {
-          common_vendor.index.__f__("error", "at pages/home/home.vue:698", "setClipboardData failed:", err);
+          common_vendor.index.__f__("error", "at pages/home/home.vue:751", "setClipboardData failed:", err);
           common_vendor.index.showToast({
             title: "复制失败",
             icon: "none"

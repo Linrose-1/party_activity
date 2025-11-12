@@ -11,7 +11,7 @@
 					<view class="smart-rice-value">{{ userInfo.point }} 智米</view>
 				</view>
 				<view class="smart-rice-info">
-					<p>智米是平台内的通用积分，可用于兑换平台内指定的虚拟服务或实体商品。</p>
+					<p>智米是平台内的通用积分，可用于兑换平台内指定的服务或商品。</p>
 				</view>
 				<view class="smart-rice-actions">
 					<button class="action-button exchange-button" @click="handleExchangeSmartRice">

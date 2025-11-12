@@ -21,9 +21,9 @@
 		<template v-else-if="userInfo">
 			<view class="card-header">
 				<view class="header-title">
-					{{ isViewingOwnCard ? '我的个人名片' : 'Ta 的个人名片' }}
+					{{ isViewingOwnCard ? '我的数字名片' : 'TA的数字名片' }}
 				</view>
-				<view class="header-subtitle">专业形象，随时分享</view>
+				<view class="header-subtitle">实时身份，及时连接！</view>
 			</view>
 
 			<MyCard :avatar="userInfo.avatar" :name="userInfo.realName || userInfo.nickname"
@@ -179,8 +179,12 @@
 			await fetchPromotionQrCode();
 
 		} catch (err) {
-			errorMsg.value = err.message || '加载失败，请稍后重试';
-			console.error('页面初始化失败:', err);
+			// 现在这里捕获的错误会更准确
+			console.error('页面初始化失败:', err.message);
+			// 只把需要给用户看的消息赋值给 errorMsg
+			if (err.message !== '权限不足，已引导至申请页。') {
+				errorMsg.value = err.message || '加载失败，请稍后重试';
+			}
 		} finally {
 			isLoading.value = false;
 		}
@@ -329,21 +333,36 @@
 			data: requestData
 		});
 		if (error) {
-			// 【关键逻辑】如果出错，且不是查看自己的卡片，则跳转到申请页
+			// 如果是查看他人名片时出错
 			if (!isViewingOwnCard.value) {
-				uni.redirectTo({
-					url: `/pages/business-card-apply/business-card-apply?id=${userId}&name=${encodeURIComponent('目标用户')}&fromShare=${fromShare.value ? '1' : '0'}`
-					// 注意：这里可能没有用户信息，所以name只能用一个占位符，或者尝试从缓存获取。
-					// 更优化的方案是在跳转前先请求一个简单的用户信息接口。
-					// 但根据现有代码，我们直接跳转。
+				// 使用 uni.showModal 来显示支持换行的长文本
+				uni.showModal({
+					title: '温馨提示',
+					// 【关键】在这里使用 \n 实现换行
+					content: '请点击左上角的“屋子”图标，\n到“猩世界”注册或登陆，\n体验“猩聚社”商友社交工具!',
+					showCancel: false, // 只保留一个“确定”按钮
+					confirmText: '我知道了',
+					success: (res) => {
+						// 当用户点击“我知道了”后，再执行页面跳转
+						if (res.confirm) {
+							uni.redirectTo({
+								url: `/pages/business-card-apply/business-card-apply?id=${userId}&name=${encodeURIComponent('目标用户')}&fromShare=${fromShare.value ? '1' : '0'}`
+							});
+						}
+					}
 				});
-				// 抛出一个特定错误，避免在当前页面显示错误信息
-				throw new Error('请点击左上角的“屋子”图标，注册或登陆，即可完美体验“猩聚社”商友社交工具！');
-			} else {
-				// 如果是查看自己的卡片出错，则正常抛出错误
+				// 【重要】返回一个 Promise.reject，让外层 catch 知道这里出错了，
+				// 并且不再继续执行后面的 userInfo.value 赋值等操作。
+				// 抛出的消息仅用于控制台调试。
+				return Promise.reject(new Error('权限不足，已引导至申请页。'));
+			}
+			// 如果是查看自己的卡片出错，则正常抛出错误让页面显示
+			else {
 				throw new Error(error);
 			}
 		}
+
+		// 如果没有错误，正常返回数据
 		return data;
 	};
 

@@ -22,7 +22,7 @@ const _sfc_main = {
     }));
     const themeColor = common_vendor.ref("#FF6E00");
     const currentTab = common_vendor.ref(0);
-    const tabItems = ["我邀请的人", "我的邀请人"];
+    const tabItems = ["我的邀请人", "我邀请的人"];
     const friendList = common_vendor.ref([]);
     const pageNo = common_vendor.ref(1);
     const pageSize = common_vendor.ref(10);
@@ -31,21 +31,26 @@ const _sfc_main = {
     const isFollowActionInProgress = common_vendor.ref(false);
     const userInfo = common_vendor.ref(null);
     common_vendor.onMounted(() => {
-      getShareUserList(true);
-      fetchUserInfo();
+      initializePage();
     });
     common_vendor.onPullDownRefresh(() => {
-      if (currentTab.value === 0) {
+      if (currentTab.value === 1) {
         getShareUserList(true);
       } else {
         fetchUserInfo().finally(() => common_vendor.index.stopPullDownRefresh());
       }
     });
     common_vendor.onReachBottom(() => {
-      if (currentTab.value === 0) {
+      if (currentTab.value === 1) {
         getShareUserList();
       }
     });
+    const initializePage = async () => {
+      const fetchListPromise = getShareUserList(true);
+      const fetchInfoPromise = fetchUserInfo();
+      await Promise.all([fetchListPromise, fetchInfoPromise]);
+      common_vendor.index.stopPullDownRefresh();
+    };
     const handleTabClick = (e) => {
       currentTab.value = e.currentIndex;
     };
@@ -76,8 +81,6 @@ const _sfc_main = {
           pageSize: pageSize.value
         }
       });
-      if (isRefresh)
-        common_vendor.index.stopPullDownRefresh();
       if (error) {
         loadStatus.value = "more";
         return;
@@ -156,10 +159,19 @@ const _sfc_main = {
       const name = user.nickname || user.realName || "匿名用户";
       const avatarUrl = user.avatar || defaultAvatar;
       const url = `/pages/applicationBusinessCard/applicationBusinessCard?id=${user.id}&name=${encodeURIComponent(name)}&avatar=${encodeURIComponent(avatarUrl)}&fromShare=1`;
-      common_vendor.index.__f__("log", "at packages/my-friendInvitation/my-friendInvitation.vue:264", "从推荐商友页跳转到名片申请页, URL:", url);
+      common_vendor.index.__f__("log", "at packages/my-friendInvitation/my-friendInvitation.vue:305", "从推荐商友页跳转到名片申请页, URL:", url);
       common_vendor.index.navigateTo({
         url
       });
+    };
+    const formatTimestamp = (timestamp) => {
+      if (!timestamp)
+        return "";
+      const date = new Date(timestamp);
+      const Y = date.getFullYear();
+      const M = (date.getMonth() + 1).toString().padStart(2, "0");
+      const D = date.getDate().toString().padStart(2, "0");
+      return `${Y}-${M}-${D}`;
     };
     return (_ctx, _cache) => {
       return common_vendor.e({
@@ -171,17 +183,29 @@ const _sfc_main = {
           ["active-color"]: "#FF6B00"
         }),
         c: common_vendor.f(friendList.value, (friend, k0, i0) => {
-          return {
+          return common_vendor.e({
             a: friend.avatar || "/static/images/default-avatar.png",
             b: common_vendor.t(friend.nickname || friend.realName || "匿名用户"),
-            c: "a29497fd-1-" + i0,
-            d: common_vendor.t(friend.companyName || "暂无公司信息"),
-            e: common_vendor.t(friend.followFlag === 1 ? "取关" : "关注"),
-            f: friend.followFlag === 1 ? 1 : "",
-            g: common_vendor.o(($event) => handleFollowAction(friend), friend.id),
-            h: friend.id,
-            i: common_vendor.o(($event) => navigateToBusinessCard(friend), friend.id)
-          };
+            c: friend.fellowTownspeopleCityFlag === 1 || friend.peerFlag === 1 || friend.classmateFlag === 1
+          }, friend.fellowTownspeopleCityFlag === 1 || friend.peerFlag === 1 || friend.classmateFlag === 1 ? common_vendor.e({
+            d: friend.fellowTownspeopleCityFlag === 1
+          }, friend.fellowTownspeopleCityFlag === 1 ? {} : {}, {
+            e: friend.peerFlag === 1
+          }, friend.peerFlag === 1 ? {} : {}, {
+            f: friend.classmateFlag === 1
+          }, friend.classmateFlag === 1 ? {} : {}) : {}, {
+            g: "a29497fd-1-" + i0,
+            h: common_vendor.t(friend.companyName || "暂无公司信息"),
+            i: common_vendor.t(friend.followFlag === 1 ? "取关" : "关注"),
+            j: friend.followFlag === 1 ? 1 : "",
+            k: common_vendor.o(($event) => handleFollowAction(friend), friend.id),
+            l: friend.followTime
+          }, friend.followTime ? {
+            m: common_vendor.t(formatTimestamp(friend.followTime))
+          } : {}, {
+            n: friend.id,
+            o: common_vendor.o(($event) => navigateToBusinessCard(friend), friend.id)
+          });
         }),
         d: common_vendor.p({
           type: "briefcase-filled",
@@ -198,7 +222,7 @@ const _sfc_main = {
       }, friendList.value.length === 0 && loadStatus.value === "noMore" ? {
         h: common_assets._imports_0$3
       } : {}, {
-        i: currentTab.value === 0,
+        i: currentTab.value === 1,
         j: userInfo.value && userInfo.value.parentName
       }, userInfo.value && userInfo.value.parentName ? common_vendor.e({
         k: userInfo.value.parentAvatar
@@ -211,7 +235,7 @@ const _sfc_main = {
       }) : {
         o: common_assets._imports_1
       }, {
-        p: currentTab.value === 1,
+        p: currentTab.value === 0,
         q: common_vendor.s(_ctx.__cssVars())
       });
     };

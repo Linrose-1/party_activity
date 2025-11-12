@@ -73,6 +73,9 @@
 	} from '@dcloudio/uni-app';
 	import request from '../../utils/request.js';
 	import uploadFile from '../../utils/upload.js';
+	import {
+		getInviteCode
+	} from '../../utils/user.js';
 
 	// --- 1. 状态管理 ---
 	const loginCode = ref(''); // uni.login 获取的登录凭证
@@ -82,6 +85,9 @@
 	const inviteCode = ref(''); // 邀请码
 	const agreed = ref(false); // 是否同意协议
 
+	// 【新增】用于存储从上游分享链接中捕获到的邀请码
+	const upstreamInviteCode = ref('');
+
 	// --- 2. 计算属性 ---
 	const isLoginDisabled = computed(() => {
 		// 登录按钮的可用条件：已授权手机号、已填写昵称、已同意协议
@@ -90,16 +96,46 @@
 	});
 
 	// --- 3. 生命周期钩子 ---
-	onLoad(() => {
-		// 页面加载时，预先获取登录凭证 code
+	// onLoad(() => {
+	// 	// 页面加载时，预先获取登录凭证 code
+	// 	getLoginCode();
+
+	// 	// 检查并自动填充通过分享链接带来的邀请码
+	// 	const pendingInviteCode = uni.getStorageSync('pendingInviteCode');
+	// 	if (pendingInviteCode) {
+	// 		console.log('✅ [登录页] 读取到暂存的邀请码:', pendingInviteCode);
+	// 		inviteCode.value = pendingInviteCode;
+	// 		uni.removeStorageSync('pendingInviteCode');
+	// 	}
+	// });
+	onLoad((options) => {
 		getLoginCode();
 
-		// 检查并自动填充通过分享链接带来的邀请码
-		const pendingInviteCode = uni.getStorageSync('pendingInviteCode');
-		if (pendingInviteCode) {
-			console.log('✅ [登录页] 读取到暂存的邀请码:', pendingInviteCode);
-			inviteCode.value = pendingInviteCode;
+		// 【核心修改】检查并处理传入的邀请码
+		// 优先级：URL参数 > 本地缓存的pendingInviteCode
+		const codeFromUrl = options?.inviteCode;
+		const codeFromStorage = uni.getStorageSync('pendingInviteCode');
+
+		let finalInviteCode = '';
+
+		if (codeFromUrl) {
+			console.log('✅ [登录页] 从 URL 参数中捕获到邀请码:', codeFromUrl);
+			finalInviteCode = codeFromUrl;
+			// 如果 URL 有，就不用 storage 里的了，并把它清除
+			if (codeFromStorage) {
+				uni.removeStorageSync('pendingInviteCode');
+			}
+		} else if (codeFromStorage) {
+			console.log('✅ [登录页] 从本地缓存读取到暂存的邀请码:', codeFromStorage);
+			finalInviteCode = codeFromStorage;
 			uni.removeStorageSync('pendingInviteCode');
+		}
+
+		if (finalInviteCode) {
+			// 1. 填充输入框，供用户注册使用
+			inviteCode.value = finalInviteCode;
+			// 2. 存入页面级变量，供本页再次分享时使用
+			upstreamInviteCode.value = finalInviteCode;
 		}
 	});
 
@@ -391,18 +427,30 @@
 	onShareAppMessage(() => {
 		console.log('[分享] 用户在登录页发起了分享');
 
-		// 因为用户此时未登录，所以不携带任何邀请码
-		// 这是一个通用的应用推荐分享
+		// 【核心逻辑】决定使用哪个邀请码
+		// 1. 优先使用从上游分享链接中捕获到的邀请码 (实现了邀请关系传递)
+		// 2. 如果没有上游邀请码，再尝试获取当前可能已登录用户的邀请码（虽然在登录页不太可能，但作为兜底逻辑）
+		// 3. 如果都没有，则不带邀请码（或者可以设置一个官方码作为最终兜底）
+		const finalInviteCode = upstreamInviteCode.value || getInviteCode();
+
+		console.log(`[分享] 登录页最终使用的邀请码: ${finalInviteCode}`);
+
+		let sharePath = '/pages/index/index'; // 分享的目标页面
+		if (finalInviteCode) {
+			sharePath += `?inviteCode=${finalInviteCode}`;
+		}
+
 		const shareContent = {
-			title: '猩聚社 - 链接商机，共创未来，快来加入我们！', // 通用推荐文案
-			path: '/pages/login/login', // 直接分享到登录页，请确保路径正确
-			imageUrl: 'https://img.gofor.club/logo.png' // 使用应用的Logo作为封面
+			title: '猩聚社 - 链接商机，共创未来，快来加入我们！',
+			path: sharePath,
+			imageUrl: 'https://img.gofor.club/logo_share.jpg'
 		};
 
-		console.log('[分享] 分享给好友的内容:', JSON.stringify(shareContent));
+		console.log('[分享] 登录页分享给好友的内容:', JSON.stringify(shareContent));
 
 		return shareContent;
 	});
+
 
 
 	/**
@@ -411,14 +459,21 @@
 	onShareTimeline(() => {
 		console.log('[分享] 用户在登录页分享到朋友圈');
 
-		// 同样，不携带任何邀请码
+		const finalInviteCode = upstreamInviteCode.value || getInviteCode();
+		console.log(`[分享] 登录页朋友圈分享最终使用的邀请码: ${finalInviteCode}`);
+
+		let queryString = '';
+		if (finalInviteCode) {
+			queryString = `inviteCode=${finalInviteCode}`;
+		}
+
 		const shareContent = {
 			title: '猩聚社 - 链接商机，共创未来，快来加入我们！',
-			query: '', // 朋友圈分享不带参数
-			imageUrl: 'https://img.gofor.club/logo.png'
+			query: queryString,
+			imageUrl: 'https://img.gofor.club/logo_share.jpg'
 		};
 
-		console.log('[分享] 分享到朋友圈的内容:', JSON.stringify(shareContent));
+		console.log('[分享] 登录页分享到朋友圈的内容:', JSON.stringify(shareContent));
 
 		return shareContent;
 	});

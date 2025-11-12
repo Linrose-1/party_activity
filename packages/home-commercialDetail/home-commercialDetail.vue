@@ -1,7 +1,7 @@
 <template>
 	<view class="business-opportunity-detail-app">
 		<view class="container">
-			<!-- 商机卡片 (保持不变) -->
+			<!-- 商机卡片 -->
 			<view class="opportunity-card">
 				<!-- ... 此处省略商机卡片的所有内容，保持原样即可 ... -->
 				<view class="author-info">
@@ -194,12 +194,15 @@
 		onLoad,
 		onReady,
 		onShareAppMessage,
-		onShareTimeline
+		onShareTimeline,
+		onBackPress
 	} from '@dcloudio/uni-app';
 	import request from '../../utils/request.js';
 	import {
 		getInviteCode
 	} from '../../utils/user.js';
+
+	const hasDataChanged = ref(false);
 
 	const isLoading = ref(true);
 	const postId = ref(null);
@@ -330,6 +333,18 @@
 		// 页面卸载时，取消监听，避免内存泄漏
 		uni.offKeyboardHeightChange();
 	});
+	
+	/**
+	 * 监听物理返回键或左上角返回按钮
+	 * 这是发出通知的最佳时机
+	 */
+	onBackPress((options) => {
+	    if (hasDataChanged.value) {
+	        console.log('详情页数据已变更，发出通知: postUpdated');
+	        uni.$emit('postUpdated');
+	    }
+	});
+
 
 	// 【新增】打开分享弹窗的方法
 	const openSharePopup = () => {
@@ -419,7 +434,7 @@
 		return {
 			title: finalTitle,
 			path: sharePath, // 使用拼接后的路径
-			imageUrl: postDetail.images.length > 0 ? postDetail.images[0] : '/static/logo.png'
+			imageUrl: postDetail.images.length > 0 ? postDetail.images[0] : 'https://img.gofor.club/logo_share.jpg'
 		};
 	});
 
@@ -437,7 +452,8 @@
 		const inviteCode = getInviteCode();
 
 		// 2. 封面图片逻辑
-		const finalImageUrl = postDetail.images.length > 0 ? postDetail.images[0] : '/static/logo.png';
+		const finalImageUrl = postDetail.images.length > 0 ? postDetail.images[0] :
+			'https://img.gofor.club/logo_share.jpg';
 
 		// 3. 【核心修改】在 query 中添加 sharerId 和 inviteCode 参数
 		let queryString = `id=${postDetail.id}&from=timeline`;
@@ -648,64 +664,130 @@
 
 
 	// ==================== 核心修改点: 完善 toggleAction (点赞/点踩) 方法 ====================
-	const toggleAction = async (item, clickedAction) => {
-		if (isActionInProgress.value) return; // 防止重复点击
-		if (!loggedInUserId.value) {
-			uni.showToast({
-				title: '请先登录',
-				icon: 'none'
-			});
-			return;
+	const toggleAction = async (post, clickedAction) => {
+		if (isActionInProgress.value) return;
+		isActionInProgress.value = true;
+
+		// 1. 备份原始状态，用于请求失败时回滚
+		const originalAction = post.userAction;
+		const originalLikes = post.likes;
+		const originalDislikes = post.dislikes;
+
+		// 2. 乐观更新UI (与首页完全一致)
+		if (post.userAction === clickedAction) {
+			post.userAction = null;
+			if (clickedAction === 'like') post.likes--;
+			else post.dislikes--;
+		} else {
+			if (clickedAction === 'like') {
+				post.likes++;
+				if (originalAction === 'dislike') post.dislikes--;
+			} else {
+				post.dislikes++;
+				if (originalAction === 'like') post.likes--;
+			}
+			post.userAction = clickedAction;
 		}
 
-		isActionInProgress.value = true;
-		uni.showLoading({
-			title: '请稍候...'
-		});
-
-		// 决定要发送给API的action值
-		// 如果再次点击已激活的按钮，则取消（发送空字符串）
-		// 否则，设置为新点击的action
-		const apiActionToSend = item.userAction === clickedAction ? '' : clickedAction;
-
 		try {
-			const requestData = {
-				userId: loggedInUserId.value,
-				targetId: item.id, // 目标是商机的ID
-				targetType: 'post', // 类型是post
-				action: apiActionToSend, // 发送 'like', 'dislike', 或 ''
-			};
-
-			console.log('点赞/踩/取消 操作, 请求:', requestData);
-
-			const result = await request('/app-api/member/like-action/add', {
+			// 3. 向后端发送请求，action 值始终是 'like' 或 'dislike'
+			const {
+				error
+			} = await request('/app-api/member/like-action/add', {
 				method: 'POST',
-				data: requestData,
+				data: {
+					targetId: post.id,
+					targetType: 'post',
+					action: clickedAction,
+				},
 			});
+			if (!error) {
+				hasDataChanged.value = true; // 操作成功，标记数据已变
+			}
 
-			if (result && result.error) {
+			// 4. 如果API返回错误，则回滚UI
+			if (error) {
+				post.userAction = originalAction;
+				post.likes = originalLikes;
+				post.dislikes = originalDislikes;
 				uni.showToast({
-					title: '操作失败',
+					title: `操作失败: ${error}`,
 					icon: 'none'
 				});
 			}
+			// 如果成功，什么都不用做，因为UI已经是最新状态了
 
-		} catch (error) {
-			console.error("点赞/踩操作异常:", error);
+		} catch (err) {
+			// 5. 如果网络异常，同样回滚UI
+			post.userAction = originalAction;
+			post.likes = originalLikes;
+			post.dislikes = originalDislikes;
 			uni.showToast({
 				title: '操作失败，请重试',
 				icon: 'none'
 			});
 		} finally {
-			// 无论成功与否，都关闭loading，然后刷新详情页数据以同步UI
-			uni.hideLoading();
-			await getBusinessOpportunitiesDetail();
-			isActionInProgress.value = false; // 解锁
+			// 6. 解锁
+			isActionInProgress.value = false;
 		}
 	};
+	// const toggleAction = async (item, clickedAction) => {
+	// 	if (isActionInProgress.value) return; // 防止重复点击
+	// 	if (!loggedInUserId.value) {
+	// 		uni.showToast({
+	// 			title: '请先登录',
+	// 			icon: 'none'
+	// 		});
+	// 		return;
+	// 	}
+
+	// 	isActionInProgress.value = true;
+	// 	// uni.showLoading({
+	// 	// 	title: '请稍候...'
+	// 	// });
+
+	// 	// 决定要发送给API的action值
+	// 	// 如果再次点击已激活的按钮，则取消（发送空字符串）
+	// 	// 否则，设置为新点击的action
+	// 	// const apiActionToSend = item.userAction === clickedAction ? '' : clickedAction;
+
+	// 	try {
+	// 		const requestData = {
+	// 			userId: loggedInUserId.value,
+	// 			targetId: item.id, // 目标是商机的ID
+	// 			targetType: 'post', // 类型是post
+	// 			action: clickedAction,
+	// 		};
+
+	// 		console.log('点赞/踩/取消 操作, 请求:', requestData);
+
+	// 		const result = await request('/app-api/member/like-action/add', {
+	// 			method: 'POST',
+	// 			data: requestData,
+	// 		});
+
+	// 		if (result && result.error) {
+	// 			uni.showToast({
+	// 				title: '速度过快,操作失败',
+	// 				icon: 'none'
+	// 			});
+	// 		}
+
+	// 	} catch (error) {
+	// 		console.error("点赞/踩操作异常:", error);
+	// 		uni.showToast({
+	// 			title: '操作失败，请重试',
+	// 			icon: 'none'
+	// 		});
+	// 	} finally {
+	// 		// 无论成功与否，都关闭loading，然后刷新详情页数据以同步UI
+	// 		// uni.hideLoading();
+	// 		await getBusinessOpportunitiesDetail();
+	// 		isActionInProgress.value = false; // 解锁
+	// 	}
+	// };
 
 	// ==================== 关注/取消关注用户 ====================
-	// ==================== 关注/取消关注用户 (已修正为乐观UI更新) ====================
 	const toggleFollow = async (post) => {
 		if (isActionInProgress.value) return;
 		if (!loggedInUserId.value) {
@@ -740,6 +822,9 @@
 				method: 'POST',
 				data: requestData
 			});
+			if (!error) {
+				hasDataChanged.value = true; // 操作成功，标记数据已变
+			}
 
 			// 4. 处理API返回结果
 			if (result && result.error) {
@@ -772,7 +857,6 @@
 
 
 	// ==================== 收藏/取消收藏商机 ====================
-	// ==================== 收藏/取消收藏商机 (已修正为乐观UI更新) ====================
 	const toggleBookmark = async (post) => {
 		if (isActionInProgress.value) return;
 		if (!loggedInUserId.value) {
@@ -808,6 +892,10 @@
 				data: requestData
 			});
 			console.log("触发收藏", result)
+			
+			if (!error) {
+				hasDataChanged.value = true; // 操作成功，标记数据已变
+			}
 
 			// 4. 处理API返回结果
 			if (result && result.error) {
@@ -962,6 +1050,8 @@
 		copyMenu.show = false;
 		copyMenu.text = ''; // 清空文本
 	};
+	
+	
 </script>
 
 <style scoped>

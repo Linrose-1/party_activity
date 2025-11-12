@@ -269,7 +269,7 @@
 		width: 100%;
 		/* 建议给视频一个最大高度，防止视频比例过高导致页面过长 */
 		/* max-height: 400rpx; */
-		aspect-ratio: 16 / 9; 
+		aspect-ratio: 16 / 9;
 		border-radius: 12rpx;
 		overflow: hidden;
 		margin-top: 30rpx;

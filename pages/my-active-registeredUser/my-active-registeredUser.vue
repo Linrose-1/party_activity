@@ -36,15 +36,17 @@
 					</view>
 
 					<!-- 卡片中部: 付款凭证 -->
-					<view v-if="item.paymentScreenshotUrl" class="payment-proof">
-						<text class="proof-label">付款凭证:</text>
-						<image class="proof-image" :src="item.paymentScreenshotUrl" mode="aspectFit"
-							@click="previewImage(item.paymentScreenshotUrl)"></image>
-					</view>
-					<view v-else class="payment-proof-empty">
-						<text>暂未上传付款凭证</text>
-					</view>
-					
+					<template v-if="activityInfo.registrationFee > 0">
+						<view v-if="item.paymentScreenshotUrl" class="payment-proof">
+							<text class="proof-label">付款凭证:</text>
+							<image class="proof-image" :src="item.paymentScreenshotUrl" mode="aspectFit"
+								@click="previewImage(item.paymentScreenshotUrl)"></image>
+						</view>
+						<view v-else class="payment-proof-empty">
+							<text>暂未上传付款凭证</text>
+						</view>
+					</template>
+
 					<!-- 【新增】驳回原因显示 -->
 					<view v-if="item.rejectMsg" class="rejection-reason">
 						<uni-icons type="info-filled" size="16" color="#f56c6c"></uni-icons>
@@ -295,15 +297,18 @@
 		height: 100vh;
 		background-color: #f5f7fa;
 	}
+
 	.activity-header-card {
 		background-color: #fff;
 		padding: 24rpx 30rpx;
 		margin-bottom: 20rpx;
 		box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+
 		.header-title-row {
 			display: flex;
 			align-items: center;
 			margin-bottom: 20rpx;
+
 			.header-title {
 				font-size: 32rpx;
 				font-weight: 600;
@@ -316,26 +321,32 @@
 				-webkit-box-orient: vertical;
 			}
 		}
+
 		.header-info-row {
 			display: flex;
 			align-items: center;
 			font-size: 26rpx;
 			color: #606266;
+
 			&:not(:last-child) {
 				margin-bottom: 12rpx;
 			}
+
 			.info-text {
 				margin-left: 12rpx;
 			}
 		}
 	}
+
 	.user-list-scroll {
 		flex: 1;
 		height: 1px;
 	}
+
 	.user-list {
 		padding: 0 24rpx 24rpx;
 	}
+
 	.user-card,
 	.empty-state {
 		background-color: #fff;
@@ -344,12 +355,14 @@
 		padding: 30rpx;
 		box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.06);
 	}
+
 	.card-header {
 		display: flex;
 		align-items: center;
 		padding-bottom: 24rpx;
 		border-bottom: 1rpx solid #f0f2f5;
 	}
+
 	.avatar {
 		width: 90rpx;
 		height: 90rpx;
@@ -358,12 +371,14 @@
 		background-color: #eee;
 		flex-shrink: 0;
 	}
+
 	.user-info {
 		flex: 1;
 		display: flex;
 		flex-direction: column;
 		min-width: 0;
 	}
+
 	.nickname {
 		font-size: 30rpx;
 		font-weight: 600;
@@ -372,11 +387,13 @@
 		overflow: hidden;
 		text-overflow: ellipsis;
 	}
+
 	.time {
 		font-size: 24rpx;
 		color: #909399;
 		margin-top: 8rpx;
 	}
+
 	.status-tag {
 		font-size: 24rpx;
 		padding: 8rpx 16rpx;
@@ -384,35 +401,42 @@
 		white-space: nowrap;
 		font-weight: 500;
 		margin-left: 16rpx;
+
 		&.status-pending {
 			background-color: #fdf6ec;
 			color: #FF7900;
 		}
+
 		&.status-confirmed {
 			background-color: #f0f9eb;
 			color: #67c23a;
 		}
+
 		&.status-rejected,
 		&.status-refunded {
 			background-color: #fef0f0;
 			color: #f56c6c;
 		}
+
 		&.status-substitute,
 		&.status-default {
 			background-color: #f4f4f5;
 			color: #909399;
 		}
 	}
+
 	.payment-proof {
 		padding: 24rpx 0;
 		display: flex;
 		align-items: flex-start;
+
 		.proof-label {
 			font-size: 28rpx;
 			color: #606266;
 			margin-right: 20rpx;
 			line-height: 1.5;
 		}
+
 		.proof-image {
 			width: 160rpx;
 			height: 160rpx;
@@ -420,11 +444,13 @@
 			background-color: #f5f5f5;
 			border: 1rpx solid #eee;
 			transition: transform 0.2s;
+
 			&:active {
 				transform: scale(0.95);
 			}
 		}
 	}
+
 	.payment-proof-empty {
 		padding: 40rpx 0;
 		font-size: 28rpx;
@@ -465,6 +491,7 @@
 		margin-top: 20rpx; // 调整与上方内容的间距
 		border-top: 1rpx solid #f0f2f5;
 	}
+
 	.btn {
 		margin: 0;
 		padding: 0 32rpx;
@@ -474,20 +501,24 @@
 		font-size: 26rpx;
 		font-weight: 500;
 		border: 1px solid transparent;
+
 		&::after {
 			border: none;
 		}
+
 		&-reject {
 			background-color: #fff;
 			color: #f56c6c;
 			border-color: #f56c6c;
 		}
+
 		&-confirm {
 			background: linear-gradient(135deg, #FF9500, #FF7900);
 			color: #fff;
 			border: none;
 		}
 	}
+
 	.empty-state {
 		display: flex;
 		flex-direction: column;
@@ -497,10 +528,12 @@
 		color: #909399;
 		margin: 0 24rpx;
 	}
+
 	.empty-text {
 		font-size: 28rpx;
 		margin-top: 20rpx;
 	}
+
 	.loading-more {
 		padding: 20rpx 0;
 	}

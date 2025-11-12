@@ -83,6 +83,7 @@
 		align-items: center;
 		/* 【新增】确保父容器也能处理溢出 */
 		overflow: hidden;
+		gap: 10rpx;
 }
 
 	/* 【新增】专门为昵称文本添加截断样式 */
@@ -100,9 +101,16 @@
 		color: #8a6d00;
 		padding: 6rpx 14rpx;
 		border-radius: 20rpx;
-		margin-left: 10rpx;
+		/* margin-left: 10rpx; */
 		font-size: 22rpx;
 		flex-shrink: 0;
+		white-space: nowrap;
+}
+.social-badge.data-v-2f1ef635 {
+		background: #e0f2fe;
+		/* 一个柔和的蓝色 */
+		color: #0c5494;
+		/* 深蓝色文字 */
 }
 .user-title.data-v-2f1ef635,
 	.user-company.data-v-2f1ef635 {

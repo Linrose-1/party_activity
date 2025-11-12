@@ -27,6 +27,13 @@
 		<uni-collapse>
 			<uni-collapse-item title="聚会筛选" :open="true" class="collapse-title">
 				<view class="filters">
+					<view class="filter-header">
+						<button class="reset-btn register-btn" size="mini" @click="resetFilters">
+							<!-- <uni-icons type="refresh" size="14" color="#666"></uni-icons> -->
+							重置筛选
+						</button>
+					</view>
+
 					<!-- 选择类型 -->
 					<view class="uni-list">
 						<view class="uni-list-cell">
@@ -358,6 +365,28 @@
 
 	// --- 事件处理器 ---
 
+	const resetFilters = () => {
+		console.log('--- 重置所有筛选条件 ---');
+
+		// 1. 重置所有筛选相关的状态变量
+		searchKeyword.value = ''; // 清空搜索框
+		typeIndex.value = 0; // 类型重置为“全部类型”
+		selectedCategory.value = ''; // 类型值重置为空
+		statusIndex.value = 0; // 状态重置为“全部状态”
+		selectedLocationInfo.value = null; // 位置信息重置为 null
+
+		// 2. 给出用户反馈
+		uni.showToast({
+			title: '筛选已重置',
+			icon: 'none'
+		});
+
+		// 3. 【重要】不需要手动调用 getActiveList()
+		// 因为上面的状态变量变化会被 watch 监听器捕捉到，
+		// watch 会自动触发 getActiveList(false) 来刷新列表。
+		// 这也是您现有代码设计的优点！
+	};
+
 	// 类型选择器改变
 	const bindTypePickerChange = (e) => {
 		const newIndex = Number(e.detail.value);
@@ -635,9 +664,41 @@
 	}
 
 	.filters {
-		padding: 24rpx 32rpx;
+		padding: 0 32rpx;
 		background: white;
 		border-bottom: 2rpx solid #eee;
+	}
+
+	.filter-header {
+		display: flex;
+		justify-content: flex-end;
+		/* 让内部元素靠右对齐 */
+		margin-bottom: 20rpx;
+		/* 与下方的筛选器拉开一点距离 */
+	}
+
+	.reset-btn {
+		background-color: #f0f0f0;
+		color: #666;
+		border: 1rpx solid #e0e0e0;
+		padding: 8rpx 20rpx;
+		font-size: 24rpx;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		line-height: 1; // 确保文字和图标垂直居中
+		margin: 0; 
+		margin-right: 40rpx;
+
+		// 消除按钮默认边框
+		&::after {
+			border: none;
+		}
+
+		// 给图标和文字之间一点间距
+		.uni-icons {
+			margin-right: 8rpx;
+		}
 	}
 
 	.uni-list {

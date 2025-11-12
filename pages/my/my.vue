@@ -28,6 +28,9 @@
 								<text class="nickname-text">{{ userInfo.nickname || '未设置昵称' }}</text>
 								<text class="badge"
 									v-if="userInfo.topUpLevel && userInfo.topUpLevel.name">{{ userInfo.topUpLevel.name }}</text>
+								<text class="badge social-badge" v-if="userInfo.level && userInfo.level.name">
+									{{ userInfo.level.name }}
+								</text>
 							</view>
 							<view v-if="userInfo.nickname === '微信用户'" class="edit-prompt-tip" @click="onEdit">
 								点击设置个性化昵称 >
@@ -454,10 +457,10 @@
 		}, // 新增
 		// 第 5 行
 		{
-			name: '精准投放',
-			desc: '将商机、聚会、聚店等精准推送',
+			name: '邀请注册',
+			desc: '连接全球精英商友',
 			icon: '../../static/icon/精准投放.png',
-			path: null
+			path: '/pages/index/index'
 		}, // 新增
 		{
 			name: '资源匹配',
@@ -656,6 +659,7 @@
 		align-items: center;
 		/* 【新增】确保父容器也能处理溢出 */
 		overflow: hidden;
+		gap: 10rpx;
 	}
 
 	/* 【新增】专门为昵称文本添加截断样式 */
@@ -674,9 +678,17 @@
 		color: #8a6d00;
 		padding: 6rpx 14rpx;
 		border-radius: 20rpx;
-		margin-left: 10rpx;
+		/* margin-left: 10rpx; */
 		font-size: 22rpx;
 		flex-shrink: 0;
+		white-space: nowrap;
+	}
+
+	.social-badge {
+		background: #e0f2fe;
+		/* 一个柔和的蓝色 */
+		color: #0c5494;
+		/* 深蓝色文字 */
 	}
 
 	.user-title,

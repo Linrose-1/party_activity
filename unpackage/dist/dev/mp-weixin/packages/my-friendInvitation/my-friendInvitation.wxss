@@ -48,10 +48,43 @@
   flex-direction: column;
   gap: 12rpx;
 }
+.info-header.data-v-a29497fd {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
 .friend-name.data-v-a29497fd {
   font-size: 32rpx;
   font-weight: 600;
   color: #333;
+}
+.relation-tags.data-v-a29497fd {
+  display: flex;
+  gap: 10rpx;
+  flex-shrink: 0;
+  /* 防止标签被挤压 */
+}
+.tag.data-v-a29497fd {
+  font-size: 20rpx;
+  /* 可以适当调整大小 */
+  padding: 4rpx 12rpx;
+  border-radius: 6rpx;
+  font-weight: 500;
+}
+.fellow-townsman.data-v-a29497fd {
+  background-color: #e8f5e9;
+  color: #388e3c;
+  border: 1rpx solid #a5d6a7;
+}
+.peer.data-v-a29497fd {
+  background-color: #e3f2fd;
+  color: #1976d2;
+  border: 1rpx solid #90caf9;
+}
+.classmate.data-v-a29497fd {
+  background-color: #fff3e0;
+  color: #ef6c00;
+  border: 1rpx solid #ffcc80;
 }
 .friend-company.data-v-a29497fd {
   display: flex;
@@ -65,6 +98,16 @@
 .friend-company uni-icons.data-v-a29497fd {
   margin-right: 10rpx;
 }
+.action-area.data-v-a29497fd {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* 居中对齐 */
+  gap: 8rpx;
+  /* 按钮和时间之间的间距 */
+  margin-left: 20rpx;
+  flex-shrink: 0;
+}
 .follow-btn.data-v-a29497fd {
   background-color: var(--1b49c0b8);
   color: white;
@@ -74,11 +117,16 @@
   line-height: 60rpx;
   border-radius: 40rpx;
   font-size: 26rpx;
-  margin-left: 20rpx;
   flex-shrink: 0;
 }
 .follow-btn.data-v-a29497fd::after {
   border: none;
+}
+.invite-time.data-v-a29497fd {
+  font-size: 22rpx;
+  color: #999;
+  white-space: nowrap;
+  /* 防止换行 */
 }
 .follow-btn.followed.data-v-a29497fd {
   background: #f0f2f5;

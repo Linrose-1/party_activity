@@ -127,8 +127,15 @@ const _sfc_main = {
           });
           return;
         }
+        return;
       }
-      currentStep.value = 2;
+      if (activityDetail.value && activityDetail.value.registrationFee === 0) {
+        common_vendor.index.__f__("log", "at pages/active-enroll/active-enroll.vue:338", "免费活动，直接提交报名");
+        joinActivity();
+      } else {
+        common_vendor.index.__f__("log", "at pages/active-enroll/active-enroll.vue:342", "收费活动，进入支付步骤");
+        currentStep.value = 2;
+      }
     };
     const chooseImage = () => {
       common_vendor.index.chooseImage({
@@ -159,7 +166,7 @@ const _sfc_main = {
               icon: "success"
             });
           } else {
-            common_vendor.index.__f__("error", "at pages/active-enroll/active-enroll.vue:374", "上传失败:", result.error);
+            common_vendor.index.__f__("error", "at pages/active-enroll/active-enroll.vue:386", "上传失败:", result.error);
             common_vendor.index.showToast({
               title: result.error || "上传失败",
               icon: "none"
@@ -185,9 +192,9 @@ const _sfc_main = {
         common_vendor.index.hideLoading();
         if (result && !result.error) {
           const data = result.data;
-          common_vendor.index.__f__("log", "at pages/active-enroll/active-enroll.vue:405", "getActiveDetail result:", data);
-          if (data && data.memberActivityJoinResp) {
-            common_vendor.index.__f__("log", "at pages/active-enroll/active-enroll.vue:409", "用户已报名，直接跳转到成功页。");
+          common_vendor.index.__f__("log", "at pages/active-enroll/active-enroll.vue:417", "getActiveDetail result:", data);
+          if (data && data.memberActivityJoinResp && data.memberActivityJoinResp.paymentStatusStr) {
+            common_vendor.index.__f__("log", "at pages/active-enroll/active-enroll.vue:421", "用户已有效报名 (paymentStatusStr 存在)，直接跳转到成功页。");
             activityDetail.value = data;
             ticketNumber.value = generateTicketNumber();
             currentStep.value = 3;
@@ -195,12 +202,12 @@ const _sfc_main = {
             formData.userPhone = data.memberActivityJoinResp.userPhone || "";
             formData.paymentScreenshotUrl = data.memberActivityJoinResp.paymentScreenshotUrl || "";
           } else {
-            common_vendor.index.__f__("log", "at pages/active-enroll/active-enroll.vue:425", "用户未报名，进入正常报名流程。");
+            common_vendor.index.__f__("log", "at pages/active-enroll/active-enroll.vue:438", "用户未报名或报名状态无效，进入正常报名流程。");
             activityDetail.value = data;
             currentStep.value = 1;
           }
         } else {
-          common_vendor.index.__f__("log", "at pages/active-enroll/active-enroll.vue:431", "请求失败:", result ? result.error : "无返回结果");
+          common_vendor.index.__f__("log", "at pages/active-enroll/active-enroll.vue:444", "请求失败:", result ? result.error : "无返回结果");
           common_vendor.index.showToast({
             title: result.error || "获取聚会信息失败",
             icon: "none"
@@ -208,7 +215,7 @@ const _sfc_main = {
         }
       } catch (e) {
         common_vendor.index.hideLoading();
-        common_vendor.index.__f__("error", "at pages/active-enroll/active-enroll.vue:439", "获取聚会详情时发生异常:", e);
+        common_vendor.index.__f__("error", "at pages/active-enroll/active-enroll.vue:452", "获取聚会详情时发生异常:", e);
         common_vendor.index.showToast({
           title: "网络异常，请稍后重试",
           icon: "none"
@@ -216,19 +223,22 @@ const _sfc_main = {
       }
     };
     const joinActivity = async () => {
-      if (!formData.paymentScreenshotUrl) {
-        common_vendor.index.showToast({
-          title: "请上传付款截图",
-          icon: "none"
-        });
-        return;
-      }
-      if (!agreedToTerms.value) {
-        common_vendor.index.showToast({
-          title: "请先阅读并同意用户协议",
-          icon: "none"
-        });
-        return;
+      const isFree = activityDetail.value && activityDetail.value.registrationFee === 0;
+      if (!isFree) {
+        if (!formData.paymentScreenshotUrl) {
+          common_vendor.index.showToast({
+            title: "请上传付款截图",
+            icon: "none"
+          });
+          return;
+        }
+        if (!agreedToTerms.value) {
+          common_vendor.index.showToast({
+            title: "请先阅读并同意用户协议",
+            icon: "none"
+          });
+          return;
+        }
       }
       common_vendor.index.showLoading({
         title: "提交中...",
@@ -307,6 +317,12 @@ const _sfc_main = {
       }
       return ticketNumber.value;
     };
+    const step1ButtonText = common_vendor.computed(() => {
+      if (activityDetail.value && activityDetail.value.registrationFee === 0) {
+        return "提交报名";
+      }
+      return "下一步：支付报名费";
+    });
     const backToHome = () => {
       common_vendor.index.navigateBack();
     };
@@ -379,41 +395,42 @@ const _sfc_main = {
           modelValue: formData.remark
         })
       } : {}, {
-        y: !canSubmitStep1.value ? 1 : "",
-        z: common_vendor.o(confirmSignup)
+        y: common_vendor.t(step1ButtonText.value),
+        z: !canSubmitStep1.value ? 1 : "",
+        A: common_vendor.o(confirmSignup)
       }) : {}, {
-        A: currentStep.value === 2 && activityDetail.value
+        B: currentStep.value === 2 && activityDetail.value
       }, currentStep.value === 2 && activityDetail.value ? common_vendor.e({
-        B: common_vendor.t(activityDetail.value.registrationFee),
-        C: activityDetail.value.organizerPaymentQrCodeUrl
+        C: common_vendor.t(activityDetail.value.registrationFee),
+        D: activityDetail.value.organizerPaymentQrCodeUrl
       }, activityDetail.value.organizerPaymentQrCodeUrl ? {
-        D: activityDetail.value.organizerPaymentQrCodeUrl,
-        E: common_vendor.o(previewQrCode)
+        E: activityDetail.value.organizerPaymentQrCodeUrl,
+        F: common_vendor.o(previewQrCode)
       } : {}, {
-        F: common_vendor.p({
+        G: common_vendor.p({
           type: "image",
           size: "18",
           color: "#FF6E00"
         }),
-        G: !formData.paymentScreenshotUrl
+        H: !formData.paymentScreenshotUrl
       }, !formData.paymentScreenshotUrl ? {} : {
-        H: formData.paymentScreenshotUrl
+        I: formData.paymentScreenshotUrl
       }, {
-        I: common_vendor.o(chooseImage),
-        J: agreedToTerms.value,
-        K: common_vendor.o(toggleAgreement),
-        L: common_vendor.o(navigateToAgreement),
-        M: !formData.paymentScreenshotUrl || !agreedToTerms.value ? 1 : "",
-        N: common_vendor.o(joinActivity)
+        J: common_vendor.o(chooseImage),
+        K: agreedToTerms.value,
+        L: common_vendor.o(toggleAgreement),
+        M: common_vendor.o(navigateToAgreement),
+        N: !formData.paymentScreenshotUrl || !agreedToTerms.value ? 1 : "",
+        O: common_vendor.o(joinActivity)
       }) : {}, {
-        O: currentStep.value === 3
+        P: currentStep.value === 3
       }, currentStep.value === 3 ? common_vendor.e({
-        P: activityDetail.value
+        Q: activityDetail.value
       }, activityDetail.value ? {
-        Q: common_vendor.t(activityDetail.value.activityTitle),
-        R: common_vendor.t(common_vendor.unref(currentDate))
+        R: common_vendor.t(activityDetail.value.activityTitle),
+        S: common_vendor.t(common_vendor.unref(currentDate))
       } : {}, {
-        S: common_vendor.o(backToHome)
+        T: common_vendor.o(backToHome)
       }) : {});
     };
   }

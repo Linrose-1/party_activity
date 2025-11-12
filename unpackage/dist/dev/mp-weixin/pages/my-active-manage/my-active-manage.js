@@ -37,11 +37,13 @@ const _sfc_main = {
             image: parsedData.coverImageUrl,
             date: formatDateTime(parsedData.startDatetime),
             location: parsedData.locationAddress || "线上聚会",
-            participants: { current: parsedData.joinCount || 0 },
+            participants: {
+              current: parsedData.joinCount || 0
+            },
             totalRefundAmount: null
           };
         } catch (e) {
-          common_vendor.index.__f__("error", "at pages/my-active-manage/my-active-manage.vue:156", "解析聚会数据失败:", e);
+          common_vendor.index.__f__("error", "at pages/my-active-manage/my-active-manage.vue:151", "解析聚会数据失败:", e);
           return;
         }
       }
@@ -52,7 +54,9 @@ const _sfc_main = {
     const fetchRefundList = async () => {
       if (!fullActivityData.value)
         return;
-      common_vendor.index.showLoading({ title: "加载中..." });
+      common_vendor.index.showLoading({
+        title: "加载中..."
+      });
       const statusToFetch = currentTab.value === 0 ? "3" : "6";
       const params = {
         activityId: fullActivityData.value.id,
@@ -67,7 +71,10 @@ const _sfc_main = {
         });
         participantList.value = result.data ? result.data.list || [] : [];
       } catch (error) {
-        common_vendor.index.showToast({ title: "加载列表失败", icon: "none" });
+        common_vendor.index.showToast({
+          title: "加载列表失败",
+          icon: "none"
+        });
       } finally {
         common_vendor.index.hideLoading();
       }
@@ -75,35 +82,74 @@ const _sfc_main = {
     const uploadProof = (user) => {
       common_vendor.index.chooseImage({
         count: 1,
+        sizeType: ["original", "compressed"],
+        sourceType: ["album", "camera"],
         success: async (res) => {
-          const tempFilePath = res.tempFilePaths[0];
-          common_vendor.index.showLoading({ title: "正在上传并确认..." });
+          let tempFilePath = "";
+          if (res.tempFilePaths && res.tempFilePaths.length > 0) {
+            tempFilePath = res.tempFilePaths[0];
+          } else if (res.tempFiles && res.tempFiles.length > 0 && res.tempFiles[0].path) {
+            tempFilePath = res.tempFiles[0].path;
+          }
+          if (!tempFilePath) {
+            common_vendor.index.showToast({
+              title: "未能获取到图片文件，请重试",
+              icon: "none"
+            });
+            common_vendor.index.__f__("error", "at pages/my-active-manage/my-active-manage.vue:279", "【严重错误】 无法从 chooseImage 的返回值中提取任何有效路径!", res);
+            return;
+          }
+          common_vendor.index.showLoading({
+            title: "正在上传并确认..."
+          });
           try {
-            const uploadResult = await utils_upload.uploadFile(tempFilePath, { directory: "refund_proof" });
+            const uploadResult = await utils_upload.uploadFile({
+              path: tempFilePath
+            }, {
+              directory: "refund_proof"
+            });
             if (uploadResult.error) {
-              throw new Error(`上传失败: ${uploadResult.error}`);
+              const errorMsg = typeof uploadResult.error === "object" ? uploadResult.error.msg : uploadResult.error;
+              throw new Error(errorMsg || "上传失败");
             }
             const proofUrl = uploadResult.data;
             const payload = {
               id: user.id,
-              // 报名记录的唯一标识符
               refundConfirmScreenshotUrl: proofUrl
-              // 上传后的凭证URL
             };
-            common_vendor.index.__f__("log", "at pages/my-active-manage/my-active-manage.vue:227", "确认退款接口请求体:", payload);
-            const confirmResult = await utils_request.request("/app-api/member/activity-join/confirm-join-user-refund", {
-              method: "POST",
-              data: payload
-            });
+            const confirmResult = await utils_request.request(
+              "/app-api/member/activity-join/confirm-join-user-refund",
+              {
+                method: "POST",
+                data: payload
+              }
+            );
             if (confirmResult.error) {
-              throw new Error(`确认失败: ${confirmResult.error}`);
+              const errorMsg = typeof confirmResult.error === "object" ? confirmResult.error.msg : confirmResult.error;
+              throw new Error(errorMsg || "确认失败");
             }
-            common_vendor.index.showToast({ title: "操作成功", icon: "success" });
+            common_vendor.index.showToast({
+              title: "操作成功",
+              icon: "success"
+            });
             fetchRefundList();
           } catch (error) {
-            common_vendor.index.showToast({ title: error.message || "操作失败", icon: "none", duration: 2e3 });
+            common_vendor.index.showToast({
+              title: error.message || "操作失败",
+              icon: "none",
+              duration: 3e3
+            });
           } finally {
             common_vendor.index.hideLoading();
+          }
+        },
+        fail: (err) => {
+          if (err.errMsg && !err.errMsg.includes("cancel")) {
+            common_vendor.index.__f__("error", "at pages/my-active-manage/my-active-manage.vue:346", "选择图片失败:", err);
+            common_vendor.index.showToast({
+              title: "选择图片失败",
+              icon: "none"
+            });
           }
         }
       });
@@ -117,7 +163,9 @@ const _sfc_main = {
     const previewImage = (url) => {
       if (!url)
         return;
-      common_vendor.index.previewImage({ urls: [url] });
+      common_vendor.index.previewImage({
+        urls: [url]
+      });
     };
     const formatDateTime = (dateTimeStr) => {
       if (!dateTimeStr)

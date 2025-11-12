@@ -160,7 +160,7 @@
 		<view class="info-section">
 			<view class="section-header">
 				<uni-icons type="map-filled" size="24" :color="themeColor"></uni-icons>
-				<text class="section-title">数字标签 (商友评价)</text>
+				<text class="section-title">数字标签 (自我评价)</text>
 			</view>
 			<view class="chart-wrapper">
 				<MyRadarChart v-if="radarSeriesData.length > 0" :categories="radarCategories"
@@ -190,7 +190,7 @@
 
 	const themeColor = '#FF7D00';
 	const userInfo = ref(null);
-	const radarCategories = ref(["基础信用", "协助态度", "专业能力", "精神格局"]);
+	const radarCategories = ref(["基础信用", "协作态度", "专业能力", "精神格局"]);
 	const radarSeriesData = ref([]);
 
 	onLoad(async (options) => {

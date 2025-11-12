@@ -9,7 +9,7 @@
 		<!-- 2. 内容区域 -->
 		<view class="content-area">
 			<!-- Tab 0: 我邀请的人 (列表) -->
-			<view v-show="currentTab === 0" class="tab-panel">
+			<view v-show="currentTab === 1" class="tab-panel">
 				<!-- 商友列表 -->
 				<view class="friend-list">
 					<view class="friend-card" v-for="friend in friendList" :key="friend.id"
@@ -19,16 +19,28 @@
 						<view class="friend-info">
 							<view class="info-header">
 								<text class="friend-name">{{ friend.nickname || friend.realName || '匿名用户' }}</text>
+								<view class="relation-tags"
+									v-if="friend.fellowTownspeopleCityFlag === 1 || friend.peerFlag === 1 || friend.classmateFlag === 1">
+									<text v-if="friend.fellowTownspeopleCityFlag === 1"
+										class="tag fellow-townsman">同乡</text>
+									<text v-if="friend.peerFlag === 1" class="tag peer">同行</text>
+									<text v-if="friend.classmateFlag === 1" class="tag classmate">同学</text>
+								</view>
 							</view>
 							<view class="friend-company">
 								<uni-icons type="briefcase-filled" size="14" color="#888"></uni-icons>
 								<text>{{ friend.companyName || '暂无公司信息' }}</text>
 							</view>
 						</view>
-						<button class="follow-btn" :class="{ 'followed': friend.followFlag === 1 }"
-							@click.stop="handleFollowAction(friend)">
-							{{ friend.followFlag === 1 ? '取关' : '关注' }}
-						</button>
+						<view class="action-area">
+							<button class="follow-btn" :class="{ 'followed': friend.followFlag === 1 }"
+								@click.stop="handleFollowAction(friend)">
+								{{ friend.followFlag === 1 ? '取关' : '关注' }}
+							</button>
+							<view class="invite-time" v-if="friend.followTime">
+								{{ formatTimestamp(friend.followTime) }}
+							</view>
+						</view>
 					</view>
 				</view>
 				<!-- 加载与空状态 -->
@@ -41,7 +53,7 @@
 			</view>
 
 			<!-- Tab 1: 我的邀请人 (单个卡片) -->
-			<view v-show="currentTab === 1" class="tab-panel">
+			<view v-show="currentTab === 0" class="tab-panel">
 				<!-- 根据 userInfo.parentName 的存在与否显示不同内容 -->
 				<view v-if="userInfo && userInfo.parentName" class="inviter-section">
 					<view class="section-title">我的邀请人</view>
@@ -81,7 +93,7 @@
 	// --- 页面配置与状态 ---
 	const themeColor = ref('#FF6E00');
 	const currentTab = ref(0);
-	const tabItems = ['我邀请的人', '我的邀请人'];
+	const tabItems = ['我的邀请人', '我邀请的人'];
 
 	// --- "我邀请的人" 列表相关状态 ---
 	const friendList = ref([]);
@@ -95,30 +107,59 @@
 	const userInfo = ref(null);
 
 	// --- 生命周期 ---
+	// onMounted(() => {
+	// 	// 页面加载时，两个接口都可以请求
+	// 	getShareUserList(true); // 加载我邀请的人列表
+	// 	fetchUserInfo(); // 加载当前用户信息
+	// });
+
+	// onPullDownRefresh(() => {
+	// 	// 下拉刷新只针对当前显示的列表
+	// 	if (currentTab.value === 0) {
+	// 		getShareUserList(true);
+	// 	} else {
+	// 		// “我的邀请人”也可以刷新一下
+	// 		fetchUserInfo().finally(() => uni.stopPullDownRefresh());
+	// 	}
+	// });
 	onMounted(() => {
-		// 页面加载时，两个接口都可以请求
-		getShareUserList(true); // 加载我邀请的人列表
-		fetchUserInfo(); // 加载当前用户信息
+		// 页面加载时，调用新的初始化函数
+		initializePage();
 	});
 
 	onPullDownRefresh(() => {
-		// 下拉刷新只针对当前显示的列表
-		if (currentTab.value === 0) {
+		// 根据新的顺序调整逻辑
+		if (currentTab.value === 1) { // 索引为 1 的是“我邀请的人”列表
 			getShareUserList(true);
 		} else {
-			// “我的邀请人”也可以刷新一下
+			// 索引为 0 的是“我的邀请人”
 			fetchUserInfo().finally(() => uni.stopPullDownRefresh());
 		}
 	});
 
 	onReachBottom(() => {
 		// 触底加载只对“我邀请的人”列表有效
-		if (currentTab.value === 0) {
+		if (currentTab.value === 1) { // 只有在列表页才加载更多
 			getShareUserList();
 		}
 	});
 
 	// --- 方法 ---
+	/**
+	 * 页面初始化函数，整合所有首次加载和刷新的逻辑
+	 */
+	const initializePage = async () => {
+		// 两个接口都可以并行请求
+		const fetchListPromise = getShareUserList(true); // 加载我邀请的人列表
+		const fetchInfoPromise = fetchUserInfo(); // 加载当前用户信息
+
+		// 等待所有请求完成
+		await Promise.all([fetchListPromise, fetchInfoPromise]);
+
+		// 所有数据加载完毕后，统一停止下拉刷新动画
+		uni.stopPullDownRefresh();
+	};
+
 	const handleTabClick = (e) => {
 		currentTab.value = e.currentIndex;
 	};
@@ -158,7 +199,7 @@
 			}
 		});
 
-		if (isRefresh) uni.stopPullDownRefresh();
+		// if (isRefresh) uni.stopPullDownRefresh();
 
 		if (error) {
 			loadStatus.value = 'more';
@@ -268,6 +309,18 @@
 			url: url
 		});
 	};
+
+	/**
+	 * 时间格式化函数
+	 */
+	const formatTimestamp = (timestamp) => {
+		if (!timestamp) return '';
+		const date = new Date(timestamp);
+		const Y = date.getFullYear();
+		const M = (date.getMonth() + 1).toString().padStart(2, '0');
+		const D = date.getDate().toString().padStart(2, '0');
+		return `${Y}-${M}-${D}`; // 只显示年月日
+	};
 </script>
 
 <style lang="scss" scoped>
@@ -331,10 +384,49 @@
 		gap: 12rpx;
 	}
 
+	.info-header {
+		display: flex;
+		align-items: center;
+		gap: 16rpx;
+	}
+
 	.friend-name {
 		font-size: 32rpx;
 		font-weight: 600;
 		color: #333;
+	}
+
+	.relation-tags {
+		display: flex;
+		gap: 10rpx;
+		flex-shrink: 0;
+		/* 防止标签被挤压 */
+	}
+
+	.tag {
+		font-size: 20rpx;
+		/* 可以适当调整大小 */
+		padding: 4rpx 12rpx;
+		border-radius: 6rpx;
+		font-weight: 500;
+	}
+
+	.fellow-townsman {
+		background-color: #e8f5e9;
+		color: #388e3c;
+		border: 1rpx solid #a5d6a7;
+	}
+
+	.peer {
+		background-color: #e3f2fd;
+		color: #1976d2;
+		border: 1rpx solid #90caf9;
+	}
+
+	.classmate {
+		background-color: #fff3e0;
+		color: #ef6c00;
+		border: 1rpx solid #ffcc80;
 	}
 
 	.friend-company {
@@ -351,6 +443,18 @@
 		margin-right: 10rpx;
 	}
 
+	.action-area {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		/* 居中对齐 */
+		gap: 8rpx;
+		/* 按钮和时间之间的间距 */
+		margin-left: 20rpx;
+		flex-shrink: 0;
+	}
+
+
 	.follow-btn {
 		background-color: v-bind(themeColor);
 		color: white;
@@ -360,13 +464,21 @@
 		line-height: 60rpx;
 		border-radius: 40rpx;
 		font-size: 26rpx;
-		margin-left: 20rpx;
+		// margin-left: 20rpx;
 		flex-shrink: 0;
 
 		&::after {
 			border: none;
 		}
 	}
+
+	.invite-time {
+		font-size: 22rpx;
+		color: #999;
+		white-space: nowrap;
+		/* 防止换行 */
+	}
+
 
 	.follow-btn.followed {
 		background: #f0f2f5;

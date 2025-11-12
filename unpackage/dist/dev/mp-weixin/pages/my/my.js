@@ -45,14 +45,14 @@ const _sfc_main = {
         });
         if (!error && data) {
           userInfo.value = data;
-          common_vendor.index.__f__("log", "at pages/my/my.vue:200", "getUserInfo userInfo:", userInfo.value);
+          common_vendor.index.__f__("log", "at pages/my/my.vue:203", "getUserInfo userInfo:", userInfo.value);
         } else {
-          common_vendor.index.__f__("log", "at pages/my/my.vue:202", "获取用户信息失败:", error);
+          common_vendor.index.__f__("log", "at pages/my/my.vue:205", "获取用户信息失败:", error);
           isLogin.value = false;
           userInfo.value = {};
         }
       } catch (err) {
-        common_vendor.index.__f__("log", "at pages/my/my.vue:208", "请求异常:", err);
+        common_vendor.index.__f__("log", "at pages/my/my.vue:211", "请求异常:", err);
         isLogin.value = false;
         userInfo.value = {};
       }
@@ -252,10 +252,10 @@ const _sfc_main = {
       // 新增
       // 第 5 行
       {
-        name: "精准投放",
-        desc: "将商机、聚会、聚店等精准推送",
+        name: "邀请注册",
+        desc: "连接全球精英商友",
         icon: "../../static/icon/精准投放.png",
-        path: null
+        path: "/pages/index/index"
       },
       // 新增
       {
@@ -331,19 +331,23 @@ const _sfc_main = {
       }, userInfo.value.topUpLevel && userInfo.value.topUpLevel.name ? {
         h: common_vendor.t(userInfo.value.topUpLevel.name)
       } : {}, {
-        i: userInfo.value.nickname === "微信用户"
+        i: userInfo.value.level && userInfo.value.level.name
+      }, userInfo.value.level && userInfo.value.level.name ? {
+        j: common_vendor.t(userInfo.value.level.name)
+      } : {}, {
+        k: userInfo.value.nickname === "微信用户"
       }, userInfo.value.nickname === "微信用户" ? {
-        j: common_vendor.o(onEdit)
+        l: common_vendor.o(onEdit)
       } : {}, {
-        k: common_vendor.t(userProfessionalTitleDisplay.value),
-        l: common_vendor.t(userCompanyAndPositionDisplay.value),
-        m: common_vendor.t(userInfo.value.parentName || "无"),
-        n: userInfo.value.id
+        m: common_vendor.t(userProfessionalTitleDisplay.value),
+        n: common_vendor.t(userCompanyAndPositionDisplay.value),
+        o: common_vendor.t(userInfo.value.parentName || "无"),
+        p: userInfo.value.id
       }, userInfo.value.id ? {
-        o: common_vendor.t(userInfo.value.virtualId)
+        q: common_vendor.t(userInfo.value.virtualId)
       } : {}, {
-        p: common_vendor.o(onViewAccountDetail),
-        q: common_vendor.f(accountList.value, (item, k0, i0) => {
+        r: common_vendor.o(onViewAccountDetail),
+        s: common_vendor.f(accountList.value, (item, k0, i0) => {
           return {
             a: common_vendor.t(item.value),
             b: common_vendor.t(item.label),
@@ -352,14 +356,14 @@ const _sfc_main = {
           };
         })
       }) : {
-        r: common_vendor.p({
+        t: common_vendor.p({
           type: "person-filled",
           size: "30",
           color: "#FF8C00"
         }),
-        s: common_vendor.o(skipToLogin)
+        v: common_vendor.o(skipToLogin)
       }, {
-        t: common_vendor.f(coreFeatures.value, (item, k0, i0) => {
+        w: common_vendor.f(coreFeatures.value, (item, k0, i0) => {
           return {
             a: common_vendor.t(item.name),
             b: item.icon,
@@ -368,7 +372,7 @@ const _sfc_main = {
             e: common_vendor.o(($event) => navigateToCoreFeature(item), item.name)
           };
         }),
-        v: common_vendor.f(featureList.value, (item, k0, i0) => {
+        x: common_vendor.f(featureList.value, (item, k0, i0) => {
           return {
             a: item.icon,
             b: common_vendor.t(item.name),

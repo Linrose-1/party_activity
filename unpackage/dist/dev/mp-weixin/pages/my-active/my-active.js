@@ -27,7 +27,7 @@ const _sfc_main = {
     const publishedPageNo = common_vendor.ref(1);
     const publishedHasMore = common_vendor.ref(true);
     common_vendor.onShow(() => {
-      common_vendor.index.__f__("log", "at pages/my-active/my-active.vue:205", "页面显示，刷新当前 Tab 数据");
+      common_vendor.index.__f__("log", "at pages/my-active/my-active.vue:215", "页面显示，刷新当前 Tab 数据");
       handleRefresh();
     });
     const getMyActivitiesList = async (isLoadMore = false) => {
@@ -49,7 +49,7 @@ const _sfc_main = {
           method: "GET",
           data: params
         });
-        common_vendor.index.__f__("log", "at pages/my-active/my-active.vue:236", `获取Tab ${currentTab.value} 的聚会`, result);
+        common_vendor.index.__f__("log", "at pages/my-active/my-active.vue:246", `获取Tab ${currentTab.value} 的聚会`, result);
         if (result && !result.error && result.data) {
           const list = result.data.list || [];
           const total = result.data.total || 0;
@@ -64,7 +64,7 @@ const _sfc_main = {
           }
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/my-active/my-active.vue:255", "请求我的聚会列表失败:", error);
+        common_vendor.index.__f__("error", "at pages/my-active/my-active.vue:265", "请求我的聚会列表失败:", error);
       } finally {
         loading.value = false;
         refreshing.value = false;
@@ -269,19 +269,19 @@ const _sfc_main = {
             g: common_vendor.t(formatDateTime(item.startDatetime)),
             h: "37541c0b-2-" + i0,
             i: common_vendor.t(item.locationAddress || "线上聚会"),
-            j: item.memberActivityJoinResp.rejectMsg
+            j: "37541c0b-3-" + i0,
+            k: common_vendor.t(item.joinCount || 0),
+            l: common_vendor.t(item.totalSlots || "不限"),
+            m: item.memberActivityJoinResp.rejectMsg
           }, item.memberActivityJoinResp.rejectMsg ? {
-            k: "37541c0b-3-" + i0,
-            l: common_vendor.p({
+            n: "37541c0b-4-" + i0,
+            o: common_vendor.p({
               type: "info-filled",
               color: "#f56c6c",
               size: "16"
             }),
-            m: common_vendor.t(item.memberActivityJoinResp.rejectMsg)
+            p: common_vendor.t(item.memberActivityJoinResp.rejectMsg)
           } : {}, {
-            n: "37541c0b-4-" + i0,
-            o: common_vendor.t(item.joinCount || 0),
-            p: common_vendor.t(item.totalSlots || "不限"),
             q: ["待支付", "已支付", "替补"].includes(item.memberActivityJoinResp.paymentStatusStr) && !item.memberActivityJoinResp.rejectMsg
           }, ["待支付", "已支付", "替补"].includes(item.memberActivityJoinResp.paymentStatusStr) && !item.memberActivityJoinResp.rejectMsg ? {
             r: common_vendor.o(($event) => cancelEnroll(item.id), item.id)
@@ -310,7 +310,7 @@ const _sfc_main = {
           color: "#999"
         }),
         g: common_vendor.p({
-          type: "people",
+          type: "person-filled",
           size: "16",
           color: "#999"
         })
@@ -374,7 +374,7 @@ const _sfc_main = {
           color: "#999"
         }),
         r: common_vendor.p({
-          type: "people",
+          type: "person-filled",
           size: "16",
           color: "#999"
         })

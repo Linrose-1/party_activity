@@ -33,14 +33,15 @@ const _sfc_main = {
       averageConsumptionRange: "",
       tags: []
     });
-    const categoryOptions = ["bar", "food", "ktv", "billiards", "other"];
-    const categoryMap = {
-      "bar": "酒吧",
-      "food": "美食",
-      "ktv": "KTV",
-      "billiards": "台球",
-      "other": "其他"
-    };
+    const categoryList = common_vendor.ref([]);
+    const categoryOptions = common_vendor.computed(() => categoryList.value.map((item) => item.label));
+    const categoryMap = common_vendor.computed(() => {
+      const map = {};
+      categoryList.value.forEach((item) => {
+        map[item.value] = item.label;
+      });
+      return map;
+    });
     const editableHours = common_vendor.reactive({
       regular: [],
       special: []
@@ -76,6 +77,7 @@ const _sfc_main = {
       }
     ];
     common_vendor.onLoad(async (options) => {
+      await getStoreCategories();
       const storeId = options.id;
       if (storeId) {
         common_vendor.index.setNavigationBarTitle({
@@ -84,12 +86,36 @@ const _sfc_main = {
         await getStoreDetails(storeId);
       } else {
         common_vendor.index.setNavigationBarTitle({
-          title: "申请聚店上榜"
+          title: "申请聚店入驻"
         });
         parseOperatingHours(null);
         isLoading.value = false;
       }
     });
+    const getStoreCategories = async () => {
+      const {
+        data,
+        error
+      } = await utils_request.request("/app-api/system/dict-data/type", {
+        method: "GET",
+        data: {
+          type: "member_store_category"
+          // 根据聚店列表页的经验，类型是这个
+        }
+      });
+      if (error) {
+        common_vendor.index.showToast({
+          title: "加载聚店类别失败",
+          icon: "none"
+        });
+        categoryList.value = [];
+        return;
+      }
+      if (data && Array.isArray(data)) {
+        categoryList.value = data;
+        common_vendor.index.__f__("log", "at pages/myStore-edit/myStore-edit.vue:271", "成功获取聚店类别:", categoryList.value);
+      }
+    };
     const getStoreDetails = async (storeId) => {
       isLoading.value = true;
       const {
@@ -136,7 +162,7 @@ const _sfc_main = {
           description: d.description || ""
         }));
       } catch (e) {
-        common_vendor.index.__f__("warn", "at pages/myStore-edit/myStore-edit.vue:289", "解析营业时间失败或为新建状态，将使用默认值:", e.message);
+        common_vendor.index.__f__("warn", "at pages/myStore-edit/myStore-edit.vue:329", "解析营业时间失败或为新建状态，将使用默认值:", e.message);
         editableHours.regular = weekdays.map((dayInfo) => ({
           key: dayInfo.key,
           label: dayInfo.label,
@@ -240,7 +266,11 @@ const _sfc_main = {
       });
     };
     const handleCategoryChange = (e) => {
-      form.value.category = categoryOptions[e.detail.value];
+      const selectedIndex = e.detail.value;
+      const selectedCategory = categoryList.value[selectedIndex];
+      if (selectedCategory) {
+        form.value.category = selectedCategory.value;
+      }
     };
     const handleSubmit = async () => {
       if (!form.value.storeName.trim())
@@ -308,14 +338,14 @@ const _sfc_main = {
           inputBorder: false,
           modelValue: form.value.storeName
         }),
-        d: common_vendor.t(categoryMap[form.value.category] || "请选择聚店类别"),
+        d: common_vendor.t(categoryMap.value[form.value.category] || "请选择聚店类别"),
         e: common_vendor.p({
           type: "right",
           size: "16",
           color: "#999"
         }),
-        f: categoryOptions,
-        g: form.value.category,
+        f: categoryOptions.value,
+        g: categoryOptions.value.indexOf(categoryMap.value[form.value.category]),
         h: common_vendor.o(handleCategoryChange),
         i: form.value.storeCoverImageUrl || "/static/images/placeholder-cover.png",
         j: common_vendor.o(($event) => handleImageUpload("cover")),

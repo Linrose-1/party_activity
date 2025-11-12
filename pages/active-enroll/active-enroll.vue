@@ -78,7 +78,7 @@
 			</view>
 
 			<button class="btn" :class="{ 'btn-disabled': !canSubmitStep1 }" @click="confirmSignup">
-				下一步：支付报名费
+				{{ step1ButtonText }}
 			</button>
 		</view>
 
@@ -329,8 +329,20 @@
 				});
 				return;
 			}
+			return;
 		}
-		currentStep.value = 2;
+
+		// 判断活动是否免费
+		if (activityDetail.value && activityDetail.value.registrationFee === 0) {
+			// 如果是免费活动，直接调用提交方法
+			console.log('免费活动，直接提交报名');
+			joinActivity();
+		} else {
+			// 如果是收费活动，按原逻辑进入第二步
+			console.log('收费活动，进入支付步骤');
+			currentStep.value = 2;
+		}
+
 	};
 
 	const chooseImage = () => {
@@ -404,14 +416,14 @@
 				const data = result.data;
 				console.log('getActiveDetail result:', data);
 
-				// 1. 检查用户是否已报名
-				if (data && data.memberActivityJoinResp) {
-					console.log('用户已报名，直接跳转到成功页。');
+				// 1. 检查用户是否已有效报名 (增加了对 paymentStatusStr 的判断)
+				if (data && data.memberActivityJoinResp && data.memberActivityJoinResp.paymentStatusStr) {
+					console.log('用户已有效报名 (paymentStatusStr 存在)，直接跳转到成功页。');
 					activityDetail.value = data; // 仍然需要赋值，以便成功页显示信息
 
 					// 【新增】如果已报名，从返回数据中获取信息，而不是重新生成
 					// 注意：后端目前没有返回报名编号，我们暂时还用前端生成逻辑
-					// 如果后端返回了，可以用：ticketNumber.value = data.memberActivityJoinResp.ticketId || generateTicketNumber();
+					// 如果后端返回了，可以用：ticketNumber.value = data.memberActivityJoin-Resp.ticketId || generateTicketNumber();
 					ticketNumber.value = generateTicketNumber();
 
 					currentStep.value = 3; // 直接设置为步骤3
@@ -422,7 +434,8 @@
 					formData.paymentScreenshotUrl = data.memberActivityJoinResp.paymentScreenshotUrl || '';
 
 				} else {
-					console.log('用户未报名，进入正常报名流程。');
+					// 【修改】这里的日志也更新一下，更清晰
+					console.log('用户未报名或报名状态无效，进入正常报名流程。');
 					// 用户未报名，正常赋值并停留在步骤1
 					activityDetail.value = data;
 					currentStep.value = 1;
@@ -445,20 +458,24 @@
 	};
 
 	const joinActivity = async () => {
-		if (!formData.paymentScreenshotUrl) {
-			uni.showToast({
-				title: '请上传付款截图',
-				icon: 'none'
-			});
-			return;
-		}
-
-		if (!agreedToTerms.value) {
-			uni.showToast({
-				title: '请先阅读并同意用户协议',
-				icon: 'none'
-			});
-			return;
+		// 判断活动是否免费，以便跳过支付相关的验证
+		const isFree = activityDetail.value && activityDetail.value.registrationFee === 0;
+		// 只有在收费活动时，才执行以下验证
+		if (!isFree) {
+			if (!formData.paymentScreenshotUrl) {
+				uni.showToast({
+					title: '请上传付款截图',
+					icon: 'none'
+				});
+				return;
+			}
+			if (!agreedToTerms.value) {
+				uni.showToast({
+					title: '请先阅读并同意用户协议',
+					icon: 'none'
+				});
+				return;
+			}
 		}
 
 		uni.showLoading({
@@ -556,6 +573,13 @@
 		}
 		return ticketNumber.value;
 	};
+
+	const step1ButtonText = computed(() => {
+		if (activityDetail.value && activityDetail.value.registrationFee === 0) {
+			return '提交报名';
+		}
+		return '下一步：支付报名费';
+	});
 
 	const backToHome = () => {
 		uni.navigateBack();

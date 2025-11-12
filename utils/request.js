@@ -3,7 +3,8 @@ import {
 } from 'vue';
 
 // 请求的基本配置
-const baseURL = 'https://jyj.gofor.club';
+const baseURL = 'https://chuxia5207.top';
+// const baseURL = 'https://jyj.gofor.club';
 // const baseURL = 'http://8.163.18.207:48080';
 const timeout = 10000; // 请求超时
 

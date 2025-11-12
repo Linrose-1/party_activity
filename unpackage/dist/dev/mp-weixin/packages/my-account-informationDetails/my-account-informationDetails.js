@@ -15,7 +15,7 @@ const _sfc_main = {
   __name: "my-account-informationDetails",
   setup(__props) {
     const userInfo = common_vendor.ref(null);
-    const radarCategories = common_vendor.ref(["基础信用", "协助态度", "专业能力", "精神格局"]);
+    const radarCategories = common_vendor.ref(["基础信用", "协作态度", "专业能力", "精神格局"]);
     const radarSeriesData = common_vendor.ref([]);
     common_vendor.onLoad(async (options) => {
       const userId = options.id;

@@ -42,16 +42,21 @@
 							<text class="info-text">{{ item.locationAddress || '线上聚会' }}</text>
 						</view>
 
+						<view class="activity-info">
+							<uni-icons type="person-filled" size="16" color="#999" />
+							<text class="info-text">{{ item.joinCount || 0 }}/{{ item.totalSlots || '不限' }}人</text>
+						</view>
+
 						<view v-if="item.memberActivityJoinResp.rejectMsg" class="rejection-reason-box">
 							<uni-icons type="info-filled" color="#f56c6c" size="16"></uni-icons>
 							<text>原因: {{ item.memberActivityJoinResp.rejectMsg }}</text>
 						</view>
 
 						<view class="activity-footer">
-							<view class="participants">
+							<!-- <view class="participants">
 								<uni-icons type="people" size="16" color="#999" />
 								<text>{{ item.joinCount || 0 }}/{{ item.totalSlots || '不限' }}人</text>
-							</view>
+							</view> -->
 
 							<view class="action-buttons">
 								<!-- 【核心修改】v-if 条件使用字符串判断 -->
@@ -119,11 +124,16 @@
 							<text class="info-text">{{ item.locationAddress || '线上聚会' }}</text>
 						</view>
 
+						<view class="activity-info">
+							<uni-icons type="person-filled" size="16" color="#999" />
+							<text class="info-text">{{ item.joinCount || 0 }}/{{ item.totalSlots || '不限' }}人</text>
+						</view>
+
 						<view class="activity-footer">
-							<view class="participants">
+							<!-- <view class="participants">
 								<uni-icons type="people" size="16" color="#999" />
 								<text>{{ item.joinCount || 0 }}/{{ item.totalSlots || '不限' }}人</text>
-							</view>
+							</view> -->
 
 							<view class="action-buttons">
 								<button v-if="item.paddingReturnCount > 0" class="btn btn-approval"
@@ -409,7 +419,6 @@
 						title: '正在删除...'
 					});
 					// 【注意】接口应该是取消聚会，而不是删除。请确认接口地址是否正确。
-					// 假设接口是 /cancel-activity
 					const result = await request('/app-api/member/activity/cancel-activity', {
 						method: 'POST',
 						data: {
@@ -615,6 +624,8 @@
 		margin-top: 24rpx;
 		padding-top: 24rpx;
 		border-top: 1rpx solid #f0f2f5;
+		justify-content: flex-end;
+		/* 让内容（按钮组）靠右对齐 */
 	}
 
 	.participants {

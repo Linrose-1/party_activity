@@ -110,6 +110,8 @@
   margin-top: 24rpx;
   padding-top: 24rpx;
   border-top: 1rpx solid #f0f2f5;
+  justify-content: flex-end;
+  /* 让内容（按钮组）靠右对齐 */
 }
 .participants.data-v-37541c0b {
   display: flex;

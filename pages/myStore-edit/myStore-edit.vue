@@ -11,8 +11,8 @@
 				<!-- 【新增】聚店分类 -->
 				<view class="form-group">
 					<label class="form-label">聚店类别</label>
-					<picker mode="selector" :range="categoryOptions" :value="form.category"
-						@change="handleCategoryChange">
+					<picker mode="selector" :range="categoryOptions"
+						:value="categoryOptions.indexOf(categoryMap[form.category])" @change="handleCategoryChange">
 						<view class="location-picker">
 							<text class="location-text">{{ categoryMap[form.category] || '请选择聚店类别' }}</text>
 							<uni-icons type="right" size="16" color="#999"></uni-icons>
@@ -142,7 +142,8 @@
 <script setup>
 	import {
 		ref,
-		reactive
+		reactive,
+		computed
 	} from 'vue';
 	import {
 		onLoad
@@ -171,14 +172,24 @@
 	});
 
 	// 聚店类别选项
-	const categoryOptions = ['bar', 'food', 'ktv', 'billiards', 'other'];
-	const categoryMap = {
-		'bar': '酒吧',
-		'food': '美食',
-		'ktv': 'KTV',
-		'billiards': '台球',
-		'other': '其他'
-	};
+	const categoryList = ref([]);
+	const categoryOptions = computed(() => categoryList.value.map(item => item.label));
+	const categoryMap = computed(() => {
+		const map = {};
+		categoryList.value.forEach(item => {
+			map[item.value] = item.label; // 'bar' -> '酒吧'
+		});
+		return map;
+	});
+
+	// const categoryOptions = ['bar', 'food', 'ktv', 'billiards', 'other'];
+	// const categoryMap = {
+	// 	'bar': '酒吧',
+	// 	'food': '美食',
+	// 	'ktv': 'KTV',
+	// 	'billiards': '台球',
+	// 	'other': '其他'
+	// };
 
 	const editableHours = reactive({
 		regular: [],
@@ -214,6 +225,7 @@
 
 	// 【核心修改】onLoad 逻辑调整
 	onLoad(async (options) => {
+		await getStoreCategories();
 		const storeId = options.id;
 		if (storeId) {
 			// --- 修改模式 ---
@@ -224,13 +236,41 @@
 		} else {
 			// --- 新建模式 ---
 			uni.setNavigationBarTitle({
-				title: '申请聚店上榜'
+				title: '申请聚店入驻'
 			});
 			// 初始化一个空的表单，特别是营业时间
 			parseOperatingHours(null);
 			isLoading.value = false;
 		}
 	});
+
+	const getStoreCategories = async () => {
+		const {
+			data,
+			error
+		} = await request('/app-api/system/dict-data/type', {
+			method: 'GET',
+			data: {
+				type: "member_store_category" // 根据聚店列表页的经验，类型是这个
+			}
+		});
+
+		if (error) {
+			uni.showToast({
+				title: '加载聚店类别失败',
+				icon: 'none'
+			});
+			// 即使失败，也给一个空数组，防止页面崩溃
+			categoryList.value = [];
+			return;
+		}
+
+		if (data && Array.isArray(data)) {
+			// 将接口返回的数据赋值给 categoryList
+			categoryList.value = data;
+			console.log('成功获取聚店类别:', categoryList.value);
+		}
+	};
 
 	const getStoreDetails = async (storeId) => {
 		isLoading.value = true;
@@ -401,7 +441,13 @@
 	};
 
 	const handleCategoryChange = (e) => {
-		form.value.category = categoryOptions[e.detail.value];
+		const selectedIndex = e.detail.value;
+		// 根据索引从原始列表中找到对应的项
+		const selectedCategory = categoryList.value[selectedIndex];
+		if (selectedCategory) {
+			// 将 'bar' 这样的 value 赋给 form.category
+			form.value.category = selectedCategory.value;
+		}
 	};
 
 	// 【核心修改】提交逻辑调整

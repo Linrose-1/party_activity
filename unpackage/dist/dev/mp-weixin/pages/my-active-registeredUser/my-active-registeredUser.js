@@ -31,7 +31,7 @@ const _sfc_main = {
           });
           handleRefresh();
         } catch (e) {
-          common_vendor.index.__f__("error", "at pages/my-active-registeredUser/my-active-registeredUser.vue:109", "解析聚会信息失败", e);
+          common_vendor.index.__f__("error", "at pages/my-active-registeredUser/my-active-registeredUser.vue:111", "解析聚会信息失败", e);
           common_vendor.index.showToast({
             title: "加载聚会信息失败",
             icon: "none"
@@ -236,12 +236,13 @@ const _sfc_main = {
             b: common_vendor.t(item.memberUser.nickname || "匿名用户"),
             c: common_vendor.t(formatTime(item.registeredAt)),
             d: common_vendor.t(item.paymentStatusStr),
-            e: common_vendor.n(getStatusClass(item.paymentStatusStr)),
+            e: common_vendor.n(getStatusClass(item.paymentStatusStr))
+          }, activityInfo.value.registrationFee > 0 ? common_vendor.e({
             f: item.paymentScreenshotUrl
           }, item.paymentScreenshotUrl ? {
             g: item.paymentScreenshotUrl,
             h: common_vendor.o(($event) => previewImage(item.paymentScreenshotUrl), item.id)
-          } : {}, {
+          } : {}) : {}, {
             i: item.rejectMsg
           }, item.rejectMsg ? {
             j: "90acde2c-3-" + i0,
@@ -259,30 +260,31 @@ const _sfc_main = {
           } : {}, {
             p: item.id
           });
-        })
+        }),
+        j: activityInfo.value.registrationFee > 0
       } : !loading.value ? {
-        k: common_vendor.p({
+        l: common_vendor.p({
           type: "staff-filled",
           size: "60",
           color: "#c8c9cc"
         })
       } : {}, {
-        j: !loading.value,
-        l: loading.value && userList.value.length > 0
+        k: !loading.value,
+        m: loading.value && userList.value.length > 0
       }, loading.value && userList.value.length > 0 ? {
-        m: common_vendor.p({
+        n: common_vendor.p({
           status: "loading"
         })
       } : {}, {
-        n: !hasMore.value && userList.value.length > 0
+        o: !hasMore.value && userList.value.length > 0
       }, !hasMore.value && userList.value.length > 0 ? {
-        o: common_vendor.p({
+        p: common_vendor.p({
           status: "noMore"
         })
       } : {}, {
-        p: refreshing.value,
-        q: common_vendor.o(onRefresh),
-        r: common_vendor.o(onReachBottom)
+        q: refreshing.value,
+        r: common_vendor.o(onRefresh),
+        s: common_vendor.o(onReachBottom)
       });
     };
   }

@@ -100,10 +100,10 @@
 			<view class="section-block user-opportunities-section" @click="$emit('goToOpportunities')">
 				<view class="section-title">
 					<uni-icons type="pyq" size="18" color="#FF6A00"></uni-icons>
-					<text>Ta的商友圈</text>
+					<text>TA的商友圈</text>
 				</view>
 				<view class="section-content">
-					<text class="content-text">查看Ta发布的所有商机</text>
+					<text class="content-text">查看TA发布的所有商机</text>
 					<uni-icons type="right" size="16" color="#bbb"></uni-icons>
 				</view>
 			</view>
@@ -142,12 +142,14 @@
 			<view class="slogan-primary">连接全球精英商友</view>
 			<view class="slogan-secondary">GO FOR PARTNERS • GO FOR FUTURE</view>
 			<view class="platform-qr-code" @click="previewImage(platformQrCodeUrl)">
-				<image :src="dynamicQrCodeUrl || platformQrCodeUrl" mode="aspectFit" show-menu-by-longpress />
+				<image :src="platformQrCodeUrl" mode="aspectFit" show-menu-by-longpress />
+				<!-- <image :src="dynamicQrCodeUrl || platformQrCodeUrl" mode="aspectFit" show-menu-by-longpress /> -->
 			</view>
 			<!-- 新增：平台二维码下方的提示文字 -->
 			<view class="qr-hint-back">扫码或长按识别加入平台</view>
 			<view class="logo">
 				<image :src="logoUrl" mode="aspectFit" />
+				<!-- <image :src="platformQrCodeUrl" mode="aspectFit" /> -->
 			</view>
 		</view>
 	</view>

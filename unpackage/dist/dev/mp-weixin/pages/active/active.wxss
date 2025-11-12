@@ -99,9 +99,35 @@
   color: #FF6B00;
 }
 .filters.data-v-12e513cf {
-  padding: 24rpx 32rpx;
+  padding: 0 32rpx;
   background: white;
   border-bottom: 2rpx solid #eee;
+}
+.filter-header.data-v-12e513cf {
+  display: flex;
+  justify-content: flex-end;
+  /* 让内部元素靠右对齐 */
+  margin-bottom: 20rpx;
+  /* 与下方的筛选器拉开一点距离 */
+}
+.reset-btn.data-v-12e513cf {
+  background-color: #f0f0f0;
+  color: #666;
+  border: 1rpx solid #e0e0e0;
+  padding: 8rpx 20rpx;
+  font-size: 24rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  margin: 0;
+  margin-right: 40rpx;
+}
+.reset-btn.data-v-12e513cf::after {
+  border: none;
+}
+.reset-btn .uni-icons.data-v-12e513cf {
+  margin-right: 8rpx;
 }
 .uni-list.data-v-12e513cf {
   margin: 15rpx auto;
