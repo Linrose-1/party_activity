@@ -220,7 +220,7 @@ const _sfc_main = {
       } : {}, {
         g: friendList.value.length === 0 && loadStatus.value === "noMore"
       }, friendList.value.length === 0 && loadStatus.value === "noMore" ? {
-        h: common_assets._imports_0$3
+        h: common_assets._imports_0$2
       } : {}, {
         i: currentTab.value === 1,
         j: userInfo.value && userInfo.value.parentName

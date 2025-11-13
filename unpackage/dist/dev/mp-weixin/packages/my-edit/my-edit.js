@@ -167,6 +167,9 @@ const _sfc_main = {
       updateUser: (data) => utils_request.request("/app-api/member/user/update", {
         method: "PUT",
         data
+      }),
+      autoPostToCircle: () => utils_request.request("/app-api/member/business-opportunities/autoOpportunities", {
+        method: "POST"
       })
     };
     common_vendor.onMounted(async () => {
@@ -208,7 +211,7 @@ const _sfc_main = {
         error
       } = await Api.getAreaTree();
       if (error) {
-        common_vendor.index.__f__("error", "at packages/my-edit/my-edit.vue:418", "获取地区树失败:", error);
+        common_vendor.index.__f__("error", "at packages/my-edit/my-edit.vue:421", "获取地区树失败:", error);
       } else {
         areaTree.value = data || [];
       }
@@ -237,10 +240,10 @@ const _sfc_main = {
         error
       } = await Api.getIndustryTree();
       if (error) {
-        common_vendor.index.__f__("error", "at packages/my-edit/my-edit.vue:465", "获取行业树失败:", error);
+        common_vendor.index.__f__("error", "at packages/my-edit/my-edit.vue:468", "获取行业树失败:", error);
       } else {
         industryTree.value = processIndustryTree(data || []);
-        common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:469", "处理后的行业树:", industryTree.value);
+        common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:472", "处理后的行业树:", industryTree.value);
       }
     };
     function findPathById(tree, targetId) {
@@ -417,7 +420,7 @@ const _sfc_main = {
             src: tempFilePath,
             cropScale: "1:1",
             success: (cropRes) => uploadAvatar(cropRes.tempFilePath),
-            fail: (err) => common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:715", "用户取消裁剪或裁剪失败:", err)
+            fail: (err) => common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:718", "用户取消裁剪或裁剪失败:", err)
           });
         }
       });
@@ -522,23 +525,59 @@ const _sfc_main = {
             icon: "none"
           });
         } else {
-          initialDataState.value = JSON.stringify({
-            form: form.value,
-            professionsList: professionsList.value,
-            schoolsList: schoolsList.value,
-            companyAndIndustryList: companyAndIndustryList.value,
-            selectedHobbies: selectedHobbies.value,
-            otherHobbyText: otherHobbyText.value
-          });
           common_vendor.index.showToast({
-            title: "保存成功",
+            title: "资料保存成功",
             icon: "success"
           });
-          setTimeout(() => common_vendor.index.navigateBack(), 1500);
+          setTimeout(() => {
+            common_vendor.index.showModal({
+              title: "发布到商友圈",
+              content: "您的资料已完善，是否发布一条商机到商友圈，让更多商友看到您？",
+              confirmText: "立即发布",
+              cancelText: "暂不发布",
+              success: (res) => {
+                if (res.confirm) {
+                  handleAutoPost();
+                } else if (res.cancel) {
+                  common_vendor.index.navigateBack();
+                }
+              }
+            });
+          }, 800);
         }
       }).catch((err) => {
-        common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:874", "表单验证失败：", err);
+        common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:906", "表单验证失败：", err);
       });
+    };
+    const handleAutoPost = async () => {
+      common_vendor.index.showLoading({
+        title: "正在发布..."
+      });
+      const {
+        data,
+        error
+      } = await Api.autoPostToCircle();
+      common_vendor.index.hideLoading();
+      if (error) {
+        common_vendor.index.showModal({
+          title: "发布失败",
+          content: typeof error === "object" ? error.msg : error,
+          showCancel: false,
+          // 只显示确认按钮
+          confirmText: "知道了"
+        });
+      } else {
+        common_vendor.index.showToast({
+          title: "已成功发布到商友圈",
+          icon: "success"
+        });
+        setTimeout(() => {
+          common_vendor.index.switchTab({
+            url: "/pages/home/home"
+            // 【重要】首页是Tab页，必须用 switchTab
+          });
+        }, 1500);
+      }
     };
     const goToLabelEditPage = () => {
       common_vendor.index.navigateTo({

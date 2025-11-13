@@ -351,6 +351,9 @@
 			method: 'PUT',
 			data
 		}),
+		autoPostToCircle: () => request('/app-api/member/business-opportunities/autoOpportunities', {
+			method: 'POST'
+		})
 	};
 
 
@@ -855,24 +858,91 @@
 				});
 			} else {
 				// 保存成功后，更新初始状态为当前状态
-				initialDataState.value = JSON.stringify({
-					form: form.value,
-					professionsList: professionsList.value,
-					schoolsList: schoolsList.value,
-					companyAndIndustryList: companyAndIndustryList.value,
-					selectedHobbies: selectedHobbies.value,
-					otherHobbyText: otherHobbyText.value
-				});
+				// initialDataState.value = JSON.stringify({
+				// 	form: form.value,
+				// 	professionsList: professionsList.value,
+				// 	schoolsList: schoolsList.value,
+				// 	companyAndIndustryList: companyAndIndustryList.value,
+				// 	selectedHobbies: selectedHobbies.value,
+				// 	otherHobbyText: otherHobbyText.value
+				// });
 
+				// uni.showToast({
+				// 	title: '保存成功',
+				// 	icon: 'success'
+				// });
+				// setTimeout(() => uni.navigateBack(), 1500);
+				// ==================== 【核心修改区域】 ====================
+				// 1. 先提示保存成功
 				uni.showToast({
-					title: '保存成功',
+					title: '资料保存成功',
 					icon: 'success'
 				});
-				setTimeout(() => uni.navigateBack(), 1500);
+
+				// 2. 移除原来的自动返回逻辑
+				// setTimeout(() => uni.navigateBack(), 1500);
+
+				// 3. 延迟一小段时间后，弹出新的引导弹窗
+				setTimeout(() => {
+					uni.showModal({
+						title: '发布到商友圈',
+						content: '您的资料已完善，是否发布一条商机到商友圈，让更多商友看到您？',
+						confirmText: '立即发布',
+						cancelText: '暂不发布',
+						success: (res) => {
+							if (res.confirm) {
+								// 用户选择“是”，调用自动发圈函数
+								handleAutoPost();
+							} else if (res.cancel) {
+								// 用户选择“否”，则返回上一页
+								uni.navigateBack();
+							}
+						}
+					});
+				}, 800); // 延迟800毫秒，确保用户看到了“保存成功”的提示
+				// =========================================================
 			}
 		}).catch(err => {
 			console.log('表单验证失败：', err);
 		});
+	};
+
+	/**
+	 * 处理自动发圈的函数
+	 */
+	const handleAutoPost = async () => {
+		uni.showLoading({
+			title: '正在发布...'
+		});
+
+		const {
+			data,
+			error
+		} = await Api.autoPostToCircle();
+
+		uni.hideLoading();
+
+		if (error) {
+			// 【核心】如果后端返回错误（例如已发布过），将错误信息展示给用户
+			uni.showModal({
+				title: '发布失败',
+				content: typeof error === 'object' ? error.msg : error,
+				showCancel: false, // 只显示确认按钮
+				confirmText: '知道了'
+			});
+		} else {
+			// 发布成功
+			uni.showToast({
+				title: '已成功发布到商友圈',
+				icon: 'success'
+			});
+			// 延迟1.5秒后跳转到商友圈（首页）
+			setTimeout(() => {
+				uni.switchTab({
+					url: '/pages/home/home' // 【重要】首页是Tab页，必须用 switchTab
+				});
+			}, 1500);
+		}
 	};
 
 	const goToLabelEditPage = () => {

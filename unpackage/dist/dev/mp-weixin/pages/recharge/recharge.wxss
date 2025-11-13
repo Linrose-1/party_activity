@@ -64,6 +64,16 @@
   border-radius: 16rpx;
   border: 1px solid #eee;
 }
+.qrcode-section .qrcode-placeholder.data-v-2984a38c {
+  width: 350rpx;
+  height: 350rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f7f7f7;
+  border-radius: 16rpx;
+  border: 1px solid #eee;
+}
 .qrcode-section .qrcode-tip.data-v-2984a38c {
   font-size: 28rpx;
   color: #666;

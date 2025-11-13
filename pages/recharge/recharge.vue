@@ -13,9 +13,16 @@
 			</view>
 			<view class="qrcode-section">
 				<!-- 【需求5】付款码展示 -->
-				<image src="/static/fake-qrcode.png" class="qrcode-image" mode="aspectFit" @click="previewQRCode">
-				</image>
-				<p class="qrcode-tip">请使用微信或支付宝扫码完成支付</p>
+				<!-- 1. :src 动态绑定到 paymentQRCodeUrl -->
+				<!-- 2. 添加一个 v-if 判断，只在 URL 加载成功后显示图片 -->
+				<image v-if="paymentQRCodeUrl" :src="paymentQRCodeUrl" class="qrcode-image" mode="aspectFit"
+					@click="previewQRCode"></image>
+
+				<!-- (可选) 添加一个加载中或加载失败的占位符 -->
+				<view v-else class="qrcode-placeholder">
+					<uni-load-more status="loading" contentText.loading="收款码加载中..."></uni-load-more>
+				</view>
+				<p class="qrcode-tip">请扫码完成支付</p>
 			</view>
 		</view>
 
@@ -105,6 +112,7 @@
 	// --- 页面状态 ---
 	const isSubmitting = ref(false);
 	const userInfo = ref(null); // 用于获取 userId
+	const paymentQRCodeUrl = ref('');
 
 	// --- 表单数据 ---
 	const form = reactive({
@@ -127,18 +135,66 @@
 			form.payType = 1; // 默认选中智米充值
 		}
 		// 获取用户信息以备提交时使用
-		fetchUserInfo();
+		// fetchUserInfo();
+	});
+	/**
+	 * 在 onMounted 中执行所有初始化数据请求
+	 */
+	onMounted(() => {
+		// 使用 Promise.all 并行获取用户信息和平台配置，提高效率
+		Promise.all([
+			fetchUserInfo(),
+			fetchPlatformConfig()
+		]).catch(error => {
+			console.error("初始化页面数据时发生错误:", error);
+			// 可以在这里做一个统一的错误提示
+		});
 	});
 
 	// --- API 调用 ---
 	/**
+	 * 获取平台配置信息（包括收款码URL）
+	 */
+	const fetchPlatformConfig = async () => {
+		const {
+			data,
+			error
+		} = await request('/app-api/system/platformConfig/getPlatformConfig');
+
+		if (error) {
+			console.error("获取平台配置失败:", error);
+			uni.showToast({
+				title: '收款码加载失败，请刷新重试',
+				icon: 'none'
+			});
+			return;
+		}
+
+		if (data && data.paymentUrl) {
+			paymentQRCodeUrl.value = data.paymentUrl;
+			console.log("成功获取收款码URL:", paymentQRCodeUrl.value);
+		} else {
+			console.error("平台配置中未找到 paymentUrl");
+			uni.showToast({
+				title: '无法获取收款码',
+				icon: 'none'
+			});
+		}
+	};
+	/**
 	 * 获取当前登录用户信息
 	 */
 	const fetchUserInfo = async () => {
-		const { data, error } = await request('/app-api/member/user/get');
+		const {
+			data,
+			error
+		} = await request('/app-api/member/user/get');
 		if (error) {
 			console.error("获取用户信息失败:", error);
-			uni.showToast({ title: '无法获取用户信息，请重新登录', icon: 'none' });
+			uni.showToast({
+				title: '无法获取用户信息，请重新登录',
+				icon: 'none'
+			});
 			return;
 		}
 		userInfo.value = data;
@@ -170,8 +226,16 @@
 	 * 预览二维码
 	 */
 	const previewQRCode = () => {
+		// 增加一个安全检查，防止在URL加载失败时点击报错
+		if (!paymentQRCodeUrl.value) {
+			uni.showToast({
+				title: '二维码正在加载中...',
+				icon: 'none'
+			});
+			return;
+		}
 		uni.previewImage({
-			urls: ['/static/fake-qrcode.png'] // 只有一个二维码
+			urls: [paymentQRCodeUrl.value] // 使用动态获取的 URL
 		});
 	};
 
@@ -181,14 +245,22 @@
 	 */
 	const handleFileSelect = async (e) => {
 		isSubmitting.value = true; // 开始上传，禁用提交按钮
-		uni.showLoading({ title: '图片上传中...' });
+		uni.showLoading({
+			title: '图片上传中...'
+		});
 
 		for (const tempFile of e.tempFiles) {
-			const { data: url, error } = await uploadFile(tempFile);
+			const {
+				data: url,
+				error
+			} = await uploadFile(tempFile);
 			if (error) {
 				uni.hideLoading();
 				isSubmitting.value = false;
-				uni.showToast({ title: `图片上传失败: ${error}`, icon: 'none' });
+				uni.showToast({
+					title: `图片上传失败: ${error}`,
+					icon: 'none'
+				});
 				// 从 uni-file-picker 的模型中移除失败的文件
 				const index = imageValue.value.findIndex(item => item.uuid === tempFile.uuid);
 				if (index > -1) {
@@ -218,12 +290,14 @@
 			form.imageUrls.splice(index, 1);
 		}
 	};
-	
+
 	/**
 	 * 跳转到会员详情页
 	 */
 	const goToMemberDetails = () => {
-		uni.navigateTo({ url: '/pages/my-memberDetails/my-memberDetails' });
+		uni.navigateTo({
+			url: '/pages/my-memberDetails/my-memberDetails'
+		});
 	};
 
 	/**
@@ -232,23 +306,40 @@
 	const handleSubmit = async () => {
 		// 表单校验
 		if (!form.payType) {
-			return uni.showToast({ title: '请选择充值类型', icon: 'none' });
+			return uni.showToast({
+				title: '请选择充值类型',
+				icon: 'none'
+			});
 		}
 		if (!form.amount || isNaN(parseFloat(form.amount)) || parseFloat(form.amount) <= 0) {
-			return uni.showToast({ title: '请输入有效的付款金额', icon: 'none' });
+			return uni.showToast({
+				title: '请输入有效的付款金额',
+				icon: 'none'
+			});
 		}
 		if (!form.payNo.trim()) {
-			return uni.showToast({ title: '请输入支付订单号', icon: 'none' });
+			return uni.showToast({
+				title: '请输入支付订单号',
+				icon: 'none'
+			});
 		}
 		if (form.imageUrls.length === 0) {
-			return uni.showToast({ title: '请上传支付凭证', icon: 'none' });
+			return uni.showToast({
+				title: '请上传支付凭证',
+				icon: 'none'
+			});
 		}
 		if (!userInfo.value || !userInfo.value.id) {
-			return uni.showToast({ title: '无法获取用户信息，请重试', icon: 'none' });
+			return uni.showToast({
+				title: '无法获取用户信息，请重试',
+				icon: 'none'
+			});
 		}
-		
+
 		isSubmitting.value = true;
-		uni.showLoading({ title: '正在提交...' });
+		uni.showLoading({
+			title: '正在提交...'
+		});
 
 		// 准备提交的数据
 		const payload = {
@@ -259,16 +350,22 @@
 			remark: form.remark.trim(),
 			payType: form.payType,
 		};
-		
-		const { data: recordId, error } = await createPaymentRecord(payload);
-		
+
+		const {
+			data: recordId,
+			error
+		} = await createPaymentRecord(payload);
+
 		uni.hideLoading();
 		isSubmitting.value = false;
 
 		if (error) {
-			return uni.showToast({ title: `提交失败: ${error}`, icon: 'none' });
+			return uni.showToast({
+				title: `提交失败: ${error}`,
+				icon: 'none'
+			});
 		}
-		
+
 		// 提交成功
 		uni.showModal({
 			title: '提交成功',
@@ -279,7 +376,6 @@
 			}
 		});
 	};
-
 </script>
 
 <style lang="scss" scoped>
@@ -359,6 +455,17 @@
 			border: 1px solid #eee;
 		}
 
+		.qrcode-placeholder {
+			width: 350rpx;
+			height: 350rpx;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			background-color: #f7f7f7;
+			border-radius: 16rpx;
+			border: 1px solid #eee;
+		}
+
 		.qrcode-tip {
 			font-size: 28rpx;
 			color: #666;
@@ -386,11 +493,11 @@
 			margin-left: 8rpx;
 		}
 	}
-	
+
 	.recharge-type-selector {
 		display: flex;
 		gap: 30rpx;
-		
+
 		button {
 			flex: 1;
 			background-color: #f5f5f5;
@@ -398,20 +505,20 @@
 			border: 1px solid #e0e0e0;
 			transition: all 0.2s ease;
 			font-size: 28rpx;
-			
+
 			&.active {
 				background-color: $theme-color;
 				color: white;
 				border-color: $theme-color;
 				font-weight: bold;
 			}
-			
+
 			&::after {
 				border: none;
 			}
 		}
 	}
-	
+
 	.type-tip {
 		margin-top: 20rpx;
 		padding: 15rpx 20rpx;
@@ -421,7 +528,7 @@
 		color: #888;
 		display: flex;
 		align-items: center;
-		
+
 		.link-text {
 			color: $theme-color;
 			text-decoration: underline;
@@ -459,20 +566,20 @@
 		box-sizing: border-box;
 		border: 1px solid transparent;
 		transition: border-color 0.2s;
-		
+
 		&:focus {
 			border-color: $theme-color;
 			background-color: #fff;
 		}
 	}
-	
+
 	.form-tip {
 		font-size: 26rpx;
 		color: #999;
 		margin-top: 15rpx;
 		display: flex;
 		align-items: center;
-		
+
 		.uni-icons {
 			margin-right: 8rpx;
 		}
@@ -481,7 +588,7 @@
 	::v-deep .uni-file-picker__container {
 		justify-content: flex-start;
 	}
-	
+
 	.security-notice {
 		display: flex;
 		align-items: flex-start;
@@ -517,7 +624,7 @@
 			box-shadow: none;
 			color: #888;
 		}
-		
+
 		&::after {
 			border: none;
 		}
