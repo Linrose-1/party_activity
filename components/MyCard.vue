@@ -20,6 +20,22 @@
 
 			<!-- 2. 基础资料区-->
 			<view class="section-block basic-info-section">
+				<!-- ==================== 备注名模块 ==================== -->
+				<!-- 只在查看他人名片时显示 -->
+				<view v-if="!isViewingOwnCard" class="info-item remark-item" @click="$emit('editRemark')">
+					<uni-icons type="compose" size="18" color="#888" />
+					<text class="info-label">备注名：</text>
+
+					<!-- 如果有备注名，则显示备注名 -->
+					<text v-if="remarkName" class="info-value remark-value">{{ remarkName }}</text>
+
+					<!-- 如果没有备注名，则显示占位提示 -->
+					<text v-else class="info-value placeholder-value">请输入商友的备忘名称或备注</text>
+
+					<!-- 添加一个向右的箭头，暗示可点击 -->
+					<uni-icons type="right" size="16" color="#bbb" class="remark-arrow"></uni-icons>
+				</view>
+				<!-- ========================================================== -->
 				<view class="info-item">
 					<uni-icons type="calendar-filled" size="18" color="#888" />
 					<text class="info-label">年代：</text>
@@ -173,6 +189,14 @@
 			type: String,
 			default: '张三'
 		},
+		remarkName: {
+			type: String,
+			default: ''
+		}, // 备注名
+		isViewingOwnCard: {
+			type: Boolean,
+			default: false
+		}, // 是否在看自己的名片
 		pinyinName: {
 			type: String,
 			default: 'ZHANG SAN'
@@ -444,6 +468,38 @@
 			font-size: 26rpx;
 			padding: 4rpx 16rpx;
 			border-radius: 8rpx;
+		}
+
+		.remark-item {
+			cursor: pointer;
+			transition: background-color 0.2s;
+			padding: 15rpx 10rpx;
+			/* 增加内边距，扩大点击区域 */
+			margin: -15rpx -10rpx;
+			/* 负 margin 平衡内边距，保持布局 */
+			border-radius: 8rpx;
+			position: relative;
+			/* 为箭头定位 */
+		}
+
+		.remark-item:active {
+			background-color: #f9f9f9;
+		}
+
+		.remark-value {
+			font-weight: 500;
+		}
+
+		.placeholder-value {
+			color: #999;
+			font-style: italic;
+			flex: 1;
+			/* 让占位符撑满，将箭头推到最右边 */
+		}
+
+		.remark-arrow {
+			margin-left: auto;
+			/* 自动推到最右边 */
 		}
 	}
 

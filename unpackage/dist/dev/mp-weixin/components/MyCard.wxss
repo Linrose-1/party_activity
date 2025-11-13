@@ -87,6 +87,33 @@
   padding: 4rpx 16rpx;
   border-radius: 8rpx;
 }
+.basic-info-section .remark-item.data-v-0262bca8 {
+  cursor: pointer;
+  transition: background-color 0.2s;
+  padding: 15rpx 10rpx;
+  /* 增加内边距，扩大点击区域 */
+  margin: -15rpx -10rpx;
+  /* 负 margin 平衡内边距，保持布局 */
+  border-radius: 8rpx;
+  position: relative;
+  /* 为箭头定位 */
+}
+.basic-info-section .remark-item.data-v-0262bca8:active {
+  background-color: #f9f9f9;
+}
+.basic-info-section .remark-value.data-v-0262bca8 {
+  font-weight: 500;
+}
+.basic-info-section .placeholder-value.data-v-0262bca8 {
+  color: #999;
+  font-style: italic;
+  flex: 1;
+  /* 让占位符撑满，将箭头推到最右边 */
+}
+.basic-info-section .remark-arrow.data-v-0262bca8 {
+  margin-left: auto;
+  /* 自动推到最右边 */
+}
 .professional-section.data-v-0262bca8 {
   background: linear-gradient(135deg, #FFFBF5, #FFF3E6);
   border: 1px solid #FDE4C9;

@@ -20,6 +20,16 @@ const _sfc_main = {
       type: String,
       default: "张三"
     },
+    remarkName: {
+      type: String,
+      default: ""
+    },
+    // 备注名
+    isViewingOwnCard: {
+      type: Boolean,
+      default: false
+    },
+    // 是否在看自己的名片
     pinyinName: {
       type: String,
       default: "ZHANG SAN"
@@ -184,15 +194,33 @@ const _sfc_main = {
         c: common_vendor.t(__props.name),
         d: common_vendor.t(__props.pinyinName),
         e: common_vendor.t(__props.title),
-        f: common_vendor.p({
+        f: !__props.isViewingOwnCard
+      }, !__props.isViewingOwnCard ? common_vendor.e({
+        g: common_vendor.p({
+          type: "compose",
+          size: "18",
+          color: "#888"
+        }),
+        h: __props.remarkName
+      }, __props.remarkName ? {
+        i: common_vendor.t(__props.remarkName)
+      } : {}, {
+        j: common_vendor.p({
+          type: "right",
+          size: "16",
+          color: "#bbb"
+        }),
+        k: common_vendor.o(($event) => _ctx.$emit("editRemark"))
+      }) : {}, {
+        l: common_vendor.p({
           type: "calendar-filled",
           size: "18",
           color: "#888"
         }),
-        g: common_vendor.t(__props.era || "未设置"),
-        h: common_vendor.f(__props.contactInfo, (item, index, i0) => {
+        m: common_vendor.t(__props.era || "未设置"),
+        n: common_vendor.f(__props.contactInfo, (item, index, i0) => {
           return {
-            a: "0262bca8-1-" + i0,
+            a: "0262bca8-3-" + i0,
             b: common_vendor.p({
               type: item.icon,
               size: "18",
@@ -203,28 +231,28 @@ const _sfc_main = {
             e: index
           };
         }),
-        i: professionalTitles.value.length > 0
+        o: professionalTitles.value.length > 0
       }, professionalTitles.value.length > 0 ? {
-        j: common_vendor.p({
+        p: common_vendor.p({
           type: "staff-filled",
           size: "18",
           color: "#C9A063"
         }),
-        k: common_vendor.f(professionalTitles.value, (item, index, i0) => {
+        q: common_vendor.f(professionalTitles.value, (item, index, i0) => {
           return {
             a: common_vendor.t(item),
             b: index
           };
         })
       } : {}, {
-        l: careerGroups.value.length > 0
+        r: careerGroups.value.length > 0
       }, careerGroups.value.length > 0 ? {
-        m: common_vendor.p({
+        s: common_vendor.p({
           type: "flag-filled",
           size: "18",
           color: "#F78C2F"
         }),
-        n: common_vendor.f(careerGroups.value, (group, index, i0) => {
+        t: common_vendor.f(careerGroups.value, (group, index, i0) => {
           return {
             a: common_vendor.t(group.company),
             b: common_vendor.t(group.position),
@@ -233,65 +261,65 @@ const _sfc_main = {
           };
         })
       } : {}, {
-        o: __props.haveResources || __props.needResources
+        v: __props.haveResources || __props.needResources
       }, __props.haveResources || __props.needResources ? common_vendor.e({
-        p: __props.haveResources
+        w: __props.haveResources
       }, __props.haveResources ? {
-        q: common_vendor.p({
+        x: common_vendor.p({
           type: "hand-up-filled",
           size: "18",
           color: "#28a745"
         }),
-        r: common_vendor.t(__props.haveResources)
+        y: common_vendor.t(__props.haveResources)
       } : {}, {
-        s: __props.needResources
+        z: __props.needResources
       }, __props.needResources ? {
-        t: common_vendor.p({
+        A: common_vendor.p({
           type: "paperplane-filled",
           size: "18",
           color: "#007bff"
         }),
-        v: common_vendor.t(__props.needResources)
+        B: common_vendor.t(__props.needResources)
       } : {}) : {}, {
-        w: __props.signature || __props.personalBio
+        C: __props.signature || __props.personalBio
       }, __props.signature || __props.personalBio ? common_vendor.e({
-        x: __props.signature
+        D: __props.signature
       }, __props.signature ? {
-        y: common_vendor.t(__props.signature)
+        E: common_vendor.t(__props.signature)
       } : {}, {
-        z: __props.personalBio
+        F: __props.personalBio
       }, __props.personalBio ? {
-        A: common_vendor.t(__props.personalBio)
+        G: common_vendor.t(__props.personalBio)
       } : {}) : {}, {
-        B: common_vendor.p({
+        H: common_vendor.p({
           type: "pyq",
           size: "18",
           color: "#FF6A00"
         }),
-        C: common_vendor.p({
+        I: common_vendor.p({
           type: "right",
           size: "16",
           color: "#bbb"
         }),
-        D: common_vendor.o(($event) => _ctx.$emit("goToOpportunities")),
-        E: __props.showUserQrCode
+        J: common_vendor.o(($event) => _ctx.$emit("goToOpportunities")),
+        K: __props.showUserQrCode
       }, __props.showUserQrCode ? {
-        F: __props.userWeChatQrCodeUrl,
-        G: common_vendor.o(($event) => previewImage(__props.userWeChatQrCodeUrl))
+        L: __props.userWeChatQrCodeUrl,
+        M: common_vendor.o(($event) => previewImage(__props.userWeChatQrCodeUrl))
       } : {}, {
-        H: __props.shardCode
+        N: __props.shardCode
       }, __props.shardCode ? {
-        I: common_vendor.t(__props.shardCode),
-        J: common_vendor.p({
+        O: common_vendor.t(__props.shardCode),
+        P: common_vendor.p({
           type: "paperclip",
           size: "16",
           color: "#F78C2F"
         }),
-        K: common_vendor.o(copyShardCode)
+        Q: common_vendor.o(copyShardCode)
       } : {}, {
-        L: __props.platformQrCodeUrl,
-        M: common_vendor.o(($event) => previewImage(__props.platformQrCodeUrl)),
-        N: __props.logoUrl
+        R: __props.platformQrCodeUrl,
+        S: common_vendor.o(($event) => previewImage(__props.platformQrCodeUrl)),
+        T: __props.logoUrl
       });
     };
   }

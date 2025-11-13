@@ -27,8 +27,9 @@
 			</view>
 
 			<MyCard :avatar="userInfo.avatar" :name="userInfo.realName || userInfo.nickname"
-				:pinyin-name="userInfo.pinyinName" :title="userInfo.titleName" :era="userInfo.era"
-				:company-name="userInfo.companyName" :position-title="userInfo.positionTitle"
+				:remark-name="userInfo.remarkName" :is-viewing-own-card="isViewingOwnCard"
+				@editRemark="handleEditRemark" :pinyin-name="userInfo.pinyinName" :title="userInfo.titleName"
+				:era="userInfo.era" :company-name="userInfo.companyName" :position-title="userInfo.positionTitle"
 				:industry="userInfo.industry" :professional-title="userInfo.professionalTitle"
 				:have-resources="userInfo.haveResources" :need-resources="userInfo.needResources"
 				:signature="userInfo.signature" :personal-bio="userInfo.personalBio"
@@ -377,6 +378,7 @@
 			avatar: rawUserData.avatar,
 			realName: rawUserData.realName,
 			nickname: rawUserData.nickname,
+			remarkName: rawUserData.remarkName,
 			pinyinName: rawUserData.topUpLevel?.name || rawUserData.topUpLevelName || '', // 会员等级
 			titleName: rawUserData.level?.name || rawUserData.levelName || '', // 身份头衔
 			era: rawUserData.era, // 新增：年代
@@ -563,6 +565,68 @@
 	});
 
 	// --- 6. 事件处理器 ---
+	
+	// 备注相关方法 ---
+	/**
+	 * 处理点击编辑备注的事件
+	 */
+	const handleEditRemark = () => {
+		uni.showModal({
+			title: '修改备注名',
+			content: userInfo.value.remarkName || '', // 将当前备注作为默认值
+			editable: true, // 开启输入框模式
+			placeholderText: '请输入备注名',
+			success: async (res) => {
+				if (res.confirm) {
+					// 用户点击了确认
+					const newRemarkName = res.content.trim();
+
+					// 调用API保存备注
+					const success = await saveUserRemark(newRemarkName);
+
+					if (success) {
+						// 如果保存成功，立即更新本地UI，无需重新请求整个页面
+						userInfo.value.remarkName = newRemarkName;
+						uni.showToast({
+							title: '备注已更新',
+							icon: 'success'
+						});
+					}
+				}
+			}
+		});
+	};
+
+	/**
+	 * 调用API保存用户备注
+	 * @param {string} remark - 新的备注名
+	 * @returns {Promise<boolean>}
+	 */
+	const saveUserRemark = async (remark) => {
+		if (!targetUserId.value) return false;
+
+		const {
+			data,
+			error
+		} = await request('/app-api/member/user-remark/addOrUpdateRemarkName', {
+			method: 'POST',
+			data: {
+				toUserId: targetUserId.value,
+				remarkName: remark,
+			}
+		});
+
+		if (error) {
+			uni.showToast({
+				title: `保存失败: ${error}`,
+				icon: 'none'
+			});
+			return false;
+		}
+
+		return true; // 返回 true 表示成功
+	};
+
 	const goToEdit = () => uni.navigateTo({
 		url: '/packages/my-edit/my-edit'
 	});
