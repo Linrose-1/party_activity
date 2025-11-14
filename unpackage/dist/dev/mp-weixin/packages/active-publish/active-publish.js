@@ -194,7 +194,16 @@ const _sfc_main = {
         url: "/pages/shop-list/shop-list"
       });
     }
-    common_vendor.onLoad(() => {
+    common_vendor.onLoad((options) => {
+      if (options && options.storeId && options.storeName) {
+        common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:401", "从聚店页跳转而来，自动填充聚店信息...");
+        form.value.associatedStoreId = options.storeId;
+        associatedStoreName.value = decodeURIComponent(options.storeName);
+        common_vendor.index.showToast({
+          title: `已选择聚店: ${associatedStoreName.value}`,
+          icon: "none"
+        });
+      }
       try {
         const draftDataString = common_vendor.index.getStorageSync(DRAFT_STORAGE_KEY);
         if (draftDataString) {
@@ -207,7 +216,7 @@ const _sfc_main = {
             title: "已成功加载草稿",
             icon: "none"
           });
-          common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:415", "草稿已加载:", parsedDraft);
+          common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:429", "草稿已加载:", parsedDraft);
         } else {
           const now = /* @__PURE__ */ new Date();
           const year = now.getFullYear();
@@ -218,11 +227,11 @@ const _sfc_main = {
           timeRange.value = [`${todayStr} 19:00:00`, `${todayStr} 21:00:00`];
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at packages/active-publish/active-publish.vue:429", "加载草稿失败:", error);
+        common_vendor.index.__f__("error", "at packages/active-publish/active-publish.vue:443", "加载草稿失败:", error);
         common_vendor.index.removeStorageSync(DRAFT_STORAGE_KEY);
       }
       common_vendor.index.$on("shopSelected", (shop) => {
-        common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:435", "接收到选择的店铺信息:", shop);
+        common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:449", "接收到选择的店铺信息:", shop);
         form.value.associatedStoreId = shop.id;
         associatedStoreName.value = shop.storeName;
       });
@@ -244,13 +253,13 @@ const _sfc_main = {
           icon: "success"
           // 使用成功图标
         });
-        common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:461", "草稿已保存:", draftData);
+        common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:475", "草稿已保存:", draftData);
       } catch (e) {
         common_vendor.index.showToast({
           title: "草稿保存失败",
           icon: "none"
         });
-        common_vendor.index.__f__("error", "at packages/active-publish/active-publish.vue:467", "保存草稿到本地存储失败:", e);
+        common_vendor.index.__f__("error", "at packages/active-publish/active-publish.vue:481", "保存草稿到本地存储失败:", e);
       }
     }
     async function publish() {
@@ -412,14 +421,14 @@ const _sfc_main = {
         } else {
           delete payload.registrationFee;
         }
-        common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:660", "发布聚会 - 最终Payload:", payload);
+        common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:674", "发布聚会 - 最终Payload:", payload);
         const {
           success,
           error
         } = await createActive(payload);
         if (success) {
           common_vendor.index.removeStorageSync(DRAFT_STORAGE_KEY);
-          common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:669", "聚会发布成功，草稿已清除。");
+          common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:683", "聚会发布成功，草稿已清除。");
           common_vendor.index.showModal({
             title: "发布成功",
             content: "可在【我的】-【我的聚会】中查看您发布的聚会。",
@@ -461,7 +470,7 @@ const _sfc_main = {
           });
         }
       } catch (e) {
-        common_vendor.index.__f__("error", "at packages/active-publish/active-publish.vue:717", "发布流程中发生未知错误:", e);
+        common_vendor.index.__f__("error", "at packages/active-publish/active-publish.vue:731", "发布流程中发生未知错误:", e);
         common_vendor.index.showToast({
           title: "操作失败，请检查网络",
           icon: "none"
@@ -472,19 +481,19 @@ const _sfc_main = {
       }
     }
     const createActive = async (payload) => {
-      common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:730", "payload", payload);
+      common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:744", "payload", payload);
       const result = await utils_request.request("/app-api/member/activity/create", {
         method: "POST",
         data: payload
       });
       if (result && !result.error) {
-        common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:738", "createActive result:", result);
+        common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:752", "createActive result:", result);
         return {
           success: true,
           error: null
         };
       } else {
-        common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:747", "请求失败:", result.error);
+        common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:761", "请求失败:", result.error);
         return {
           success: false,
           error: result.error

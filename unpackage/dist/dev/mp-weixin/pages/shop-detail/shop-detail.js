@@ -14,6 +14,15 @@ const _sfc_main = {
   setup(__props) {
     const storeDetail = common_vendor.ref(null);
     const isLoading = common_vendor.ref(true);
+    const coverImages = common_vendor.computed(() => {
+      if (storeDetail.value && Array.isArray(storeDetail.value.storeCoverImageUrls)) {
+        return storeDetail.value.storeCoverImageUrls;
+      }
+      if (storeDetail.value && storeDetail.value.storeCoverImageUrl) {
+        return [storeDetail.value.storeCoverImageUrl];
+      }
+      return [];
+    });
     const formattedOperatingHours = common_vendor.computed(() => {
       const defaultResult = {
         regular: [],
@@ -56,8 +65,14 @@ const _sfc_main = {
           special
         };
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/shop-detail/shop-detail.vue:185", "解析营业时间失败:", error);
-        return { regular: [{ day: "营业时间", time: storeDetail.value.operatingHours }], special: [] };
+        common_vendor.index.__f__("error", "at pages/shop-detail/shop-detail.vue:213", "解析营业时间失败:", error);
+        return {
+          regular: [{
+            day: "营业时间",
+            time: storeDetail.value.operatingHours
+          }],
+          special: []
+        };
       }
     });
     common_vendor.onLoad(async (options) => {
@@ -81,7 +96,7 @@ const _sfc_main = {
       });
       isLoading.value = false;
       if (error) {
-        common_vendor.index.__f__("error", "at pages/shop-detail/shop-detail.vue:217", "获取聚店详情失败:", error);
+        common_vendor.index.__f__("error", "at pages/shop-detail/shop-detail.vue:251", "获取聚店详情失败:", error);
         common_vendor.index.showToast({
           title: error,
           icon: "none"
@@ -89,7 +104,7 @@ const _sfc_main = {
         return;
       }
       storeDetail.value = data;
-      common_vendor.index.__f__("log", "at pages/shop-detail/shop-detail.vue:226", "聚店详情数据:", storeDetail.value);
+      common_vendor.index.__f__("log", "at pages/shop-detail/shop-detail.vue:260", "聚店详情数据:", storeDetail.value);
     });
     const openMap = () => {
       if (!storeDetail.value)
@@ -100,7 +115,10 @@ const _sfc_main = {
         name: storeDetail.value.storeName,
         address: storeDetail.value.fullAddress,
         fail: (err) => {
-          common_vendor.index.showToast({ title: "无法打开地图", icon: "none" });
+          common_vendor.index.showToast({
+            title: "无法打开地图",
+            icon: "none"
+          });
         }
       });
     };
@@ -119,54 +137,72 @@ const _sfc_main = {
       common_vendor.index.makePhoneCall({
         phoneNumber,
         fail: (err) => {
-          common_vendor.index.showToast({ title: "拨打电话失败", icon: "none" });
+          common_vendor.index.showToast({
+            title: "拨打电话失败",
+            icon: "none"
+          });
         }
       });
     };
-    const previewImage = (imageUrl) => {
+    const previewImage = (urls, current = 0) => {
+      if (!urls || urls.length === 0)
+        return;
+      const finalUrls = Array.isArray(urls) ? urls : [urls];
       common_vendor.index.previewImage({
-        urls: [imageUrl],
-        current: imageUrl
+        urls: finalUrls,
+        current: Array.isArray(urls) ? urls[current] : urls
+        // 兼容旧的单图预览
       });
     };
     return (_ctx, _cache) => {
       return common_vendor.e({
         a: storeDetail.value
       }, storeDetail.value ? common_vendor.e({
-        b: common_vendor.t(storeDetail.value.storeName),
-        c: storeDetail.value.distance !== null
+        b: coverImages.value.length > 0
+      }, coverImages.value.length > 0 ? {
+        c: common_vendor.f(coverImages.value, (img, index, i0) => {
+          return {
+            a: img,
+            b: common_vendor.o(($event) => previewImage(coverImages.value, index), index),
+            c: index
+          };
+        })
+      } : {
+        d: common_vendor.t(storeDetail.value.storeName)
+      }, {
+        e: common_vendor.t(storeDetail.value.storeName),
+        f: storeDetail.value.distance !== null
       }, storeDetail.value.distance !== null ? {
-        d: common_vendor.p({
+        g: common_vendor.p({
           type: "paperplane-filled",
           color: "#fff",
           size: "16"
         }),
-        e: common_vendor.t(storeDetail.value.distance)
+        h: common_vendor.t(storeDetail.value.distance)
       } : {}, {
-        f: storeDetail.value.storeCoverImageUrl ? `url(${storeDetail.value.storeCoverImageUrl})` : "linear-gradient(45deg, #2c3e50, #4a6491)",
-        g: storeDetail.value.tags && storeDetail.value.tags.length > 0
+        i: storeDetail.value.tags && storeDetail.value.tags.length > 0
       }, storeDetail.value.tags && storeDetail.value.tags.length > 0 ? {
-        h: common_vendor.f(storeDetail.value.tags, (tag, index, i0) => {
+        j: common_vendor.f(storeDetail.value.tags, (tag, index, i0) => {
           return {
             a: common_vendor.t(tag),
             b: index
           };
         })
       } : {}, {
-        i: common_vendor.t(storeDetail.value.storeDescription || "暂无简介"),
-        j: common_vendor.t(storeDetail.value.fullAddress || "暂无地址信息"),
-        k: formattedOperatingHours.value.regular.length > 0
+        k: common_vendor.t(storeDetail.value.storeDescription || "暂无简介"),
+        l: common_vendor.t(storeDetail.value.fullAddress || "暂无地址信息"),
+        m: formattedOperatingHours.value.regular.length > 0
       }, formattedOperatingHours.value.regular.length > 0 ? common_vendor.e({
-        l: common_vendor.f(formattedOperatingHours.value.regular, (item, k0, i0) => {
+        n: common_vendor.f(formattedOperatingHours.value.regular, (item, k0, i0) => {
           return {
             a: common_vendor.t(item.day),
             b: common_vendor.t(item.time),
             c: item.day
           };
         }),
-        m: formattedOperatingHours.value.special.length > 0
+        o: formattedOperatingHours.value.special.length > 0
       }, formattedOperatingHours.value.special.length > 0 ? {
-        n: common_vendor.f(formattedOperatingHours.value.special, (item, k0, i0) => {
+        p: common_vendor.f(formattedOperatingHours.value.special, (item, k0, i0) => {
           return {
             a: common_vendor.t(item.date),
             b: common_vendor.t(item.description),
@@ -175,39 +211,39 @@ const _sfc_main = {
           };
         })
       } : {}) : {}, {
-        o: storeDetail.value.contactPhone
+        q: storeDetail.value.contactPhone
       }, storeDetail.value.contactPhone ? {
-        p: common_vendor.t(storeDetail.value.contactPhone)
+        r: common_vendor.t(storeDetail.value.contactPhone)
       } : {}, {
-        q: storeDetail.value.contactWechatQrCodeUrl
+        s: storeDetail.value.contactWechatQrCodeUrl
       }, storeDetail.value.contactWechatQrCodeUrl ? {
-        r: storeDetail.value.contactWechatQrCodeUrl,
-        s: common_vendor.o(($event) => previewImage(storeDetail.value.contactWechatQrCodeUrl))
+        t: storeDetail.value.contactWechatQrCodeUrl,
+        v: common_vendor.o(($event) => previewImage(storeDetail.value.contactWechatQrCodeUrl))
       } : {}, {
-        t: storeDetail.value.averageConsumptionRange
+        w: storeDetail.value.averageConsumptionRange
       }, storeDetail.value.averageConsumptionRange ? {
-        v: common_vendor.t(storeDetail.value.averageConsumptionRange)
+        x: common_vendor.t(storeDetail.value.averageConsumptionRange)
       } : {}, {
-        w: common_vendor.p({
+        y: common_vendor.p({
           type: "map-pin-ellipse",
           size: "40",
           color: "#ccc"
         }),
-        x: common_vendor.o(openMap),
-        y: common_vendor.p({
+        z: common_vendor.o(openMap),
+        A: common_vendor.p({
           type: "map-filled",
           color: "#FF6B00",
           size: "20"
         }),
-        z: common_vendor.o((...args) => common_vendor.unref(openNavigation) && common_vendor.unref(openNavigation)(...args)),
-        A: common_vendor.p({
+        B: common_vendor.o((...args) => common_vendor.unref(openNavigation) && common_vendor.unref(openNavigation)(...args)),
+        C: common_vendor.p({
           type: "phone-filled",
           color: "#fff",
           size: "20"
         }),
-        B: common_vendor.o(callPhone)
+        D: common_vendor.o(callPhone)
       }) : {
-        C: common_vendor.p({
+        E: common_vendor.p({
           type: "spinner-cycle",
           size: "30",
           color: "#999"

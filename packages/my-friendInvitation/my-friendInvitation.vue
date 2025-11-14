@@ -94,6 +94,7 @@
 	const themeColor = ref('#FF6E00');
 	const currentTab = ref(0);
 	const tabItems = ['我的邀请人', '我邀请的人'];
+	const loading = ref(false);
 
 	// --- "我邀请的人" 列表相关状态 ---
 	const friendList = ref([]);
@@ -125,25 +126,36 @@
 	onMounted(() => {
 		// 页面加载时，调用新的初始化函数
 		initializePage();
+		getShareUserList(true);
+		fetchUserInfo();
 	});
 
-	onPullDownRefresh(() => {
-		// 根据新的顺序调整逻辑
-		if (currentTab.value === 1) { // 索引为 1 的是“我邀请的人”列表
-			getShareUserList(true);
-		} else {
-			// 索引为 0 的是“我的邀请人”
-			fetchUserInfo().finally(() => uni.stopPullDownRefresh());
+	onPullDownRefresh(async () => {
+		console.log("触发下拉刷新...");
+		try {
+			if (currentTab.value === 1) {
+				// 如果是“我邀请的人”列表，则刷新列表数据
+				await getShareUserList(true);
+			} else {
+				// 如果是“我的邀请人”，则刷新用户信息
+				await fetchUserInfo();
+			}
+		} catch (error) {
+			// 即使出错，也要确保停止刷新动画
+			console.error("下拉刷新时发生错误:", error);
+		} finally {
+			// 【关键】无论 try 块中的操作成功还是失败，finally 块总会执行
+			console.log("刷新操作完成，停止动画。");
+			uni.stopPullDownRefresh();
 		}
 	});
 
 	onReachBottom(() => {
-		// 触底加载只对“我邀请的人”列表有效
-		if (currentTab.value === 1) { // 只有在列表页才加载更多
+		if (currentTab.value === 1 && loadStatus.value === 'more' && !loading.value) {
+			console.log("触底加载更多...");
 			getShareUserList();
 		}
 	});
-
 	// --- 方法 ---
 	/**
 	 * 页面初始化函数，整合所有首次加载和刷新的逻辑
@@ -160,8 +172,16 @@
 		uni.stopPullDownRefresh();
 	};
 
+	// const handleTabClick = (e) => {
+	// 	currentTab.value = e.currentIndex;
+	// };
 	const handleTabClick = (e) => {
 		currentTab.value = e.currentIndex;
+		// 切换 Tab 时滚动回顶部
+		uni.pageScrollTo({
+			scrollTop: 0,
+			duration: 0
+		});
 	};
 
 	/**
@@ -181,41 +201,96 @@
 	 * @description 获取我邀请的人列表 (原"我推荐的商友")
 	 */
 	const getShareUserList = async (isRefresh = false) => {
-		if (loadStatus.value === 'loading' || (!isRefresh && loadStatus.value === 'noMore')) return;
-		if (isRefresh) {
-			pageNo.value = 1;
-			friendList.value = [];
-			loadStatus.value = 'more';
-		}
-		loadStatus.value = 'loading';
-
-		const {
-			data,
-			error
-		} = await request('/app-api/member/user/share-user-list', {
-			data: {
-				pageNo: pageNo.value,
-				pageSize: pageSize.value
-			}
-		});
-
-		// if (isRefresh) uni.stopPullDownRefresh();
-
-		if (error) {
-			loadStatus.value = 'more';
+		// 1. 防并发请求和重复加载
+		if (loadStatus.value === 'loading' || (!isRefresh && loadStatus.value === 'noMore')) {
 			return;
 		}
 
-		if (data && data.list) {
-			const list = data.list || [];
-			friendList.value = isRefresh ? list : [...friendList.value, ...list];
-			total.value = data.total;
-			loadStatus.value = friendList.value.length >= total.value ? 'noMore' : 'more';
-			if (loadStatus.value === 'more') pageNo.value++;
-		} else {
-			loadStatus.value = 'noMore';
+		// 2. 如果是刷新，重置分页状态
+		if (isRefresh) {
+			pageNo.value = 1;
+		}
+
+		// 3. 设置为加载中状态
+		loadStatus.value = 'loading';
+
+		try {
+			// 4. 发送 API 请求
+			const {
+				data,
+				error
+			} = await request('/app-api/member/user/share-user-list', {
+				data: {
+					pageNo: pageNo.value,
+					pageSize: pageSize.value
+				}
+			});
+
+			if (error) {
+				throw new Error(error); // 抛出错误
+			}
+
+			if (data && data.list) {
+				const list = data.list || [];
+				// 5. 合并数据
+				friendList.value = isRefresh ? list : [...friendList.value, ...list];
+
+				// 6. 更新加载状态
+				if (friendList.value.length >= data.total) {
+					loadStatus.value = 'noMore';
+				} else {
+					loadStatus.value = 'more';
+				}
+
+				// 7. 如果成功，页码+1
+				pageNo.value++;
+
+			} else {
+				// 如果没有数据返回，也视为没有更多了
+				loadStatus.value = 'noMore';
+			}
+		} catch (err) {
+			console.error("获取邀请列表失败:", err);
+			// 发生错误时，将状态重置为'more'，以便用户可以下拉刷新或重新尝试上拉
+			loadStatus.value = 'more';
 		}
 	};
+	// const getShareUserList = async (isRefresh = false) => {
+	// 	if (loadStatus.value === 'loading' || (!isRefresh && loadStatus.value === 'noMore')) return;
+	// 	if (isRefresh) {
+	// 		pageNo.value = 1;
+	// 		friendList.value = [];
+	// 		loadStatus.value = 'more';
+	// 	}
+	// 	loadStatus.value = 'loading';
+
+	// 	const {
+	// 		data,
+	// 		error
+	// 	} = await request('/app-api/member/user/share-user-list', {
+	// 		data: {
+	// 			pageNo: pageNo.value,
+	// 			pageSize: pageSize.value
+	// 		}
+	// 	});
+
+	// 	// if (isRefresh) uni.stopPullDownRefresh();
+
+	// 	if (error) {
+	// 		loadStatus.value = 'more';
+	// 		return;
+	// 	}
+
+	// 	if (data && data.list) {
+	// 		const list = data.list || [];
+	// 		friendList.value = isRefresh ? list : [...friendList.value, ...list];
+	// 		total.value = data.total;
+	// 		loadStatus.value = friendList.value.length >= total.value ? 'noMore' : 'more';
+	// 		if (loadStatus.value === 'more') pageNo.value++;
+	// 	} else {
+	// 		loadStatus.value = 'noMore';
+	// 	}
+	// };
 
 	const handleFollowAction = async (user) => {
 		if (isFollowActionInProgress.value) return;
@@ -325,18 +400,29 @@
 
 <style lang="scss" scoped>
 	.page-container {
-		display: flex;
-		flex-direction: column;
-		height: 100vh;
+		// display: flex;
+		// flex-direction: column;
+		// height: 100vh;
+		min-height: 100vh;
 		background-color: #f7f8fa;
+		/*  paddingTop 为固定定位的 Tabs 留出空间 */
+		padding-top: 100rpx;
 	}
 
 	.tabs-container {
 		background-color: #fff;
 		padding: 20rpx 30rpx;
-		/* 增加上下内边距，让分段器看起来更舒展 */
 		border-bottom: 1rpx solid #eee;
-		flex-shrink: 0;
+
+		/* 【关键】改为固定定位，吸附在顶部 */
+		position: fixed;
+		top: 0;
+		/* 如果有原生导航栏，可能需要加上 var(--window-top) */
+		/* top: var(--window-top); */
+		left: 0;
+		width: 100%;
+		z-index: 999;
+		box-sizing: border-box;
 	}
 
 	// 深度选择器修改组件内部样式

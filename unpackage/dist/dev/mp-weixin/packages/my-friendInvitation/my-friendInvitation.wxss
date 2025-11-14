@@ -1,17 +1,24 @@
 /* 水平间距 */
 /* 水平间距 */
 .page-container.data-v-a29497fd {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
+  min-height: 100vh;
   background-color: #f7f8fa;
+  /*  paddingTop 为固定定位的 Tabs 留出空间 */
+  padding-top: 100rpx;
 }
 .tabs-container.data-v-a29497fd {
   background-color: #fff;
   padding: 20rpx 30rpx;
-  /* 增加上下内边距，让分段器看起来更舒展 */
   border-bottom: 1rpx solid #eee;
-  flex-shrink: 0;
+  /* 【关键】改为固定定位，吸附在顶部 */
+  position: fixed;
+  top: 0;
+  /* 如果有原生导航栏，可能需要加上 var(--window-top) */
+  /* top: var(--window-top); */
+  left: 0;
+  width: 100%;
+  z-index: 999;
+  box-sizing: border-box;
 }
 .content-area.data-v-a29497fd {
   flex: 1;

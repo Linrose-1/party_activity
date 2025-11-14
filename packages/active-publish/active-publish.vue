@@ -395,8 +395,22 @@
 		});
 	}
 
-	onLoad(() => {
-		// 1. 尝试从本地存储加载草稿数据
+	onLoad((options) => {
+		// 1. 检查 onLoad 的 options 中是否存在从聚店卡片传来的 storeId 和 storeName
+		if (options && options.storeId && options.storeName) {
+			console.log('从聚店页跳转而来，自动填充聚店信息...');
+
+			// 2. 将获取到的值直接填充到表单数据中
+			form.value.associatedStoreId = options.storeId;
+			// 使用 decodeURIComponent 对店名进行解码，还原为原始文本
+			associatedStoreName.value = decodeURIComponent(options.storeName);
+
+			uni.showToast({
+				title: `已选择聚店: ${associatedStoreName.value}`,
+				icon: 'none'
+			});
+		}
+		// 2. 尝试从本地存储加载草稿数据
 		try {
 			const draftDataString = uni.getStorageSync(DRAFT_STORAGE_KEY);
 			if (draftDataString) {

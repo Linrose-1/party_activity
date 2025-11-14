@@ -1,5 +1,4 @@
 <template>
-	<!-- UI 结构完全不用变 -->
 	<view class="edit-store-container" v-if="!isLoading">
 		<scroll-view scroll-y class="form-scroll-view">
 			<view class="form-wrapper">
@@ -8,7 +7,7 @@
 					<uni-easyinput v-model="form.storeName" placeholder="请输入聚店名称" :inputBorder="false" />
 				</view>
 
-				<!-- 【新增】聚店分类 -->
+				<!-- 聚店分类 -->
 				<view class="form-group">
 					<label class="form-label">聚店类别</label>
 					<picker mode="selector" :range="categoryOptions"
@@ -21,11 +20,15 @@
 				</view>
 
 				<view class="form-group">
-					<label class="form-label">聚店封面</label>
-					<view class="image-uploader">
-						<image :src="form.storeCoverImageUrl || '/static/images/placeholder-cover.png'"
-							class="preview-image" mode="aspectFill" @click="handleImageUpload('cover')"></image>
-						<view class="upload-tip">点击图片可更换封面（建议上传横图）</view>
+					<label class="form-label">聚店封面(最多9张)</label>
+					<view class="image-preview-grid">
+						<view v-for="(img, index) in coverImages" :key="index" class="image-wrapper">
+							<image :src="img" class="preview-image" mode="aspectFill" />
+							<view class="delete-btn" @click.stop="deleteCoverImage(index)">×</view>
+						</view>
+						<view v-if="coverImages.length < 9" class="add-placeholder" @click="handleCoverImageUpload">
+							<uni-icons type="plusempty" size="30" color="#ccc"></uni-icons>
+						</view>
 					</view>
 				</view>
 				<view class="form-group">
@@ -159,6 +162,7 @@
 		id: null,
 		storeName: '',
 		storeCoverImageUrl: '',
+		storeCoverImageUrls: '',
 		category: '', // 默认为空
 		fullAddress: '',
 		longitude: null,
@@ -171,6 +175,9 @@
 		tags: [],
 	});
 
+	// 一个专门用于UI绑定的图片数组
+	const coverImages = ref([]);
+
 	// 聚店类别选项
 	const categoryList = ref([]);
 	const categoryOptions = computed(() => categoryList.value.map(item => item.label));
@@ -182,14 +189,6 @@
 		return map;
 	});
 
-	// const categoryOptions = ['bar', 'food', 'ktv', 'billiards', 'other'];
-	// const categoryMap = {
-	// 	'bar': '酒吧',
-	// 	'food': '美食',
-	// 	'ktv': 'KTV',
-	// 	'billiards': '台球',
-	// 	'other': '其他'
-	// };
 
 	const editableHours = reactive({
 		regular: [],
@@ -223,7 +222,7 @@
 		},
 	];
 
-	// 【核心修改】onLoad 逻辑调整
+	// onLoad 逻辑调整
 	onLoad(async (options) => {
 		await getStoreCategories();
 		const storeId = options.id;
@@ -293,12 +292,21 @@
 			});
 			return;
 		}
+		if (!error) {
+			Object.assign(form.value, data);
+			parseOperatingHours(data.operatingHours);
 
-		Object.assign(form.value, data);
-		parseOperatingHours(data.operatingHours);
+			// 从新的 storeCoverImageUrls 字段解析图片
+			if (data.storeCoverImageUrls && Array.isArray(data.storeCoverImageUrls)) {
+				coverImages.value = data.storeCoverImageUrls;
+			}
+		}
+
+		// Object.assign(form.value, data);
+		// parseOperatingHours(data.operatingHours);
 	};
 
-	// 【核心修改】此函数现在能处理空数据，用于新建初始化
+	// 此函数现在能处理空数据，用于新建初始化
 	const parseOperatingHours = (jsonString) => {
 		try {
 			// 如果 jsonString 无效或为空，会进入 catch 块
@@ -424,6 +432,39 @@
 		});
 	};
 
+	// 封面图上传相关函数
+	const handleCoverImageUpload = () => {
+		uni.chooseImage({
+			count: 9 - coverImages.value.length,
+			success: async (res) => {
+				uni.showLoading({
+					title: '上传中...'
+				});
+
+				const uploadPromises = res.tempFiles.map(file => uploadFile(file, {
+					directory: 'store-cover'
+				}));
+				const results = await Promise.all(uploadPromises);
+
+				uni.hideLoading();
+
+				const successfulUrls = results.filter(r => r.data).map(r => r.data);
+				coverImages.value.push(...successfulUrls);
+
+				if (results.some(r => r.error)) {
+					uni.showToast({
+						title: '部分图片上传失败',
+						icon: 'none'
+					});
+				}
+			}
+		});
+	};
+
+	const deleteCoverImage = (index) => {
+		coverImages.value.splice(index, 1);
+	};
+
 	const openMapToChooseLocation = () => {
 		uni.chooseLocation({
 			latitude: form.value.latitude,
@@ -450,7 +491,7 @@
 		}
 	};
 
-	// 【核心修改】提交逻辑调整
+	//提交逻辑调整
 	const handleSubmit = async () => {
 		// 表单校验
 		if (!form.value.storeName.trim()) return uni.showToast({
@@ -465,14 +506,23 @@
 			title: '请选择聚店地址',
 			icon: 'none'
 		});
+		if (coverImages.value.length === 0) {
+			return uni.showToast({
+				title: '请至少上传一张聚店封面',
+				icon: 'none'
+			});
+		}
+
 
 		isSubmitting.value = true;
 
 		// 准备要提交的数据
 		const payload = {
 			...form.value,
+			storeCoverImageUrls: coverImages.value,
 			operatingHours: serializeOperatingHours(),
 		};
+		// payload.storeCoverImageUrl = coverImages.value[0];
 
 		// 根据 form.id 是否存在，决定调用哪个接口
 		const isUpdate = !!form.value.id;
@@ -480,7 +530,7 @@
 		const successMsg = isUpdate ? '修改成功，等待审核' : '申请成功，等待审核';
 		const errorMsgPrefix = isUpdate ? '修改失败: ' : '申请失败: ';
 
-		// 【注意】如果是新建，确保不提交 id 字段
+		//如果是新建，确保不提交 id 字段
 		if (!isUpdate) {
 			delete payload.id;
 		}
@@ -522,7 +572,6 @@
 
 
 <style lang="scss" scoped>
-	/* 您的样式完全不用修改，这里只新增 .location-picker 的样式 */
 	.edit-store-container {
 		display: flex;
 		flex-direction: column;
@@ -561,6 +610,50 @@
 	:deep(.uni-easyinput__content-input),
 	:deep(.uni-easyinput__content-textarea) {
 		padding-left: 0 !important;
+	}
+
+	.image-preview-grid {
+		display: grid;
+		grid-template-columns: repeat(3, 1fr);
+		gap: 16rpx;
+	}
+
+	.image-wrapper {
+		position: relative;
+		width: 100%;
+		aspect-ratio: 1 / 1;
+		border-radius: 12rpx;
+		overflow: hidden;
+	}
+
+	.preview-image {
+		width: 100%;
+		height: 100%;
+	}
+
+	.delete-btn {
+		position: absolute;
+		top: 0;
+		right: 0;
+		width: 40rpx;
+		height: 40rpx;
+		background-color: rgba(0, 0, 0, 0.6);
+		color: white;
+		border-radius: 0 0 0 12rpx;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 28rpx;
+	}
+
+	.add-placeholder {
+		width: 100%;
+		aspect-ratio: 1 / 1;
+		border: 2rpx dashed #ccc;
+		border-radius: 12rpx;
+		display: flex;
+		align-items: center;
+		justify-content: center;
 	}
 
 	.image-uploader {

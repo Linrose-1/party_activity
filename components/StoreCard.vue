@@ -6,9 +6,9 @@
 					<uni-icons :type="store.icon" size="20" color="#FF6B00"></uni-icons>
 					<text>{{ store.storeName }}</text>
 				</view>
-				<view class="distance" v-if="formattedDistance">
+				<view class="distance" v-if="store.distanceKm">
 					<uni-icons type="location-filled" size="16" color="#FF6B00"></uni-icons>
-					<text>{{ formattedDistance }}</text>
+					<text>{{ store.distanceKm }}</text>
 				</view>
 			</view>
 			<view class="store-desc">
@@ -59,12 +59,37 @@
 	};
 
 	/**
-	 * 新增点 2：处理“发起聚会”按钮的点击事件
+	 * 处理“发起聚会”按钮的点击事件
+	 */
+	// const handleInitiateParty = () => {
+	// 	// 跳转到发起聚会页面，并通过 query 参数传递店铺 ID
+	// 	uni.navigateTo({
+	// 		url: `/packages/active-publish/active-publish?storeId=${props.store.id}`
+	// 	});
+	// };
+	/**
+	 * 处理“发起聚会”按钮的点击事件
 	 */
 	const handleInitiateParty = () => {
-		// 跳转到发起聚会页面，并通过 query 参数传递店铺 ID
+		// 1. 安全检查，确保 store 对象和 id 存在
+		if (!props.store || !props.store.id) {
+			uni.showToast({
+				title: '聚店信息不完整',
+				icon: 'none'
+			});
+			return;
+		}
+
+		// ==================== 【核心修改点】 ====================
+		// 2. 在 URL 中同时传递 storeId 和 storeName
+		//    使用 encodeURIComponent 对店名进行编码，防止特殊字符（如 &、?、空格）破坏URL结构
+		const url =
+			`/packages/active-publish/active-publish?storeId=${props.store.id}&storeName=${encodeURIComponent(props.store.storeName)}`;
+		// =======================================================
+
+		// 3. 执行跳转
 		uni.navigateTo({
-			url: `/packages/active-publish/active-publish?storeId=${props.store.id}`
+			url: url
 		});
 	};
 </script>

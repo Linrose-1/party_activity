@@ -1,6 +1,5 @@
 /* 水平间距 */
 /* 水平间距 */
-/* 您的样式完全不用修改，这里只新增 .location-picker 的样式 */
 .edit-store-container.data-v-1bd087ec {
   display: flex;
   flex-direction: column;
@@ -32,6 +31,45 @@
 }
 .data-v-1bd087ec .uni-easyinput__content-input,.data-v-1bd087ec .uni-easyinput__content-textarea {
   padding-left: 0 !important;
+}
+.image-preview-grid.data-v-1bd087ec {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16rpx;
+}
+.image-wrapper.data-v-1bd087ec {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1/1;
+  border-radius: 12rpx;
+  overflow: hidden;
+}
+.preview-image.data-v-1bd087ec {
+  width: 100%;
+  height: 100%;
+}
+.delete-btn.data-v-1bd087ec {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 40rpx;
+  height: 40rpx;
+  background-color: rgba(0, 0, 0, 0.6);
+  color: white;
+  border-radius: 0 0 0 12rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28rpx;
+}
+.add-placeholder.data-v-1bd087ec {
+  width: 100%;
+  aspect-ratio: 1/1;
+  border: 2rpx dashed #ccc;
+  border-radius: 12rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .image-uploader .preview-image.data-v-1bd087ec {
   width: 100%;

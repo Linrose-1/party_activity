@@ -23,25 +23,37 @@ const _sfc_main = {
     const themeColor = common_vendor.ref("#FF6E00");
     const currentTab = common_vendor.ref(0);
     const tabItems = ["我的邀请人", "我邀请的人"];
+    const loading = common_vendor.ref(false);
     const friendList = common_vendor.ref([]);
     const pageNo = common_vendor.ref(1);
     const pageSize = common_vendor.ref(10);
-    const total = common_vendor.ref(0);
+    common_vendor.ref(0);
     const loadStatus = common_vendor.ref("more");
     const isFollowActionInProgress = common_vendor.ref(false);
     const userInfo = common_vendor.ref(null);
     common_vendor.onMounted(() => {
       initializePage();
+      getShareUserList(true);
+      fetchUserInfo();
     });
-    common_vendor.onPullDownRefresh(() => {
-      if (currentTab.value === 1) {
-        getShareUserList(true);
-      } else {
-        fetchUserInfo().finally(() => common_vendor.index.stopPullDownRefresh());
+    common_vendor.onPullDownRefresh(async () => {
+      common_vendor.index.__f__("log", "at packages/my-friendInvitation/my-friendInvitation.vue:134", "触发下拉刷新...");
+      try {
+        if (currentTab.value === 1) {
+          await getShareUserList(true);
+        } else {
+          await fetchUserInfo();
+        }
+      } catch (error) {
+        common_vendor.index.__f__("error", "at packages/my-friendInvitation/my-friendInvitation.vue:145", "下拉刷新时发生错误:", error);
+      } finally {
+        common_vendor.index.__f__("log", "at packages/my-friendInvitation/my-friendInvitation.vue:148", "刷新操作完成，停止动画。");
+        common_vendor.index.stopPullDownRefresh();
       }
     });
     common_vendor.onReachBottom(() => {
-      if (currentTab.value === 1) {
+      if (currentTab.value === 1 && loadStatus.value === "more" && !loading.value) {
+        common_vendor.index.__f__("log", "at packages/my-friendInvitation/my-friendInvitation.vue:155", "触底加载更多...");
         getShareUserList();
       }
     });
@@ -53,6 +65,10 @@ const _sfc_main = {
     };
     const handleTabClick = (e) => {
       currentTab.value = e.currentIndex;
+      common_vendor.index.pageScrollTo({
+        scrollTop: 0,
+        duration: 0
+      });
     };
     const fetchUserInfo = async () => {
       const {
@@ -64,36 +80,41 @@ const _sfc_main = {
       }
     };
     const getShareUserList = async (isRefresh = false) => {
-      if (loadStatus.value === "loading" || !isRefresh && loadStatus.value === "noMore")
+      if (loadStatus.value === "loading" || !isRefresh && loadStatus.value === "noMore") {
         return;
+      }
       if (isRefresh) {
         pageNo.value = 1;
-        friendList.value = [];
-        loadStatus.value = "more";
       }
       loadStatus.value = "loading";
-      const {
-        data,
-        error
-      } = await utils_request.request("/app-api/member/user/share-user-list", {
-        data: {
-          pageNo: pageNo.value,
-          pageSize: pageSize.value
+      try {
+        const {
+          data,
+          error
+        } = await utils_request.request("/app-api/member/user/share-user-list", {
+          data: {
+            pageNo: pageNo.value,
+            pageSize: pageSize.value
+          }
+        });
+        if (error) {
+          throw new Error(error);
         }
-      });
-      if (error) {
-        loadStatus.value = "more";
-        return;
-      }
-      if (data && data.list) {
-        const list = data.list || [];
-        friendList.value = isRefresh ? list : [...friendList.value, ...list];
-        total.value = data.total;
-        loadStatus.value = friendList.value.length >= total.value ? "noMore" : "more";
-        if (loadStatus.value === "more")
+        if (data && data.list) {
+          const list = data.list || [];
+          friendList.value = isRefresh ? list : [...friendList.value, ...list];
+          if (friendList.value.length >= data.total) {
+            loadStatus.value = "noMore";
+          } else {
+            loadStatus.value = "more";
+          }
           pageNo.value++;
-      } else {
-        loadStatus.value = "noMore";
+        } else {
+          loadStatus.value = "noMore";
+        }
+      } catch (err) {
+        common_vendor.index.__f__("error", "at packages/my-friendInvitation/my-friendInvitation.vue:253", "获取邀请列表失败:", err);
+        loadStatus.value = "more";
       }
     };
     const handleFollowAction = async (user) => {
@@ -159,7 +180,7 @@ const _sfc_main = {
       const name = user.nickname || user.realName || "匿名用户";
       const avatarUrl = user.avatar || defaultAvatar;
       const url = `/pages/applicationBusinessCard/applicationBusinessCard?id=${user.id}&name=${encodeURIComponent(name)}&avatar=${encodeURIComponent(avatarUrl)}&fromShare=1`;
-      common_vendor.index.__f__("log", "at packages/my-friendInvitation/my-friendInvitation.vue:305", "从推荐商友页跳转到名片申请页, URL:", url);
+      common_vendor.index.__f__("log", "at packages/my-friendInvitation/my-friendInvitation.vue:380", "从推荐商友页跳转到名片申请页, URL:", url);
       common_vendor.index.navigateTo({
         url
       });

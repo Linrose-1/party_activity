@@ -5,14 +5,30 @@
 		<!-- 内容可滚动区域 -->
 		<scroll-view scroll-y class="content-scroll">
 			<!-- 1. 商店封面图 -->
-			<view class="store-cover"
-				:style="{ backgroundImage: storeDetail.storeCoverImageUrl ? `url(${storeDetail.storeCoverImageUrl})` : 'linear-gradient(45deg, #2c3e50, #4a6491)' }">
-				<view class="cover-overlay">
-					<view class="store-name">{{ storeDetail.storeName }}</view>
-					<view class="distance" v-if="storeDetail.distance !== null">
-						<uni-icons type="paperplane-filled" color="#fff" size="16"></uni-icons>
-						{{ storeDetail.distance }}公里
+			<view class="store-cover-container">
+				<swiper v-if="coverImages.length > 0" class="cover-swiper" circular indicator-dots autoplay>
+					<swiper-item v-for="(img, index) in coverImages" :key="index">
+						<image :src="img" class="swiper-image" mode="aspectFill"
+							@click="previewImage(coverImages, index)" />
+					</swiper-item>
+				</swiper>
+
+				<!-- 如果没有图片，可以显示一个默认的占位背景 -->
+				<view v-else class="cover-placeholder">
+					<!-- 覆盖层依然保留，用于显示店名 -->
+					<view class="cover-overlay">
+						<view class="store-name">{{ storeDetail.storeName }}</view>
 					</view>
+				</view>
+			</view>
+
+			<!-- 覆盖在轮播图或占位图之上的店名和距离信息 -->
+			<!-- 【注意】这部分从原来的封面图中移出来，独立放置 -->
+			<view class="cover-info-overlay">
+				<view class="store-name">{{ storeDetail.storeName }}</view>
+				<view class="distance" v-if="storeDetail.distance !== null">
+					<uni-icons type="paperplane-filled" color="#fff" size="16"></uni-icons>
+					{{ storeDetail.distance }}公里
 				</view>
 			</view>
 
@@ -128,7 +144,19 @@
 	const storeDetail = ref(null);
 	const isLoading = ref(true);
 
-	// --- [新增] 解析营业时间的计算属性 ---
+	const coverImages = computed(() => {
+		// 直接返回后端提供的数组，如果不存在则返回空数组
+		if (storeDetail.value && Array.isArray(storeDetail.value.storeCoverImageUrls)) {
+			return storeDetail.value.storeCoverImageUrls;
+		}
+		// (可选的兼容逻辑) 如果新字段不存在，但旧的单图字段存在
+		if (storeDetail.value && storeDetail.value.storeCoverImageUrl) {
+			return [storeDetail.value.storeCoverImageUrl];
+		}
+		return [];
+	});
+
+	// --- 解析营业时间的计算属性 ---
 	const formattedOperatingHours = computed(() => {
 		const defaultResult = {
 			regular: [],
@@ -184,7 +212,13 @@
 		} catch (error) {
 			console.error('解析营业时间失败:', error);
 			// 如果解析失败，返回原始字符串或一个提示
-			return { regular: [{ day: '营业时间', time: storeDetail.value.operatingHours }], special: [] };
+			return {
+				regular: [{
+					day: '营业时间',
+					time: storeDetail.value.operatingHours
+				}],
+				special: []
+			};
 		}
 	});
 
@@ -234,7 +268,10 @@
 			name: storeDetail.value.storeName,
 			address: storeDetail.value.fullAddress,
 			fail: (err) => {
-				uni.showToast({ title: '无法打开地图', icon: 'none' });
+				uni.showToast({
+					title: '无法打开地图',
+					icon: 'none'
+				});
 			}
 		});
 	};
@@ -254,15 +291,23 @@
 		uni.makePhoneCall({
 			phoneNumber: phoneNumber,
 			fail: (err) => {
-				uni.showToast({ title: '拨打电话失败', icon: 'none' });
+				uni.showToast({
+					title: '拨打电话失败',
+					icon: 'none'
+				});
 			}
 		});
 	};
 
-	const previewImage = (imageUrl) => {
+	const previewImage = (urls, current = 0) => {
+		if (!urls || urls.length === 0) return;
+
+		// 如果传入的是字符串，则包装成数组
+		const finalUrls = Array.isArray(urls) ? urls : [urls];
+
 		uni.previewImage({
-			urls: [imageUrl],
-			current: imageUrl
+			urls: finalUrls,
+			current: Array.isArray(urls) ? urls[current] : urls // 兼容旧的单图预览
 		});
 	};
 </script>
@@ -275,16 +320,20 @@
 		font-size: 28rpx;
 		margin-bottom: 12rpx;
 	}
+
 	.hours-item:last-child {
 		margin-bottom: 0;
 	}
+
 	.hours-day {
 		color: var(--gray-text);
 	}
+
 	.hours-time {
 		font-weight: 500;
 		color: var(--dark-text);
 	}
+
 	.special-hours {
 		margin-top: 20rpx;
 		padding-top: 20rpx;
@@ -317,6 +366,40 @@
 		flex: 1;
 		overflow-y: auto;
 		-webkit-overflow-scrolling: touch;
+	}
+
+	.store-cover-container {
+		height: 480rpx;
+		position: relative;
+		overflow: hidden;
+		background: linear-gradient(45deg, #2c3e50, #4a6491);
+		/* 默认背景 */
+	}
+
+	.cover-swiper,
+	.cover-placeholder {
+		width: 100%;
+		height: 100%;
+	}
+
+	.cover-info-overlay {
+		position: absolute;
+		bottom: 0;
+		left: 0;
+		right: 0;
+		z-index: 2;
+		/* 确保在图片之上 */
+		padding: 40rpx 30rpx;
+		background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+		color: white;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+	}
+
+	.swiper-image {
+		width: 100%;
+		height: 100%;
 	}
 
 	.store-cover {
@@ -389,6 +472,7 @@
 		padding: 40rpx 30rpx;
 		margin-bottom: 20rpx;
 	}
+
 	.detail-card:last-of-type {
 		margin-bottom: 0;
 	}
@@ -420,6 +504,7 @@
 		padding: 24rpx 0;
 		border-bottom: 1px solid var(--border);
 	}
+
 	.info-item:last-child {
 		border-bottom: none;
 	}
@@ -459,6 +544,7 @@
 		position: relative;
 		overflow: hidden;
 	}
+
 	.map-overlay {
 		position: absolute;
 		bottom: 0;
@@ -481,7 +567,8 @@
 		box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
 	}
 
-	.nav-btn, .primary-btn {
+	.nav-btn,
+	.primary-btn {
 		border-radius: 50rpx;
 		font-size: 32rpx;
 		font-weight: 500;
@@ -494,6 +581,7 @@
 		margin: 0;
 		padding: 0;
 	}
+
 	.nav-btn::after,
 	.primary-btn::after {
 		border: none;
@@ -525,6 +613,7 @@
 		color: #999;
 		font-size: 28rpx;
 	}
+
 	.loading-state text {
 		margin-top: 10rpx;
 	}

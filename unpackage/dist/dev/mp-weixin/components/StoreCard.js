@@ -20,7 +20,7 @@ const _sfc_main = {
   setup(__props, { emit: __emit }) {
     const props = __props;
     const emit = __emit;
-    const formattedDistance = common_vendor.computed(() => {
+    common_vendor.computed(() => {
       if (typeof props.store.distance !== "number") {
         return null;
       }
@@ -31,8 +31,16 @@ const _sfc_main = {
       emit("click-card", props.store);
     };
     const handleInitiateParty = () => {
+      if (!props.store || !props.store.id) {
+        common_vendor.index.showToast({
+          title: "聚店信息不完整",
+          icon: "none"
+        });
+        return;
+      }
+      const url = `/packages/active-publish/active-publish?storeId=${props.store.id}&storeName=${encodeURIComponent(props.store.storeName)}`;
       common_vendor.index.navigateTo({
-        url: `/packages/active-publish/active-publish?storeId=${props.store.id}`
+        url
       });
     };
     return (_ctx, _cache) => {
@@ -43,14 +51,14 @@ const _sfc_main = {
           color: "#FF6B00"
         }),
         b: common_vendor.t(__props.store.storeName),
-        c: formattedDistance.value
-      }, formattedDistance.value ? {
+        c: __props.store.distanceKm
+      }, __props.store.distanceKm ? {
         d: common_vendor.p({
           type: "location-filled",
           size: "16",
           color: "#FF6B00"
         }),
-        e: common_vendor.t(formattedDistance.value)
+        e: common_vendor.t(__props.store.distanceKm)
       } : {}, {
         f: common_vendor.t(__props.store.storeDescription),
         g: common_vendor.o(handleInitiateParty),
