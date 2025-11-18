@@ -37,6 +37,12 @@
   grid-template-columns: repeat(3, 1fr);
   gap: 16rpx;
 }
+.cover-tip.data-v-1bd087ec {
+  margin-top: 16rpx;
+  font-size: 24rpx;
+  color: #999;
+  line-height: 1.4;
+}
 .image-wrapper.data-v-1bd087ec {
   position: relative;
   width: 100%;

@@ -245,7 +245,9 @@
 
 	.activity-image {
 		width: 100%;
-		height: 320rpx;
+		aspect-ratio: 5 / 4;
+		/* ⭐ 设置为 5:4 比例 */
+		// height: 320rpx;
 		border-radius: 16rpx;
 		margin-bottom: 30rpx;
 		box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.1);
@@ -331,18 +333,20 @@
 		padding: 6rpx 20rpx;
 		border-radius: 20rpx;
 	}
-	
+
 	.activity-distance {
-			display: flex;
-			align-items: center;
-			color: #FF6B00; /* 覆盖父级的灰色 */
-			font-weight: 500;
-			margin-bottom: -150rpx;
-			
-			text {
-				margin-left: 8rpx; /* 图标和文字间距 */
-			}
+		display: flex;
+		align-items: center;
+		color: #FF6B00;
+		/* 覆盖父级的灰色 */
+		font-weight: 500;
+		margin-bottom: -150rpx;
+
+		text {
+			margin-left: 8rpx;
+			/* 图标和文字间距 */
 		}
+	}
 
 	.activity-tags {
 		display: flex;

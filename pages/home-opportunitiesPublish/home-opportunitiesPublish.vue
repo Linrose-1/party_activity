@@ -87,6 +87,7 @@
 						<view class="delete-video-btn" @click.stop="deleteVideo">×</view>
 					</view>
 					<text class="hint">{{ form.mediaType === 'image' ? '最多可上传9张图片' : '仅支持上传一个视频' }}</text>
+					<view class="hint">为了适应分享封面，首张图片建议使用5:4或4:3画幅比例上传，可使用相册自带的画幅剪切工具调整图片尺寸</view>
 				</view>
 			</view>
 
@@ -113,10 +114,15 @@
 		ref
 	} from 'vue'; // ref 已被移除，引入 reactive
 	import {
-		onLoad
+		onLoad,
+		onShareAppMessage,
+		onShareTimeline
 	} from '@dcloudio/uni-app';
 	import request from '../../utils/request.js';
 	import uploadFile from '../../utils/upload.js';
+	import {
+		getInviteCode
+	} from '../../utils/user.js';
 
 	// --- 【核心】统一使用 reactive 管理所有表单状态 ---
 	const form = reactive({
@@ -164,6 +170,10 @@
 			return;
 		}
 		checkDraft();
+		uni.showShareMenu({
+			withShareTicket: true,
+			menus: ["shareAppMessage", "shareTimeline"]
+		});
 	});
 
 	// --- 草稿功能 (逻辑不变，已适配 reactive) ---
@@ -639,6 +649,57 @@
 			});
 		}
 	};
+
+	/**
+	 * @description 监听用户点击“分享给好友”
+	 */
+	onShareAppMessage(() => {
+		// 1. 获取当前用户的邀请码
+		const inviteCode = getInviteCode();
+		console.log(`[商机发布页] 分享给好友，获取到邀请码: ${inviteCode}`);
+
+		// 2. 构建分享路径，并附带邀请码参数
+		let sharePath = '/pages/home-opportunitiesPublish/home-opportunitiesPublish';
+		if (inviteCode) {
+			sharePath += `?inviteCode=${inviteCode}`;
+		}
+
+		// 3. 定义分享内容
+		const shareContent = {
+			title: '发现一个好商机，快来发布你的商业需求！',
+			path: sharePath,
+			// 建议使用一个固定的、吸引人的分享图片
+			imageUrl: 'https://img.gofor.club/logo_share.jpg'
+		};
+
+		console.log('[商机发布页] 分享给好友的内容:', JSON.stringify(shareContent));
+		return shareContent;
+	});
+
+	/**
+	 * @description 监听用户点击“分享到朋友圈”
+	 */
+	onShareTimeline(() => {
+		// 1. 获取当前用户的邀请码
+		const inviteCode = getInviteCode();
+		console.log(`[商机发布页] 分享到朋友圈，获取到邀请码: ${inviteCode}`);
+
+		// 2. 构建 query 字符串
+		let queryString = '';
+		if (inviteCode) {
+			queryString = `inviteCode=${inviteCode}`;
+		}
+
+		// 3. 定义分享内容
+		const shareContent = {
+			title: '发现一个好商机，快来发布你的商业需求！',
+			query: queryString,
+			imageUrl: 'https://img.gofor.club/logo_share.jpg'
+		};
+
+		console.log('[商机发布页] 分享到朋友圈的内容:', JSON.stringify(shareContent));
+		return shareContent;
+	});
 </script>
 
 <style scoped>

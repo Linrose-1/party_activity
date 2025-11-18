@@ -17,7 +17,7 @@
 		<!-- 【新增】最低起聚名额提示 -->
 		<view v-if="showLimitSlotsTip" class="limit-slots-tip">
 			<uni-icons type="info-filled" color="#e6a23c" size="16" style="margin-right: 10rpx;"></uni-icons>
-			当前报名人数未达到最低起聚名额 ({{ activityDetail.limitSlots }}人)，聚会可能被取消；聚会组织者将退回报名费用。
+			当前报名人数未达到最低起聚名额 ({{ activityDetail.limitSlots }}人)，聚会可能被取消；若有收费聚会组织者将退回报名费用。
 		</view>
 
 		<!-- 聚会信息 -->
@@ -75,7 +75,7 @@
 		<!-- 主办方 -->
 		<view class="organizer-section">
 			<view class="organizer-title">聚会组织者</view>
-			<view class="organizer-info" @click="navigateToBusinessCard(activityDetail.memberUser)">
+			<view class="organizer-info" @click="navigateToBusinessCard(activityDetail.memberUser, true)">
 				<view class="organizer-avatar">
 					<!-- <uni-icons type="person-filled" size="24" color="#fff" /> -->
 					<img :src="activityDetail.memberUser.avatar" alt="" class="organizer-avatar" />
@@ -322,6 +322,19 @@
 			menus: ["shareAppMessage", "shareTimeline"]
 		});
 	});
+
+	/**
+	 * @description 计算当前登录用户是否为本次聚会的组织者
+	 */
+	const isOrganizer = computed(() => {
+		// 安全检查，确保数据都已加载
+		if (!loggedInUserId.value || !activityDetail.value || !activityDetail.value.memberUser) {
+			return false;
+		}
+		// 比较当前登录用户ID和聚会组织者ID
+		return parseInt(loggedInUserId.value) === activityDetail.value.memberUser.id;
+	});
+
 	const isRegistrationActive = computed(() => {
 		// 如果聚会详情还没加载出来，则默认不可报名
 		if (!activityDetail.value) {
@@ -694,18 +707,29 @@
 			});
 			return;
 		}
+
+		// 构建基础 URL
+		let url = `/pages/activity-participants/activity-participants?id=${activityId.value}`;
+
+		// 如果是组织者，则在 URL 中添加一个标识
+		if (isOrganizer.value) {
+			url += '&isOrganizer=1';
+		}
+
+		console.log('跳转到报名列表页, URL:', url);
+
 		uni.navigateTo({
-			url: `/pages/activity-participants/activity-participants?id=${activityId.value}`
-		})
+			url: url
+		});
 	}
 
 
 	/**
 	 * 跳转到申请兑换名片页面
 	 * @param {object} user - 包含用户信息的对象 (id, nickname, avatar)
+	 * @param {boolean} isFreeView - 是否免费查看，默认为 false
 	 */
-	const navigateToBusinessCard = (user) => {
-		// 1. 安全检查
+	const navigateToBusinessCard = (user, isFreeView = false) => {
 		if (!user || !user.id) {
 			uni.showToast({
 				title: '无法查看该用户主页',
@@ -714,19 +738,22 @@
 			return;
 		}
 
-		// 2. 提供默认值
 		const defaultAvatar = '/static/images/default-avatar.png';
 		const name = user.nickname || '匿名用户';
 		const avatarUrl = user.avatar || defaultAvatar;
 
-		// 3. 构建URL并编码
-		const url = `/pages/applicationBusinessCard/applicationBusinessCard?id=${user.id}` +
+		let url = `/pages/applicationBusinessCard/applicationBusinessCard?id=${user.id}` +
 			`&name=${encodeURIComponent(name)}` +
 			`&avatar=${encodeURIComponent(avatarUrl)}`;
 
-		console.log('从聚会详情页跳转到名片申请页, URL:', url);
+		// 如果需要免费查看，则添加 fromShare=1 参数
+		if (isFreeView) {
+			url += '&fromShare=1';
+			console.log(`[免费查看] 跳转到名片申请页, UserID: ${user.id}`);
+		} else {
+			console.log(`[标准流程] 跳转到名片申请页, UserID: ${user.id}`);
+		}
 
-		// 4. 执行跳转
 		uni.navigateTo({
 			url: url
 		});
@@ -786,19 +813,50 @@
 
 	/* --- 聚会封面 --- */
 	.event-cover {
-		height: 400rpx;
+		width: 100%;
+		aspect-ratio: 5 / 4;
 		background: linear-gradient(45deg, #ff9a9e, #fad0c4);
 		display: flex;
-		align-items: center;
-		justify-content: center;
-		color: white;
-		font-size: 36rpx;
-		font-weight: bold;
-		text-align: center;
+		/* 垂直对齐方式: 从 center 改为 flex-end (底部对齐) */
+		align-items: flex-end;
+		/* 水平对齐方式: 从 center 改为 flex-start (左侧对齐) */
+		justify-content: flex-start;
 		padding: 20rpx;
 		background-size: cover;
 		background-position: center;
 		background-repeat: no-repeat;
+		position: relative;
+		/* 添加相对定位，为遮罩层提供定位上下文 */
+		box-sizing: border-box;
+		/* 确保 padding 不会撑大容器 */
+	}
+
+	/* 新增一个伪元素作为渐变遮罩，确保文字在任何背景下都清晰可见 */
+	.event-cover::after {
+		content: '';
+		position: absolute;
+		bottom: 0;
+		left: 0;
+		right: 0;
+		height: 50%;
+		/* 遮罩层高度为封面的一半 */
+		background: linear-gradient(to top, rgba(0, 0, 0, 0.6), transparent);
+		z-index: 1;
+	}
+
+	.event-cover-text {
+		color: white;
+		font-size: 32rpx;
+		/* 稍微缩小一点字体以适应角落 */
+		font-weight: bold;
+		text-align: left;
+		padding: 10rpx 20rpx;
+		background-color: rgba(0, 0, 0, 0.3);
+		/* 给文字一个半透明背景，进一步提升可读性 */
+		border-radius: 10rpx;
+		position: relative;
+		/* 确保文字在遮罩层之上 */
+		z-index: 2;
 	}
 
 	/* --- 状态与提示横幅 --- */
@@ -1049,8 +1107,10 @@
 	}
 
 	.action-btn.share-btn {
-		background: #f0f0f0;
-		color: #333;
+		/* 将原来的灰色背景替换为绿色渐变 */
+		background: linear-gradient(to right, #4cd964, #34a853);
+		/* 文字颜色改为白色以适应深色背景 */
+		color: #fff;
 	}
 
 	.action-btn.register-btn {

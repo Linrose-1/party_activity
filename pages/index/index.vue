@@ -29,7 +29,7 @@
 				<text class="label">手机号</text>
 				<button v-if="!phoneCode" class="get-phone-btn" open-type="getPhoneNumber"
 					@getphonenumber="getPhoneNumber">
-					授权微信手机号
+					手机号快捷登录
 				</button>
 				<text v-else class="input-display">已授权</text>
 			</view>

@@ -21,6 +21,7 @@ const _sfc_main = {
     const total = common_vendor.ref(0);
     const loadingStatus = common_vendor.ref("more");
     const isEmpty = common_vendor.ref(false);
+    const isOrganizer = common_vendor.ref(false);
     common_vendor.onLoad((options) => {
       if (options.id) {
         activityId.value = options.id;
@@ -28,6 +29,10 @@ const _sfc_main = {
           title: "报名用户"
         });
         getParticipantList(true);
+      }
+      if (options.isOrganizer && options.isOrganizer === "1") {
+        isOrganizer.value = true;
+        common_vendor.index.__f__("log", "at pages/activity-participants/activity-participants.vue:56", "✅ [报名列表页] 当前用户是组织者，可以免费查看所有报名者名片。");
       }
     });
     common_vendor.onReachBottom(() => {
@@ -44,7 +49,10 @@ const _sfc_main = {
         participantList.value = [];
         isEmpty.value = false;
       }
-      const { data, error } = await utils_request.request("/app-api/member/activity-join/list", {
+      const {
+        data,
+        error
+      } = await utils_request.request("/app-api/member/activity-join/list", {
         method: "GET",
         data: {
           activityId: activityId.value,
@@ -53,7 +61,7 @@ const _sfc_main = {
         }
       });
       if (error) {
-        common_vendor.index.__f__("error", "at pages/activity-participants/activity-participants.vue:73", "获取报名用户列表失败:", error);
+        common_vendor.index.__f__("error", "at pages/activity-participants/activity-participants.vue:89", "获取报名用户列表失败:", error);
         loadingStatus.value = "more";
         return;
       }
@@ -84,6 +92,25 @@ const _sfc_main = {
       const D = date.getDate();
       return `${M}月${D}日`;
     };
+    const viewParticipantCard = (participantItem) => {
+      const user = participantItem.memberUser;
+      if (!user || !user.id) {
+        common_vendor.index.showToast({
+          title: "无法获取用户信息",
+          icon: "none"
+        });
+        return;
+      }
+      const name = user.nickname || "匿名用户";
+      const avatar = user.avatar || "";
+      let url = `/pages/applicationBusinessCard/applicationBusinessCard?id=${user.id}&name=${encodeURIComponent(name)}&avatar=${encodeURIComponent(avatar)}`;
+      if (isOrganizer.value) {
+        url += "&fromShare=1";
+      }
+      common_vendor.index.navigateTo({
+        url
+      });
+    };
     return (_ctx, _cache) => {
       return common_vendor.e({
         a: common_vendor.f(participantList.value, (item, k0, i0) => {
@@ -91,7 +118,8 @@ const _sfc_main = {
             a: item.memberUser.avatar,
             b: common_vendor.t(item.memberUser.nickname || "匿名用户"),
             c: common_vendor.t(formatJoinTime(item.createTime)),
-            d: item.id
+            d: item.id,
+            e: common_vendor.o(($event) => viewParticipantCard(item), item.id)
           };
         }),
         b: common_vendor.p({

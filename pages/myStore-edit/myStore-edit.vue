@@ -30,6 +30,7 @@
 							<uni-icons type="plusempty" size="30" color="#ccc"></uni-icons>
 						</view>
 					</view>
+					<view class="cover-tip">为了适应分享封面，首张图片建议使用5:4或4:3画幅比例上传，可使用相册自带的画幅剪切工具调整图片尺寸</view>
 				</view>
 				<view class="form-group">
 					<label class="form-label">聚店地址</label>
@@ -131,7 +132,7 @@
 
 		<view class="action-bar">
 			<button class="submit-btn" @click="handleSubmit" :loading="isSubmitting" :disabled="isSubmitting">
-				{{ isSubmitting ? '提交中...' : (form.id ? '提交修改' : '申请上榜') }}
+				{{ isSubmitting ? '提交中...' : (form.id ? '提交修改' : '申请入驻') }}
 			</button>
 		</view>
 	</view>
@@ -616,6 +617,13 @@
 		display: grid;
 		grid-template-columns: repeat(3, 1fr);
 		gap: 16rpx;
+	}
+
+	.cover-tip {
+		margin-top: 16rpx;
+		font-size: 24rpx;
+		color: #999;
+		line-height: 1.4;
 	}
 
 	.image-wrapper {

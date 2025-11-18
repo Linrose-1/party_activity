@@ -481,6 +481,15 @@
 			icon: '../../static/icon/protocols.png',
 			path: '/pages/user-agreement/user-agreement'
 		},
+		{
+			name: '平台客服',
+			desc: '联系我们，获取帮助',
+			icon: '../../static/icon/customer-service.png', // 假设您有一个客服图标
+			path: null, // path 为 null, 我们将通过 key 来特殊处理
+			key: 'customerService', // 定义一个唯一的 key
+			phone: '18024545855' ,// 【请在这里替换成您的真实客服电话】
+			fullWidth: true
+		},
 		// 单独成行
 		{
 			name: '平台认证',
@@ -492,11 +501,39 @@
 	]);
 
 	const navigateToFeature = (item) => {
+		// 1. 优先处理有特殊 key 的项
+		if (item && item.key === 'customerService') {
+			// 检查电话号码是否存在
+			if (!item.phone) {
+				uni.showToast({
+					title: '客服电话未设置',
+					icon: 'none'
+				});
+				return;
+			}
+			// 调用 uni-app 的拨打电话 API
+			uni.makePhoneCall({
+				phoneNumber: item.phone,
+				success: () => {
+					console.log('拨打电话成功');
+				},
+				fail: (err) => {
+					console.log('拨打电话失败:', err);
+					// 用户取消拨打也会进入 fail 回调，可以不做提示
+				}
+			});
+			// 执行完后结束函数
+			return;
+		}
+
+		// 2. 处理有 path 的普通跳转项 (保持原有逻辑)
 		if (item && item.path) {
 			uni.navigateTo({
 				url: item.path
 			});
-		} else {
+		}
+		// 3. 处理其他开发中的项 (保持原有逻辑)
+		else {
 			uni.showToast({
 				title: '该功能正在开发中',
 				icon: 'none'

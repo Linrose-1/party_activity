@@ -21,6 +21,36 @@
 					<!-- <view class="target-title">{{ targetUserInfo.companyName || '公司信息未设置' }}</view> -->
 				</view>
 
+				<!-- ==================== 用户信息预览区 ==================== -->
+				<view class="target-details">
+					<view v-if="targetUserInfo.companyName" class="detail-item">
+						<uni-icons type="flag" size="16" color="#888"></uni-icons>
+						<text class="detail-label">公司:</text>
+						<text class="detail-value">{{ targetUserInfo.companyName }}</text>
+					</view>
+					<view v-if="targetUserInfo.positionTitle" class="detail-item">
+						<uni-icons type="staff" size="16" color="#888"></uni-icons>
+						<text class="detail-label">职务:</text>
+						<text class="detail-value">{{ targetUserInfo.positionTitle }}</text>
+					</view>
+					<view v-if="targetUserInfo.professionalTitle" class="detail-item">
+						<uni-icons type="medal" size="16" color="#888"></uni-icons>
+						<text class="detail-label">社会职务:</text>
+						<text class="detail-value">{{ targetUserInfo.professionalTitle }}</text>
+					</view>
+					<view v-if="targetUserInfo.socialOrganization" class="detail-item">
+						<uni-icons type="network" size="16" color="#888"></uni-icons>
+						<text class="detail-label">社会组织:</text>
+						<text class="detail-value">{{ targetUserInfo.socialOrganization }}</text>
+					</view>
+					<view v-if="targetUserInfo.personalBio" class="detail-item bio-item">
+						<uni-icons type="paperclip" size="16" color="#888"></uni-icons>
+						<text class="detail-label">个人简介:</text>
+						<text class="detail-value">{{ targetUserInfo.personalBio }}</text>
+					</view>
+				</view>
+				<!-- ======================================================================== -->
+
 				<view class="description">
 					您正在申请查看<span
 						class="highlight">{{ targetUserInfo.realName || targetUserInfo.nickname }}</span>的联系方式。请选择一种方式支付查看费用：
@@ -167,8 +197,15 @@
 				return;
 			}
 
-			// 步骤二：如果权限检查未通过（即需要支付），再获取当前用户信息
-			await fetchCurrentUserInfo();
+			// ==================== 并行获取两种信息 ====================
+			// 如果权限检查未通过（即需要支付），则同时获取：
+			// 1. 目标用户的简要信息（用于展示）
+			// 2. 当前登录用户的信息（用于显示余额）
+			await Promise.all([
+				fetchCurrentUserInfo(),
+				fetchSimpleTargetUserInfo(),
+			]);
+			// ========================================================================
 
 		} catch (e) {
 			console.error("初始化页面时发生错误:", e);
@@ -207,6 +244,51 @@
 			return false;
 		}
 	};
+
+	// ==================== 获取目标用户简要信息的函数 ====================
+	/**
+	 * @description 获取目标用户的简要信息用于支付前预览
+	 */
+	const fetchSimpleTargetUserInfo = async () => {
+		// 防御性编程，确保 targetUserId 存在
+		if (!targetUserId.value) {
+			console.warn("无法获取简要信息，因为 targetUserId 不存在。");
+			return;
+		}
+
+		const {
+			data,
+			error
+		} = await request('/app-api/member/user/getSimpleUserInfo', {
+			method: 'GET', 
+			data: {
+				readUserId: targetUserId.value,
+				notPay: 1 // 固定传 1
+			}
+		});
+
+		// ==================== 【按您的要求】打印接口返回数据 ====================
+		console.log('----------- getSimpleUserInfo 接口返回数据 -----------');
+		console.log(JSON.stringify(data, null, 2)); // 格式化输出，方便查看
+		console.log('----------------------------------------------------');
+		// =================================================================
+
+		if (error) {
+			console.error("获取目标用户简要信息失败:", error);
+			// 即使失败，页面也能用 URL 传来的基础信息展示，不中断流程
+			return;
+		}
+
+		if (data) {
+			// 将获取到的新信息，与已有的基础信息（如头像）合并
+			// 这样可以保留从 URL 传来的头像，同时补充 API 返回的字段
+			targetUserInfo.value = {
+				...targetUserInfo.value,
+				...data
+			};
+		}
+	};
+	// ===================================================================================
 
 	// 任务二：获取当前登录用户的信息（为了余额和好友申请语）
 	const fetchCurrentUserInfo = async () => {
@@ -1010,5 +1092,51 @@
 
 	.nav-item span {
 		font-weight: 500;
+	}
+
+
+	.target-details {
+		margin-top: 40rpx;
+		margin-bottom: 40rpx;
+		padding-top: 40rpx;
+		border-top: 1rpx solid #f0f0f0;
+		display: flex;
+		flex-direction: column;
+		gap: 20rpx;
+		text-align: left;
+		/* 确保内容左对齐 */
+	}
+
+	.detail-item {
+		display: flex;
+		align-items: flex-start;
+		/* 顶部对齐，方便简介换行 */
+		font-size: 28rpx;
+	}
+
+	.detail-item .uni-icons {
+		margin-right: 16rpx;
+		transform: translateY(4rpx);
+		/* 图标垂直微调 */
+	}
+
+	.detail-label {
+		color: #888;
+		width: 150rpx;
+		/* 固定标签宽度，使其对齐 */
+		flex-shrink: 0;
+	}
+
+	.detail-value {
+		color: #333;
+		flex: 1;
+		word-break: break-all;
+		/* 确保长文本能正确换行 */
+	}
+
+	.bio-item .detail-value {
+		white-space: pre-wrap;
+		/* 保持简介的换行符 */
+		line-height: 1.6;
 	}
 </style>

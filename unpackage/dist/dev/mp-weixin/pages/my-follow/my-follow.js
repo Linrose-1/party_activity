@@ -23,7 +23,10 @@ const _sfc_main = {
     common_vendor.onLoad(() => {
       userId.value = common_vendor.index.getStorageSync("userId");
       if (!userId.value) {
-        common_vendor.index.showToast({ title: "请先登录", icon: "none" });
+        common_vendor.index.showToast({
+          title: "请先登录",
+          icon: "none"
+        });
         return;
       }
       getFollowedUsers(true);
@@ -48,11 +51,14 @@ const _sfc_main = {
         // 【关键】指定目标类型为用户
       };
       try {
-        const { data, error } = await utils_request.request("/app-api/member/follow/page", {
+        const {
+          data,
+          error
+        } = await utils_request.request("/app-api/member/follow/page", {
           method: "GET",
           data: params
         });
-        common_vendor.index.__f__("log", "at pages/my-follow/my-follow.vue:117", "关注的商友", data);
+        common_vendor.index.__f__("log", "at pages/my-follow/my-follow.vue:120", "关注的商友", data);
         if (!error && data) {
           const validUsers = (data.list || []).filter((item) => item.userRespVO);
           validUsers.forEach((item) => {
@@ -63,11 +69,17 @@ const _sfc_main = {
           loadingStatus.value = (data.list || []).length < pageSize ? "noMore" : "more";
         } else {
           loadingStatus.value = "noMore";
-          common_vendor.index.showToast({ title: error || "加载失败", icon: "none" });
+          common_vendor.index.showToast({
+            title: error || "加载失败",
+            icon: "none"
+          });
         }
       } catch (err) {
         loadingStatus.value = "noMore";
-        common_vendor.index.showToast({ title: "网络请求异常", icon: "none" });
+        common_vendor.index.showToast({
+          title: "网络请求异常",
+          icon: "none"
+        });
       } finally {
         if (isRefresh) {
           refreshing.value = false;
@@ -80,7 +92,9 @@ const _sfc_main = {
         content: "确定要取消关注该商友吗？",
         success: async (res) => {
           if (res.confirm) {
-            const { error } = await utils_request.request("/app-api/member/follow/del", {
+            const {
+              error
+            } = await utils_request.request("/app-api/member/follow/del", {
               method: "POST",
               data: {
                 targetId: followId,
@@ -90,13 +104,19 @@ const _sfc_main = {
               }
             });
             if (!error) {
-              common_vendor.index.showToast({ title: "已取消关注", icon: "success" });
+              common_vendor.index.showToast({
+                title: "已取消关注",
+                icon: "success"
+              });
               const index = followedUsers.value.findIndex((item) => item.id === followId);
               if (index !== -1) {
                 followedUsers.value.splice(index, 1);
               }
             } else {
-              common_vendor.index.showToast({ title: error || "操作失败", icon: "none" });
+              common_vendor.index.showToast({
+                title: error || "操作失败",
+                icon: "none"
+              });
             }
           }
         }
@@ -109,9 +129,18 @@ const _sfc_main = {
     const loadMore = () => {
       getFollowedUsers(false);
     };
-    const viewUserDetail = (targetUserId) => {
+    const viewUserDetail = (user) => {
+      if (!user || !user.id) {
+        common_vendor.index.showToast({
+          title: "无法获取用户信息",
+          icon: "none"
+        });
+        return;
+      }
+      const url = `/pages/applicationBusinessCard/applicationBusinessCard?id=${user.id}&name=${encodeURIComponent(user.nickname)}&avatar=${encodeURIComponent(user.avatar || "")}`;
+      common_vendor.index.__f__("log", "at pages/my-follow/my-follow.vue:232", "跳转到名片页（标准流程），URL:", url);
       common_vendor.index.navigateTo({
-        url: `/pages/user-profile/index?id=${targetUserId}`
+        url
       });
     };
     const goToDiscover = () => {
@@ -139,7 +168,7 @@ const _sfc_main = {
           } : {}, {
             g: common_vendor.o(($event) => cancelFollow(item.id), item.id),
             h: item.id,
-            i: common_vendor.o(($event) => viewUserDetail(item.userRespVO.id), item.id)
+            i: common_vendor.o(($event) => viewUserDetail(item.userRespVO), item.id)
           });
         })
       } : {}, {

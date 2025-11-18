@@ -78,7 +78,7 @@ const _sfc_main = {
         params.push(`inviteCode=${inviteCode}`);
       const sharePath = `/pages/home/home${params.length > 0 ? "?" + params.join("&") : ""}`;
       return {
-        title: "发现了一个每天都想打开的商友社交小工具！点戳进入☞☞",
+        title: "精英商友社交，您需要这个带工具的平台——猩聚社！点戳进入☞☞",
         path: sharePath,
         imageUrl: "https://img.gofor.club/logo_share.jpg"
       };
@@ -93,7 +93,7 @@ const _sfc_main = {
         params.push(`inviteCode=${inviteCode}`);
       const queryString = params.join("&");
       return {
-        title: "发现了一个每天都想打开的商友社交小工具！点戳进入☞☞",
+        title: "精英商友社交，您需要这个带工具的平台——猩聚社！点戳进入☞☞",
         query: queryString,
         imageUrl: "https://img.gofor.club/logo_share.jpg"
       };

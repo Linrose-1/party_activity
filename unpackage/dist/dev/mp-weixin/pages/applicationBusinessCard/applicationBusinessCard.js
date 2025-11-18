@@ -2,12 +2,14 @@
 const common_vendor = require("../../common/vendor.js");
 const utils_request = require("../../utils/request.js");
 if (!Array) {
+  const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
   const _easycom_uni_load_more2 = common_vendor.resolveComponent("uni-load-more");
-  _easycom_uni_load_more2();
+  (_easycom_uni_icons2 + _easycom_uni_load_more2)();
 }
+const _easycom_uni_icons = () => "../../uni_modules/uni-icons/components/uni-icons/uni-icons.js";
 const _easycom_uni_load_more = () => "../../uni_modules/uni-load-more/components/uni-load-more/uni-load-more.js";
 if (!Math) {
-  _easycom_uni_load_more();
+  (_easycom_uni_icons + _easycom_uni_load_more)();
 }
 const _sfc_main = {
   __name: "applicationBusinessCard",
@@ -21,7 +23,7 @@ const _sfc_main = {
     common_vendor.ref(false);
     const isLoading = common_vendor.ref(true);
     common_vendor.onLoad((options) => {
-      common_vendor.index.__f__("log", "at pages/applicationBusinessCard/applicationBusinessCard.vue:126", "[business-card-apply] onLoad 触发。收到的选项：", options);
+      common_vendor.index.__f__("log", "at pages/applicationBusinessCard/applicationBusinessCard.vue:156", "[business-card-apply] onLoad 触发。收到的选项：", options);
       if (options.id && options.name) {
         targetUserId.value = parseInt(options.id, 10);
         fromShare.value = options.fromShare === "1";
@@ -47,9 +49,12 @@ const _sfc_main = {
         if (hasPermission) {
           return;
         }
-        await fetchCurrentUserInfo();
+        await Promise.all([
+          fetchCurrentUserInfo(),
+          fetchSimpleTargetUserInfo()
+        ]);
       } catch (e) {
-        common_vendor.index.__f__("error", "at pages/applicationBusinessCard/applicationBusinessCard.vue:174", "初始化页面时发生错误:", e);
+        common_vendor.index.__f__("error", "at pages/applicationBusinessCard/applicationBusinessCard.vue:211", "初始化页面时发生错误:", e);
       } finally {
         isLoading.value = false;
       }
@@ -69,14 +74,44 @@ const _sfc_main = {
         data: requestData
       });
       if (data && !error) {
-        common_vendor.index.__f__("log", "at pages/applicationBusinessCard/applicationBusinessCard.vue:200", "权限检查成功，直接跳转到名片页。");
+        common_vendor.index.__f__("log", "at pages/applicationBusinessCard/applicationBusinessCard.vue:237", "权限检查成功，直接跳转到名片页。");
         common_vendor.index.redirectTo({
           url: `/pages/my-businessCard/my-businessCard?id=${targetUserId.value}&fromShare=${fromShare.value ? "1" : "0"}`
         });
         return true;
       } else {
-        common_vendor.index.__f__("log", "at pages/applicationBusinessCard/applicationBusinessCard.vue:206", "权限检查失败，显示支付页面。", error);
+        common_vendor.index.__f__("log", "at pages/applicationBusinessCard/applicationBusinessCard.vue:243", "权限检查失败，显示支付页面。", error);
         return false;
+      }
+    };
+    const fetchSimpleTargetUserInfo = async () => {
+      if (!targetUserId.value) {
+        common_vendor.index.__f__("warn", "at pages/applicationBusinessCard/applicationBusinessCard.vue:255", "无法获取简要信息，因为 targetUserId 不存在。");
+        return;
+      }
+      const {
+        data,
+        error
+      } = await utils_request.request("/app-api/member/user/getSimpleUserInfo", {
+        method: "GET",
+        data: {
+          readUserId: targetUserId.value,
+          notPay: 1
+          // 固定传 1
+        }
+      });
+      common_vendor.index.__f__("log", "at pages/applicationBusinessCard/applicationBusinessCard.vue:271", "----------- getSimpleUserInfo 接口返回数据 -----------");
+      common_vendor.index.__f__("log", "at pages/applicationBusinessCard/applicationBusinessCard.vue:272", JSON.stringify(data, null, 2));
+      common_vendor.index.__f__("log", "at pages/applicationBusinessCard/applicationBusinessCard.vue:273", "----------------------------------------------------");
+      if (error) {
+        common_vendor.index.__f__("error", "at pages/applicationBusinessCard/applicationBusinessCard.vue:277", "获取目标用户简要信息失败:", error);
+        return;
+      }
+      if (data) {
+        targetUserInfo.value = {
+          ...targetUserInfo.value,
+          ...data
+        };
       }
     };
     const fetchCurrentUserInfo = async () => {
@@ -89,7 +124,7 @@ const _sfc_main = {
       if (data) {
         currentUserInfo.value = data;
       } else {
-        common_vendor.index.__f__("error", "at pages/applicationBusinessCard/applicationBusinessCard.vue:222", "获取当前用户信息失败:", error);
+        common_vendor.index.__f__("error", "at pages/applicationBusinessCard/applicationBusinessCard.vue:304", "获取当前用户信息失败:", error);
       }
     };
     const handlePayToReadCard = async () => {
@@ -188,29 +223,74 @@ const _sfc_main = {
         e: common_vendor.t((targetUserInfo.value.realName || targetUserInfo.value.nickname || "?").charAt(0))
       }, {
         f: common_vendor.t(targetUserInfo.value.realName || targetUserInfo.value.nickname),
-        g: common_vendor.t(targetUserInfo.value.realName || targetUserInfo.value.nickname),
-        h: currentUserInfo.value
-      }, currentUserInfo.value ? {
-        i: common_vendor.t(currentUserInfo.value.point),
-        j: currentUserInfo.value.point < 1 ? 1 : ""
+        g: targetUserInfo.value.companyName
+      }, targetUserInfo.value.companyName ? {
+        h: common_vendor.p({
+          type: "flag",
+          size: "16",
+          color: "#888"
+        }),
+        i: common_vendor.t(targetUserInfo.value.companyName)
       } : {}, {
-        k: showInsufficient.value
-      }, showInsufficient.value ? {} : {}, {
-        l: common_vendor.t(isPaying.value ? "支付中..." : "确认支付"),
-        m: common_vendor.o(handlePayToReadCard),
-        n: isPaying.value,
-        o: isPaying.value,
-        p: common_vendor.o(goToEarnPoints)
-      }) : {
+        j: targetUserInfo.value.positionTitle
+      }, targetUserInfo.value.positionTitle ? {
+        k: common_vendor.p({
+          type: "staff",
+          size: "16",
+          color: "#888"
+        }),
+        l: common_vendor.t(targetUserInfo.value.positionTitle)
+      } : {}, {
+        m: targetUserInfo.value.professionalTitle
+      }, targetUserInfo.value.professionalTitle ? {
+        n: common_vendor.p({
+          type: "medal",
+          size: "16",
+          color: "#888"
+        }),
+        o: common_vendor.t(targetUserInfo.value.professionalTitle)
+      } : {}, {
+        p: targetUserInfo.value.socialOrganization
+      }, targetUserInfo.value.socialOrganization ? {
         q: common_vendor.p({
+          type: "network",
+          size: "16",
+          color: "#888"
+        }),
+        r: common_vendor.t(targetUserInfo.value.socialOrganization)
+      } : {}, {
+        s: targetUserInfo.value.personalBio
+      }, targetUserInfo.value.personalBio ? {
+        t: common_vendor.p({
+          type: "paperclip",
+          size: "16",
+          color: "#888"
+        }),
+        v: common_vendor.t(targetUserInfo.value.personalBio)
+      } : {}, {
+        w: common_vendor.t(targetUserInfo.value.realName || targetUserInfo.value.nickname),
+        x: currentUserInfo.value
+      }, currentUserInfo.value ? {
+        y: common_vendor.t(currentUserInfo.value.point),
+        z: currentUserInfo.value.point < 1 ? 1 : ""
+      } : {}, {
+        A: showInsufficient.value
+      }, showInsufficient.value ? {} : {}, {
+        B: common_vendor.t(isPaying.value ? "支付中..." : "确认支付"),
+        C: common_vendor.o(handlePayToReadCard),
+        D: isPaying.value,
+        E: isPaying.value,
+        F: common_vendor.o(goToEarnPoints)
+      }) : {
+        G: common_vendor.p({
           status: "loading",
           contentText: "正在加载用户信息..."
         })
       }, {
-        r: currentUserInfo.value && targetUserInfo.value
+        H: currentUserInfo.value && targetUserInfo.value
       }, currentUserInfo.value && targetUserInfo.value ? {
-        s: common_vendor.t(formattedFriendRequestMessage.value),
-        t: common_vendor.o(copyFriendRequestMessage)
+        I: common_vendor.t(formattedFriendRequestMessage.value),
+        J: common_vendor.o(copyFriendRequestMessage)
       } : {}));
     };
   }

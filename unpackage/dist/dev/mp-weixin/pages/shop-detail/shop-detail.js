@@ -65,7 +65,7 @@ const _sfc_main = {
           special
         };
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/shop-detail/shop-detail.vue:213", "解析营业时间失败:", error);
+        common_vendor.index.__f__("error", "at pages/shop-detail/shop-detail.vue:225", "解析营业时间失败:", error);
         return {
           regular: [{
             day: "营业时间",
@@ -96,7 +96,7 @@ const _sfc_main = {
       });
       isLoading.value = false;
       if (error) {
-        common_vendor.index.__f__("error", "at pages/shop-detail/shop-detail.vue:251", "获取聚店详情失败:", error);
+        common_vendor.index.__f__("error", "at pages/shop-detail/shop-detail.vue:263", "获取聚店详情失败:", error);
         common_vendor.index.showToast({
           title: error,
           icon: "none"
@@ -104,7 +104,7 @@ const _sfc_main = {
         return;
       }
       storeDetail.value = data;
-      common_vendor.index.__f__("log", "at pages/shop-detail/shop-detail.vue:260", "聚店详情数据:", storeDetail.value);
+      common_vendor.index.__f__("log", "at pages/shop-detail/shop-detail.vue:272", "聚店详情数据:", storeDetail.value);
     });
     const openMap = () => {
       if (!storeDetail.value)
@@ -154,6 +154,25 @@ const _sfc_main = {
         // 兼容旧的单图预览
       });
     };
+    common_vendor.onShareAppMessage(() => {
+      if (!storeDetail.value)
+        return {};
+      return {
+        title: storeDetail.value.storeName + " - 聚店推荐",
+        path: `/pages/shop-detail/shop-detail?id=${storeDetail.value.id}`,
+        imageUrl: coverImages.value[0] || ""
+        // 封面图（支持可选）
+      };
+    });
+    common_vendor.onShareTimeline(() => {
+      if (!storeDetail.value)
+        return {};
+      return {
+        title: storeDetail.value.storeName + " - 聚店推荐",
+        query: `id=${storeDetail.value.id}`,
+        imageUrl: coverImages.value[0] || ""
+      };
+    });
     return (_ctx, _cache) => {
       return common_vendor.e({
         a: storeDetail.value
@@ -253,5 +272,6 @@ const _sfc_main = {
   }
 };
 const MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["__scopeId", "data-v-b8678dae"]]);
+_sfc_main.__runtimeHooks = 6;
 wx.createPage(MiniProgramPage);
 //# sourceMappingURL=../../../.sourcemap/mp-weixin/pages/shop-detail/shop-detail.js.map

@@ -20,17 +20,25 @@
 						<view class="store-name">{{ storeDetail.storeName }}</view>
 					</view>
 				</view>
+
+				<view class="cover-info-overlay">
+					<view class="store-name">{{ storeDetail.storeName }}</view>
+					<view class="distance" v-if="storeDetail.distance !== null">
+						<uni-icons type="paperplane-filled" color="#fff" size="16"></uni-icons>
+						{{ storeDetail.distance }}公里
+					</view>
+				</view>
 			</view>
 
 			<!-- 覆盖在轮播图或占位图之上的店名和距离信息 -->
 			<!-- 【注意】这部分从原来的封面图中移出来，独立放置 -->
-			<view class="cover-info-overlay">
+			<!-- <view class="cover-info-overlay">
 				<view class="store-name">{{ storeDetail.storeName }}</view>
 				<view class="distance" v-if="storeDetail.distance !== null">
 					<uni-icons type="paperplane-filled" color="#fff" size="16"></uni-icons>
 					{{ storeDetail.distance }}公里
 				</view>
-			</view>
+			</view> -->
 
 			<!-- 2. 商店基本信息 -->
 			<view class="store-info">
@@ -113,7 +121,7 @@
 		<view class="action-bar">
 			<button class="nav-btn" @click="openNavigation">
 				<uni-icons type="map-filled" color="#FF6B00" size="20"></uni-icons>
-				<text>导航</text>
+				<text>聚店导航</text>
 			</button>
 			<button class="primary-btn" @click="callPhone">
 				<uni-icons type="phone-filled" color="#fff" size="20"></uni-icons>
@@ -136,6 +144,10 @@
 		ref,
 		computed // 导入 computed
 	} from 'vue';
+	import {
+		onShareAppMessage,
+		onShareTimeline
+	} from '@dcloudio/uni-app';
 	import {
 		onLoad
 	} from '@dcloudio/uni-app';
@@ -310,6 +322,28 @@
 			current: Array.isArray(urls) ? urls[current] : urls // 兼容旧的单图预览
 		});
 	};
+
+	// 1. 微信好友分享
+	onShareAppMessage(() => {
+		if (!storeDetail.value) return {};
+
+		return {
+			title: storeDetail.value.storeName + " - 聚店推荐",
+			path: `/pages/shop-detail/shop-detail?id=${storeDetail.value.id}`,
+			imageUrl: coverImages.value[0] || "" // 封面图（支持可选）
+		};
+	});
+
+	// 2. 朋友圈分享
+	onShareTimeline(() => {
+		if (!storeDetail.value) return {};
+
+		return {
+			title: storeDetail.value.storeName + " - 聚店推荐",
+			query: `id=${storeDetail.value.id}`,
+			imageUrl: coverImages.value[0] || ""
+		};
+	});
 </script>
 
 <style scoped>
@@ -369,12 +403,14 @@
 	}
 
 	.store-cover-container {
-		height: 480rpx;
+		aspect-ratio: 5 / 4;
+		/* ★ 设定为 5:4 固定比例 */
+		width: 100%;
 		position: relative;
 		overflow: hidden;
 		background: linear-gradient(45deg, #2c3e50, #4a6491);
-		/* 默认背景 */
 	}
+
 
 	.cover-swiper,
 	.cover-placeholder {

@@ -278,6 +278,19 @@ const _sfc_main = {
         icon: "../../static/icon/protocols.png",
         path: "/pages/user-agreement/user-agreement"
       },
+      {
+        name: "平台客服",
+        desc: "联系我们，获取帮助",
+        icon: "../../static/icon/customer-service.png",
+        // 假设您有一个客服图标
+        path: null,
+        // path 为 null, 我们将通过 key 来特殊处理
+        key: "customerService",
+        // 定义一个唯一的 key
+        phone: "18024545855",
+        // 【请在这里替换成您的真实客服电话】
+        fullWidth: true
+      },
       // 单独成行
       {
         name: "平台认证",
@@ -289,6 +302,25 @@ const _sfc_main = {
       // 新增，带特殊标记
     ]);
     const navigateToFeature = (item) => {
+      if (item && item.key === "customerService") {
+        if (!item.phone) {
+          common_vendor.index.showToast({
+            title: "客服电话未设置",
+            icon: "none"
+          });
+          return;
+        }
+        common_vendor.index.makePhoneCall({
+          phoneNumber: item.phone,
+          success: () => {
+            common_vendor.index.__f__("log", "at pages/my/my.vue:518", "拨打电话成功");
+          },
+          fail: (err) => {
+            common_vendor.index.__f__("log", "at pages/my/my.vue:521", "拨打电话失败:", err);
+          }
+        });
+        return;
+      }
       if (item && item.path) {
         common_vendor.index.navigateTo({
           url: item.path

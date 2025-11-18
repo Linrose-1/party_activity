@@ -2,6 +2,7 @@
 const common_vendor = require("../../common/vendor.js");
 const utils_request = require("../../utils/request.js");
 const utils_upload = require("../../utils/upload.js");
+const utils_user = require("../../utils/user.js");
 if (!Array) {
   const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
   _easycom_uni_icons2();
@@ -54,6 +55,10 @@ const _sfc_main = {
         return;
       }
       checkDraft();
+      common_vendor.index.showShareMenu({
+        withShareTicket: true,
+        menus: ["shareAppMessage", "shareTimeline"]
+      });
     });
     let debounceTimer = null;
     common_vendor.watch(form, (newValue) => {
@@ -67,7 +72,7 @@ const _sfc_main = {
     const saveDraft = (data) => {
       if (data.title || data.content || data.tags.length > 0 || data.images.length > 0) {
         common_vendor.index.setStorageSync(DRAFT_KEY, JSON.stringify(data));
-        common_vendor.index.__f__("log", "at pages/home-opportunitiesPublish/home-opportunitiesPublish.vue:185", "📝 草稿已自动保存");
+        common_vendor.index.__f__("log", "at pages/home-opportunitiesPublish/home-opportunitiesPublish.vue:195", "📝 草稿已自动保存");
       }
     };
     const checkDraft = () => {
@@ -91,7 +96,7 @@ const _sfc_main = {
     };
     const clearDraft = () => {
       common_vendor.index.removeStorageSync(DRAFT_KEY);
-      common_vendor.index.__f__("log", "at pages/home-opportunitiesPublish/home-opportunitiesPublish.vue:211", "🧹 草稿已清除");
+      common_vendor.index.__f__("log", "at pages/home-opportunitiesPublish/home-opportunitiesPublish.vue:221", "🧹 草稿已清除");
     };
     function topicChange(e) {
       form.topic = e.detail.value;
@@ -151,9 +156,9 @@ const _sfc_main = {
             type
           }
         });
-        common_vendor.index.__f__("log", "at pages/home-opportunitiesPublish/home-opportunitiesPublish.vue:324", `标签历史 "${tagName}" 已记录`);
+        common_vendor.index.__f__("log", "at pages/home-opportunitiesPublish/home-opportunitiesPublish.vue:334", `标签历史 "${tagName}" 已记录`);
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/home-opportunitiesPublish/home-opportunitiesPublish.vue:326", "记录标签历史失败:", error);
+        common_vendor.index.__f__("error", "at pages/home-opportunitiesPublish/home-opportunitiesPublish.vue:336", "记录标签历史失败:", error);
       }
     }
     common_vendor.watch(() => form.tagInput, (newValue) => {
@@ -188,7 +193,7 @@ const _sfc_main = {
         const suggestions = data.list.map((item) => item.name);
         tagSuggestions.value = [...new Set(suggestions)];
       } catch (e) {
-        common_vendor.index.__f__("error", "at pages/home-opportunitiesPublish/home-opportunitiesPublish.vue:375", "获取标签建议失败:", e);
+        common_vendor.index.__f__("error", "at pages/home-opportunitiesPublish/home-opportunitiesPublish.vue:385", "获取标签建议失败:", e);
         tagSuggestions.value = [];
       }
     }
@@ -223,7 +228,7 @@ const _sfc_main = {
             if (result.data)
               successfulUrls.push(result.data);
             else
-              common_vendor.index.__f__("error", "at pages/home-opportunitiesPublish/home-opportunitiesPublish.vue:440", "上传失败:", result.error);
+              common_vendor.index.__f__("error", "at pages/home-opportunitiesPublish/home-opportunitiesPublish.vue:450", "上传失败:", result.error);
           });
           form.images.push(...successfulUrls);
           if (successfulUrls.length < validFiles.length) {
@@ -322,7 +327,7 @@ const _sfc_main = {
         },
         fail: (err) => {
           if (err.errMsg.indexOf("cancel") === -1) {
-            common_vendor.index.__f__("error", "at pages/home-opportunitiesPublish/home-opportunitiesPublish.vue:553", "选择视频失败:", err);
+            common_vendor.index.__f__("error", "at pages/home-opportunitiesPublish/home-opportunitiesPublish.vue:563", "选择视频失败:", err);
           }
         }
       });
@@ -408,6 +413,37 @@ const _sfc_main = {
         });
       }
     };
+    common_vendor.onShareAppMessage(() => {
+      const inviteCode = utils_user.getInviteCode();
+      common_vendor.index.__f__("log", "at pages/home-opportunitiesPublish/home-opportunitiesPublish.vue:659", `[商机发布页] 分享给好友，获取到邀请码: ${inviteCode}`);
+      let sharePath = "/pages/home-opportunitiesPublish/home-opportunitiesPublish";
+      if (inviteCode) {
+        sharePath += `?inviteCode=${inviteCode}`;
+      }
+      const shareContent = {
+        title: "发现一个好商机，快来发布你的商业需求！",
+        path: sharePath,
+        // 建议使用一个固定的、吸引人的分享图片
+        imageUrl: "https://img.gofor.club/logo_share.jpg"
+      };
+      common_vendor.index.__f__("log", "at pages/home-opportunitiesPublish/home-opportunitiesPublish.vue:675", "[商机发布页] 分享给好友的内容:", JSON.stringify(shareContent));
+      return shareContent;
+    });
+    common_vendor.onShareTimeline(() => {
+      const inviteCode = utils_user.getInviteCode();
+      common_vendor.index.__f__("log", "at pages/home-opportunitiesPublish/home-opportunitiesPublish.vue:685", `[商机发布页] 分享到朋友圈，获取到邀请码: ${inviteCode}`);
+      let queryString = "";
+      if (inviteCode) {
+        queryString = `inviteCode=${inviteCode}`;
+      }
+      const shareContent = {
+        title: "发现一个好商机，快来发布你的商业需求！",
+        query: queryString,
+        imageUrl: "https://img.gofor.club/logo_share.jpg"
+      };
+      common_vendor.index.__f__("log", "at pages/home-opportunitiesPublish/home-opportunitiesPublish.vue:700", "[商机发布页] 分享到朋友圈的内容:", JSON.stringify(shareContent));
+      return shareContent;
+    });
     return (_ctx, _cache) => {
       return common_vendor.e({
         a: form.title,
@@ -484,5 +520,6 @@ const _sfc_main = {
   }
 };
 const MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["__scopeId", "data-v-90e28424"]]);
+_sfc_main.__runtimeHooks = 6;
 wx.createPage(MiniProgramPage);
 //# sourceMappingURL=../../../.sourcemap/mp-weixin/pages/home-opportunitiesPublish/home-opportunitiesPublish.js.map

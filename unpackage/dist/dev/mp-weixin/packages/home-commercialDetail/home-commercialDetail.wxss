@@ -244,13 +244,18 @@
 		aspect-ratio: 1 / 1;
 		/* 多图时，保持1:1的正方形比例 */
 }
-
+.images-count-1.data-v-8303b14f {
+		/* 让单张图的网格容器宽度不是100%，比如 70%，使其不会显得过大 */
+		/* 注意：这里是修改父容器的样式，而不是 .image-wrapper */
+		grid-template-columns: minmax(0, 2fr) 1fr;
+		/* 让第一列占据 2/3 宽度 */
+}
 
 	/* Case 1: 只有 1 张图片 */
 .images-count-1 .image-wrapper.data-v-8303b14f {
-		grid-column: 1 / -1;
+		/* grid-column: 1 / -1; */
 		/* 占据整行 */
-		aspect-ratio: unset;
+		/* aspect-ratio: unset; */
 		/* 移除正方形限制，让图片以原始比例显示 */
 }
 

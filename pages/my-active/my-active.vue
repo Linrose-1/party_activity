@@ -419,7 +419,7 @@
 						title: '正在删除...'
 					});
 					// 【注意】接口应该是取消聚会，而不是删除。请确认接口地址是否正确。
-					const result = await request('/app-api/member/activity/cancel-activity', {
+					const result = await request('/app-api/member/activity/delete', {
 						method: 'POST',
 						data: {
 							id: activityId

@@ -191,7 +191,7 @@ const _sfc_main = {
             common_vendor.index.showLoading({
               title: "正在删除..."
             });
-            const result = await utils_request.request("/app-api/member/activity/cancel-activity", {
+            const result = await utils_request.request("/app-api/member/activity/delete", {
               method: "POST",
               data: {
                 id: activityId

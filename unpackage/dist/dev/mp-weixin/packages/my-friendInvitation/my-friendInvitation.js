@@ -37,7 +37,7 @@ const _sfc_main = {
       fetchUserInfo();
     });
     common_vendor.onPullDownRefresh(async () => {
-      common_vendor.index.__f__("log", "at packages/my-friendInvitation/my-friendInvitation.vue:134", "触发下拉刷新...");
+      common_vendor.index.__f__("log", "at packages/my-friendInvitation/my-friendInvitation.vue:119", "触发下拉刷新...");
       try {
         if (currentTab.value === 1) {
           await getShareUserList(true);
@@ -45,15 +45,15 @@ const _sfc_main = {
           await fetchUserInfo();
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at packages/my-friendInvitation/my-friendInvitation.vue:145", "下拉刷新时发生错误:", error);
+        common_vendor.index.__f__("error", "at packages/my-friendInvitation/my-friendInvitation.vue:130", "下拉刷新时发生错误:", error);
       } finally {
-        common_vendor.index.__f__("log", "at packages/my-friendInvitation/my-friendInvitation.vue:148", "刷新操作完成，停止动画。");
+        common_vendor.index.__f__("log", "at packages/my-friendInvitation/my-friendInvitation.vue:133", "刷新操作完成，停止动画。");
         common_vendor.index.stopPullDownRefresh();
       }
     });
     common_vendor.onReachBottom(() => {
       if (currentTab.value === 1 && loadStatus.value === "more" && !loading.value) {
-        common_vendor.index.__f__("log", "at packages/my-friendInvitation/my-friendInvitation.vue:155", "触底加载更多...");
+        common_vendor.index.__f__("log", "at packages/my-friendInvitation/my-friendInvitation.vue:140", "触底加载更多...");
         getShareUserList();
       }
     });
@@ -113,7 +113,7 @@ const _sfc_main = {
           loadStatus.value = "noMore";
         }
       } catch (err) {
-        common_vendor.index.__f__("error", "at packages/my-friendInvitation/my-friendInvitation.vue:253", "获取邀请列表失败:", err);
+        common_vendor.index.__f__("error", "at packages/my-friendInvitation/my-friendInvitation.vue:238", "获取邀请列表失败:", err);
         loadStatus.value = "more";
       }
     };
@@ -180,7 +180,7 @@ const _sfc_main = {
       const name = user.nickname || user.realName || "匿名用户";
       const avatarUrl = user.avatar || defaultAvatar;
       const url = `/pages/applicationBusinessCard/applicationBusinessCard?id=${user.id}&name=${encodeURIComponent(name)}&avatar=${encodeURIComponent(avatarUrl)}&fromShare=1`;
-      common_vendor.index.__f__("log", "at packages/my-friendInvitation/my-friendInvitation.vue:380", "从推荐商友页跳转到名片申请页, URL:", url);
+      common_vendor.index.__f__("log", "at packages/my-friendInvitation/my-friendInvitation.vue:365", "从推荐商友页跳转到名片申请页, URL:", url);
       common_vendor.index.navigateTo({
         url
       });
@@ -192,7 +192,9 @@ const _sfc_main = {
       const Y = date.getFullYear();
       const M = (date.getMonth() + 1).toString().padStart(2, "0");
       const D = date.getDate().toString().padStart(2, "0");
-      return `${Y}-${M}-${D}`;
+      const h = date.getHours().toString().padStart(2, "0");
+      const m = date.getMinutes().toString().padStart(2, "0");
+      return `${Y}-${M}-${D} ${h}:${m}`;
     };
     return (_ctx, _cache) => {
       return common_vendor.e({

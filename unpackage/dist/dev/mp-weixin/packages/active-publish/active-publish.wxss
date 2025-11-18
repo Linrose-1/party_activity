@@ -81,6 +81,13 @@
   width: 100%;
   height: 100%;
 }
+.tips.data-v-5d3444db {
+  font-size: 24rpx;
+  color: #888;
+  margin-top: 10rpx;
+  line-height: 36rpx;
+  margin-bottom: 20rpx;
+}
 .activity-item.data-v-5d3444db {
   margin: 20rpx 0;
   background-color: #f9f9f9;

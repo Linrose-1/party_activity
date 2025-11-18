@@ -108,21 +108,6 @@
 	const userInfo = ref(null);
 
 	// --- 生命周期 ---
-	// onMounted(() => {
-	// 	// 页面加载时，两个接口都可以请求
-	// 	getShareUserList(true); // 加载我邀请的人列表
-	// 	fetchUserInfo(); // 加载当前用户信息
-	// });
-
-	// onPullDownRefresh(() => {
-	// 	// 下拉刷新只针对当前显示的列表
-	// 	if (currentTab.value === 0) {
-	// 		getShareUserList(true);
-	// 	} else {
-	// 		// “我的邀请人”也可以刷新一下
-	// 		fetchUserInfo().finally(() => uni.stopPullDownRefresh());
-	// 	}
-	// });
 	onMounted(() => {
 		// 页面加载时，调用新的初始化函数
 		initializePage();
@@ -394,7 +379,9 @@
 		const Y = date.getFullYear();
 		const M = (date.getMonth() + 1).toString().padStart(2, '0');
 		const D = date.getDate().toString().padStart(2, '0');
-		return `${Y}-${M}-${D}`; // 只显示年月日
+		const h = date.getHours().toString().padStart(2, '0');
+		const m = date.getMinutes().toString().padStart(2, '0');
+		return `${Y}-${M}-${D} ${h}:${m}`; // 年月日 + 时:分
 	};
 </script>
 

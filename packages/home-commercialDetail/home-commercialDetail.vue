@@ -51,8 +51,9 @@
 					:class="['post-images', 'images-count-' + postDetail.images.length]">
 					<view v-for="(image, imgIndex) in postDetail.images" :key="imgIndex" class="image-wrapper"
 						@click.stop="previewImage(postDetail.images, imgIndex)">
-						<image :src="image" class="post-image"
-							:mode="postDetail.images.length === 1 ? 'widthFix' : 'aspectFill'" />
+						<!-- <image :src="image" class="post-image"
+							:mode="postDetail.images.length === 1 ? 'widthFix' : 'aspectFill'" /> -->
+						<image :src="image" class="post-image" mode="aspectFill" />
 					</view>
 				</view>
 
@@ -333,16 +334,16 @@
 		// 页面卸载时，取消监听，避免内存泄漏
 		uni.offKeyboardHeightChange();
 	});
-	
+
 	/**
 	 * 监听物理返回键或左上角返回按钮
 	 * 这是发出通知的最佳时机
 	 */
 	onBackPress((options) => {
-	    if (hasDataChanged.value) {
-	        console.log('详情页数据已变更，发出通知: postUpdated');
-	        uni.$emit('postUpdated');
-	    }
+		if (hasDataChanged.value) {
+			console.log('详情页数据已变更，发出通知: postUpdated');
+			uni.$emit('postUpdated');
+		}
 	});
 
 
@@ -892,7 +893,7 @@
 				data: requestData
 			});
 			console.log("触发收藏", result)
-			
+
 			if (!error) {
 				hasDataChanged.value = true; // 操作成功，标记数据已变
 			}
@@ -1050,8 +1051,6 @@
 		copyMenu.show = false;
 		copyMenu.text = ''; // 清空文本
 	};
-	
-	
 </script>
 
 <style scoped>
@@ -1324,12 +1323,18 @@
 		/* 多图时，保持1:1的正方形比例 */
 	}
 
+	.images-count-1 {
+		/* 让单张图的网格容器宽度不是100%，比如 70%，使其不会显得过大 */
+		/* 注意：这里是修改父容器的样式，而不是 .image-wrapper */
+		grid-template-columns: minmax(0, 2fr) 1fr;
+		/* 让第一列占据 2/3 宽度 */
+	}
 
 	/* Case 1: 只有 1 张图片 */
 	.images-count-1 .image-wrapper {
-		grid-column: 1 / -1;
+		/* grid-column: 1 / -1; */
 		/* 占据整行 */
-		aspect-ratio: unset;
+		/* aspect-ratio: unset; */
 		/* 移除正方形限制，让图片以原始比例显示 */
 	}
 

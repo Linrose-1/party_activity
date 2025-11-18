@@ -115,7 +115,7 @@ const _sfc_main = {
       }
       if (data && Array.isArray(data)) {
         categoryList.value = data;
-        common_vendor.index.__f__("log", "at pages/myStore-edit/myStore-edit.vue:270", "成功获取聚店类别:", categoryList.value);
+        common_vendor.index.__f__("log", "at pages/myStore-edit/myStore-edit.vue:271", "成功获取聚店类别:", categoryList.value);
       }
     };
     const getStoreDetails = async (storeId) => {
@@ -169,7 +169,7 @@ const _sfc_main = {
           description: d.description || ""
         }));
       } catch (e) {
-        common_vendor.index.__f__("warn", "at pages/myStore-edit/myStore-edit.vue:337", "解析营业时间失败或为新建状态，将使用默认值:", e.message);
+        common_vendor.index.__f__("warn", "at pages/myStore-edit/myStore-edit.vue:338", "解析营业时间失败或为新建状态，将使用默认值:", e.message);
         editableHours.regular = weekdays.map((dayInfo) => ({
           key: dayInfo.key,
           label: dayInfo.label,
@@ -497,7 +497,7 @@ const _sfc_main = {
         }),
         C: form.value.contactWechatQrCodeUrl || "/static/images/placeholder-qr.png",
         D: common_vendor.o(($event) => handleImageUpload("wechat")),
-        E: common_vendor.t(isSubmitting.value ? "提交中..." : form.value.id ? "提交修改" : "申请上榜"),
+        E: common_vendor.t(isSubmitting.value ? "提交中..." : form.value.id ? "提交修改" : "申请入驻"),
         F: common_vendor.o(handleSubmit),
         G: isSubmitting.value,
         H: isSubmitting.value

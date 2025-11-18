@@ -57,7 +57,7 @@
 					<!-- 卡片底部: 操作按钮 -->
 					<view v-if="item.paymentStatusStr === '待确定'" class="card-actions">
 						<button class="btn btn-reject" @click.stop="handleReject(item)">驳回</button>
-						<button class="btn btn-confirm" @click.stop="handleConfirm(item)">确认收款</button>
+						<button class="btn btn-confirm" @click.stop="handleConfirm(item)">确认</button>
 					</view>
 				</view>
 			</view>

@@ -29,6 +29,9 @@
 						<text v-else>点击上传封面图片</text>
 					</view>
 				</uni-forms-item>
+				<view class="tips">
+					请使用5:4或4:3画幅比例上传图片，可使用相册自带的画幅剪切工具调整图片尺寸
+				</view>
 
 				<!-- 【修改】聚会时间选择器 -->
 				<uni-forms-item label="聚会时间" required>
@@ -38,6 +41,7 @@
 							@change="isPickerOpen = false" @maskClick="isPickerOpen = false" />
 					</view>
 				</uni-forms-item>
+
 
 				<!-- 【修改】报名时间选择器 -->
 				<uni-forms-item label="报名时间" required>
@@ -141,7 +145,7 @@
 				</uni-forms-item>
 
 				<!-- organizerPaymentQrCodeUrl -->
-				<uni-forms-item label="收款码" :required="form.activityFunds === 1">
+				<uni-forms-item label="收款码" v-if="form.activityFunds === 1" :required="true">
 					<view class="cover-upload" @click="uploadCode">
 						<image v-if="form.organizerPaymentQrCodeUrl" :src="form.organizerPaymentQrCodeUrl"
 							mode="aspectFit"></image>
@@ -186,10 +190,15 @@
 	} from 'vue';
 	import {
 		onLoad,
-		onUnload
+		onUnload,
+		onShareAppMessage,
+		onShareTimeline
 	} from '@dcloudio/uni-app';
 	import request from '../../utils/request.js';
 	import uploadFile from '../../utils/upload.js';
+	import {
+		getInviteCode
+	} from '../../utils/user.js';
 
 	const isUserVerified = ref(true);
 
@@ -450,6 +459,11 @@
 			form.value.associatedStoreId = shop.id;
 			associatedStoreName.value = shop.storeName;
 		});
+
+		uni.showShareMenu({
+			withShareTicket: true,
+			menus: ["shareAppMessage", "shareTimeline"]
+		});
 	});
 
 	onUnload(() => {
@@ -470,7 +484,7 @@
 			uni.setStorageSync(DRAFT_STORAGE_KEY, JSON.stringify(draftData));
 			uni.showToast({
 				title: '聚会已保存为草稿',
-				icon: 'success' // 使用成功图标
+				icon: 'none'
 			});
 			console.log('草稿已保存:', draftData);
 		} catch (e) {
@@ -766,6 +780,57 @@
 			};
 		}
 	};
+
+	/**
+	 * @description 监听用户点击“分享给好友”
+	 */
+	onShareAppMessage(() => {
+		// 1. 获取当前用户的邀请码
+		const inviteCode = getInviteCode();
+		console.log(`[活动发布页] 分享给好友，获取到邀请码: ${inviteCode}`);
+
+		// 2. 构建分享路径，并附带邀请码参数
+		let sharePath = '/packages/active-publish/active-publish'; // 指向当前页面
+		if (inviteCode) {
+			sharePath += `?inviteCode=${inviteCode}`;
+		}
+
+		// 3. 定义分享内容
+		const shareContent = {
+			title: '快来组织一场有趣的聚会吧，链接你的商友！',
+			path: sharePath,
+			// 建议使用一个固定的、吸引人的分享图片
+			imageUrl: 'https://img.gofor.club/logo_share.jpg'
+		};
+
+		console.log('[活动发布页] 分享给好友的内容:', JSON.stringify(shareContent));
+		return shareContent;
+	});
+
+	/**
+	 * @description 监听用户点击“分享到朋友圈”
+	 */
+	onShareTimeline(() => {
+		// 1. 获取当前用户的邀请码
+		const inviteCode = getInviteCode();
+		console.log(`[活动发布页] 分享到朋友圈，获取到邀请码: ${inviteCode}`);
+
+		// 2. 构建 query 字符串
+		let queryString = '';
+		if (inviteCode) {
+			queryString = `inviteCode=${inviteCode}`;
+		}
+
+		// 3. 定义分享内容
+		const shareContent = {
+			title: '快来组织一场有趣的聚会吧，链接你的商友！',
+			query: queryString,
+			imageUrl: 'https://img.gofor.club/logo_share.jpg'
+		};
+
+		console.log('[活动发布页] 分享到朋友圈的内容:', JSON.stringify(shareContent));
+		return shareContent;
+	});
 </script>
 
 <style lang="scss" scoped>
@@ -866,6 +931,15 @@
 			height: 100%;
 		}
 	}
+
+	.tips {
+		font-size: 24rpx;
+		color: #888;
+		margin-top: 10rpx;
+		line-height: 36rpx;
+		margin-bottom: 20rpx;
+	}
+
 
 	.activity-item {
 		margin: 20rpx 0;

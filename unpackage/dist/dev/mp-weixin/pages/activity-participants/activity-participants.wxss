@@ -12,9 +12,15 @@
   align-items: center;
   padding: 24rpx 30rpx;
   border-bottom: 1rpx solid #f0f0f0;
+  /* 为点击增加一个过渡效果 */
+  transition: background-color 0.2s;
+  /* 增加点击态的样式 */
 }
 .participant-item.data-v-d6800723:last-child {
   border-bottom: none;
+}
+.participant-item.data-v-d6800723:active {
+  background-color: #f9f9f9;
 }
 .avatar.data-v-d6800723 {
   width: 88rpx;
