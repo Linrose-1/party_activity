@@ -182,6 +182,7 @@ const _sfc_main = {
       });
     };
     const cancelActivity = (activityId) => {
+      common_vendor.index.__f__("log", "at pages/my-active/my-active.vue:412", "一进来就调用");
       common_vendor.index.showModal({
         title: "警告",
         content: "确定要取消您发布的此聚会吗？此操作不可逆。",

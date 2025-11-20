@@ -90,6 +90,9 @@
 	} from '@dcloudio/uni-app';
 	import MyCard from '../../components/MyCard.vue';
 	import request from '../../utils/request.js';
+	// import {
+	// 	showPointsGainedFeedback
+	// } from '../../utils/feedback.js';
 
 	// --- 1. 状态管理：更清晰的状态变量 ---
 	const userInfo = ref(null);
@@ -486,6 +489,10 @@
 			console.error('调用分享名片加分接口失败:', error);
 		} else {
 			console.log(`成功为分享者(ID: ${sharerId})触发贡分增加`);
+
+			// const pointsGained = data?.experience || 1; // 优先用后端返回的值，否则默认为 1
+
+			// showPointsGainedFeedback('分享名片', pointsGained);
 		}
 	};
 
@@ -565,7 +572,7 @@
 	});
 
 	// --- 6. 事件处理器 ---
-	
+
 	// 备注相关方法 ---
 	/**
 	 * 处理点击编辑备注的事件

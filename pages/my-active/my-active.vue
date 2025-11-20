@@ -409,6 +409,7 @@
 	};
 
 	const cancelActivity = (activityId) => {
+		console.log("一进来就调用")
 		uni.showModal({
 			title: '警告',
 			content: '确定要取消您发布的此聚会吗？此操作不可逆。',
@@ -418,7 +419,6 @@
 					uni.showLoading({
 						title: '正在删除...'
 					});
-					// 【注意】接口应该是取消聚会，而不是删除。请确认接口地址是否正确。
 					const result = await request('/app-api/member/activity/delete', {
 						method: 'POST',
 						data: {

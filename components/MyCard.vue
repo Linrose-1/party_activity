@@ -157,7 +157,7 @@
 		<view class="card-back">
 			<view class="slogan-primary">连接全球精英商友</view>
 			<view class="slogan-secondary">GO FOR PARTNERS • GO FOR FUTURE</view>
-			<view class="platform-qr-code" @click="previewImage(platformQrCodeUrl)">
+			<view class="platform-qr-code"  @click="previewImage(dynamicQrCodeUrl || platformQrCodeUrl)">
 				<!-- <image :src="platformQrCodeUrl" mode="aspectFit" show-menu-by-longpress /> -->
 				<image :src="dynamicQrCodeUrl || platformQrCodeUrl" mode="aspectFit" show-menu-by-longpress />
 			</view>
