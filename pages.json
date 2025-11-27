@@ -359,6 +359,13 @@
 				{
 					"navigationBarTitleText" : "商友圈"
 				}
+			},
+			{
+				"path" : "home-customization/home-customization",
+				"style" : 
+				{
+					"navigationBarTitleText" : "猩聚社定制"
+				}
 			}
 			// 如果还有其他页面要放进这个分包，继续在这里加
 		]

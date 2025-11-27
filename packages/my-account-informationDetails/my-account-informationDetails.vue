@@ -4,8 +4,15 @@
 		<!-- 1. 基本资料 -->
 		<view class="info-section">
 			<view class="section-header">
-				<uni-icons type="person-filled" size="24" :color="themeColor"></uni-icons>
-				<text class="section-title">基本资料</text>
+				<view class="header-left">
+					<uni-icons type="person-filled" size="24" :color="themeColor"></uni-icons>
+					<text class="section-title">基本资料</text>
+				</view>
+				<!-- 编辑按钮：只有当 isSelf 为 true 时显示 -->
+				<view v-if="isSelf" class="header-right" @click="goToEdit">
+					<uni-icons type="compose" size="20" color="#999"></uni-icons>
+					<text class="edit-text">编辑</text>
+				</view>
 			</view>
 			<view class="info-grid">
 				<view class="info-item">
@@ -192,6 +199,15 @@
 	const userInfo = ref(null);
 	const radarCategories = ref(["基础信用", "协作态度", "专业能力", "精神格局"]);
 	const radarSeriesData = ref([]);
+	// 当前登录用户的ID
+	const currentUserId = uni.getStorageSync('userId');
+
+	// 计算属性：判断是否是查看自己的主页
+	const isSelf = computed(() => {
+		if (!userInfo.value || !currentUserId) return false;
+		// 注意：有时候ID可能是字符串或数字，建议统一转字符串比较
+		return String(userInfo.value.id) === String(currentUserId);
+	});
 
 	onLoad(async (options) => {
 		const userId = options.id;
@@ -229,7 +245,7 @@
 	});
 
 	/**
-	 * 【新增】工具函数：将逗号或换行符分隔的字符串转为数组
+	 * 工具函数：将逗号或换行符分隔的字符串转为数组
 	 * @param {string|null|undefined} str - 输入的字符串
 	 * @returns {Array<string>} - 返回处理后的数组
 	 */
@@ -240,7 +256,7 @@
 	};
 
 	/**
-	 * 【新增】计算属性：将公司、行业、职务数据格式化为对象数组
+	 * 计算属性：将公司、行业、职务数据格式化为对象数组
 	 */
 	const formattedCompanies = computed(() => {
 		if (!userInfo.value) return [];
@@ -307,6 +323,13 @@
 			urls: [url]
 		});
 	};
+
+	// 跳转到编辑页的方法
+	const goToEdit = () => {
+		uni.navigateTo({
+			url: '/packages/my-edit/my-edit' // 请确认这是您项目中真实的编辑页路径
+		});
+	};
 </script>
 
 <style lang="scss" scoped>
@@ -328,9 +351,45 @@
 	.section-header {
 		display: flex;
 		align-items: center;
+		/* 【修改】两端对齐 */
+		// justify-content: space-between;
 		padding-bottom: 24rpx;
 		margin-bottom: 24rpx;
 		border-bottom: 1rpx solid #f0f2f5;
+	}
+
+	/* 【新增】左侧标题容器 */
+	.header-left {
+		display: flex;
+		align-items: center;
+	}
+
+	.section-title {
+		font-size: 32rpx;
+		font-weight: 600;
+		color: #303133;
+		margin-left: 16rpx;
+	}
+
+	/* 【新增】右侧编辑按钮样式 */
+	.header-right {
+		margin-left: auto;
+		display: flex;
+		align-items: center;
+		padding: 8rpx 16rpx;
+		background-color: #f5f7fa;
+		border-radius: 30rpx;
+		cursor: pointer;
+
+		&:active {
+			opacity: 0.7;
+		}
+	}
+
+	.edit-text {
+		font-size: 26rpx;
+		color: #666;
+		margin-left: 6rpx;
 	}
 
 	.section-title {

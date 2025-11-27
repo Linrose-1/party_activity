@@ -157,8 +157,11 @@
 									报名用户
 								</button>
 
-								<button class="btn btn-detail" @click.stop="viewDetail(item.id)">
+								<!-- <button class="btn btn-detail" @click.stop="viewDetail(item.id)">
 									查看详情
+								</button> -->
+								<button class="btn btn-edit-style" @click.stop="navigateToEdit(item.id)">
+									编辑
 								</button>
 							</view>
 						</view>
@@ -487,6 +490,14 @@
 			url: '/packages/active-publish/active-publish'
 		});
 	};
+
+	// 跳转到编辑页面
+	const navigateToEdit = (activityId) => {
+		// 跳转到发布页，并携带 mode=edit 和 id 参数
+		uni.navigateTo({
+			url: `/packages/active-publish/active-publish?mode=edit&id=${activityId}`
+		});
+	};
 </script>
 
 
@@ -652,6 +663,11 @@
 			background-color: #fef0f0;
 			color: #f56c6c;
 		}
+	}
+
+	.btn-edit-style {
+		background-color: #e3fdfd;
+		color: #2196f3;
 	}
 
 	.rejection-reason-box {

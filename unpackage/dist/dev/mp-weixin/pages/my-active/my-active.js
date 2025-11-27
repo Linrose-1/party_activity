@@ -27,7 +27,7 @@ const _sfc_main = {
     const publishedPageNo = common_vendor.ref(1);
     const publishedHasMore = common_vendor.ref(true);
     common_vendor.onShow(() => {
-      common_vendor.index.__f__("log", "at pages/my-active/my-active.vue:215", "页面显示，刷新当前 Tab 数据");
+      common_vendor.index.__f__("log", "at pages/my-active/my-active.vue:218", "页面显示，刷新当前 Tab 数据");
       handleRefresh();
     });
     const getMyActivitiesList = async (isLoadMore = false) => {
@@ -49,7 +49,7 @@ const _sfc_main = {
           method: "GET",
           data: params
         });
-        common_vendor.index.__f__("log", "at pages/my-active/my-active.vue:246", `获取Tab ${currentTab.value} 的聚会`, result);
+        common_vendor.index.__f__("log", "at pages/my-active/my-active.vue:249", `获取Tab ${currentTab.value} 的聚会`, result);
         if (result && !result.error && result.data) {
           const list = result.data.list || [];
           const total = result.data.total || 0;
@@ -64,7 +64,7 @@ const _sfc_main = {
           }
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/my-active/my-active.vue:265", "请求我的聚会列表失败:", error);
+        common_vendor.index.__f__("error", "at pages/my-active/my-active.vue:268", "请求我的聚会列表失败:", error);
       } finally {
         loading.value = false;
         refreshing.value = false;
@@ -182,7 +182,7 @@ const _sfc_main = {
       });
     };
     const cancelActivity = (activityId) => {
-      common_vendor.index.__f__("log", "at pages/my-active/my-active.vue:412", "一进来就调用");
+      common_vendor.index.__f__("log", "at pages/my-active/my-active.vue:415", "一进来就调用");
       common_vendor.index.showModal({
         title: "警告",
         content: "确定要取消您发布的此聚会吗？此操作不可逆。",
@@ -244,6 +244,11 @@ const _sfc_main = {
     const navigateToCreate = () => {
       common_vendor.index.navigateTo({
         url: "/packages/active-publish/active-publish"
+      });
+    };
+    const navigateToEdit = (activityId) => {
+      common_vendor.index.navigateTo({
+        url: `/packages/active-publish/active-publish?mode=edit&id=${activityId}`
       });
     };
     return (_ctx, _cache) => {
@@ -359,7 +364,7 @@ const _sfc_main = {
           }, item.statusStr !== "聚会取消" ? {
             v: common_vendor.o(($event) => navigateToRegisteredUsers(item), item.id)
           } : {}, {
-            w: common_vendor.o(($event) => viewDetail(item.id), item.id),
+            w: common_vendor.o(($event) => navigateToEdit(item.id), item.id),
             x: item.id,
             y: common_vendor.o(($event) => handleActivityClick(item.id), item.id)
           });

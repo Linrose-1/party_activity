@@ -189,9 +189,26 @@ const _sfc_main = {
       const name = user.nickname || "匿名用户";
       const avatarUrl = user.avatar || defaultAvatar;
       const url = `/pages/applicationBusinessCard/applicationBusinessCard?id=${user.id}&name=${encodeURIComponent(name)}&avatar=${encodeURIComponent(avatarUrl)}`;
-      common_vendor.index.__f__("log", "at pages/relation/relation.vue:361", "从人脉列表页跳转，URL:", url);
+      common_vendor.index.__f__("log", "at pages/relation/relation.vue:372", "从人脉列表页跳转，URL:", url);
       common_vendor.index.navigateTo({
         url
+      });
+    };
+    const resetFilters = () => {
+      common_vendor.index.showModal({
+        title: "提示",
+        content: "确定要重置所有筛选条件吗？",
+        success: (res) => {
+          if (res.confirm) {
+            destination.value = {};
+            timeRange.value = [];
+            fetchUserList(true);
+            common_vendor.index.showToast({
+              title: "已重置",
+              icon: "none"
+            });
+          }
+        }
       });
     };
     const handleChooseLocation = () => common_vendor.index.chooseLocation({
@@ -205,19 +222,19 @@ const _sfc_main = {
     common_vendor.watch([destination, timeRange], updateNextLocation);
     common_vendor.watch(activeTab, () => fetchUserList(true));
     common_vendor.onShow(() => {
-      common_vendor.index.__f__("log", "at pages/relation/relation.vue:388", "人脉页 onShow: 开始监听摇一摇");
+      common_vendor.index.__f__("log", "at pages/relation/relation.vue:424", "人脉页 onShow: 开始监听摇一摇");
       common_vendor.index.onAccelerometerChange((res) => {
         if (Math.abs(res.x) > 1.5 || Math.abs(res.y) > 1.5 || Math.abs(res.z) > 1.5) {
           if (!isShakeLocked.value) {
             lockShake();
-            common_vendor.index.__f__("log", "at pages/relation/relation.vue:400", "检测到摇一摇，准备跳转...");
+            common_vendor.index.__f__("log", "at pages/relation/relation.vue:436", "检测到摇一摇，准备跳转...");
             goToShakePage();
           }
         }
       });
     });
     common_vendor.onHide(() => {
-      common_vendor.index.__f__("log", "at pages/relation/relation.vue:411", "人脉页 onHide: 停止监听摇一摇");
+      common_vendor.index.__f__("log", "at pages/relation/relation.vue:447", "人脉页 onHide: 停止监听摇一摇");
       common_vendor.index.stopAccelerometer();
     });
     common_vendor.onLoad(() => {
@@ -233,8 +250,8 @@ const _sfc_main = {
     });
     common_vendor.onShareAppMessage(() => {
       const inviteCode = utils_user.getInviteCode();
-      common_vendor.index.__f__("log", "at pages/relation/relation.vue:435", `[分享] 准备分享人脉页面给好友，邀请码: ${inviteCode}`);
-      let sharePath = "/pages/connections/connections";
+      common_vendor.index.__f__("log", "at pages/relation/relation.vue:471", `[分享] 准备分享人脉页面给好友，邀请码: ${inviteCode}`);
+      let sharePath = "/pages/relation/relation";
       if (inviteCode) {
         sharePath += `?inviteCode=${inviteCode}`;
       }
@@ -244,12 +261,12 @@ const _sfc_main = {
         imageUrl: "/static/connections-bg.png"
         // 使用页面头部的背景图作为分享封面
       };
-      common_vendor.index.__f__("log", "at pages/relation/relation.vue:451", "[分享] 分享给好友的内容:", JSON.stringify(shareContent));
+      common_vendor.index.__f__("log", "at pages/relation/relation.vue:487", "[分享] 分享给好友的内容:", JSON.stringify(shareContent));
       return shareContent;
     });
     common_vendor.onShareTimeline(() => {
       const inviteCode = utils_user.getInviteCode();
-      common_vendor.index.__f__("log", "at pages/relation/relation.vue:463", `[分享] 准备分享人脉页面到朋友圈，邀请码: ${inviteCode}`);
+      common_vendor.index.__f__("log", "at pages/relation/relation.vue:499", `[分享] 准备分享人脉页面到朋友圈，邀请码: ${inviteCode}`);
       let queryString = "";
       if (inviteCode) {
         queryString = `inviteCode=${inviteCode}`;
@@ -260,12 +277,12 @@ const _sfc_main = {
         imageUrl: "/static/connections-bg.png"
         // 使用页面头部的背景图作为分享封面
       };
-      common_vendor.index.__f__("log", "at pages/relation/relation.vue:478", "[分享] 分享到朋友圈的内容:", JSON.stringify(shareContent));
+      common_vendor.index.__f__("log", "at pages/relation/relation.vue:514", "[分享] 分享到朋友圈的内容:", JSON.stringify(shareContent));
       return shareContent;
     });
     return (_ctx, _cache) => {
       return common_vendor.e({
-        a: common_assets._imports_0$1,
+        a: common_assets._imports_0$2,
         b: common_vendor.p({
           type: "personadd",
           size: "42",
@@ -273,49 +290,55 @@ const _sfc_main = {
         }),
         c: common_vendor.o(goToShakePage),
         d: common_vendor.p({
+          type: "refreshempty",
+          size: "16",
+          color: "#666"
+        }),
+        e: common_vendor.o(resetFilters),
+        f: common_vendor.p({
           type: "paperplane",
           size: "20",
           color: "#999"
         }),
-        e: common_vendor.t(destination.value.name || "请选择拟访友地点"),
-        f: common_vendor.p({
+        g: common_vendor.t(destination.value.name || "请选择拟访友地点"),
+        h: common_vendor.p({
           type: "right",
           size: "16",
           color: "#999"
         }),
-        g: common_vendor.o(handleChooseLocation),
-        h: common_vendor.p({
+        i: common_vendor.o(handleChooseLocation),
+        j: common_vendor.p({
           type: "calendar",
           size: "20",
           color: "#999"
         }),
-        i: common_vendor.t(timeRangeText.value),
-        j: common_vendor.o(handleTimeChange),
-        k: common_vendor.o(($event) => timeRange.value = $event),
-        l: common_vendor.p({
+        k: common_vendor.t(timeRangeText.value),
+        l: common_vendor.o(handleTimeChange),
+        m: common_vendor.o(($event) => timeRange.value = $event),
+        n: common_vendor.p({
           type: "datetimerange",
           modelValue: timeRange.value
         }),
-        m: common_vendor.p({
+        o: common_vendor.p({
           type: "right",
           size: "16",
           color: "#999"
         }),
-        n: common_vendor.p({
+        p: common_vendor.p({
           type: "paperplane-filled",
           size: "18",
           color: activeTab.value === 0 ? themeColor : "#666"
         }),
-        o: activeTab.value === 0 ? 1 : "",
-        p: common_vendor.o(($event) => switchTab(0)),
-        q: common_vendor.p({
+        q: activeTab.value === 0 ? 1 : "",
+        r: common_vendor.o(($event) => switchTab(0)),
+        s: common_vendor.p({
           type: "heart-filled",
           size: "18",
           color: activeTab.value === 1 ? themeColor : "#666"
         }),
-        r: activeTab.value === 1 ? 1 : "",
-        s: common_vendor.o(($event) => switchTab(1)),
-        t: common_vendor.f(userList.value, (user, k0, i0) => {
+        t: activeTab.value === 1 ? 1 : "",
+        v: common_vendor.o(($event) => switchTab(1)),
+        w: common_vendor.f(userList.value, (user, k0, i0) => {
           return common_vendor.e({
             a: user.avatar,
             b: common_vendor.o(($event) => navigateToBusinessCard(user), user.id),
@@ -333,17 +356,17 @@ const _sfc_main = {
             k: user.id
           });
         }),
-        v: isListEmpty.value
+        x: isListEmpty.value
       }, isListEmpty.value ? {
-        w: common_vendor.p({
+        y: common_vendor.p({
           type: "staff",
           size: "60",
           color: "#e0e0e0"
         })
       } : {}, {
-        x: userList.value.length > 0 || loadingStatus.value === "loading"
+        z: userList.value.length > 0 || loadingStatus.value === "loading"
       }, userList.value.length > 0 || loadingStatus.value === "loading" ? {
-        y: common_vendor.p({
+        A: common_vendor.p({
           status: loadingStatus.value,
           contentText: {
             contentdown: "上拉加载更多",

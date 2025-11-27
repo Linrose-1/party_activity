@@ -1,16 +1,61 @@
 
+.business-opportunity-app.data-v-07e72d3c {
+		position: relative;
+}
+.custom-fab.data-v-07e72d3c {
+		position: fixed;
+		/* 关键：固定定位 */
+		top: 100rpx;
+		/* 与顶部的距离，您可以根据实际视觉效果微调 */
+		right: 30rpx;
+		/* 与右侧的距离 */
+		z-index: 99;
+		/* 确保在其他内容之上 */
+
+		display: flex;
+		flex-direction: column;
+		/* 让图标和文字垂直排列 */
+		align-items: center;
+		justify-content: center;
+
+		width: 100rpx;
+		/* 按钮宽度 */
+		height: 100rpx;
+		/* 按钮高度 */
+
+		background: linear-gradient(135deg, #4facfe, #00f2fe);
+		/* 蓝色渐变 */
+		color: white;
+		border-radius: 50%;
+		/* 圆形 */
+		box-shadow: 0 8rpx 20rpx rgba(0, 191, 255, 0.4);
+
+		font-size: 24rpx;
+		/* 文字大小 */
+		font-weight: 500;
+}
+
+	/* 调整图标下方的间距 */
+.custom-fab .uni-icons.data-v-07e72d3c {
+		margin-bottom: 4rpx;
+}
+
 	/* =========================
 	 * 1. 页面通用与头部样式
 	 * ========================= */
 .header.data-v-07e72d3c {
+		/* 保持原有背景和圆角 */
 		background: linear-gradient(135deg, #FF6A00, #FF8C37);
 		color: white;
-		padding: 40rpx 40rpx 60rpx;
+		/* padding-bottom 留给搜索框，padding-top 可以适当减小，因为 swiper 自己有高度 */
+		padding: 20rpx 40rpx 60rpx;
 		border-radius: 0 0 40rpx 40rpx;
 		box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.1);
 		position: relative;
 		overflow: hidden;
 }
+
+	/* 补上 .header::before 的样式 (可能之前不小心删了或者本来就在) */
 .header.data-v-07e72d3c::before {
 		content: "";
 		position: absolute;
@@ -21,11 +66,35 @@
 		background: rgba(255, 255, 255, 0.1);
 		border-radius: 50%;
 }
+
+	/* 【新增】Swiper 样式 */
+.header-swiper.data-v-07e72d3c {
+		/* 高度需要根据内容自适应或给一个固定高度 */
+		/* 预估高度：标题(56+16) + 口号(32+10) + 描述(28+40) ≈ 180~200rpx */
+		height: 220rpx;
+		width: 100%;
+		/* margin-bottom: 20rpx; */
+		/* 与搜索框的间距 */
+}
+.header-content.data-v-07e72d3c {
+		display: flex;
+		flex-direction: column;
+		/* 确保内容垂直居中或靠上 */
+		justify-content: flex-start;
+		height: 100%;
+}
+
+	/* 原有文字样式微调，确保在 swiper 里显示正常 */
 .app-title.data-v-07e72d3c {
 		font-size: 56rpx;
 		font-weight: 700;
-		margin-bottom: 16rpx;
+		margin-bottom: 10rpx;
+		/*稍微减小间距*/
 		text-shadow: 0 4rpx 8rpx rgba(0, 0, 0, 0.2);
+		/* 防止长标题换行导致布局错乱 */
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
 }
 .app-subtitle.data-v-07e72d3c {
 		font-size: 32rpx;
@@ -184,17 +253,70 @@
 		flex: 1;
 		min-width: 0;
 }
+.user-name-line.data-v-07e72d3c {
+		display: flex;
+		align-items: center;
+		gap: 12rpx;
+		/* 图标和文字之间的间距 */
+}
 .user-name.data-v-07e72d3c {
 		font-weight: 600;
 		font-size: 32rpx;
-		margin-bottom: 6rpx;
+		margin-bottom: 8rpx;
+		/* 【关键】在名字和认证行之间增加一点间距 */
 		white-space: nowrap;
 		overflow: hidden;
 		text-overflow: ellipsis;
 }
-.post-time.data-v-07e72d3c {
+
+	/* 新增：认证行的样式 */
+.user-certs-line.data-v-07e72d3c {
+		display: flex;
+		align-items: center;
+		gap: 12rpx;
+		/* 图标和文字之间的间距 */
+		/* 如果认证标识可能很多，可以加上 flex-wrap */
+		/* flex-wrap: wrap; */
+}
+.cert-icon.data-v-07e72d3c {
+		width: 32rpx;
+		height: 32rpx;
+		flex-shrink: 0;
+		/* 防止图标被压缩变形 */
+}
+.cert-badge.data-v-07e72d3c {
+		padding: 4rpx 12rpx;
+		border-radius: 6rpx;
+		font-size: 20rpx;
+		font-weight: 500;
+		white-space: nowrap;
+		/* 防止文字换行 */
+		flex-shrink: 0;
+}
+.cert-badge.real-name.data-v-07e72d3c {
+		background-color: #ecf5ff;
+		/* 淡蓝色背景 */
+		color: #409eff;
+		/* 蓝色文字 */
+		border: 1rpx solid #d9ecff;
+}
+.cert-badge.enterprise.data-v-07e72d3c {
+		background-color: #fdf6ec;
+		/* 淡橙色背景 */
+		color: #e6a23c;
+		/* 橙色文字 */
+		border: 1rpx solid #faecd8;
+}
+.post-footer.data-v-07e72d3c {
+		display: flex;
+		justify-content: flex-end;
+		/* 让内容靠右对齐 */
+		margin-top: 20rpx;
+		/* 与上方内容隔开 */
+}
+.post-footer .post-time.data-v-07e72d3c {
 		font-size: 26rpx;
-		color: #888;
+		color: #999;
 }
 .follow-button.data-v-07e72d3c {
 		background-color: #FF6A00;
@@ -307,7 +429,7 @@
 		align-items: center;
 		border-top: 2rpx solid #f0f0f0;
 		padding-top: 30rpx;
-		margin-top: 30rpx;
+		/* margin-top: 30rpx; */
 }
 .action.data-v-07e72d3c {
 		display: flex;

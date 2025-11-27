@@ -18,7 +18,7 @@ const _sfc_main = {
     const form = common_vendor.reactive({
       title: "",
       content: "",
-      topic: "普通商机",
+      topic: "商机分享",
       tags: [],
       tagInput: "",
       mediaType: "image",
@@ -363,7 +363,7 @@ const _sfc_main = {
         userId: common_vendor.index.getStorageSync("userId") || 0,
         // 从缓存获取 userId
         postTitle: form.title,
-        postType: form.topic === "普通商机" ? "0" : "1",
+        postType: form.topic === "商机分享" ? "0" : "1",
         postContent: form.content,
         postImg: form.mediaType === "image" ? form.images.join(",") : "",
         postVideo: form.mediaType === "video" ? form.postVideo : "",
@@ -451,7 +451,7 @@ const _sfc_main = {
         c: contentPlaceholder.value,
         d: form.content,
         e: common_vendor.o(($event) => form.content = $event.detail.value),
-        f: form.topic === "普通商机",
+        f: form.topic === "商机分享",
         g: form.topic === "创业猎伙",
         h: common_vendor.o(topicChange),
         i: common_vendor.f(form.tags, (tag, index, i0) => {

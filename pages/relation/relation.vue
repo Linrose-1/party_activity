@@ -26,7 +26,18 @@
 		<view class="main-content">
 			<!-- 【修改后】的选择器区域 -->
 			<view class="selectors-card">
-				<!-- 访友地点：使用地图选点 -->
+				<!-- ==================== 【核心模板修改点】: 为重置按钮创建一个独立的行 ==================== -->
+				<!-- 1. 创建一个 wrapper 容器，它将占据一整行 -->
+				<view class="reset-btn-wrapper">
+					<!-- 2. 将重置按钮放在这个容器里 -->
+					<view class="reset-btn" @click="resetFilters">
+						<uni-icons type="refreshempty" size="16" color="#666"></uni-icons>
+						<text>重置</text>
+					</view>
+				</view>
+				<!-- ==================================================================================== -->
+
+				<!-- 访友地点 -->
 				<view class="selector-item" @click="handleChooseLocation">
 					<uni-icons type="paperplane" size="20" color="#999"></uni-icons>
 					<view class="picker-view">
@@ -35,10 +46,10 @@
 					</view>
 					<uni-icons type="right" size="16" color="#999"></uni-icons>
 				</view>
-				<!-- 到达时间：使用时间范围选择器 -->
+
+				<!-- 到达时间 -->
 				<view class="selector-item">
 					<uni-icons type="calendar" size="20" color="#999"></uni-icons>
-					<!-- 使用 uni-datetime-picker 组件 -->
 					<uni-datetime-picker v-model="timeRange" type="datetimerange" @change="handleTimeChange">
 						<view class="picker-view">
 							<text class="label">访友时段：</text>
@@ -334,7 +345,7 @@
 	};
 
 	/**
-	 * ==================== 新增方法：跳转到个人名片页 ====================
+	 * ==================== 跳转到个人名片页 ====================
 	 * 
 	 */
 	const navigateToBusinessCard = (user) => {
@@ -363,6 +374,31 @@
 		// 4. 执行跳转
 		uni.navigateTo({
 			url: url
+		});
+	};
+
+	/**
+	 * @description 重置访友地点和时段的筛选条件
+	 */
+	const resetFilters = () => {
+		uni.showModal({
+			title: '提示',
+			content: '确定要重置所有筛选条件吗？',
+			success: (res) => {
+				if (res.confirm) {
+					destination.value = {};
+					timeRange.value = [];
+
+					// 重置后，列表应该变为空，所以直接调用 fetchUserList 即可
+					// fetchUserList 内部有判断，当条件不满足时会自动清空列表
+					fetchUserList(true);
+
+					uni.showToast({
+						title: '已重置',
+						icon: 'none'
+					});
+				}
+			}
 		});
 	};
 
@@ -436,7 +472,7 @@
 
 		// 2. 构建分享路径
 		// 基础路径是当前页面
-		let sharePath = '/pages/connections/connections'; // 请确保这个路径是正确的
+		let sharePath = '/pages/relation/relation'; // 请确保这个路径是正确的
 		if (inviteCode) {
 			sharePath += `?inviteCode=${inviteCode}`;
 		}
@@ -580,20 +616,23 @@
 		padding: 20rpx 30rpx;
 		box-shadow: 0 8rpx 30rpx rgba(0, 0, 0, 0.08);
 		margin-bottom: 40rpx;
+		// 不再需要相对定位
+		// position: relative; 
 	}
 
 	.selector-item {
 		display: flex;
 		align-items: center;
-		padding: 20rpx 0;
+		padding: 25rpx 0;
 		border-bottom: 1rpx solid #f0f0f0;
+
+		// 移除之前为避免重叠而加的 padding-right
+		// &:first-of-type {
+		// 	padding-right: 150rpx; 
+		// }
 
 		&:last-child {
 			border-bottom: none;
-		}
-
-		.uni-icons[type="right"] {
-			margin-left: 10rpx;
 		}
 
 		.picker-view {
@@ -602,10 +641,13 @@
 			display: flex;
 			justify-content: space-between;
 			align-items: center;
+			min-width: 0;
 
 			.label {
 				font-size: 30rpx;
 				color: #666;
+				flex-shrink: 0;
+				margin-right: 20rpx;
 			}
 
 			.value {
@@ -617,6 +659,34 @@
 				overflow: hidden;
 				text-overflow: ellipsis;
 			}
+		}
+	}
+
+	// 【全新的、最简单的重置按钮样式】
+	// 1. 按钮行的容器
+	.reset-btn-wrapper {
+		display: flex; // 使用 flex 布局
+		justify-content: flex-end; // 将内部元素推到最右边
+		padding-bottom: 15rpx; // 按钮行与下方内容的分隔
+		margin-bottom: 15rpx; // 
+		border-bottom: 1rpx solid #f0f0f0; // 添加一条分割线，使其看起来更规整
+	}
+
+	// 2. 按钮本身
+	.reset-btn {
+		// 移除所有定位属性
+		// position: absolute;
+
+		display: flex;
+		align-items: center;
+		padding: 8rpx 15rpx;
+		background-color: #f5f5f5;
+		border-radius: 20rpx;
+		font-size: 24rpx;
+		color: #666;
+
+		text {
+			margin-left: 8rpx;
 		}
 	}
 

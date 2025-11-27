@@ -29,64 +29,30 @@ const _sfc_main = {
       value: "all"
     }]);
     const bannerList = common_vendor.ref([]);
-    const getCurrentLocation = () => {
-      common_vendor.index.__f__("log", "at pages/shop/shop.vue:120", "[定位流程] 开始执行 getCurrentLocation 函数...");
-      return new Promise((resolve) => {
-        let isResolved = false;
-        const timeoutId = setTimeout(() => {
-          if (!isResolved) {
-            isResolved = true;
-            common_vendor.index.__f__("error", "at pages/shop/shop.vue:129", "[定位流程] 获取位置超时（8秒），主动返回失败。");
+    const displayAddress = common_vendor.ref("");
+    const handleChooseLocation = () => {
+      common_vendor.index.chooseLocation({
+        success: (res) => {
+          common_vendor.index.__f__("log", "at pages/shop/shop.vue:216", "用户手动选择了新位置:", res);
+          const newAddress = res.name || res.address;
+          const newLocation = {
+            latitude: res.latitude,
+            longitude: res.longitude
+          };
+          displayAddress.value = newAddress;
+          userLocation.value = newLocation;
+          common_vendor.index.setStorageSync("userLocation", newLocation);
+          common_vendor.index.setStorageSync("displayAddress", newAddress);
+          handleRefresh();
+        },
+        fail: (err) => {
+          if (!err.errMsg.includes("cancel")) {
             common_vendor.index.showToast({
-              title: "定位超时，请稍后重试",
+              title: "选择位置失败",
               icon: "none"
             });
-            resolve(null);
           }
-        }, 8e3);
-        const handleSuccess = (res) => {
-          if (!isResolved) {
-            isResolved = true;
-            clearTimeout(timeoutId);
-            common_vendor.index.__f__("log", "at pages/shop/shop.vue:142", "[定位流程] 成功获取位置", res);
-            const location = {
-              latitude: res.latitude,
-              longitude: res.longitude
-            };
-            userLocation.value = location;
-            common_vendor.index.setStorageSync("userLocation", location);
-            resolve(location);
-          }
-        };
-        const handleError = (err) => {
-          if (!isResolved) {
-            isResolved = true;
-            clearTimeout(timeoutId);
-            common_vendor.index.__f__("error", "at pages/shop/shop.vue:157", "[定位流程] 获取位置失败", err);
-            if (isRefreshing.value) {
-              common_vendor.index.showToast({
-                title: "定位失败，请检查权限",
-                icon: "none"
-              });
-            }
-            resolve(null);
-          }
-        };
-        common_vendor.index.__f__("log", "at pages/shop/shop.vue:169", "[定位流程] 正在调用 uni.getLocation API...");
-        common_vendor.index.getLocation({
-          type: "gcj02",
-          isHighAccuracy: true,
-          accuracy: "best",
-          success: handleSuccess,
-          fail: (err) => {
-            common_vendor.index.__f__("warn", "at pages/shop/shop.vue:176", "[定位流程] 高精度定位失败，尝试普通定位...", err);
-            common_vendor.index.getLocation({
-              type: "gcj02",
-              success: handleSuccess,
-              fail: handleError
-            });
-          }
-        });
+        }
       });
     };
     const fetchBanners = async () => {
@@ -102,7 +68,7 @@ const _sfc_main = {
         }
       });
       if (error) {
-        common_vendor.index.__f__("error", "at pages/shop/shop.vue:205", "获取聚店页轮播图失败:", error);
+        common_vendor.index.__f__("error", "at pages/shop/shop.vue:264", "获取聚店页轮播图失败:", error);
         bannerList.value = [];
         return;
       }
@@ -113,16 +79,6 @@ const _sfc_main = {
       }
     };
     const getStoreList = async () => {
-      if (!userLocation.value) {
-        common_vendor.index.__f__("warn", "at pages/shop/shop.vue:222", "getStoreList 中断：位置信息为空。");
-        isRefreshing.value = false;
-        loadingMore.value = false;
-        if (pageNo.value === 1) {
-          allStores.value = [];
-          hasMore.value = false;
-        }
-        return;
-      }
       if (loadingMore.value || pageNo.value > 1 && !hasMore.value) {
         return;
       }
@@ -130,13 +86,16 @@ const _sfc_main = {
       const params = {
         pageNo: pageNo.value,
         pageSize,
-        storeName: searchTerm.value.trim(),
-        longitude: userLocation.value.longitude,
-        latitude: userLocation.value.latitude
+        storeName: searchTerm.value.trim()
       };
+      if (userLocation.value) {
+        params.longitude = userLocation.value.longitude;
+        params.latitude = userLocation.value.latitude;
+      }
       if (activeFilter.value !== "all") {
         params.category = activeFilter.value;
       }
+      common_vendor.index.__f__("log", "at pages/shop/shop.vue:311", "🚀 [getStoreList] 最终请求参数:", params);
       const {
         data: result,
         error
@@ -146,7 +105,7 @@ const _sfc_main = {
       });
       loadingMore.value = false;
       if (error) {
-        common_vendor.index.__f__("error", "at pages/shop/shop.vue:261", "获取店铺列表失败:", error);
+        common_vendor.index.__f__("error", "at pages/shop/shop.vue:324", "获取店铺列表失败:", error);
         common_vendor.index.showToast({
           title: error,
           icon: "none"
@@ -168,35 +127,21 @@ const _sfc_main = {
       }
     };
     const handleRefresh = async (isPullDown = false) => {
-      if (isLoading.value) {
-        common_vendor.index.__f__("log", "at pages/shop/shop.vue:293", "刷新操作已在进行中，本次触发被忽略。");
+      if (isLoading.value)
         return;
-      }
       isLoading.value = true;
       if (isPullDown) {
         isRefreshing.value = true;
-      } else {
-        common_vendor.index.showLoading({
-          title: "加载中..."
-        });
       }
       try {
-        const location = await getCurrentLocation();
         pageNo.value = 1;
         hasMore.value = true;
         allStores.value = [];
-        if (location) {
-          await getStoreList();
-        }
+        await getStoreList();
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/shop/shop.vue:321", "handleRefresh 过程中捕获到错误:", error);
+        common_vendor.index.__f__("error", "at pages/shop/shop.vue:369", "handleRefresh 过程中捕获到错误:", error);
       } finally {
         isLoading.value = false;
-        if (isPullDown) {
-          isRefreshing.value = false;
-        } else {
-          common_vendor.index.hideLoading();
-        }
       }
     };
     const getShopType = async () => {
@@ -226,21 +171,29 @@ const _sfc_main = {
     common_vendor.onMounted(() => {
       getShopType();
       fetchBanners();
+      handleRefresh();
     });
     common_vendor.onShow(() => {
       if (allStores.value.length === 0) {
-        common_vendor.index.__f__("log", "at pages/shop/shop.vue:374", "onShow: 列表为空，执行初次加载...");
+        common_vendor.index.__f__("log", "at pages/shop/shop.vue:416", "onShow: 列表为空，执行初次加载...");
         const storedLocation = common_vendor.index.getStorageSync("userLocation");
+        const storedAddress = common_vendor.index.getStorageSync("displayAddress");
         if (storedLocation) {
           userLocation.value = storedLocation;
         }
-        handleRefresh();
+        if (storedAddress) {
+          displayAddress.value = storedAddress;
+          handleRefresh();
+        } else {
+          displayAddress.value = "正在定位...";
+          handleRefresh();
+        }
       } else {
-        common_vendor.index.__f__("log", "at pages/shop/shop.vue:382", "onShow: 列表已有数据，不自动刷新位置。");
+        common_vendor.index.__f__("log", "at pages/shop/shop.vue:432", "onShow: 列表已有数据，不自动刷新位置。");
       }
     });
     const handleRefresherRefresh = async () => {
-      common_vendor.index.__f__("log", "at pages/shop/shop.vue:388", "--- scroll-view 的 @refresherrefresh 事件已触发 ---");
+      common_vendor.index.__f__("log", "at pages/shop/shop.vue:438", "--- scroll-view 的 @refresherrefresh 事件已触发 ---");
       await handleRefresh(true);
     };
     const loadMore = () => {
@@ -283,8 +236,8 @@ const _sfc_main = {
     };
     common_vendor.onShareAppMessage(() => {
       const inviteCode = utils_user.getInviteCode();
-      common_vendor.index.__f__("log", "at pages/shop/shop.vue:458", `[分享] 准备分享聚店页面给好友，邀请码: ${inviteCode}`);
-      let sharePath = "/pages/store-list/store-list";
+      common_vendor.index.__f__("log", "at pages/shop/shop.vue:508", `[分享] 准备分享聚店页面给好友，邀请码: ${inviteCode}`);
+      let sharePath = "/pages/shop/shop";
       if (inviteCode) {
         sharePath += `?inviteCode=${inviteCode}`;
       }
@@ -294,12 +247,12 @@ const _sfc_main = {
         imageUrl: bannerList.value.length > 0 ? bannerList.value[0].imageUrl : "https://img.gofor.club/logo.png"
         // 优先使用第一张轮播图作为分享封面
       };
-      common_vendor.index.__f__("log", "at pages/shop/shop.vue:475", "[分享] 分享给好友的内容:", JSON.stringify(shareContent));
+      common_vendor.index.__f__("log", "at pages/shop/shop.vue:525", "[分享] 分享给好友的内容:", JSON.stringify(shareContent));
       return shareContent;
     });
     common_vendor.onShareTimeline(() => {
       const inviteCode = utils_user.getInviteCode();
-      common_vendor.index.__f__("log", "at pages/shop/shop.vue:487", `[分享] 准备分享聚店页面到朋友圈，邀请码: ${inviteCode}`);
+      common_vendor.index.__f__("log", "at pages/shop/shop.vue:537", `[分享] 准备分享聚店页面到朋友圈，邀请码: ${inviteCode}`);
       let queryString = "";
       if (inviteCode) {
         queryString = `inviteCode=${inviteCode}`;
@@ -309,7 +262,7 @@ const _sfc_main = {
         query: queryString,
         imageUrl: bannerList.value.length > 0 ? bannerList.value[0].imageUrl : "https://img.gofor.club/logo.png"
       };
-      common_vendor.index.__f__("log", "at pages/shop/shop.vue:503", "[分享] 分享到朋友圈的内容:", JSON.stringify(shareContent));
+      common_vendor.index.__f__("log", "at pages/shop/shop.vue:553", "[分享] 分享到朋友圈的内容:", JSON.stringify(shareContent));
       return shareContent;
     });
     return (_ctx, _cache) => {
@@ -322,9 +275,21 @@ const _sfc_main = {
         b: common_vendor.o([($event) => searchTerm.value = $event.detail.value, onSearchInput]),
         c: searchTerm.value,
         d: common_vendor.o(handleSearchClick),
-        e: bannerList.value.length > 0
+        e: common_vendor.p({
+          type: "location-filled",
+          size: "20",
+          color: "#FF6B00"
+        }),
+        f: common_vendor.t(displayAddress.value || "点击选择位置查看附近聚店"),
+        g: common_vendor.p({
+          type: "right",
+          size: "16",
+          color: "#999"
+        }),
+        h: common_vendor.o(handleChooseLocation),
+        i: bannerList.value.length > 0
       }, bannerList.value.length > 0 ? {
-        f: common_vendor.f(bannerList.value, (banner, k0, i0) => {
+        j: common_vendor.f(bannerList.value, (banner, k0, i0) => {
           return common_vendor.e({
             a: banner.imageUrl,
             b: banner.title
@@ -335,7 +300,7 @@ const _sfc_main = {
           });
         })
       } : {}, {
-        g: common_vendor.f(filters.value, (filter, k0, i0) => {
+        k: common_vendor.f(filters.value, (filter, k0, i0) => {
           return {
             a: common_vendor.t(filter.name),
             b: filter.value,
@@ -343,55 +308,55 @@ const _sfc_main = {
             d: common_vendor.o(($event) => selectFilter(filter.value), filter.value)
           };
         }),
-        h: common_vendor.f(filteredStores.value, (store, k0, i0) => {
+        l: common_vendor.f(filteredStores.value, (store, k0, i0) => {
           return {
             a: store.id,
             b: common_vendor.o(goToStoreDetail, store.id),
-            c: "6d1ef275-1-" + i0,
+            c: "6d1ef275-3-" + i0,
             d: common_vendor.p({
               store
             })
           };
         }),
-        i: loadingMore.value
+        m: loadingMore.value
       }, loadingMore.value ? {
-        j: common_vendor.p({
+        n: common_vendor.p({
           type: "spinner-cycle",
           size: "20",
           color: "#999"
         })
       } : {}, {
-        k: !hasMore.value && allStores.value.length > 0
+        o: !hasMore.value && allStores.value.length > 0
       }, !hasMore.value && allStores.value.length > 0 ? {
-        l: common_vendor.p({
+        p: common_vendor.p({
           type: "checkmarkempty",
           size: "20",
           color: "#999"
         })
       } : {}, {
-        m: allStores.value.length === 0 && !loadingMore.value && !isRefreshing.value
+        q: allStores.value.length === 0 && !loadingMore.value && !isRefreshing.value
       }, allStores.value.length === 0 && !loadingMore.value && !isRefreshing.value ? {
-        n: common_vendor.p({
+        r: common_vendor.p({
           type: "info",
           size: "60",
           color: "#ffd8c1"
         })
       } : {}, {
-        o: common_vendor.o(loadMore),
-        p: isRefreshing.value,
-        q: common_vendor.o(handleRefresherRefresh),
-        r: common_vendor.p({
+        s: common_vendor.o(loadMore),
+        t: isRefreshing.value,
+        v: common_vendor.o(handleRefresherRefresh),
+        w: common_vendor.p({
           type: "hand-up-filled",
           size: "20",
           color: "#fff"
         }),
-        s: common_vendor.o(shareStore),
-        t: common_vendor.p({
+        x: common_vendor.o(shareStore),
+        y: common_vendor.p({
           type: "plus-filled",
           size: "20",
           color: "#fff"
         }),
-        v: common_vendor.o(skipToNewShop)
+        z: common_vendor.o(skipToNewShop)
       });
     };
   }

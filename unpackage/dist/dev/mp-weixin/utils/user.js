@@ -16,5 +16,6 @@ function getInviteCode() {
   const userInfo = getCachedUserInfo();
   return userInfo ? userInfo.shardCode || "" : "";
 }
+exports.getCachedUserInfo = getCachedUserInfo;
 exports.getInviteCode = getInviteCode;
 //# sourceMappingURL=../../.sourcemap/mp-weixin/utils/user.js.map

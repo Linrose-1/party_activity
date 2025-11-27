@@ -1,0 +1,57 @@
+/* 水平间距 */
+/* 水平间距 */
+.page-container.data-v-9b385765 {
+  padding: 30rpx;
+  background-color: #f9f9f9;
+  min-height: 100vh;
+}
+.status-view.data-v-9b385765 {
+  padding-top: 200rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.error-view.data-v-9b385765 {
+  color: #e43d33;
+}
+.error-view .error-text.data-v-9b385765 {
+  margin-top: 20rpx;
+  font-size: 30rpx;
+}
+.form-card.data-v-9b385765 {
+  background-color: #fff;
+  padding: 30rpx;
+  border-radius: 20rpx;
+}
+.switch-container.data-v-9b385765 {
+  display: flex;
+  align-items: center;
+}
+.switch-labels.data-v-9b385765 {
+  margin-left: 20rpx;
+}
+.switch-labels .label-text.data-v-9b385765 {
+  font-size: 30rpx;
+  color: #333;
+  font-weight: 500;
+}
+.switch-labels .label-hint.data-v-9b385765 {
+  display: block;
+  font-size: 24rpx;
+  color: #999;
+  margin-top: 5rpx;
+}
+.save-btn.data-v-9b385765 {
+  margin-top: 60rpx;
+  width: 100%;
+  height: 88rpx;
+  line-height: 88rpx;
+  border-radius: 44rpx;
+  font-size: 32rpx;
+  color: white;
+  background: linear-gradient(to right, #FF8C00, #FF6B00);
+}
+.save-btn.data-v-9b385765::after {
+  border: none;
+}

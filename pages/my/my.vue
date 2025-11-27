@@ -7,7 +7,7 @@
 				<text class="section-title-main white-text">数字身份</text>
 				<!-- 【优化 2】只有登录后才显示操作按钮，并去掉了 "查看" -->
 				<view class="header-actions" v-if="isLogin">
-					<text class="header-action-btn" @tap="onEdit">编辑 ›</text>
+					<text class="header-action-btn" @tap="onEdit"> >>> </text>
 				</view>
 			</view>
 
@@ -123,10 +123,9 @@
 		<!-- ==================== 功能中心模块 ==================== -->
 		<view class="features-section">
 			<view class="section-header">
-				<text class="section-title-main">功能中心</text>
+				<text class="section-title-main">创享中心</text>
 			</view>
 			<view class="features-list">
-				<!-- 【【【结构微调】】】 -->
 				<view class="feature-item" v-for="item in featureList" :key="item.name"
 					:class="{ 'full-width': item.fullWidth }" @tap="navigateToFeature(item)">
 					<!-- 增加一个 inner 容器 -->
@@ -239,7 +238,7 @@
 			},
 			{
 				value: '--', // 或者 '查看'，或其他占位符
-				label: '互动信息',
+				label: '社交互动',
 				path: null // 使用 null 作为特殊标记
 			}
 		]
@@ -357,12 +356,19 @@
 			path: '/packages/my-member/my-member'
 		},
 		{
-			name: '精准投放',
-			desc: '广告精准触达',
-			icon: '../../static/icon/广告投放.png',
-			iconBg: 'linear-gradient(135deg, #FAD961, #F76B1C)',
-			key: 'precisionTargeting'
-		}
+			name: '邀请注册',
+			desc: '连接精英商友',
+			icon: '../../static/icon/注册.png',
+			iconBg: 'linear-gradient(135deg, #30CFD0, #330867)',
+			path: '/pages/index/index'
+		}, // 新增
+		// {
+		// 	name: '精准投放',
+		// 	desc: '广告精准触达',
+		// 	icon: '../../static/icon/广告投放.png',
+		// 	iconBg: 'linear-gradient(135deg, #FAD961, #F76B1C)',
+		// 	key: 'precisionTargeting'
+		// }
 	]);
 
 
@@ -404,18 +410,18 @@
 
 	const featureList = ref([
 		// 第 1 行
-		{
-			name: '我的商机',
-			desc: '查看您发布的商机内容',
-			icon: '../../static/icon/商机.png',
-			path: '/pages/my-opportunity/my-opportunity'
-		},
-		{
-			name: '我的聚会',
-			desc: '已报名/已发布的聚会',
-			icon: '../../static/icon/聚会.png',
-			path: '/pages/my-active/my-active'
-		},
+		// {
+		// 	name: '我的商机',
+		// 	desc: '查看您发布的商机内容',
+		// 	icon: '../../static/icon/商机.png',
+		// 	path: '/pages/my-opportunity/my-opportunity'
+		// },
+		// {
+		// 	name: '我的聚会',
+		// 	desc: '已报名/已发布的聚会',
+		// 	icon: '../../static/icon/聚会.png',
+		// 	path: '/pages/my-active/my-active'
+		// },
 		// 第 2 行
 		{
 			name: '我的推荐',
@@ -450,24 +456,43 @@
 			path: '/pages/my-order/my-order'
 		},
 		{
+			name: '我的券包',
+			desc: '查看您的猩友优惠券',
+			icon: '../../static/icon/订单.png',
+			path: null
+		},
+		{
+			name: '时空共享',
+			desc: '一键共享创业社交空间',
+			icon: '../../static/icon/我的评论.png',
+			path: null
+		}, // 新增
+		{
 			name: '我的评论',
 			desc: '查看对您发布的评论信息',
 			icon: '../../static/icon/我的评论.png',
 			path: null
 		}, // 新增
 		// 第 5 行
-		{
-			name: '邀请注册',
-			desc: '连接全球精英商友',
-			icon: '../../static/icon/精准投放.png',
-			path: '/pages/index/index'
-		}, // 新增
+		// {
+		// 	name: '邀请注册',
+		// 	desc: '连接全球精英商友',
+		// 	icon: '../../static/icon/精准投放.png',
+		// 	path: '/pages/index/index'
+		// }, // 新增
+
 		{
 			name: '资源匹配',
 			desc: '智能匹配供需资源对应的商友',
 			icon: '../../static/icon/资源匹配.png',
 			path: null
 		}, // 新增
+		{
+			name: '精准投放',
+			desc: '广告精准触达',
+			icon: '../../static/icon/广告投放2.0.png',
+			path: null
+		},
 		// 第 6 行
 		{
 			name: '系统共建',
@@ -487,7 +512,7 @@
 			icon: '../../static/icon/customer-service.png', // 假设您有一个客服图标
 			path: null, // path 为 null, 我们将通过 key 来特殊处理
 			key: 'customerService', // 定义一个唯一的 key
-			phone: '18024545855' ,// 【请在这里替换成您的真实客服电话】
+			phone: '18024545855', // 【请在这里替换成您的真实客服电话】
 			fullWidth: true
 		},
 		// 单独成行
@@ -544,7 +569,8 @@
 
 	const onEdit = () => {
 		uni.navigateTo({
-			url: '/packages/my-edit/my-edit'
+			// url: '/packages/my-edit/my-edit'
+			url: `/packages/my-account-informationDetails/my-account-informationDetails?id=${userInfo.value.id}`
 		})
 	}
 

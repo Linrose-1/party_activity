@@ -1,10 +1,27 @@
 <template>
 	<view class="business-opportunity-app">
+		<!-- <view class="custom-fab" @click="goToCustomizationPage">
+			<uni-icons type="gear-filled" size="20" color="#FFFFFF"></uni-icons>
+			<text>定制</text>
+		</view> -->
 		<!-- ==================== 1. 顶部区域 ==================== -->
 		<view class="header wechat-style">
-			<view class="app-title">猩聚社</view>
-			<view class="app-subtitle">商友连接·商机分享</view>
-			<view class="app-description">连接全球精英商友</view>
+
+			<!-- 【新增】轮播区域 -->
+			<swiper class="header-swiper" :indicator-dots="headerSlides.length > 1" :autoplay="headerSlides.length > 1"
+				:circular="true" :vertical="false" interval="4000" duration="500"
+				indicator-color="rgba(255,255,255,0.4)" indicator-active-color="#FFFFFF" @click="goToCustomizationPage">
+				<swiper-item v-for="(slide, index) in headerSlides" :key="index">
+					<view class="header-content">
+						<view class="app-title">{{ slide.title }}</view>
+						<view class="app-subtitle">{{ slide.slogan }}</view>
+						<!-- 描述文案是共用的，放在 swiper-item 里 -->
+						<view class="app-description">{{ pageDescription }}</view>
+					</view>
+				</swiper-item>
+			</swiper>
+
+
 			<view class="search-section">
 				<view class="search-container">
 					<uni-icons type="search" size="20" color="#FF6A00"></uni-icons>
@@ -36,8 +53,21 @@
 					<image :src="post.user.avatar" mode="aspectFill" class="avatar"
 						@click.stop="navigateToBusinessCard(post.user)" />
 					<view class="user-info">
+						<!-- 第一行：用户名 -->
 						<view class="user-name">{{ post.user.name }}</view>
-						<view class="post-time">{{ post.time }}</view>
+
+						<!-- 第二行：认证标识 -->
+						<view class="user-certs-line">
+							<!-- 蓝V图标 (企业认证) -->
+							<image v-if="post.user.isEnterpriseVerified" src="/static/icon/企业认证.png"
+								class="cert-icon" />
+
+							<!-- 已实名 (个人认证) -->
+							<text v-if="post.user.isIdVerified" class="cert-badge real-name">已实名</text>
+
+							<!-- 已认证 (企业号认证) -->
+							<text v-if="post.user.isEnterprise" class="cert-badge enterprise">已认证</text>
+						</view>
 					</view>
 					<button v-if="isLogin && loggedInUserId !== post.user.id" class="follow-button"
 						:class="{ 'followed': post.isFollowedUser }" @click.stop="toggleFollow(post)">
@@ -81,6 +111,10 @@
 				<!-- ============================================================ -->
 				<view class="tags" v-if="post.tags && post.tags.length">
 					<view v-for="(tag, tagIndex) in post.tags" :key="tagIndex" class="tag">{{ tag }}</view>
+				</view>
+
+				<view class="post-footer">
+					<view class="post-time">{{ post.time }}</view>
 				</view>
 
 				<!-- 3.3 卡片交互 (登录后可见) -->
@@ -161,8 +195,10 @@
 	} from '@dcloudio/uni-app';
 	import request from '../../utils/request.js';
 	import {
-		getInviteCode
+		getInviteCode,
+		getCachedUserInfo
 	} from '../../utils/user.js';
+
 
 
 	// ============================
@@ -173,6 +209,8 @@
 	const loggedInUserId = ref(null);
 	const isLogin = ref(false);
 	const member = ref('白银'); // 示例会员等级
+
+	const currentUserInfo = ref(null);
 
 	// 列表与筛选状态
 	const postList = ref([]);
@@ -202,6 +240,80 @@
 	// ============================
 	// 2. 计算属性 (Computed)
 	// ============================
+
+	const pageTitle = computed(() => {
+		// 优先使用 currentUserInfo (实时数据)，如果不存在，再尝试用缓存数据
+		const info = currentUserInfo.value || getCachedUserInfo();
+		return info?.homeTitle || '猩聚社';
+	});
+
+	const pageSlogan = computed(() => {
+		const info = currentUserInfo.value || getCachedUserInfo();
+		return info?.homeSlogan || '商友连接·商机分享';
+	});
+
+	// 【新增】计算轮播图数据源
+	const headerSlides = computed(() => {
+		const info = currentUserInfo.value || getCachedUserInfo() || {};
+		const slides = [];
+
+		// 1. 获取各级标题和口号
+		const parentTitle = info.parentHomeTitle;
+		const parentSlogan = info.parentHomeSlogan;
+		const userTitle = info.homeTitle;
+		const userSlogan = info.homeSlogan;
+
+		// 默认文案
+		const defaultTitle = '猩聚社';
+		const defaultSlogan = '商友连接·商机分享';
+
+		// 2. 构建第一张卡片 (优先级：Parent > User > Default)
+		let firstSlide = {
+			title: defaultTitle,
+			slogan: defaultSlogan
+		};
+
+		if (parentTitle) {
+			firstSlide = {
+				title: parentTitle,
+				slogan: parentSlogan || ''
+			};
+		} else if (userTitle) {
+			firstSlide = {
+				title: userTitle,
+				slogan: userSlogan || ''
+			};
+		}
+		slides.push(firstSlide);
+
+		// 3. 构建第二张卡片 (只有当 Parent 和 User 都有值时才存在)
+		if (parentTitle && userTitle) {
+			slides.push({
+				title: userTitle,
+				slogan: userSlogan || ''
+			});
+		}
+
+		return slides;
+	});
+
+	// 页面描述文案
+	const pageDescription = computed(() => {
+		const info = currentUserInfo.value || getCachedUserInfo() || {};
+		// 只要有任意一个定制标题，就显示带 "by猩聚社" 的后缀
+		if (info.parentHomeTitle || info.homeTitle) {
+			return '连接全球精英商友——by猩聚社';
+		}
+		return '连接全球精英商友';
+	});
+
+	// const pageDescription = computed(() => {
+	// 	// 检查 pageTitle 或 pageSlogan 是否已经被定制
+	// 	if (pageTitle.value !== '猩聚社' || pageSlogan.value !== '商友连接·商机分享') {
+	// 		return '连接全球精英商友——by猩聚社';
+	// 	}
+	// 	return '连接全球精英商友';
+	// });
 
 	const hasPaidMembership = computed(() => {
 		const paidLevels = ['青铜', '白银', '黄金', '黑钻'];
@@ -237,6 +349,12 @@
 			// 更新登录状态
 			loggedInUserId.value = currentUserId;
 			isLogin.value = currentUserIsLogin;
+
+			if (isLogin.value) {
+				fetchCurrentUserInfo(); // 获取实时用户信息
+			} else {
+				currentUserInfo.value = null; // 未登录则清空
+			}
 
 			// 执行强制刷新
 			getBusinessOpportunitiesList(true);
@@ -314,6 +432,25 @@
 	// 5. 主要业务方法 (Business Methods)
 	// ============================
 
+	const fetchCurrentUserInfo = async () => {
+		const {
+			data,
+			error
+		} = await request('/app-api/member/user/get', {
+			method: 'GET'
+		});
+		if (error) {
+			console.error("首页实时获取用户信息失败:", error);
+			// 失败时可以考虑使用缓存数据作为兜底
+			currentUserInfo.value = getCachedUserInfo();
+		} else {
+			currentUserInfo.value = data;
+			console.log("首页实时获取用户信息成功:", currentUserInfo.value);
+			// 【重要】获取成功后，用新数据更新本地缓存
+			uni.setStorageSync('userInfo', JSON.stringify(data));
+		}
+	};
+
 	const getBusinessOpportunitiesList = async (isRefresh = false) => {
 		if (loadingStatus.value === 'loading' && !isRefresh) return;
 		loadingStatus.value = 'loading';
@@ -386,7 +523,14 @@
 					user: {
 						id: item.memberUser?.id || item.userId,
 						name: item.memberUser?.nickname || '匿名用户',
-						avatar: item.memberUser?.avatar || defaultAvatarUrl
+						avatar: item.memberUser?.avatar || defaultAvatarUrl,
+
+						// certType: 表示企业号认证
+						isEnterprise: item.memberUser?.certType === 1,
+						// idCert: 表示个人实名认证
+						isIdVerified: item.memberUser?.idCert === 1,
+						// enterpriseIdCert: 表示是否为企业
+						isEnterpriseVerified: item.memberUser?.enterpriseIdCert === 1,
 					}
 				}
 			});
@@ -652,6 +796,75 @@
 	// 7. 导航方法 (Navigation Methods)
 	// ============================
 
+	// 跳转到定制页的函数
+	const goToCustomizationPage = async () => {
+		// 1. 检查是否登录
+		if (!isLogin.value) {
+			goToLogin();
+			return;
+		}
+
+		// 2. 确保已获取到最新的用户信息
+		// 如果 currentUserInfo 还没有值，主动获取一次
+		if (!currentUserInfo.value) {
+			await fetchCurrentUserInfo();
+		}
+
+		// 3. 从【实时】用户信息中获取支付状态
+		const isPaid = currentUserInfo.value?.payBusinessFriendAuth === 1;
+
+		if (isPaid) {
+			// 如果已支付，直接跳转
+			uni.navigateTo({
+				url: `/packages/home-customization/home-customization`
+			});
+		} else {
+			// 如果未支付，弹出确认支付弹窗
+			uni.showModal({
+				title: '开启定制功能',
+				content: '定制功能需要支付10智米，请问是否同意支付开启该功能？',
+				confirmText: '立即支付',
+				cancelText: '再想想',
+				success: async (res) => {
+					if (res.confirm) {
+						// 用户确认支付，调用支付接口
+						uni.showLoading({
+							title: '正在开通...'
+						});
+						const {
+							data,
+							error
+						} = await request('/app-api/member/user/pay-business-friend-auth', {
+							method: 'POST'
+						});
+						uni.hideLoading();
+
+						if (error) {
+							uni.showToast({
+								title: error,
+								icon: 'none',
+								duration: 3000
+							});
+						} else {
+							uni.showToast({
+								title: '开通成功！',
+								icon: 'success'
+							});
+							// 支付成功后，重新获取用户信息以更新状态
+							await fetchCurrentUserInfo();
+							// 然后再跳转到定制页
+							setTimeout(() => {
+								uni.navigateTo({
+									url: `/packages/home-customization/home-customization`
+								});
+							}, 800);
+						}
+					}
+				}
+			});
+		}
+	};
+
 	const handlePostClick = (post) => {
 		if (!isLogin.value) {
 			goToLogin();
@@ -775,19 +988,64 @@
 </script>
 
 <style scoped>
+	.business-opportunity-app {
+		position: relative;
+	}
+
+	.custom-fab {
+		position: fixed;
+		/* 关键：固定定位 */
+		top: 100rpx;
+		/* 与顶部的距离，您可以根据实际视觉效果微调 */
+		right: 30rpx;
+		/* 与右侧的距离 */
+		z-index: 99;
+		/* 确保在其他内容之上 */
+
+		display: flex;
+		flex-direction: column;
+		/* 让图标和文字垂直排列 */
+		align-items: center;
+		justify-content: center;
+
+		width: 100rpx;
+		/* 按钮宽度 */
+		height: 100rpx;
+		/* 按钮高度 */
+
+		background: linear-gradient(135deg, #4facfe, #00f2fe);
+		/* 蓝色渐变 */
+		color: white;
+		border-radius: 50%;
+		/* 圆形 */
+		box-shadow: 0 8rpx 20rpx rgba(0, 191, 255, 0.4);
+
+		font-size: 24rpx;
+		/* 文字大小 */
+		font-weight: 500;
+	}
+
+	/* 调整图标下方的间距 */
+	.custom-fab .uni-icons {
+		margin-bottom: 4rpx;
+	}
+
 	/* =========================
 	 * 1. 页面通用与头部样式
 	 * ========================= */
 	.header {
+		/* 保持原有背景和圆角 */
 		background: linear-gradient(135deg, #FF6A00, #FF8C37);
 		color: white;
-		padding: 40rpx 40rpx 60rpx;
+		/* padding-bottom 留给搜索框，padding-top 可以适当减小，因为 swiper 自己有高度 */
+		padding: 20rpx 40rpx 60rpx;
 		border-radius: 0 0 40rpx 40rpx;
 		box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.1);
 		position: relative;
 		overflow: hidden;
 	}
 
+	/* 补上 .header::before 的样式 (可能之前不小心删了或者本来就在) */
 	.header::before {
 		content: "";
 		position: absolute;
@@ -799,12 +1057,37 @@
 		border-radius: 50%;
 	}
 
+	/* 【新增】Swiper 样式 */
+	.header-swiper {
+		/* 高度需要根据内容自适应或给一个固定高度 */
+		/* 预估高度：标题(56+16) + 口号(32+10) + 描述(28+40) ≈ 180~200rpx */
+		height: 220rpx;
+		width: 100%;
+		/* margin-bottom: 20rpx; */
+		/* 与搜索框的间距 */
+	}
+
+	.header-content {
+		display: flex;
+		flex-direction: column;
+		/* 确保内容垂直居中或靠上 */
+		justify-content: flex-start;
+		height: 100%;
+	}
+
+	/* 原有文字样式微调，确保在 swiper 里显示正常 */
 	.app-title {
 		font-size: 56rpx;
 		font-weight: 700;
-		margin-bottom: 16rpx;
+		margin-bottom: 10rpx;
+		/*稍微减小间距*/
 		text-shadow: 0 4rpx 8rpx rgba(0, 0, 0, 0.2);
+		/* 防止长标题换行导致布局错乱 */
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
 	}
+
 
 	.app-subtitle {
 		font-size: 32rpx;
@@ -981,19 +1264,79 @@
 		min-width: 0;
 	}
 
+	.user-name-line {
+		display: flex;
+		align-items: center;
+		gap: 12rpx;
+		/* 图标和文字之间的间距 */
+	}
+
 	.user-name {
 		font-weight: 600;
 		font-size: 32rpx;
-		margin-bottom: 6rpx;
+		margin-bottom: 8rpx;
+		/* 【关键】在名字和认证行之间增加一点间距 */
 		white-space: nowrap;
 		overflow: hidden;
 		text-overflow: ellipsis;
 	}
 
-	.post-time {
-		font-size: 26rpx;
-		color: #888;
+	/* 新增：认证行的样式 */
+	.user-certs-line {
+		display: flex;
+		align-items: center;
+		gap: 12rpx;
+		/* 图标和文字之间的间距 */
+		/* 如果认证标识可能很多，可以加上 flex-wrap */
+		/* flex-wrap: wrap; */
 	}
+
+	.cert-icon {
+		width: 32rpx;
+		height: 32rpx;
+		flex-shrink: 0;
+		/* 防止图标被压缩变形 */
+	}
+
+	.cert-badge {
+		padding: 4rpx 12rpx;
+		border-radius: 6rpx;
+		font-size: 20rpx;
+		font-weight: 500;
+		white-space: nowrap;
+		/* 防止文字换行 */
+		flex-shrink: 0;
+	}
+
+	.cert-badge.real-name {
+		background-color: #ecf5ff;
+		/* 淡蓝色背景 */
+		color: #409eff;
+		/* 蓝色文字 */
+		border: 1rpx solid #d9ecff;
+	}
+
+	.cert-badge.enterprise {
+		background-color: #fdf6ec;
+		/* 淡橙色背景 */
+		color: #e6a23c;
+		/* 橙色文字 */
+		border: 1rpx solid #faecd8;
+	}
+
+	.post-footer {
+		display: flex;
+		justify-content: flex-end;
+		/* 让内容靠右对齐 */
+		margin-top: 20rpx;
+		/* 与上方内容隔开 */
+	}
+
+	.post-footer .post-time {
+		font-size: 26rpx;
+		color: #999;
+	}
+
 
 	.follow-button {
 		background-color: #FF6A00;
@@ -1114,7 +1457,7 @@
 		align-items: center;
 		border-top: 2rpx solid #f0f0f0;
 		padding-top: 30rpx;
-		margin-top: 30rpx;
+		/* margin-top: 30rpx; */
 	}
 
 	.action {

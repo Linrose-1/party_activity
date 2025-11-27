@@ -10,10 +10,11 @@
 				<view class="identity">
 					<view class="name-line">
 						<text class="name">{{ name }}</text>
-						<text class="pinyin">{{ pinyinName }}</text>
+						<!-- <text class="pinyin">{{ pinyinName }}</text> -->
 					</view>
-					<view class="title-line">
-						<text class="title">{{ title }}</text>
+					<view class="tags-line">
+						<text class="tag-style pinyin-tag" v-if="pinyinName">{{ pinyinName }}</text>
+						<text class="tag-style title-tag" v-if="title">{{ title }}</text>
 					</view>
 				</view>
 			</view>
@@ -157,7 +158,7 @@
 		<view class="card-back">
 			<view class="slogan-primary">连接全球精英商友</view>
 			<view class="slogan-secondary">GO FOR PARTNERS • GO FOR FUTURE</view>
-			<view class="platform-qr-code"  @click="previewImage(dynamicQrCodeUrl || platformQrCodeUrl)">
+			<view class="platform-qr-code" @click="previewImage(dynamicQrCodeUrl || platformQrCodeUrl)">
 				<!-- <image :src="platformQrCodeUrl" mode="aspectFit" show-menu-by-longpress /> -->
 				<image :src="dynamicQrCodeUrl || platformQrCodeUrl" mode="aspectFit" show-menu-by-longpress />
 			</view>
@@ -221,7 +222,7 @@
 		}, // 职务
 		industry: {
 			type: String,
-			default: '互联网'
+			default: '未填写'
 		}, // 行业
 		professionalTitle: {
 			type: String,
@@ -403,28 +404,62 @@
 		}
 
 		.identity {
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+			/* 垂直居中 */
+
 			.name-line {
-				display: flex;
-				align-items: baseline;
-				margin-bottom: 10rpx;
+				margin-bottom: 16rpx;
+				/* 增加一点与下方标签的距离 */
 			}
 
 			.name {
 				font-size: 48rpx;
 				font-weight: bold;
 				color: #2c3e50;
-				margin-right: 20rpx;
+				line-height: 1.2;
 			}
 
-			.pinyin {
-				font-size: 26rpx;
-				color: #95a5a6;
-				font-weight: 300;
+			/* 标签行容器 */
+			.tags-line {
+				display: flex;
+				align-items: center;
+				flex-wrap: wrap;
+				/* 防止内容过长溢出 */
+				gap: 16rpx;
+				/* 标签之间的间距 */
 			}
 
-			.title-line {
-				font-size: 28rpx;
-				color: #34495e;
+			/* 通用标签样式 */
+			.tag-style {
+				font-size: 24rpx;
+				padding: 6rpx 16rpx;
+				border-radius: 8rpx;
+				line-height: 1;
+				display: inline-block;
+			}
+
+			/* 拼音标签样式 */
+			.pinyin-tag {
+				background-color: #f0f2f5;
+				/* 浅灰色背景 */
+				color: #909399;
+				/* 深灰色文字 */
+				text-transform: uppercase;
+				/* 自动转大写 */
+				font-weight: 500;
+			}
+
+			/* 头衔标签样式 */
+			.title-tag {
+				background-color: #fff7e6;
+				/* 浅橙色背景，呼应主色调 */
+				color: #fa8c16;
+				/* 橙色文字 */
+				border: 1rpx solid #ffd591;
+				/* 可选：加个细边框增加精致感 */
+				font-weight: 500;
 			}
 		}
 	}

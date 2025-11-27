@@ -10,6 +10,12 @@
 				<button class="search-btn" @click="handleSearchClick">搜索</button>
 			</view>
 
+			<view class="location-selector" @click="handleChooseLocation">
+				<uni-icons type="location-filled" size="20" color="#FF6B00"></uni-icons>
+				<text class="location-text">{{ displayAddress || '点击选择位置查看附近聚店' }}</text>
+				<uni-icons type="right" size="16" color="#999"></uni-icons>
+			</view>
+
 			<!-- 轮播图区域 -->
 			<view v-if="bannerList.length > 0" class="swiper-section">
 				<swiper class="swiper" circular :indicator-dots="true" :autoplay="true" :interval="3000"
@@ -109,6 +115,7 @@
 		value: 'all'
 	}]);
 	const bannerList = ref([]);
+	const displayAddress = ref('');
 
 
 	/**
@@ -146,6 +153,21 @@
 					};
 					userLocation.value = location;
 					uni.setStorageSync('userLocation', location);
+
+					uni.request({
+						url: `https://restapi.amap.com/v3/geocode/regeo?key=您的高德Web服务KEY&location=${res.longitude},${res.latitude}`,
+						success: (geoRes) => {
+							if (geoRes.data && geoRes.data.regeocode) {
+								displayAddress.value = geoRes.data.regeocode.formatted_address;
+							} else {
+								displayAddress.value = "当前位置";
+							}
+						},
+						fail: () => {
+							displayAddress.value = "当前位置";
+						}
+					});
+
 					resolve(location);
 				}
 			};
@@ -186,6 +208,43 @@
 	};
 
 	/**
+	 * @description 允许用户手动在地图上选择一个位置
+	 */
+	const handleChooseLocation = () => {
+		uni.chooseLocation({
+			success: (res) => {
+				console.log('用户手动选择了新位置:', res);
+				const newAddress = res.name || res.address;
+				const newLocation = {
+					latitude: res.latitude,
+					longitude: res.longitude
+				};
+
+				// 1. 更新UI显示的地址
+				displayAddress.value = newAddress;
+
+				// 2. 更新用于API请求的经纬度
+				userLocation.value = newLocation;
+
+				// 3. 【关键修正】将新选择的【位置】和【地址名称】都存入缓存
+				uni.setStorageSync('userLocation', newLocation);
+				uni.setStorageSync('displayAddress', newAddress);
+
+				// 4. 立即使用新位置刷新列表
+				handleRefresh();
+			},
+			fail: (err) => {
+				if (!err.errMsg.includes('cancel')) {
+					uni.showToast({
+						title: '选择位置失败',
+						icon: 'none'
+					});
+				}
+			}
+		});
+	};
+
+	/**
 	 * 获取轮播图数据
 	 */
 	const fetchBanners = async () => {
@@ -218,16 +277,16 @@
 	 * 获取店铺列表
 	 */
 	const getStoreList = async () => {
-		if (!userLocation.value) {
-			console.warn("getStoreList 中断：位置信息为空。");
-			isRefreshing.value = false;
-			loadingMore.value = false;
-			if (pageNo.value === 1) {
-				allStores.value = [];
-				hasMore.value = false;
-			}
-			return;
-		}
+		// if (!userLocation.value) {
+		// 	console.warn("getStoreList 中断：位置信息为空。");
+		// 	isRefreshing.value = false;
+		// 	loadingMore.value = false;
+		// 	if (pageNo.value === 1) {
+		// 		allStores.value = [];
+		// 		hasMore.value = false;
+		// 	}
+		// 	return;
+		// }
 
 		if (loadingMore.value || (pageNo.value > 1 && !hasMore.value)) {
 			return;
@@ -239,13 +298,17 @@
 			pageNo: pageNo.value,
 			pageSize: pageSize,
 			storeName: searchTerm.value.trim(),
-			longitude: userLocation.value.longitude,
-			latitude: userLocation.value.latitude,
 		};
-
+		// 只有在 userLocation 有值 (用户已手动选择) 的情况下，才添加经纬度参数
+		if (userLocation.value) {
+			params.longitude = userLocation.value.longitude;
+			params.latitude = userLocation.value.latitude;
+		}
 		if (activeFilter.value !== 'all') {
 			params.category = activeFilter.value;
 		}
+
+		console.log('🚀 [getStoreList] 最终请求参数:', params);
 
 		const {
 			data: result,
@@ -288,47 +351,25 @@
 	 * @param {boolean} isPullDown - 是否由下拉刷新触发
 	 */
 	const handleRefresh = async (isPullDown = false) => {
-		// 【关键】检查“加载锁”，如果正在加载，则直接退出，防止重复执行
-		if (isLoading.value) {
-			console.log("刷新操作已在进行中，本次触发被忽略。");
-			return;
-		}
-
-		// 上锁，开始加载流程
+		if (isLoading.value) return;
 		isLoading.value = true;
 
 		if (isPullDown) {
 			isRefreshing.value = true;
-		} else {
-			uni.showLoading({
-				title: '加载中...'
-			});
 		}
 
 		try {
-			// --- 核心逻辑 ---
-			const location = await getCurrentLocation();
-
+			// 重置分页和状态
 			pageNo.value = 1;
 			hasMore.value = true;
 			allStores.value = [];
-
-			if (location) {
-				await getStoreList();
-			}
+			// 直接调用获取列表的函数，它会根据 userLocation 的有无来决定是否传经纬度
+			await getStoreList();
 		} catch (error) {
-			// 捕获意料之外的错误
 			console.error("handleRefresh 过程中捕获到错误:", error);
 		} finally {
-			// 【关键】解锁！无论成功或失败，最后一定要把锁打开
 			isLoading.value = false;
-
-			// 恢复UI状态
-			if (isPullDown) {
-				isRefreshing.value = false;
-			} else {
-				uni.hideLoading();
-			}
+			// isRefreshing 在 getStoreList 内部被重置
 		}
 	};
 
@@ -366,18 +407,27 @@
 	onMounted(() => {
 		getShopType();
 		fetchBanners();
+		handleRefresh();
 	});
 
 	onShow(() => {
 		// 只有在列表为空（首次进入）时，才触发自动刷新
 		if (allStores.value.length === 0) {
 			console.log('onShow: 列表为空，执行初次加载...');
-			// 尝试从缓存快速恢复位置，避免加载白屏
 			const storedLocation = uni.getStorageSync('userLocation');
+			const storedAddress = uni.getStorageSync('displayAddress');
 			if (storedLocation) {
 				userLocation.value = storedLocation;
 			}
-			handleRefresh();
+
+			// 优先使用缓存的地址名，如果没有，再显示"正在定位..."
+			if (storedAddress) {
+				displayAddress.value = storedAddress;
+				handleRefresh(); // 如果有地址缓存，直接刷新
+			} else {
+				displayAddress.value = '正在定位...';
+				handleRefresh(); // 触发自动定位和刷新
+			}
 		} else {
 			console.log('onShow: 列表已有数据，不自动刷新位置。');
 		}
@@ -459,7 +509,7 @@
 
 		// 2. 构建分享路径
 		// 基础路径是当前页面
-		let sharePath = '/pages/store-list/store-list'; // 请确保这个路径是正确的
+		let sharePath = '/pages/shop/shop'; // 请确保这个路径是正确的
 		if (inviteCode) {
 			sharePath += `?inviteCode=${inviteCode}`;
 		}
@@ -543,6 +593,26 @@
 		border-radius: 20rpx;
 		padding: 10rpx 10rpx 10rpx 15rpx; // 调整内边距适应按钮
 		border: 1rpx solid #ffe8d9;
+	}
+
+	.location-selector {
+		display: flex;
+		align-items: center;
+		padding: 20rpx;
+		background-color: #f7f7f7;
+		border-radius: 16rpx;
+		margin-top: 20rpx;
+		border: 1rpx solid #f0f0f0;
+	}
+
+	.location-text {
+		flex: 1;
+		font-size: 28rpx;
+		color: #333;
+		margin: 0 16rpx;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
 	}
 
 	.search-input {

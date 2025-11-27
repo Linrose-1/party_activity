@@ -122,6 +122,14 @@
 								</view>
 							</uni-forms-item>
 
+							<uni-forms-item label="企业号" name="enterpriseIdCert">
+								<view class="switch-container">
+									<switch :checked="form.enterpriseIdCert === 1" @change="onEnterpriseSwitchChange"
+										color="#FF6A00" />
+									<text class="switch-label">{{ form.enterpriseIdCert === 1 ? '已开启' : '未开启' }}</text>
+								</view>
+							</uni-forms-item>
+
 							<!-- 爱好和简介 -->
 							<uni-forms-item label="爱好" name="hobby">
 								<uni-data-checkbox v-model="selectedHobbies" :localdata="hobbyOptions" multiple
@@ -252,7 +260,8 @@
 		era: null, // 出生年代
 		signature: '', // 个性签名
 		haveResources: '', // 我有资源
-		needResources: '' // 我需资源
+		needResources: '', // 我需资源
+		enterpriseIdCert: 0,
 	});
 
 	// 数据源
@@ -406,6 +415,16 @@
 	// --- 页面切换方法 ---
 	const handleTabClick = (e) => {
 		currentTab.value = e.currentIndex;
+	};
+
+	/**
+	 * @description 处理企业号开关状态变化
+	 * @param {object} e - switch 组件派发的事件对象
+	 */
+	const onEnterpriseSwitchChange = (e) => {
+		// e.detail.value 是一个布尔值 (true/false)
+		// 我们需要将其转换为数字 1 或 0
+		form.value.enterpriseIdCert = e.detail.value ? 1 : 0;
 	};
 
 
@@ -886,7 +905,7 @@
 				setTimeout(() => {
 					uni.showModal({
 						title: '发布到商友圈',
-						content: '您的资料已完善，是否发布一条商机到商友圈，让更多商友看到您？',
+						content: '您的资料已更新，是否发布名片到商友圈，让更多商友看见您？',
 						confirmText: '立即发布',
 						cancelText: '暂不发布',
 						success: (res) => {
@@ -1093,6 +1112,20 @@
 
 	.other-hobby-input {
 		margin-top: 20rpx;
+	}
+
+	.switch-container {
+		display: flex;
+		align-items: center;
+		width: 100%;
+		// uni-forms-item 已经有 padding, 这里可能不需要额外的高度
+		// height: 80rpx; 
+	}
+
+	.switch-label {
+		font-size: 28rpx;
+		color: #666;
+		margin-left: 20rpx;
 	}
 
 	/* --- 5. 动态增删区块样式 --- */

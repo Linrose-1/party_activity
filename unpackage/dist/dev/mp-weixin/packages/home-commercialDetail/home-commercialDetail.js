@@ -795,7 +795,7 @@ const _sfc_main = {
         }),
         af: showTimelineGuide.value
       }, showTimelineGuide.value ? {
-        ag: common_assets._imports_0,
+        ag: common_assets._imports_0$1,
         ah: common_vendor.o(hideTimelineGuide)
       } : {}, {
         ai: copyMenu.show

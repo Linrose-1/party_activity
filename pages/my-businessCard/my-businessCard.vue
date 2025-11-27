@@ -111,12 +111,15 @@
 
 
 	// --- 2. 页面生命周期与初始化 ---
-	onLoad((options) => {
+	onLoad(async (options) => {
+		// 1. 获取本地 Token
+		const token = uni.getStorageSync('token');
+
+		// 2. 初始化最终参数对象，处理可能的 scene 参数 (扫码进入)
 		let finalOptions = options || {};
 
-		// 1. 检查是否存在 scene 参数 (扫码进入)
-		if (options && options.scene) {
-			const sceneStr = decodeURIComponent(options.scene);
+		if (finalOptions.scene) {
+			const sceneStr = decodeURIComponent(finalOptions.scene);
 			console.log(`✅ [名片页] 在 onLoad 中检测到 scene: ${sceneStr}`);
 			const sceneParams = {};
 			sceneStr.split('&').forEach(item => {
@@ -126,42 +129,175 @@
 				}
 			});
 			console.log('✅ [名片页] scene 解析结果:', sceneParams);
-			// 2. 将解析后的参数合并到 finalOptions 中
+			// 将解析后的 scene 参数合并到 finalOptions 中
 			finalOptions = {
 				...finalOptions,
 				...sceneParams
 			};
 		}
 
-		// 3. 后续所有逻辑都从 finalOptions 中取值
+		console.log('[my-businessCard] onLoad 触发。最终选项:', JSON.stringify(finalOptions));
+
+		// 3. 捕获并暂存邀请码 (无论是否登录都执行，防止邀请关系丢失)
 		const inviteCode = finalOptions.c || finalOptions.inviteCode;
 		if (inviteCode) {
-			console.log(`✅ [名片页] 在 onLoad 中捕获到邀请码: ${inviteCode}`);
+			console.log('✅ [邀请码] 捕获邀请码，暂存本地:', inviteCode);
 			uni.setStorageSync('pendingInviteCode', inviteCode);
 		}
 
-		console.log('[my-businessCard] onLoad 触发。已收到的选项:', JSON.stringify(options));
+		// 4. 游客模式判断 (日志记录)
+		if (!token) {
+			console.log('⚠️ 当前为游客模式（未登录），尝试允许查看名片数据...');
+			// 【关键】这里不再 return，让代码继续往下走
+		}
 
+		// 5. 确定当前查看的目标 ID 和身份
 		const loggedInUserId = uni.getStorageSync('userId');
+		const targetId = finalOptions.i || finalOptions.id;
 
 		if (finalOptions.fromShare && finalOptions.fromShare === '1') {
 			fromShare.value = true;
 		}
 
-		const targetId = finalOptions.i || finalOptions.id;
-		if (targetId && targetId != loggedInUserId) {
-			isViewingOwnCard.value = false;
-			targetUserId.value = targetId;
+		if (targetId) {
+			// 情况 A: 有目标ID -> 查看他人 (无论是否登录)
+			// 注意：如果已登录且 targetId == loggedInUserId，逻辑上也是看自己，但 isViewingOwnCard 设为 false 也没大问题，
+			// 或者你可以加个判断: if (loggedInUserId && targetId == loggedInUserId) isViewingOwnCard.value = true;
+			// 这里保持你原有的逻辑结构：
+			if (loggedInUserId && targetId == loggedInUserId) {
+				isViewingOwnCard.value = true;
+			} else {
+				isViewingOwnCard.value = false;
+				targetUserId.value = targetId;
+			}
 		} else {
-			isViewingOwnCard.value = true;
+			// 情况 B: 没有目标ID
+			if (token) {
+				// 已登录 -> 查看自己的名片
+				isViewingOwnCard.value = true;
+			} else {
+				// 未登录且没目标ID -> 游客误入 -> 强制去登录页
+				console.warn('游客模式且无目标ID，无法展示内容，跳转登录页');
+				uni.reLaunch({
+					url: '/pages/index/index'
+				});
+				return;
+			}
 		}
 
-		// 统一的页面初始化入口
+		// 6. 执行页面初始化 (加载数据)
+		// 注意：fetchTargetUserInfo 调用的接口需要后端放行 Auth
 		initializePage();
 
-		// 处理分享点击带来的奖励逻辑
+		// 7. 处理分享奖励 (内部有判断 loggedInUserId，游客调用安全)
 		handleShareReward(finalOptions);
 	});
+	// onLoad((options) => {
+
+	// 	// ================= 【新增逻辑开始】 =================
+	// 	// 1. 第一步：立刻检查本地是否有 Token
+	// 	const token = uni.getStorageSync('token');
+
+	// 	if (!token) {
+	// 		// 2. 如果没登录，先处理可能携带的邀请码（防止邀请关系丢失）
+	// 		// 这一步很重要！即使未登录，也要先把链接里的邀请码存下来
+	// 		let tempOptions = options || {};
+	// 		// 解析 Scene (扫码情况)
+	// 		if (tempOptions.scene) {
+	// 			const sceneStr = decodeURIComponent(tempOptions.scene);
+	// 			sceneStr.split('&').forEach(item => {
+	// 				const parts = item.split('=');
+	// 				if (parts[0] && parts[1]) {
+	// 					tempOptions[parts[0]] = parts[1];
+	// 				}
+	// 			});
+	// 		}
+
+	// 		// 捕获邀请码并存入缓存
+	// 		const inviteCode = tempOptions.c || tempOptions.inviteCode;
+	// 		if (inviteCode) {
+	// 			console.log('✅ [未登录拦截] 捕获邀请码，暂存本地:', inviteCode);
+	// 			uni.setStorageSync('pendingInviteCode', inviteCode);
+	// 		}
+
+	// 		// 3. 停止加载动画，避免转圈圈
+	// 		isLoading.value = false;
+
+	// 		// 4. 弹出强制引导窗
+	// 		uni.showModal({
+	// 			title: '温馨提示',
+	// 			content: '查看商友名片需要先登录\n登录后重新打开分享链接查看名片',
+	// 			showCancel: false, // 不显示“取消”按钮，强制引导
+	// 			confirmText: '去登录',
+	// 			confirmColor: '#FF6E00', // 配合你的主题色
+	// 			success: (res) => {
+	// 				if (res.confirm) {
+	// 					// 跳转到登录页
+	// 					// 注意：这里使用 reLaunch 或 redirectTo，避免用户点左上角返回又回到白屏页
+	// 					uni.reLaunch({
+	// 						url: '/pages/index/index'
+	// 					});
+	// 				}
+	// 			}
+	// 		});
+
+	// 		// 5. 【关键】阻断后续代码执行！
+	// 		// 这样就不会去调用 fetchTargetUserInfo，也不会报错了
+	// 		return;
+	// 	}
+	// 	// ================= 【新增逻辑结束】 =================
+
+
+	// 	let finalOptions = options || {};
+
+	// 	// 1. 检查是否存在 scene 参数 (扫码进入)
+	// 	if (options && options.scene) {
+	// 		const sceneStr = decodeURIComponent(options.scene);
+	// 		console.log(`✅ [名片页] 在 onLoad 中检测到 scene: ${sceneStr}`);
+	// 		const sceneParams = {};
+	// 		sceneStr.split('&').forEach(item => {
+	// 			const parts = item.split('=');
+	// 			if (parts[0] && parts[1]) {
+	// 				sceneParams[parts[0]] = parts[1];
+	// 			}
+	// 		});
+	// 		console.log('✅ [名片页] scene 解析结果:', sceneParams);
+	// 		// 2. 将解析后的参数合并到 finalOptions 中
+	// 		finalOptions = {
+	// 			...finalOptions,
+	// 			...sceneParams
+	// 		};
+	// 	}
+
+	// 	// 3. 后续所有逻辑都从 finalOptions 中取值
+	// 	const inviteCode = finalOptions.c || finalOptions.inviteCode;
+	// 	if (inviteCode) {
+	// 		console.log(`✅ [名片页] 在 onLoad 中捕获到邀请码: ${inviteCode}`);
+	// 		uni.setStorageSync('pendingInviteCode', inviteCode);
+	// 	}
+
+	// 	console.log('[my-businessCard] onLoad 触发。已收到的选项:', JSON.stringify(options));
+
+	// 	const loggedInUserId = uni.getStorageSync('userId');
+
+	// 	if (finalOptions.fromShare && finalOptions.fromShare === '1') {
+	// 		fromShare.value = true;
+	// 	}
+
+	// 	const targetId = finalOptions.i || finalOptions.id;
+	// 	if (targetId && targetId != loggedInUserId) {
+	// 		isViewingOwnCard.value = false;
+	// 		targetUserId.value = targetId;
+	// 	} else {
+	// 		isViewingOwnCard.value = true;
+	// 	}
+
+	// 	// 统一的页面初始化入口
+	// 	initializePage();
+
+	// 	// 处理分享点击带来的奖励逻辑
+	// 	handleShareReward(finalOptions);
+	// });
 
 	/**
 	 * @description 页面初始化总函数，负责数据加载和状态管理
@@ -185,8 +321,12 @@
 		} catch (err) {
 			// 现在这里捕获的错误会更准确
 			console.error('页面初始化失败:', err.message);
-			// 只把需要给用户看的消息赋值给 errorMsg
-			if (err.message !== '权限不足，已引导至申请页。') {
+			const ignoredErrors = [
+				'权限不足，已引导至申请页。',
+				'GUEST_ACCESS_DENIED'
+			];
+
+			if (!ignoredErrors.includes(err.message)) {
 				errorMsg.value = err.message || '加载失败，请稍后重试';
 			}
 		} finally {
@@ -211,9 +351,18 @@
 	};
 
 	/**
-	 * @description 【新增】获取推广小程序码的函数
+	 * @description 获取推广小程序码的函数
 	 */
 	const fetchPromotionQrCode = async () => {
+		// 】在这里定义并获取 token
+		const token = uni.getStorageSync('token');
+
+		// 如果未登录（游客模式），直接跳过生成推广码
+		if (!token) {
+			console.log('游客模式，跳过生成推广小程序码');
+			return;
+		}
+
 		// 确保在调用此函数时，userInfo 已经加载完毕
 		if (!userInfo.value) {
 			console.warn('无法生成小程序码，因为用户信息尚未加载。');
@@ -253,10 +402,8 @@
 		// 4. 处理返回结果
 		if (error) {
 			console.error('❌ [二维码生成] 调用接口失败:', error);
-			uni.showToast({
-				title: '生成分享码失败',
-				icon: 'none'
-			});
+			// 只有在非静默失败时才弹窗，这里可以选择不弹窗以免打扰游客体验
+			// uni.showToast({ title: '生成分享码失败', icon: 'none' });
 			return;
 		}
 
@@ -268,8 +415,7 @@
 
 		promotionQrCodeBase64.value = finalBase64;
 
-		console.log('✅ [二维码生成] 成功获取并存储了小程序码 Base64 数据:');
-		console.log(promotionQrCodeBase64.value); // 按您的要求打印出来
+		console.log('✅ [二维码生成] 成功获取并存储了小程序码 Base64 数据');
 	};
 
 
@@ -312,22 +458,19 @@
 		return scene;
 	};
 
-
 	/**
 	 * @description 获取他人的名片信息
 	 */
 	const fetchTargetUserInfo = async (userId) => {
-		// 【修改点】在这里构建请求参数
 		const requestData = {
 			readUserId: userId
 		};
-
-		// 如果是通过免费分享链接进来的，就加上 notPay: 1
+		// 如果是分享链接进来的，加上这个参数（按后端要求）
 		if (fromShare.value) {
 			requestData.notPay = 1;
 		}
 
-		console.log('[my-businessCard] 准备使用参数调用 /read-card:', JSON.stringify(requestData));
+		console.log('[名片页] 游客/用户请求名片数据:', JSON.stringify(requestData));
 
 		const {
 			data,
@@ -336,39 +479,91 @@
 			method: 'POST',
 			data: requestData
 		});
-		if (error) {
-			// 如果是查看他人名片时出错
-			if (!isViewingOwnCard.value) {
-				// 使用 uni.showModal 来显示支持换行的长文本
-				uni.showModal({
-					title: '温馨提示',
-					// 【关键】在这里使用 \n 实现换行
-					content: '请点击左上角的“屋子”图标，\n到“猩世界”注册或登陆，\n体验“猩聚社”商友社交工具!',
-					showCancel: false, // 只保留一个“确定”按钮
-					confirmText: '我知道了',
-					success: (res) => {
-						// 当用户点击“我知道了”后，再执行页面跳转
-						if (res.confirm) {
-							uni.redirectTo({
-								url: `/pages/business-card-apply/business-card-apply?id=${userId}&name=${encodeURIComponent('目标用户')}&fromShare=${fromShare.value ? '1' : '0'}`
-							});
-						}
-					}
-				});
-				// 【重要】返回一个 Promise.reject，让外层 catch 知道这里出错了，
-				// 并且不再继续执行后面的 userInfo.value 赋值等操作。
-				// 抛出的消息仅用于控制台调试。
-				return Promise.reject(new Error('权限不足，已引导至申请页。'));
-			}
-			// 如果是查看自己的卡片出错，则正常抛出错误让页面显示
-			else {
-				throw new Error(error);
-			}
+
+		// 1. 如果请求成功 (error 为 null)
+		if (!error) {
+			console.log('✅ 获取名片成功');
+			return data;
 		}
 
-		// 如果没有错误，正常返回数据
-		return data;
+		// 2. 如果请求失败 (有 error)
+		console.error('获取名片失败:', error);
+
+		// 这里处理一种特殊情况：万一后端还是返回了 401 (虽然你在工具里测是通的，但为了保险)
+		const token = uni.getStorageSync('token');
+		if (!token) {
+			// 如果是游客，且真的报错了，才提示去登录
+			uni.showModal({
+				title: '提示',
+				content: '当前为游客模式，如无法查看完整信息，请尝试登录',
+				confirmText: '去登录',
+				cancelText: '暂不登录',
+				success: (res) => {
+					if (res.confirm) uni.reLaunch({
+						url: '/pages/index/index'
+					});
+				}
+			});
+			// 返回 null，让页面保持空状态或显示默认图，不要抛出异常导致红字报错
+			return null;
+		}
+
+		// 如果是已登录用户报错，抛出异常让外层处理
+		throw new Error(typeof error === 'string' ? error : (error.msg || '获取失败'));
 	};
+	// const fetchTargetUserInfo = async (userId) => {
+	// 	// 【修改点】在这里构建请求参数
+	// 	const requestData = {
+	// 		readUserId: userId
+	// 	};
+
+	// 	// 如果是通过免费分享链接进来的，就加上 notPay: 1
+	// 	if (fromShare.value) {
+	// 		requestData.notPay = 1;
+	// 	}
+
+	// 	console.log('[my-businessCard] 准备使用参数调用 /read-card:', JSON.stringify(requestData));
+
+	// 	const {
+	// 		data,
+	// 		error
+	// 	} = await request('/app-api/member/user/read-card', {
+	// 		method: 'POST',
+	// 		data: requestData
+	// 	});
+	// 	if (error) {
+	// 		// 如果是查看他人名片时出错
+	// 		if (!isViewingOwnCard.value) {
+	// 			// 使用 uni.showModal 来显示支持换行的长文本
+	// 			uni.showModal({
+	// 				title: '温馨提示',
+	// 				// 【关键】在这里使用 \n 实现换行
+	// 				content: '请点击左上角的“屋子”图标，\n到“猩世界”注册或登陆，\n体验“猩聚社”商友社交工具!',
+	// 				showCancel: false, // 只保留一个“确定”按钮
+	// 				confirmText: '我知道了',
+	// 				success: (res) => {
+	// 					// 当用户点击“我知道了”后，再执行页面跳转
+	// 					if (res.confirm) {
+	// 						uni.redirectTo({
+	// 							url: `/pages/business-card-apply/business-card-apply?id=${userId}&name=${encodeURIComponent('目标用户')}&fromShare=${fromShare.value ? '1' : '0'}`
+	// 						});
+	// 					}
+	// 				}
+	// 			});
+	// 			// 【重要】返回一个 Promise.reject，让外层 catch 知道这里出错了，
+	// 			// 并且不再继续执行后面的 userInfo.value 赋值等操作。
+	// 			// 抛出的消息仅用于控制台调试。
+	// 			return Promise.reject(new Error('权限不足，已引导至申请页。'));
+	// 		}
+	// 		// 如果是查看自己的卡片出错，则正常抛出错误让页面显示
+	// 		else {
+	// 			throw new Error(error);
+	// 		}
+	// 	}
+
+	// 	// 如果没有错误，正常返回数据
+	// 	return data;
+	// };
 
 	/**
 	 * @description 适配不同接口返回的用户数据，统一为组件所需格式
@@ -638,6 +833,21 @@
 		url: '/packages/my-edit/my-edit'
 	});
 	const openSharePopup = () => {
+		const token = uni.getStorageSync('token');
+		if (!token) {
+			uni.showModal({
+				title: '提示',
+				content: '登录后才能分享名片哦',
+				confirmText: '去登录',
+				success: (res) => {
+					if (res.confirm) uni.reLaunch({
+						url: '/pages/index/index'
+					});
+				}
+			});
+			return;
+		}
+
 		customShareTitle.value = `这是 ${userInfo.value.realName || userInfo.value.nickname} 的名片`;
 		sharePopup.value.open();
 	};

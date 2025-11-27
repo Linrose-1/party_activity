@@ -1,0 +1,10 @@
+{
+  "navigationBarTitleText": "猩聚社定制",
+  "usingComponents": {
+    "uni-load-more": "../../uni_modules/uni-load-more/components/uni-load-more/uni-load-more",
+    "uni-icons": "../../uni_modules/uni-icons/components/uni-icons/uni-icons",
+    "uni-easyinput": "../../uni_modules/uni-easyinput/components/uni-easyinput/uni-easyinput",
+    "uni-forms-item": "../../uni_modules/uni-forms/components/uni-forms-item/uni-forms-item",
+    "uni-forms": "../../uni_modules/uni-forms/components/uni-forms/uni-forms"
+  }
+}

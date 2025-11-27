@@ -45,14 +45,14 @@ const _sfc_main = {
         });
         if (!error && data) {
           userInfo.value = data;
-          common_vendor.index.__f__("log", "at pages/my/my.vue:203", "getUserInfo userInfo:", userInfo.value);
+          common_vendor.index.__f__("log", "at pages/my/my.vue:202", "getUserInfo userInfo:", userInfo.value);
         } else {
-          common_vendor.index.__f__("log", "at pages/my/my.vue:205", "获取用户信息失败:", error);
+          common_vendor.index.__f__("log", "at pages/my/my.vue:204", "获取用户信息失败:", error);
           isLogin.value = false;
           userInfo.value = {};
         }
       } catch (err) {
-        common_vendor.index.__f__("log", "at pages/my/my.vue:211", "请求异常:", err);
+        common_vendor.index.__f__("log", "at pages/my/my.vue:210", "请求异常:", err);
         isLogin.value = false;
         userInfo.value = {};
       }
@@ -83,7 +83,7 @@ const _sfc_main = {
         {
           value: "--",
           // 或者 '查看'，或其他占位符
-          label: "互动信息",
+          label: "社交互动",
           path: null
           // 使用 null 作为特殊标记
         }
@@ -159,12 +159,20 @@ const _sfc_main = {
         path: "/packages/my-member/my-member"
       },
       {
-        name: "精准投放",
-        desc: "广告精准触达",
-        icon: "../../static/icon/广告投放.png",
-        iconBg: "linear-gradient(135deg, #FAD961, #F76B1C)",
-        key: "precisionTargeting"
+        name: "邀请注册",
+        desc: "连接精英商友",
+        icon: "../../static/icon/注册.png",
+        iconBg: "linear-gradient(135deg, #30CFD0, #330867)",
+        path: "/pages/index/index"
       }
+      // 新增
+      // {
+      // 	name: '精准投放',
+      // 	desc: '广告精准触达',
+      // 	icon: '../../static/icon/广告投放.png',
+      // 	iconBg: 'linear-gradient(135deg, #FAD961, #F76B1C)',
+      // 	key: 'precisionTargeting'
+      // }
     ]);
     const navigateToCoreFeature = (item) => {
       if (item.key) {
@@ -198,18 +206,18 @@ const _sfc_main = {
     };
     const featureList = common_vendor.ref([
       // 第 1 行
-      {
-        name: "我的商机",
-        desc: "查看您发布的商机内容",
-        icon: "../../static/icon/商机.png",
-        path: "/pages/my-opportunity/my-opportunity"
-      },
-      {
-        name: "我的聚会",
-        desc: "已报名/已发布的聚会",
-        icon: "../../static/icon/聚会.png",
-        path: "/pages/my-active/my-active"
-      },
+      // {
+      // 	name: '我的商机',
+      // 	desc: '查看您发布的商机内容',
+      // 	icon: '../../static/icon/商机.png',
+      // 	path: '/pages/my-opportunity/my-opportunity'
+      // },
+      // {
+      // 	name: '我的聚会',
+      // 	desc: '已报名/已发布的聚会',
+      // 	icon: '../../static/icon/聚会.png',
+      // 	path: '/pages/my-active/my-active'
+      // },
       // 第 2 行
       {
         name: "我的推荐",
@@ -244,6 +252,19 @@ const _sfc_main = {
         path: "/pages/my-order/my-order"
       },
       {
+        name: "我的券包",
+        desc: "查看您的猩友优惠券",
+        icon: "../../static/icon/订单.png",
+        path: null
+      },
+      {
+        name: "时空共享",
+        desc: "一键共享创业社交空间",
+        icon: "../../static/icon/我的评论.png",
+        path: null
+      },
+      // 新增
+      {
         name: "我的评论",
         desc: "查看对您发布的评论信息",
         icon: "../../static/icon/我的评论.png",
@@ -251,13 +272,12 @@ const _sfc_main = {
       },
       // 新增
       // 第 5 行
-      {
-        name: "邀请注册",
-        desc: "连接全球精英商友",
-        icon: "../../static/icon/精准投放.png",
-        path: "/pages/index/index"
-      },
-      // 新增
+      // {
+      // 	name: '邀请注册',
+      // 	desc: '连接全球精英商友',
+      // 	icon: '../../static/icon/精准投放.png',
+      // 	path: '/pages/index/index'
+      // }, // 新增
       {
         name: "资源匹配",
         desc: "智能匹配供需资源对应的商友",
@@ -265,6 +285,12 @@ const _sfc_main = {
         path: null
       },
       // 新增
+      {
+        name: "精准投放",
+        desc: "广告精准触达",
+        icon: "../../static/icon/广告投放2.0.png",
+        path: null
+      },
       // 第 6 行
       {
         name: "系统共建",
@@ -313,10 +339,10 @@ const _sfc_main = {
         common_vendor.index.makePhoneCall({
           phoneNumber: item.phone,
           success: () => {
-            common_vendor.index.__f__("log", "at pages/my/my.vue:518", "拨打电话成功");
+            common_vendor.index.__f__("log", "at pages/my/my.vue:543", "拨打电话成功");
           },
           fail: (err) => {
-            common_vendor.index.__f__("log", "at pages/my/my.vue:521", "拨打电话失败:", err);
+            common_vendor.index.__f__("log", "at pages/my/my.vue:546", "拨打电话失败:", err);
           }
         });
         return;
@@ -334,7 +360,8 @@ const _sfc_main = {
     };
     const onEdit = () => {
       common_vendor.index.navigateTo({
-        url: "/packages/my-edit/my-edit"
+        // url: '/packages/my-edit/my-edit'
+        url: `/packages/my-account-informationDetails/my-account-informationDetails?id=${userInfo.value.id}`
       });
     };
     const onViewAccountDetail = () => {

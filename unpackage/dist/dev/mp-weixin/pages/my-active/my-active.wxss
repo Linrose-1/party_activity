@@ -130,6 +130,10 @@
   background-color: #fef0f0;
   color: #f56c6c;
 }
+.btn-edit-style.data-v-37541c0b {
+  background-color: #e3fdfd;
+  color: #2196f3;
+}
 .rejection-reason-box.data-v-37541c0b {
   background-color: #fef0f0;
   color: #f56c6c;

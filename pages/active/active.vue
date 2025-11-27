@@ -505,7 +505,7 @@
 
 		// 2. 构建分享路径
 		// 基础路径是当前页面
-		let sharePath = '/pages/activity-list/activity-list';
+		let sharePath = '/pages/active/active';
 		// 如果邀请码存在，就拼接到路径参数中
 		if (inviteCode) {
 			sharePath += `?inviteCode=${inviteCode}`;

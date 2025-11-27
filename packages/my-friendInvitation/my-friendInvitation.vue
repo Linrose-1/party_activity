@@ -10,6 +10,10 @@
 		<view class="content-area">
 			<!-- Tab 0: 我邀请的人 (列表) -->
 			<view v-show="currentTab === 1" class="tab-panel">
+				<view class="search-wrapper">
+					<uni-easyinput prefixIcon="search" v-model="searchKey" placeholder="搜索昵称或姓名" @confirm="handleSearch"
+						@clear="handleSearch"></uni-easyinput>
+				</view>
 				<!-- 商友列表 -->
 				<view class="friend-list">
 					<view class="friend-card" v-for="friend in friendList" :key="friend.id"
@@ -74,6 +78,26 @@
 					<image class="empty-image" src="/static/images/empty-box.png" mode="widthFix"></image>
 					<text class="empty-text">您不是通过邀请加入的哦</text>
 				</view>
+
+				<!-- 2.2 【新增】邀请新商友模块 -->
+				<view class="invite-tools-section">
+					<view class="section-title">邀请新商友</view>
+					<view class="tools-grid">
+						<view class="tool-item" v-for="(item, index) in inviteTools" :key="index"
+							@click="handleToolClick(item)">
+							<!-- 增加 inner 容器保持布局一致性 -->
+							<view class="tool-item-inner">
+								<image :src="item.icon" class="tool-icon" mode="aspectFit"></image>
+								<view class="tool-content">
+									<view class="tool-name">{{ item.name }}</view>
+									<view class="tool-desc">{{ item.desc }}</view>
+								</view>
+								<text class="chevron-icon">›</text>
+							</view>
+						</view>
+					</view>
+				</view>
+
 			</view>
 		</view>
 	</view>
@@ -82,7 +106,8 @@
 <script setup>
 	import {
 		ref,
-		onMounted
+		onMounted,
+		watch
 	} from 'vue';
 	import {
 		onPullDownRefresh,
@@ -104,8 +129,40 @@
 	const loadStatus = ref('more');
 	const isFollowActionInProgress = ref(false);
 
+	const searchKey = ref('');
+	let searchDebounceTimer = null;
+
 	// --- "我的邀请人" 相关状态 ---
 	const userInfo = ref(null);
+
+
+	// --- 【新增】邀请工具配置 ---
+	// 图标路径使用了你之前提供的路径，请确保图片真实存在
+	const inviteTools = ref([{
+			name: '注册邀请',
+			desc: '注册分享邀请',
+			icon: '/static/icon/精准投放.png', // 这里复用了"精准投放"的图标，或者你可以换成 /static/icon/invite-register.png
+			path: '/pages/index/index' // 跳转到注册/登录页
+		},
+		{
+			name: '名片邀请',
+			desc: '名片分享邀请',
+			icon: '/static/icon/我的名片.png',
+			path: '/pages/my-businessCard/my-businessCard' // 跳转到名片页
+		},
+		{
+			name: '发贴邀请',
+			desc: '商机分享邀友',
+			icon: '/static/icon/商机.png',
+			path: '/pages/home-opportunitiesPublish/home-opportunitiesPublish' // 商机发布页路径
+		},
+		{
+			name: '聚会邀请',
+			desc: '聚会分享邀友',
+			icon: '/static/icon/聚会.png',
+			path: '/packages/active-publish/active-publish' //聚会发布页路径
+		}
+	]);
 
 	// --- 生命周期 ---
 	onMounted(() => {
@@ -201,14 +258,20 @@
 
 		try {
 			// 4. 发送 API 请求
+			const params = {
+				pageNo: pageNo.value,
+				pageSize: pageSize.value,
+			};
+			// 只有当 searchKey 有值时，才将其添加到参数中
+			if (searchKey.value.trim()) {
+				params.searchKey = searchKey.value.trim();
+			}
+
 			const {
 				data,
 				error
 			} = await request('/app-api/member/user/share-user-list', {
-				data: {
-					pageNo: pageNo.value,
-					pageSize: pageSize.value
-				}
+				data: params
 			});
 
 			if (error) {
@@ -239,6 +302,44 @@
 			// 发生错误时，将状态重置为'more'，以便用户可以下拉刷新或重新尝试上拉
 			loadStatus.value = 'more';
 		}
+	};
+
+	watch(searchKey, (newValue, oldValue) => {
+		// 避免首次加载时触发
+		if (newValue !== oldValue) {
+			clearTimeout(searchDebounceTimer);
+			searchDebounceTimer = setTimeout(() => {
+				// 输入停止 500ms 后，执行刷新搜索
+				getShareUserList(true);
+			}, 500); // 500ms 防抖
+		}
+	});
+
+	const handleToolClick = (item) => {
+		if (item.path) {
+			uni.navigateTo({
+				url: item.path,
+				fail: (err) => {
+					console.error('跳转失败', err);
+					uni.showToast({
+						title: '页面路径未配置',
+						icon: 'none'
+					});
+				}
+			});
+		} else {
+			uni.showToast({
+				title: '功能开发中',
+				icon: 'none'
+			});
+		}
+	};
+
+
+	// 【新增】处理键盘确认和清除按钮的函数
+	const handleSearch = () => {
+		clearTimeout(searchDebounceTimer);
+		getShareUserList(true);
 	};
 	// const getShareUserList = async (isRefresh = false) => {
 	// 	if (loadStatus.value === 'loading' || (!isRefresh && loadStatus.value === 'noMore')) return;
@@ -426,6 +527,18 @@
 		height: 100%;
 	}
 
+	.search-wrapper {
+		padding: 20rpx;
+		background-color: #fff;
+
+		// 深度选择器，修改 uni-easyinput 的内部样式
+		::v-deep .uni-easyinput__content {
+			border-radius: 40rpx !important;
+			background-color: #f7f8fa !important;
+			border: 1rpx solid #eee !important;
+		}
+	}
+
 	/* --- "我邀请的人" 列表样式 (基本复用) --- */
 	.friend-list {
 		padding: 20rpx;
@@ -560,7 +673,12 @@
 
 	/* --- "我的邀请人" 模块样式 --- */
 	.inviter-section {
-		padding: 40rpx;
+		padding: 30rpx 30rpx 0 30rpx;
+		/* 调整 padding */
+	}
+
+	.invite-tools-section {
+		padding: 30rpx;
 	}
 
 	.section-title {
@@ -613,6 +731,64 @@
 	.inviter-desc {
 		font-size: 28rpx;
 		color: #666;
+	}
+
+	.tools-grid {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		/* 双列 */
+		gap: 20rpx;
+	}
+
+	.tool-item {
+		background: #fff;
+		padding: 30rpx 20rpx;
+		border-radius: 20rpx;
+		box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.03);
+		transition: background-color 0.2s;
+	}
+
+	.tool-item:active {
+		background-color: #fafafa;
+	}
+
+	.tool-item-inner {
+		display: flex;
+		align-items: center;
+		width: 100%;
+	}
+
+	.tool-icon {
+		width: 70rpx;
+		height: 70rpx;
+		margin-right: 20rpx;
+		flex-shrink: 0;
+	}
+
+	.tool-content {
+		flex: 1;
+		min-width: 0;
+	}
+
+	.tool-name {
+		font-size: 28rpx;
+		font-weight: bold;
+		color: #333;
+		margin-bottom: 6rpx;
+	}
+
+	.tool-desc {
+		font-size: 22rpx;
+		color: #999;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+	.chevron-icon {
+		font-size: 30rpx;
+		color: #ddd;
+		margin-left: 10rpx;
 	}
 
 	/* --- 通用空状态样式 --- */

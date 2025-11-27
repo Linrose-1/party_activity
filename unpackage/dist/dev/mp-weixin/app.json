@@ -55,7 +55,8 @@
         "my-member/my-member",
         "my-friendInvitation/my-friendInvitation",
         "my-systemConstruction/my-systemConstruction",
-        "user-opportunities/user-opportunities"
+        "user-opportunities/user-opportunities",
+        "home-customization/home-customization"
       ]
     }
   ],

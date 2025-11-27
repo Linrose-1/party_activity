@@ -54,6 +54,7 @@ if (!Math) {
   "./packages/my-friendInvitation/my-friendInvitation.js";
   "./packages/my-systemConstruction/my-systemConstruction.js";
   "./packages/user-opportunities/user-opportunities.js";
+  "./packages/home-customization/home-customization.js";
 }
 const _sfc_main = {
   data() {

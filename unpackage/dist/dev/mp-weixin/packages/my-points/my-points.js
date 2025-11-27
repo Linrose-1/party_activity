@@ -32,7 +32,7 @@ const _sfc_main = {
         icon: "calendar",
         name: "参与聚会",
         desc: "参加平台组织的聚会",
-        points: "+5分/次",
+        points: "+100分/次",
         path: "/pages/active/active",
         isTabBar: true
       },
@@ -40,7 +40,7 @@ const _sfc_main = {
         icon: "chat",
         name: "分享聚会",
         desc: "分享有价值的聚会",
-        points: "+5分/次",
+        points: "+80分/次",
         path: "/pages/active/active",
         isTabBar: true
       },
@@ -48,7 +48,7 @@ const _sfc_main = {
         icon: "shop",
         name: "聚店推荐",
         desc: "推荐优质店铺入驻平台",
-        points: "+10分/家",
+        points: "+50分/家",
         path: "/pages/my-shopRecommend/my-shopRecommend"
       },
       {
@@ -62,21 +62,21 @@ const _sfc_main = {
         icon: "personadd",
         name: "分享名片",
         desc: "分享个人名片卡片",
-        points: "+5分/人",
+        points: "+50分/人",
         path: "/pages/my-businessCard/my-businessCard"
       },
       {
         icon: "redo",
         name: "邀请注册",
         desc: "邀请新用户进行注册",
-        points: "+5分/人",
+        points: "+50分/人",
         path: "/pages/index/index"
       },
       {
         icon: "star",
         name: "其他贡献",
         desc: "用户在平台的其他贡献",
-        points: "+5分",
+        points: "+n分",
         path: "/packages/getPoints/getPoints"
       }
     ]);

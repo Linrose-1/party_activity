@@ -278,7 +278,7 @@ const _sfc_main = {
     common_vendor.onShareAppMessage(() => {
       const inviteCode = utils_user.getInviteCode();
       common_vendor.index.__f__("log", "at pages/active/active.vue:504", `[分享] 准备分享给好友，获取到邀请码: ${inviteCode}`);
-      let sharePath = "/pages/activity-list/activity-list";
+      let sharePath = "/pages/active/active";
       if (inviteCode) {
         sharePath += `?inviteCode=${inviteCode}`;
       }

@@ -55,7 +55,7 @@ const _sfc_main = {
     // 职务
     industry: {
       type: String,
-      default: "互联网"
+      default: "未填写"
     },
     // 行业
     professionalTitle: {
@@ -192,33 +192,39 @@ const _sfc_main = {
         a: __props.avatar,
         b: common_vendor.o(($event) => previewImage(__props.avatar)),
         c: common_vendor.t(__props.name),
-        d: common_vendor.t(__props.pinyinName),
-        e: common_vendor.t(__props.title),
-        f: !__props.isViewingOwnCard
+        d: __props.pinyinName
+      }, __props.pinyinName ? {
+        e: common_vendor.t(__props.pinyinName)
+      } : {}, {
+        f: __props.title
+      }, __props.title ? {
+        g: common_vendor.t(__props.title)
+      } : {}, {
+        h: !__props.isViewingOwnCard
       }, !__props.isViewingOwnCard ? common_vendor.e({
-        g: common_vendor.p({
+        i: common_vendor.p({
           type: "compose",
           size: "18",
           color: "#888"
         }),
-        h: __props.remarkName
+        j: __props.remarkName
       }, __props.remarkName ? {
-        i: common_vendor.t(__props.remarkName)
+        k: common_vendor.t(__props.remarkName)
       } : {}, {
-        j: common_vendor.p({
+        l: common_vendor.p({
           type: "right",
           size: "16",
           color: "#bbb"
         }),
-        k: common_vendor.o(($event) => _ctx.$emit("editRemark"))
+        m: common_vendor.o(($event) => _ctx.$emit("editRemark"))
       }) : {}, {
-        l: common_vendor.p({
+        n: common_vendor.p({
           type: "calendar-filled",
           size: "18",
           color: "#888"
         }),
-        m: common_vendor.t(__props.era || "未设置"),
-        n: common_vendor.f(__props.contactInfo, (item, index, i0) => {
+        o: common_vendor.t(__props.era || "未设置"),
+        p: common_vendor.f(__props.contactInfo, (item, index, i0) => {
           return {
             a: "0262bca8-3-" + i0,
             b: common_vendor.p({
@@ -231,28 +237,28 @@ const _sfc_main = {
             e: index
           };
         }),
-        o: professionalTitles.value.length > 0
+        q: professionalTitles.value.length > 0
       }, professionalTitles.value.length > 0 ? {
-        p: common_vendor.p({
+        r: common_vendor.p({
           type: "staff-filled",
           size: "18",
           color: "#C9A063"
         }),
-        q: common_vendor.f(professionalTitles.value, (item, index, i0) => {
+        s: common_vendor.f(professionalTitles.value, (item, index, i0) => {
           return {
             a: common_vendor.t(item),
             b: index
           };
         })
       } : {}, {
-        r: careerGroups.value.length > 0
+        t: careerGroups.value.length > 0
       }, careerGroups.value.length > 0 ? {
-        s: common_vendor.p({
+        v: common_vendor.p({
           type: "flag-filled",
           size: "18",
           color: "#F78C2F"
         }),
-        t: common_vendor.f(careerGroups.value, (group, index, i0) => {
+        w: common_vendor.f(careerGroups.value, (group, index, i0) => {
           return {
             a: common_vendor.t(group.company),
             b: common_vendor.t(group.position),
@@ -261,65 +267,65 @@ const _sfc_main = {
           };
         })
       } : {}, {
-        v: __props.haveResources || __props.needResources
+        x: __props.haveResources || __props.needResources
       }, __props.haveResources || __props.needResources ? common_vendor.e({
-        w: __props.haveResources
+        y: __props.haveResources
       }, __props.haveResources ? {
-        x: common_vendor.p({
+        z: common_vendor.p({
           type: "hand-up-filled",
           size: "18",
           color: "#28a745"
         }),
-        y: common_vendor.t(__props.haveResources)
+        A: common_vendor.t(__props.haveResources)
       } : {}, {
-        z: __props.needResources
+        B: __props.needResources
       }, __props.needResources ? {
-        A: common_vendor.p({
+        C: common_vendor.p({
           type: "paperplane-filled",
           size: "18",
           color: "#007bff"
         }),
-        B: common_vendor.t(__props.needResources)
+        D: common_vendor.t(__props.needResources)
       } : {}) : {}, {
-        C: __props.signature || __props.personalBio
+        E: __props.signature || __props.personalBio
       }, __props.signature || __props.personalBio ? common_vendor.e({
-        D: __props.signature
+        F: __props.signature
       }, __props.signature ? {
-        E: common_vendor.t(__props.signature)
+        G: common_vendor.t(__props.signature)
       } : {}, {
-        F: __props.personalBio
+        H: __props.personalBio
       }, __props.personalBio ? {
-        G: common_vendor.t(__props.personalBio)
+        I: common_vendor.t(__props.personalBio)
       } : {}) : {}, {
-        H: common_vendor.p({
+        J: common_vendor.p({
           type: "pyq",
           size: "18",
           color: "#FF6A00"
         }),
-        I: common_vendor.p({
+        K: common_vendor.p({
           type: "right",
           size: "16",
           color: "#bbb"
         }),
-        J: common_vendor.o(($event) => _ctx.$emit("goToOpportunities")),
-        K: __props.showUserQrCode
+        L: common_vendor.o(($event) => _ctx.$emit("goToOpportunities")),
+        M: __props.showUserQrCode
       }, __props.showUserQrCode ? {
-        L: __props.userWeChatQrCodeUrl,
-        M: common_vendor.o(($event) => previewImage(__props.userWeChatQrCodeUrl))
+        N: __props.userWeChatQrCodeUrl,
+        O: common_vendor.o(($event) => previewImage(__props.userWeChatQrCodeUrl))
       } : {}, {
-        N: __props.shardCode
+        P: __props.shardCode
       }, __props.shardCode ? {
-        O: common_vendor.t(__props.shardCode),
-        P: common_vendor.p({
+        Q: common_vendor.t(__props.shardCode),
+        R: common_vendor.p({
           type: "paperclip",
           size: "16",
           color: "#F78C2F"
         }),
-        Q: common_vendor.o(copyShardCode)
+        S: common_vendor.o(copyShardCode)
       } : {}, {
-        R: __props.dynamicQrCodeUrl || __props.platformQrCodeUrl,
-        S: common_vendor.o(($event) => previewImage(__props.dynamicQrCodeUrl || __props.platformQrCodeUrl)),
-        T: __props.logoUrl
+        T: __props.dynamicQrCodeUrl || __props.platformQrCodeUrl,
+        U: common_vendor.o(($event) => previewImage(__props.dynamicQrCodeUrl || __props.platformQrCodeUrl)),
+        V: __props.logoUrl
       });
     };
   }

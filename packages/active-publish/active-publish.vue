@@ -74,11 +74,11 @@
 				</uni-forms-item>
 
 				<!-- totalSlots -->
-				<uni-forms-item label="人数上限" required>
+				<uni-forms-item label="人数上限">
 					<uni-easyinput type="number" v-model="form.totalSlots" placeholder="超过人数上限,不能报名" />
 				</uni-forms-item>
 
-				<uni-forms-item label="起聚人数" required>
+				<uni-forms-item label="起聚人数">
 					<uni-easyinput type="number" v-model="form.limitSlots" placeholder="不达起聚人数,聚会取消" />
 				</uni-forms-item>
 
@@ -174,11 +174,19 @@
 
 		<!-- 底部操作栏 -->
 		<view class="action-bar" :class="{ 'z-index-low': isPickerOpen }">
+			<!-- 编辑模式下通常不需要存草稿，可以隐藏或保留 -->
+			<view v-if="mode === 'create'" class="action-btn save-btn" @click="saveDraft">保存草稿</view>
+
+			<view class="action-btn publish-btn" :class="{ 'disabled': isPublishing }" @click="publish">
+				{{ isPublishing ? '处理中...' : (mode === 'edit' ? '保存修改' : '发起聚会') }}
+			</view>
+		</view>
+		<!-- <view class="action-bar" :class="{ 'z-index-low': isPickerOpen }">
 			<view class="action-btn save-btn" @click="saveDraft">保存草稿</view>
 			<view class="action-btn publish-btn" :class="{ 'disabled': isPublishing }" @click="publish">
 				{{ isPublishing ? '发布中...' : '发起聚会' }}
 			</view>
-		</view>
+		</view> -->
 	</view>
 </template>
 
@@ -247,6 +255,9 @@
 
 	// 用于显示合作店铺名称，不提交给后端
 	const associatedStoreName = ref('');
+
+	const mode = ref('create'); // 默认为创建模式 'create' | 'edit'
+	const editActivityId = ref(null); // 编辑时的活动ID
 
 	// 表单数据模型，字段名与后端API完全对应
 	const form = ref({
@@ -404,7 +415,26 @@
 		});
 	}
 
-	onLoad((options) => {
+	onLoad(async (options) => {
+		// 1. 检查是否有模式参数
+		if (options && options.mode === 'edit' && options.id) {
+			mode.value = 'edit';
+			editActivityId.value = options.id;
+			uni.setNavigationBarTitle({
+				title: '编辑聚会'
+			});
+
+			// 加载详情数据进行回显
+			await loadActivityDetailForEdit(options.id);
+		} else {
+			mode.value = 'create';
+			uni.setNavigationBarTitle({
+				title: '发起聚会'
+			});
+			// 只有在创建模式下才尝试加载草稿 (原有逻辑放这里)
+			loadDraft();
+		}
+
 		// 1. 检查 onLoad 的 options 中是否存在从聚店卡片传来的 storeId 和 storeName
 		if (options && options.storeId && options.storeName) {
 			console.log('从聚店页跳转而来，自动填充聚店信息...');
@@ -469,6 +499,141 @@
 	onUnload(() => {
 		uni.$off('shopSelected');
 	});
+
+	// --- 【新增】加载详情并回显数据 ---
+	const loadActivityDetailForEdit = async (id) => {
+		uni.showLoading({
+			title: '加载中...'
+		});
+		const [detailRes, dictRes] = await Promise.all([
+			request('/app-api/member/activity/get', {
+				method: 'GET',
+				data: {
+					id
+				}
+			}),
+			// 如果 tagOptions 已经有值，就不必请求了，直接返回 null 占位
+			tagOptions.value.length === 0 ?
+			request('/app-api/system/dict-data/type', {
+				method: 'GET',
+				data: {
+					type: "member_activity_category "
+				}
+			}) :
+			Promise.resolve(null)
+		]);
+
+		uni.hideLoading();
+
+		// --- 处理字典数据 (如果发起了请求) ---
+		if (dictRes && !dictRes.error && dictRes.data) {
+			tagOptions.value = dictRes.data.map(item => ({
+				value: item.value,
+				text: item.label
+			}));
+		}
+
+		// --- 处理详情数据 ---
+		if (detailRes.error || !detailRes.data) {
+			uni.showToast({
+				title: '加载活动详情失败',
+				icon: 'none'
+			});
+			setTimeout(() => uni.navigateBack(), 1500);
+			return;
+		}
+
+		const data = detailRes.data;
+		console.log('获取详情用于编辑:', data);
+
+
+		// === 数据映射 (将详情数据映射回 form) ===
+
+		// 1. 基础字段直接映射
+		form.value.activityTitle = data.activityTitle;
+		form.value.activityDescription = data.activityDescription;
+		form.value.totalSlots = data.totalSlots;
+		form.value.limitSlots = data.limitSlots;
+		form.value.activityFunds = data.activityFunds;
+		form.value.registrationFee = data.registrationFee;
+		form.value.companyName = data.companyName;
+		form.value.companyLogo = data.companyLogo;
+		form.value.locationAddress = data.locationAddress;
+		form.value.latitude = data.latitude;
+		form.value.longitude = data.longitude;
+		form.value.coverImageUrl = data.coverImageUrl;
+		form.value.organizerUnitName = data.organizerUnitName;
+		form.value.organizerContactPhone = data.organizerContactPhone;
+		form.value.organizerPaymentQrCodeUrl = data.organizerPaymentQrCodeUrl;
+
+		let matchedValue = '';
+
+		// 策略A：通过 category (ID) 匹配
+		if (data.category) {
+			// 将后端返回的 category 转为字符串，以防类型不一致
+			const targetVal = String(data.category);
+			// 在选项中查找对应的 value
+			const foundOption = tagOptions.value.find(opt => String(opt.value) === targetVal);
+			if (foundOption) {
+				matchedValue = foundOption.value;
+			}
+		}
+
+		// 策略B：如果策略A失败，尝试通过 tags (中文名称) 匹配
+		if (!matchedValue && data.tags && data.tags.length > 0) {
+			const tagName = data.tags[0];
+			const foundOption = tagOptions.value.find(opt => opt.text === tagName);
+			if (foundOption) {
+				matchedValue = foundOption.value;
+			}
+		}
+
+		// 赋值
+		form.value.tag = matchedValue;
+
+		// 3. 特殊字段处理：时间范围
+		// 需要将时间戳转回 'YYYY-MM-DD HH:mm:ss' 格式供 picker 显示
+		if (data.startDatetime && data.endDatetime) {
+			timeRange.value = [
+				formatDateForPicker(data.startDatetime),
+				formatDateForPicker(data.endDatetime)
+			];
+		}
+		if (data.registrationStartDatetime && data.registrationEndDatetime) {
+			enrollTimeRange.value = [
+				formatDateForPicker(data.registrationStartDatetime),
+				formatDateForPicker(data.registrationEndDatetime)
+			];
+		}
+
+		// 4. 特殊字段处理：店铺
+		if (data.memberStoreRespVO) {
+			form.value.associatedStoreId = data.memberStoreRespVO.id;
+			associatedStoreName.value = data.memberStoreRespVO.storeName;
+		}
+
+		// 5. 特殊字段处理：活动环节
+		// 注意：编辑时环节带有 ID，保留 ID 可以让后端知道是更新旧环节
+		if (data.memberActivitySessionList && data.memberActivitySessionList.length > 0) {
+			form.value.activitySessions = data.memberActivitySessionList.map(item => ({
+				id: item.id, // 关键：保留ID
+				sessionTitle: item.sessionTitle,
+				sessionDescription: item.sessionDescription
+			}));
+		}
+	};
+
+	// 辅助函数：时间戳转格式化字符串
+	const formatDateForPicker = (timestamp) => {
+		const date = new Date(timestamp);
+		const Y = date.getFullYear();
+		const M = (date.getMonth() + 1).toString().padStart(2, '0');
+		const D = date.getDate().toString().padStart(2, '0');
+		const h = date.getHours().toString().padStart(2, '0');
+		const m = date.getMinutes().toString().padStart(2, '0');
+		const s = date.getSeconds().toString().padStart(2, '0');
+		return `${Y}-${M}-${D} ${h}:${m}:${s}`;
+	};
 
 	function saveDraft() {
 		// 1. 将所有需要保存的数据打包成一个对象
@@ -554,28 +719,28 @@
 			});
 			return;
 		}
-		if (!form.value.totalSlots || form.value.totalSlots <= 0) {
-			uni.showToast({
-				title: '请输入正确的总名额',
-				icon: 'none'
-			});
-			return;
-		}
-		if (!form.value.limitSlots || form.value.limitSlots <= 0) {
-			uni.showToast({
-				title: '请输入正确的最低起聚名额',
-				icon: 'none'
-			});
-			return;
-		}
+		// if (!form.value.totalSlots || form.value.totalSlots <= 0) {
+		// 	uni.showToast({
+		// 		title: '请输入正确的总名额',
+		// 		icon: 'none'
+		// 	});
+		// 	return;
+		// }
+		// if (!form.value.limitSlots || form.value.limitSlots <= 0) {
+		// 	uni.showToast({
+		// 		title: '请输入正确的最低起聚名额',
+		// 		icon: 'none'
+		// 	});
+		// 	return;
+		// }
 		// 【新增】逻辑验证：最低名额不能大于总名额
-		if (parseInt(form.value.limitSlots) > parseInt(form.value.totalSlots)) {
-			uni.showToast({
-				title: '最低起聚名额不能大于总名额',
-				icon: 'none'
-			});
-			return;
-		}
+		// if (parseInt(form.value.limitSlots) > parseInt(form.value.totalSlots)) {
+		// 	uni.showToast({
+		// 		title: '最低起聚名额不能大于总名额',
+		// 		icon: 'none'
+		// 	});
+		// 	return;
+		// }
 		if (form.value.activityFunds === 1) { // AA
 			if (form.value.registrationFee === null || form.value.registrationFee < 0) {
 				uni.showToast({
@@ -659,7 +824,7 @@
 		});
 
 		try {
-			// --- 构建最终提交给后端的 payload (这部分逻辑保持不变) ---
+			// --- 构建最终提交给后端的 payload ---
 			const payload = JSON.parse(JSON.stringify(form.value));
 			payload.startDatetime = new Date(timeRange.value[0]).getTime();
 			payload.endDatetime = new Date(timeRange.value[1]).getTime();
@@ -685,30 +850,59 @@
 				delete payload.registrationFee;
 			}
 
-			console.log('发布聚会 - 最终Payload:', payload);
+			let result;
+			if (mode.value === 'edit') {
+				// 编辑模式：添加 ID，调用编辑接口
+				payload.id = editActivityId.value;
+				// 如果有 organizerId 也可以加上，不过后端通常从 token 获取
 
-			const {
-				success,
-				error
-			} = await createActive(payload);
+				console.log('编辑提交 Payload:', payload);
+				result = await editActive(payload);
+			} else {
+				// 创建模式
+				console.log('创建提交 Payload:', payload);
+				result = await createActive(payload);
+			}
 
-			if (success) {
-				uni.removeStorageSync(DRAFT_STORAGE_KEY);
-				console.log('聚会发布成功，草稿已清除。');
+			// console.log('发布聚会 - 最终Payload:', payload);
+			// const {
+			// 	success,
+			// 	error
+			// } = await createActive(payload);
+
+			if (result.success) {
+				// uni.removeStorageSync(DRAFT_STORAGE_KEY);
+				// console.log('聚会发布成功，草稿已清除。');
+				// uni.showModal({
+				// 	title: '发布成功',
+				// 	content: '可在【我的】-【我的聚会】中查看您发布的聚会。',
+				// 	showCancel: false,
+				// 	confirmText: '知道了',
+				// 	success: (modalRes) => {
+				// 		if (modalRes.confirm) {
+				// 			uni.switchTab({
+				// 				url: '/pages/active/active'
+				// 			});
+				// 		}
+				// 	}
+				// });
+				if (mode.value === 'create') uni.removeStorageSync(DRAFT_STORAGE_KEY);
 				uni.showModal({
-					title: '发布成功',
-					content: '可在【我的】-【我的聚会】中查看您发布的聚会。',
+					title: mode.value === 'edit' ? '修改成功' : '发布成功',
+					content: mode.value === 'edit' ? '聚会信息已更新。' : '可在【我的】-【我的聚会】中查看。',
 					showCancel: false,
 					confirmText: '知道了',
 					success: (modalRes) => {
 						if (modalRes.confirm) {
-							uni.switchTab({
-								url: '/pages/active/active'
+							// 返回上一页（通常是列表页），并通知刷新
+							uni.navigateBack({
+								delta: 1
 							});
 						}
 					}
 				});
 			} else {
+				const error = result.error;
 				if (typeof error === 'object' && error !== null && error.code === 453) {
 					// 453 错误码：未实名认证
 					uni.hideLoading();
@@ -774,6 +968,26 @@
 		else {
 			console.log('请求失败:', result.error);
 			// 【修改】这里不再显示 Toast，只返回结果
+			return {
+				success: false,
+				error: result.error
+			};
+		}
+	};
+
+	// --- 新增 editActive 接口调用 ---
+	const editActive = async (payload) => {
+		const result = await request('/app-api/member/activity/edit', {
+			method: 'POST',
+			data: payload
+		});
+
+		if (result && !result.error) {
+			return {
+				success: true,
+				error: null
+			};
+		} else {
 			return {
 				success: false,
 				error: result.error

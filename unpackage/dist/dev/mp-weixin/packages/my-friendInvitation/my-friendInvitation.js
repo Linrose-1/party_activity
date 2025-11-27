@@ -4,15 +4,17 @@ const common_assets = require("../../common/assets.js");
 const utils_request = require("../../utils/request.js");
 if (!Array) {
   const _easycom_uni_segmented_control2 = common_vendor.resolveComponent("uni-segmented-control");
+  const _easycom_uni_easyinput2 = common_vendor.resolveComponent("uni-easyinput");
   const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
   const _easycom_uni_load_more2 = common_vendor.resolveComponent("uni-load-more");
-  (_easycom_uni_segmented_control2 + _easycom_uni_icons2 + _easycom_uni_load_more2)();
+  (_easycom_uni_segmented_control2 + _easycom_uni_easyinput2 + _easycom_uni_icons2 + _easycom_uni_load_more2)();
 }
 const _easycom_uni_segmented_control = () => "../../uni_modules/uni-segmented-control/components/uni-segmented-control/uni-segmented-control.js";
+const _easycom_uni_easyinput = () => "../../uni_modules/uni-easyinput/components/uni-easyinput/uni-easyinput.js";
 const _easycom_uni_icons = () => "../../uni_modules/uni-icons/components/uni-icons/uni-icons.js";
 const _easycom_uni_load_more = () => "../../uni_modules/uni-load-more/components/uni-load-more/uni-load-more.js";
 if (!Math) {
-  (_easycom_uni_segmented_control + _easycom_uni_icons + _easycom_uni_load_more)();
+  (_easycom_uni_segmented_control + _easycom_uni_easyinput + _easycom_uni_icons + _easycom_uni_load_more)();
 }
 const _sfc_main = {
   __name: "my-friendInvitation",
@@ -30,14 +32,47 @@ const _sfc_main = {
     common_vendor.ref(0);
     const loadStatus = common_vendor.ref("more");
     const isFollowActionInProgress = common_vendor.ref(false);
+    const searchKey = common_vendor.ref("");
+    let searchDebounceTimer = null;
     const userInfo = common_vendor.ref(null);
+    const inviteTools = common_vendor.ref([
+      {
+        name: "注册邀请",
+        desc: "注册分享邀请",
+        icon: "/static/icon/精准投放.png",
+        // 这里复用了"精准投放"的图标，或者你可以换成 /static/icon/invite-register.png
+        path: "/pages/index/index"
+        // 跳转到注册/登录页
+      },
+      {
+        name: "名片邀请",
+        desc: "名片分享邀请",
+        icon: "/static/icon/我的名片.png",
+        path: "/pages/my-businessCard/my-businessCard"
+        // 跳转到名片页
+      },
+      {
+        name: "发贴邀请",
+        desc: "商机分享邀友",
+        icon: "/static/icon/商机.png",
+        path: "/pages/home-opportunitiesPublish/home-opportunitiesPublish"
+        // 商机发布页路径
+      },
+      {
+        name: "聚会邀请",
+        desc: "聚会分享邀友",
+        icon: "/static/icon/聚会.png",
+        path: "/packages/active-publish/active-publish"
+        //聚会发布页路径
+      }
+    ]);
     common_vendor.onMounted(() => {
       initializePage();
       getShareUserList(true);
       fetchUserInfo();
     });
     common_vendor.onPullDownRefresh(async () => {
-      common_vendor.index.__f__("log", "at packages/my-friendInvitation/my-friendInvitation.vue:119", "触发下拉刷新...");
+      common_vendor.index.__f__("log", "at packages/my-friendInvitation/my-friendInvitation.vue:176", "触发下拉刷新...");
       try {
         if (currentTab.value === 1) {
           await getShareUserList(true);
@@ -45,15 +80,15 @@ const _sfc_main = {
           await fetchUserInfo();
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at packages/my-friendInvitation/my-friendInvitation.vue:130", "下拉刷新时发生错误:", error);
+        common_vendor.index.__f__("error", "at packages/my-friendInvitation/my-friendInvitation.vue:187", "下拉刷新时发生错误:", error);
       } finally {
-        common_vendor.index.__f__("log", "at packages/my-friendInvitation/my-friendInvitation.vue:133", "刷新操作完成，停止动画。");
+        common_vendor.index.__f__("log", "at packages/my-friendInvitation/my-friendInvitation.vue:190", "刷新操作完成，停止动画。");
         common_vendor.index.stopPullDownRefresh();
       }
     });
     common_vendor.onReachBottom(() => {
       if (currentTab.value === 1 && loadStatus.value === "more" && !loading.value) {
-        common_vendor.index.__f__("log", "at packages/my-friendInvitation/my-friendInvitation.vue:140", "触底加载更多...");
+        common_vendor.index.__f__("log", "at packages/my-friendInvitation/my-friendInvitation.vue:197", "触底加载更多...");
         getShareUserList();
       }
     });
@@ -88,14 +123,18 @@ const _sfc_main = {
       }
       loadStatus.value = "loading";
       try {
+        const params = {
+          pageNo: pageNo.value,
+          pageSize: pageSize.value
+        };
+        if (searchKey.value.trim()) {
+          params.searchKey = searchKey.value.trim();
+        }
         const {
           data,
           error
         } = await utils_request.request("/app-api/member/user/share-user-list", {
-          data: {
-            pageNo: pageNo.value,
-            pageSize: pageSize.value
-          }
+          data: params
         });
         if (error) {
           throw new Error(error);
@@ -113,9 +152,40 @@ const _sfc_main = {
           loadStatus.value = "noMore";
         }
       } catch (err) {
-        common_vendor.index.__f__("error", "at packages/my-friendInvitation/my-friendInvitation.vue:238", "获取邀请列表失败:", err);
+        common_vendor.index.__f__("error", "at packages/my-friendInvitation/my-friendInvitation.vue:301", "获取邀请列表失败:", err);
         loadStatus.value = "more";
       }
+    };
+    common_vendor.watch(searchKey, (newValue, oldValue) => {
+      if (newValue !== oldValue) {
+        clearTimeout(searchDebounceTimer);
+        searchDebounceTimer = setTimeout(() => {
+          getShareUserList(true);
+        }, 500);
+      }
+    });
+    const handleToolClick = (item) => {
+      if (item.path) {
+        common_vendor.index.navigateTo({
+          url: item.path,
+          fail: (err) => {
+            common_vendor.index.__f__("error", "at packages/my-friendInvitation/my-friendInvitation.vue:323", "跳转失败", err);
+            common_vendor.index.showToast({
+              title: "页面路径未配置",
+              icon: "none"
+            });
+          }
+        });
+      } else {
+        common_vendor.index.showToast({
+          title: "功能开发中",
+          icon: "none"
+        });
+      }
+    };
+    const handleSearch = () => {
+      clearTimeout(searchDebounceTimer);
+      getShareUserList(true);
     };
     const handleFollowAction = async (user) => {
       if (isFollowActionInProgress.value)
@@ -180,7 +250,7 @@ const _sfc_main = {
       const name = user.nickname || user.realName || "匿名用户";
       const avatarUrl = user.avatar || defaultAvatar;
       const url = `/pages/applicationBusinessCard/applicationBusinessCard?id=${user.id}&name=${encodeURIComponent(name)}&avatar=${encodeURIComponent(avatarUrl)}&fromShare=1`;
-      common_vendor.index.__f__("log", "at packages/my-friendInvitation/my-friendInvitation.vue:365", "从推荐商友页跳转到名片申请页, URL:", url);
+      common_vendor.index.__f__("log", "at packages/my-friendInvitation/my-friendInvitation.vue:466", "从推荐商友页跳转到名片申请页, URL:", url);
       common_vendor.index.navigateTo({
         url
       });
@@ -205,7 +275,15 @@ const _sfc_main = {
           ["style-type"]: "button",
           ["active-color"]: "#FF6B00"
         }),
-        c: common_vendor.f(friendList.value, (friend, k0, i0) => {
+        c: common_vendor.o(handleSearch),
+        d: common_vendor.o(handleSearch),
+        e: common_vendor.o(($event) => searchKey.value = $event),
+        f: common_vendor.p({
+          prefixIcon: "search",
+          placeholder: "搜索昵称或姓名",
+          modelValue: searchKey.value
+        }),
+        g: common_vendor.f(friendList.value, (friend, k0, i0) => {
           return common_vendor.e({
             a: friend.avatar || "/static/images/default-avatar.png",
             b: common_vendor.t(friend.nickname || friend.realName || "匿名用户"),
@@ -217,7 +295,7 @@ const _sfc_main = {
           }, friend.peerFlag === 1 ? {} : {}, {
             f: friend.classmateFlag === 1
           }, friend.classmateFlag === 1 ? {} : {}) : {}, {
-            g: "a29497fd-1-" + i0,
+            g: "a29497fd-2-" + i0,
             h: common_vendor.t(friend.companyName || "暂无公司信息"),
             i: common_vendor.t(friend.followFlag === 1 ? "取关" : "关注"),
             j: friend.followFlag === 1 ? 1 : "",
@@ -230,36 +308,45 @@ const _sfc_main = {
             o: common_vendor.o(($event) => navigateToBusinessCard(friend), friend.id)
           });
         }),
-        d: common_vendor.p({
+        h: common_vendor.p({
           type: "briefcase-filled",
           size: "14",
           color: "#888"
         }),
-        e: friendList.value.length > 0 || loadStatus.value === "loading"
+        i: friendList.value.length > 0 || loadStatus.value === "loading"
       }, friendList.value.length > 0 || loadStatus.value === "loading" ? {
-        f: common_vendor.p({
+        j: common_vendor.p({
           status: loadStatus.value
         })
       } : {}, {
-        g: friendList.value.length === 0 && loadStatus.value === "noMore"
+        k: friendList.value.length === 0 && loadStatus.value === "noMore"
       }, friendList.value.length === 0 && loadStatus.value === "noMore" ? {
-        h: common_assets._imports_0$2
+        l: common_assets._imports_0$3
       } : {}, {
-        i: currentTab.value === 1,
-        j: userInfo.value && userInfo.value.parentName
+        m: currentTab.value === 1,
+        n: userInfo.value && userInfo.value.parentName
       }, userInfo.value && userInfo.value.parentName ? common_vendor.e({
-        k: userInfo.value.parentAvatar
+        o: userInfo.value.parentAvatar
       }, userInfo.value.parentAvatar ? {
-        l: userInfo.value.parentAvatar
+        p: userInfo.value.parentAvatar
       } : {
-        m: common_vendor.t(userInfo.value.parentName.charAt(0))
+        q: common_vendor.t(userInfo.value.parentName.charAt(0))
       }, {
-        n: common_vendor.t(userInfo.value.parentName)
+        r: common_vendor.t(userInfo.value.parentName)
       }) : {
-        o: common_assets._imports_1
+        s: common_assets._imports_1
       }, {
-        p: currentTab.value === 0,
-        q: common_vendor.s(_ctx.__cssVars())
+        t: common_vendor.f(inviteTools.value, (item, index, i0) => {
+          return {
+            a: item.icon,
+            b: common_vendor.t(item.name),
+            c: common_vendor.t(item.desc),
+            d: index,
+            e: common_vendor.o(($event) => handleToolClick(item), index)
+          };
+        }),
+        v: currentTab.value === 0,
+        w: common_vendor.s(_ctx.__cssVars())
       });
     };
   }

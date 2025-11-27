@@ -81,8 +81,9 @@ const _sfc_main = {
       // 个性签名
       haveResources: "",
       // 我有资源
-      needResources: ""
+      needResources: "",
       // 我需资源
+      enterpriseIdCert: 0
     });
     const areaTree = common_vendor.ref([]);
     const industryTree = common_vendor.ref([]);
@@ -205,13 +206,16 @@ const _sfc_main = {
     const handleTabClick = (e) => {
       currentTab.value = e.currentIndex;
     };
+    const onEnterpriseSwitchChange = (e) => {
+      form.value.enterpriseIdCert = e.detail.value ? 1 : 0;
+    };
     const getAreaTreeData = async () => {
       const {
         data,
         error
       } = await Api.getAreaTree();
       if (error) {
-        common_vendor.index.__f__("error", "at packages/my-edit/my-edit.vue:421", "获取地区树失败:", error);
+        common_vendor.index.__f__("error", "at packages/my-edit/my-edit.vue:440", "获取地区树失败:", error);
       } else {
         areaTree.value = data || [];
       }
@@ -240,10 +244,10 @@ const _sfc_main = {
         error
       } = await Api.getIndustryTree();
       if (error) {
-        common_vendor.index.__f__("error", "at packages/my-edit/my-edit.vue:468", "获取行业树失败:", error);
+        common_vendor.index.__f__("error", "at packages/my-edit/my-edit.vue:487", "获取行业树失败:", error);
       } else {
         industryTree.value = processIndustryTree(data || []);
-        common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:472", "处理后的行业树:", industryTree.value);
+        common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:491", "处理后的行业树:", industryTree.value);
       }
     };
     function findPathById(tree, targetId) {
@@ -420,7 +424,7 @@ const _sfc_main = {
             src: tempFilePath,
             cropScale: "1:1",
             success: (cropRes) => uploadAvatar(cropRes.tempFilePath),
-            fail: (err) => common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:718", "用户取消裁剪或裁剪失败:", err)
+            fail: (err) => common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:737", "用户取消裁剪或裁剪失败:", err)
           });
         }
       });
@@ -532,7 +536,7 @@ const _sfc_main = {
           setTimeout(() => {
             common_vendor.index.showModal({
               title: "发布到商友圈",
-              content: "您的资料已完善，是否发布一条商机到商友圈，让更多商友看到您？",
+              content: "您的资料已更新，是否发布名片到商友圈，让更多商友看见您？",
               confirmText: "立即发布",
               cancelText: "暂不发布",
               success: (res) => {
@@ -546,7 +550,7 @@ const _sfc_main = {
           }, 800);
         }
       }).catch((err) => {
-        common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:906", "表单验证失败：", err);
+        common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:925", "表单验证失败：", err);
       });
     };
     const handleAutoPost = async () => {
@@ -821,92 +825,99 @@ const _sfc_main = {
           label: "微信二维码",
           name: "wechatQrCodeUrl"
         }),
-        ae: common_vendor.o(onHobbyChange),
-        af: common_vendor.o(($event) => selectedHobbies.value = $event),
-        ag: common_vendor.p({
+        ae: form.value.enterpriseIdCert === 1,
+        af: common_vendor.o(onEnterpriseSwitchChange),
+        ag: common_vendor.t(form.value.enterpriseIdCert === 1 ? "已开启" : "未开启"),
+        ah: common_vendor.p({
+          label: "企业号",
+          name: "enterpriseIdCert"
+        }),
+        ai: common_vendor.o(onHobbyChange),
+        aj: common_vendor.o(($event) => selectedHobbies.value = $event),
+        ak: common_vendor.p({
           localdata: hobbyOptions.value,
           multiple: true,
           modelValue: selectedHobbies.value
         }),
-        ah: isOtherHobbySelected.value
+        al: isOtherHobbySelected.value
       }, isOtherHobbySelected.value ? {
-        ai: common_vendor.o(($event) => otherHobbyText.value = $event),
-        aj: common_vendor.p({
+        am: common_vendor.o(($event) => otherHobbyText.value = $event),
+        an: common_vendor.p({
           placeholder: "请输入您的其他爱好",
           modelValue: otherHobbyText.value
         })
       } : {}, {
-        ak: common_vendor.p({
+        ao: common_vendor.p({
           label: "爱好",
           name: "hobby"
         }),
-        al: common_vendor.o(($event) => form.value.signature = $event),
-        am: common_vendor.p({
+        ap: common_vendor.o(($event) => form.value.signature = $event),
+        aq: common_vendor.p({
           placeholder: "设置一个独特的个性签名吧",
           modelValue: form.value.signature
         }),
-        an: common_vendor.p({
+        ar: common_vendor.p({
           label: "个性签名",
           name: "signature"
         }),
-        ao: common_vendor.o(($event) => form.value.personalBio = $event),
-        ap: common_vendor.p({
+        as: common_vendor.o(($event) => form.value.personalBio = $event),
+        at: common_vendor.p({
           type: "textarea",
           placeholder: "介绍一下自己...",
           modelValue: form.value.personalBio
         }),
-        aq: common_vendor.p({
+        av: common_vendor.p({
           label: "个人简介",
           name: "personalBio"
         }),
-        ar: common_vendor.o(($event) => form.value.haveResources = $event),
-        as: common_vendor.p({
+        aw: common_vendor.o(($event) => form.value.haveResources = $event),
+        ax: common_vendor.p({
           type: "textarea",
           placeholder: "用来智能匹配商友资源",
           modelValue: form.value.haveResources
         }),
-        at: common_vendor.p({
+        ay: common_vendor.p({
           label: "我有资源",
           name: "haveResources"
         }),
-        av: common_vendor.o(($event) => form.value.needResources = $event),
-        aw: common_vendor.p({
+        az: common_vendor.o(($event) => form.value.needResources = $event),
+        aA: common_vendor.p({
           type: "textarea",
           placeholder: "用来智能匹配商友资源",
           modelValue: form.value.needResources
         }),
-        ax: common_vendor.p({
+        aB: common_vendor.p({
           label: "我需资源",
           name: "needResources"
         }),
-        ay: common_vendor.sr(formRef, "2d637515-1", {
+        aC: common_vendor.sr(formRef, "2d637515-1", {
           "k": "formRef"
         }),
-        az: common_vendor.p({
+        aD: common_vendor.p({
           modelValue: form.value,
           rules
         }),
-        aA: common_vendor.o(submitForm),
-        aB: currentTab.value === 0,
-        aC: common_vendor.p({
+        aE: common_vendor.o(submitForm),
+        aF: currentTab.value === 0,
+        aG: common_vendor.p({
           type: "checkmarkempty",
           color: "#00C777"
         }),
-        aD: common_vendor.p({
+        aH: common_vendor.p({
           type: "checkmarkempty",
           color: "#00C777"
         }),
-        aE: common_vendor.p({
+        aI: common_vendor.p({
           type: "checkmarkempty",
           color: "#00C777"
         }),
-        aF: common_vendor.p({
+        aJ: common_vendor.p({
           type: "compose",
           color: "#fff",
           size: "20"
         }),
-        aG: common_vendor.o(goToLabelEditPage),
-        aH: currentTab.value === 1
+        aK: common_vendor.o(goToLabelEditPage),
+        aL: currentTab.value === 1
       });
     };
   }

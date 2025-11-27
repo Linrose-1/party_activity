@@ -117,6 +117,16 @@
 .other-hobby-input.data-v-2d637515 {
   margin-top: 20rpx;
 }
+.switch-container.data-v-2d637515 {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+.switch-label.data-v-2d637515 {
+  font-size: 28rpx;
+  color: #666;
+  margin-left: 20rpx;
+}
 
 /* --- 5. 动态增删区块样式 --- */
 .dynamic-section.data-v-2d637515 {

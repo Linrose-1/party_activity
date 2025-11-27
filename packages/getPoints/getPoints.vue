@@ -49,53 +49,65 @@
 			icon: 'redo-filled',
 			tasks: [{
 					name: '分享名片奖励',
-					points: 5,
-					dailyLimit: 100,
+					points: 50,
+					dailyLimit: '10次/天',
 					path: '/pages/my-businessCard/my-businessCard'
 				},
 				{
-					name: '分享活动奖励',
-					points: 5,
-					dailyLimit: 100,
+					name: '分享聚会奖励',
+					points: 80,
+					dailyLimit: '3次/天',
 					path: '/pages/active/active',
 					isTabBar: true
 				},
 				{
 					name: '分享商机奖励',
-					points: 5,
-					dailyLimit: 100,
+					points: 50,
+					dailyLimit: '5次/天',
 					path: '/pages/home/home',
 					isTabBar: true
 				},
-				{
-					name: '关注用户',
-					points: 5,
-					dailyLimit: 100,
-					path: '/pages/home/home',
-					isTabBar: true
-				},
+				// {
+				// 	name: '关注用户',
+				// 	points: 5,
+				// 	dailyLimit: 100,
+				// 	path: '/pages/home/home',
+				// 	isTabBar: true
+				// },
 			]
 		},
 		{
 			title: '内容贡献',
 			icon: 'compose',
 			tasks: [{
-					name: '发布评论',
-					points: 5,
-					dailyLimit: 100,
+					name: '成功发布评论',
+					points: 15,
+					dailyLimit: '10次/天',
 					path: '/pages/home/home',
 					isTabBar: true
 				},
 				{
-					name: '推荐门店',
-					points: 10,
-					dailyLimit: 100,
+					name: '成功推荐门店',
+					points: 50,
+					dailyLimit: '5次/天',
 					path: '/pages/shop-recommend/shop-recommend'
 				},
 				{
-					name: '修改名片获得贡分',
-					points: 5,
-					dailyLimit: 100,
+					name: '成功申请入驻',
+					points: 100,
+					dailyLimit: '不限',
+					path: null
+				},
+				{
+					name: '完成完整的数字身份编辑',
+					points: 120,
+					dailyLimit: '1次',
+					path: '/packages/my-edit/my-edit'
+				},
+				{
+					name: '数字身份更新',
+					points: 30,
+					dailyLimit: '1次/天',
 					path: '/packages/my-edit/my-edit'
 				},
 			]
@@ -104,72 +116,72 @@
 			title: '核心参与',
 			icon: 'paperplane-filled',
 			tasks: [{
-					name: '报名活动',
+					name: '参加聚会',
+					points: 100,
+					dailyLimit: '5次/天',
+					path: '/pages/active/active',
+					isTabBar: true
+				},
+				{
+					name: '阅读聚会详情',
 					points: 10,
-					dailyLimit: 100,
+					dailyLimit: '5次/天',
 					path: '/pages/active/active',
 					isTabBar: true
 				},
 				{
-					name: '阅读活动',
-					points: 5,
-					dailyLimit: 100,
-					path: '/pages/active/active',
-					isTabBar: true
-				},
-				{
-					name: '阅读商机',
-					points: 5,
-					dailyLimit: 100,
+					name: '阅读商机详情',
+					points: 10,
+					dailyLimit: '5次/天',
 					path: '/pages/home/home',
 					isTabBar: true
 				},
 				{
-					name: '阅览门店',
+					name: '阅览聚店详情',
 					points: 10,
-					dailyLimit: 100,
+					dailyLimit: '5次/天',
 					path: '/pages/shop/shop',
 					isTabBar: true
 				},
 				{
-					name: '收藏活动',
-					points: 5,
-					dailyLimit: 100,
+					name: '收藏聚会',
+					points: 10,
+					dailyLimit: '5次/天',
 					path: '/pages/active/active',
 					isTabBar: true
 				},
 				{
 					name: '收藏商机',
-					points: 5,
-					dailyLimit: 100,
+					points: 10,
+					dailyLimit: '5次/天',
 					path: '/pages/home/home',
 					isTabBar: true
 				},
 				{
-					name: '点赞商机',
-					points: 5,
-					dailyLimit: 100,
+					name: '赞踩商机',
+					points: 10,
+					dailyLimit: '5次/天',
 					path: '/pages/home/home',
 					isTabBar: true
 				},
 				{
-					name: '点踩商机',
-					points: 5,
-					dailyLimit: 100,
-					path: '/pages/home/home',
-					isTabBar: true
-				},
-				{
-					name: '点赞活动',
-					points: 5,
-					dailyLimit: 100,
+					name: '匿名举报或建议商机',
+					points: 20,
+					dailyLimit: '5次/天',
 					path: '/pages/active/active',
 					isTabBar: true
 				},
 				{
-					name: '点踩活动',
-					points: 5,
-					dailyLimit: 100,
+					name: '赞踩聚会',
+					points: 10,
+					dailyLimit: '5次/天',
+					path: '/pages/active/active',
+					isTabBar: true
+				},
+				{
+					name: '举报聚会',
+					points: 20,
+					dailyLimit: '5次/天',
 					path: '/pages/active/active',
 					isTabBar: true
 				},
@@ -180,26 +192,26 @@
 			icon: 'money-filled',
 			tasks: [{
 					name: '支付名片获得贡分',
-					points: 10,
-					dailyLimit: 100,
+					points: 20,
+					dailyLimit: '5次/天',
 					path: null
 				}, // 假设这个没有直接跳转入口
 				{
-					name: '用户报名活动让利',
-					points: 10,
-					dailyLimit: 100,
+					name: '用户参加活动让利',
+					points: 80,
+					dailyLimit: '5次/天',
 					path: null
 				},
 				{
-					name: '用户报名活动平台让利',
-					points: 10,
-					dailyLimit: 100,
+					name: '用户参加活动平台让利',
+					points: 80,
+					dailyLimit: '5次/天',
 					path: null
 				},
 				{
-					name: '店铺因活动有报名获得贡分',
-					points: 10,
-					dailyLimit: 100,
+					name: '店铺因活动成功举办获得贡分',
+					points: 100,
+					dailyLimit: '5次/天',
 					path: null
 				},
 			]

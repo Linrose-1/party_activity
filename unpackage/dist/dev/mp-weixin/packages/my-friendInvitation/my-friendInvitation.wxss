@@ -27,6 +27,15 @@
 .tab-panel.data-v-a29497fd {
   height: 100%;
 }
+.search-wrapper.data-v-a29497fd {
+  padding: 20rpx;
+  background-color: #fff;
+}
+.search-wrapper.data-v-a29497fd .uni-easyinput__content {
+  border-radius: 40rpx !important;
+  background-color: #f7f8fa !important;
+  border: 1rpx solid #eee !important;
+}
 
 /* --- "我邀请的人" 列表样式 (基本复用) --- */
 .friend-list.data-v-a29497fd {
@@ -142,7 +151,11 @@
 
 /* --- "我的邀请人" 模块样式 --- */
 .inviter-section.data-v-a29497fd {
-  padding: 40rpx;
+  padding: 30rpx 30rpx 0 30rpx;
+  /* 调整 padding */
+}
+.invite-tools-section.data-v-a29497fd {
+  padding: 30rpx;
 }
 .section-title.data-v-a29497fd {
   font-size: 36rpx;
@@ -188,6 +201,55 @@
 .inviter-desc.data-v-a29497fd {
   font-size: 28rpx;
   color: #666;
+}
+.tools-grid.data-v-a29497fd {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  /* 双列 */
+  gap: 20rpx;
+}
+.tool-item.data-v-a29497fd {
+  background: #fff;
+  padding: 30rpx 20rpx;
+  border-radius: 20rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.03);
+  transition: background-color 0.2s;
+}
+.tool-item.data-v-a29497fd:active {
+  background-color: #fafafa;
+}
+.tool-item-inner.data-v-a29497fd {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+.tool-icon.data-v-a29497fd {
+  width: 70rpx;
+  height: 70rpx;
+  margin-right: 20rpx;
+  flex-shrink: 0;
+}
+.tool-content.data-v-a29497fd {
+  flex: 1;
+  min-width: 0;
+}
+.tool-name.data-v-a29497fd {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 6rpx;
+}
+.tool-desc.data-v-a29497fd {
+  font-size: 22rpx;
+  color: #999;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.chevron-icon.data-v-a29497fd {
+  font-size: 30rpx;
+  color: #ddd;
+  margin-left: 10rpx;
 }
 
 /* --- 通用空状态样式 --- */

@@ -117,9 +117,9 @@
 			<!-- 提示信息 -->
 			<view class="info-card">
 				<h1 class="info-card-title">
-					<i class="fas fa-info-circle"></i> 为什么需要支付积分？
+					<i class="fas fa-info-circle"></i> 为什么需要支付智米？
 				</h1>
-				<p>为了维护平台的商业环境和用户隐私，查看他人联系方式需要消耗积分。这有助于：</p>
+				<p>为了维护平台的商业环境和用户隐私，查看他人联系方式需要消耗智米。这有助于：</p>
 				<ul>
 					<li>确保联系请求的严肃性</li>
 					<li>保护用户免受骚扰</li>
