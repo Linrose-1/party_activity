@@ -203,7 +203,7 @@ const _sfc_main = {
         return;
       common_vendor.index.__f__("log", "at packages/home-commercialDetail/home-commercialDetail.vue:482", `准备为分享者 (ID: ${sharerId}) 增加贡分, 关联商机ID: ${bizId}`);
       const {
-        error: error2
+        error
       } = await utils_request.request("/app-api/member/experience-record/share-experience-hit", {
         method: "POST",
         data: {
@@ -214,8 +214,8 @@ const _sfc_main = {
           // 新增：传递关联的商机ID
         }
       });
-      if (error2) {
-        common_vendor.index.__f__("error", "at packages/home-commercialDetail/home-commercialDetail.vue:496", "调用分享加分接口失败:", error2);
+      if (error) {
+        common_vendor.index.__f__("error", "at packages/home-commercialDetail/home-commercialDetail.vue:496", "调用分享加分接口失败:", error);
       } else {
         common_vendor.index.__f__("log", "at packages/home-commercialDetail/home-commercialDetail.vue:498", `成功为分享者 (ID: ${sharerId}) 触发贡分增加`);
       }
@@ -260,8 +260,8 @@ const _sfc_main = {
             icon: "none"
           });
         }
-      } catch (error2) {
-        common_vendor.index.__f__("error", "at packages/home-commercialDetail/home-commercialDetail.vue:544", "获取商机详情失败:", error2);
+      } catch (error) {
+        common_vendor.index.__f__("error", "at packages/home-commercialDetail/home-commercialDetail.vue:544", "获取商机详情失败:", error);
         common_vendor.index.showToast({
           title: "网络请求异常",
           icon: "none"
@@ -310,8 +310,8 @@ const _sfc_main = {
         } else {
           comments.value = [];
         }
-      } catch (error2) {
-        common_vendor.index.__f__("error", "at packages/home-commercialDetail/home-commercialDetail.vue:595", "请求评论列表异常:", error2);
+      } catch (error) {
+        common_vendor.index.__f__("error", "at packages/home-commercialDetail/home-commercialDetail.vue:595", "请求评论列表异常:", error);
       }
     };
     const replyComment = (comment) => {
@@ -363,14 +363,21 @@ const _sfc_main = {
           replyToCommentId.value = 0;
           replyToNickname.value = "";
           await getCommentList();
+          const currentTotalCount = comments.value.length;
+          common_vendor.index.$emit("postInteractionChanged", {
+            postId: postId.value,
+            type: "comment",
+            totalCount: currentTotalCount
+            // 直接告诉首页现在的总数是多少
+          });
         } else {
           common_vendor.index.showToast({
             title: ((_a = result.error) == null ? void 0 : _a.message) || "评论失败",
             icon: "none"
           });
         }
-      } catch (error2) {
-        common_vendor.index.__f__("error", "at packages/home-commercialDetail/home-commercialDetail.vue:655", "创建评论异常:", error2);
+      } catch (error) {
+        common_vendor.index.__f__("error", "at packages/home-commercialDetail/home-commercialDetail.vue:666", "创建评论异常:", error);
         common_vendor.index.showToast({
           title: "评论失败，请稍后重试",
           icon: "none"
@@ -406,7 +413,7 @@ const _sfc_main = {
       }
       try {
         const {
-          error: error2
+          error
         } = await utils_request.request("/app-api/member/like-action/add", {
           method: "POST",
           data: {
@@ -415,15 +422,22 @@ const _sfc_main = {
             action: clickedAction
           }
         });
-        if (!error2) {
+        if (!error) {
           hasDataChanged.value = true;
+          common_vendor.index.$emit("postInteractionChanged", {
+            postId: post.id,
+            type: "action",
+            userAction: post.userAction,
+            likes: post.likes,
+            dislikes: post.dislikes
+          });
         }
-        if (error2) {
+        if (error) {
           post.userAction = originalAction;
           post.likes = originalLikes;
           post.dislikes = originalDislikes;
           common_vendor.index.showToast({
-            title: `操作失败: ${error2}`,
+            title: `操作失败: ${error}`,
             icon: "none"
           });
         }
@@ -461,34 +475,36 @@ const _sfc_main = {
           targetId: post.userId,
           targetType: "post_user"
         };
-        const result = await utils_request.request(apiUrl, {
+        const {
+          error
+        } = await utils_request.request(apiUrl, {
           method: "POST",
           data: requestData
         });
         if (!error) {
           hasDataChanged.value = true;
-        }
-        if (result && result.error) {
-          post.isFollowedUser = originalFollowState;
-          common_vendor.index.showToast({
-            title: result.error || "操作失败",
-            icon: "none"
-          });
-        } else {
           common_vendor.index.showToast({
             title: successMessage,
             icon: "success"
           });
+          common_vendor.index.$emit("userFollowStatusChanged", {
+            userId: post.userId,
+            isFollowed: post.isFollowedUser
+          });
+        } else {
+          throw new Error(error);
         }
-      } catch (error2) {
-        common_vendor.index.__f__("error", "at packages/home-commercialDetail/home-commercialDetail.vue:846", "关注/取关用户异常:", error2);
+      } catch (err) {
+        common_vendor.index.__f__("error", "at packages/home-commercialDetail/home-commercialDetail.vue:809", "关注/取关用户异常:", err);
         post.isFollowedUser = originalFollowState;
         common_vendor.index.showToast({
-          title: "操作失败，请重试",
+          title: typeof err === "string" ? err : "操作失败，请重试",
           icon: "none"
         });
       } finally {
-        isActionInProgress.value = false;
+        setTimeout(() => {
+          isActionInProgress.value = false;
+        }, 500);
       }
     };
     const toggleBookmark = async (post) => {
@@ -513,35 +529,37 @@ const _sfc_main = {
           targetId: post.id,
           targetType: "post"
         };
-        const result = await utils_request.request(apiUrl, {
+        const {
+          error
+        } = await utils_request.request(apiUrl, {
           method: "POST",
           data: requestData
         });
-        common_vendor.index.__f__("log", "at packages/home-commercialDetail/home-commercialDetail.vue:895", "触发收藏", result);
         if (!error) {
           hasDataChanged.value = true;
-        }
-        if (result && result.error) {
-          post.saved = originalSavedState;
-          common_vendor.index.showToast({
-            title: result.error || "操作失败",
-            icon: "none"
-          });
-        } else {
           common_vendor.index.showToast({
             title: successMessage,
             icon: "success"
           });
+          common_vendor.index.$emit("postInteractionChanged", {
+            postId: post.id,
+            type: "save",
+            isSaved: post.saved
+          });
+        } else {
+          throw new Error(error);
         }
-      } catch (error2) {
-        common_vendor.index.__f__("error", "at packages/home-commercialDetail/home-commercialDetail.vue:917", "收藏/取消收藏商机异常:", error2);
+      } catch (err) {
+        common_vendor.index.__f__("error", "at packages/home-commercialDetail/home-commercialDetail.vue:876", "收藏/取消收藏商机异常:", err);
         post.saved = originalSavedState;
         common_vendor.index.showToast({
           title: "操作失败，请重试",
           icon: "none"
         });
       } finally {
-        isActionInProgress.value = false;
+        setTimeout(() => {
+          isActionInProgress.value = false;
+        }, 500);
       }
     };
     const previewImage = (urls, current) => {
@@ -580,7 +598,7 @@ const _sfc_main = {
               title: "删除中..."
             });
             const {
-              error: error2
+              error
             } = await utils_request.request("/app-api/member/business-opportunities/delete", {
               method: "POST",
               data: {
@@ -589,9 +607,9 @@ const _sfc_main = {
               }
             });
             common_vendor.index.hideLoading();
-            if (error2) {
+            if (error) {
               common_vendor.index.showToast({
-                title: "删除失败: " + error2,
+                title: "删除失败: " + error,
                 icon: "none"
               });
               return;
@@ -630,7 +648,7 @@ const _sfc_main = {
           });
         },
         fail: (err) => {
-          common_vendor.index.__f__("error", "at packages/home-commercialDetail/home-commercialDetail.vue:1036", "setClipboardData failed in detail page:", err);
+          common_vendor.index.__f__("error", "at packages/home-commercialDetail/home-commercialDetail.vue:988", "setClipboardData failed in detail page:", err);
           common_vendor.index.showToast({
             title: "复制失败",
             icon: "none"

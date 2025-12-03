@@ -1,22 +1,31 @@
 <template>
 	<view class="app">
 
-		<!-- 1. 搜索和筛选区域 -->
-		<view class="search-container">
-			<view class="search-box">
-				<uni-icons type="search" size="20" color="#999"></uni-icons>
-				<input class="search-input" type="text" placeholder="搜索聚店名称或关键词" v-model="searchTerm"
-					@input="onSearchInput" />
-				<button class="search-btn" @click="handleSearchClick">搜索</button>
+		<!-- 1. 顶部固定区域：搜索 + 定位 -->
+		<view class="fixed-header">
+			<view class="search-location-bar">
+				<!-- 左侧定位 -->
+				<view class="location-trigger" @click="handleChooseLocation">
+					<text class="city-text">{{ shortAddress || '定位' }}</text>
+					<uni-icons type="bottom" size="12" color="#333"></uni-icons>
+				</view>
+				<!-- 中间搜索 -->
+				<view class="search-box">
+					<uni-icons type="search" size="16" color="#999"></uni-icons>
+					<input class="search-input" type="text" placeholder="搜索聚店名称或关键词..." v-model="searchTerm"
+						@confirm="handleSearchClick" />
+				</view>
+				<!-- 右侧搜索按钮 (可选，或者直接用键盘回车) -->
+				<view class="search-btn-text" @click="handleSearchClick">搜索</view>
 			</view>
+		</view>
 
-			<view class="location-selector" @click="handleChooseLocation">
-				<uni-icons type="location-filled" size="20" color="#FF6B00"></uni-icons>
-				<text class="location-text">{{ displayAddress || '点击选择位置查看附近聚店' }}</text>
-				<uni-icons type="right" size="16" color="#999"></uni-icons>
-			</view>
+		<!-- 2. 可滚动区域 (包含 Banner、金刚区按钮、筛选栏、列表) -->
+		<scroll-view class="main-scroll" scroll-y="true" @scrolltolower="loadMore" refresher-enabled="true"
+			:refresher-triggered="isRefreshing" @refresherrefresh="handleRefresherRefresh" :sticky-header-indices="[2]">
+			<!-- 如果用原生 sticky 也可以 -->
 
-			<!-- 轮播图区域 -->
+			<!-- 2.1 轮播图 -->
 			<view v-if="bannerList.length > 0" class="swiper-section">
 				<swiper class="swiper" circular :indicator-dots="true" :autoplay="true" :interval="3000"
 					:duration="500">
@@ -29,55 +38,69 @@
 				</swiper>
 			</view>
 
-			<scroll-view scroll-x class="filters-scroll">
-				<view class="filters">
-					<!-- v-for 动态渲染从接口获取的 filters -->
-					<button v-for="filter in filters" :key="filter.value" class="filter-btn"
-						:class="{ active: activeFilter === filter.value }" @click="selectFilter(filter.value)">
-						{{ filter.name }}
-					</button>
+			<!-- 2.2 功能入口区 (原底部按钮移至此处) -->
+			<view class="function-grid">
+				<view class="func-item" @click="shareStore">
+					<view class="icon-box share-bg">
+						<uni-icons type="hand-up-filled" size="24" color="#fff"></uni-icons>
+					</view>
+					<text>(我喜欢的)聚店推荐</text>
 				</view>
-			</scroll-view>
-		</view>
-
-		<!-- 2. 店铺列表区域 -->
-		<scroll-view class="store-list" scroll-y="true" @scrolltolower="loadMore" refresher-enabled="true"
-			:refresher-triggered="isRefreshing" @refresherrefresh="handleRefresherRefresh">
-			<!-- 卡片列表 -->
-			<!-- 之前这里缺少了 @click-card 事件来处理跳转 -->
-			<StoreCard v-for="store in filteredStores" :key="store.id" :store="store" @click-card="goToStoreDetail" />
-
-			<!-- 加载状态提示 -->
-			<view v-if="loadingMore" class="load-more">
-				<uni-icons type="spinner-cycle" size="20" color="#999"></uni-icons>
-				<text>加载中...</text>
-			</view>
-			<view v-if="!hasMore && allStores.length > 0" class="load-more">
-				<uni-icons type="checkmarkempty" size="20" color="#999"></uni-icons>
-				<text>已加载全部内容</text>
+				<view class="func-item" @click="skipToNewShop">
+					<view class="icon-box join-bg">
+						<uni-icons type="shop-filled" size="24" color="#fff"></uni-icons>
+					</view>
+					<text>(我开的店)申请入驻</text>
+				</view>
 			</view>
 
-			<!-- 空状态提示 -->
-			<view v-if="allStores.length === 0 && !loadingMore && !isRefreshing" class="empty-state">
-				<uni-icons type="info" size="60" color="#ffd8c1"></uni-icons>
-				<text>附近3公里暂无合适的“聚店”</text>
-				<text>请在下方猛击 “聚店推荐” </text>
-				<text>(推荐成功可获贡分)</text>
-
+			<!-- 2.3 筛选栏 (吸顶) -->
+			<!-- 使用 CSS position: sticky 实现吸顶 -->
+			<view class="sticky-tabs">
+				<scroll-view scroll-x class="filters-scroll">
+					<view class="filters">
+						<!-- v-for 动态渲染从接口获取的 filters -->
+						<button v-for="filter in filters" :key="filter.value" class="filter-btn"
+							:class="{ active: activeFilter === filter.value }" @click="selectFilter(filter.value)">
+							{{ filter.name }}
+						</button>
+					</view>
+				</scroll-view>
 			</view>
+
+			<!-- 2.4 店铺列表 -->
+			<view class="store-list-container">
+				<!-- 卡片列表 -->
+				<!-- 之前这里缺少了 @click-card 事件来处理跳转 -->
+				<StoreCard v-for="store in filteredStores" :key="store.id" :store="store"
+					@click-card="goToStoreDetail" />
+
+				<!-- 加载状态提示 -->
+				<view v-if="loadingMore" class="load-more">
+					<uni-icons type="spinner-cycle" size="20" color="#999"></uni-icons>
+					<text>加载中...</text>
+				</view>
+				<view v-if="!hasMore && allStores.length > 0" class="load-more">
+					<uni-icons type="checkmarkempty" size="20" color="#999"></uni-icons>
+					<text>已加载全部内容</text>
+				</view>
+
+				<!-- 空状态提示 -->
+				<view v-if="allStores.length === 0 && !loadingMore && !isRefreshing" class="empty-state">
+					<uni-icons type="info" size="60" color="#ffd8c1"></uni-icons>
+					<text>附近3公里暂无合适的“聚店”</text>
+					<text>请在下方猛击 “聚店推荐” </text>
+					<text>(推荐成功可获贡分)</text>
+
+				</view>
+			</view>
+
+			<!-- 底部垫高，防止被 TabBar 遮挡 -->
+			<view style="height: 20rpx;"></view>
 		</scroll-view>
 
-		<!-- 3. 底部操作栏 -->
-		<view class="action-bar">
-			<button class="action-btn share-btn" @click="shareStore">
-				<uni-icons type="hand-up-filled" size="20" color="#fff"></uni-icons>
-				<text>聚店推荐</text>
-			</button>
-			<button class="action-btn register-btn" @click="skipToNewShop">
-				<uni-icons type="plus-filled" size="20" color="#fff"></uni-icons>
-				<text>申请入驻</text>
-			</button>
-		</view>
+
+
 	</view>
 </template>
 
@@ -243,6 +266,18 @@
 			}
 		});
 	};
+
+	// 简短地址，用于顶部显示
+	const shortAddress = computed(() => {
+		if (!displayAddress.value) return '定位中';
+		// 简单的截取逻辑，或者在获取地址时就解析出 district/street
+		// 假设 displayAddress 是完整地址，这里只取前几个字或特定部分
+		// 实际项目中建议在 getCurrentLocation 里就把 district 单独存下来
+		if (displayAddress.value.length > 4) {
+			return displayAddress.value.substring(0, 4) + '...';
+		}
+		return displayAddress.value;
+	});
 
 	/**
 	 * 获取轮播图数据
@@ -573,6 +608,134 @@
 		display: flex;
 		flex-direction: column;
 		height: 100vh;
+		background-color: #f5f5f5;
+	}
+
+	/* 1. 顶部固定区域 */
+	.fixed-header {
+		background: #fff;
+		padding: 20rpx;
+		z-index: 100;
+		/* 保持固定在顶部 */
+	}
+
+	.search-location-bar {
+		display: flex;
+		align-items: center;
+		gap: 20rpx;
+	}
+
+	.location-trigger {
+		display: flex;
+		align-items: center;
+		font-size: 28rpx;
+		font-weight: bold;
+		color: #333;
+		max-width: 160rpx;
+		/* 限制宽度 */
+	}
+
+	.city-text {
+		margin-right: 6rpx;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+	.search-box {
+		flex: 1;
+		background: #f5f5f5;
+		border-radius: 30rpx;
+		padding: 12rpx 20rpx;
+		display: flex;
+		align-items: center;
+	}
+
+	.search-input {
+		flex: 1;
+		font-size: 26rpx;
+		margin-left: 10rpx;
+	}
+
+	.search-btn-text {
+		font-size: 28rpx;
+		color: #FF6B00;
+		font-weight: 500;
+	}
+
+	/* 2. 主滚动区域 */
+	.main-scroll {
+		flex: 1;
+		/* 占据剩余所有空间 */
+		height: 0;
+		/* 配合 flex: 1 使用 */
+	}
+
+	/* 轮播图 */
+	.swiper-section {
+		margin: 20rpx;
+		border-radius: 16rpx;
+		overflow: hidden;
+	}
+
+	/* 功能金刚区 */
+	.function-grid {
+		display: flex;
+		justify-content: space-around;
+		/* 两个按钮分散居中 */
+		padding: 20rpx 40rpx;
+		background: #fff;
+		margin: 0 20rpx 20rpx;
+		border-radius: 16rpx;
+	}
+
+	.func-item {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 10rpx;
+		font-size: 24rpx;
+		color: #333;
+	}
+
+	.icon-box {
+		width: 80rpx;
+		height: 80rpx;
+		border-radius: 50%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		box-shadow: 0 4rpx 10rpx rgba(0, 0, 0, 0.1);
+	}
+
+	.share-bg {
+		background: linear-gradient(135deg, #4facfe, #00f2fe);
+	}
+
+	.join-bg {
+		background: linear-gradient(135deg, #FF8C00, #FF6B00);
+	}
+
+	/* 吸顶筛选栏 */
+	.sticky-tabs {
+		position: sticky;
+		top: 0;
+		/* 滚动到顶部时吸附 */
+		z-index: 99;
+		background: #f5f5f5;
+		/* 与背景同色，或者用 #fff */
+		padding: 10rpx 0;
+	}
+
+	/* 列表容器 */
+	.store-list-container {
+		padding: 0 20rpx;
+	}
+
+	.app {
+		display: flex;
+		flex-direction: column;
+		height: 100vh;
 		background-color: #ededed;
 		color: #333;
 		font-size: 16px;
@@ -782,6 +945,7 @@
 		font-weight: 500;
 		cursor: pointer;
 		line-height: 1;
+		font-size: 28rpx
 	}
 
 	.action-btn .uni-icons {

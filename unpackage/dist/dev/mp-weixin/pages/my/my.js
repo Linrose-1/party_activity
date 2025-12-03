@@ -83,7 +83,7 @@ const _sfc_main = {
         {
           value: "--",
           // 或者 '查看'，或其他占位符
-          label: "社交互动",
+          label: "猩球信用",
           path: null
           // 使用 null 作为特殊标记
         }
@@ -137,18 +137,11 @@ const _sfc_main = {
         path: "/packages/my-friendInvitation/my-friendInvitation"
       },
       {
-        name: "数字身份",
-        desc: "详细身份信息",
-        icon: "../../static/icon/数字身份.png",
+        name: "社交互动",
+        desc: "您的互动信息",
+        icon: "../../static/icon/社交互动.png",
         iconBg: "linear-gradient(135deg, #4158D0, #C850C0)",
-        key: "digitalIdentity"
-      },
-      {
-        name: "名片分享",
-        desc: "您的电子名片",
-        icon: "../../static/icon/我的名片.png",
-        iconBg: "linear-gradient(135deg, #30CFD0, #330867)",
-        path: "/pages/my-businessCard/my-businessCard"
+        key: "membershipCenter"
       },
       {
         name: "用户中心",
@@ -157,6 +150,13 @@ const _sfc_main = {
         iconBg: "linear-gradient(135deg, #FFD700, #FFA500)",
         // key: 'membershipCenter'
         path: "/packages/my-member/my-member"
+      },
+      {
+        name: "名片分享",
+        desc: "您的电子名片",
+        icon: "../../static/icon/我的名片.png",
+        iconBg: "linear-gradient(135deg, #30CFD0, #330867)",
+        path: "/pages/my-businessCard/my-businessCard"
       },
       {
         name: "邀请注册",
@@ -254,13 +254,13 @@ const _sfc_main = {
       {
         name: "我的券包",
         desc: "查看您的猩友优惠券",
-        icon: "../../static/icon/订单.png",
+        icon: "../../static/icon/我的券包.png",
         path: null
       },
       {
         name: "时空共享",
         desc: "一键共享创业社交空间",
-        icon: "../../static/icon/我的评论.png",
+        icon: "../../static/icon/时空共享.png",
         path: null
       },
       // 新增
@@ -339,10 +339,10 @@ const _sfc_main = {
         common_vendor.index.makePhoneCall({
           phoneNumber: item.phone,
           success: () => {
-            common_vendor.index.__f__("log", "at pages/my/my.vue:543", "拨打电话成功");
+            common_vendor.index.__f__("log", "at pages/my/my.vue:544", "拨打电话成功");
           },
           fail: (err) => {
-            common_vendor.index.__f__("log", "at pages/my/my.vue:546", "拨打电话失败:", err);
+            common_vendor.index.__f__("log", "at pages/my/my.vue:547", "拨打电话失败:", err);
           }
         });
         return;

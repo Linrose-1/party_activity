@@ -288,7 +288,7 @@
 			setTimeout(() => uni.navigateBack(), 1500);
 		}
 
-		// ==================== 新增：处理分享点击逻辑 ====================
+		// ==================== 处理分享点击逻辑 ====================
 		if (options && options.sharerId) {
 			const sharerId = options.sharerId;
 			const bizId = options.id; // 商机ID就是从options.id获取
@@ -347,7 +347,7 @@
 	});
 
 
-	// 【新增】打开分享弹窗的方法
+	// 打开分享弹窗的方法
 	const openSharePopup = () => {
 		// 设置输入框的默认值为商机标题
 		customShareTitle.value = postDetail.postTitle || '发现一个商机，快来看看吧！';
@@ -355,12 +355,12 @@
 		sharePopup.value.open();
 	};
 
-	// 【新增】关闭分享弹窗的方法
+	// 关闭分享弹窗的方法
 	const closeSharePopup = () => {
 		sharePopup.value.close();
 	};
 
-	// 【新增】引导用户分享到朋友圈的方法
+	// 引导用户分享到朋友圈的方法
 	const guideShareTimeline = () => {
 		// 1. 先关闭底部的分享弹窗
 		closeSharePopup();
@@ -373,7 +373,7 @@
 		// 所以我们在这里不需要做什么特殊处理，只需要显示引导即可
 	};
 
-	// 【新增】隐藏引导遮罩的方法
+	// 隐藏引导遮罩的方法
 	const hideTimelineGuide = () => {
 		showTimelineGuide.value = false;
 	};
@@ -443,25 +443,25 @@
 	onShareTimeline(() => {
 		console.log("触发分享到朋友圈");
 
-		// 新增：获取分享者自己的用户ID
+		// 获取分享者自己的用户ID
 		const sharerId = uni.getStorageSync('userId');
 
 		// 1. 优先使用用户在弹窗中编辑的自定义标题
 		const finalTitle = customShareTitle.value || postDetail.postTitle || '发现一个商机，快来看看吧！';
 
-		// 【新增】获取邀请码
+		// 获取邀请码
 		const inviteCode = getInviteCode();
 
 		// 2. 封面图片逻辑
 		const finalImageUrl = postDetail.images.length > 0 ? postDetail.images[0] :
 			'https://img.gofor.club/logo_share.jpg';
 
-		// 3. 【核心修改】在 query 中添加 sharerId 和 inviteCode 参数
+		// 3. 在 query 中添加 sharerId 和 inviteCode 参数
 		let queryString = `id=${postDetail.id}&from=timeline`;
 		if (sharerId) {
 			queryString += `&sharerId=${sharerId}`;
 		}
-		// 【新增】如果邀请码存在，则拼接到 query 中
+		// 如果邀请码存在，则拼接到 query 中
 		if (inviteCode) {
 			queryString += `&inviteCode=${inviteCode}`;
 		}
@@ -644,7 +644,18 @@
 				newCommentText.value = '';
 				replyToCommentId.value = 0;
 				replyToNickname.value = '';
+				// 1. 等待列表刷新，确保 comments.value 是最新的
 				await getCommentList();
+
+				// 2. 【核心修改】获取当前最新的总数
+				const currentTotalCount = comments.value.length;
+
+				// 3. 发射事件，带上 totalCount
+				uni.$emit('postInteractionChanged', {
+					postId: postId.value,
+					type: 'comment',
+					totalCount: currentTotalCount // 直接告诉首页现在的总数是多少
+				});
 			} else {
 				uni.showToast({
 					title: result.error?.message || '评论失败',
@@ -664,7 +675,7 @@
 
 
 
-	// ==================== 核心修改点: 完善 toggleAction (点赞/点踩) 方法 ====================
+	// ==================== 完善 toggleAction (点赞/点踩) 方法 ====================
 	const toggleAction = async (post, clickedAction) => {
 		if (isActionInProgress.value) return;
 		isActionInProgress.value = true;
@@ -704,6 +715,14 @@
 			});
 			if (!error) {
 				hasDataChanged.value = true; // 操作成功，标记数据已变
+				// 发射点赞状态变更事件
+				uni.$emit('postInteractionChanged', {
+					postId: post.id,
+					type: 'action',
+					userAction: post.userAction,
+					likes: post.likes,
+					dislikes: post.dislikes
+				});
 			}
 
 			// 4. 如果API返回错误，则回滚UI
@@ -732,64 +751,10 @@
 			isActionInProgress.value = false;
 		}
 	};
-	// const toggleAction = async (item, clickedAction) => {
-	// 	if (isActionInProgress.value) return; // 防止重复点击
-	// 	if (!loggedInUserId.value) {
-	// 		uni.showToast({
-	// 			title: '请先登录',
-	// 			icon: 'none'
-	// 		});
-	// 		return;
-	// 	}
-
-	// 	isActionInProgress.value = true;
-	// 	// uni.showLoading({
-	// 	// 	title: '请稍候...'
-	// 	// });
-
-	// 	// 决定要发送给API的action值
-	// 	// 如果再次点击已激活的按钮，则取消（发送空字符串）
-	// 	// 否则，设置为新点击的action
-	// 	// const apiActionToSend = item.userAction === clickedAction ? '' : clickedAction;
-
-	// 	try {
-	// 		const requestData = {
-	// 			userId: loggedInUserId.value,
-	// 			targetId: item.id, // 目标是商机的ID
-	// 			targetType: 'post', // 类型是post
-	// 			action: clickedAction,
-	// 		};
-
-	// 		console.log('点赞/踩/取消 操作, 请求:', requestData);
-
-	// 		const result = await request('/app-api/member/like-action/add', {
-	// 			method: 'POST',
-	// 			data: requestData,
-	// 		});
-
-	// 		if (result && result.error) {
-	// 			uni.showToast({
-	// 				title: '速度过快,操作失败',
-	// 				icon: 'none'
-	// 			});
-	// 		}
-
-	// 	} catch (error) {
-	// 		console.error("点赞/踩操作异常:", error);
-	// 		uni.showToast({
-	// 			title: '操作失败，请重试',
-	// 			icon: 'none'
-	// 		});
-	// 	} finally {
-	// 		// 无论成功与否，都关闭loading，然后刷新详情页数据以同步UI
-	// 		// uni.hideLoading();
-	// 		await getBusinessOpportunitiesDetail();
-	// 		isActionInProgress.value = false; // 解锁
-	// 	}
-	// };
 
 	// ==================== 关注/取消关注用户 ====================
 	const toggleFollow = async (post) => {
+		// 1. 防抖/节流
 		if (isActionInProgress.value) return;
 		if (!loggedInUserId.value) {
 			uni.showToast({
@@ -801,10 +766,10 @@
 
 		isActionInProgress.value = true;
 
-		// 1. 保存原始状态，用于请求失败时回滚
+		// 2. 保存原始状态
 		const originalFollowState = post.isFollowedUser;
 
-		// 2.【核心】立即修改本地数据，UI瞬间响应
+		// 3. 乐观更新
 		post.isFollowedUser = !post.isFollowedUser;
 
 		const isAdding = post.isFollowedUser;
@@ -818,44 +783,43 @@
 				targetType: 'post_user'
 			};
 
-			// 3. 在后台发送API请求
-			const result = await request(apiUrl, {
+			// 4. 发送请求并解构 error
+			const {
+				error
+			} = await request(apiUrl, {
 				method: 'POST',
 				data: requestData
 			});
-			if (!error) {
-				hasDataChanged.value = true; // 操作成功，标记数据已变
-			}
 
-			// 4. 处理API返回结果
-			if (result && result.error) {
-				// 如果API返回失败，将UI状态回滚到原始状态
-				post.isFollowedUser = originalFollowState;
-				uni.showToast({
-					title: result.error || '操作失败',
-					icon: 'none'
-				});
-			} else {
-				// API成功，给出成功提示，UI已是最新，无需任何操作
+			if (!error) {
+				hasDataChanged.value = true; // 标记数据已变
 				uni.showToast({
 					title: successMessage,
 					icon: 'success'
 				});
+				// 通知首页更新该用户的关注状态
+				uni.$emit('userFollowStatusChanged', {
+					userId: post.userId,
+					isFollowed: post.isFollowedUser
+				});
+			} else {
+				throw new Error(error); // 抛出错误以回滚状态
 			}
-		} catch (error) {
-			console.error("关注/取关用户异常:", error);
-			// 如果网络请求异常，同样回滚UI状态
+		} catch (err) {
+			console.error("关注/取关用户异常:", err);
+			// 5. 回滚状态
 			post.isFollowedUser = originalFollowState;
 			uni.showToast({
-				title: '操作失败，请重试',
+				title: typeof err === 'string' ? err : '操作失败，请重试',
 				icon: 'none'
 			});
 		} finally {
-			// 5. 无论成功失败，最后都解锁
-			isActionInProgress.value = false;
+			// 6. 延时解锁 (500ms 防抖)
+			setTimeout(() => {
+				isActionInProgress.value = false;
+			}, 500);
 		}
 	};
-
 
 	// ==================== 收藏/取消收藏商机 ====================
 	const toggleBookmark = async (post) => {
@@ -870,10 +834,7 @@
 
 		isActionInProgress.value = true;
 
-		// 1. 保存原始状态
 		const originalSavedState = post.saved;
-
-		// 2.【核心】立即修改本地数据，UI瞬间响应
 		post.saved = !post.saved;
 
 		const isAdding = post.saved;
@@ -887,52 +848,44 @@
 				targetType: 'post'
 			};
 
-			// 3. 在后台发送API请求
-			const result = await request(apiUrl, {
+			// 【修复】解构 error
+			const {
+				error
+			} = await request(apiUrl, {
 				method: 'POST',
 				data: requestData
 			});
-			console.log("触发收藏", result)
 
 			if (!error) {
-				hasDataChanged.value = true; // 操作成功，标记数据已变
-			}
-
-			// 4. 处理API返回结果
-			if (result && result.error) {
-				// API失败，回滚UI
-				post.saved = originalSavedState;
-				uni.showToast({
-					title: result.error || '操作失败',
-					icon: 'none'
-				});
-			} else {
-				// API成功，给出成功提示
+				hasDataChanged.value = true;
 				uni.showToast({
 					title: successMessage,
 					icon: 'success'
 				});
+
+				// 发射收藏状态变更事件
+				uni.$emit('postInteractionChanged', {
+					postId: post.id,
+					type: 'save',
+					isSaved: post.saved
+				});
+			} else {
+				throw new Error(error);
 			}
-		} catch (error) {
-			console.error("收藏/取消收藏商机异常:", error);
-			// 网络异常，回滚UI
+		} catch (err) {
+			console.error("收藏/取消收藏商机异常:", err);
 			post.saved = originalSavedState;
 			uni.showToast({
 				title: '操作失败，请重试',
 				icon: 'none'
 			});
 		} finally {
-			// 5. 解锁
-			isActionInProgress.value = false;
+			setTimeout(() => {
+				isActionInProgress.value = false;
+			}, 500);
 		}
 	};
 
-	// const shareOpportunity = () => {
-	// 	uni.showToast({
-	// 		title: '分享功能即将上线',
-	// 		icon: 'none'
-	// 	});
-	// };
 	const previewImage = (urls, current) => {
 		uni.previewImage({
 			urls: urls,
@@ -958,7 +911,6 @@
 			return;
 		}
 
-		// 【核心修改】构建带有多参数的URL
 		// 使用 encodeURIComponent 确保名字和URL中的特殊字符不会导致问题
 		const url = `/pages/applicationBusinessCard/applicationBusinessCard?id=${user.id}` +
 			`&name=${encodeURIComponent(user.name)}` +
@@ -1008,13 +960,13 @@
 	};
 
 
-	// 【修改】简化长按复制菜单的状态，不再需要坐标
+	//简化长按复制菜单的状态，不再需要坐标
 	const copyMenu = reactive({
 		show: false,
 		text: '', // 准备要复制的文本
 	});
 
-	// 【修改】长按处理函数，现在它只负责显示菜单
+	//长按处理函数，现在它只负责显示菜单
 	const handleLongPress = (textToCopy) => {
 		if (!textToCopy) return;
 		copyMenu.text = textToCopy;
@@ -1046,7 +998,7 @@
 		});
 	};
 
-	// 【新增】点击遮罩层或取消按钮隐藏菜单
+	// 点击遮罩层或取消按钮隐藏菜单
 	const hideCopyMenu = () => {
 		copyMenu.show = false;
 		copyMenu.text = ''; // 清空文本
@@ -1160,7 +1112,7 @@
 		flex: 1;
 		min-width: 0;
 		overflow: hidden;
-		/* 【新增】让内部元素垂直排列 */
+		/* 让内部元素垂直排列 */
 		display: flex;
 		flex-direction: column;
 		justify-content: center;
@@ -1173,7 +1125,7 @@
 		color: #333;
 		margin-bottom: 6rpx;
 
-		/* 【修改】移除单行省略样式，允许换行 */
+		/* 移除单行省略样式，允许换行 */
 		white-space: normal;
 		/* 允许正常换行 */
 		word-break: break-all;
@@ -1181,7 +1133,7 @@
 		/* 移除 overflow: hidden 和 text-overflow: ellipsis */
 	}
 
-	/* 【新增】时间和按钮的容器样式 */
+	/* 时间和按钮的容器样式 */
 	.time-and-actions {
 		display: flex;
 		align-items: center;
@@ -1293,7 +1245,7 @@
 		/* 消除 image 标签底部空隙 */
 	}
 
-	/* ==================== 【新增】视频容器和播放器样式 ==================== */
+	/* ==================== 视频容器和播放器样式 ==================== */
 	.post-video-container {
 		width: 100%;
 		border-radius: 12rpx;

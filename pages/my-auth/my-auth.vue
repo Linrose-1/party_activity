@@ -55,27 +55,50 @@
 		<!-- ============      实名认证内容 (Tab 2)      ============ -->
 		<!-- ====================================================== -->
 		<view v-if="activeTab === 2" class="auth-content">
-			<!-- 这里直接复用您之前的实名认证代码 -->
+
 			<view class="auth-card">
-				<view class="card-header">
-					<text class="title">实名认证</text>
-					<text class="subtitle">为了保障您的账户安全，请完成实名认证</text>
+
+				<!-- 已认证状态展示 -->
+				<view v-if="isRealNameAuth" class="verified-view">
+					<uni-icons type="checkbox-filled" size="80" color="#4cd964"></uni-icons>
+					<text class="verified-title">已完成实名认证</text>
+
+					<view class="verified-info">
+						<view class="info-row">
+							<text class="label">真实姓名</text>
+							<text class="value">{{ realNameForm.cardName }}</text>
+						</view>
+						<view class="info-row">
+							<text class="label">身份证号</text>
+							<text class="value">{{ realNameForm.idCard }}</text>
+						</view>
+					</view>
+
+					<button class="submit-btn disabled-btn" disabled>已认证</button>
 				</view>
 
-				<uni-forms ref="realNameFormRef" :modelValue="realNameForm" :rules="rules" class="form-content">
-					<uni-forms-item label="真实姓名" name="cardName">
-						<uni-easyinput v-model="realNameForm.cardName" placeholder="请输入您的真实姓名" />
-					</uni-forms-item>
-					<uni-forms-item label="身份证号" name="idCard">
-						<uni-easyinput v-model="realNameForm.idCard" placeholder="请输入您的身份证号码" />
-					</uni-forms-item>
-				</uni-forms>
+				<!-- 未认证状态展示 (表单) -->
+				<template v-else>
+					<view class="card-header">
+						<text class="title">实名认证</text>
+						<text class="subtitle">为了保障您的账户安全，请完成实名认证</text>
+					</view>
 
-				<button class="submit-btn" @click="submitRealNameForm">立即认证</button>
+					<uni-forms ref="realNameFormRef" :modelValue="realNameForm" :rules="rules" class="form-content">
+						<uni-forms-item label="真实姓名" name="cardName">
+							<uni-easyinput v-model="realNameForm.cardName" placeholder="请输入您的真实姓名" />
+						</uni-forms-item>
+						<uni-forms-item label="身份证号" name="idCard">
+							<uni-easyinput v-model="realNameForm.idCard" placeholder="请输入您的身份证号码" />
+						</uni-forms-item>
+					</uni-forms>
 
-				<view class="tips">
-					<text>信息仅用于实名认证，我们将严格保密，请放心填写。</text>
-				</view>
+					<button class="submit-btn" @click="submitRealNameForm">立即认证</button>
+
+					<view class="tips">
+						<text>信息仅用于实名认证，我们将严格保密，请放心填写。</text>
+					</view>
+				</template>
 			</view>
 		</view>
 
@@ -88,6 +111,9 @@
 		reactive,
 		computed
 	} from 'vue';
+	import {
+		onLoad
+	} from '@dcloudio/uni-app'; // 确保引入 onLoad
 	import request from '../../utils/request.js';
 	import uploadFile from '../../utils/upload.js'; // 引入上传工具
 
@@ -262,6 +288,33 @@
 		cardName: '',
 		idCard: '',
 	});
+
+	// 是否已实名认证的状态
+	const isRealNameAuth = ref(false);
+
+	// 加载用户信息
+	onLoad(() => {
+		fetchUserInfo();
+	});
+
+	const fetchUserInfo = async () => {
+		const {
+			data,
+			error
+		} = await request('/app-api/member/user/get', {
+			method: 'GET'
+		});
+		if (!error && data) {
+			// 检查是否已有身份证信息
+			if (data.idCard && data.cardName) {
+				isRealNameAuth.value = true;
+				// 【修改】后端已脱敏，直接赋值
+				realNameForm.value.cardName = data.cardName;
+				realNameForm.value.idCard = data.idCard;
+			}
+		}
+	};
+
 	const rules = {
 		cardName: {
 			rules: [{
@@ -379,6 +432,56 @@
 		border-radius: 20rpx;
 		position: relative;
 		padding-top: 60rpx;
+	}
+
+	// 已认证状态样式
+	.verified-view {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		padding: 40rpx 0;
+	}
+
+	.verified-title {
+		font-size: 36rpx;
+		font-weight: bold;
+		color: #333;
+		margin-top: 20rpx;
+		margin-bottom: 50rpx;
+	}
+
+	.verified-info {
+		width: 100%;
+		background-color: #f9f9f9;
+		border-radius: 12rpx;
+		padding: 30rpx;
+		margin-bottom: 40rpx;
+	}
+
+	.info-row {
+		display: flex;
+		justify-content: space-between;
+		margin-bottom: 20rpx;
+		font-size: 28rpx;
+
+		&:last-child {
+			margin-bottom: 0;
+		}
+
+		.label {
+			color: #999;
+		}
+
+		.value {
+			color: #333;
+			font-weight: 500;
+		}
+	}
+
+	.disabled-btn {
+		opacity: 0.6;
+		background: #ccc !important;
+		/* 覆盖原来的橙色 */
 	}
 
 	.card-header {

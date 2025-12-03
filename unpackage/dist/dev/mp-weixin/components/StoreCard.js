@@ -1,13 +1,5 @@
 "use strict";
 const common_vendor = require("../common/vendor.js");
-if (!Array) {
-  const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
-  _easycom_uni_icons2();
-}
-const _easycom_uni_icons = () => "../uni_modules/uni-icons/components/uni-icons/uni-icons.js";
-if (!Math) {
-  _easycom_uni_icons();
-}
 const _sfc_main = {
   __name: "StoreCard",
   props: {
@@ -20,24 +12,29 @@ const _sfc_main = {
   setup(__props, { emit: __emit }) {
     const props = __props;
     const emit = __emit;
-    common_vendor.computed(() => {
-      if (typeof props.store.distance !== "number") {
-        return null;
+    const coverImage = common_vendor.computed(() => {
+      if (props.store.storeCoverImageUrls && props.store.storeCoverImageUrls.length > 0) {
+        return props.store.storeCoverImageUrls[0];
       }
-      const distanceWithDecimals = props.store.distance.toFixed(2);
-      return `${distanceWithDecimals}公里`;
+      if (props.store.storeCoverImageUrl) {
+        return props.store.storeCoverImageUrl;
+      }
+      return "/static/images/default-store.png";
+    });
+    const displayDistance = common_vendor.computed(() => {
+      if (props.store.distanceKm)
+        return props.store.distanceKm;
+      if (typeof props.store.distance === "number") {
+        return props.store.distance.toFixed(1) + "km";
+      }
+      return "";
     });
     const handleCardClick = () => {
       emit("click-card", props.store);
     };
     const handleInitiateParty = () => {
-      if (!props.store || !props.store.id) {
-        common_vendor.index.showToast({
-          title: "聚店信息不完整",
-          icon: "none"
-        });
+      if (!props.store || !props.store.id)
         return;
-      }
       const url = `/packages/active-publish/active-publish?storeId=${props.store.id}&storeName=${encodeURIComponent(props.store.storeName)}`;
       common_vendor.index.navigateTo({
         url
@@ -45,24 +42,19 @@ const _sfc_main = {
     };
     return (_ctx, _cache) => {
       return common_vendor.e({
-        a: common_vendor.p({
-          type: __props.store.icon,
-          size: "20",
-          color: "#FF6B00"
-        }),
+        a: coverImage.value,
         b: common_vendor.t(__props.store.storeName),
-        c: __props.store.distanceKm
-      }, __props.store.distanceKm ? {
-        d: common_vendor.p({
-          type: "location-filled",
-          size: "16",
-          color: "#FF6B00"
-        }),
-        e: common_vendor.t(__props.store.distanceKm)
+        c: displayDistance.value
+      }, displayDistance.value ? {
+        d: common_vendor.t(displayDistance.value)
       } : {}, {
-        f: common_vendor.t(__props.store.storeDescription),
-        g: common_vendor.o(handleInitiateParty),
-        h: common_vendor.o(handleCardClick)
+        e: common_vendor.t(__props.store.storeDescription || "暂无介绍"),
+        f: __props.store.averageConsumptionRange
+      }, __props.store.averageConsumptionRange ? {
+        g: common_vendor.t(__props.store.averageConsumptionRange)
+      } : {}, {
+        h: common_vendor.o(handleInitiateParty),
+        i: common_vendor.o(handleCardClick)
       });
     };
   }

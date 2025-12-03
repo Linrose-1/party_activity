@@ -163,6 +163,25 @@ const _sfc_main = {
       cardName: "",
       idCard: ""
     });
+    const isRealNameAuth = common_vendor.ref(false);
+    common_vendor.onLoad(() => {
+      fetchUserInfo();
+    });
+    const fetchUserInfo = async () => {
+      const {
+        data,
+        error
+      } = await utils_request.request("/app-api/member/user/get", {
+        method: "GET"
+      });
+      if (!error && data) {
+        if (data.idCard && data.cardName) {
+          isRealNameAuth.value = true;
+          realNameForm.value.cardName = data.cardName;
+          realNameForm.value.idCard = data.idCard;
+        }
+      }
+    };
     const rules = {
       cardName: {
         rules: [{
@@ -209,7 +228,7 @@ const _sfc_main = {
           }, 1500);
         }
       }).catch((err) => {
-        common_vendor.index.__f__("log", "at pages/my-auth/my-auth.vue:311", "表单校验失败：", err);
+        common_vendor.index.__f__("log", "at pages/my-auth/my-auth.vue:364", "表单校验失败：", err);
       });
     };
     return (_ctx, _cache) => {
@@ -272,34 +291,44 @@ const _sfc_main = {
         w: isSubmitting.value
       }) : {}, {
         x: activeTab.value === 2
-      }, activeTab.value === 2 ? {
-        y: common_vendor.o(($event) => realNameForm.value.cardName = $event),
+      }, activeTab.value === 2 ? common_vendor.e({
+        y: isRealNameAuth.value
+      }, isRealNameAuth.value ? {
         z: common_vendor.p({
+          type: "checkbox-filled",
+          size: "80",
+          color: "#4cd964"
+        }),
+        A: common_vendor.t(realNameForm.value.cardName),
+        B: common_vendor.t(realNameForm.value.idCard)
+      } : {
+        C: common_vendor.o(($event) => realNameForm.value.cardName = $event),
+        D: common_vendor.p({
           placeholder: "请输入您的真实姓名",
           modelValue: realNameForm.value.cardName
         }),
-        A: common_vendor.p({
+        E: common_vendor.p({
           label: "真实姓名",
           name: "cardName"
         }),
-        B: common_vendor.o(($event) => realNameForm.value.idCard = $event),
-        C: common_vendor.p({
+        F: common_vendor.o(($event) => realNameForm.value.idCard = $event),
+        G: common_vendor.p({
           placeholder: "请输入您的身份证号码",
           modelValue: realNameForm.value.idCard
         }),
-        D: common_vendor.p({
+        H: common_vendor.p({
           label: "身份证号",
           name: "idCard"
         }),
-        E: common_vendor.sr(realNameFormRef, "32098fb6-7", {
+        I: common_vendor.sr(realNameFormRef, "32098fb6-8", {
           "k": "realNameFormRef"
         }),
-        F: common_vendor.p({
+        J: common_vendor.p({
           modelValue: realNameForm.value,
           rules
         }),
-        G: common_vendor.o(submitRealNameForm)
-      } : {});
+        K: common_vendor.o(submitRealNameForm)
+      }) : {});
     };
   }
 };

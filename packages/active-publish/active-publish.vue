@@ -500,6 +500,41 @@
 		uni.$off('shopSelected');
 	});
 
+	// 【加载草稿的函数
+	const loadDraft = () => {
+		try {
+			const draftDataString = uni.getStorageSync(DRAFT_STORAGE_KEY);
+			if (draftDataString) {
+				const parsedDraft = JSON.parse(draftDataString);
+
+				// 将草稿数据赋值给页面的 ref 变量
+				form.value = parsedDraft.form;
+				timeRange.value = parsedDraft.timeRange;
+				enrollTimeRange.value = parsedDraft.enrollTimeRange;
+				associatedStoreName.value = parsedDraft.associatedStoreName;
+
+				uni.showToast({
+					title: '已恢复上次草稿',
+					icon: 'none'
+				});
+				console.log('草稿已加载:', parsedDraft);
+			} else {
+				// 如果没有草稿，初始化默认时间
+				const now = new Date();
+				const year = now.getFullYear();
+				const month = (now.getMonth() + 1).toString().padStart(2, '0');
+				const day = now.getDate().toString().padStart(2, '0');
+				const todayStr = `${year}-${month}-${day}`;
+
+				enrollTimeRange.value = [`${todayStr} 09:00:00`, `${todayStr} 18:00:00`];
+				timeRange.value = [`${todayStr} 19:00:00`, `${todayStr} 21:00:00`];
+			}
+		} catch (error) {
+			console.error("加载草稿失败:", error);
+			uni.removeStorageSync(DRAFT_STORAGE_KEY);
+		}
+	};
+
 	// --- 【新增】加载详情并回显数据 ---
 	const loadActivityDetailForEdit = async (id) => {
 		uni.showLoading({

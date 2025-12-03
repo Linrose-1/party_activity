@@ -30,7 +30,7 @@
     <view class="card upload-card">
       <view class="card-title">上传收款码</view>
       <view class="upload-notice">
-        <text>请上传微信或支付宝收款码，以便组织者能准确向您退款。</text>
+        <text>请上传微信收款码，以便组织者能准确向您退款。</text>
       </view>
       <view class="file-picker-wrapper">
         <uni-file-picker 

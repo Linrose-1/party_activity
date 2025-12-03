@@ -7,10 +7,10 @@
 		<!-- ==================== 1. 顶部区域 ==================== -->
 		<view class="header wechat-style">
 
-			<!-- 【新增】轮播区域 -->
-			<swiper class="header-swiper" :indicator-dots="headerSlides.length > 1" :autoplay="headerSlides.length > 1"
-				:circular="true" :vertical="false" interval="4000" duration="500"
-				indicator-color="rgba(255,255,255,0.4)" indicator-active-color="#FFFFFF" @click="goToCustomizationPage">
+			<!-- 轮播区域 -->
+			<swiper class="header-swiper" :indicator-dots="false" :autoplay="false" :circular="true" :vertical="false"
+				interval="4000" duration="500" indicator-color="rgba(255,255,255,0.4)" indicator-active-color="#FFFFFF"
+				@click="goToCustomizationPage">
 				<swiper-item v-for="(slide, index) in headerSlides" :key="index">
 					<view class="header-content">
 						<view class="app-title">{{ slide.title }}</view>
@@ -76,10 +76,10 @@
 				</view>
 
 				<!-- 3.2 卡片内容 (公开) -->
-				<!-- 【修改】为标题添加新的 longpress 事件 -->
+				<!-- 为标题添加新的 longpress 事件 -->
 				<view class="post-content-title" @longpress.stop="handleLongPress(post.title)">{{ post.title }}</view>
 
-				<!-- 【修改】为内容预览区域添加新的 longpress 事件 -->
+				<!-- 为内容预览区域添加新的 longpress 事件 -->
 				<view v-if="post.displayContent" class="post-content-preview"
 					@longpress.stop="handleLongPress(post.fullContent)">
 					{{ post.displayContent }}<span v-if="post.isTruncated">...
@@ -101,12 +101,6 @@
 					</view>
 				</view>
 
-				<!-- <video :src="post.video" controls autoplay="false"
-					style="width: 100%; height: 400rpx; background: #000;" @error="onVideoError"></video> -->
-
-				<!-- <view style="font-size: 20rpx; color: red; word-break: break-all;">
-					调试信息: {{ JSON.stringify(post) }}
-				</view> -->
 
 				<!-- ============================================================ -->
 				<view class="tags" v-if="post.tags && post.tags.length">
@@ -252,45 +246,40 @@
 		return info?.homeSlogan || '商友连接·商机分享';
 	});
 
-	// 【新增】计算轮播图数据源
+	// 计算轮播图数据源
 	const headerSlides = computed(() => {
 		const info = currentUserInfo.value || getCachedUserInfo() || {};
 		const slides = [];
 
 		// 1. 获取各级标题和口号
-		const parentTitle = info.parentHomeTitle;
-		const parentSlogan = info.parentHomeSlogan;
 		const userTitle = info.homeTitle;
 		const userSlogan = info.homeSlogan;
+		const parentTitle = info.parentHomeTitle;
+		const parentSlogan = info.parentHomeSlogan;
 
-		// 默认文案
+		// 默认文案 (作为 Parent/Platform 的兜底)
 		const defaultTitle = '猩聚社';
 		const defaultSlogan = '商友连接·商机分享';
 
-		// 2. 构建第一张卡片 (优先级：Parent > User > Default)
-		let firstSlide = {
-			title: defaultTitle,
-			slogan: defaultSlogan
-		};
-
-		if (parentTitle) {
-			firstSlide = {
-				title: parentTitle,
-				slogan: parentSlogan || ''
-			};
-		} else if (userTitle) {
-			firstSlide = {
-				title: userTitle,
-				slogan: userSlogan || ''
-			};
-		}
-		slides.push(firstSlide);
-
-		// 3. 构建第二张卡片 (只有当 Parent 和 User 都有值时才存在)
-		if (parentTitle && userTitle) {
+		// 2. 处理本级定制 (User) - 永远作为第一张（如果有）
+		if (userTitle) {
 			slides.push({
 				title: userTitle,
 				slogan: userSlogan || ''
+			});
+		}
+
+		// 3. 处理上一级定制 (Parent) - 作为第二张（或者第一张，如果User没定制）
+		if (parentTitle) {
+			slides.push({
+				title: parentTitle,
+				slogan: parentSlogan || ''
+			});
+		} else {
+			// 如果没有 Parent 定制，显示平台默认值
+			slides.push({
+				title: defaultTitle,
+				slogan: defaultSlogan
 			});
 		}
 
@@ -307,14 +296,6 @@
 		return '连接全球精英商友';
 	});
 
-	// const pageDescription = computed(() => {
-	// 	// 检查 pageTitle 或 pageSlogan 是否已经被定制
-	// 	if (pageTitle.value !== '猩聚社' || pageSlogan.value !== '商友连接·商机分享') {
-	// 		return '连接全球精英商友——by猩聚社';
-	// 	}
-	// 	return '连接全球精英商友';
-	// });
-
 	const hasPaidMembership = computed(() => {
 		const paidLevels = ['青铜', '白银', '黄金', '黑钻'];
 		return paidLevels.includes(member.value);
@@ -327,11 +308,24 @@
 	onMounted(() => {
 		console.log('首页 onMounted: 开始监听 postUpdated 事件');
 		uni.$on('postUpdated', handlePostUpdate);
+
+		// 监听用户关注状态变更
+		uni.$on('userFollowStatusChanged', handleUserFollowStatusChange);
+		//监听帖子互动状态变更
+		uni.$on('postInteractionChanged', handlePostInteractionChange);
+		// 监听用户信息变更 (来自定制页)
+		uni.$on('userInfoChanged', handleUserInfoChange);
 	});
 
 	onUnmounted(() => {
 		console.log('首页 onUnmounted: 移除 postUpdated 事件监听');
 		uni.$off('postUpdated', handlePostUpdate);
+
+		// 移除监听
+		uni.$off('userFollowStatusChanged', handleUserFollowStatusChange);
+		// 移除
+		uni.$off('postInteractionChanged', handlePostInteractionChange);
+		uni.$off('userInfoChanged', handleUserInfoChange);
 	});
 
 	onShow(() => {
@@ -424,8 +418,9 @@
 	 * 一个处理刷新事件的函数
 	 */
 	const handlePostUpdate = () => {
-		console.log('接收到 postUpdated 通知，强制刷新首页列表...');
-		getBusinessOpportunitiesList(true); // 调用强制刷新
+		// 可以留空，或者只做一些非破坏性的更新
+		// 因为我们已经通过具体的事件完成了数据同步
+		console.log('postUpdated 触发，但已通过精准事件同步数据，跳过全量刷新');
 	};
 
 	// ============================
@@ -492,7 +487,7 @@
 			}
 
 			const mappedData = apiData.list.map(item => {
-				// 【新增】处理内容的逻辑
+				// 处理内容的逻辑
 				const plainText = (item.postContent || '').replace(/<[^>]+>/g, '').trim();
 				const isTruncated = plainText.length > 100;
 				const displayContent = isTruncated ? plainText.substring(0, 100) : plainText;
@@ -500,11 +495,10 @@
 				return {
 					id: item.id,
 					title: item.postTitle,
-					// 【修改】使用新的内容变量
 					fullContent: plainText, // 完整纯文本内容，为长按复制做准备
 					displayContent: displayContent, // 用于显示的内容
 					isTruncated: isTruncated, // 是否被截断的标志
-					// ==================== 【核心修改点】 ====================
+					// ========================================
 					// 1. 检查并赋值 postVideo 字段
 					video: item.postVideo || '',
 
@@ -612,6 +606,69 @@
 	// 6. 卡片交互方法 (Card Interaction Methods)
 	// ============================
 
+	/**
+	 * 处理从详情页传来的关注状态变更
+	 * @param {Object} data { userId, isFollowed }
+	 */
+	const handleUserFollowStatusChange = (data) => {
+		console.log('接收到关注状态变更:', data);
+		if (!data || !data.userId) return;
+
+		// 遍历当前列表，找到所有该用户的帖子，同步更新关注状态
+		postList.value.forEach(post => {
+			if (post.user.id === data.userId) {
+				post.isFollowedUser = data.isFollowed;
+			}
+		});
+	};
+
+	/**
+	 * 处理帖子互动状态变更 (点赞/收藏/评论)
+	 */
+	const handlePostInteractionChange = (data) => {
+		console.log('接收到帖子互动变更:', data);
+		// 1. 基础校验
+		if (!data || !data.postId) return;
+
+		// 2. 查找目标帖子 (使用 String 转换确保 ID 类型匹配，防止 数字 vs 字符串 导致找不到)
+		const targetPost = postList.value.find(p => String(p.id) === String(data.postId));
+
+		// 3. 【关键】只有当找到了帖子，才进行更新
+		if (targetPost) {
+			if (data.type === 'action') {
+				// 更新点赞/踩
+				targetPost.userAction = data.userAction;
+				targetPost.likes = data.likes;
+				targetPost.dislikes = data.dislikes;
+			} else if (data.type === 'save') {
+				// 更新收藏
+				targetPost.isSaved = data.isSaved;
+			} else if (data.type === 'comment') {
+				if (typeof data.totalCount === 'number') {
+					targetPost.commonCount = data.totalCount;
+				}
+				// 兼容旧逻辑（如果以后有其他地方只传 delta）
+				else if (data.delta) {
+					const currentCount = Number(targetPost.commonCount) || 0;
+					targetPost.commonCount = currentCount + data.delta;
+				}
+			}
+		} else {
+			console.warn(`未在当前列表中找到 ID 为 ${data.postId} 的帖子，跳过更新`);
+		}
+	};
+
+	/**
+	 * 处理用户信息变更 (如定制标题修改)
+	 */
+	const handleUserInfoChange = async () => {
+		console.log('收到用户信息变更通知，刷新首页配置');
+		// 1. 重新获取用户信息 (更新标题、口号等)
+		await fetchCurrentUserInfo();
+		// 2. (可选) 刷新列表，以防有其他关联数据变动
+		// getBusinessOpportunitiesList(true); 
+	};
+
 	const toggleAction = async (post, clickedAction) => {
 		if (isActionInProgress.value || !isLogin.value) return;
 		isActionInProgress.value = true;
@@ -683,14 +740,30 @@
 		}
 	};
 
+	// 通用的关注/收藏处理函数
 	const toggleGenericFollow = async (post, type, targetId, statusKey, successMsg, failureMsg) => {
+		// 1. 防抖/节流检查
 		if (isActionInProgress.value || !isLogin.value) return;
 		isActionInProgress.value = true;
 
+		// 2. 记录原始状态 (用于失败回滚)
 		const originalStatus = post[statusKey];
-		post[statusKey] = !originalStatus;
+		const newStatus = !originalStatus;
 
-		const apiUrl = post[statusKey] ? '/app-api/member/follow/add' : '/app-api/member/follow/del';
+		// 3. 乐观更新 (如果是关注人，需要同步更新列表里所有该人的帖子)
+		if (type === 'post_user') {
+			// 遍历列表，找到所有该用户的帖子并更新状态
+			postList.value.forEach(p => {
+				if (p.user.id === targetId) {
+					p[statusKey] = newStatus;
+				}
+			});
+		} else {
+			// 如果是收藏帖子，只更新当前这一条
+			post[statusKey] = newStatus;
+		}
+
+		const apiUrl = newStatus ? '/app-api/member/follow/add' : '/app-api/member/follow/del';
 
 		try {
 			const {
@@ -704,25 +777,34 @@
 			});
 
 			if (error) {
-				post[statusKey] = originalStatus; // 回滚
-				uni.showToast({
-					title: failureMsg,
-					icon: 'none'
-				});
+				throw new Error(error); // 抛出错误进入 catch 回滚
 			} else {
 				uni.showToast({
-					title: post[statusKey] ? successMsg.add : successMsg.remove,
+					title: newStatus ? successMsg.add : successMsg.remove,
 					icon: 'none'
 				});
 			}
 		} catch (err) {
-			post[statusKey] = originalStatus; // 回滚
+			// 4. 失败回滚
+			if (type === 'post_user') {
+				postList.value.forEach(p => {
+					if (p.user.id === targetId) {
+						p[statusKey] = originalStatus;
+					}
+				});
+			} else {
+				post[statusKey] = originalStatus;
+			}
+
 			uni.showToast({
-				title: '操作失败，请重试',
+				title: failureMsg || '操作失败，请重试',
 				icon: 'none'
 			});
 		} finally {
-			isActionInProgress.value = false;
+			// 5. 释放锁 (为了防止过快点击，可以加一个小延迟，例如 500ms)
+			setTimeout(() => {
+				isActionInProgress.value = false;
+			}, 500);
 		}
 	};
 
@@ -935,20 +1017,20 @@
 	};
 
 	// 长按复制文本的方法
-	// 【新增】用于长按复制菜单的状态
+	// 用于长按复制菜单的状态
 	const copyMenu = reactive({
 		show: false,
 		text: '', // 准备要复制的文本
 	});
 
-	// 【修改】长按处理函数，现在它只负责显示菜单
+	// 长按处理函数，现在它只负责显示菜单
 	const handleLongPress = (textToCopy) => {
 		if (!textToCopy) return;
 		copyMenu.text = textToCopy;
 		copyMenu.show = true;
 	};
 
-	// 【新增】点击“复制”按钮后真正执行复制操作的函数
+	// 点击“复制”按钮后真正执行复制操作的函数
 	const executeCopy = () => {
 		if (!copyMenu.text) return;
 		uni.setClipboardData({
@@ -975,16 +1057,10 @@
 		});
 	};
 
-	// 【新增】点击遮罩层隐藏菜单
+	// 点击遮罩层隐藏菜单
 	const hideCopyMenu = () => {
 		copyMenu.show = false;
 	};
-
-	// const generateContentPreview = (content) => {
-	// 	if (!content) return '';
-	// 	const plainText = content.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
-	// 	return plainText.length > 50 ? plainText.substring(0, 50) + '...' : plainText;
-	// };
 </script>
 
 <style scoped>

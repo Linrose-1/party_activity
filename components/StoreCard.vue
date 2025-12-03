@@ -1,28 +1,46 @@
 <template>
-	<view class="store-item">
-		<view class="store-content">
-			<view class="store-header">
-				<view class="store-name">
-					<uni-icons :type="store.icon" size="20" color="#FF6B00"></uni-icons>
-					<text>{{ store.storeName }}</text>
-				</view>
-				<view class="distance" v-if="store.distanceKm">
-					<uni-icons type="location-filled" size="16" color="#FF6B00"></uni-icons>
-					<text>{{ store.distanceKm }}</text>
-				</view>
-			</view>
-			<view class="store-desc">
-				{{ store.storeDescription }}
-			</view>
-			<view class="store-footer">
-				<!-- 修改点 1：将原来的标签区域替换为“发起聚会”按钮 -->
-				<button class="nav-btn initiate-btn" @click.stop="handleInitiateParty">
-					<text>发起聚会</text>
-				</button>
+	<view class="store-card" @click="handleCardClick">
+		<!-- 左侧：封面图 -->
+		<view class="card-image-wrapper">
+			<image :src="coverImage" mode="aspectFill" class="card-image" lazy-load></image>
+			<!-- 可选：左上角标签 (如分类) -->
+			<!-- <view class="category-tag" v-if="store.categoryStr">{{ store.categoryStr }}</view> -->
+		</view>
 
-				<button class="nav-btn detail-btn" @click.stop="handleCardClick">
-					<text>聚店详情</text>
-				</button>
+		<!-- 右侧：内容区 -->
+		<view class="card-content">
+			<!-- 1. 头部：店名 + 距离 -->
+			<view class="card-header">
+				<text class="store-name">{{ store.storeName }}</text>
+				<view class="distance-badge" v-if="displayDistance">
+					<text>{{ displayDistance }}</text>
+				</view>
+			</view>
+
+			<!-- 2. 中部：描述/简介 -->
+			<view class="card-body">
+				<text class="store-desc">{{ store.storeDescription || '暂无介绍' }}</text>
+			</view>
+
+			<!-- 3. 底部：人均 + 按钮 -->
+			<view class="card-footer">
+				<!-- 左侧显示人均消费 (如果有) -->
+				<view class="price-info" v-if="store.averageConsumptionRange">
+					<text>人均 {{ store.averageConsumptionRange }}</text>
+				</view>
+				<view class="price-info" v-else></view> <!-- 占位 -->
+
+				<view class="action-buttons">
+					<!-- 发起聚会按钮 (次要操作，用空心或浅色) -->
+					<view class="btn btn-outline" @click.stop="handleInitiateParty">
+						<text>发起聚会</text>
+					</view>
+
+					<!-- 详情按钮 (主要操作，虽然点击卡片也能进，但保留按钮引导性更强) -->
+					<!-- <view class="btn btn-primary" @click.stop="handleCardClick">
+						<text>详情</text>
+					</view> -->
+				</view>
 			</view>
 		</view>
 	</view>
@@ -30,8 +48,6 @@
 
 <script setup>
 	import {
-		defineProps,
-		defineEmits,
 		computed
 	} from 'vue';
 
@@ -44,200 +60,172 @@
 
 	const emit = defineEmits(['click-card']);
 
-	const formattedDistance = computed(() => {
-		if (typeof props.store.distance !== 'number') {
-			return null;
+	// 计算封面图：优先取列表的第一张，没有则取单张字段，再没有用默认图
+	const coverImage = computed(() => {
+		if (props.store.storeCoverImageUrls && props.store.storeCoverImageUrls.length > 0) {
+			return props.store.storeCoverImageUrls[0];
 		}
+		if (props.store.storeCoverImageUrl) {
+			return props.store.storeCoverImageUrl;
+		}
+		return '/static/images/default-store.png'; // 请替换为您的默认图路径
+	});
 
-		// 修改点 3：将 Math.floor() 改为 toFixed(2) 以保留两位小数
-		const distanceWithDecimals = props.store.distance.toFixed(2);
-		return `${distanceWithDecimals}公里`;
+	// 计算距离显示
+	const displayDistance = computed(() => {
+		if (props.store.distanceKm) return props.store.distanceKm;
+		if (typeof props.store.distance === 'number') {
+			return props.store.distance.toFixed(1) + 'km';
+		}
+		return '';
 	});
 
 	const handleCardClick = () => {
 		emit('click-card', props.store);
 	};
 
-	/**
-	 * 处理“发起聚会”按钮的点击事件
-	 */
-	// const handleInitiateParty = () => {
-	// 	// 跳转到发起聚会页面，并通过 query 参数传递店铺 ID
-	// 	uni.navigateTo({
-	// 		url: `/packages/active-publish/active-publish?storeId=${props.store.id}`
-	// 	});
-	// };
-	/**
-	 * 处理“发起聚会”按钮的点击事件
-	 */
 	const handleInitiateParty = () => {
-		// 1. 安全检查，确保 store 对象和 id 存在
-		if (!props.store || !props.store.id) {
-			uni.showToast({
-				title: '聚店信息不完整',
-				icon: 'none'
-			});
-			return;
-		}
-
-		// ==================== 【核心修改点】 ====================
-		// 2. 在 URL 中同时传递 storeId 和 storeName
-		//    使用 encodeURIComponent 对店名进行编码，防止特殊字符（如 &、?、空格）破坏URL结构
+		if (!props.store || !props.store.id) return;
 		const url =
 			`/packages/active-publish/active-publish?storeId=${props.store.id}&storeName=${encodeURIComponent(props.store.storeName)}`;
-		// =======================================================
-
-		// 3. 执行跳转
 		uni.navigateTo({
-			url: url
+			url
 		});
 	};
 </script>
 
 <style lang="scss" scoped>
-	/* ... (其他样式保持不变) ... */
-	:root {
-		--primary: #FF6B00;
-		--primary-light: #FF8A33;
-		--light-bg: #f8f8f8;
-		--dark-text: #333;
-		--gray-text: #666;
-		--light-text: #999;
-		--border: #eee;
-		--weui-BG-0: #ededed;
-		--weui-BG-1: #f7f7f7;
+	.store-card {
+		background-color: #fff;
+		border-radius: 16rpx;
+		padding: 24rpx;
+		margin-bottom: 20rpx;
+		display: flex;
+		/* Flex 布局实现左图右文 */
+		gap: 24rpx;
+		/* 图片和内容的间距 */
+		box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.04);
+
+		&:active {
+			background-color: #f9f9f9;
+		}
 	}
 
-	.store-item {
-		background: white;
-		border-radius: 12px;
-		margin-bottom: 15px;
-		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+	/* 左侧图片 */
+	.card-image-wrapper {
+		width: 180rpx;
+		height: 180rpx;
+		flex-shrink: 0;
+		/* 防止被压缩 */
+		border-radius: 12rpx;
 		overflow: hidden;
-		transition: all 0.3s ease;
+		position: relative;
+		background-color: #f5f5f5;
 	}
 
-	.store-item:active {
-		transform: scale(0.98);
+	.card-image {
+		width: 100%;
+		height: 100%;
 	}
 
-	.store-content {
-		padding: 15px;
+	/* 右侧内容 */
+	.card-content {
+		flex: 1;
+		min-width: 0;
+		/* 关键：允许子元素在 flex 容器中收缩 */
+		display: flex;
+		flex-direction: column;
+		justify-content: space-between;
 	}
 
-	.store-header {
+	/* 1. 头部 */
+	.card-header {
 		display: flex;
 		justify-content: space-between;
-		align-items: center;
-		margin-bottom: 12px;
+		align-items: flex-start;
+		margin-bottom: 8rpx;
 	}
 
 	.store-name {
-		font-size: 18px;
-		font-weight: 600;
-		color: var(--dark-text);
-		display: flex;
-		align-items: center;
+		font-size: 30rpx;
+		font-weight: bold;
+		color: #333;
+		line-height: 1.4;
 
-		flex: 1;
-		/* 1. 让它占据所有剩余空间，这是最关键的一步 */
-		min-width: 0;
-		/* 2. 允许 flex 项在内容溢出时收缩，这是 flex 布局的一个重要技巧 */
-	}
-
-	.store-name .uni-icons {
-		margin-right: 8px;
-		flex-shrink: 0;
-	}
-
-	.store-name text {
+		/* 限制店名最多显示1行，超出省略 (美团风格通常是单行) */
 		white-space: nowrap;
-		/* 禁止文本换行 */
 		overflow: hidden;
-		/* 隐藏超出的部分 */
 		text-overflow: ellipsis;
-		/* 将隐藏的部分显示为省略号 */
-		display: inline-block;
-		/* 确保 text 元素表现为块级行为，以便应用溢出样式 */
-		vertical-align: middle;
-		/* (可选) 确保文本和图标垂直对齐更精确 */
+		flex: 1;
+		margin-right: 10rpx;
 	}
 
-	.distance {
-		color: var(--primary);
-		font-size: 14px;
-		display: flex;
-		align-items: center;
-		font-weight: 500;
-
-		margin-left: 10px;
-		/* 5. (推荐) 给距离增加一个左边距，确保即使店名不长，两者之间也有安全间距 */
+	.distance-badge {
+		font-size: 22rpx;
+		color: #666;
 		flex-shrink: 0;
-		/* 6. (推荐) 确保距离部分本身不会被压缩 */
+		padding-top: 4rpx;
+		/* 微调对齐 */
 	}
 
-	.distance .uni-icons {
-		margin-right: 4px;
+	/* 2. 描述 */
+	.card-body {
+		flex: 1;
+		margin-bottom: 12rpx;
 	}
 
 	.store-desc {
-		font-size: 14px;
-		color: var(--gray-text);
-		margin-bottom: 15px;
+		font-size: 24rpx;
+		color: #999;
 		line-height: 1.5;
+
+		/* 限制显示两行，超出省略 */
 		display: -webkit-box;
-		-webkit-line-clamp: 2;
 		-webkit-box-orient: vertical;
+		-webkit-line-clamp: 2;
 		overflow: hidden;
 		text-overflow: ellipsis;
 	}
 
-	.store-footer {
+	/* 3. 底部 */
+	.card-footer {
 		display: flex;
-		justify-content: flex-end;
-		/* 修改为 flex-end，让按钮靠右对齐 */
+		justify-content: space-between;
 		align-items: center;
-		padding-top: 10px;
-		border-top: 1px dashed #ffe8d9;
-		gap: 10px;
-		/* 新增：给按钮之间增加一些间距 */
 	}
 
-	/* 移除 .store-tags 和 .store-tag 的样式 */
-
-	.nav-btn {
-		/* 这是两个按钮的通用样式 */
-		color: white;
-		border: none;
-		padding: 6px 18px;
-		border-radius: 16px;
-		font-size: 14px;
-		display: flex;
-		align-items: center;
-		cursor: pointer;
-		transition: all 0.3s;
+	.price-info {
+		font-size: 24rpx;
+		color: #ff6b00;
 		font-weight: 500;
+	}
+
+	.action-buttons {
+		display: flex;
+		gap: 16rpx;
+	}
+
+	.btn {
+		font-size: 24rpx;
+		padding: 8rpx 20rpx;
+		border-radius: 30rpx;
 		line-height: 1;
-		margin: 0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
 	}
 
-	.nav-btn::after {
+	/* 空心按钮样式 (发起聚会) */
+	.btn-outline {
+		border: 1rpx solid #ff6b00;
+		color: #ff6b00;
+		background-color: transparent;
+	}
+
+	/* 实心按钮样式 (详情) */
+	/* .btn-primary {
+		background: linear-gradient(to right, #ff8c00, #ff6b00);
+		color: #fff;
 		border: none;
-	}
-
-	/* 新增：“发起聚会”按钮的特定样式 */
-	.initiate-btn {
-		background: #FF8A33;
-		/* 使用一个稍浅的橙色以作区分 */
-	}
-
-	/* 修改：“聚店详情”按钮的样式 */
-	.detail-btn {
-		background: var(--primary);
-		/* 使用主色 */
-	}
-
-	.nav-btn .uni-icons {
-		margin-right: 5px;
-	}
+	} */
 </style>

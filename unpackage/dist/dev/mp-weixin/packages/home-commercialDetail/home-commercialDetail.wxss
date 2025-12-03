@@ -97,7 +97,7 @@
 		flex: 1;
 		min-width: 0;
 		overflow: hidden;
-		/* 【新增】让内部元素垂直排列 */
+		/* 让内部元素垂直排列 */
 		display: flex;
 		flex-direction: column;
 		justify-content: center;
@@ -109,7 +109,7 @@
 		color: #333;
 		margin-bottom: 6rpx;
 
-		/* 【修改】移除单行省略样式，允许换行 */
+		/* 移除单行省略样式，允许换行 */
 		white-space: normal;
 		/* 允许正常换行 */
 		word-break: break-all;
@@ -117,7 +117,7 @@
 		/* 移除 overflow: hidden 和 text-overflow: ellipsis */
 }
 
-	/* 【新增】时间和按钮的容器样式 */
+	/* 时间和按钮的容器样式 */
 .time-and-actions.data-v-8303b14f {
 		display: flex;
 		align-items: center;
@@ -217,7 +217,7 @@
 		/* 消除 image 标签底部空隙 */
 }
 
-	/* ==================== 【新增】视频容器和播放器样式 ==================== */
+	/* ==================== 视频容器和播放器样式 ==================== */
 .post-video-container.data-v-8303b14f {
 		width: 100%;
 		border-radius: 12rpx;

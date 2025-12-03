@@ -44,32 +44,27 @@ const _sfc_main = {
     const headerSlides = common_vendor.computed(() => {
       const info = currentUserInfo.value || utils_user.getCachedUserInfo() || {};
       const slides = [];
-      const parentTitle = info.parentHomeTitle;
-      const parentSlogan = info.parentHomeSlogan;
       const userTitle = info.homeTitle;
       const userSlogan = info.homeSlogan;
+      const parentTitle = info.parentHomeTitle;
+      const parentSlogan = info.parentHomeSlogan;
       const defaultTitle = "猩聚社";
       const defaultSlogan = "商友连接·商机分享";
-      let firstSlide = {
-        title: defaultTitle,
-        slogan: defaultSlogan
-      };
-      if (parentTitle) {
-        firstSlide = {
-          title: parentTitle,
-          slogan: parentSlogan || ""
-        };
-      } else if (userTitle) {
-        firstSlide = {
-          title: userTitle,
-          slogan: userSlogan || ""
-        };
-      }
-      slides.push(firstSlide);
-      if (parentTitle && userTitle) {
+      if (userTitle) {
         slides.push({
           title: userTitle,
           slogan: userSlogan || ""
+        });
+      }
+      if (parentTitle) {
+        slides.push({
+          title: parentTitle,
+          slogan: parentSlogan || ""
+        });
+      } else {
+        slides.push({
+          title: defaultTitle,
+          slogan: defaultSlogan
         });
       }
       return slides;
@@ -86,18 +81,24 @@ const _sfc_main = {
       return paidLevels.includes(member.value);
     });
     common_vendor.onMounted(() => {
-      common_vendor.index.__f__("log", "at pages/home/home.vue:328", "首页 onMounted: 开始监听 postUpdated 事件");
+      common_vendor.index.__f__("log", "at pages/home/home.vue:309", "首页 onMounted: 开始监听 postUpdated 事件");
       common_vendor.index.$on("postUpdated", handlePostUpdate);
+      common_vendor.index.$on("userFollowStatusChanged", handleUserFollowStatusChange);
+      common_vendor.index.$on("postInteractionChanged", handlePostInteractionChange);
+      common_vendor.index.$on("userInfoChanged", handleUserInfoChange);
     });
     common_vendor.onUnmounted(() => {
-      common_vendor.index.__f__("log", "at pages/home/home.vue:333", "首页 onUnmounted: 移除 postUpdated 事件监听");
+      common_vendor.index.__f__("log", "at pages/home/home.vue:321", "首页 onUnmounted: 移除 postUpdated 事件监听");
       common_vendor.index.$off("postUpdated", handlePostUpdate);
+      common_vendor.index.$off("userFollowStatusChanged", handleUserFollowStatusChange);
+      common_vendor.index.$off("postInteractionChanged", handlePostInteractionChange);
+      common_vendor.index.$off("userInfoChanged", handleUserInfoChange);
     });
     common_vendor.onShow(() => {
       const currentUserId = common_vendor.index.getStorageSync("userId");
       const currentUserIsLogin = !!currentUserId;
       if (isInitialLoad.value || isLogin.value !== currentUserIsLogin || postList.value.length === 0) {
-        common_vendor.index.__f__("log", "at pages/home/home.vue:347", "触发刷新: 首次加载或登录状态变更");
+        common_vendor.index.__f__("log", "at pages/home/home.vue:341", "触发刷新: 首次加载或登录状态变更");
         loggedInUserId.value = currentUserId;
         isLogin.value = currentUserIsLogin;
         if (isLogin.value) {
@@ -108,7 +109,7 @@ const _sfc_main = {
         getBusinessOpportunitiesList(true);
         isInitialLoad.value = false;
       } else {
-        common_vendor.index.__f__("log", "at pages/home/home.vue:365", "从详情页返回，不刷新列表，保持滚动位置。");
+        common_vendor.index.__f__("log", "at pages/home/home.vue:359", "从详情页返回，不刷新列表，保持滚动位置。");
       }
       common_vendor.index.showShareMenu({
         withShareTicket: true,
@@ -154,8 +155,7 @@ const _sfc_main = {
       };
     });
     const handlePostUpdate = () => {
-      common_vendor.index.__f__("log", "at pages/home/home.vue:427", "接收到 postUpdated 通知，强制刷新首页列表...");
-      getBusinessOpportunitiesList(true);
+      common_vendor.index.__f__("log", "at pages/home/home.vue:423", "postUpdated 触发，但已通过精准事件同步数据，跳过全量刷新");
     };
     const fetchCurrentUserInfo = async () => {
       const {
@@ -165,11 +165,11 @@ const _sfc_main = {
         method: "GET"
       });
       if (error) {
-        common_vendor.index.__f__("error", "at pages/home/home.vue:443", "首页实时获取用户信息失败:", error);
+        common_vendor.index.__f__("error", "at pages/home/home.vue:438", "首页实时获取用户信息失败:", error);
         currentUserInfo.value = utils_user.getCachedUserInfo();
       } else {
         currentUserInfo.value = data;
-        common_vendor.index.__f__("log", "at pages/home/home.vue:448", "首页实时获取用户信息成功:", currentUserInfo.value);
+        common_vendor.index.__f__("log", "at pages/home/home.vue:443", "首页实时获取用户信息成功:", currentUserInfo.value);
         common_vendor.index.setStorageSync("userInfo", JSON.stringify(data));
       }
     };
@@ -220,14 +220,13 @@ const _sfc_main = {
           return {
             id: item.id,
             title: item.postTitle,
-            // 【修改】使用新的内容变量
             fullContent: plainText,
             // 完整纯文本内容，为长按复制做准备
             displayContent,
             // 用于显示的内容
             isTruncated,
             // 是否被截断的标志
-            // ==================== 【核心修改点】 ====================
+            // ========================================
             // 1. 检查并赋值 postVideo 字段
             video: item.postVideo || "",
             // 2. 将 postImg 的处理结果赋值给 images 字段
@@ -262,7 +261,7 @@ const _sfc_main = {
           pageNo.value++;
         }
       } catch (err) {
-        common_vendor.index.__f__("error", "at pages/home/home.vue:547", "getBusinessOpportunitiesList 逻辑异常:", err);
+        common_vendor.index.__f__("error", "at pages/home/home.vue:541", "getBusinessOpportunitiesList 逻辑异常:", err);
         loadingStatus.value = "more";
         common_vendor.index.showToast({
           title: "页面逻辑异常，请稍后重试",
@@ -320,6 +319,44 @@ const _sfc_main = {
           getBusinessOpportunitiesList(true);
         }
       });
+    };
+    const handleUserFollowStatusChange = (data) => {
+      common_vendor.index.__f__("log", "at pages/home/home.vue:614", "接收到关注状态变更:", data);
+      if (!data || !data.userId)
+        return;
+      postList.value.forEach((post) => {
+        if (post.user.id === data.userId) {
+          post.isFollowedUser = data.isFollowed;
+        }
+      });
+    };
+    const handlePostInteractionChange = (data) => {
+      common_vendor.index.__f__("log", "at pages/home/home.vue:629", "接收到帖子互动变更:", data);
+      if (!data || !data.postId)
+        return;
+      const targetPost = postList.value.find((p) => String(p.id) === String(data.postId));
+      if (targetPost) {
+        if (data.type === "action") {
+          targetPost.userAction = data.userAction;
+          targetPost.likes = data.likes;
+          targetPost.dislikes = data.dislikes;
+        } else if (data.type === "save") {
+          targetPost.isSaved = data.isSaved;
+        } else if (data.type === "comment") {
+          if (typeof data.totalCount === "number") {
+            targetPost.commonCount = data.totalCount;
+          } else if (data.delta) {
+            const currentCount = Number(targetPost.commonCount) || 0;
+            targetPost.commonCount = currentCount + data.delta;
+          }
+        }
+      } else {
+        common_vendor.index.__f__("warn", "at pages/home/home.vue:657", `未在当前列表中找到 ID 为 ${data.postId} 的帖子，跳过更新`);
+      }
+    };
+    const handleUserInfoChange = async () => {
+      common_vendor.index.__f__("log", "at pages/home/home.vue:665", "收到用户信息变更通知，刷新首页配置");
+      await fetchCurrentUserInfo();
     };
     const toggleAction = async (post, clickedAction) => {
       if (isActionInProgress.value || !isLogin.value)
@@ -390,8 +427,17 @@ const _sfc_main = {
         return;
       isActionInProgress.value = true;
       const originalStatus = post[statusKey];
-      post[statusKey] = !originalStatus;
-      const apiUrl = post[statusKey] ? "/app-api/member/follow/add" : "/app-api/member/follow/del";
+      const newStatus = !originalStatus;
+      if (type === "post_user") {
+        postList.value.forEach((p) => {
+          if (p.user.id === targetId) {
+            p[statusKey] = newStatus;
+          }
+        });
+      } else {
+        post[statusKey] = newStatus;
+      }
+      const apiUrl = newStatus ? "/app-api/member/follow/add" : "/app-api/member/follow/del";
       try {
         const {
           error
@@ -403,25 +449,31 @@ const _sfc_main = {
           }
         });
         if (error) {
-          post[statusKey] = originalStatus;
-          common_vendor.index.showToast({
-            title: failureMsg,
-            icon: "none"
-          });
+          throw new Error(error);
         } else {
           common_vendor.index.showToast({
-            title: post[statusKey] ? successMsg.add : successMsg.remove,
+            title: newStatus ? successMsg.add : successMsg.remove,
             icon: "none"
           });
         }
       } catch (err) {
-        post[statusKey] = originalStatus;
+        if (type === "post_user") {
+          postList.value.forEach((p) => {
+            if (p.user.id === targetId) {
+              p[statusKey] = originalStatus;
+            }
+          });
+        } else {
+          post[statusKey] = originalStatus;
+        }
         common_vendor.index.showToast({
-          title: "操作失败，请重试",
+          title: failureMsg || "操作失败，请重试",
           icon: "none"
         });
       } finally {
-        isActionInProgress.value = false;
+        setTimeout(() => {
+          isActionInProgress.value = false;
+        }, 500);
       }
     };
     const toggleSave = (post) => {
@@ -623,7 +675,7 @@ const _sfc_main = {
           });
         },
         fail: (err) => {
-          common_vendor.index.__f__("error", "at pages/home/home.vue:964", "setClipboardData failed:", err);
+          common_vendor.index.__f__("error", "at pages/home/home.vue:1046", "setClipboardData failed:", err);
           common_vendor.index.showToast({
             title: "复制失败",
             icon: "none"
@@ -648,33 +700,31 @@ const _sfc_main = {
           };
         }),
         b: common_vendor.t(pageDescription.value),
-        c: headerSlides.value.length > 1,
-        d: headerSlides.value.length > 1,
-        e: common_vendor.o(goToCustomizationPage),
-        f: common_vendor.p({
+        c: common_vendor.o(goToCustomizationPage),
+        d: common_vendor.p({
           type: "search",
           size: "20",
           color: "#FF6A00"
         }),
-        g: common_vendor.o(handleSearch),
-        h: searchQuery.value,
-        i: common_vendor.o(($event) => searchQuery.value = $event.detail.value),
-        j: common_vendor.o(handleSearch),
-        k: activeTab.value === 1 ? 1 : "",
-        l: common_vendor.o(($event) => handleTabClick(1)),
-        m: activeTab.value === 2 ? 1 : "",
-        n: common_vendor.o(($event) => handleTabClick(2)),
-        o: activeTab.value === 3 ? 1 : "",
-        p: common_vendor.o(($event) => handleTabClick(3)),
-        q: activeTab.value === 4 ? 1 : "",
-        r: common_vendor.o(($event) => handleTabClick(4)),
-        s: common_vendor.p({
+        e: common_vendor.o(handleSearch),
+        f: searchQuery.value,
+        g: common_vendor.o(($event) => searchQuery.value = $event.detail.value),
+        h: common_vendor.o(handleSearch),
+        i: activeTab.value === 1 ? 1 : "",
+        j: common_vendor.o(($event) => handleTabClick(1)),
+        k: activeTab.value === 2 ? 1 : "",
+        l: common_vendor.o(($event) => handleTabClick(2)),
+        m: activeTab.value === 3 ? 1 : "",
+        n: common_vendor.o(($event) => handleTabClick(3)),
+        o: activeTab.value === 4 ? 1 : "",
+        p: common_vendor.o(($event) => handleTabClick(4)),
+        q: common_vendor.p({
           type: "compose",
           size: "18",
           color: "#FFFFFF"
         }),
-        t: common_vendor.o(postNew),
-        v: common_vendor.f(postList.value, (post, k0, i0) => {
+        r: common_vendor.o(postNew),
+        s: common_vendor.f(postList.value, (post, k0, i0) => {
           return common_vendor.e({
             a: post.user.avatar,
             b: common_vendor.o(($event) => navigateToBusinessCard(post.user), post.id),
@@ -779,30 +829,30 @@ const _sfc_main = {
             aa: common_vendor.o(($event) => handlePostClick(post), post.id)
           });
         }),
-        w: isLogin.value,
-        x: !isLogin.value && postList.value.length === 0
+        t: isLogin.value,
+        v: !isLogin.value && postList.value.length === 0
       }, !isLogin.value && postList.value.length === 0 ? {
-        y: common_vendor.o(goToLogin)
+        w: common_vendor.o(goToLogin)
       } : isLogin.value && postList.value.length === 0 && loadingStatus.value === "noMore" ? {} : loadingStatus.value === "loading" ? {
-        B: common_vendor.p({
+        z: common_vendor.p({
           status: "loading",
           ["contentText.loading"]: "正在加载..."
         })
       } : loadingStatus.value === "noMore" ? {
-        D: common_vendor.p({
+        B: common_vendor.p({
           status: "noMore",
           ["contentText.noMore"]: "暂无更多内容"
         })
       } : {}, {
-        z: isLogin.value && postList.value.length === 0 && loadingStatus.value === "noMore",
-        A: loadingStatus.value === "loading",
-        C: loadingStatus.value === "noMore",
-        E: copyMenu.show
+        x: isLogin.value && postList.value.length === 0 && loadingStatus.value === "noMore",
+        y: loadingStatus.value === "loading",
+        A: loadingStatus.value === "noMore",
+        C: copyMenu.show
       }, copyMenu.show ? {
-        F: common_vendor.o(executeCopy),
-        G: common_vendor.o(() => {
+        D: common_vendor.o(executeCopy),
+        E: common_vendor.o(() => {
         }),
-        H: common_vendor.o(hideCopyMenu)
+        F: common_vendor.o(hideCopyMenu)
       } : {});
     };
   }

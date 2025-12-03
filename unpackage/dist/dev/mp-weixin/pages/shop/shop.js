@@ -33,7 +33,7 @@ const _sfc_main = {
     const handleChooseLocation = () => {
       common_vendor.index.chooseLocation({
         success: (res) => {
-          common_vendor.index.__f__("log", "at pages/shop/shop.vue:216", "用户手动选择了新位置:", res);
+          common_vendor.index.__f__("log", "at pages/shop/shop.vue:239", "用户手动选择了新位置:", res);
           const newAddress = res.name || res.address;
           const newLocation = {
             latitude: res.latitude,
@@ -55,6 +55,14 @@ const _sfc_main = {
         }
       });
     };
+    const shortAddress = common_vendor.computed(() => {
+      if (!displayAddress.value)
+        return "定位中";
+      if (displayAddress.value.length > 4) {
+        return displayAddress.value.substring(0, 4) + "...";
+      }
+      return displayAddress.value;
+    });
     const fetchBanners = async () => {
       const {
         data,
@@ -68,7 +76,7 @@ const _sfc_main = {
         }
       });
       if (error) {
-        common_vendor.index.__f__("error", "at pages/shop/shop.vue:264", "获取聚店页轮播图失败:", error);
+        common_vendor.index.__f__("error", "at pages/shop/shop.vue:299", "获取聚店页轮播图失败:", error);
         bannerList.value = [];
         return;
       }
@@ -95,7 +103,7 @@ const _sfc_main = {
       if (activeFilter.value !== "all") {
         params.category = activeFilter.value;
       }
-      common_vendor.index.__f__("log", "at pages/shop/shop.vue:311", "🚀 [getStoreList] 最终请求参数:", params);
+      common_vendor.index.__f__("log", "at pages/shop/shop.vue:346", "🚀 [getStoreList] 最终请求参数:", params);
       const {
         data: result,
         error
@@ -105,7 +113,7 @@ const _sfc_main = {
       });
       loadingMore.value = false;
       if (error) {
-        common_vendor.index.__f__("error", "at pages/shop/shop.vue:324", "获取店铺列表失败:", error);
+        common_vendor.index.__f__("error", "at pages/shop/shop.vue:359", "获取店铺列表失败:", error);
         common_vendor.index.showToast({
           title: error,
           icon: "none"
@@ -139,7 +147,7 @@ const _sfc_main = {
         allStores.value = [];
         await getStoreList();
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/shop/shop.vue:369", "handleRefresh 过程中捕获到错误:", error);
+        common_vendor.index.__f__("error", "at pages/shop/shop.vue:404", "handleRefresh 过程中捕获到错误:", error);
       } finally {
         isLoading.value = false;
       }
@@ -175,7 +183,7 @@ const _sfc_main = {
     });
     common_vendor.onShow(() => {
       if (allStores.value.length === 0) {
-        common_vendor.index.__f__("log", "at pages/shop/shop.vue:416", "onShow: 列表为空，执行初次加载...");
+        common_vendor.index.__f__("log", "at pages/shop/shop.vue:451", "onShow: 列表为空，执行初次加载...");
         const storedLocation = common_vendor.index.getStorageSync("userLocation");
         const storedAddress = common_vendor.index.getStorageSync("displayAddress");
         if (storedLocation) {
@@ -189,11 +197,11 @@ const _sfc_main = {
           handleRefresh();
         }
       } else {
-        common_vendor.index.__f__("log", "at pages/shop/shop.vue:432", "onShow: 列表已有数据，不自动刷新位置。");
+        common_vendor.index.__f__("log", "at pages/shop/shop.vue:467", "onShow: 列表已有数据，不自动刷新位置。");
       }
     });
     const handleRefresherRefresh = async () => {
-      common_vendor.index.__f__("log", "at pages/shop/shop.vue:438", "--- scroll-view 的 @refresherrefresh 事件已触发 ---");
+      common_vendor.index.__f__("log", "at pages/shop/shop.vue:473", "--- scroll-view 的 @refresherrefresh 事件已触发 ---");
       await handleRefresh(true);
     };
     const loadMore = () => {
@@ -206,12 +214,6 @@ const _sfc_main = {
     });
     const filteredStores = common_vendor.computed(() => allStores.value);
     let searchTimer = null;
-    const onSearchInput = () => {
-      clearTimeout(searchTimer);
-      searchTimer = setTimeout(() => {
-        handleRefresh();
-      }, 500);
-    };
     const handleSearchClick = () => {
       clearTimeout(searchTimer);
       handleRefresh();
@@ -236,7 +238,7 @@ const _sfc_main = {
     };
     common_vendor.onShareAppMessage(() => {
       const inviteCode = utils_user.getInviteCode();
-      common_vendor.index.__f__("log", "at pages/shop/shop.vue:508", `[分享] 准备分享聚店页面给好友，邀请码: ${inviteCode}`);
+      common_vendor.index.__f__("log", "at pages/shop/shop.vue:543", `[分享] 准备分享聚店页面给好友，邀请码: ${inviteCode}`);
       let sharePath = "/pages/shop/shop";
       if (inviteCode) {
         sharePath += `?inviteCode=${inviteCode}`;
@@ -247,12 +249,12 @@ const _sfc_main = {
         imageUrl: bannerList.value.length > 0 ? bannerList.value[0].imageUrl : "https://img.gofor.club/logo.png"
         // 优先使用第一张轮播图作为分享封面
       };
-      common_vendor.index.__f__("log", "at pages/shop/shop.vue:525", "[分享] 分享给好友的内容:", JSON.stringify(shareContent));
+      common_vendor.index.__f__("log", "at pages/shop/shop.vue:560", "[分享] 分享给好友的内容:", JSON.stringify(shareContent));
       return shareContent;
     });
     common_vendor.onShareTimeline(() => {
       const inviteCode = utils_user.getInviteCode();
-      common_vendor.index.__f__("log", "at pages/shop/shop.vue:537", `[分享] 准备分享聚店页面到朋友圈，邀请码: ${inviteCode}`);
+      common_vendor.index.__f__("log", "at pages/shop/shop.vue:572", `[分享] 准备分享聚店页面到朋友圈，邀请码: ${inviteCode}`);
       let queryString = "";
       if (inviteCode) {
         queryString = `inviteCode=${inviteCode}`;
@@ -262,31 +264,27 @@ const _sfc_main = {
         query: queryString,
         imageUrl: bannerList.value.length > 0 ? bannerList.value[0].imageUrl : "https://img.gofor.club/logo.png"
       };
-      common_vendor.index.__f__("log", "at pages/shop/shop.vue:553", "[分享] 分享到朋友圈的内容:", JSON.stringify(shareContent));
+      common_vendor.index.__f__("log", "at pages/shop/shop.vue:588", "[分享] 分享到朋友圈的内容:", JSON.stringify(shareContent));
       return shareContent;
     });
     return (_ctx, _cache) => {
       return common_vendor.e({
-        a: common_vendor.p({
+        a: common_vendor.t(shortAddress.value || "定位"),
+        b: common_vendor.p({
+          type: "bottom",
+          size: "12",
+          color: "#333"
+        }),
+        c: common_vendor.o(handleChooseLocation),
+        d: common_vendor.p({
           type: "search",
-          size: "20",
-          color: "#999"
-        }),
-        b: common_vendor.o([($event) => searchTerm.value = $event.detail.value, onSearchInput]),
-        c: searchTerm.value,
-        d: common_vendor.o(handleSearchClick),
-        e: common_vendor.p({
-          type: "location-filled",
-          size: "20",
-          color: "#FF6B00"
-        }),
-        f: common_vendor.t(displayAddress.value || "点击选择位置查看附近聚店"),
-        g: common_vendor.p({
-          type: "right",
           size: "16",
           color: "#999"
         }),
-        h: common_vendor.o(handleChooseLocation),
+        e: common_vendor.o(handleSearchClick),
+        f: searchTerm.value,
+        g: common_vendor.o(($event) => searchTerm.value = $event.detail.value),
+        h: common_vendor.o(handleSearchClick),
         i: bannerList.value.length > 0
       }, bannerList.value.length > 0 ? {
         j: common_vendor.f(bannerList.value, (banner, k0, i0) => {
@@ -300,7 +298,19 @@ const _sfc_main = {
           });
         })
       } : {}, {
-        k: common_vendor.f(filters.value, (filter, k0, i0) => {
+        k: common_vendor.p({
+          type: "hand-up-filled",
+          size: "24",
+          color: "#fff"
+        }),
+        l: common_vendor.o(shareStore),
+        m: common_vendor.p({
+          type: "shop-filled",
+          size: "24",
+          color: "#fff"
+        }),
+        n: common_vendor.o(skipToNewShop),
+        o: common_vendor.f(filters.value, (filter, k0, i0) => {
           return {
             a: common_vendor.t(filter.name),
             b: filter.value,
@@ -308,55 +318,44 @@ const _sfc_main = {
             d: common_vendor.o(($event) => selectFilter(filter.value), filter.value)
           };
         }),
-        l: common_vendor.f(filteredStores.value, (store, k0, i0) => {
+        p: common_vendor.f(filteredStores.value, (store, k0, i0) => {
           return {
             a: store.id,
             b: common_vendor.o(goToStoreDetail, store.id),
-            c: "6d1ef275-3-" + i0,
+            c: "6d1ef275-4-" + i0,
             d: common_vendor.p({
               store
             })
           };
         }),
-        m: loadingMore.value
+        q: loadingMore.value
       }, loadingMore.value ? {
-        n: common_vendor.p({
+        r: common_vendor.p({
           type: "spinner-cycle",
           size: "20",
           color: "#999"
         })
       } : {}, {
-        o: !hasMore.value && allStores.value.length > 0
+        s: !hasMore.value && allStores.value.length > 0
       }, !hasMore.value && allStores.value.length > 0 ? {
-        p: common_vendor.p({
+        t: common_vendor.p({
           type: "checkmarkempty",
           size: "20",
           color: "#999"
         })
       } : {}, {
-        q: allStores.value.length === 0 && !loadingMore.value && !isRefreshing.value
+        v: allStores.value.length === 0 && !loadingMore.value && !isRefreshing.value
       }, allStores.value.length === 0 && !loadingMore.value && !isRefreshing.value ? {
-        r: common_vendor.p({
+        w: common_vendor.p({
           type: "info",
           size: "60",
           color: "#ffd8c1"
         })
       } : {}, {
-        s: common_vendor.o(loadMore),
-        t: isRefreshing.value,
-        v: common_vendor.o(handleRefresherRefresh),
-        w: common_vendor.p({
-          type: "hand-up-filled",
-          size: "20",
-          color: "#fff"
-        }),
-        x: common_vendor.o(shareStore),
-        y: common_vendor.p({
-          type: "plus-filled",
-          size: "20",
-          color: "#fff"
-        }),
-        z: common_vendor.o(skipToNewShop)
+        x: common_vendor.o(loadMore),
+        y: isRefreshing.value,
+        z: common_vendor.o(handleRefresherRefresh),
+        A: [2]
       });
     };
   }
