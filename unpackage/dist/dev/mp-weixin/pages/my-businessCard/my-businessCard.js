@@ -3,16 +3,16 @@ const common_vendor = require("../../common/vendor.js");
 const common_assets = require("../../common/assets.js");
 const utils_request = require("../../utils/request.js");
 if (!Array) {
-  const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
   const _easycom_uni_load_more2 = common_vendor.resolveComponent("uni-load-more");
+  const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
   const _easycom_uni_popup2 = common_vendor.resolveComponent("uni-popup");
-  (_easycom_uni_icons2 + _easycom_uni_load_more2 + _easycom_uni_popup2)();
+  (_easycom_uni_load_more2 + _easycom_uni_icons2 + _easycom_uni_popup2)();
 }
-const _easycom_uni_icons = () => "../../uni_modules/uni-icons/components/uni-icons/uni-icons.js";
 const _easycom_uni_load_more = () => "../../uni_modules/uni-load-more/components/uni-load-more/uni-load-more.js";
+const _easycom_uni_icons = () => "../../uni_modules/uni-icons/components/uni-icons/uni-icons.js";
 const _easycom_uni_popup = () => "../../uni_modules/uni-popup/components/uni-popup/uni-popup.js";
 if (!Math) {
-  (_easycom_uni_icons + _easycom_uni_load_more + MyCard + _easycom_uni_popup)();
+  (_easycom_uni_load_more + _easycom_uni_icons + MyCard + _easycom_uni_popup)();
 }
 const MyCard = () => "../../components/MyCard.js";
 const _sfc_main = {
@@ -29,12 +29,24 @@ const _sfc_main = {
     const sharePopup = common_vendor.ref(null);
     const customShareTitle = common_vendor.ref("");
     const showTimelineGuide = common_vendor.ref(false);
+    const isPopupOpen = common_vendor.ref(false);
+    const userStatus = common_vendor.computed(() => {
+      const token = common_vendor.index.getStorageSync("token");
+      if (!token)
+        return "GUEST";
+      if (isViewingOwnCard.value)
+        return "SELF";
+      if (userInfo.value && userInfo.value.isFriend) {
+        return "FRIEND";
+      }
+      return "STRANGER";
+    });
     common_vendor.onLoad(async (options) => {
       const token = common_vendor.index.getStorageSync("token");
       let finalOptions = options || {};
       if (finalOptions.scene) {
         const sceneStr = decodeURIComponent(finalOptions.scene);
-        common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:123", `✅ [名片页] 在 onLoad 中检测到 scene: ${sceneStr}`);
+        common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:186", `✅ [名片页] 在 onLoad 中检测到 scene: ${sceneStr}`);
         const sceneParams = {};
         sceneStr.split("&").forEach((item) => {
           const parts = item.split("=");
@@ -42,20 +54,20 @@ const _sfc_main = {
             sceneParams[parts[0]] = parts[1];
           }
         });
-        common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:131", "✅ [名片页] scene 解析结果:", sceneParams);
+        common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:194", "✅ [名片页] scene 解析结果:", sceneParams);
         finalOptions = {
           ...finalOptions,
           ...sceneParams
         };
       }
-      common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:139", "[my-businessCard] onLoad 触发。最终选项:", JSON.stringify(finalOptions));
+      common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:202", "[my-businessCard] onLoad 触发。最终选项:", JSON.stringify(finalOptions));
       const inviteCode = finalOptions.c || finalOptions.inviteCode;
       if (inviteCode) {
-        common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:144", "✅ [邀请码] 捕获邀请码，暂存本地:", inviteCode);
+        common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:207", "✅ [邀请码] 捕获邀请码，暂存本地:", inviteCode);
         common_vendor.index.setStorageSync("pendingInviteCode", inviteCode);
       }
       if (!token) {
-        common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:150", "⚠️ 当前为游客模式（未登录），尝试允许查看名片数据...");
+        common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:213", "⚠️ 当前为游客模式（未登录），尝试允许查看名片数据...");
       }
       const loggedInUserId = common_vendor.index.getStorageSync("userId");
       const targetId = finalOptions.i || finalOptions.id;
@@ -73,7 +85,7 @@ const _sfc_main = {
         if (token) {
           isViewingOwnCard.value = true;
         } else {
-          common_vendor.index.__f__("warn", "at pages/my-businessCard/my-businessCard.vue:180", "游客模式且无目标ID，无法展示内容，跳转登录页");
+          common_vendor.index.__f__("warn", "at pages/my-businessCard/my-businessCard.vue:243", "游客模式且无目标ID，无法展示内容，跳转登录页");
           common_vendor.index.reLaunch({
             url: "/pages/index/index"
           });
@@ -94,7 +106,7 @@ const _sfc_main = {
         userInfo.value = adaptUserInfo(rawData);
         await fetchPromotionQrCode();
       } catch (err) {
-        common_vendor.index.__f__("error", "at pages/my-businessCard/my-businessCard.vue:323", "页面初始化失败:", err.message);
+        common_vendor.index.__f__("error", "at pages/my-businessCard/my-businessCard.vue:386", "页面初始化失败:", err.message);
         const ignoredErrors = [
           "权限不足，已引导至申请页。",
           "GUEST_ACCESS_DENIED"
@@ -120,20 +132,20 @@ const _sfc_main = {
     const fetchPromotionQrCode = async () => {
       const token = common_vendor.index.getStorageSync("token");
       if (!token) {
-        common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:362", "游客模式，跳过生成推广小程序码");
+        common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:425", "游客模式，跳过生成推广小程序码");
         return;
       }
       if (!userInfo.value) {
-        common_vendor.index.__f__("warn", "at pages/my-businessCard/my-businessCard.vue:368", "无法生成小程序码，因为用户信息尚未加载。");
+        common_vendor.index.__f__("warn", "at pages/my-businessCard/my-businessCard.vue:431", "无法生成小程序码，因为用户信息尚未加载。");
         return;
       }
-      common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:372", "🚀 [二维码生成] 开始生成小程序码...");
+      common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:435", "🚀 [二维码生成] 开始生成小程序码...");
       const scene = generateSceneString();
       if (!scene) {
-        common_vendor.index.__f__("error", "at pages/my-businessCard/my-businessCard.vue:377", "❌ [二维码生成] 生成 scene 失败，无法继续。");
+        common_vendor.index.__f__("error", "at pages/my-businessCard/my-businessCard.vue:440", "❌ [二维码生成] 生成 scene 失败，无法继续。");
         return;
       }
-      common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:380", `✅ [二维码生成] 使用的 scene: ${scene}`);
+      common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:443", `✅ [二维码生成] 使用的 scene: ${scene}`);
       const payload = {
         scene,
         path: "pages/my-businessCard/my-businessCard",
@@ -150,12 +162,12 @@ const _sfc_main = {
         data: payload
       });
       if (error) {
-        common_vendor.index.__f__("error", "at pages/my-businessCard/my-businessCard.vue:404", "❌ [二维码生成] 调用接口失败:", error);
+        common_vendor.index.__f__("error", "at pages/my-businessCard/my-businessCard.vue:467", "❌ [二维码生成] 调用接口失败:", error);
         return;
       }
       const finalBase64 = base64Image.startsWith("data:image") ? base64Image : `data:image/png;base64,${base64Image}`;
       promotionQrCodeBase64.value = finalBase64;
-      common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:418", "✅ [二维码生成] 成功获取并存储了小程序码 Base64 数据");
+      common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:481", "✅ [二维码生成] 成功获取并存储了小程序码 Base64 数据");
     };
     const generateSceneString = () => {
       if (!userInfo.value)
@@ -173,9 +185,9 @@ const _sfc_main = {
       params.push("fs=1");
       const scene = params.join("&");
       if (scene.length > 32) {
-        common_vendor.index.__f__("warn", "at pages/my-businessCard/my-businessCard.vue:447", `生成的 scene 字符串长度为 ${scene.length}，超过了32个字符的限制！Scene: ${scene}`);
+        common_vendor.index.__f__("warn", "at pages/my-businessCard/my-businessCard.vue:510", `生成的 scene 字符串长度为 ${scene.length}，超过了32个字符的限制！Scene: ${scene}`);
       }
-      common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:456", "scene", scene);
+      common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:519", "scene", scene);
       return scene;
     };
     const fetchTargetUserInfo = async (userId) => {
@@ -185,7 +197,7 @@ const _sfc_main = {
       if (fromShare.value) {
         requestData.notPay = 1;
       }
-      common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:473", "[名片页] 游客/用户请求名片数据:", JSON.stringify(requestData));
+      common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:536", "[名片页] 游客/用户请求名片数据:", JSON.stringify(requestData));
       const {
         data,
         error
@@ -194,10 +206,10 @@ const _sfc_main = {
         data: requestData
       });
       if (!error) {
-        common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:485", "✅ 获取名片成功");
+        common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:548", "✅ 获取名片成功");
         return data;
       }
-      common_vendor.index.__f__("error", "at pages/my-businessCard/my-businessCard.vue:490", "获取名片失败:", error);
+      common_vendor.index.__f__("error", "at pages/my-businessCard/my-businessCard.vue:553", "获取名片失败:", error);
       const token = common_vendor.index.getStorageSync("token");
       if (!token) {
         common_vendor.index.showModal({
@@ -288,14 +300,14 @@ const _sfc_main = {
       const bizId = options.i || options.id;
       const loggedInUserId = common_vendor.index.getStorageSync("userId");
       if (sharerId == loggedInUserId) {
-        common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:648", "用户点击了自己的分享链接，不计分。");
+        common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:711", "用户点击了自己的分享链接，不计分。");
         return;
       }
       if (loggedInUserId) {
-        common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:654", "其他已登录用户点击，准备为分享者加分。");
+        common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:717", "其他已登录用户点击，准备为分享者加分。");
         triggerShareHitApi(sharerId, bizId);
       } else {
-        common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:659", "未登录用户点击，暂存分享信息。");
+        common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:722", "未登录用户点击，暂存分享信息。");
         common_vendor.index.setStorageSync("pendingShareReward", {
           sharerId,
           bizId,
@@ -318,9 +330,9 @@ const _sfc_main = {
         }
       });
       if (error) {
-        common_vendor.index.__f__("error", "at pages/my-businessCard/my-businessCard.vue:684", "调用分享名片加分接口失败:", error);
+        common_vendor.index.__f__("error", "at pages/my-businessCard/my-businessCard.vue:747", "调用分享名片加分接口失败:", error);
       } else {
-        common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:686", `成功为分享者(ID: ${sharerId})触发贡分增加`);
+        common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:749", `成功为分享者(ID: ${sharerId})触发贡分增加`);
       }
     };
     common_vendor.onShareAppMessage(() => {
@@ -345,7 +357,7 @@ const _sfc_main = {
         path: sharePath,
         imageUrl: userInfo.value.avatar
       };
-      common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:726", "[my-businessCard] 分享好友内容:", JSON.stringify(shareContent));
+      common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:789", "[my-businessCard] 分享好友内容:", JSON.stringify(shareContent));
       return shareContent;
     });
     common_vendor.onShareTimeline(() => {
@@ -370,7 +382,7 @@ const _sfc_main = {
         query: queryString,
         imageUrl: userInfo.value.avatar
       };
-      common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:764", "[my-businessCard] 生成时间轴共享内容:", JSON.stringify(shareContent));
+      common_vendor.index.__f__("log", "at pages/my-businessCard/my-businessCard.vue:827", "[my-businessCard] 生成时间轴共享内容:", JSON.stringify(shareContent));
       return shareContent;
     });
     const handleEditRemark = () => {
@@ -439,11 +451,18 @@ const _sfc_main = {
       }
       customShareTitle.value = `这是 ${userInfo.value.realName || userInfo.value.nickname} 的名片`;
       sharePopup.value.open();
+      isPopupOpen.value = true;
     };
-    const closeSharePopup = () => sharePopup.value.close();
+    const closeSharePopup = () => {
+      sharePopup.value.close();
+      isPopupOpen.value = false;
+    };
     const guideShareTimeline = () => {
       closeSharePopup();
       showTimelineGuide.value = true;
+    };
+    const onPopupChange = (e) => {
+      isPopupOpen.value = e.show;
     };
     const hideTimelineGuide = () => showTimelineGuide.value = false;
     const handleGoToOpportunities = () => {
@@ -459,35 +478,42 @@ const _sfc_main = {
         url
       });
     };
+    const goToLogin = () => {
+      common_vendor.index.reLaunch({
+        url: "/pages/index/index"
+      });
+    };
+    const goToHome = () => {
+      common_vendor.index.switchTab({
+        url: "/pages/home/home"
+      });
+    };
+    const handleAddCircle = () => {
+      common_vendor.index.showToast({
+        title: "加圈申请已发送",
+        icon: "none"
+      });
+    };
     return (_ctx, _cache) => {
       return common_vendor.e({
-        a: userInfo.value
-      }, userInfo.value ? {
-        b: common_vendor.p({
-          type: "undo-filled",
-          size: "24",
-          color: "#fff"
-        }),
-        c: common_vendor.o(openSharePopup)
-      } : {}, {
-        d: isLoading.value
+        a: isLoading.value
       }, isLoading.value ? {
-        e: common_vendor.p({
+        b: common_vendor.p({
           status: "loading",
           contentText: "正在加载名片..."
         })
       } : errorMsg.value ? {
-        g: common_vendor.p({
+        d: common_vendor.p({
           type: "closeempty",
           size: "50",
           color: "#999"
         }),
-        h: common_vendor.t(errorMsg.value)
-      } : userInfo.value ? common_vendor.e({
-        j: common_vendor.t(isViewingOwnCard.value ? "我的数字名片" : "TA的数字名片"),
-        k: common_vendor.o(handleEditRemark),
-        l: common_vendor.o(handleGoToOpportunities),
-        m: common_vendor.p({
+        e: common_vendor.t(errorMsg.value)
+      } : userInfo.value ? {
+        g: common_vendor.t(isViewingOwnCard.value ? "我的数字名片" : "TA的数字名片"),
+        h: common_vendor.o(handleEditRemark),
+        i: common_vendor.o(handleGoToOpportunities),
+        j: common_vendor.p({
           avatar: userInfo.value.avatar,
           name: userInfo.value.realName || userInfo.value.nickname,
           ["remark-name"]: userInfo.value.remarkName,
@@ -509,39 +535,66 @@ const _sfc_main = {
           ["shard-code"]: userInfo.value.shardCode,
           ["dynamic-qr-code-url"]: promotionQrCodeBase64.value,
           ["platform-qr-code-url"]: "https://img.gofor.club/mmexport1759211962539.jpg"
+        })
+      } : {}, {
+        c: errorMsg.value,
+        f: userInfo.value,
+        k: userInfo.value
+      }, userInfo.value ? common_vendor.e({
+        l: userStatus.value === "GUEST"
+      }, userStatus.value === "GUEST" ? {
+        m: common_vendor.o(goToLogin),
+        n: common_vendor.o(goToHome)
+      } : userStatus.value === "STRANGER" ? {
+        p: common_vendor.p({
+          type: "plusempty",
+          size: "18",
+          color: "#fff"
         }),
-        n: isViewingOwnCard.value
-      }, isViewingOwnCard.value ? {
-        o: common_vendor.o(goToEdit)
-      } : {}) : {}, {
-        f: errorMsg.value,
-        i: userInfo.value,
-        p: customShareTitle.value,
-        q: common_vendor.o(($event) => customShareTitle.value = $event.detail.value),
-        r: common_vendor.p({
-          type: "weixin",
-          size: "30",
-          color: "#07c160"
-        }),
+        q: common_vendor.o(handleAddCircle)
+      } : userStatus.value === "FRIEND" ? {
         s: common_vendor.p({
-          type: "pyq",
-          size: "30",
-          color: "#53a046"
-        }),
-        t: common_vendor.o(guideShareTimeline),
-        v: common_vendor.o(closeSharePopup),
-        w: common_vendor.sr(sharePopup, "30894501-4", {
-          "k": "sharePopup"
-        }),
-        x: common_vendor.p({
-          type: "bottom",
-          ["background-color"]: "#fff"
-        }),
+          type: "star-filled",
+          size: "18",
+          color: "#fff"
+        })
+      } : userStatus.value === "SELF" ? {
+        v: common_vendor.o(openSharePopup),
+        w: common_vendor.o(goToEdit)
+      } : {}, {
+        o: userStatus.value === "STRANGER",
+        r: userStatus.value === "FRIEND",
+        t: userStatus.value === "SELF",
+        x: isPopupOpen.value ? 1 : ""
+      }) : {}, {
         y: showTimelineGuide.value
       }, showTimelineGuide.value ? {
         z: common_assets._imports_0$1,
         A: common_vendor.o(hideTimelineGuide)
-      } : {});
+      } : {}, {
+        B: customShareTitle.value,
+        C: common_vendor.o(($event) => customShareTitle.value = $event.detail.value),
+        D: common_vendor.p({
+          type: "weixin",
+          size: "30",
+          color: "#07c160"
+        }),
+        E: common_vendor.p({
+          type: "pyq",
+          size: "30",
+          color: "#53a046"
+        }),
+        F: common_vendor.o(guideShareTimeline),
+        G: common_vendor.o(closeSharePopup),
+        H: common_vendor.sr(sharePopup, "30894501-5", {
+          "k": "sharePopup"
+        }),
+        I: common_vendor.o(onPopupChange),
+        J: common_vendor.p({
+          type: "bottom",
+          ["background-color"]: "#fff"
+        })
+      });
     };
   }
 };

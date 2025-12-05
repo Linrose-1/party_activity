@@ -14,6 +14,9 @@
   padding-top: 80rpx;
   box-sizing: border-box;
 }
+.share-fab.data-v-30894501 {
+  display: none;
+}
 .card-header.data-v-30894501 {
   text-align: center;
   margin-bottom: 60rpx;
@@ -172,4 +175,80 @@
 .guide-text text.data-v-30894501 {
   display: block;
   margin-bottom: 10rpx;
+}
+
+/* ==================== 底部操作栏样式 ==================== */
+.footer-action-bar.data-v-30894501 {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: #fff;
+  padding: 20rpx 30rpx;
+  padding-bottom: calc(20rpx + env(safe-area-inset-bottom));
+  box-shadow: 0 -4rpx 16rpx rgba(0, 0, 0, 0.05);
+  z-index: 100;
+  transition: z-index 0.1s;
+  box-sizing: border-box;
+}
+
+/* 弹窗打开时降低层级 */
+.footer-action-bar.z-index-low.data-v-30894501 {
+  z-index: 1;
+  /* 或者 -1，只要比 popup 小就行 */
+  /* 或者直接隐藏，看需求 */
+  /* visibility: hidden; */
+}
+.action-group.data-v-30894501 {
+  display: flex;
+  gap: 20rpx;
+  align-items: center;
+  width: 100%;
+}
+.btn.data-v-30894501 {
+  flex: 1;
+  height: 88rpx;
+  line-height: 88rpx;
+  border-radius: 44rpx;
+  font-size: 30rpx;
+  font-weight: 600;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.btn.data-v-30894501::after {
+  border: none;
+}
+.btn-block.data-v-30894501 {
+  width: 100%;
+  /* 独占一行 */
+}
+
+/* 样式变体 */
+.btn-primary.data-v-30894501 {
+  background: linear-gradient(135deg, #FF6A00, #FF8C37);
+  color: white;
+  box-shadow: 0 4rpx 12rpx rgba(255, 106, 0, 0.3);
+}
+.btn-primary.data-v-30894501:active {
+  opacity: 0.9;
+}
+.btn-secondary.data-v-30894501 {
+  background-color: #f5f7fa;
+  color: #606266;
+  border: 1rpx solid #e4e7ed;
+}
+.btn-secondary.data-v-30894501:active {
+  background-color: #eef0f4;
+}
+.btn-success.data-v-30894501 {
+  background-color: #52c41a;
+  /* 绿色 */
+  color: white;
+  opacity: 0.8;
+  /* 稍微淡一点表示状态 */
+}
+.btn .uni-icons.data-v-30894501 {
+  margin-right: 8rpx;
 }

@@ -164,10 +164,10 @@
 			</view>
 			<!-- 新增：平台二维码下方的提示文字 -->
 			<view class="qr-hint-back">扫码或长按识别加入平台</view>
-			<view class="logo">
+			<!-- <view class="logo">
 				<image :src="logoUrl" mode="aspectFit" />
-				<!-- <image :src="platformQrCodeUrl" mode="aspectFit" /> -->
-			</view>
+				<image :src="platformQrCodeUrl" mode="aspectFit" />
+			</view> -->
 		</view>
 	</view>
 </template>

@@ -1,11 +1,11 @@
 <template>
 	<view class="container">
-		<!-- 1. 悬浮分享按钮：仅在数据加载成功后显示 -->
-		<view class="share-fab" v-if="userInfo" @click="openSharePopup">
+		<!--  悬浮分享按钮：仅在数据加载成功后显示 -->
+		<!-- <view class="share-fab" v-if="userInfo" @click="openSharePopup">
 			<uni-icons type="undo-filled" size="24" color="#fff"></uni-icons>
-		</view>
+		</view> -->
 
-		<!-- 2. 页面状态处理：加载、错误、成功 -->
+		<!--  页面状态处理：加载、错误、成功 -->
 		<!-- 加载中 -->
 		<view v-if="isLoading" class="status-indicator">
 			<uni-load-more status="loading" contentText="正在加载名片..."></uni-load-more>
@@ -24,6 +24,10 @@
 					{{ isViewingOwnCard ? '我的数字名片' : 'TA的数字名片' }}
 				</view>
 				<view class="header-subtitle">实时身份，及时连接！</view>
+				<!-- 编辑提示：仅在查看自己的名片时显示 -->
+				<!-- <view v-if="isViewingOwnCard" class="edit-hint">
+					名片信息可在 <text @click="goToEdit" class="edit-link">个人资料</text> 中编辑
+				</view> -->
 			</view>
 
 			<MyCard :avatar="userInfo.avatar" :name="userInfo.realName || userInfo.nickname"
@@ -39,14 +43,54 @@
 				platform-qr-code-url="https://img.gofor.club/mmexport1759211962539.jpg"
 				@goToOpportunities="handleGoToOpportunities" />
 
-			<!-- 编辑提示：仅在查看自己的名片时显示 -->
-			<view v-if="isViewingOwnCard" class="edit-hint">
-				名片信息可在 <text @click="goToEdit" class="edit-link">个人资料</text> 中编辑
-			</view>
+			<view style="width: 100%;height: 140rpx;"></view>
 		</template>
 
-		<!-- 3. 自定义分享弹窗 (逻辑不变) -->
-		<uni-popup ref="sharePopup" type="bottom" background-color="#fff">
+		<!-- ==================== 底部动态操作栏 ==================== -->
+		<view class="footer-action-bar" v-if="userInfo" :class="{ 'z-index-low': isPopupOpen }">
+
+			<!-- 场景 A: 未登录用户 -->
+			<view v-if="userStatus === 'GUEST'" class="action-group">
+				<button class="btn btn-secondary" @click="goToLogin">登录体验</button>
+				<button class="btn btn-primary" @click="goToHome">首页预览</button>
+			</view>
+
+			<!-- 场景 B: 已登录，陌生人 -->
+			<view v-else-if="userStatus === 'STRANGER'" class="action-group">
+				<!-- 这里预留加圈逻辑，目前先做按钮 -->
+				<button class="btn btn-primary btn-block" @click="handleAddCircle">
+					<uni-icons type="plusempty" size="18" color="#fff"></uni-icons> 加圈
+				</button>
+			</view>
+
+			<!-- 场景 C: 已登录，已是圈友 -->
+			<view v-else-if="userStatus === 'FRIEND'" class="action-group">
+				<button class="btn btn-success btn-block" disabled>
+					<uni-icons type="star-filled" size="18" color="#fff"></uni-icons> 已互圈
+				</button>
+			</view>
+
+			<!-- 场景 D: 访问自己的名片 -->
+			<view v-else-if="userStatus === 'SELF'" class="action-group">
+				<button class="btn btn-secondary" @click="openSharePopup">分享名片</button>
+				<button class="btn btn-primary" @click="goToEdit">编辑资料</button>
+			</view>
+
+		</view>
+
+
+		<!-- 4. 分享到朋友圈的引导遮罩层-->
+		<view v-if="showTimelineGuide" class="timeline-guide-mask" @click="hideTimelineGuide">
+			<image src="/static/icons/share-guide-arrow.png" class="guide-arrow"></image>
+			<view class="guide-text">
+				<text>点击右上角</text>
+				<text>分享到朋友圈</text>
+			</view>
+		</view>
+
+
+		<!-- 自定义分享弹窗 -->
+		<uni-popup ref="sharePopup" type="bottom" background-color="#fff" @change="onPopupChange">
 			<view class="share-popup-content">
 				<view class="share-popup-title">自定义分享内容</view>
 				<view class="share-title-editor">
@@ -67,14 +111,6 @@
 			</view>
 		</uni-popup>
 
-		<!-- 4. 分享到朋友圈的引导遮罩层 (逻辑不变) -->
-		<view v-if="showTimelineGuide" class="timeline-guide-mask" @click="hideTimelineGuide">
-			<image src="/static/icons/share-guide-arrow.png" class="guide-arrow"></image>
-			<view class="guide-text">
-				<text>点击右上角</text>
-				<text>分享到朋友圈</text>
-			</view>
-		</view>
 	</view>
 </template>
 
@@ -108,6 +144,33 @@
 	const sharePopup = ref(null);
 	const customShareTitle = ref('');
 	const showTimelineGuide = ref(false);
+	const isPopupOpen = ref(false);
+
+	// 假设后端返回的名片信息里有一个字段表示是否互圈，比如 isFriend
+	// 目前先模拟一下，或者根据需求说明先预留
+	/**
+	 * 计算当前访问者的身份状态
+	 * 返回值: 'GUEST' | 'STRANGER' | 'FRIEND' | 'SELF'
+	 */
+	const userStatus = computed(() => {
+		// 1. 未登录 -> GUEST
+		const token = uni.getStorageSync('token');
+		if (!token) return 'GUEST';
+
+		// 2. 看自己 -> SELF
+		if (isViewingOwnCard.value) return 'SELF';
+
+		// 3. 看他人
+		// 这里需要依赖 userInfo 中的字段来判断是否互圈
+		// 假设 userInfo.value.isFriend === true 表示已互圈
+		// 目前暂时没有这个字段，所以除了自己都是 STRANGER (或者你可以手动改这里测试 FRIEND 状态)
+		if (userInfo.value && userInfo.value.isFriend) {
+			return 'FRIEND';
+		}
+
+		// 默认是陌生人
+		return 'STRANGER';
+	});
 
 
 	// --- 2. 页面生命周期与初始化 ---
@@ -850,16 +913,26 @@
 
 		customShareTitle.value = `这是 ${userInfo.value.realName || userInfo.value.nickname} 的名片`;
 		sharePopup.value.open();
+		isPopupOpen.value = true; // 标记弹窗打开
 	};
-	const closeSharePopup = () => sharePopup.value.close();
+	const closeSharePopup = () => {
+		sharePopup.value.close();
+		isPopupOpen.value = false; // 标记弹窗关闭
+	};
 	const guideShareTimeline = () => {
-		closeSharePopup();
-		showTimelineGuide.value = true;
+		closeSharePopup(); // 这会自动把 isPopupOpen 设为 false
+		showTimelineGuide.value = true; // 引导层 z-index 很高，通常没问题
 	};
+
+	// 监听 popup 的 change 事件 (防止用户点击遮罩层关闭时状态没同步)
+	const onPopupChange = (e) => {
+		isPopupOpen.value = e.show;
+	}
+
 	const hideTimelineGuide = () => showTimelineGuide.value = false;
 
 	/**
-	 * 【新增】处理跳转到商友圈页面的事件
+	 * 处理跳转到商友圈页面的事件
 	 */
 	const handleGoToOpportunities = () => {
 		if (!userInfo.value || !userInfo.value.id) {
@@ -878,11 +951,32 @@
 			url
 		});
 	};
+
+	const goToLogin = () => {
+		uni.reLaunch({
+			url: '/pages/index/index'
+		});
+	};
+
+	const goToHome = () => {
+		uni.switchTab({
+			url: '/pages/home/home'
+		});
+	};
+
+	const handleAddCircle = () => {
+		uni.showToast({
+			title: '加圈申请已发送',
+			icon: 'none'
+		});
+		// 这里后续对接加圈接口
+	};
 </script>
 
 <style lang="scss" scoped>
 	/* 页面基础布局样式 */
 	.container {
+		// padding-bottom: calc(280rpx + env(safe-area-inset-bottom));
 		background: linear-gradient(135deg, #f8f9fa, #e9ecef);
 		color: #333;
 		line-height: 1.6;
@@ -894,6 +988,10 @@
 		justify-content: flex-start;
 		padding-top: 80rpx;
 		box-sizing: border-box;
+	}
+
+	.share-fab {
+		display: none;
 	}
 
 	.card-header {
@@ -1075,5 +1173,90 @@
 			display: block;
 			margin-bottom: 10rpx;
 		}
+	}
+
+	/* ==================== 底部操作栏样式 ==================== */
+	.footer-action-bar {
+		position: fixed;
+		bottom: 0;
+		left: 0;
+		width: 100%;
+		background-color: #fff;
+		padding: 20rpx 30rpx;
+		padding-bottom: calc(20rpx + env(safe-area-inset-bottom));
+		box-shadow: 0 -4rpx 16rpx rgba(0, 0, 0, 0.05);
+		z-index: 100;
+		transition: z-index 0.1s;
+		box-sizing: border-box;
+	}
+
+	/* 弹窗打开时降低层级 */
+	.footer-action-bar.z-index-low {
+		z-index: 1;
+		/* 或者 -1，只要比 popup 小就行 */
+		/* 或者直接隐藏，看需求 */
+		/* visibility: hidden; */
+	}
+
+	.action-group {
+		display: flex;
+		gap: 20rpx;
+		align-items: center;
+		width: 100%;
+	}
+
+	.btn {
+		flex: 1;
+		height: 88rpx;
+		line-height: 88rpx;
+		border-radius: 44rpx;
+		font-size: 30rpx;
+		font-weight: 600;
+		border: none;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+
+		&::after {
+			border: none;
+		}
+	}
+
+	.btn-block {
+		width: 100%;
+		/* 独占一行 */
+	}
+
+	/* 样式变体 */
+	.btn-primary {
+		background: linear-gradient(135deg, #FF6A00, #FF8C37);
+		color: white;
+		box-shadow: 0 4rpx 12rpx rgba(255, 106, 0, 0.3);
+
+		&:active {
+			opacity: 0.9;
+		}
+	}
+
+	.btn-secondary {
+		background-color: #f5f7fa;
+		color: #606266;
+		border: 1rpx solid #e4e7ed;
+
+		&:active {
+			background-color: #eef0f4;
+		}
+	}
+
+	.btn-success {
+		background-color: #52c41a;
+		/* 绿色 */
+		color: white;
+		opacity: 0.8;
+		/* 稍微淡一点表示状态 */
+	}
+
+	.btn .uni-icons {
+		margin-right: 8rpx;
 	}
 </style>

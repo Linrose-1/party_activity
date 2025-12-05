@@ -324,8 +324,7 @@ const _sfc_main = {
         S: common_vendor.o(copyShardCode)
       } : {}, {
         T: __props.dynamicQrCodeUrl || __props.platformQrCodeUrl,
-        U: common_vendor.o(($event) => previewImage(__props.dynamicQrCodeUrl || __props.platformQrCodeUrl)),
-        V: __props.logoUrl
+        U: common_vendor.o(($event) => previewImage(__props.dynamicQrCodeUrl || __props.platformQrCodeUrl))
       });
     };
   }
