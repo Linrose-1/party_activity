@@ -188,8 +188,8 @@ const _sfc_main = {
       const defaultAvatar = "/static/icon/default-avatar.png";
       const name = user.nickname || "匿名用户";
       const avatarUrl = user.avatar || defaultAvatar;
-      const url = `/pages/applicationBusinessCard/applicationBusinessCard?id=${user.id}&name=${encodeURIComponent(name)}&avatar=${encodeURIComponent(avatarUrl)}`;
-      common_vendor.index.__f__("log", "at pages/relation/relation.vue:372", "从人脉列表页跳转，URL:", url);
+      const url = `/packages/applicationBusinessCard/applicationBusinessCard?id=${user.id}&name=${encodeURIComponent(name)}&avatar=${encodeURIComponent(avatarUrl)}`;
+      common_vendor.index.__f__("log", "at pages/relation/relation.vue:373", "从人脉列表页跳转，URL:", url);
       common_vendor.index.navigateTo({
         url
       });
@@ -211,30 +211,44 @@ const _sfc_main = {
         }
       });
     };
-    const handleChooseLocation = () => common_vendor.index.chooseLocation({
-      success: (res) => destination.value = res
-    });
-    const handleTimeChange = (e) => timeRange.value = e;
+    const handleChooseLocation = () => {
+      if (!utils_user.checkLoginGuard())
+        return;
+      common_vendor.index.chooseLocation({
+        success: (res) => destination.value = res
+      });
+    };
+    const handleTimeChange = (e) => {
+      if (!utils_user.checkLoginGuard()) {
+        timeRange.value = [];
+        return;
+      }
+      timeRange.value = e;
+    };
     const switchTab = (tabIndex) => activeTab.value = tabIndex;
-    const goToShakePage = () => common_vendor.index.navigateTo({
-      url: "/pages/location/location?autoShake=true"
-    });
+    const goToShakePage = () => {
+      if (!utils_user.checkLoginGuard())
+        return;
+      common_vendor.index.navigateTo({
+        url: "/pages/location/location?autoShake=true"
+      });
+    };
     common_vendor.watch([destination, timeRange], updateNextLocation);
     common_vendor.watch(activeTab, () => fetchUserList(true));
     common_vendor.onShow(() => {
-      common_vendor.index.__f__("log", "at pages/relation/relation.vue:424", "人脉页 onShow: 开始监听摇一摇");
+      common_vendor.index.__f__("log", "at pages/relation/relation.vue:441", "人脉页 onShow: 开始监听摇一摇");
       common_vendor.index.onAccelerometerChange((res) => {
         if (Math.abs(res.x) > 1.5 || Math.abs(res.y) > 1.5 || Math.abs(res.z) > 1.5) {
           if (!isShakeLocked.value) {
             lockShake();
-            common_vendor.index.__f__("log", "at pages/relation/relation.vue:436", "检测到摇一摇，准备跳转...");
+            common_vendor.index.__f__("log", "at pages/relation/relation.vue:453", "检测到摇一摇，准备跳转...");
             goToShakePage();
           }
         }
       });
     });
     common_vendor.onHide(() => {
-      common_vendor.index.__f__("log", "at pages/relation/relation.vue:447", "人脉页 onHide: 停止监听摇一摇");
+      common_vendor.index.__f__("log", "at pages/relation/relation.vue:464", "人脉页 onHide: 停止监听摇一摇");
       common_vendor.index.stopAccelerometer();
     });
     common_vendor.onLoad(() => {
@@ -250,7 +264,7 @@ const _sfc_main = {
     });
     common_vendor.onShareAppMessage(() => {
       const inviteCode = utils_user.getInviteCode();
-      common_vendor.index.__f__("log", "at pages/relation/relation.vue:471", `[分享] 准备分享人脉页面给好友，邀请码: ${inviteCode}`);
+      common_vendor.index.__f__("log", "at pages/relation/relation.vue:488", `[分享] 准备分享人脉页面给好友，邀请码: ${inviteCode}`);
       let sharePath = "/pages/relation/relation";
       if (inviteCode) {
         sharePath += `?inviteCode=${inviteCode}`;
@@ -261,12 +275,12 @@ const _sfc_main = {
         imageUrl: "/static/connections-bg.png"
         // 使用页面头部的背景图作为分享封面
       };
-      common_vendor.index.__f__("log", "at pages/relation/relation.vue:487", "[分享] 分享给好友的内容:", JSON.stringify(shareContent));
+      common_vendor.index.__f__("log", "at pages/relation/relation.vue:504", "[分享] 分享给好友的内容:", JSON.stringify(shareContent));
       return shareContent;
     });
     common_vendor.onShareTimeline(() => {
       const inviteCode = utils_user.getInviteCode();
-      common_vendor.index.__f__("log", "at pages/relation/relation.vue:499", `[分享] 准备分享人脉页面到朋友圈，邀请码: ${inviteCode}`);
+      common_vendor.index.__f__("log", "at pages/relation/relation.vue:516", `[分享] 准备分享人脉页面到朋友圈，邀请码: ${inviteCode}`);
       let queryString = "";
       if (inviteCode) {
         queryString = `inviteCode=${inviteCode}`;
@@ -277,7 +291,7 @@ const _sfc_main = {
         imageUrl: "/static/connections-bg.png"
         // 使用页面头部的背景图作为分享封面
       };
-      common_vendor.index.__f__("log", "at pages/relation/relation.vue:514", "[分享] 分享到朋友圈的内容:", JSON.stringify(shareContent));
+      common_vendor.index.__f__("log", "at pages/relation/relation.vue:531", "[分享] 分享到朋友圈的内容:", JSON.stringify(shareContent));
       return shareContent;
     });
     return (_ctx, _cache) => {

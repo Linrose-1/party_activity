@@ -1,6 +1,7 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
 const utils_request = require("../../utils/request.js");
+const utils_user = require("../../utils/user.js");
 if (!Array) {
   const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
   _easycom_uni_icons2();
@@ -45,14 +46,14 @@ const _sfc_main = {
         });
         if (!error && data) {
           userInfo.value = data;
-          common_vendor.index.__f__("log", "at pages/my/my.vue:202", "getUserInfo userInfo:", userInfo.value);
+          common_vendor.index.__f__("log", "at pages/my/my.vue:205", "getUserInfo userInfo:", userInfo.value);
         } else {
-          common_vendor.index.__f__("log", "at pages/my/my.vue:204", "获取用户信息失败:", error);
+          common_vendor.index.__f__("log", "at pages/my/my.vue:207", "获取用户信息失败:", error);
           isLogin.value = false;
           userInfo.value = {};
         }
       } catch (err) {
-        common_vendor.index.__f__("log", "at pages/my/my.vue:210", "请求异常:", err);
+        common_vendor.index.__f__("log", "at pages/my/my.vue:213", "请求异常:", err);
         isLogin.value = false;
         userInfo.value = {};
       }
@@ -63,7 +64,7 @@ const _sfc_main = {
         {
           value: user.activityCount || 0,
           label: "我的聚会",
-          path: "/pages/my-active/my-active"
+          path: "/packages/my-active/my-active"
         },
         {
           value: user.postCount || 0,
@@ -117,6 +118,8 @@ const _sfc_main = {
       return firstCompany || firstPosition || "暂未设置公司和职位";
     });
     const navigateToAccountDetail = (item) => {
+      if (!utils_user.checkLoginGuard())
+        return;
       if (item && item.path) {
         common_vendor.index.navigateTo({
           url: item.path
@@ -156,7 +159,7 @@ const _sfc_main = {
         desc: "您的电子名片",
         icon: "../../static/icon/我的名片.png",
         iconBg: "linear-gradient(135deg, #30CFD0, #330867)",
-        path: "/pages/my-businessCard/my-businessCard"
+        path: "/packages/my-businessCard/my-businessCard"
       },
       {
         name: "邀请注册",
@@ -175,6 +178,8 @@ const _sfc_main = {
       // }
     ]);
     const navigateToCoreFeature = (item) => {
+      if (!utils_user.checkLoginGuard())
+        return;
       if (item.key) {
         switch (item.key) {
           case "digitalIdentity":
@@ -216,7 +221,7 @@ const _sfc_main = {
       // 	name: '我的聚会',
       // 	desc: '已报名/已发布的聚会',
       // 	icon: '../../static/icon/聚会.png',
-      // 	path: '/pages/my-active/my-active'
+      // 	path: '/packages/my-active/my-active'
       // },
       // 第 2 行
       {
@@ -236,7 +241,7 @@ const _sfc_main = {
         name: "我的收藏",
         desc: "查看您收藏的聚会和商机",
         icon: "../../static/icon/收藏.png",
-        path: "/pages/my-collection/my-collection"
+        path: "/packages/my-collection/my-collection"
       },
       {
         name: "我的关注",
@@ -286,7 +291,7 @@ const _sfc_main = {
       },
       // 新增
       {
-        name: "精准投放",
+        name: "数字营销",
         desc: "广告精准触达",
         icon: "../../static/icon/广告投放2.0.png",
         path: null
@@ -328,6 +333,8 @@ const _sfc_main = {
       // 新增，带特殊标记
     ]);
     const navigateToFeature = (item) => {
+      if (!utils_user.checkLoginGuard())
+        return;
       if (item && item.key === "customerService") {
         if (!item.phone) {
           common_vendor.index.showToast({
@@ -339,10 +346,10 @@ const _sfc_main = {
         common_vendor.index.makePhoneCall({
           phoneNumber: item.phone,
           success: () => {
-            common_vendor.index.__f__("log", "at pages/my/my.vue:544", "拨打电话成功");
+            common_vendor.index.__f__("log", "at pages/my/my.vue:550", "拨打电话成功");
           },
           fail: (err) => {
-            common_vendor.index.__f__("log", "at pages/my/my.vue:547", "拨打电话失败:", err);
+            common_vendor.index.__f__("log", "at pages/my/my.vue:553", "拨打电话失败:", err);
           }
         });
         return;
@@ -359,12 +366,16 @@ const _sfc_main = {
       }
     };
     const onEdit = () => {
+      if (!utils_user.checkLoginGuard())
+        return;
       common_vendor.index.navigateTo({
         // url: '/packages/my-edit/my-edit'
         url: `/packages/my-account-informationDetails/my-account-informationDetails?id=${userInfo.value.id}`
       });
     };
     const onViewAccountDetail = () => {
+      if (!utils_user.checkLoginGuard())
+        return;
       common_vendor.index.navigateTo({
         url: "/packages/my-edit/my-edit"
       });

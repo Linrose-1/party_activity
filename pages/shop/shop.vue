@@ -44,13 +44,13 @@
 					<view class="icon-box share-bg">
 						<uni-icons type="hand-up-filled" size="24" color="#fff"></uni-icons>
 					</view>
-					<text>(我喜欢的)聚店推荐</text>
+					<text>推荐聚店</text>
 				</view>
 				<view class="func-item" @click="skipToNewShop">
 					<view class="icon-box join-bg">
 						<uni-icons type="shop-filled" size="24" color="#fff"></uni-icons>
 					</view>
-					<text>(我开的店)申请入驻</text>
+					<text>自荐聚店</text>
 				</view>
 			</view>
 
@@ -119,7 +119,8 @@
 	import StoreCard from '../../components/StoreCard.vue';
 	import request from '../../utils/request.js';
 	import {
-		getInviteCode
+		getInviteCode,
+		checkLoginGuard 
 	} from '../../utils/user.js';
 
 	// --- 状态变量 ---
@@ -513,19 +514,22 @@
 	// --- 页面跳转 ---
 
 	const goToStoreDetail = (store) => {
+		if (!checkLoginGuard()) return;
 		uni.navigateTo({
 			url: `/pages/shop-detail/shop-detail?id=${store.id}`
 		});
 	};
 
 	const shareStore = () => {
+		if (!checkLoginGuard()) return;
 		uni.navigateTo({
 			url: '/pages/shop-recommend/shop-recommend'
 		});
 	};
 	const skipToNewShop = () => {
+		if (!checkLoginGuard()) return;
 		uni.navigateTo({
-			url: '/pages/myStore-edit/myStore-edit'
+			url: '/packages/myStore-edit/myStore-edit'
 		});
 	};
 

@@ -204,7 +204,7 @@
 		const avatarUrl = user.avatar || defaultAvatar;
 
 		// 3. 构建带有多参数的URL，并使用 encodeURIComponent 编码，防止特殊字符导致问题
-		const url = `/pages/applicationBusinessCard/applicationBusinessCard?id=${user.id}` +
+		const url = `/packages/applicationBusinessCard/applicationBusinessCard?id=${user.id}` +
 			`&name=${encodeURIComponent(name)}` +
 			`&avatar=${encodeURIComponent(avatarUrl)}` +
 			`&fromShare=1`;

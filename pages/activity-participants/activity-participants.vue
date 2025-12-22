@@ -35,7 +35,7 @@
 	const activityId = ref(null);
 	const participantList = ref([]);
 	const pageNo = ref(1);
-	const pageSize = ref(15);
+	const pageSize = ref(10);
 	const total = ref(0);
 	const loadingStatus = ref('more');
 	const isEmpty = ref(false);
@@ -64,13 +64,17 @@
 	});
 
 	const getParticipantList = async (isFirstLoad = false) => {
-		if (loadingStatus.value === 'loading') return;
+		// 1. 加载中或没有更多数据时，直接返回
+		if (loadingStatus.value === 'loading' || loadingStatus.value === 'noMore') return;
+
 		loadingStatus.value = 'loading';
 
 		if (isFirstLoad) {
 			pageNo.value = 1;
 			participantList.value = [];
 			isEmpty.value = false;
+			// 重置状态，防止之前是 noMore 导致进不来，但在 isFirstLoad 时我们要强制刷新
+			loadingStatus.value = 'loading';
 		}
 
 		const {
@@ -86,30 +90,32 @@
 		});
 
 		if (error) {
-			console.error('获取报名用户列表失败:', error);
 			loadingStatus.value = 'more';
 			return;
 		}
 
 		if (data && data.list) {
+			// 追加数据
 			participantList.value = [...participantList.value, ...data.list];
 			total.value = data.total;
 
-			if (participantList.value.length >= total.value) {
+			// 关键判断：
+			// 1. 如果当前列表长度 >= 总数
+			// 2. 或者 当前接口返回的数据条数 < pageSize (说明是最后一页不满的情况)
+			if (participantList.value.length >= total.value || data.list.length < pageSize.value) {
 				loadingStatus.value = 'noMore';
 			} else {
 				loadingStatus.value = 'more';
-				pageNo.value++;
+				pageNo.value++; // 准备下一页
 			}
 
 			if (isFirstLoad && data.list.length === 0) {
 				isEmpty.value = true;
 			}
 		} else {
+			// 接口数据异常处理
 			loadingStatus.value = 'noMore';
-			if (isFirstLoad) {
-				isEmpty.value = true;
-			}
+			if (isFirstLoad) isEmpty.value = true;
 		}
 	};
 
@@ -139,7 +145,7 @@
 		const name = user.nickname || '匿名用户';
 		const avatar = user.avatar || ''; // 目标页面会处理默认头像
 
-		let url = `/pages/applicationBusinessCard/applicationBusinessCard?id=${user.id}` +
+		let url = `/packages/applicationBusinessCard/applicationBusinessCard?id=${user.id}` +
 			`&name=${encodeURIComponent(name)}` +
 			`&avatar=${encodeURIComponent(avatar)}`;
 
@@ -158,6 +164,7 @@
 	.page-container {
 		background-color: #f5f5f5;
 		min-height: 100vh;
+		padding-bottom: 40rpx;
 	}
 
 	.participant-list {

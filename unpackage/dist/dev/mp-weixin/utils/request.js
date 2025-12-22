@@ -28,6 +28,14 @@ const request = async (url, options = {}) => {
           data: res.data.data,
           error: null
         };
+      } else if (res.data.code === 401) {
+        common_vendor.index.__f__("warn", "at utils/request.js:135", "Token 失效 (401)，清除本地缓存");
+        common_vendor.index.removeStorageSync("token");
+        common_vendor.index.removeStorageSync("userId");
+        return {
+          data: null,
+          error: "账号未登录"
+        };
       } else if (res.data.code === 453) {
         return {
           data: null,
@@ -46,7 +54,7 @@ const request = async (url, options = {}) => {
       };
     }
   } catch (err) {
-    common_vendor.index.__f__("error", "at utils/request.js:150", "[Network Error]", err);
+    common_vendor.index.__f__("error", "at utils/request.js:163", "[Network Error]", err);
     return {
       data: null,
       error: err.message || "网络错误"

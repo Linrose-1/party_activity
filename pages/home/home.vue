@@ -50,8 +50,10 @@
 			<view v-for="post in postList" :key="post.id" class="post-card" @click="handlePostClick(post)">
 				<!-- 3.1 卡片头部 -->
 				<view class="post-header">
+					<!-- <image :src="post.user.avatar" mode="aspectFill" class="avatar"
+						@click.stop="navigateToBusinessCard(post.user)" /> -->
 					<image :src="post.user.avatar" mode="aspectFill" class="avatar"
-						@click.stop="navigateToBusinessCard(post.user)" />
+						@click.stop="handleAvatarClick(post.user)" />
 					<view class="user-info">
 						<!-- 第一行：用户名 -->
 						<view class="user-name">{{ post.user.name }}</view>
@@ -170,6 +172,13 @@
 			</view>
 		</view>
 	</view>
+
+	<GuidePopup ref="guidePopupRef" />
+
+	<AvatarLongPressMenu ref="avatarMenuRef" @action="handleMenuAction" />
+
+	<AddCircleConfirmPopup ref="addCirclePopup" />
+
 </template>
 
 <script setup>
@@ -190,8 +199,12 @@
 	import request from '../../utils/request.js';
 	import {
 		getInviteCode,
-		getCachedUserInfo
+		getCachedUserInfo,
+		checkLoginGuard
 	} from '../../utils/user.js';
+	import GuidePopup from '@/components/GuidePopup.vue';
+	import AvatarLongPressMenu from '@/components/AvatarLongPressMenu.vue';
+	import AddCircleConfirmPopup from '@/components/AddCircleConfirmPopup.vue';
 
 
 
@@ -229,6 +242,14 @@
 
 	// 标志位，用于控制 onShow 是否需要强制刷新
 	const isInitialLoad = ref(true);
+
+	const guidePopupRef = ref(null);
+
+	const avatarMenuRef = ref(null);
+
+	const addCirclePopup = ref(null);
+
+
 
 
 	// ============================
@@ -315,6 +336,13 @@
 		uni.$on('postInteractionChanged', handlePostInteractionChange);
 		// 监听用户信息变更 (来自定制页)
 		uni.$on('userInfoChanged', handleUserInfoChange);
+
+		// 延迟一点显示引导弹窗，避免和页面加载动画冲突，体验更好
+		setTimeout(() => {
+			if (guidePopupRef.value) {
+				guidePopupRef.value.checkAndShow();
+			}
+		}, 2000); // 延迟2秒显示
 	});
 
 	onUnmounted(() => {
@@ -328,9 +356,21 @@
 		uni.$off('userInfoChanged', handleUserInfoChange);
 	});
 
-	onShow(() => {
+	onShow(async () => {
+		// --- 静默登录逻辑 ---
+		// 1. 获取当前缓存中的 userId
+		let currentUserId = uni.getStorageSync('userId');
+
+		// 2. 如果本地没有 userId，说明未登录，尝试进行静默登录
+		if (!currentUserId) {
+			console.log('检测到未登录，尝试静默登录...');
+			await performSilentLogin();
+			// 静默登录尝试完成后，再次获取 userId (如果成功，现在应该有了)
+			currentUserId = uni.getStorageSync('userId');
+		}
+
 		// 每次进入页面时检查登录状态并刷新数据
-		const currentUserId = uni.getStorageSync('userId');
+		// const currentUserId = uni.getStorageSync('userId');
 		const currentUserIsLogin = !!currentUserId;
 
 		// 只有在以下三种情况时才强制刷新列表：
@@ -426,6 +466,67 @@
 	// ============================
 	// 5. 主要业务方法 (Business Methods)
 	// ============================
+
+	/**
+	 * 静默登录方法
+	 * 尝试使用 wx.login 获取 code 直接调用登录接口
+	 */
+	const performSilentLogin = async () => {
+		try {
+			// 1. 获取微信 loginCode
+			const loginRes = await uni.login({
+				provider: 'weixin'
+			});
+			if (!loginRes || !loginRes.code) {
+				return;
+			}
+
+			// 2. 检查是否有暂存的邀请码
+			const pendingInviteCode = uni.getStorageSync('pendingInviteCode');
+
+			// 3. 构造请求参数，只传 loginCode 和必要的邀请码
+			const payload = {
+				loginCode: loginRes.code,
+				state: 'default',
+				shardCode: pendingInviteCode || ''
+			};
+
+			// 4. 调用后端接口
+			const {
+				data,
+				error
+			} = await request('/app-api/member/auth/weixin-mini-app-login', {
+				method: 'POST',
+				data: payload
+			});
+
+			// 5. 登录成功处理
+			if (!error && data && data.accessToken) {
+				console.log('✅ 静默登录成功!', data);
+				// 存储 Token 和 UserId
+				uni.setStorageSync('token', data.accessToken);
+				uni.setStorageSync('userId', data.userId);
+
+				// 【关键】登录成功后，立即更新状态并刷新数据
+				isLogin.value = true;
+				loggedInUserId.value = data.userId;
+
+				// 刷新用户信息和列表
+				fetchCurrentUserInfo();
+				getBusinessOpportunitiesList(true);
+
+				// 如果之前使用了邀请码，现在可以清除了
+				if (pendingInviteCode) {
+					uni.removeStorageSync('pendingInviteCode');
+				}
+			} else {
+				// 失败不弹窗，保持静默
+				console.log('静默登录未成功 (可能是非新用户需手机号或接口异常):', error);
+			}
+		} catch (e) {
+			console.error('静默登录流程异常:', e);
+		}
+	};
 
 	const fetchCurrentUserInfo = async () => {
 		const {
@@ -550,6 +651,7 @@
 	};
 
 	const handleSearch = () => {
+		if (!checkLoginGuard()) return;
 		getBusinessOpportunitiesList(true);
 	};
 
@@ -600,6 +702,120 @@
 				getBusinessOpportunitiesList(true);
 			}
 		});
+	};
+
+	const handleAvatarClick = (user) => {
+		if (!checkLoginGuard()) return;
+
+		if (avatarMenuRef.value) {
+			avatarMenuRef.value.open(user);
+		}
+	};
+
+	// 处理菜单项点击
+	const handleMenuAction = ({
+		type,
+		user
+	}) => {
+		console.log('菜单操作:', type, user);
+
+		switch (type) {
+			case 'viewCard':
+				// 原有的跳转名片逻辑
+				navigateToBusinessCard(user);
+				break;
+			case 'addCircle':
+				addCirclePopup.value.open(user);
+				break;
+			case 'removeCircle':
+				uni.showModal({
+					title: '确认脱圈',
+					content: `确定要与 ${user.name} 解除圈友关系吗？`,
+					success: (res) => {
+						if (res.confirm) {
+							uni.showToast({
+								title: '已脱圈',
+								icon: 'none'
+							});
+							// 调用接口
+						}
+					}
+				});
+				break;
+			case 'disconnect':
+				uni.showToast({
+					title: '已断开连接',
+					icon: 'none'
+				});
+				break;
+			case 'comment':
+				uni.showToast({
+					title: '点评功能待开发',
+					icon: 'none'
+				});
+				break;
+		}
+	};
+
+	/**
+	 * 处理申请入圈
+	 */
+	const handleApplyCircle = (targetUser) => {
+		// 1. 弹出确认框 
+		uni.showModal({
+			title: '建立圈友关系',
+			content: `与 ${targetUser.name} 建立圈友关系\n 同时将您展示在对方的圈友网络中\n（这将建立双向的圈友关系）`,
+			confirmText: '确认互圈',
+			cancelText: '取消',
+			confirmColor: '#FF7009', // 使用主题色
+			success: async (res) => {
+				if (res.confirm) {
+					// 2. 用户确认后，调用接口
+					await submitApplyCircle(targetUser.id);
+				}
+			}
+		});
+	};
+
+	/**
+	 * 提交加圈申请接口调用
+	 */
+	const submitApplyCircle = async (targetUserId) => {
+		uni.showLoading({
+			title: '申请中...'
+		});
+
+		try {
+			// 构造 URL: /app-api/member/user/friend/apply/{userId}
+			const url = `/app-api/member/user/friend/apply/${targetUserId}`;
+
+			const {
+				data,
+				error
+			} = await request(url, {
+				method: 'POST'
+			});
+
+			if (!error) {
+				uni.showToast({
+					title: '申请已发送',
+					icon: 'success'
+				});
+			} else {
+				uni.showToast({
+					title: error || '申请失败',
+					icon: 'none'
+				});
+			}
+		} catch (e) {
+			uni.showToast({
+				title: '网络异常',
+				icon: 'none'
+			});
+			console.error(e);
+		} finally {
+			uni.hideLoading();
+		}
 	};
 
 	// ============================
@@ -671,6 +887,7 @@
 
 	const toggleAction = async (post, clickedAction) => {
 		if (isActionInProgress.value || !isLogin.value) return;
+		if (!checkLoginGuard()) return;
 		isActionInProgress.value = true;
 
 		const originalAction = post.userAction;
@@ -744,6 +961,7 @@
 	const toggleGenericFollow = async (post, type, targetId, statusKey, successMsg, failureMsg) => {
 		// 1. 防抖/节流检查
 		if (isActionInProgress.value || !isLogin.value) return;
+		if (!checkLoginGuard()) return;
 		isActionInProgress.value = true;
 
 		// 2. 记录原始状态 (用于失败回滚)
@@ -880,6 +1098,7 @@
 
 	// 跳转到定制页的函数
 	const goToCustomizationPage = async () => {
+		if (!checkLoginGuard()) return;
 		// 1. 检查是否登录
 		if (!isLogin.value) {
 			goToLogin();
@@ -948,9 +1167,8 @@
 	};
 
 	const handlePostClick = (post) => {
-		if (!isLogin.value) {
-			goToLogin();
-		} else if (!hasPaidMembership.value) {
+		if (!checkLoginGuard()) return;
+		if (!hasPaidMembership.value) {
 			goToMembership();
 		} else {
 			skipCommercialDetail(post.id);
@@ -959,9 +1177,8 @@
 
 	const navigateToComments = (post) => {
 		// 复用卡片点击的权限检查逻辑
-		if (!isLogin.value) {
-			goToLogin();
-		} else if (!hasPaidMembership.value) {
+		if (!checkLoginGuard()) return;
+		if (!hasPaidMembership.value) {
 			goToMembership();
 		} else {
 			uni.navigateTo({
@@ -979,7 +1196,7 @@
 			return;
 		}
 		const avatarUrl = user.avatar || defaultAvatarUrl;
-		const url = `/pages/applicationBusinessCard/applicationBusinessCard?id=${user.id}` +
+		const url = `/packages/applicationBusinessCard/applicationBusinessCard?id=${user.id}` +
 			`&name=${encodeURIComponent(user.name)}` +
 			`&avatar=${encodeURIComponent(avatarUrl)}`;
 		uni.navigateTo({
@@ -987,9 +1204,12 @@
 		});
 	};
 
-	const postNew = () => uni.navigateTo({
-		url: '/pages/home-opportunitiesPublish/home-opportunitiesPublish'
-	});
+	const postNew = () => {
+		if (!checkLoginGuard()) return;
+		uni.navigateTo({
+			url: '/packages/home-opportunitiesPublish/home-opportunitiesPublish'
+		});
+	};
 	const goToLogin = () => uni.navigateTo({
 		url: '/pages/index/index'
 	}); // 指向登录页

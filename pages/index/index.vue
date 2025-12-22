@@ -35,7 +35,7 @@
 			</view>
 
 			<!-- 3. 邀请码 -->
-			<view class="form-item">
+			<view class="form-item" v-if="!hasParent">
 				<uni-icons type="paperplane-filled" size="22" color="#FF7600"></uni-icons>
 				<text class="label">邀请码</text>
 				<input v-model="inviteCode" class="input" type="text" placeholder="请输入邀请码(首次登录需要填写)"
@@ -84,15 +84,17 @@
 	const avatarUrl = ref(null); // 用户头像URL，通过授权获取
 	const inviteCode = ref(''); // 邀请码
 	const agreed = ref(false); // 是否同意协议
-
-	// 【新增】用于存储从上游分享链接中捕获到的邀请码
-	const upstreamInviteCode = ref('');
+	const hasParent = ref(false); // 标记是否已绑定上级
+	const upstreamInviteCode = ref(''); // 用于存储从上游分享链接中捕获到的邀请码
 
 	// --- 2. 计算属性 ---
 	const isLoginDisabled = computed(() => {
-		// 登录按钮的可用条件：已授权手机号、已填写昵称、已同意协议
-		// return !avatarUrl.value || !phoneCode.value || !nickName.value.trim() || !agreed.value;
-		return !phoneCode.value || !agreed.value;
+		// 登录按钮的可用条件：
+		// 1. 必须有头像 (avatarUrl)
+		// 2. 必须有手机号凭证 (phoneCode)
+		// 3. 必须有昵称且不为空 (nickName)
+		// 4. 必须同意协议 (agreed)
+		return !avatarUrl.value || !phoneCode.value || !nickName.value || !nickName.value.trim() || !agreed.value;
 	});
 
 	// --- 3. 生命周期钩子 ---
@@ -108,10 +110,10 @@
 	// 		uni.removeStorageSync('pendingInviteCode');
 	// 	}
 	// });
-	onLoad((options) => {
+	onLoad(async (options) => {
 		getLoginCode();
 
-		// 【核心修改】检查并处理传入的邀请码
+		// 检查并处理传入的邀请码
 		// 优先级：URL参数 > 本地缓存的pendingInviteCode
 		const codeFromUrl = options?.inviteCode;
 		const codeFromStorage = uni.getStorageSync('pendingInviteCode');
@@ -137,12 +139,31 @@
 			// 2. 存入页面级变量，供本页再次分享时使用
 			upstreamInviteCode.value = finalInviteCode;
 		}
+
+		//检查是否已绑定上级 (静默登录可能已绑定)
+		const token = uni.getStorageSync('token');
+		if (token) {
+			try {
+				// 调用获取用户信息接口
+				const {
+					data
+				} = await request('/app-api/member/user/get', {
+					method: 'GET'
+				});
+				if (data && data.parentId) {
+					hasParent.value = true;
+					console.log('✅ 用户已绑定上级 (ID:', data.parentId, ')，隐藏邀请码输入框');
+				}
+			} catch (e) {
+				console.error('预检用户信息失败', e);
+			}
+		}
 	});
 
 	// --- 4. 授权相关方法 ---
 
 	/**
-	 * @description 【新增】处理微信头像选择事件
+	 * @description 处理微信头像选择事件
 	 * @param {object} e - 事件对象，包含头像的临时路径
 	 */
 	const onChooseAvatar = (e) => {
@@ -210,6 +231,7 @@
 	 */
 	const getPhoneNumber = (e) => {
 		if (e.detail.code) {
+			console.log("getPhoneNumber获取到的值：", e.detail)
 			phoneCode.value = e.detail.code;
 			uni.showToast({
 				title: '手机号授权成功',
@@ -236,98 +258,136 @@
 	/**
 	 * @description 处理一键登录
 	 */
+	/**
+	 * @description 处理一键登录
+	 */
 	const handleLogin = async () => {
-		// 前端校验
+		// 1. 前端校验
 		if (isLoginDisabled.value) {
 			if (!phoneCode.value) {
-				uni.showToast({
+				return uni.showToast({
 					title: '请授权手机号',
 					icon: 'none'
 				});
 			} else if (!agreed.value) {
-				uni.showToast({
-					title: '请同意用户协议和隐私政策',
+				return uni.showToast({
+					title: '请同意协议',
 					icon: 'none'
 				});
 			}
 			return;
 		}
-		// if (isLoginDisabled.value) {
-		// 	if (!avatarUrl.value) {
-		// 		uni.showToast({
-		// 			title: '请上传头像',
-		// 			icon: 'none'
-		// 		});
-		// 	} else if (!phoneCode.value) {
-		// 		uni.showToast({
-		// 			title: '请授权手机号',
-		// 			icon: 'none'
-		// 		});
-		// 	} else if (!nickName.value.trim()) {
-		// 		uni.showToast({
-		// 			title: '请输入昵称',
-		// 			icon: 'none'
-		// 		});
-		// 	} else if (!agreed.value) {
-		// 		uni.showToast({
-		// 			title: '请同意协议',
-		// 			icon: 'none'
-		// 		});
-		// 	}
-		// 	return;
-		// }
+
+		// 二次校验（防止 computed 没更新）
+		if (!avatarUrl.value) {
+			return uni.showToast({
+				title: '请上传头像',
+				icon: 'none'
+			});
+		}
+		if (!nickName.value || !nickName.value.trim()) {
+			return uni.showToast({
+				title: '请输入昵称',
+				icon: 'none'
+			});
+		}
 
 		uni.showLoading({
 			title: '正在登录...'
 		});
 
+		// 1. 检查是否有 Token，没有则先进行静默登录获取 Token
+		let token = uni.getStorageSync('token');
+		if (!token) {
+			console.log('无 Token，先执行静默登录...');
+			const loginRes = await uni.login({
+				provider: 'weixin'
+			});
+			if (loginRes.code) {
+				const silentResult = await request('/app-api/member/auth/weixin-mini-app-login', {
+					method: 'POST',
+					data: {
+						loginCode: loginRes.code,
+						state: 'default',
+						shardCode: inviteCode.value
+					}
+				});
+				if (silentResult.data && silentResult.data.accessToken) {
+					uni.setStorageSync('token', silentResult.data.accessToken);
+					uni.setStorageSync('userId', silentResult.data.userId);
+					console.log('静默登录补救成功');
+				} else {
+					uni.hideLoading();
+					return uni.showToast({
+						title: '登录初始化失败，请重试',
+						icon: 'none'
+					});
+				}
+			}
+		}
+
 		try {
-			// 准备提交给后端的数据
+			// 2. 准备提交给后端的数据
 			const payload = {
-				loginCode: loginCode.value,
+				// loginCode: loginCode.value, // 注释掉，使用 phoneCode
 				phoneCode: phoneCode.value,
+				telephone: "", // 后端要求字段，微信授权模式下传空字符串
 				nickName: nickName.value,
-				avatar: avatarUrl.value, // 将获取到的头像URL加入
+				avatar: avatarUrl.value,
 				shardCode: inviteCode.value,
-				state: 'default'
 			};
 			console.log('🚀 准备提交的登录数据:', payload);
 
-			// 发起登录请求
-			const loginResult = await request('/app-api/member/auth/weixin-mini-app-login', {
+			// 3. 发起绑定请求
+			const loginResult = await request('/app-api/member/auth/bind/info', {
 				method: 'POST',
 				data: payload
 			});
 
-			if (loginResult.error || !loginResult.data?.accessToken) {
+			// ==================== 【核心修复点】开始 ====================
+			// 旧代码：if (loginResult.error || !loginResult.data?.accessToken) { ... }
+			// 错误原因：后端返回 data: true，true 没有 accessToken 属性，导致报错。
+
+			// 新代码：只判断是否有 error。只要没有 error，哪怕 data 是 true 也是成功。
+			if (loginResult.error) {
 				// 特殊处理453错误码
-				if (loginResult.error && loginResult.error.code === 453) {
+				if (loginResult.error.code === 453) {
 					uni.showToast({
 						title: loginResult.error.msg,
 						icon: 'none',
 						duration: 3000
 					});
 				} else {
-					throw new Error(loginResult.error || '登录失败，请重试');
+					// 抛出后端返回的具体错误信息
+					throw new Error(loginResult.error.msg || '登录失败，请重试');
 				}
-				// 无论如何，453之后需要重新获取code
+				// 重新获取 code 防止下次失败
 				getLoginCode();
 				return;
 			}
+			// ==================== 【核心修复点】结束 ====================
 
-			// 登录成功，存储 token 和 userId
-			const {
-				accessToken,
-				userId
-			} = loginResult.data;
-			uni.setStorageSync('token', accessToken);
-			uni.setStorageSync('userId', userId);
+			console.log('✅ 绑定成功 (后端返回:', loginResult.data, ')');
 
-			// 紧接着获取并存储完整的用户信息
+			// 4. 登录成功后的处理
+			// 如果后端返回了新的 token (万一改回去)，则更新；否则保持静默登录的 token
+			if (loginResult.data && typeof loginResult.data === 'object' && loginResult.data.accessToken) {
+				const {
+					accessToken,
+					userId
+				} = loginResult.data;
+				uni.setStorageSync('token', accessToken);
+				uni.setStorageSync('userId', userId);
+			}
+
+			// 5. 同步用户信息
 			await fetchAndCacheUserInfo();
 
-			// 检查并处理分享奖励
-			await handlePendingShareReward(userId);
+			// 6. 处理分享奖励
+			const currentUserId = uni.getStorageSync('userId');
+			if (currentUserId) {
+				await handlePendingShareReward(currentUserId);
+			}
 
 			uni.hideLoading();
 			uni.showToast({
@@ -335,21 +395,134 @@
 				icon: 'success'
 			});
 
-			// 跳转到首页
-			uni.switchTab({
-				url: '/pages/home/home'
-			});
+			// 7. 跳转首页
+			setTimeout(() => {
+				uni.switchTab({
+					url: '/pages/home/home'
+				});
+			}, 500);
 
 		} catch (error) {
 			uni.hideLoading();
 			console.error('登录流程异常:', error);
 			uni.showToast({
-				title: error.message,
+				title: error.message || '系统异常',
 				icon: 'none'
 			});
-			getLoginCode(); // 登录失败后，重新获取 code 以便重试
+			getLoginCode();
 		}
 	};
+	// const handleLogin = async () => {
+	// 	if (!avatarUrl.value) {
+	// 		return uni.showToast({
+	// 			title: '请上传头像',
+	// 			icon: 'none'
+	// 		});
+	// 	}
+	// 	if (!nickName.value || !nickName.value.trim()) {
+	// 		return uni.showToast({
+	// 			title: '请输入昵称',
+	// 			icon: 'none'
+	// 		});
+	// 	}
+	// 	if (!phoneCode.value) {
+	// 		return uni.showToast({
+	// 			title: '请授权手机号',
+	// 			icon: 'none'
+	// 		});
+	// 	}
+	// 	if (!agreed.value) {
+	// 		return uni.showToast({
+	// 			title: '请同意协议',
+	// 			icon: 'none'
+	// 		});
+	// 	}
+
+	// 	uni.showLoading({
+	// 		title: '正在登录...'
+	// 	});
+
+	// 	try {
+	// 		// 准备提交给后端的数据
+	// 		const payload = {
+	// 			// loginCode: loginCode.value,
+	// 			phoneCode: phoneCode.value,
+	// 			nickName: nickName.value,
+	// 			avatar: avatarUrl.value, // 将获取到的头像URL加入
+	// 			shardCode: inviteCode.value,
+	// 			// state: 'default'
+	// 		};
+	// 		console.log('🚀 准备提交的登录数据:', payload);
+
+	// 		// 发起登录请求
+	// 		const loginResult = await request('/app-api/member/auth/bind/info', {
+	// 			method: 'POST',
+	// 			data: payload
+	// 		});
+
+	// 		// 【修正逻辑】：只要 error 为空，或者 data 为 true，都视为成功
+	// 		if (loginResult.error) {
+	// 			// 特殊处理453错误码
+	// 			if (loginResult.error.code === 453) {
+	// 				uni.showToast({
+	// 					title: loginResult.error.msg,
+	// 					icon: 'none',
+	// 					duration: 3000
+	// 				});
+	// 			} else {
+	// 				// 其他错误才抛出异常
+	// 				throw new Error(loginResult.error.msg || '登录失败，请重试');
+	// 			}
+	// 			getLoginCode();
+	// 			return;
+	// 		}
+
+	// 		// --- 下面是成功后的逻辑 ---
+
+	// 		// 注意：后端现在返回的是 true，不一定包含 accessToken
+	// 		// 如果返回了 data 对象且有 accessToken，我们就更新；如果没有，就继续用之前的
+	// 		if (loginResult.data && typeof loginResult.data === 'object' && loginResult.data.accessToken) {
+	// 			const {
+	// 				accessToken,
+	// 				userId
+	// 			} = loginResult.data;
+	// 			uni.setStorageSync('token', accessToken);
+	// 			uni.setStorageSync('userId', userId);
+	// 		} else {
+	// 			console.log('接口返回 true，继续使用现有 Token');
+	// 		}
+
+	// 		// 紧接着获取并存储完整的用户信息
+	// 		await fetchAndCacheUserInfo();
+
+	// 		// 检查并处理分享奖励
+	// 		// 注意：这里需要 userId，如果上面没返回，从缓存取
+	// 		const currentUserId = uni.getStorageSync('userId');
+	// 		if (currentUserId) {
+	// 			await handlePendingShareReward(currentUserId);
+	// 		}
+
+	// 		uni.hideLoading();
+	// 		uni.showToast({
+	// 			title: '登录成功',
+	// 			icon: 'success'
+	// 		});
+
+	// 		// 跳转到首页
+	// 		uni.switchTab({
+	// 			url: '/pages/home/home'
+	// 		});
+
+	// 	} catch (error) {
+	// 		uni.hideLoading();
+	// 		console.error('登录流程异常:', error);
+	// 		uni.showToast({
+	// 			title: error.message,
+	// 			icon: 'none'
+	// 		});
+	// 		getLoginCode(); // 登录失败后，重新获取 code 以便重试
+	// 	}
+	// };
 
 	/**
 	 * @description 登录成功后，获取并缓存完整的用户信息

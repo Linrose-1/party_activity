@@ -352,7 +352,7 @@ const _sfc_main = {
         return;
       }
       common_vendor.index.navigateTo({
-        url: `/pages/active-enroll/active-enroll?id=${activityId.value}`
+        url: `/packages/active-enroll/active-enroll?id=${activityId.value}`
       });
     }
     function viewAllUsers() {
@@ -383,7 +383,7 @@ const _sfc_main = {
       const defaultAvatar = "/static/images/default-avatar.png";
       const name = user.nickname || "匿名用户";
       const avatarUrl = user.avatar || defaultAvatar;
-      let url = `/pages/applicationBusinessCard/applicationBusinessCard?id=${user.id}&name=${encodeURIComponent(name)}&avatar=${encodeURIComponent(avatarUrl)}`;
+      let url = `/packages/applicationBusinessCard/applicationBusinessCard?id=${user.id}&name=${encodeURIComponent(name)}&avatar=${encodeURIComponent(avatarUrl)}`;
       if (isFreeView) {
         url += "&fromShare=1";
         common_vendor.index.__f__("log", "at packages/active-detail/active-detail.vue:752", `[免费查看] 跳转到名片申请页, UserID: ${user.id}`);
@@ -533,7 +533,7 @@ const _sfc_main = {
         }),
         ai: showTimelineGuide.value
       }, showTimelineGuide.value ? {
-        aj: common_assets._imports_0$1,
+        aj: common_assets._imports_0$3,
         ak: common_vendor.o(hideTimelineGuide)
       } : {}) : {});
     };

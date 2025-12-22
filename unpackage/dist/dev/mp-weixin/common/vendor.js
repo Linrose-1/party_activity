@@ -7299,7 +7299,7 @@ function initOnError() {
 function initRuntimeSocketService() {
   const hosts = "172.20.10.4,127.0.0.1";
   const port = "8090";
-  const id = "mp-weixin_w4u1O6";
+  const id = "mp-weixin_mEYyLB";
   const lazy = typeof swan !== "undefined";
   let restoreError = lazy ? () => {
   } : initOnError();
@@ -8285,27 +8285,9 @@ const pages = [
     }
   },
   {
-    path: "pages/active-enroll/active-enroll",
-    style: {
-      navigationBarTitleText: "聚会报名"
-    }
-  },
-  {
-    path: "pages/my-businessCard/my-businessCard",
-    style: {
-      navigationBarTitleText: "个人名片"
-    }
-  },
-  {
     path: "pages/shop-detail/shop-detail",
     style: {
       navigationBarTitleText: "聚店详情"
-    }
-  },
-  {
-    path: "pages/applicationBusinessCard/applicationBusinessCard",
-    style: {
-      navigationBarTitleText: "兑换名片"
     }
   },
   {
@@ -8315,27 +8297,9 @@ const pages = [
     }
   },
   {
-    path: "pages/home-opportunitiesPublish/home-opportunitiesPublish",
-    style: {
-      navigationBarTitleText: "发布帖子"
-    }
-  },
-  {
-    path: "pages/my-active/my-active",
-    style: {
-      navigationBarTitleText: "我的聚会"
-    }
-  },
-  {
     path: "pages/my-opportunity/my-opportunity",
     style: {
       navigationBarTitleText: "我的商机"
-    }
-  },
-  {
-    path: "pages/my-collection/my-collection",
-    style: {
-      navigationBarTitleText: "我的收藏"
     }
   },
   {
@@ -8396,12 +8360,6 @@ const pages = [
     path: "pages/my-shopRecommend/my-shopRecommend",
     style: {
       navigationBarTitleText: "我的推荐聚店"
-    }
-  },
-  {
-    path: "pages/myStore-edit/myStore-edit",
-    style: {
-      navigationBarTitleText: "修改聚店信息"
     }
   },
   {
@@ -8479,7 +8437,19 @@ const pages = [
   {
     path: "pages/my-auth/my-auth",
     style: {
-      navigationBarTitleText: "实名认证"
+      navigationBarTitleText: "平台认证"
+    }
+  },
+  {
+    path: "pages/platform-intro/platform-intro",
+    style: {
+      navigationBarTitleText: "平台详情"
+    }
+  },
+  {
+    path: "pages/my-order-detail/my-order-detail",
+    style: {
+      navigationBarTitleText: "订单详情"
     }
   }
 ];
@@ -8497,6 +8467,12 @@ const subPackages = [
         path: "my-account/my-account",
         style: {
           navigationBarTitleText: "账户详情"
+        }
+      },
+      {
+        path: "home-opportunitiesPublish/home-opportunitiesPublish",
+        style: {
+          navigationBarTitleText: "发布帖子"
         }
       },
       {
@@ -8521,6 +8497,12 @@ const subPackages = [
         path: "active-detail/active-detail",
         style: {
           navigationBarTitleText: "聚会详情"
+        }
+      },
+      {
+        path: "active-enroll/active-enroll",
+        style: {
+          navigationBarTitleText: "聚会报名"
         }
       },
       {
@@ -8569,6 +8551,36 @@ const subPackages = [
         path: "home-customization/home-customization",
         style: {
           navigationBarTitleText: "猩聚社定制"
+        }
+      },
+      {
+        path: "my-businessCard/my-businessCard",
+        style: {
+          navigationBarTitleText: "个人名片"
+        }
+      },
+      {
+        path: "applicationBusinessCard/applicationBusinessCard",
+        style: {
+          navigationBarTitleText: "兑换名片"
+        }
+      },
+      {
+        path: "myStore-edit/myStore-edit",
+        style: {
+          navigationBarTitleText: "修改聚店信息"
+        }
+      },
+      {
+        path: "my-active/my-active",
+        style: {
+          navigationBarTitleText: "我的聚会"
+        }
+      },
+      {
+        path: "my-collection/my-collection",
+        style: {
+          navigationBarTitleText: "我的收藏"
         }
       }
     ]

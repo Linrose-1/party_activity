@@ -583,7 +583,7 @@ const _sfc_main = {
         });
         return;
       }
-      const url = `/pages/applicationBusinessCard/applicationBusinessCard?id=${user.id}&name=${encodeURIComponent(user.name)}&avatar=${encodeURIComponent(user.avatar)}`;
+      const url = `/packages/applicationBusinessCard/applicationBusinessCard?id=${user.id}&name=${encodeURIComponent(user.name)}&avatar=${encodeURIComponent(user.avatar)}`;
       common_vendor.index.navigateTo({
         url
       });
@@ -813,7 +813,7 @@ const _sfc_main = {
         }),
         af: showTimelineGuide.value
       }, showTimelineGuide.value ? {
-        ag: common_assets._imports_0$1,
+        ag: common_assets._imports_0$3,
         ah: common_vendor.o(hideTimelineGuide)
       } : {}, {
         ai: copyMenu.show

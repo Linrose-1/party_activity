@@ -154,6 +154,9 @@
 		onShow
 	} from '@dcloudio/uni-app'; // 引入 onLoad
 	import request from '../../utils/request.js';
+	import {
+	    checkLoginGuard
+	} from '../../utils/user.js';
 
 	onMounted(() => {
 		getUserInfo();
@@ -219,7 +222,7 @@
 		return [{
 				value: user.activityCount || 0,
 				label: '我的聚会',
-				path: '/pages/my-active/my-active'
+				path: '/packages/my-active/my-active'
 			},
 			{
 				value: user.postCount || 0,
@@ -280,6 +283,7 @@
 
 	// 【优化 3】修改跳转逻辑，处理 "互动信息" 的点击事件
 	const navigateToAccountDetail = (item) => {
+		if (!checkLoginGuard()) return;
 		if (item && item.path) {
 			uni.navigateTo({
 				url: item.path
@@ -353,7 +357,7 @@
 			desc: '您的电子名片',
 			icon: '../../static/icon/我的名片.png',
 			iconBg: 'linear-gradient(135deg, #30CFD0, #330867)',
-			path: '/pages/my-businessCard/my-businessCard'
+			path: '/packages/my-businessCard/my-businessCard'
 		},
 
 		{
@@ -373,8 +377,9 @@
 	]);
 
 
-	// 【【【新增】】】 "人脉金库" 模块的跳转逻辑处理
+	//  "人脉金库" 模块的跳转逻辑处理
 	const navigateToCoreFeature = (item) => {
+		if (!checkLoginGuard()) return;
 		// 优先处理有特殊 key 的项
 		if (item.key) {
 			switch (item.key) {
@@ -421,7 +426,7 @@
 		// 	name: '我的聚会',
 		// 	desc: '已报名/已发布的聚会',
 		// 	icon: '../../static/icon/聚会.png',
-		// 	path: '/pages/my-active/my-active'
+		// 	path: '/packages/my-active/my-active'
 		// },
 		// 第 2 行
 		{
@@ -441,7 +446,7 @@
 			name: '我的收藏',
 			desc: '查看您收藏的聚会和商机',
 			icon: '../../static/icon/收藏.png',
-			path: '/pages/my-collection/my-collection'
+			path: '/packages/my-collection/my-collection'
 		},
 		{
 			name: '我的关注',
@@ -489,7 +494,7 @@
 			path: null
 		}, // 新增
 		{
-			name: '精准投放',
+			name: '数字营销',
 			desc: '广告精准触达',
 			icon: '../../static/icon/广告投放2.0.png',
 			path: null
@@ -527,6 +532,7 @@
 	]);
 
 	const navigateToFeature = (item) => {
+		if (!checkLoginGuard()) return;
 		// 1. 优先处理有特殊 key 的项
 		if (item && item.key === 'customerService') {
 			// 检查电话号码是否存在
@@ -569,6 +575,8 @@
 
 
 	const onEdit = () => {
+		if (!checkLoginGuard()) return;
+
 		uni.navigateTo({
 			// url: '/packages/my-edit/my-edit'
 			url: `/packages/my-account-informationDetails/my-account-informationDetails?id=${userInfo.value.id}`
@@ -576,6 +584,8 @@
 	}
 
 	const onViewAccountDetail = () => {
+		if (!checkLoginGuard()) return;
+
 		uni.navigateTo({
 			url: '/packages/my-edit/my-edit'
 		});
@@ -583,6 +593,7 @@
 
 
 	const copyToClipboard = (text) => {
+		if (!checkLoginGuard()) return;
 		if (!text) {
 			uni.showToast({
 				title: '没有可复制的内容',
@@ -617,7 +628,7 @@
 
 	// const onViewDetail = () => {
 	// 	uni.navigateTo({
-	// 		url: '/pages/my-businessCard/my-businessCard'
+	// 		url: '/packages/my-businessCard/my-businessCard'
 	// 	})
 	// }
 

@@ -16,6 +16,7 @@
   border-radius: 16rpx;
   margin-bottom: 30rpx;
   box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.1);
+  object-fit: cover;
 }
 .activity-header.data-v-f73ae0ce {
   display: flex;

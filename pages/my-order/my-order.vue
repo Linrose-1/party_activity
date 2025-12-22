@@ -1,72 +1,64 @@
 <template>
-	<view class="page-container">
-		<!-- 顶部搜索区域 -->
-		<view class="search-bar-sticky">
-			<view class="search-bar">
-				<uni-icons type="search" size="20" color="#999"></uni-icons>
-				<input class="search-input" v-model="searchQuery" placeholder="输入支付订单号搜索" @confirm="handleSearch"
-					confirm-type="search" />
-				<button class="search-button" @click="handleSearch">搜索</button>
-			</view>
+	<view class="container">
+		<!-- 1. 顶部 Tab -->
+		<view class="tabs-header">
+			<view class="tab-item" :class="{ active: currentTab === 0 }" @click="switchTab(0)">全部</view>
+			<view class="tab-item" :class="{ active: currentTab === 1 }" @click="switchTab(1)">智米充值</view>
+			<view class="tab-item" :class="{ active: currentTab === 2 }" @click="switchTab(2)">会员开通</view>
 		</view>
 
-		<!-- 订单列表区域 -->
-		<scroll-view class="record-list-container" scroll-y="true" @scrolltolower="loadMore" refresher-enabled="true"
-			:refresher-triggered="isRefreshing" @refresherrefresh="onPullDownRefresh">
-
-			<!-- 订单卡片列表 -->
-			<view class="record-card" v-for="record in recordList" :key="record.id">
+		<!-- 2. 列表区域 -->
+		<view class="order-list">
+			<view class="order-card" v-for="(item, index) in orderList" :key="item.id" @click="goToDetail(item)">
+				<!-- 头部：时间和状态 -->
 				<view class="card-header">
-					<view class="remark">{{ record.remark || '无备注' }}</view>
-					<view class="status-badge" :style="{ backgroundColor: getStatusInfo(record.status).color }">
-						{{ getStatusInfo(record.status).text }}
-					</view>
+					<text class="time">{{ formatTime(item.createTime) }}</text>
+					<text class="status" :class="getStatusClass(item.payStatus)">
+						{{ getStatusText(item.payStatus) }}
+					</text>
 				</view>
 
+				<!-- 内容区 -->
 				<view class="card-body">
-					<view class="info-row">
-						<text class="label">付款金额：</text>
-						<text class="value amount">¥ {{ (record.amount || 0).toFixed(2) }}</text>
+					<!-- 图标 -->
+					<view class="icon-box" :class="item.payType === 2 ? 'member-bg' : 'zhimi-bg'">
+						<uni-icons :type="item.payType === 2 ? 'vip-filled' : 'star-filled'" size="24" color="#fff">
+						</uni-icons>
 					</view>
-					<view class="info-row">
-						<text class="label">支付单号：</text>
-						<text class="value">{{ record.payNo }}</text>
-					</view>
-					<view class="info-row">
-						<text class="label">提交时间：</text>
-						<text class="value">{{ formatTimestamp(record.createTime) }}</text>
-					</view>
-					<view class="info-row" v-if="record.imageUrls">
-						<text class="label">支付凭证：</text>
-						<view class="image-previews">
-							<image v-for="(img, index) in record.imageUrls.split(',')" :key="index" :src="img"
-								mode="aspectFill" class="preview-thumb" @click="previewImages(record.imageUrls, index)">
-							</image>
+
+					<!-- 信息 -->
+					<view class="info-box">
+						<view class="title-row">
+							<text class="title">{{ item.payType === 2 ? '会员开通' : '智米充值' }}</text>
+							<text class="amount">¥{{ item.amount }}</text>
+						</view>
+						<view class="desc-row">
+							<text class="desc">{{ item.remark || (item.payType === 2 ? '会员服务' : '充值余额') }}</text>
+						</view>
+						<view class="order-no-row">
+							订单号: {{ item.orderNo || '生成中...' }}
 						</view>
 					</view>
 				</view>
 
-				<!-- 【需求】驳回信息和操作 -->
-				<view class="card-footer rejected-section" v-if="record.status === 4 && record.errMsg">
-					<view class="rejected-info">
-						<uni-icons type="info-filled" color="#D9534F" size="18"></uni-icons>
-						<text class="rejected-label">驳回原因：</text>
-						<text class="rejected-msg">{{ record.errMsg }}</text>
-					</view>
-					<button class="re-upload-button" @click="handleReupload(record)">重新上传</button>
+				<!-- 底部操作区 (仅未支付显示) -->
+				<view class="card-footer" v-if="item.payStatus === 0">
+					<view class="total-text">需付款：<text class="highlight">¥{{ item.amount }}</text></view>
+					<button class="repay-btn" @click.stop="handleRepay(item)" :disabled="isPaying" :loading="isPaying">
+						重新支付
+					</button>
 				</view>
 			</view>
 
 			<!-- 加载状态 -->
-			<uni-load-more v-if="recordList.length > 0 || loadStatus !== 'more'" :status="loadStatus"></uni-load-more>
+			<uni-load-more :status="loadingStatus" v-if="orderList.length > 0 || loadingStatus === 'loading'" />
 
 			<!-- 空状态 -->
-			<view class="empty-state" v-if="recordList.length === 0 && loadStatus === 'noMore'">
-				<uni-icons type="list" size="60" color="#e0e0e0"></uni-icons>
-				<text class="empty-text">暂无付款记录</text>
+			<view v-if="orderList.length === 0 && loadingStatus === 'noMore'" class="empty-state">
+				<uni-icons type="cart" size="60" color="#ddd"></uni-icons>
+				<text>暂无订单记录</text>
 			</view>
-
-		</scroll-view>
+		</view>
 	</view>
 </template>
 
@@ -77,360 +69,351 @@
 	} from 'vue';
 	import {
 		onReachBottom,
-		onPullDownRefresh,
-		onShow
+		onPullDownRefresh
 	} from '@dcloudio/uni-app';
-	import request from '../../utils/request.js'; // 确保路径正确
+	import request from '@/utils/request.js';
 
-	// --- 状态变量 ---
-	const recordList = ref([]);
-	const searchQuery = ref('');
+	// --- 状态 ---
+	const currentTab = ref(0); // 0:全部, 1:智米, 2:会员
+	const orderList = ref([]);
 	const pageNo = ref(1);
 	const pageSize = 10;
-	const hasMore = ref(true);
-	const loadStatus = ref('more'); // 'more', 'loading', 'noMore'
-	const isRefreshing = ref(false);
-	const userInfo = ref(null); // 用于存储用户信息，特别是 userId
+	const loadingStatus = ref('more');
+	const isPaying = ref(false);
 
-	// --- 生命周期函数 ---
-	onShow(() => {
-		// 使用 onShow 确保每次进入页面都能刷新数据
-		// 比如从重新上传页回来后，列表应该更新
-		initPage();
+	onMounted(() => {
+		loadData(true);
 	});
 
 	onPullDownRefresh(() => {
-		isRefreshing.value = true;
-		getRecordPage(true);
+		loadData(true);
 	});
 
 	onReachBottom(() => {
-		if (hasMore.value) {
-			getRecordPage();
+		if (loadingStatus.value === 'more') {
+			loadData(false);
 		}
 	});
 
-	// --- 核心逻辑 ---
+	// --- 数据获取 ---
+	const loadData = async (isRefresh = false) => {
+		if (loadingStatus.value === 'loading') return;
+		loadingStatus.value = 'loading';
 
-	/**
-	 * 初始化页面，获取用户信息并加载第一页数据
-	 */
-	const initPage = async () => {
-		const { data, error } = await request('/app-api/member/user/get');
-		if (error) {
-			uni.showToast({ title: '获取用户信息失败', icon: 'none' });
-			return;
-		}
-		userInfo.value = data;
-		// 获取到用户信息后，再加载列表
-		await getRecordPage(true);
-	};
-
-	/**
-	 * 获取付款记录分页的核心函数
-	 * @param {boolean} isRefresh - 是否为刷新操作
-	 */
-	const getRecordPage = async (isRefresh = false) => {
-		if (loadStatus.value === 'loading') return;
 		if (isRefresh) {
 			pageNo.value = 1;
-			hasMore.value = true;
-			recordList.value = [];
-		}
-		if (!hasMore.value) {
-			loadStatus.value = 'noMore';
-			return;
+			orderList.value = [];
 		}
 
-		loadStatus.value = 'loading';
+		try {
+			const params = {
+				pageNo: pageNo.value,
+				pageSize: pageSize
+			};
+			// 如果不是全部，则传 payType
+			if (currentTab.value !== 0) {
+				params.payType = currentTab.value;
+			}
 
-		const params = {
-			pageNo: pageNo.value,
-			pageSize: pageSize,
-			userId: userInfo.value.id, // 使用当前用户的ID
-			payNo: searchQuery.value.trim(),
-		};
+			// 假设列表接口地址是 /page (根据你的项目习惯推测)
+			const {
+				data,
+				error
+			} = await request('/app-api/member/user-post-pay-record/page', {
+				method: 'GET',
+				data: params
+			});
 
-		const { data, error } = await request('/app-api/member/user-post-pay-record/page', {
-			method: 'GET',
-			data: params
-		});
+			if (error) throw new Error(error);
 
-		isRefreshing.value = false;
+			const list = data.list || [];
+			orderList.value = isRefresh ? list : [...orderList.value, ...list];
 
-		if (error) {
-			loadStatus.value = 'more';
-			uni.showToast({ title: `加载失败: ${error}`, icon: 'none' });
-			return;
-		}
-
-		const newList = data.list || [];
-		const total = data.total || 0;
-
-		if (isRefresh) {
-			recordList.value = newList;
-		} else {
-			recordList.value.push(...newList);
-		}
-
-		// 更新分页状态
-		if (recordList.value.length >= total) {
-			hasMore.value = false;
-			loadStatus.value = 'noMore';
-		} else {
-			hasMore.value = true;
-			loadStatus.value = 'more';
-			pageNo.value++;
+			if (list.length < pageSize) {
+				loadingStatus.value = 'noMore';
+			} else {
+				loadingStatus.value = 'more';
+				pageNo.value++;
+			}
+		} catch (e) {
+			console.error('加载订单失败', e);
+			loadingStatus.value = 'more';
+		} finally {
+			uni.stopPullDownRefresh();
 		}
 	};
 
-
-	// --- 事件处理器 ---
-
-	/**
-	 * 处理搜索按钮点击
-	 */
-	const handleSearch = () => {
-		getRecordPage(true);
+	// --- 交互 ---
+	const switchTab = (index) => {
+		if (currentTab.value === index) return;
+		currentTab.value = index;
+		loadData(true);
 	};
 
-	/**
-	 * 处理重新上传按钮点击
-	 * @param {object} record - 被点击的订单记录
-	 */
-	const handleReupload = (record) => {
-		// ‼️ 请确保 'my-active-secondRegistration' 页面存在
-		// 可以将订单ID或其他信息通过URL参数传递
+	const goToDetail = (item) => {
 		uni.navigateTo({
-			url: `/pages/my-active-secondRegistration/my-active-secondRegistration?id=${record.id}`
-		});
-	};
-	
-	/**
-	 * 预览凭证图片
-	 * @param {string} imageUrls - 逗号分隔的图片URL字符串
-	 * @param {number} currentIndex - 当前点击的图片索引
-	 */
-	const previewImages = (imageUrls, currentIndex) => {
-		const urls = imageUrls.split(',');
-		uni.previewImage({
-			urls: urls,
-			current: currentIndex
+			url: `/pages/my-order-detail/my-order-detail?id=${item.id}`
 		});
 	};
 
+	// --- 支付逻辑 (复用) ---
+	const handleRepay = async (item) => {
+		if (!item.orderNo) {
+			return uni.showToast({
+				title: '订单号无效',
+				icon: 'none'
+			});
+		}
+		isPaying.value = true;
+		uni.showLoading({
+			title: '正在支付...'
+		});
 
-	// --- 辅助函数 ---
+		try {
+			// 1. 获取支付参数
+			const {
+				data: payParams,
+				error
+			} = await request('/app-api/member/user-post-pay-record/pay', {
+				method: 'POST',
+				data: {
+					orderNo: item.orderNo
+				}
+			});
 
-	/**
-	 * 根据状态码返回文本和颜色
-	 * @param {number} status - 状态码
-	 */
-	const getStatusInfo = (status) => {
-		switch (status) {
-			case 1:
-				return { text: '待确认', color: '#007BFF' };
-			case 2:
-				return { text: '确认支付', color: '#28A745' };
-			case 3:
-				return { text: '已操作数据', color: '#6C757D' };
-			case 4:
-				return { text: '驳回', color: '#D9534F' };
-			default:
-				return { text: '未知', color: '#6C757D' };
+			if (error) throw new Error(error);
+
+			// 2. 调起微信支付
+			await new Promise((resolve, reject) => {
+				uni.requestPayment({
+					provider: 'weixin',
+					...payParams,
+					success: resolve,
+					fail: (err) => {
+						if (err.errMsg.includes('cancel')) reject(new Error('取消支付'));
+						else reject(new Error('支付失败'));
+					}
+				});
+			});
+
+			uni.hideLoading();
+			uni.showToast({
+				title: '支付成功',
+				icon: 'success'
+			});
+			// 支付成功后刷新列表状态
+			setTimeout(() => loadData(true), 1000);
+
+		} catch (e) {
+			uni.hideLoading();
+			if (e.message !== '取消支付') {
+				uni.showToast({
+					title: e.message || '支付异常',
+					icon: 'none'
+				});
+			}
+		} finally {
+			isPaying.value = false;
 		}
 	};
-	
-	/**
-	 * 格式化时间戳
-	 * @param {number} timestamp - 时间戳
-	 */
-	const formatTimestamp = (timestamp) => {
-		if (!timestamp) return 'N/A';
-		const date = new Date(timestamp);
-		return date.toLocaleString('zh-CN', { hour12: false }).replace(/\//g, '-');
+
+	// --- 工具函数 ---
+	const formatTime = (ts) => {
+		if (!ts) return '';
+		const d = new Date(ts);
+		return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
 	};
 
+	const getStatusText = (status) => {
+		return status === 1 ? '✅ 支付成功' : '⏳ 待支付';
+	};
+
+	const getStatusClass = (status) => {
+		return status === 1 ? 'status-success' : 'status-pending';
+	};
 </script>
 
 <style lang="scss" scoped>
-	.page-container {
-		display: flex;
-		flex-direction: column;
-		height: 100vh;
+	.container {
 		background-color: #f5f5f5;
+		min-height: 100vh;
+		padding-top: 100rpx;
 	}
 
-	.search-bar-sticky {
-		position: sticky;
+	/* Tab 样式 */
+	.tabs-header {
+		position: fixed;
 		top: 0;
-		background-color: #ffffff;
-		padding: 20rpx;
-		box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
-		z-index: 100;
-	}
-
-	.search-bar {
+		left: 0;
+		width: 100%;
+		height: 90rpx;
+		background: #fff;
 		display: flex;
 		align-items: center;
-		background-color: #f5f5f5;
-		border-radius: 40rpx;
-		padding: 0 10rpx 0 25rpx;
-	}
+		z-index: 10;
+		border-bottom: 1rpx solid #eee;
 
-	.search-input {
-		flex: 1;
-		height: 70rpx;
-		padding: 0 20rpx;
-		font-size: 28rpx;
-	}
-
-	.search-button {
-		background: #FF6E00;
-		color: white;
-		height: 60rpx;
-		line-height: 60rpx;
-		font-size: 26rpx;
-		border-radius: 30rpx;
-		padding: 0 30rpx;
-		margin-left: 10rpx;
-		border: none;
-
-		&::after {
-			border: none;
-		}
-	}
-
-	.record-list-container {
-		flex: 1;
-		height: 0; // 关键：让 scroll-view 在 flex 布局中正确计算高度
-	}
-	
-	.record-card {
-		background-color: #ffffff;
-		margin: 20rpx;
-		border-radius: 20rpx;
-		box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.06);
-		overflow: hidden;
-	}
-	
-	.card-header {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		padding: 25rpx 30rpx;
-		border-bottom: 1rpx solid #f0f0f0;
-
-		.remark {
-			font-size: 32rpx;
-			font-weight: 600;
-			color: #333;
-		}
-		
-		.status-badge {
-			padding: 8rpx 20rpx;
-			border-radius: 30rpx;
-			color: white;
-			font-size: 24rpx;
-			font-weight: 500;
-		}
-	}
-	
-	.card-body {
-		padding: 30rpx;
-	}
-	
-	.info-row {
-		display: flex;
-		align-items: flex-start;
-		font-size: 28rpx;
-		margin-bottom: 20rpx;
-		
-		&:last-child {
-			margin-bottom: 0;
-		}
-		
-		.label {
-			color: #888;
-			width: 160rpx;
-			flex-shrink: 0;
-		}
-		
-		.value {
-			color: #333;
+		.tab-item {
 			flex: 1;
-			word-break: break-all;
-			
-			&.amount {
+			text-align: center;
+			font-size: 28rpx;
+			color: #666;
+			line-height: 90rpx;
+			position: relative;
+
+			&.active {
 				color: #FF6E00;
 				font-weight: bold;
-				font-size: 32rpx;
+
+				&::after {
+					content: '';
+					position: absolute;
+					bottom: 0;
+					left: 50%;
+					transform: translateX(-50%);
+					width: 40rpx;
+					height: 4rpx;
+					background: #FF6E00;
+				}
 			}
 		}
 	}
-	
-	.image-previews {
+
+	/* 列表样式 */
+	.order-list {
+		padding: 20rpx;
+	}
+
+	.order-card {
+		background: #fff;
+		border-radius: 16rpx;
+		padding: 30rpx;
+		margin-bottom: 20rpx;
+		box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.03);
+	}
+
+	.card-header {
 		display: flex;
-		flex-wrap: wrap;
-		gap: 15rpx;
+		justify-content: space-between;
+		margin-bottom: 20rpx;
+		font-size: 24rpx;
+
+		.time {
+			color: #999;
+		}
+
+		.status-success {
+			color: #52c41a;
+		}
+
+		.status-pending {
+			color: #ff9800;
+		}
 	}
-	
-	.preview-thumb {
-		width: 120rpx;
-		height: 120rpx;
-		border-radius: 12rpx;
-		background-color: #f0f0f0;
-	}
-	
-	.card-footer.rejected-section {
-		background-color: #FFF4F4;
-		padding: 25rpx 30rpx;
-		border-top: 1rpx solid #FFE0E0;
-	}
-	
-	.rejected-info {
+
+	.card-body {
 		display: flex;
 		align-items: flex-start;
-		color: #D9534F;
-		font-size: 26rpx;
-		margin-bottom: 20rpx;
-		
-		.rejected-label {
-			font-weight: 500;
-			margin: 0 10rpx;
-			flex-shrink: 0;
-		}
-		.rejected-msg {
-			flex: 1;
-			line-height: 1.5;
-		}
+		padding-bottom: 20rpx;
+		border-bottom: 1rpx solid #f5f5f5;
 	}
-	
-	.re-upload-button {
-		width: 100%;
+
+	.icon-box {
+		width: 80rpx;
 		height: 80rpx;
-		line-height: 80rpx;
-		background-color: #FF6E00;
-		color: white;
-		font-size: 30rpx;
-		border-radius: 40rpx;
-		
-		&::after {
-			border: none;
+		border-radius: 50%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		margin-right: 20rpx;
+
+		&.zhimi-bg {
+			background: #4facfe;
+		}
+
+		&.member-bg {
+			background: #ffb347;
 		}
 	}
-	
+
+	.info-box {
+		flex: 1;
+
+		.title-row {
+			display: flex;
+			justify-content: space-between;
+			margin-bottom: 8rpx;
+
+			.title {
+				font-size: 30rpx;
+				font-weight: bold;
+				color: #333;
+			}
+
+			.amount {
+				font-size: 32rpx;
+				font-weight: bold;
+				color: #333;
+			}
+		}
+
+		.desc-row {
+			margin-bottom: 8rpx;
+
+			.desc {
+				font-size: 26rpx;
+				color: #666;
+			}
+		}
+
+		.order-no-row {
+			font-size: 22rpx;
+			color: #999;
+		}
+	}
+
+	.card-footer {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding-top: 20rpx;
+
+		.total-text {
+			font-size: 26rpx;
+			color: #333;
+
+			.highlight {
+				font-size: 32rpx;
+				font-weight: bold;
+				color: #FF6E00;
+			}
+		}
+
+		.repay-btn {
+			margin: 0;
+			font-size: 26rpx;
+			background: #FF6E00;
+			color: #fff;
+			border-radius: 30rpx;
+			padding: 0 30rpx;
+			line-height: 56rpx;
+
+			&::after {
+				border: none;
+			}
+		}
+	}
+
 	.empty-state {
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		justify-content: center;
-		padding: 150rpx 0;
-		
-		.empty-text {
-			margin-top: 20rpx;
-			font-size: 28rpx;
-			color: #999;
+		padding-top: 200rpx;
+		color: #999;
+		font-size: 28rpx;
+
+		.uni-icons {
+			margin-bottom: 20rpx;
 		}
 	}
 </style>

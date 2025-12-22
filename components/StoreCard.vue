@@ -50,6 +50,10 @@
 	import {
 		computed
 	} from 'vue';
+	import {
+		getInviteCode,
+		checkLoginGuard 
+	} from '../utils/user.js';
 
 	const props = defineProps({
 		store: {
@@ -85,6 +89,7 @@
 	};
 
 	const handleInitiateParty = () => {
+		if (!checkLoginGuard()) return;
 		if (!props.store || !props.store.id) return;
 		const url =
 			`/packages/active-publish/active-publish?storeId=${props.store.id}&storeName=${encodeURIComponent(props.store.storeName)}`;

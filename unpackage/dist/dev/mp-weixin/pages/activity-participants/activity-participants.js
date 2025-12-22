@@ -17,7 +17,7 @@ const _sfc_main = {
     const activityId = common_vendor.ref(null);
     const participantList = common_vendor.ref([]);
     const pageNo = common_vendor.ref(1);
-    const pageSize = common_vendor.ref(15);
+    const pageSize = common_vendor.ref(10);
     const total = common_vendor.ref(0);
     const loadingStatus = common_vendor.ref("more");
     const isEmpty = common_vendor.ref(false);
@@ -41,13 +41,14 @@ const _sfc_main = {
       }
     });
     const getParticipantList = async (isFirstLoad = false) => {
-      if (loadingStatus.value === "loading")
+      if (loadingStatus.value === "loading" || loadingStatus.value === "noMore")
         return;
       loadingStatus.value = "loading";
       if (isFirstLoad) {
         pageNo.value = 1;
         participantList.value = [];
         isEmpty.value = false;
+        loadingStatus.value = "loading";
       }
       const {
         data,
@@ -61,14 +62,13 @@ const _sfc_main = {
         }
       });
       if (error) {
-        common_vendor.index.__f__("error", "at pages/activity-participants/activity-participants.vue:89", "获取报名用户列表失败:", error);
         loadingStatus.value = "more";
         return;
       }
       if (data && data.list) {
         participantList.value = [...participantList.value, ...data.list];
         total.value = data.total;
-        if (participantList.value.length >= total.value) {
+        if (participantList.value.length >= total.value || data.list.length < pageSize.value) {
           loadingStatus.value = "noMore";
         } else {
           loadingStatus.value = "more";
@@ -79,9 +79,8 @@ const _sfc_main = {
         }
       } else {
         loadingStatus.value = "noMore";
-        if (isFirstLoad) {
+        if (isFirstLoad)
           isEmpty.value = true;
-        }
       }
     };
     const formatJoinTime = (timestamp) => {
@@ -103,7 +102,7 @@ const _sfc_main = {
       }
       const name = user.nickname || "匿名用户";
       const avatar = user.avatar || "";
-      let url = `/pages/applicationBusinessCard/applicationBusinessCard?id=${user.id}&name=${encodeURIComponent(name)}&avatar=${encodeURIComponent(avatar)}`;
+      let url = `/packages/applicationBusinessCard/applicationBusinessCard?id=${user.id}&name=${encodeURIComponent(name)}&avatar=${encodeURIComponent(avatar)}`;
       if (isOrganizer.value) {
         url += "&fromShare=1";
       }

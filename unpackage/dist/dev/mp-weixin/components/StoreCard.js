@@ -1,5 +1,6 @@
 "use strict";
 const common_vendor = require("../common/vendor.js");
+const utils_user = require("../utils/user.js");
 const _sfc_main = {
   __name: "StoreCard",
   props: {
@@ -33,6 +34,8 @@ const _sfc_main = {
       emit("click-card", props.store);
     };
     const handleInitiateParty = () => {
+      if (!utils_user.checkLoginGuard())
+        return;
       if (!props.store || !props.store.id)
         return;
       const url = `/packages/active-publish/active-publish?storeId=${props.store.id}&storeName=${encodeURIComponent(props.store.storeName)}`;

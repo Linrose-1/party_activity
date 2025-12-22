@@ -8,15 +8,9 @@ if (!Math) {
   "./pages/active/active.js";
   "./pages/shop/shop.js";
   "./pages/my/my.js";
-  "./pages/active-enroll/active-enroll.js";
-  "./pages/my-businessCard/my-businessCard.js";
   "./pages/shop-detail/shop-detail.js";
-  "./pages/applicationBusinessCard/applicationBusinessCard.js";
   "./pages/shop-recommend/shop-recommend.js";
-  "./pages/home-opportunitiesPublish/home-opportunitiesPublish.js";
-  "./pages/my-active/my-active.js";
   "./pages/my-opportunity/my-opportunity.js";
-  "./pages/my-collection/my-collection.js";
   "./pages/user-agreement/user-agreement.js";
   "./pages/location/location.js";
   "./pages/shop-list/shop-list.js";
@@ -27,7 +21,6 @@ if (!Math) {
   "./pages/my-active-approval/my-active-approval.js";
   "./pages/my-shop/my-shop.js";
   "./pages/my-shopRecommend/my-shopRecommend.js";
-  "./pages/myStore-edit/myStore-edit.js";
   "./pages/login/login.js";
   "./pages/activity-participants/activity-participants.js";
   "./pages/my-edit-label/my-edit-label.js";
@@ -41,12 +34,16 @@ if (!Math) {
   "./pages/shop-apply/shop-apply.js";
   "./pages/my-systemSuggestions/my-systemSuggestions.js";
   "./pages/my-auth/my-auth.js";
+  "./pages/platform-intro/platform-intro.js";
+  "./pages/my-order-detail/my-order-detail.js";
   "./packages/my-account-informationDetails/my-account-informationDetails.js";
   "./packages/my-account/my-account.js";
+  "./packages/home-opportunitiesPublish/home-opportunitiesPublish.js";
   "./packages/home-commercialDetail/home-commercialDetail.js";
   "./packages/my-edit/my-edit.js";
   "./packages/active-publish/active-publish.js";
   "./packages/active-detail/active-detail.js";
+  "./packages/active-enroll/active-enroll.js";
   "./packages/my-points/my-points.js";
   "./packages/my-zhimi/my-zhimi.js";
   "./packages/getPoints/getPoints.js";
@@ -55,6 +52,11 @@ if (!Math) {
   "./packages/my-systemConstruction/my-systemConstruction.js";
   "./packages/user-opportunities/user-opportunities.js";
   "./packages/home-customization/home-customization.js";
+  "./packages/my-businessCard/my-businessCard.js";
+  "./packages/applicationBusinessCard/applicationBusinessCard.js";
+  "./packages/myStore-edit/myStore-edit.js";
+  "./packages/my-active/my-active.js";
+  "./packages/my-collection/my-collection.js";
 }
 const _sfc_main = {
   data() {

@@ -1,6 +1,7 @@
 "use strict";
 const common_vendor = require("../common/vendor.js");
 const utils_request = require("../utils/request.js");
+const utils_user = require("../utils/user.js");
 if (!Array) {
   const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
   _easycom_uni_icons2();
@@ -57,88 +58,69 @@ const _sfc_main = {
       };
       return classMap[statusStr] || "";
     };
-    const requireLogin = (actionCallback, message) => {
-      if (props.isLogin) {
-        actionCallback();
-      } else {
-        common_vendor.index.showModal({
-          title: "温馨提示",
-          content: message || "您还未登录，登录后才能进行此操作哦！",
-          confirmText: "去登录",
-          cancelText: "再看看",
-          success: (res) => {
-            if (res.confirm) {
-              common_vendor.index.navigateTo({
-                url: "/pages/login/login"
-              });
-            }
-          }
-        });
-      }
-    };
     const handleCardClick = () => {
-      requireLogin(() => {
-        common_vendor.index.navigateTo({
-          url: `/packages/active-detail/active-detail?id=${props.activity.id}`
-        });
-      }, "登录后才能查看聚会详情，是否立即登录？");
+      if (!utils_user.checkLoginGuard("登录并绑定手机号后才能查看聚会详情，是否立即登录？"))
+        return;
+      common_vendor.index.navigateTo({
+        url: `/packages/active-detail/active-detail?id=${props.activity.id}`
+      });
     };
     const handleRegisterClick = () => {
-      requireLogin(() => {
-        common_vendor.index.navigateTo({
-          url: `/pages/active-enroll/active-enroll?id=${props.activity.id}`
-        });
-      }, "登录后才能报名聚会，是否立即登录？");
+      if (!utils_user.checkLoginGuard("登录并绑定手机号后才能报名聚会，是否立即登录？"))
+        return;
+      common_vendor.index.navigateTo({
+        url: `/packages/active-enroll/active-enroll?id=${props.activity.id}`
+      });
     };
     const toggleFavorite = async () => {
       if (loading.value) {
         return;
       }
-      requireLogin(async () => {
-        loading.value = true;
-        const userId = common_vendor.index.getStorageSync("userId");
-        const originalFavoriteStatus = isFavorite.value;
-        isFavorite.value = !isFavorite.value;
-        const endpoint = isFavorite.value ? "/app-api/member/follow/add" : "/app-api/member/follow/del";
-        const successMessage = isFavorite.value ? "收藏成功" : "已取消收藏";
-        const payload = {
-          userId,
-          targetId: props.activity.id,
-          targetType: "activity"
-        };
-        try {
-          const {
-            error
-          } = await utils_request.request(endpoint, {
-            method: "POST",
-            data: payload
+      if (!utils_user.checkLoginGuard("登录并绑定手机号后才能收藏聚会，是否立即登录？"))
+        return;
+      loading.value = true;
+      const userId = common_vendor.index.getStorageSync("userId");
+      const originalFavoriteStatus = isFavorite.value;
+      isFavorite.value = !isFavorite.value;
+      const endpoint = isFavorite.value ? "/app-api/member/follow/add" : "/app-api/member/follow/del";
+      const successMessage = isFavorite.value ? "收藏成功" : "已取消收藏";
+      const payload = {
+        userId,
+        targetId: props.activity.id,
+        targetType: "activity"
+      };
+      try {
+        const {
+          error
+        } = await utils_request.request(endpoint, {
+          method: "POST",
+          data: payload
+        });
+        if (!error) {
+          common_vendor.index.showToast({
+            title: successMessage,
+            icon: "success"
           });
-          if (!error) {
-            common_vendor.index.showToast({
-              title: successMessage,
-              icon: "success"
-            });
-            emit("updateFavoriteStatus", {
-              id: props.activity.id,
-              newFollowFlag: isFavorite.value ? 1 : 0
-            });
-          } else {
-            isFavorite.value = originalFavoriteStatus;
-            common_vendor.index.showToast({
-              title: error || "操作失败",
-              icon: "none"
-            });
-          }
-        } catch (err) {
+          emit("updateFavoriteStatus", {
+            id: props.activity.id,
+            newFollowFlag: isFavorite.value ? 1 : 0
+          });
+        } else {
           isFavorite.value = originalFavoriteStatus;
           common_vendor.index.showToast({
-            title: "网络错误",
+            title: error || "操作失败",
             icon: "none"
           });
-        } finally {
-          loading.value = false;
         }
-      }, "登录后才能收藏聚会，是否立即登录？");
+      } catch (err) {
+        isFavorite.value = originalFavoriteStatus;
+        common_vendor.index.showToast({
+          title: "网络错误",
+          icon: "none"
+        });
+      } finally {
+        loading.value = false;
+      }
     };
     return (_ctx, _cache) => {
       return common_vendor.e({

@@ -91,13 +91,13 @@ const _sfc_main = {
     const goToApplyPage = () => {
       common_vendor.index.navigateTo({
         // 目标是新建/编辑页面
-        url: `/pages/myStore-edit/myStore-edit`
+        url: `/packages/myStore-edit/myStore-edit`
       });
     };
     const goToEditPage = (store) => {
       common_vendor.index.navigateTo({
         // 目标是修改页面
-        url: `/pages/myStore-edit/myStore-edit?id=${store.id}`
+        url: `/packages/myStore-edit/myStore-edit?id=${store.id}`
       });
     };
     common_vendor.onMounted(() => {

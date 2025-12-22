@@ -1,60 +1,17 @@
 <template>
 	<view class="container">
-		<!-- 1. Tab 切换 -->
+		<!-- 1. Tab 切换 (顺序互换) -->
 		<view class="tab-container">
-			<view class="tab-item" :class="{ active: activeTab === 1 }" @click="activeTab = 1">猩球认证</view>
-			<view class="tab-item" :class="{ active: activeTab === 2 }" @click="activeTab = 2">实名认证</view>
+			<!-- 现在 Tab 1 是实名认证 -->
+			<view class="tab-item" :class="{ active: activeTab === 1 }" @click="activeTab = 1">实名认证</view>
+			<!-- 现在 Tab 2 是猩球认证 -->
+			<view class="tab-item" :class="{ active: activeTab === 2 }" @click="activeTab = 2">猩球认证</view>
 		</view>
 
 		<!-- ====================================================== -->
-		<!-- ============      猩球认证内容 (Tab 1)      ============ -->
+		<!-- ============      实名认证内容 (Tab 1)      ============ -->
 		<!-- ====================================================== -->
 		<view v-if="activeTab === 1" class="auth-content">
-			<view class="auth-card">
-				<!-- 历史记录查询入口 (预留) -->
-				<!-- <view class="history-link" @click="queryHistory">
-					<uni-icons type="calendar" size="16" color="#007aff"></uni-icons>
-					<text>查询历史认证</text>
-				</view> -->
-
-				<uni-forms ref="certFormRef" :modelValue="certForm" class="form-content" :label-width="80">
-					<!-- 认证类型 -->
-					<uni-forms-item label="认证类型" required>
-						<uni-data-checkbox v-model="certForm.certType" :localdata="certTypeOptions"></uni-data-checkbox>
-					</uni-forms-item>
-
-					<!-- 认证名称 -->
-					<uni-forms-item label="认证名称" required>
-						<uni-easyinput v-model="certForm.certName" placeholder="请输入企业/组织的全称" />
-					</uni-forms-item>
-
-					<!-- 上传资料 -->
-					<uni-forms-item label="上传资料" required>
-						<view class="image-preview">
-							<view v-for="(img, i) in certForm.certImages" :key="i" class="image-wrapper">
-								<image :src="img" mode="aspectFill" class="preview-img" @click="replaceCertImage(i)" />
-								<view class="delete-image-btn" @click.stop="deleteCertImage(i)">×</view>
-							</view>
-							<view class="add-img-placeholder" @click="handleChooseCertImage"
-								v-if="certForm.certImages.length < 6">
-								<uni-icons type="plusempty" size="24" color="#ccc"></uni-icons>
-								<text>添加图片</text>
-							</view>
-						</view>
-						<view class="cert-remark">{{ certRemark }}</view>
-					</uni-forms-item>
-				</uni-forms>
-
-				<button class="submit-btn" @click="submitCertForm" :loading="isSubmitting">
-					{{ isSubmitting ? '提交中...' : '提交认证' }}
-				</button>
-			</view>
-		</view>
-
-		<!-- ====================================================== -->
-		<!-- ============      实名认证内容 (Tab 2)      ============ -->
-		<!-- ====================================================== -->
-		<view v-if="activeTab === 2" class="auth-content">
 
 			<view class="auth-card">
 
@@ -96,14 +53,60 @@
 					<button class="submit-btn" @click="submitRealNameForm">立即认证</button>
 
 					<view class="tips">
-						<text>信息仅用于实名认证，我们将严格保密，请放心填写。</text>
+						<text>实名认证既是应小程序监管政策对用户参与平台互动的管理要求，也是提升商友交流信用度及活动安全管理的需求。如有疑问，请您咨询猩聚社客服。</text>
 					</view>
 				</template>
 			</view>
 		</view>
 
+		<!-- ====================================================== -->
+		<!-- ============      猩球认证内容 (Tab 2)      ============ -->
+		<!-- ====================================================== -->
+		<view v-if="activeTab === 2" class="auth-content">
+			<view class="auth-card">
+				<!-- 历史记录查询入口 (预留) -->
+				<!-- <view class="history-link" @click="queryHistory">
+					<uni-icons type="calendar" size="16" color="#007aff"></uni-icons>
+					<text>查询历史认证</text>
+				</view> -->
+
+				<uni-forms ref="certFormRef" :modelValue="certForm" class="form-content" :label-width="80">
+					<!-- 认证类型 -->
+					<uni-forms-item label="认证类型" required>
+						<uni-data-checkbox v-model="certForm.certType" :localdata="certTypeOptions"></uni-data-checkbox>
+					</uni-forms-item>
+
+					<!-- 认证名称 -->
+					<uni-forms-item label="认证名称" required>
+						<uni-easyinput v-model="certForm.certName" placeholder="请输入企业/组织的全称" />
+					</uni-forms-item>
+
+					<!-- 上传资料 -->
+					<uni-forms-item label="上传资料" required>
+						<view class="image-preview">
+							<view v-for="(img, i) in certForm.certImages" :key="i" class="image-wrapper">
+								<image :src="img" mode="aspectFill" class="preview-img" @click="replaceCertImage(i)" />
+								<view class="delete-image-btn" @click.stop="deleteCertImage(i)">×</view>
+							</view>
+							<view class="add-img-placeholder" @click="handleChooseCertImage"
+								v-if="certForm.certImages.length < 6">
+								<uni-icons type="plusempty" size="24" color="#ccc"></uni-icons>
+								<text>添加图片</text>
+							</view>
+						</view>
+						<view class="cert-remark">{{ certRemark }}</view>
+					</uni-forms-item>
+				</uni-forms>
+
+				<button class="submit-btn" @click="submitCertForm" :loading="isSubmitting">
+					{{ isSubmitting ? '提交中...' : '提交认证' }}
+				</button>
+			</view>
+		</view>
+
 	</view>
 </template>
+
 
 <script setup>
 	import {
@@ -118,7 +121,7 @@
 	import uploadFile from '../../utils/upload.js'; // 引入上传工具
 
 	// --- 1. 全局与 Tab 管理 ---
-	const activeTab = ref(1); // 默认显示猩球认证
+	const activeTab = ref(1); // 默认显示实名认证
 
 	// --- 2. 猩球认证逻辑 ---
 	const certFormRef = ref(null);

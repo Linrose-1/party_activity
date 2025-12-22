@@ -1,277 +1,298 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
-const utils_upload = require("../../utils/upload.js");
 const utils_request = require("../../utils/request.js");
+const utils_user = require("../../utils/user.js");
 if (!Array) {
-  const _easycom_uni_load_more2 = common_vendor.resolveComponent("uni-load-more");
   const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
-  const _easycom_uni_file_picker2 = common_vendor.resolveComponent("uni-file-picker");
-  (_easycom_uni_load_more2 + _easycom_uni_icons2 + _easycom_uni_file_picker2)();
+  _easycom_uni_icons2();
 }
-const _easycom_uni_load_more = () => "../../uni_modules/uni-load-more/components/uni-load-more/uni-load-more.js";
 const _easycom_uni_icons = () => "../../uni_modules/uni-icons/components/uni-icons/uni-icons.js";
-const _easycom_uni_file_picker = () => "../../uni_modules/uni-file-picker/components/uni-file-picker/uni-file-picker.js";
 if (!Math) {
-  (_easycom_uni_load_more + _easycom_uni_icons + _easycom_uni_file_picker)();
+  _easycom_uni_icons();
 }
 const _sfc_main = {
   __name: "recharge",
   setup(__props) {
-    const isSubmitting = common_vendor.ref(false);
+    const currentTab = common_vendor.ref(1);
+    const isPaying = common_vendor.ref(false);
     const userInfo = common_vendor.ref(null);
-    const paymentQRCodeUrl = common_vendor.ref("");
-    const form = common_vendor.reactive({
-      payType: null,
-      // 1-智米, 2-会员
-      amount: "",
-      payNo: "",
-      remark: "",
-      imageUrls: []
-      // 存储上传成功后的 URL
+    const zhimiOptions = [10, 20, 50, 100, 500];
+    const selectedZhimiIndex = common_vendor.ref(0);
+    const customAmount = common_vendor.ref("");
+    const memberLevels = common_vendor.ref([
+      {
+        id: 1,
+        name: "玄铁会员",
+        price: 10,
+        period: "月",
+        desc: "基础功能体验",
+        isRecommended: false
+      },
+      {
+        id: 2,
+        name: "青铜会员",
+        price: 100,
+        period: "月",
+        desc: "进阶商友特权",
+        isRecommended: false
+      },
+      {
+        id: 3,
+        name: "白银会员",
+        price: 365,
+        period: "年",
+        desc: "超高性价比首选",
+        isRecommended: true
+      },
+      {
+        id: 4,
+        name: "黄金会员",
+        price: 3650,
+        period: "年",
+        desc: "尊享全部权益",
+        isRecommended: false
+      },
+      {
+        id: 5,
+        name: "黑钻会员",
+        price: 36500,
+        period: "年",
+        desc: "顶级身份象征",
+        isRecommended: false
+      }
+    ]);
+    const selectedMemberId = common_vendor.ref(3);
+    const payAmount = common_vendor.computed(() => {
+      if (currentTab.value === 1) {
+        if (customAmount.value) {
+          return parseFloat(customAmount.value).toFixed(2);
+        }
+        if (selectedZhimiIndex.value !== -1) {
+          return zhimiOptions[selectedZhimiIndex.value].toFixed(2);
+        }
+        return 0;
+      } else {
+        const level = memberLevels.value.find((item) => item.id === selectedMemberId.value);
+        return level ? level.price.toFixed(2) : 0;
+      }
     });
-    const imageValue = common_vendor.ref([]);
     common_vendor.onLoad((options) => {
       if (options.type === "membership") {
-        form.payType = 2;
-      } else if (options.type === "points") {
-        form.payType = 1;
+        currentTab.value = 2;
       }
     });
     common_vendor.onMounted(() => {
-      Promise.all([
-        fetchUserInfo(),
-        fetchPlatformConfig()
-      ]).catch((error) => {
-        common_vendor.index.__f__("error", "at pages/recharge/recharge.vue:149", "初始化页面数据时发生错误:", error);
-      });
+      fetchUserInfo();
     });
-    const fetchPlatformConfig = async () => {
-      const {
-        data,
-        error
-      } = await utils_request.request("/app-api/system/platformConfig/getPlatformConfig");
-      if (error) {
-        common_vendor.index.__f__("error", "at pages/recharge/recharge.vue:165", "获取平台配置失败:", error);
-        common_vendor.index.showToast({
-          title: "收款码加载失败，请刷新重试",
-          icon: "none"
-        });
-        return;
+    const switchTab = (index) => {
+      currentTab.value = index;
+      if (index === 1) {
+        customAmount.value = "";
+        selectedZhimiIndex.value = 0;
       }
-      if (data && data.paymentUrl) {
-        paymentQRCodeUrl.value = data.paymentUrl;
-        common_vendor.index.__f__("log", "at pages/recharge/recharge.vue:175", "成功获取收款码URL:", paymentQRCodeUrl.value);
-      } else {
-        common_vendor.index.__f__("error", "at pages/recharge/recharge.vue:177", "平台配置中未找到 paymentUrl");
-        common_vendor.index.showToast({
-          title: "无法获取收款码",
-          icon: "none"
-        });
+    };
+    const selectZhimiOption = (index) => {
+      selectedZhimiIndex.value = index;
+      customAmount.value = "";
+    };
+    const onCustomInput = () => {
+      if (customAmount.value) {
+        selectedZhimiIndex.value = -1;
       }
+    };
+    const selectMemberLevel = (level) => {
+      selectedMemberId.value = level.id;
     };
     const fetchUserInfo = async () => {
       const {
+        data
+      } = await utils_request.request("/app-api/member/user/get");
+      if (data)
+        userInfo.value = data;
+    };
+    const goToMemberDetails = () => {
+      const currentLevel = memberLevels.value.find((item) => item.id === selectedMemberId.value);
+      const targetLevelNum = currentLevel ? currentLevel.level : 1;
+      common_vendor.index.navigateTo({
+        // 带上参数，让详情页自动定位到对应的 Tab
+        url: `/pages/my-memberDetails/my-memberDetails?level=${targetLevelNum}`
+      });
+    };
+    const createOrder = async () => {
+      var _a;
+      let payload = {
+        userId: userInfo.value.id,
+        payType: currentTab.value,
+        // 1-智米, 2-会员
+        remark: currentTab.value === 2 ? `购买会员:${(_a = memberLevels.value.find((l) => l.id === selectedMemberId.value)) == null ? void 0 : _a.name}` : "充值智米"
+      };
+      if (currentTab.value === 2) {
+        payload.levelId = selectedMemberId.value;
+      } else {
+        payload.amount = parseFloat(payAmount.value);
+      }
+      common_vendor.index.__f__("log", "at pages/recharge/recharge.vue:282", "1. 开始创建订单, 参数:", payload);
+      const {
         data,
         error
-      } = await utils_request.request("/app-api/member/user/get");
-      if (error) {
-        common_vendor.index.__f__("error", "at pages/recharge/recharge.vue:193", "获取用户信息失败:", error);
-        common_vendor.index.showToast({
-          title: "无法获取用户信息，请重新登录",
-          icon: "none"
-        });
-        return;
-      }
-      userInfo.value = data;
-      common_vendor.index.__f__("log", "at pages/recharge/recharge.vue:201", "获取用户信息:", userInfo.value);
-    };
-    const createPaymentRecord = (payload) => {
-      return utils_request.request("/app-api/member/user-post-pay-record/create", {
+      } = await utils_request.request("/app-api/member/user-post-pay-record/create", {
         method: "POST",
         data: payload
       });
+      if (error)
+        throw new Error(error);
+      return data;
     };
-    const selectRechargeType = (type) => {
-      form.payType = type;
+    const getPayParams = async (orderNo) => {
+      common_vendor.index.__f__("log", "at pages/recharge/recharge.vue:303", "正在获取支付签名，订单号:", orderNo);
+      const {
+        data,
+        error
+      } = await utils_request.request("/app-api/member/user-post-pay-record/pay", {
+        method: "POST",
+        data: {
+          orderNo: orderNo.orderNo
+        }
+      });
+      if (error)
+        throw new Error(error);
+      return data;
     };
-    const previewQRCode = () => {
-      if (!paymentQRCodeUrl.value) {
-        common_vendor.index.showToast({
-          title: "二维码正在加载中...",
+    const requestWxPayment = (params) => {
+      return new Promise((resolve, reject) => {
+        common_vendor.index.requestPayment({
+          provider: "weixin",
+          timeStamp: params.timeStamp,
+          nonceStr: params.nonceStr,
+          package: params.package,
+          signType: params.signType,
+          paySign: params.paySign,
+          success: (res) => {
+            common_vendor.index.__f__("log", "at pages/recharge/recharge.vue:331", "微信支付成功:", res);
+            resolve(res);
+          },
+          fail: (err) => {
+            common_vendor.index.__f__("error", "at pages/recharge/recharge.vue:335", "微信支付失败/取消:", err);
+            if (err.errMsg.includes("cancel")) {
+              reject(new Error("用户取消支付"));
+            } else {
+              reject(new Error("支付失败，请重试"));
+            }
+          }
+        });
+      });
+    };
+    const handleRecharge = async () => {
+      if (!utils_user.checkLoginGuard())
+        return;
+      if (parseFloat(payAmount.value) <= 0) {
+        return common_vendor.index.showToast({
+          title: "支付金额异常",
           icon: "none"
         });
-        return;
       }
-      common_vendor.index.previewImage({
-        urls: [paymentQRCodeUrl.value]
-        // 使用动态获取的 URL
-      });
-    };
-    const handleFileSelect = async (e) => {
-      isSubmitting.value = true;
+      if (currentTab.value === 1 && parseFloat(payAmount.value) < 1) {
+        return common_vendor.index.showToast({
+          title: "智米最小充值 1 元",
+          icon: "none"
+        });
+      }
+      isPaying.value = true;
       common_vendor.index.showLoading({
-        title: "图片上传中..."
+        title: "正在创建订单...",
+        mask: true
       });
-      for (const tempFile of e.tempFiles) {
-        const {
-          data: url,
-          error
-        } = await utils_upload.uploadFile(tempFile);
-        if (error) {
-          common_vendor.index.hideLoading();
-          isSubmitting.value = false;
+      try {
+        const orderNo = await createOrder();
+        common_vendor.index.__f__("log", "at pages/recharge/recharge.vue:378", "订单创建成功，订单号:", orderNo);
+        common_vendor.index.showLoading({
+          title: "请求支付中..."
+        });
+        const payParams = await getPayParams(orderNo);
+        await requestWxPayment(payParams);
+        common_vendor.index.hideLoading();
+        common_vendor.index.showToast({
+          title: "支付成功",
+          icon: "success",
+          duration: 2e3
+        });
+        setTimeout(() => {
+          common_vendor.index.navigateBack();
+        }, 1500);
+      } catch (error) {
+        common_vendor.index.hideLoading();
+        const msg = error.message || "支付异常";
+        common_vendor.index.__f__("error", "at pages/recharge/recharge.vue:409", "支付流程中断:", error);
+        if (msg === "用户取消支付") {
           common_vendor.index.showToast({
-            title: `图片上传失败: ${error}`,
+            title: "已取消支付",
             icon: "none"
           });
-          const index = imageValue.value.findIndex((item) => item.uuid === tempFile.uuid);
-          if (index > -1) {
-            imageValue.value.splice(index, 1);
-          }
-          return;
+        } else {
+          common_vendor.index.showModal({
+            title: "支付失败",
+            content: msg,
+            showCancel: false
+          });
         }
-        form.imageUrls.push(url);
+      } finally {
+        isPaying.value = false;
       }
-      common_vendor.index.hideLoading();
-      isSubmitting.value = false;
-    };
-    const handleFileDelete = (e) => {
-      const removedFile = e.tempFile;
-      const index = imageValue.value.findIndex((item) => item.url === removedFile.url);
-      if (index > -1) {
-        form.imageUrls.splice(index, 1);
-      }
-    };
-    const goToMemberDetails = () => {
-      common_vendor.index.navigateTo({
-        url: "/pages/my-memberDetails/my-memberDetails"
-      });
-    };
-    const handleSubmit = async () => {
-      if (!form.payType) {
-        return common_vendor.index.showToast({
-          title: "请选择充值类型",
-          icon: "none"
-        });
-      }
-      if (!form.amount || isNaN(parseFloat(form.amount)) || parseFloat(form.amount) <= 0) {
-        return common_vendor.index.showToast({
-          title: "请输入有效的付款金额",
-          icon: "none"
-        });
-      }
-      if (!form.payNo.trim()) {
-        return common_vendor.index.showToast({
-          title: "请输入支付订单号",
-          icon: "none"
-        });
-      }
-      if (form.imageUrls.length === 0) {
-        return common_vendor.index.showToast({
-          title: "请上传支付凭证",
-          icon: "none"
-        });
-      }
-      if (!userInfo.value || !userInfo.value.id) {
-        return common_vendor.index.showToast({
-          title: "无法获取用户信息，请重试",
-          icon: "none"
-        });
-      }
-      isSubmitting.value = true;
-      common_vendor.index.showLoading({
-        title: "正在提交..."
-      });
-      const payload = {
-        userId: userInfo.value.id,
-        amount: parseFloat(form.amount),
-        payNo: form.payNo.trim(),
-        imageUrls: form.imageUrls.join(","),
-        // 将 URL 数组拼接成字符串
-        remark: form.remark.trim(),
-        payType: form.payType
-      };
-      const {
-        data: recordId,
-        error
-      } = await createPaymentRecord(payload);
-      common_vendor.index.hideLoading();
-      isSubmitting.value = false;
-      if (error) {
-        return common_vendor.index.showToast({
-          title: `提交失败: ${error}`,
-          icon: "none"
-        });
-      }
-      common_vendor.index.showModal({
-        title: "提交成功",
-        content: `您的充值申请已提交，ID为 ${recordId}，请耐心等待后台审核。`,
-        showCancel: false,
-        success: () => {
-          common_vendor.index.navigateBack();
-        }
-      });
     };
     return (_ctx, _cache) => {
       return common_vendor.e({
-        a: paymentQRCodeUrl.value
-      }, paymentQRCodeUrl.value ? {
-        b: paymentQRCodeUrl.value,
-        c: common_vendor.o(previewQRCode)
-      } : {
-        d: common_vendor.p({
-          status: "loading",
-          ["contentText.loading"]: "收款码加载中..."
-        })
-      }, {
-        e: common_vendor.o(($event) => selectRechargeType(2)),
-        f: form.payType === 2 ? 1 : "",
-        g: common_vendor.o(($event) => selectRechargeType(1)),
-        h: form.payType === 1 ? 1 : "",
-        i: form.payType === 2
-      }, form.payType === 2 ? {
-        j: common_vendor.p({
-          type: "info",
-          size: "14",
-          color: "#FF6E00"
+        a: currentTab.value === 1
+      }, currentTab.value === 1 ? {} : {}, {
+        b: currentTab.value === 1 ? 1 : "",
+        c: common_vendor.o(($event) => switchTab(1)),
+        d: currentTab.value === 2
+      }, currentTab.value === 2 ? {} : {}, {
+        e: currentTab.value === 2 ? 1 : "",
+        f: common_vendor.o(($event) => switchTab(2)),
+        g: currentTab.value === 1
+      }, currentTab.value === 1 ? {
+        h: common_vendor.f(zhimiOptions, (item, index, i0) => {
+          return {
+            a: common_vendor.t(item),
+            b: common_vendor.t(item),
+            c: index,
+            d: selectedZhimiIndex.value === index ? 1 : "",
+            e: common_vendor.o(($event) => selectZhimiOption(index), index)
+          };
         }),
-        k: common_vendor.o(goToMemberDetails)
+        i: common_vendor.o([($event) => customAmount.value = $event.detail.value, onCustomInput]),
+        j: customAmount.value
       } : {}, {
-        l: form.amount,
-        m: common_vendor.o(($event) => form.amount = $event.detail.value),
-        n: form.payNo,
-        o: common_vendor.o(($event) => form.payNo = $event.detail.value),
-        p: common_vendor.p({
-          type: "help",
-          size: "14",
-          color: "#999"
-        }),
-        q: common_vendor.o(handleFileSelect),
-        r: common_vendor.o(handleFileDelete),
-        s: common_vendor.o(($event) => imageValue.value = $event),
-        t: common_vendor.p({
-          fileMediatype: "image",
-          mode: "grid",
-          limit: "3",
-          title: "最多选择3张图片",
-          modelValue: imageValue.value
-        }),
-        v: common_vendor.p({
-          type: "help",
-          size: "14",
-          color: "#999"
-        }),
-        w: form.remark,
-        x: common_vendor.o(($event) => form.remark = $event.detail.value),
-        y: common_vendor.p({
-          type: "shield-filled",
-          size: "18",
+        k: currentTab.value === 2
+      }, currentTab.value === 2 ? {
+        l: common_vendor.p({
+          type: "right",
+          size: "12",
           color: "#FF6E00"
         }),
-        z: common_vendor.t(isSubmitting.value ? "正在提交..." : "确认提交"),
-        A: common_vendor.o(handleSubmit),
-        B: isSubmitting.value,
-        C: isSubmitting.value
+        m: common_vendor.o(goToMemberDetails),
+        n: common_vendor.f(memberLevels.value, (level, index, i0) => {
+          return common_vendor.e({
+            a: level.isRecommended
+          }, level.isRecommended ? {} : {}, {
+            b: common_vendor.t(level.name),
+            c: common_vendor.t(level.desc),
+            d: common_vendor.t(level.price),
+            e: common_vendor.t(level.period),
+            f: selectedMemberId.value === level.id
+          }, selectedMemberId.value === level.id ? {} : {}, {
+            g: index,
+            h: selectedMemberId.value === level.id ? 1 : "",
+            i: level.isRecommended ? 1 : "",
+            j: common_vendor.o(($event) => selectMemberLevel(level), index)
+          });
+        })
+      } : {}, {
+        o: common_vendor.t(payAmount.value || "0.00"),
+        p: common_vendor.t(isPaying.value ? "支付中..." : "立即支付"),
+        q: common_vendor.o(handleRecharge),
+        r: isPaying.value || payAmount.value <= 0,
+        s: isPaying.value
       });
     };
   }

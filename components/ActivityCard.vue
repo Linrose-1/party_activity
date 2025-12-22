@@ -73,6 +73,9 @@
 		computed
 	} from 'vue';
 	import request from '../utils/request.js';
+	import {
+		checkLoginGuard // 【新增】导入权限卫士
+	} from '../utils/user.js';
 
 	const props = defineProps({
 		activity: {
@@ -146,82 +149,82 @@
 		}
 	};
 
-	// 【新增】卡片主体点击事件
+	// 卡片主体点击事件
 	const handleCardClick = () => {
-		requireLogin(() => {
-			// 登录后要执行的操作
-			uni.navigateTo({
-				url: `/packages/active-detail/active-detail?id=${props.activity.id}`
-			});
-		}, '登录后才能查看聚会详情，是否立即登录？');
+		// 使用统一卫士，如果校验未通过，自动弹窗并拦截
+		if (!checkLoginGuard('登录并绑定手机号后才能查看聚会详情，是否立即登录？')) return;
+
+		// 校验通过，执行跳转
+		uni.navigateTo({
+			url: `/packages/active-detail/active-detail?id=${props.activity.id}`
+		});
 	};
 
-	// 【新增】报名按钮点击事件
+	// 报名按钮点击事件
 	const handleRegisterClick = () => {
-		requireLogin(() => {
-			// 登录后要执行的操作
-			uni.navigateTo({
-				url: `/pages/active-enroll/active-enroll?id=${props.activity.id}`
-			});
-		}, '登录后才能报名聚会，是否立即登录？');
+		if (!checkLoginGuard('登录并绑定手机号后才能报名聚会，是否立即登录？')) return;
+
+		uni.navigateTo({
+			url: `/packages/active-enroll/active-enroll?id=${props.activity.id}`
+		});
 	};
 
 	const toggleFavorite = async () => {
 		if (loading.value) {
 			return;
 		}
-		requireLogin(async () => {
-			loading.value = true;
-			const userId = uni.getStorageSync('userId');
-			const originalFavoriteStatus = isFavorite.value;
-			isFavorite.value = !isFavorite.value;
-			const endpoint = isFavorite.value ? '/app-api/member/follow/add' :
-				'/app-api/member/follow/del';
-			const successMessage = isFavorite.value ? '收藏成功' : '已取消收藏';
-			const payload = {
-				userId,
-				targetId: props.activity.id,
-				targetType: "activity"
-			};
+		if (!checkLoginGuard('登录并绑定手机号后才能收藏聚会，是否立即登录？')) return;
 
-			try {
-				const {
-					error
-				} = await request(endpoint, {
-					method: 'POST',
-					data: payload
+		loading.value = true;
+		const userId = uni.getStorageSync('userId');
+		const originalFavoriteStatus = isFavorite.value;
+		isFavorite.value = !isFavorite.value;
+		const endpoint = isFavorite.value ? '/app-api/member/follow/add' :
+			'/app-api/member/follow/del';
+		const successMessage = isFavorite.value ? '收藏成功' : '已取消收藏';
+		const payload = {
+			userId,
+			targetId: props.activity.id,
+			targetType: "activity"
+		};
+
+		try {
+			const {
+				error
+			} = await request(endpoint, {
+				method: 'POST',
+				data: payload
+			});
+			if (!error) {
+				uni.showToast({
+					title: successMessage,
+					icon: 'success'
 				});
-				if (!error) {
-					uni.showToast({
-						title: successMessage,
-						icon: 'success'
-					});
-					emit('updateFavoriteStatus', {
-						id: props.activity.id,
-						newFollowFlag: isFavorite.value ? 1 : 0
-					});
-				} else {
-					isFavorite.value = originalFavoriteStatus;
-					uni.showToast({
-						title: error || '操作失败',
-						icon: 'none'
-					});
-				}
-			} catch (err) {
+				emit('updateFavoriteStatus', {
+					id: props.activity.id,
+					newFollowFlag: isFavorite.value ? 1 : 0
+				});
+			} else {
 				isFavorite.value = originalFavoriteStatus;
 				uni.showToast({
-					title: '网络错误',
+					title: error || '操作失败',
 					icon: 'none'
 				});
-			} finally {
-				loading.value = false;
 			}
-		}, '登录后才能收藏聚会，是否立即登录？');
-	};
+		} catch (err) {
+			isFavorite.value = originalFavoriteStatus;
+			uni.showToast({
+				title: '网络错误',
+				icon: 'none'
+			});
+		} finally {
+			loading.value = false;
+		}
+	}
 
 	const registerActivity = (activityId) => {
 		uni.navigateTo({
-			url: `/pages/active-enroll/active-enroll?id=${activityId}`
+			url: `/packages/active-enroll/active-enroll?id=${activityId}`
 		})
 	};
 
@@ -251,6 +254,8 @@
 		border-radius: 16rpx;
 		margin-bottom: 30rpx;
 		box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.1);
+		
+		object-fit: cover; 
 	}
 
 	.activity-header {

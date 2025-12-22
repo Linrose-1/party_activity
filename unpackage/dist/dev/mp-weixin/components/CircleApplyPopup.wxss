@@ -1,0 +1,107 @@
+/* 水平间距 */
+/* 水平间距 */
+.apply-popup-container.data-v-8f869322 {
+  height: 80vh;
+  /* 半屏高度 */
+  background-color: #f5f7fa;
+  border-radius: 24rpx 24rpx 0 0;
+  display: flex;
+  flex-direction: column;
+}
+.popup-header.data-v-8f869322 {
+  padding: 30rpx;
+  background-color: #fff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-radius: 24rpx 24rpx 0 0;
+  border-bottom: 1rpx solid #eee;
+}
+.title.data-v-8f869322 {
+  font-size: 32rpx;
+  font-weight: bold;
+}
+.apply-list.data-v-8f869322 {
+  flex: 1;
+  padding: 20rpx;
+  box-sizing: border-box;
+  overflow-y: auto;
+}
+.apply-card.data-v-8f869322 {
+  background-color: #fff;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  margin-bottom: 20rpx;
+}
+.user-info.data-v-8f869322 {
+  display: flex;
+  margin-bottom: 30rpx;
+}
+.avatar.data-v-8f869322 {
+  width: 100rpx;
+  height: 100rpx;
+  border-radius: 50%;
+  margin-right: 24rpx;
+  border: 1rpx solid #eee;
+}
+.info-content.data-v-8f869322 {
+  flex: 1;
+}
+.name-row.data-v-8f869322 {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8rpx;
+}
+.name.data-v-8f869322 {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+}
+.time.data-v-8f869322 {
+  font-size: 24rpx;
+  color: #999;
+}
+.desc.data-v-8f869322 {
+  font-size: 26rpx;
+  color: #666;
+  margin-bottom: 10rpx;
+}
+.common-tags.data-v-8f869322 {
+  display: flex;
+  gap: 12rpx;
+}
+.tag.data-v-8f869322 {
+  font-size: 22rpx;
+  color: #FF6E00;
+  background-color: #fff0e6;
+  padding: 4rpx 12rpx;
+  border-radius: 6rpx;
+}
+.action-row.data-v-8f869322 {
+  display: flex;
+  gap: 20rpx;
+}
+.btn.data-v-8f869322 {
+  flex: 1;
+  height: 70rpx;
+  line-height: 70rpx;
+  font-size: 28rpx;
+  border-radius: 35rpx;
+}
+.btn.data-v-8f869322::after {
+  border: none;
+}
+.reject.data-v-8f869322 {
+  background-color: #f5f5f5;
+  color: #666;
+}
+.agree.data-v-8f869322 {
+  background: linear-gradient(135deg, #FF6E00, #FF8C00);
+  color: #fff;
+}
+.empty-tip.data-v-8f869322 {
+  text-align: center;
+  color: #999;
+  padding-top: 100rpx;
+}

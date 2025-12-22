@@ -3,20 +3,20 @@ const common_vendor = require("../../common/vendor.js");
 const utils_request = require("../../utils/request.js");
 const utils_upload = require("../../utils/upload.js");
 if (!Array) {
-  const _easycom_uni_data_checkbox2 = common_vendor.resolveComponent("uni-data-checkbox");
-  const _easycom_uni_forms_item2 = common_vendor.resolveComponent("uni-forms-item");
-  const _easycom_uni_easyinput2 = common_vendor.resolveComponent("uni-easyinput");
   const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
+  const _easycom_uni_easyinput2 = common_vendor.resolveComponent("uni-easyinput");
+  const _easycom_uni_forms_item2 = common_vendor.resolveComponent("uni-forms-item");
   const _easycom_uni_forms2 = common_vendor.resolveComponent("uni-forms");
-  (_easycom_uni_data_checkbox2 + _easycom_uni_forms_item2 + _easycom_uni_easyinput2 + _easycom_uni_icons2 + _easycom_uni_forms2)();
+  const _easycom_uni_data_checkbox2 = common_vendor.resolveComponent("uni-data-checkbox");
+  (_easycom_uni_icons2 + _easycom_uni_easyinput2 + _easycom_uni_forms_item2 + _easycom_uni_forms2 + _easycom_uni_data_checkbox2)();
 }
-const _easycom_uni_data_checkbox = () => "../../uni_modules/uni-data-checkbox/components/uni-data-checkbox/uni-data-checkbox.js";
-const _easycom_uni_forms_item = () => "../../uni_modules/uni-forms/components/uni-forms-item/uni-forms-item.js";
-const _easycom_uni_easyinput = () => "../../uni_modules/uni-easyinput/components/uni-easyinput/uni-easyinput.js";
 const _easycom_uni_icons = () => "../../uni_modules/uni-icons/components/uni-icons/uni-icons.js";
+const _easycom_uni_easyinput = () => "../../uni_modules/uni-easyinput/components/uni-easyinput/uni-easyinput.js";
+const _easycom_uni_forms_item = () => "../../uni_modules/uni-forms/components/uni-forms-item/uni-forms-item.js";
 const _easycom_uni_forms = () => "../../uni_modules/uni-forms/components/uni-forms/uni-forms.js";
+const _easycom_uni_data_checkbox = () => "../../uni_modules/uni-data-checkbox/components/uni-data-checkbox/uni-data-checkbox.js";
 if (!Math) {
-  (_easycom_uni_data_checkbox + _easycom_uni_forms_item + _easycom_uni_easyinput + _easycom_uni_icons + _easycom_uni_forms)();
+  (_easycom_uni_icons + _easycom_uni_easyinput + _easycom_uni_forms_item + _easycom_uni_forms + _easycom_uni_data_checkbox)();
 }
 const _sfc_main = {
   __name: "my-auth",
@@ -228,7 +228,7 @@ const _sfc_main = {
           }, 1500);
         }
       }).catch((err) => {
-        common_vendor.index.__f__("log", "at pages/my-auth/my-auth.vue:364", "表单校验失败：", err);
+        common_vendor.index.__f__("log", "at pages/my-auth/my-auth.vue:367", "表单校验失败：", err);
       });
     };
     return (_ctx, _cache) => {
@@ -239,25 +239,64 @@ const _sfc_main = {
         d: common_vendor.o(($event) => activeTab.value = 2),
         e: activeTab.value === 1
       }, activeTab.value === 1 ? common_vendor.e({
-        f: common_vendor.o(($event) => certForm.certType = $event),
+        f: isRealNameAuth.value
+      }, isRealNameAuth.value ? {
         g: common_vendor.p({
+          type: "checkbox-filled",
+          size: "80",
+          color: "#4cd964"
+        }),
+        h: common_vendor.t(realNameForm.value.cardName),
+        i: common_vendor.t(realNameForm.value.idCard)
+      } : {
+        j: common_vendor.o(($event) => realNameForm.value.cardName = $event),
+        k: common_vendor.p({
+          placeholder: "请输入您的真实姓名",
+          modelValue: realNameForm.value.cardName
+        }),
+        l: common_vendor.p({
+          label: "真实姓名",
+          name: "cardName"
+        }),
+        m: common_vendor.o(($event) => realNameForm.value.idCard = $event),
+        n: common_vendor.p({
+          placeholder: "请输入您的身份证号码",
+          modelValue: realNameForm.value.idCard
+        }),
+        o: common_vendor.p({
+          label: "身份证号",
+          name: "idCard"
+        }),
+        p: common_vendor.sr(realNameFormRef, "32098fb6-1", {
+          "k": "realNameFormRef"
+        }),
+        q: common_vendor.p({
+          modelValue: realNameForm.value,
+          rules
+        }),
+        r: common_vendor.o(submitRealNameForm)
+      }) : {}, {
+        s: activeTab.value === 2
+      }, activeTab.value === 2 ? common_vendor.e({
+        t: common_vendor.o(($event) => certForm.certType = $event),
+        v: common_vendor.p({
           localdata: certTypeOptions,
           modelValue: certForm.certType
         }),
-        h: common_vendor.p({
+        w: common_vendor.p({
           label: "认证类型",
           required: true
         }),
-        i: common_vendor.o(($event) => certForm.certName = $event),
-        j: common_vendor.p({
+        x: common_vendor.o(($event) => certForm.certName = $event),
+        y: common_vendor.p({
           placeholder: "请输入企业/组织的全称",
           modelValue: certForm.certName
         }),
-        k: common_vendor.p({
+        z: common_vendor.p({
           label: "认证名称",
           required: true
         }),
-        l: common_vendor.f(certForm.certImages, (img, i, i0) => {
+        A: common_vendor.f(certForm.certImages, (img, i, i0) => {
           return {
             a: img,
             b: common_vendor.o(($event) => replaceCertImage(i), i),
@@ -265,69 +304,30 @@ const _sfc_main = {
             d: i
           };
         }),
-        m: certForm.certImages.length < 6
+        B: certForm.certImages.length < 6
       }, certForm.certImages.length < 6 ? {
-        n: common_vendor.p({
+        C: common_vendor.p({
           type: "plusempty",
           size: "24",
           color: "#ccc"
         }),
-        o: common_vendor.o(handleChooseCertImage)
+        D: common_vendor.o(handleChooseCertImage)
       } : {}, {
-        p: common_vendor.t(certRemark.value),
-        q: common_vendor.p({
+        E: common_vendor.t(certRemark.value),
+        F: common_vendor.p({
           label: "上传资料",
           required: true
         }),
-        r: common_vendor.sr(certFormRef, "32098fb6-0", {
+        G: common_vendor.sr(certFormRef, "32098fb6-6", {
           "k": "certFormRef"
         }),
-        s: common_vendor.p({
+        H: common_vendor.p({
           modelValue: certForm,
           ["label-width"]: 80
         }),
-        t: common_vendor.t(isSubmitting.value ? "提交中..." : "提交认证"),
-        v: common_vendor.o(submitCertForm),
-        w: isSubmitting.value
-      }) : {}, {
-        x: activeTab.value === 2
-      }, activeTab.value === 2 ? common_vendor.e({
-        y: isRealNameAuth.value
-      }, isRealNameAuth.value ? {
-        z: common_vendor.p({
-          type: "checkbox-filled",
-          size: "80",
-          color: "#4cd964"
-        }),
-        A: common_vendor.t(realNameForm.value.cardName),
-        B: common_vendor.t(realNameForm.value.idCard)
-      } : {
-        C: common_vendor.o(($event) => realNameForm.value.cardName = $event),
-        D: common_vendor.p({
-          placeholder: "请输入您的真实姓名",
-          modelValue: realNameForm.value.cardName
-        }),
-        E: common_vendor.p({
-          label: "真实姓名",
-          name: "cardName"
-        }),
-        F: common_vendor.o(($event) => realNameForm.value.idCard = $event),
-        G: common_vendor.p({
-          placeholder: "请输入您的身份证号码",
-          modelValue: realNameForm.value.idCard
-        }),
-        H: common_vendor.p({
-          label: "身份证号",
-          name: "idCard"
-        }),
-        I: common_vendor.sr(realNameFormRef, "32098fb6-8", {
-          "k": "realNameFormRef"
-        }),
-        J: common_vendor.p({
-          modelValue: realNameForm.value,
-          rules
-        }),
-        K: common_vendor.o(submitRealNameForm)
+        I: common_vendor.t(isSubmitting.value ? "提交中..." : "提交认证"),
+        J: common_vendor.o(submitCertForm),
+        K: isSubmitting.value
       }) : {});
     };
   }

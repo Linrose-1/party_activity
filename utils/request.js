@@ -129,6 +129,19 @@ const request = async (url, options = {}) => {
 					data: res.data.data,
 					error: null
 				};
+			} else if (res.data.code === 401) {
+				// 401 逻辑：只清除 Token，不强制跳转
+				// 这样首页 onShow 里的 if (!token) 逻辑就会生效，从而触发静默登录
+				console.warn('Token 失效 (401)，清除本地缓存');
+				uni.removeStorageSync('token');
+				uni.removeStorageSync('userId');
+				// 注意：不要清除 userInfo，以免影响静默登录前的展示
+
+				// 返回错误，让业务层知道失败了
+				return {
+					data: null,
+					error: '账号未登录'
+				};
 			} else if (res.data.code === 453) {
 				return {
 					data: null,

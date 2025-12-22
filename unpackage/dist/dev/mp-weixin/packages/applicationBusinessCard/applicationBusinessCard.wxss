@@ -1,0 +1,671 @@
+
+.loading-container.data-v-fd2d3e1c {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		height: 100vh;
+		background-color: #f8f9fa;
+}
+.loading-spinner.data-v-fd2d3e1c {
+		width: 50rpx;
+		height: 50rpx;
+		border: 4rpx solid #e0e0e0;
+		border-top-color: #ff6b00;
+		border-radius: 50%;
+		animation: spin-fd2d3e1c 1s linear infinite;
+		margin-bottom: 20rpx;
+}
+.loading-text.data-v-fd2d3e1c {
+		font-size: 28rpx;
+		color: #666;
+}
+@keyframes spin-fd2d3e1c {
+0% {
+			transform: rotate(0deg);
+}
+100% {
+			transform: rotate(360deg);
+}
+}
+
+	/* 在原有样式基础上，新增和修改以下样式 */
+.target-avatar-image.data-v-fd2d3e1c {
+		width: 180rpx;
+		height: 180rpx;
+		border-radius: 50%;
+		margin-bottom: 30rpx;
+		border: 6rpx solid white;
+		box-shadow: 0 10rpx 30rpx rgba(0, 0, 0, 0.2);
+}
+.loading-placeholder.data-v-fd2d3e1c {
+		padding: 100rpx 0;
+}
+
+	/* 其他样式保持不变... */
+	/* 页面根容器样式，模拟 body 的布局和最大宽度 */
+.business-card-apply-page.data-v-fd2d3e1c {
+		background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+		color: #333;
+		line-height: 1.6;
+		max-width: 750rpx;
+		/* uni-app 推荐使用 rpx */
+		margin: 0 auto;
+		/* 页面内容居中 */
+		position: relative;
+		min-height: 100vh;
+		/* 确保页面至少占满视口高度 */
+		display: flex;
+		/* 使用 flex 布局，使顶部导航和内容可以分开管理 */
+		flex-direction: column;
+}
+.container.data-v-fd2d3e1c {
+		padding: 40rpx;
+		/* 转换为 rpx */
+		padding-bottom: 160rpx;
+		/* 为底部导航栏留出空间，转换为 rpx */
+		flex: 1;
+		/* 容器占据剩余垂直空间 */
+		overflow-y: auto;
+		/* 允许内容垂直滚动 */
+		-webkit-overflow-scrolling: touch;
+		/* 提升 iOS 滚动流畅度 */
+}
+
+	/* 顶部导航 (此处模板中已移除，保留样式以防需要) */
+.header.data-v-fd2d3e1c {
+		background: linear-gradient(135deg, #FF6A00, #FF8C00);
+		color: white;
+		padding: 36rpx 40rpx;
+		/* 转换为 rpx */
+		position: -webkit-sticky;
+		position: sticky;
+		/* 吸顶效果 */
+		top: 0;
+		z-index: 100;
+		box-shadow: 0 6rpx 24rpx rgba(255, 106, 0, 0.3);
+		/* 转换为 rpx */
+		display: flex;
+		align-items: center;
+		border-bottom-left-radius: 30rpx;
+		/* 转换为 rpx */
+		border-bottom-right-radius: 30rpx;
+		/* 转换为 rpx */
+}
+.header .back-btn.data-v-fd2d3e1c {
+		font-size: 44rpx;
+		/* 转换为 rpx */
+		margin-right: 30rpx;
+		/* 转换为 rpx */
+		width: 72rpx;
+		/* 转换为 rpx */
+		height: 72rpx;
+		/* 转换为 rpx */
+		border-radius: 50%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		transition: background 0.3s;
+}
+.header .back-btn.data-v-fd2d3e1c:active {
+		background: rgba(255, 255, 255, 0.2);
+}
+.header h1.data-v-fd2d3e1c {
+		font-size: 40rpx;
+		/* 转换为 rpx */
+		font-weight: 600;
+		flex-grow: 1;
+		text-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.2);
+		/* 转换为 rpx */
+}
+
+	/* 申请卡片 */
+.application-card.data-v-fd2d3e1c {
+		background: white;
+		border-radius: 40rpx;
+		/* 转换为 rpx */
+		margin: 50rpx 0;
+		/* 转换为 rpx */
+		padding: 60rpx;
+		/* 转换为 rpx */
+		box-shadow: 0 20rpx 60rpx rgba(0, 0, 0, 0.1);
+		/* 转换为 rpx */
+		border: 2rpx solid #eee;
+		/* 转换为 rpx */
+		position: relative;
+		overflow: hidden;
+		text-align: center;
+}
+.application-card.data-v-fd2d3e1c::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 10rpx;
+		/* 转换为 rpx */
+		background: linear-gradient(to right, #FF6A00, #FF8C00);
+}
+.target-user.data-v-fd2d3e1c {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		margin-bottom: 60rpx;
+		/* 转换为 rpx */
+}
+.target-avatar.data-v-fd2d3e1c {
+		width: 180rpx;
+		/* 转换为 rpx */
+		height: 180rpx;
+		/* 转换为 rpx */
+		border-radius: 50%;
+		background: linear-gradient(135deg, #FF6A00, #FF8C00);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		color: white;
+		font-weight: bold;
+		font-size: 72rpx;
+		/* 转换为 rpx */
+		margin-bottom: 30rpx;
+		/* 转换为 rpx */
+		border: 6rpx solid white;
+		/* 转换为 rpx */
+		box-shadow: 0 10rpx 30rpx rgba(0, 0, 0, 0.2);
+		/* 转换为 rpx */
+}
+.target-name.data-v-fd2d3e1c {
+		font-size: 48rpx;
+		/* 转换为 rpx */
+		font-weight: 700;
+		color: #333;
+}
+.target-title.data-v-fd2d3e1c {
+		font-size: 32rpx;
+		/* 转换为 rpx */
+		color: #666;
+		margin-top: 10rpx;
+		/* 转换为 rpx */
+}
+.description.data-v-fd2d3e1c {
+		font-size: 32rpx;
+		/* 转换为 rpx */
+		color: #555;
+		margin: 40rpx 0;
+		/* 转换为 rpx */
+		line-height: 1.7;
+		padding: 0 20rpx;
+		/* 转换为 rpx */
+}
+.highlight.data-v-fd2d3e1c {
+		color: #FF6A00;
+		font-weight: bold;
+}
+.cost-section.data-v-fd2d3e1c {
+		background: #fff8f3;
+		border-radius: 30rpx;
+		/* 转换为 rpx */
+		padding: 40rpx;
+		/* 转换为 rpx */
+		margin: 50rpx 0;
+		/* 转换为 rpx */
+		border: 2rpx solid #ffe8d9;
+		/* 转换为 rpx */
+}
+.cost-title.data-v-fd2d3e1c {
+		font-size: 36rpx;
+		/* 转换为 rpx */
+		font-weight: 600;
+		color: #FF6A00;
+		margin-bottom: 40rpx;
+		/* 转换为 rpx */
+		text-align: center;
+}
+.cost-options.data-v-fd2d3e1c {
+		display: flex;
+		justify-content: center;
+		/* 确保单个选项也能居中 */
+		gap: 40rpx;
+		/* 转换为 rpx */
+		margin-bottom: 20rpx;
+		/* 转换为 rpx */
+}
+.cost-option.data-v-fd2d3e1c {
+		/* 移除 flex: 1; 因为现在只有一个选项，flex:1 会使其占据所有空间 */
+		max-width: 300rpx;
+		/* 转换为 rpx */
+		min-width: 280rpx;
+		/* 确保有最小宽度，避免内容过少时太窄 */
+		border: 4rpx solid #e0e0e0;
+		/* 转换为 rpx */
+		border-radius: 30rpx;
+		/* 转换为 rpx */
+		padding: 30rpx;
+		/* 转换为 rpx */
+		text-align: center;
+		transition: all 0.3s;
+		position: relative;
+		background: white;
+}
+.cost-option.selected.data-v-fd2d3e1c {
+		border-color: #FF6A00;
+		background: #fff8f3;
+		box-shadow: 0 10rpx 30rpx rgba(255, 106, 0, 0.15);
+		/* 转换为 rpx */
+}
+.cost-option.selected.data-v-fd2d3e1c::after {
+		content: '✓';
+		position: absolute;
+		top: -20rpx;
+		/* 转换为 rpx */
+		right: -20rpx;
+		/* 转换为 rpx */
+		width: 50rpx;
+		/* 转换为 rpx */
+		height: 50rpx;
+		/* 转换为 rpx */
+		background: #FF6A00;
+		color: white;
+		border-radius: 50%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-weight: bold;
+		font-size: 32rpx;
+		/* 转换为 rpx */
+}
+.currency-icon.data-v-fd2d3e1c {
+		font-size: 56rpx;
+		/* 转换为 rpx */
+		color: #FF8C00;
+		margin-bottom: 20rpx;
+		/* 转换为 rpx */
+}
+.cost-amount.data-v-fd2d3e1c {
+		font-size: 40rpx;
+		/* 转换为 rpx */
+		font-weight: 700;
+		color: #333;
+		margin-bottom: 10rpx;
+		/* 转换为 rpx */
+}
+.cost-label.data-v-fd2d3e1c {
+		font-size: 28rpx;
+		/* 转换为 rpx */
+		color: #777;
+}
+.user-balance.data-v-fd2d3e1c {
+		display: flex;
+		justify-content: center;
+		/* 单个项目时也能居中 */
+		gap: 60rpx;
+		/* 转换为 rpx */
+		margin: 40rpx 0;
+		/* 转换为 rpx */
+		padding: 30rpx;
+		/* 转换为 rpx */
+		background: #f8f9fa;
+		border-radius: 24rpx;
+		/* 转换为 rpx */
+		font-size: 30rpx;
+		/* 转换为 rpx */
+}
+.balance-item.data-v-fd2d3e1c {
+		text-align: center;
+}
+.balance-value.data-v-fd2d3e1c {
+		font-weight: 700;
+		font-size: 36rpx;
+		/* 转换为 rpx */
+		color: #FF6A00;
+		margin-top: 10rpx;
+		/* 转换为 rpx */
+}
+.insufficient-value.data-v-fd2d3e1c {
+		color: #e53935;
+}
+.action-buttons.data-v-fd2d3e1c {
+		display: flex;
+		flex-direction: column;
+		gap: 30rpx;
+		/* 转换为 rpx */
+		margin-top: 40rpx;
+		/* 转换为 rpx */
+}
+.btn.data-v-fd2d3e1c {
+		padding: 32rpx;
+		/* 转换为 rpx */
+		border-radius: 24rpx;
+		/* 转换为 rpx */
+		font-size: 34rpx;
+		/* 转换为 rpx */
+		font-weight: 600;
+		transition: all 0.3s;
+		text-align: center;
+		border: none;
+		-webkit-appearance: none;
+		background-color: transparent;
+		line-height: 1;
+}
+.btn.data-v-fd2d3e1c::after {
+		border: none;
+}
+.btn-primary.data-v-fd2d3e1c {
+		background: linear-gradient(135deg, #FF6A00, #FF8C00);
+		color: white;
+		box-shadow: 0 10rpx 30rpx rgba(255, 106, 0, 0.3);
+		/* 转换为 rpx */
+}
+.btn-primary.data-v-fd2d3e1c:active {
+		background: linear-gradient(135deg, #e05a00, #e07a00);
+		transform: translateY(-4rpx);
+		/* 转换为 rpx */
+		box-shadow: 0 14rpx 36rpx rgba(255, 106, 0, 0.4);
+		/* 转换为 rpx */
+}
+.btn-secondary.data-v-fd2d3e1c {
+		background: #f0f0f0;
+		color: #666;
+}
+.btn-secondary.data-v-fd2d3e1c:active {
+		background: #e0e0e0;
+}
+.insufficient.data-v-fd2d3e1c {
+		color: #e53935;
+		font-size: 28rpx;
+		/* 转换为 rpx */
+		margin-top: 20rpx;
+		/* 转换为 rpx */
+		text-align: center;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 10rpx;
+		/* 转换为 rpx */
+}
+.success-message.data-v-fd2d3e1c {
+		background: #4caf50;
+		color: white;
+		padding: 30rpx;
+		/* 转换为 rpx */
+		border-radius: 24rpx;
+		/* 转换为 rpx */
+		margin-top: 40rpx;
+		/* 转换为 rpx */
+		text-align: center;
+		animation: fadeIn-fd2d3e1c 0.5s;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 10rpx;
+		/* 转换为 rpx */
+		font-size: 32rpx;
+		/* 转换为 rpx */
+}
+@keyframes fadeIn-fd2d3e1c {
+from {
+			opacity: 0;
+			transform: translateY(20rpx);
+}
+
+		/* 转换为 rpx */
+to {
+			opacity: 1;
+			transform: translateY(0);
+}
+}
+
+	/* 新增的格式化申请好友语卡片样式 */
+.friend-request-card.data-v-fd2d3e1c {
+		background: white;
+		border-radius: 40rpx;
+		margin-top: 50rpx;
+		/* 与上一个卡片保持间距 */
+		padding: 50rpx;
+		box-shadow: 0 15rpx 50rpx rgba(0, 0, 0, 0.08);
+		border: 2rpx solid #f0f0f0;
+		position: relative;
+		overflow: hidden;
+}
+.friend-request-card.data-v-fd2d3e1c::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 8rpx;
+		background: linear-gradient(to right, #007bff, #0056b3);
+		/* 蓝色渐变 */
+		border-top-left-radius: 40rpx;
+		border-top-right-radius: 40rpx;
+}
+.friend-request-title.data-v-fd2d3e1c {
+		font-size: 42rpx;
+		font-weight: 700;
+		color: #333;
+		margin-bottom: 20rpx;
+		/* 调整标题下方间距 */
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		text-align: center;
+}
+.friend-request-title i.data-v-fd2d3e1c {
+		margin-right: 20rpx;
+		font-size: 48rpx;
+		color: #007bff;
+		/* 图标颜色 */
+		text-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.1);
+}
+.friend-request-desc.data-v-fd2d3e1c {
+		font-size: 28rpx;
+		color: #777;
+		text-align: center;
+		margin-bottom: 30rpx;
+}
+.message-box.data-v-fd2d3e1c {
+		background: #f8f9fa;
+		border: 2rpx solid #e9ecef;
+		border-radius: 20rpx;
+		padding: 30rpx;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		/* 文本和按钮居中 */
+		gap: 20rpx;
+		/* 文本和按钮间距 */
+}
+.formatted-message.data-v-fd2d3e1c {
+		width: 100%;
+		font-size: 30rpx;
+		color: #555;
+		line-height: 1.6;
+		text-align: left;
+		/* 文本左对齐 */
+		word-break: break-all;
+		/* 确保长文本换行 */
+}
+.copy-btn.data-v-fd2d3e1c {
+		background: #007bff;
+		color: black;
+		border: none;
+		border-radius: 24rpx;
+		padding: 20rpx 40rpx;
+		font-size: 30rpx;
+		font-weight: 600;
+		box-shadow: 0 8rpx 20rpx rgba(0, 123, 255, 0.3);
+		transition: background 0.3s;
+		width: auto;
+		/* 按钮宽度自适应内容 */
+		/* uni-app 按钮默认样式重置 */
+		-webkit-appearance: none;
+		background-color: transparent;
+		line-height: 1;
+		display: flex;
+		/* 让图标和文字在按钮内水平居中 */
+		align-items: center;
+		justify-content: center;
+		gap: 10rpx;
+		/* 图标和文字间距 */
+}
+.copy-btn.data-v-fd2d3e1c::after {
+		border: none;
+}
+.copy-btn.data-v-fd2d3e1c:active {
+		background: #0056b3;
+		transform: translateY(-2rpx);
+		box-shadow: 0 10rpx 24rpx rgba(0, 123, 255, 0.4);
+}
+.copy-btn i.data-v-fd2d3e1c {
+		font-size: 32rpx;
+}
+
+
+	/* 提示卡片 */
+.info-card.data-v-fd2d3e1c {
+		background: white;
+		border-radius: 40rpx;
+		padding: 50rpx;
+		margin-top: 50rpx;
+		box-shadow: 0 15rpx 50rpx rgba(0, 0, 0, 0.08);
+		border: 2rpx solid #f0f0f0;
+		position: relative;
+		overflow: hidden;
+}
+.info-card.data-v-fd2d3e1c::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 8rpx;
+		background: linear-gradient(to right, #4CAF50, #8BC34A);
+		border-top-left-radius: 40rpx;
+		border-top-right-radius: 40rpx;
+}
+.info-card-title.data-v-fd2d3e1c {
+		font-size: 42rpx;
+		font-weight: 700;
+		color: #333;
+		margin-bottom: 40rpx;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		text-align: center;
+}
+.info-card-title i.data-v-fd2d3e1c {
+		margin-right: 20rpx;
+		font-size: 48rpx;
+		color: #4CAF50;
+		text-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.1);
+}
+.info-card p.data-v-fd2d3e1c {
+		font-size: 30rpx;
+		color: #666;
+		margin-bottom: 25rpx;
+		line-height: 1.7;
+		text-align: justify;
+}
+.info-card ul.data-v-fd2d3e1c {
+		padding-left: 60rpx;
+		margin-top: 30rpx;
+		list-style: none;
+}
+.info-card li.data-v-fd2d3e1c {
+		position: relative;
+		font-size: 30rpx;
+		color: #666;
+		margin-bottom: 20rpx;
+		line-height: 1.6;
+		padding-left: 40rpx;
+}
+.info-card li.data-v-fd2d3e1c::before {
+		content: '\2022';
+		font-size: 36rpx;
+		color: #4CAF50;
+		position: absolute;
+		left: 0;
+		top: 0rpx;
+		line-height: 1.6;
+		font-weight: bold;
+}
+
+	/* 底部导航 (此处模板中已移除，保留样式以防需要) */
+.bottom-nav.data-v-fd2d3e1c {
+		position: fixed;
+		bottom: 0;
+		left: 50%;
+		transform: translateX(-50%);
+		width: 100%;
+		background: white;
+		display: flex;
+		justify-content: space-around;
+		padding: 24rpx 0;
+		padding-bottom: calc(24rpx + env(safe-area-inset-bottom));
+		border-top: 2rpx solid #e0e0e0;
+		box-shadow: 0 -10rpx 30rpx rgba(0, 0, 0, 0.05);
+		max-width: 750rpx;
+		z-index: 100;
+		border-top-left-radius: 40rpx;
+		border-top-right-radius: 40rpx;
+}
+.nav-item.data-v-fd2d3e1c {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		font-size: 24rpx;
+		color: #888;
+		padding: 10rpx 30rpx;
+		border-radius: 30rpx;
+		transition: all 0.3s;
+}
+.nav-item.active.data-v-fd2d3e1c {
+		color: #FF6A00;
+		background: rgba(255, 106, 0, 0.08);
+}
+.nav-item i.data-v-fd2d3e1c {
+		font-size: 44rpx;
+		margin-bottom: 10rpx;
+}
+.nav-item span.data-v-fd2d3e1c {
+		font-weight: 500;
+}
+.target-details.data-v-fd2d3e1c {
+		margin-top: 40rpx;
+		margin-bottom: 40rpx;
+		padding-top: 40rpx;
+		border-top: 1rpx solid #f0f0f0;
+		display: flex;
+		flex-direction: column;
+		gap: 20rpx;
+		text-align: left;
+		/* 确保内容左对齐 */
+}
+.detail-item.data-v-fd2d3e1c {
+		display: flex;
+		align-items: flex-start;
+		/* 顶部对齐，方便简介换行 */
+		font-size: 28rpx;
+}
+.detail-item .uni-icons.data-v-fd2d3e1c {
+		margin-right: 16rpx;
+		transform: translateY(4rpx);
+		/* 图标垂直微调 */
+}
+.detail-label.data-v-fd2d3e1c {
+		color: #888;
+		width: 150rpx;
+		/* 固定标签宽度，使其对齐 */
+		flex-shrink: 0;
+}
+.detail-value.data-v-fd2d3e1c {
+		color: #333;
+		flex: 1;
+		word-break: break-all;
+		/* 确保长文本能正确换行 */
+}
+.bio-item .detail-value.data-v-fd2d3e1c {
+		white-space: pre-wrap;
+		/* 保持简介的换行符 */
+		line-height: 1.6;
+}

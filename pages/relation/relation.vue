@@ -139,7 +139,8 @@
 		useShakeLock
 	} from '@/utils/shakeLock.js';
 	import {
-		getInviteCode
+		getInviteCode,
+		checkLoginGuard
 	} from '@/utils/user.js';
 
 	const themeColor = '#FF7500';
@@ -365,7 +366,7 @@
 		const avatarUrl = user.avatar || defaultAvatar;
 
 		// 3. 构建带有多参数的URL，并使用 encodeURIComponent 编码
-		const url = `/pages/applicationBusinessCard/applicationBusinessCard?id=${user.id}` +
+		const url = `/packages/applicationBusinessCard/applicationBusinessCard?id=${user.id}` +
 			`&name=${encodeURIComponent(name)}` +
 			`&avatar=${encodeURIComponent(avatarUrl)}`;
 
@@ -405,14 +406,30 @@
 
 
 	// --- 事件处理器 ---
-	const handleChooseLocation = () => uni.chooseLocation({
-		success: (res) => destination.value = res
-	});
-	const handleTimeChange = (e) => timeRange.value = e;
+	const handleChooseLocation = () => {
+		if (!checkLoginGuard()) return;
+
+		uni.chooseLocation({
+			success: (res) => destination.value = res
+		});
+	};
+	const handleTimeChange = (e) => {
+		if (!checkLoginGuard()) {
+			// 如果未登录，重置时间选择，防止触发 watch
+			timeRange.value = [];
+			return;
+		}
+
+		timeRange.value = e;
+	};
 	const switchTab = (tabIndex) => activeTab.value = tabIndex;
-	const goToShakePage = () => uni.navigateTo({
-		url: '/pages/location/location?autoShake=true'
-	});
+	const goToShakePage = () => {
+		if (!checkLoginGuard()) return;
+
+		uni.navigateTo({
+			url: '/pages/location/location?autoShake=true'
+		});
+	};
 
 	// --- 监听筛选条件变化 ---
 	watch([destination, timeRange], updateNextLocation);

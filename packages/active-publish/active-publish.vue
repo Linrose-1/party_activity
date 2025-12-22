@@ -385,8 +385,72 @@
 	};
 
 	function uploadCover() {
-		handleImageUpload('coverImageUrl', 'activity-cover');
+		uni.chooseMedia({
+			count: 1,
+			mediaType: ['image'],
+			sourceType: ['album', 'camera'],
+			success: (res) => {
+				const tempFilePath = res.tempFiles[0].tempFilePath;
+
+				// 【核心】调用微信原生图片裁剪接口
+				// 注意：仅微信小程序支持，App/H5 需要降级处理
+				// #ifdef MP-WEIXIN
+				wx.cropImage({
+					src: tempFilePath, // 图片路径
+					cropScale: '5:4', // 裁剪比例
+					success: (cropRes) => {
+						console.log('裁剪成功:', cropRes.tempFilePath);
+						// 使用裁剪后的图片进行上传
+						uploadFileToCloud(cropRes.tempFilePath, 'coverImageUrl', 'activity-cover');
+					},
+					fail: (err) => {
+						console.log('用户取消裁剪或不支持:', err);
+						// 如果用户取消裁剪，是否允许直接上传原图？建议允许，或者提示
+						// 这里选择直接上传原图作为降级
+						uploadFileToCloud(tempFilePath, 'coverImageUrl', 'activity-cover');
+					}
+				});
+				// #endif
+
+				// #ifndef MP-WEIXIN
+				// 非微信小程序环境，直接上传
+				uploadFileToCloud(tempFilePath, 'coverImageUrl', 'activity-cover');
+				// #endif
+			}
+		});
 	}
+
+	// 抽离上传逻辑
+	const uploadFileToCloud = async (filePath, field, directory) => {
+		uni.showLoading({
+			title: '上传中...',
+			mask: true
+		});
+
+		// 构造一个符合 uploadFile 函数要求的 file 对象结构
+		// 因为你的 uploadFile.js 可能期待的是一个 file 对象或者路径
+		// 这里假设 uploadFile.js 接受 { path: ... }
+		const result = await uploadFile({
+			path: filePath
+		}, {
+			directory: directory
+		});
+
+		uni.hideLoading();
+
+		if (result.data) {
+			form.value[field] = result.data;
+			uni.showToast({
+				title: '上传成功',
+				icon: 'none'
+			});
+		} else {
+			uni.showToast({
+				title: result.error || '上传失败',
+				icon: 'none'
+			});
+		}
+	};
 
 	function uploadSponsorLogo() {
 		handleImageUpload('companyLogo', 'sponsor-logo');
@@ -1159,7 +1223,9 @@
 		color: #999;
 
 		width: 100%;
-		height: 200rpx;
+		aspect-ratio: 5 / 4;
+		height: auto;
+		/* 移除固定高度 */
 
 		display: flex;
 		align-items: center;
@@ -1170,6 +1236,9 @@
 		overflow: hidden;
 
 		cursor: pointer;
+
+		position: relative;
+		/* 加上定位 */
 
 		text {
 			font-size: 28rpx;

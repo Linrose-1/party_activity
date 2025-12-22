@@ -912,7 +912,7 @@
 		}
 
 		// 使用 encodeURIComponent 确保名字和URL中的特殊字符不会导致问题
-		const url = `/pages/applicationBusinessCard/applicationBusinessCard?id=${user.id}` +
+		const url = `/packages/applicationBusinessCard/applicationBusinessCard?id=${user.id}` +
 			`&name=${encodeURIComponent(user.name)}` +
 			`&avatar=${encodeURIComponent(user.avatar)}`;
 

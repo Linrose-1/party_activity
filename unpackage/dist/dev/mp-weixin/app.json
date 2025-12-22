@@ -5,15 +5,9 @@
     "pages/active/active",
     "pages/shop/shop",
     "pages/my/my",
-    "pages/active-enroll/active-enroll",
-    "pages/my-businessCard/my-businessCard",
     "pages/shop-detail/shop-detail",
-    "pages/applicationBusinessCard/applicationBusinessCard",
     "pages/shop-recommend/shop-recommend",
-    "pages/home-opportunitiesPublish/home-opportunitiesPublish",
-    "pages/my-active/my-active",
     "pages/my-opportunity/my-opportunity",
-    "pages/my-collection/my-collection",
     "pages/user-agreement/user-agreement",
     "pages/location/location",
     "pages/shop-list/shop-list",
@@ -24,7 +18,6 @@
     "pages/my-active-approval/my-active-approval",
     "pages/my-shop/my-shop",
     "pages/my-shopRecommend/my-shopRecommend",
-    "pages/myStore-edit/myStore-edit",
     "pages/login/login",
     "pages/activity-participants/activity-participants",
     "pages/my-edit-label/my-edit-label",
@@ -37,7 +30,9 @@
     "pages/relation/relation",
     "pages/shop-apply/shop-apply",
     "pages/my-systemSuggestions/my-systemSuggestions",
-    "pages/my-auth/my-auth"
+    "pages/my-auth/my-auth",
+    "pages/platform-intro/platform-intro",
+    "pages/my-order-detail/my-order-detail"
   ],
   "subPackages": [
     {
@@ -45,10 +40,12 @@
       "pages": [
         "my-account-informationDetails/my-account-informationDetails",
         "my-account/my-account",
+        "home-opportunitiesPublish/home-opportunitiesPublish",
         "home-commercialDetail/home-commercialDetail",
         "my-edit/my-edit",
         "active-publish/active-publish",
         "active-detail/active-detail",
+        "active-enroll/active-enroll",
         "my-points/my-points",
         "my-zhimi/my-zhimi",
         "getPoints/getPoints",
@@ -56,7 +53,12 @@
         "my-friendInvitation/my-friendInvitation",
         "my-systemConstruction/my-systemConstruction",
         "user-opportunities/user-opportunities",
-        "home-customization/home-customization"
+        "home-customization/home-customization",
+        "my-businessCard/my-businessCard",
+        "applicationBusinessCard/applicationBusinessCard",
+        "myStore-edit/myStore-edit",
+        "my-active/my-active",
+        "my-collection/my-collection"
       ]
     }
   ],

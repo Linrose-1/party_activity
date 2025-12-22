@@ -3,18 +3,96 @@
 		<!-- 1. 顶部 Tab 切换 -->
 		<view class="tabs-container">
 			<uni-segmented-control :current="currentTab" :values="tabItems" @clickItem="handleTabClick"
-				style-type="button" active-color="#FF6B00" />
+				style-type="button" active-color="#FF6B00" style="width: 90%; margin: 0 auto;" />
 		</view>
 
 		<!-- 2. 内容区域 -->
 		<view class="content-area">
-			<!-- Tab 0: 我邀请的人 (列表) -->
-			<view v-show="currentTab === 1" class="tab-panel">
-				<view class="search-wrapper">
-					<uni-easyinput prefixIcon="search" v-model="searchKey" placeholder="搜索昵称或姓名" @confirm="handleSearch"
-						@clear="handleSearch"></uni-easyinput>
+			<!-- 我的商友 -->
+			<view v-show="currentTab === 0" class="tab-panel">
+
+				<!-- 邀请新商友模块 -->
+				<view class="invite-tools-section">
+					<view class="section-title">邀请新商友</view>
+					<view class="tools-grid">
+						<view class="tool-item" v-for="(item, index) in inviteTools" :key="index"
+							@click="handleToolClick(item)">
+							<!-- 增加 inner 容器保持布局一致性 -->
+							<view class="tool-item-inner">
+								<image :src="item.icon" class="tool-icon" mode="aspectFit"></image>
+								<view class="tool-content">
+									<view class="tool-name">{{ item.name }}</view>
+									<view class="tool-desc">{{ item.desc }}</view>
+								</view>
+								<text class="chevron-icon">›</text>
+							</view>
+						</view>
+					</view>
 				</view>
-				<!-- 商友列表 -->
+
+				<!-- 我邀请的人 -->
+				<view v-if="userInfo && userInfo.parentName" class="inviter-section">
+					<view class="section-title">我的邀请人</view>
+
+					<!-- A. 平台邀请人卡片 (始终显示，或者仅在有中间人时显示) -->
+					<!-- 您的需求：如果 parentName 不是 "猩聚社"，则显示平台 -->
+					<view v-if="shouldShowPlatformCard" class="inviter-card platform-card" @click="goToPlatformIntro">
+						<view class="inviter-avatar">
+							<image :src="platformInfo.img" class="inviter-avatar-img" mode="aspectFill"></image>
+						</view>
+						<view class="inviter-info">
+							<view class="inviter-name">{{ platformInfo.name }} <text class="tag-platform">平台</text>
+							</view>
+							<view class="inviter-desc">点击查看平台介绍</view>
+						</view>
+						<uni-icons type="right" size="16" color="#ccc"></uni-icons>
+					</view>
+					<!-- B. 个人上级邀请人 (UserInfo 中的 parent) -->
+					<view v-if="userInfo && userInfo.parentName" class="inviter-card" @click="viewParentCard">
+						<view class="inviter-avatar">
+							<image v-if="userInfo.parentAvatar" :src="userInfo.parentAvatar" class="inviter-avatar-img"
+								mode="aspectFill"></image>
+							<view v-else class="avatar-placeholder">{{ userInfo.parentName.charAt(0) }}</view>
+						</view>
+						<view class="inviter-info">
+							<view class="inviter-name">{{ userInfo.parentName }}</view>
+							<!-- 如果 parentName 就是平台名，可以加个备注 -->
+							<view v-if="userInfo.parentName === '猩聚社'" class="inviter-desc">平台直属</view>
+						</view>
+					</view>
+					<!-- C. 如果既没有平台信息(网络错误?)也没有个人上级 -->
+					<view v-if="!shouldShowPlatformCard && (!userInfo || !userInfo.parentName)" class="empty-container">
+						<image class="empty-image" src="/static/images/empty-box.png" mode="widthFix"></image>
+						<text class="empty-text">您不是通过邀请加入的哦</text>
+					</view>
+
+					<!-- <view class="inviter-card">
+						<view class="inviter-avatar">
+							<image v-if="userInfo.parentAvatar" :src="userInfo.parentAvatar" class="inviter-avatar-img"
+								mode="aspectFill"></image>
+							<view v-else class="avatar-placeholder">{{ userInfo.parentName.charAt(0) }}</view>
+						</view>
+						<view class="inviter-info">
+							<view class="inviter-name">{{ userInfo.parentName }}</view>
+						</view>
+					</view> -->
+				</view>
+				<!-- <view v-else class="empty-container">
+					<image class="empty-image" src="/static/images/empty-box.png" mode="widthFix"></image>
+					<text class="empty-text">您不是通过邀请加入的哦</text>
+				</view> -->
+
+				<!-- 我邀请的人 -->
+				<!-- 【关键】吸顶头部 -->
+				<view class="sticky-header">
+					<view class="section-title list-title">我邀请的人</view>
+					<view class="search-wrapper">
+						<uni-easyinput prefixIcon="search" v-model="searchKey" placeholder="搜索商友姓名/昵称/公司,同学/同行/同乡/同圈"
+							@confirm="handleSearch" @clear="handleSearch"></uni-easyinput>
+					</view>
+				</view>
+
+				<!-- 商友列表内容 -->
 				<view class="friend-list">
 					<view class="friend-card" v-for="friend in friendList" :key="friend.id"
 						@click="navigateToBusinessCard(friend)">
@@ -47,59 +125,94 @@
 						</view>
 					</view>
 				</view>
-				<!-- 加载与空状态 -->
+				<!-- 加载更多 -->
 				<uni-load-more :status="loadStatus"
 					v-if="friendList.length > 0 || loadStatus === 'loading'"></uni-load-more>
+
 				<view class="empty-container" v-if="friendList.length === 0 && loadStatus === 'noMore'">
 					<image class="empty-image" src="/static/images/empty-invite.png" mode="widthFix"></image>
 					<text class="empty-text">您还没有邀请过商友哦，快去分享吧！</text>
 				</view>
+
 			</view>
 
-			<!-- Tab 1: 我的邀请人 (单个卡片) -->
-			<view v-show="currentTab === 0" class="tab-panel">
-				<!-- 根据 userInfo.parentName 的存在与否显示不同内容 -->
-				<view v-if="userInfo && userInfo.parentName" class="inviter-section">
-					<view class="section-title">我的邀请人</view>
-					<view class="inviter-card">
-						<view class="inviter-avatar">
-							<!-- 同样使用头像或文字占位 -->
-							<image v-if="userInfo.parentAvatar" :src="userInfo.parentAvatar" class="inviter-avatar-img"
-								mode="aspectFill"></image>
-							<view v-else class="avatar-placeholder">{{ userInfo.parentName.charAt(0) }}</view>
-						</view>
-						<view class="inviter-info">
-							<view class="inviter-name">{{ userInfo.parentName }}</view>
-							<!-- <view class="inviter-desc">感谢引荐，共同成长！</view> -->
-						</view>
-					</view>
-				</view>
-				<view v-else class="empty-container">
-					<image class="empty-image" src="/static/images/empty-box.png" mode="widthFix"></image>
-					<text class="empty-text">您不是通过邀请加入的哦</text>
+			<!-- Tab 0: 我邀请的人 (列表) -->
+			<view v-show="currentTab === 1" class="tab-panel">
+
+				<!-- 1. 顶部搜索 (圈友专属) -->
+				<view class="search-wrapper sticky-header-circle">
+					<uni-easyinput prefixIcon="search" v-model="circleSearchKey" placeholder="搜索圈友姓名"
+						@confirm="handleCircleSearch" @clear="handleCircleSearch"></uni-easyinput>
 				</view>
 
-				<!-- 2.2 【新增】邀请新商友模块 -->
-				<view class="invite-tools-section">
-					<view class="section-title">邀请新商友</view>
-					<view class="tools-grid">
-						<view class="tool-item" v-for="(item, index) in inviteTools" :key="index"
-							@click="handleToolClick(item)">
-							<!-- 增加 inner 容器保持布局一致性 -->
-							<view class="tool-item-inner">
-								<image :src="item.icon" class="tool-icon" mode="aspectFit"></image>
-								<view class="tool-content">
-									<view class="tool-name">{{ item.name }}</view>
-									<view class="tool-desc">{{ item.desc }}</view>
+				<!-- 2. 新申请入口 -->
+				<!-- 只有当有新申请或者想要常驻显示时展示 -->
+				<view class="new-apply-entry" @click="openApplyPopup">
+					<view class="entry-left">
+						<view class="icon-box">
+							<uni-icons type="personadd-filled" size="24" color="#fff"></uni-icons>
+						</view>
+						<text class="entry-title">新的圈友申请</text>
+					</view>
+					<view class="entry-right">
+						<!-- 如果有申请，显示红点数字 -->
+						<view v-if="newApplyCount > 0" class="badge">{{ newApplyCount }}</view>
+						<uni-icons type="right" size="16" color="#ccc"></uni-icons>
+					</view>
+				</view>
+
+				<!-- 2. 圈友列表 -->
+				<view class="friend-list">
+					<view class="friend-card" v-for="friend in circleFriendList" :key="friend.id"
+						@click="navigateToBusinessCard(friend)">
+						<image class="friend-avatar" :src="friend.avatar || '/static/images/default-avatar.png'"
+							mode="aspectFill"></image>
+						<view class="friend-info">
+							<view class="info-header">
+								<text class="friend-name">{{ friend.realName || friend.nickname || '匿名用户' }}</text>
+								<!-- 关系标签 -->
+								<view class="relation-tags">
+									<text v-if="friend.fellowTownspeopleFlag === 1"
+										class="tag fellow-townsman">同乡</text>
+									<text v-if="friend.peerFlag === 1" class="tag peer">同行</text>
+									<text v-if="friend.classmateFlag === 1" class="tag classmate">同学</text>
+									<!-- 也可以加上同城: fellowTownspeopleCityFlag -->
 								</view>
-								<text class="chevron-icon">›</text>
+							</view>
+							<view class="friend-company">
+								<uni-icons type="briefcase-filled" size="14" color="#888"></uni-icons>
+								<text>{{ friend.companyName || '暂无公司信息' }}</text>
+								<text v-if="friend.positionTitle"> | {{ friend.positionTitle }}</text>
 							</view>
 						</view>
+
+						<!-- 右侧操作区 (如果是圈友，可能不需要关注按钮，或者显示“已互圈”) -->
+						<view class="action-area" @click.stop="confirmDeleteFriend(friend)">
+							<!-- 比如显示一个互圈的图标 -->
+							<uni-icons type="checkbox-filled" size="20" color="#4cd964"></uni-icons>
+							<text class="friend-status">已互圈</text>
+						</view>
 					</view>
 				</view>
 
+				<!-- 加载状态 -->
+				<uni-load-more :status="circleLoadStatus"
+					v-if="circleFriendList.length > 0 || circleLoadStatus === 'loading'"></uni-load-more>
+
+				<!-- 空状态 -->
+				<view class="empty-container" v-if="circleFriendList.length === 0 && circleLoadStatus === 'noMore'">
+					<image class="empty-image" src="/static/images/empty-box.png" mode="widthFix"></image>
+					<text class="empty-text">暂无圈友，快去添加吧！</text>
+				</view>
+
 			</view>
+
+
+
+
 		</view>
+
+		<CircleApplyPopup ref="applyPopupRef" @refresh="handleAuditSuccess" />
 	</view>
 </template>
 
@@ -107,18 +220,20 @@
 	import {
 		ref,
 		onMounted,
-		watch
+		watch,
+		computed
 	} from 'vue';
 	import {
 		onPullDownRefresh,
 		onReachBottom
 	} from '@dcloudio/uni-app';
 	import request from '@/utils/request.js'; // 确保路径正确
+	import CircleApplyPopup from '@/components/CircleApplyPopup.vue';
 
 	// --- 页面配置与状态 ---
 	const themeColor = ref('#FF6E00');
 	const currentTab = ref(0);
-	const tabItems = ['我的邀请人', '我邀请的人'];
+	const tabItems = ['我的商友', '我的圈友'];
 	const loading = ref(false);
 
 	// --- "我邀请的人" 列表相关状态 ---
@@ -134,9 +249,69 @@
 
 	// --- "我的邀请人" 相关状态 ---
 	const userInfo = ref(null);
+	const platformInfo = ref({});
+
+	// --- 圈友列表相关状态 ---
+	const circleFriendList = ref([]);
+	const circlePageNo = ref(1);
+	const circleLoadStatus = ref('more'); // 'more', 'loading', 'noMore'
+	const circleSearchKey = ref(''); // 圈友专属搜索框
+
+	// --- 新申请相关状态 ---
+	const newApplyList = ref([]); // 申请列表数据
+	const newApplyCount = ref(0); // 待处理数量
+	const applyPopupRef = ref(null);
+
+	const openApplyPopup = () => {
+		// 传入当前获取到的新申请列表数据
+		applyPopupRef.value.open(newApplyList.value);
+	};
+
+	// 审批操作成功后，刷新数据
+	const handleAuditSuccess = () => {
+		getNewApplyList(); // 刷新红点数量
+		getCircleFriendList(true); // 刷新圈友列表（因为同意后会变成好友）
+	};
+
+	// 计算属性：是否显示独立的平台卡片
+	// 逻辑：如果有平台信息，且 (没有个人上级 或者 个人上级不是“猩聚社”)
+	const shouldShowPlatformCard = computed(() => {
+		if (!platformInfo.value.name) return false;
+		// 如果 userInfo 还没加载，暂时不显示
+		if (!userInfo.value) return false;
+
+		// 如果个人上级就是平台 (parentName === platformName)，则不需要额外显示一个平台卡片，
+		// 因为下面的卡片显示的已经是平台了。
+		// 但是，下面的卡片没有“点击跳转介绍”的功能，且头像可能不一致。
+		// 为了体验一致性，建议：如果是直属，下面的卡片也渲染成平台样式。
+		// 或者简单点：只要有平台信息就显示，不管下面是谁。
+
+		// 按照您的具体需求：“如果不是猩聚社...增加平台这个邀请人”
+		return userInfo.value.parentName !== '猩聚社';
+	});
 
 
-	// --- 【新增】邀请工具配置 ---
+
+	// 获取平台配置
+	const fetchPlatformConfig = async () => {
+		const {
+			data,
+			error
+		} = await request('/app-api/system/platformConfig/getPlatformConfig');
+		if (!error && data) {
+			platformInfo.value = data;
+		}
+	};
+
+	// 跳转平台介绍
+	const goToPlatformIntro = () => {
+		uni.navigateTo({
+			url: '/pages/platform-intro/platform-intro'
+		});
+	};
+
+
+	// --- 邀请工具配置 ---
 	// 图标路径使用了你之前提供的路径，请确保图片真实存在
 	const inviteTools = ref([{
 			name: '注册邀请',
@@ -148,13 +323,13 @@
 			name: '名片邀请',
 			desc: '名片分享邀请',
 			icon: '/static/icon/我的名片.png',
-			path: '/pages/my-businessCard/my-businessCard' // 跳转到名片页
+			path: '/packages/my-businessCard/my-businessCard' // 跳转到名片页
 		},
 		{
 			name: '发贴邀请',
 			desc: '商机分享邀友',
 			icon: '/static/icon/商机.png',
-			path: '/pages/home-opportunitiesPublish/home-opportunitiesPublish' // 商机发布页路径
+			path: '/packages/home-opportunitiesPublish/home-opportunitiesPublish' // 商机发布页路径
 		},
 		{
 			name: '聚会邀请',
@@ -175,12 +350,15 @@
 	onPullDownRefresh(async () => {
 		console.log("触发下拉刷新...");
 		try {
+			if (currentTab.value === 0) {
+				// 刷新“我的商友”页的所有数据
+				await Promise.all([getShareUserList(true), fetchUserInfo()]);
+			}
 			if (currentTab.value === 1) {
-				// 如果是“我邀请的人”列表，则刷新列表数据
-				await getShareUserList(true);
-			} else {
-				// 如果是“我的邀请人”，则刷新用户信息
-				await fetchUserInfo();
+				await Promise.all([
+					getCircleFriendList(true),
+					getNewApplyList() // 刷新圈友时同步刷新申请
+				]);
 			}
 		} catch (error) {
 			// 即使出错，也要确保停止刷新动画
@@ -193,24 +371,41 @@
 	});
 
 	onReachBottom(() => {
-		if (currentTab.value === 1 && loadStatus.value === 'more' && !loading.value) {
-			console.log("触底加载更多...");
-			getShareUserList();
+		if (currentTab.value === 0) {
+			// 加载更多商友
+			if (loadStatus.value === 'more' && !loading.value) {
+				getShareUserList();
+			}
+		} else {
+			// 加载更多圈友
+			if (circleLoadStatus.value === 'more') getCircleFriendList();
 		}
 	});
+
 	// --- 方法 ---
 	/**
 	 * 页面初始化函数，整合所有首次加载和刷新的逻辑
 	 */
+	// const initializePage = async () => {
+	// 	// 两个接口都可以并行请求
+	// 	const fetchListPromise = getShareUserList(true); // 加载我邀请的人列表
+	// 	const fetchInfoPromise = fetchUserInfo(); // 加载当前用户信息
+
+	// 	// 等待所有请求完成
+	// 	await Promise.all([fetchListPromise, fetchInfoPromise]);
+
+	// 	// 所有数据加载完毕后，统一停止下拉刷新动画
+	// 	uni.stopPullDownRefresh();
+	// };
 	const initializePage = async () => {
-		// 两个接口都可以并行请求
-		const fetchListPromise = getShareUserList(true); // 加载我邀请的人列表
-		const fetchInfoPromise = fetchUserInfo(); // 加载当前用户信息
+		await Promise.all([
+			getShareUserList(true),
+			fetchUserInfo(),
+			fetchPlatformConfig(),
+			getCircleFriendList(true),
+			getNewApplyList()
+		]);
 
-		// 等待所有请求完成
-		await Promise.all([fetchListPromise, fetchInfoPromise]);
-
-		// 所有数据加载完毕后，统一停止下拉刷新动画
 		uni.stopPullDownRefresh();
 	};
 
@@ -237,6 +432,43 @@
 		if (!error) {
 			userInfo.value = data;
 		}
+	};
+
+	/**
+	 * 查看上级邀请人名片
+	 * 逻辑：使用 parentId 跳转名片页，并带上 fromShare=1 参数以绕过支付
+	 */
+	const viewParentCard = () => {
+
+		// 2. 数据校验
+		if (!userInfo.value || !userInfo.value.parentId) {
+			uni.showToast({
+				title: '无法获取上级信息',
+				icon: 'none'
+			});
+			return;
+		}
+
+		// 3. 如果上级是平台（ID为0或特定值，或者名字是猩聚社），可能不跳转或跳转平台介绍
+		if (userInfo.value.parentName === '猩聚社') {
+			return; // 或者 goToPlatformIntro()
+		}
+
+		// 4. 构建参数
+		const targetId = userInfo.value.parentId;
+		const name = userInfo.value.parentName || '邀请人';
+		const avatar = userInfo.value.parentAvatar || '';
+
+		// 5. 跳转名片页
+		// 关键：带上 fromShare=1，后端接口会根据这个参数判断是否免支付查看
+		const url = `/pages/applicationBusinessCard/applicationBusinessCard?id=${targetId}` +
+			`&name=${encodeURIComponent(name)}` +
+			`&avatar=${encodeURIComponent(avatar)}` +
+			`&fromShare=1`; // 【关键参数】
+
+		uni.navigateTo({
+			url
+		});
 	};
 
 	/**
@@ -304,6 +536,83 @@
 		}
 	};
 
+	// --- 获取圈友列表 ---
+	const getCircleFriendList = async (isRefresh = false) => {
+		if (circleLoadStatus.value === 'loading') return;
+		if (!isRefresh && circleLoadStatus.value === 'noMore') return;
+
+		if (isRefresh) {
+			circlePageNo.value = 1;
+			circleLoadStatus.value = 'more';
+		}
+
+		circleLoadStatus.value = 'loading';
+
+		try {
+			const params = {
+				pageNo: circlePageNo.value,
+				pageSize: pageSize.value,
+				status: 1, // 1: 好友位 (全部圈友)
+			};
+			if (circleSearchKey.value.trim()) {
+				params.searchKey = circleSearchKey.value.trim();
+			}
+
+			const {
+				data,
+				error
+			} = await request('/app-api/member/user/friend/list', {
+				method: 'GET',
+				data: params
+			});
+
+			if (error) throw new Error(error);
+
+			if (data && data.list) {
+				const list = data.list;
+				circleFriendList.value = isRefresh ? list : [...circleFriendList.value, ...list];
+
+				if (circleFriendList.value.length >= data.total) {
+					circleLoadStatus.value = 'noMore';
+				} else {
+					circleLoadStatus.value = 'more';
+					circlePageNo.value++;
+				}
+			} else {
+				circleLoadStatus.value = 'noMore';
+			}
+		} catch (e) {
+			console.error("获取圈友列表失败:", e);
+			circleLoadStatus.value = 'more';
+		} finally {
+			if (isRefresh) uni.stopPullDownRefresh();
+		}
+	};
+
+	// --- 获取新申请列表 ---
+	const getNewApplyList = async () => {
+		try {
+			const {
+				data,
+				error
+			} = await request('/app-api/member/user/friend/list', {
+				method: 'GET',
+				data: {
+					pageNo: 1,
+					pageSize: 10, // 只取前10条展示红点即可，详情在浮层里看
+					status: 0 // 0: 申请中
+				}
+			});
+
+			if (!error && data) {
+				newApplyList.value = data.list;
+				newApplyCount.value = data.total;
+			}
+		} catch (e) {
+			console.error('获取新申请失败', e);
+		}
+	};
+
 	watch(searchKey, (newValue, oldValue) => {
 		// 避免首次加载时触发
 		if (newValue !== oldValue) {
@@ -335,8 +644,74 @@
 		}
 	};
 
+	// --- 圈友搜索处理 ---
+	const handleCircleSearch = () => {
+		getCircleFriendList(true);
+	};
 
-	// 【新增】处理键盘确认和清除按钮的函数
+	// 弹出删除确认框
+	const confirmDeleteFriend = (friend) => {
+		uni.showModal({
+			title: '解除互圈关系',
+			content: `⚠️ 确定要与 ${friend.realName || friend.nickname} 解除互圈吗？\n\n📌 解除后：\n\n• 双方不再显示为圈友\n\n• 将移出彼此的圈友列表`,
+			confirmText: '确认解除',
+			confirmColor: '#dd524d',
+			cancelText: '取消',
+			success: async (res) => {
+				if (res.confirm) {
+					await deleteFriend(friend);
+				}
+			}
+		});
+	};
+
+	// 调用删除接口
+	const deleteFriend = async (friend) => {
+		uni.showLoading({
+			title: '删除中...'
+		});
+		try {
+			const url = `/app-api/member/user/friend/del`;
+			// 注意：这里传的是 fid (关系ID) 还是 id (用户ID)？
+			// 根据审核接口的经验，大概率是 fid。
+			const payload = {
+				id: friend.fid
+			};
+
+			const {
+				error
+			} = await request(url, {
+				method: 'POST',
+				data: payload
+			});
+
+			if (!error) {
+				uni.showToast({
+					title: '解除成功',
+					icon: 'success'
+				});
+				// 从列表中移除
+				circleFriendList.value = circleFriendList.value.filter(item => item.id !== friend.id);
+				// 也可以选择重新加载列表
+				// getCircleFriendList(true);
+			} else {
+				uni.showToast({
+					title: error || '删除失败',
+					icon: 'none'
+				});
+			}
+		} catch (e) {
+			uni.showToast({
+				title: '网络异常',
+				icon: 'none'
+			});
+		} finally {
+			uni.hideLoading();
+		}
+	};
+
+
+	// 处理键盘确认和清除按钮的函数
 	const handleSearch = () => {
 		clearTimeout(searchDebounceTimer);
 		getShareUserList(true);
@@ -458,7 +833,7 @@
 		const avatarUrl = user.avatar || defaultAvatar;
 
 		// 3. 构建带有多参数的URL，并使用 encodeURIComponent 编码，防止特殊字符导致问题
-		const url = `/pages/applicationBusinessCard/applicationBusinessCard?id=${user.id}` +
+		const url = `/packages/applicationBusinessCard/applicationBusinessCard?id=${user.id}` +
 			`&name=${encodeURIComponent(name)}` +
 			`&avatar=${encodeURIComponent(avatarUrl)}` +
 			`&fromShare=1`;
@@ -497,30 +872,54 @@
 		padding-top: 100rpx;
 	}
 
-	.tabs-container {
-		background-color: #fff;
-		padding: 20rpx 30rpx;
-		border-bottom: 1rpx solid #eee;
+	/* --- 3. 吸顶头部 (列表标题+搜索) --- */
+	.sticky-header {
+		position: sticky;
+		/* 吸顶位置 = Tabs 的高度 */
+		/* 如果有 var(--window-top)，也要加上 */
+		top: 100rpx;
+		/* top: calc(100rpx + var(--window-top)); */
+		z-index: 10;
+		background-color: #f7f8fa;
+		padding-top: 20rpx;
+	}
 
-		/* 【关键】改为固定定位，吸附在顶部 */
+	.list-title {
+		/* 增加具体的左内边距 */
+		padding-left: 30rpx;
+		padding-right: 30rpx;
+		padding-bottom: 20rpx;
+
+		font-size: 34rpx;
+		font-weight: bold;
+		color: #333;
+	}
+
+
+	.tabs-container {
 		position: fixed;
 		top: 0;
-		/* 如果有原生导航栏，可能需要加上 var(--window-top) */
-		/* top: var(--window-top); */
 		left: 0;
 		width: 100%;
 		z-index: 999;
+		background-color: #fff;
+		border-bottom: 1rpx solid #eee;
+		height: 100rpx;
+
+		/* 【关键】移除 padding，改用 Flex 居中 */
+		padding: 0;
+
+		display: flex;
+		align-items: center;
+		/* justify-content: center;  这个可以保留，作为双重保险 */
+		justify-content: center;
+
 		box-sizing: border-box;
 	}
 
-	// 深度选择器修改组件内部样式
-	// :deep(.segmented-control__text) {
-	// 	font-size: 30rpx !important;
-	// }
-
 	.content-area {
-		flex: 1;
-		overflow-y: auto;
+		// flex: 1;
+		// overflow-y: auto;
 	}
 
 	.tab-panel {
@@ -672,6 +1071,24 @@
 	}
 
 	/* --- "我的邀请人" 模块样式 --- */
+	.platform-card {
+		margin-bottom: 20rpx;
+		/* 与下方的个人卡片隔开 */
+		background-color: #fcfcfc;
+		/*稍微区分一下背景*/
+		border: 1rpx solid #eee;
+	}
+
+	.tag-platform {
+		font-size: 20rpx;
+		background-color: #FF6E00;
+		color: white;
+		padding: 2rpx 8rpx;
+		border-radius: 6rpx;
+		margin-left: 10rpx;
+		vertical-align: middle;
+	}
+
 	.inviter-section {
 		padding: 30rpx 30rpx 0 30rpx;
 		/* 调整 padding */
@@ -684,7 +1101,7 @@
 	.section-title {
 		font-size: 36rpx;
 		font-weight: bold;
-		margin-bottom: 30rpx;
+		// margin-bottom: 30rpx;
 		color: #333;
 	}
 
@@ -695,6 +1112,7 @@
 		background: #fff;
 		border-radius: 30rpx;
 		box-shadow: 0 10rpx 30rpx rgba(0, 0, 0, 0.06);
+		margin-top: 10rpx;
 	}
 
 	.inviter-avatar {
@@ -738,6 +1156,7 @@
 		grid-template-columns: 1fr 1fr;
 		/* 双列 */
 		gap: 20rpx;
+		margin-top: 10rpx;
 	}
 
 	.tool-item {
@@ -808,5 +1227,84 @@
 
 	.empty-text {
 		font-size: 28rpx;
+	}
+
+
+	/* 圈友列表的吸顶搜索栏 */
+	.sticky-header-circle {
+		position: sticky;
+		top: 100rpx;
+		/* 与商友列表保持一致，适配 Tab 高度 */
+		z-index: 10;
+		background-color: #f7f8fa;
+		padding-bottom: 20rpx;
+	}
+
+	.friend-status {
+		font-size: 24rpx;
+		color: #999;
+		background-color: #f0f2f5;
+		padding: 4rpx 12rpx;
+		border-radius: 8rpx;
+
+		/* 增加点击感 */
+		padding: 8rpx 16rpx;
+		background-color: #f0f2f5;
+		border: 1rpx solid transparent;
+		transition: all 0.2s;
+
+		&:active {
+			background-color: #e6e6e6;
+			border-color: #d9d9d9;
+		}
+	}
+
+	/* 新申请入口样式 */
+	.new-apply-entry {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		background-color: #fff;
+		padding: 24rpx 30rpx;
+		margin-bottom: 20rpx;
+		/* 与下方列表隔开 */
+		/* 如果需要吸顶，也可以加 sticky，或者就让它随页面滚动 */
+	}
+
+	.entry-left {
+		display: flex;
+		align-items: center;
+	}
+
+	.icon-box {
+		width: 80rpx;
+		height: 80rpx;
+		background-color: #FF6E00;
+		/* 主题色背景 */
+		border-radius: 12rpx;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		margin-right: 20rpx;
+	}
+
+	.entry-title {
+		font-size: 30rpx;
+		font-weight: bold;
+		color: #333;
+	}
+
+	.entry-right {
+		display: flex;
+		align-items: center;
+	}
+
+	.badge {
+		background-color: #ff4d4f;
+		color: #fff;
+		font-size: 24rpx;
+		padding: 4rpx 12rpx;
+		border-radius: 20rpx;
+		margin-right: 10rpx;
 	}
 </style>

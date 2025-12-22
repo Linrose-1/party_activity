@@ -207,7 +207,7 @@ const _sfc_main = {
     };
     const goToPublishPage = () => {
       common_vendor.index.navigateTo({
-        url: "/pages/home-opportunitiesPublish/home-opportunitiesPublish"
+        url: "/packages/home-opportunitiesPublish/home-opportunitiesPublish"
       });
     };
     common_vendor.onLoad(() => getMyOpportunitiesList(true));

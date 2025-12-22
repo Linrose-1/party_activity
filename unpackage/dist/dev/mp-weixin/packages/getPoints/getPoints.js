@@ -24,7 +24,7 @@ const _sfc_main = {
             name: "分享名片奖励",
             points: 50,
             dailyLimit: "10次/天",
-            path: "/pages/my-businessCard/my-businessCard"
+            path: "/packages/my-businessCard/my-businessCard"
           },
           {
             name: "分享聚会奖励",

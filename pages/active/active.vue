@@ -9,7 +9,7 @@
 			</view>
 		</view>
 
-		<!-- 【新增】轮播图区域 -->
+		<!-- 轮播图区域 -->
 		<view v-if="bannerList.length > 0" class="swiper-section">
 			<swiper class="swiper" circular :indicator-dots="true" :autoplay="true" :interval="3000" :duration="500">
 				<swiper-item v-for="banner in bannerList" :key="banner.id" @click="handleBannerClick(banner)">
@@ -130,7 +130,8 @@
 	import ActivityCard from '@/components/ActivityCard.vue';
 	import request from '../../utils/request.js';
 	import {
-		getInviteCode
+		getInviteCode,
+		checkLoginGuard
 	} from '../../utils/user.js';
 
 	// --- 核心状态 ---
@@ -431,23 +432,24 @@
 
 	// 发布聚会
 	const publishActivity = () => {
-		if (!isLogin.value) {
-			uni.showModal({
-				title: '温馨提示',
-				content: '登录后才能发布聚会，是否立即登录？',
-				confirmText: '去登录',
-				cancelText: '再看看',
-				success: (res) => {
-					if (res.confirm) {
-						uni.navigateTo({
-							// url: '/pages/login/login'
-							url: '/pages/index/index'
-						});
-					}
-				}
-			});
-			return;
-		}
+		if (!checkLoginGuard()) return;
+		// if (!isLogin.value) {
+		// 	uni.showModal({
+		// 		title: '温馨提示',
+		// 		content: '登录后才能发布聚会，是否立即登录？',
+		// 		confirmText: '去登录',
+		// 		cancelText: '再看看',
+		// 		success: (res) => {
+		// 			if (res.confirm) {
+		// 				uni.navigateTo({
+		// 					// url: '/pages/login/login'
+		// 					url: '/pages/index/index'
+		// 				});
+		// 			}
+		// 		}
+		// 	});
+		// 	return;
+		// }
 		uni.navigateTo({
 			url: '/packages/active-publish/active-publish'
 		});
@@ -458,6 +460,7 @@
 	 * @param {object} banner - 被点击的轮播图数据对象
 	 */
 	const handleBannerClick = (banner) => {
+		if (!checkLoginGuard()) return;
 		// 1. 检查 banner 对象和 targetUrl 是否存在
 		if (!banner || !banner.targetUrl) {
 			console.log('该轮播图没有配置跳转链接，不执行任何操作。');
@@ -687,7 +690,7 @@
 		align-items: center;
 		justify-content: center;
 		line-height: 1; // 确保文字和图标垂直居中
-		margin: 0; 
+		margin: 0;
 		margin-right: 40rpx;
 
 		// 消除按钮默认边框

@@ -695,7 +695,7 @@
 			return; // 阻止跳转
 		}
 		uni.navigateTo({
-			url: `/pages/active-enroll/active-enroll?id=${activityId.value}`
+			url: `/packages/active-enroll/active-enroll?id=${activityId.value}`
 		})
 	}
 
@@ -742,7 +742,7 @@
 		const name = user.nickname || '匿名用户';
 		const avatarUrl = user.avatar || defaultAvatar;
 
-		let url = `/pages/applicationBusinessCard/applicationBusinessCard?id=${user.id}` +
+		let url = `/packages/applicationBusinessCard/applicationBusinessCard?id=${user.id}` +
 			`&name=${encodeURIComponent(name)}` +
 			`&avatar=${encodeURIComponent(avatarUrl)}`;
 

@@ -168,7 +168,7 @@
 	const goToApplyPage = () => {
 	    uni.navigateTo({
 	        // 目标是新建/编辑页面
-	        url: `/pages/myStore-edit/myStore-edit` 
+	        url: `/packages/myStore-edit/myStore-edit` 
 	    });
 	};
 
@@ -179,7 +179,7 @@
 	const goToEditPage = (store) => {
 		uni.navigateTo({
 			// 目标是修改页面
-			url: `/pages/myStore-edit/myStore-edit?id=${store.id}` 
+			url: `/packages/myStore-edit/myStore-edit?id=${store.id}` 
 		});
 	};
 	

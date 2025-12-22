@@ -33,7 +33,7 @@ const _sfc_main = {
     const handleChooseLocation = () => {
       common_vendor.index.chooseLocation({
         success: (res) => {
-          common_vendor.index.__f__("log", "at pages/shop/shop.vue:239", "用户手动选择了新位置:", res);
+          common_vendor.index.__f__("log", "at pages/shop/shop.vue:240", "用户手动选择了新位置:", res);
           const newAddress = res.name || res.address;
           const newLocation = {
             latitude: res.latitude,
@@ -76,7 +76,7 @@ const _sfc_main = {
         }
       });
       if (error) {
-        common_vendor.index.__f__("error", "at pages/shop/shop.vue:299", "获取聚店页轮播图失败:", error);
+        common_vendor.index.__f__("error", "at pages/shop/shop.vue:300", "获取聚店页轮播图失败:", error);
         bannerList.value = [];
         return;
       }
@@ -103,7 +103,7 @@ const _sfc_main = {
       if (activeFilter.value !== "all") {
         params.category = activeFilter.value;
       }
-      common_vendor.index.__f__("log", "at pages/shop/shop.vue:346", "🚀 [getStoreList] 最终请求参数:", params);
+      common_vendor.index.__f__("log", "at pages/shop/shop.vue:347", "🚀 [getStoreList] 最终请求参数:", params);
       const {
         data: result,
         error
@@ -113,7 +113,7 @@ const _sfc_main = {
       });
       loadingMore.value = false;
       if (error) {
-        common_vendor.index.__f__("error", "at pages/shop/shop.vue:359", "获取店铺列表失败:", error);
+        common_vendor.index.__f__("error", "at pages/shop/shop.vue:360", "获取店铺列表失败:", error);
         common_vendor.index.showToast({
           title: error,
           icon: "none"
@@ -147,7 +147,7 @@ const _sfc_main = {
         allStores.value = [];
         await getStoreList();
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/shop/shop.vue:404", "handleRefresh 过程中捕获到错误:", error);
+        common_vendor.index.__f__("error", "at pages/shop/shop.vue:405", "handleRefresh 过程中捕获到错误:", error);
       } finally {
         isLoading.value = false;
       }
@@ -183,7 +183,7 @@ const _sfc_main = {
     });
     common_vendor.onShow(() => {
       if (allStores.value.length === 0) {
-        common_vendor.index.__f__("log", "at pages/shop/shop.vue:451", "onShow: 列表为空，执行初次加载...");
+        common_vendor.index.__f__("log", "at pages/shop/shop.vue:452", "onShow: 列表为空，执行初次加载...");
         const storedLocation = common_vendor.index.getStorageSync("userLocation");
         const storedAddress = common_vendor.index.getStorageSync("displayAddress");
         if (storedLocation) {
@@ -197,11 +197,11 @@ const _sfc_main = {
           handleRefresh();
         }
       } else {
-        common_vendor.index.__f__("log", "at pages/shop/shop.vue:467", "onShow: 列表已有数据，不自动刷新位置。");
+        common_vendor.index.__f__("log", "at pages/shop/shop.vue:468", "onShow: 列表已有数据，不自动刷新位置。");
       }
     });
     const handleRefresherRefresh = async () => {
-      common_vendor.index.__f__("log", "at pages/shop/shop.vue:473", "--- scroll-view 的 @refresherrefresh 事件已触发 ---");
+      common_vendor.index.__f__("log", "at pages/shop/shop.vue:474", "--- scroll-view 的 @refresherrefresh 事件已触发 ---");
       await handleRefresh(true);
     };
     const loadMore = () => {
@@ -222,23 +222,29 @@ const _sfc_main = {
       activeFilter.value = filterValue;
     };
     const goToStoreDetail = (store) => {
+      if (!utils_user.checkLoginGuard())
+        return;
       common_vendor.index.navigateTo({
         url: `/pages/shop-detail/shop-detail?id=${store.id}`
       });
     };
     const shareStore = () => {
+      if (!utils_user.checkLoginGuard())
+        return;
       common_vendor.index.navigateTo({
         url: "/pages/shop-recommend/shop-recommend"
       });
     };
     const skipToNewShop = () => {
+      if (!utils_user.checkLoginGuard())
+        return;
       common_vendor.index.navigateTo({
-        url: "/pages/myStore-edit/myStore-edit"
+        url: "/packages/myStore-edit/myStore-edit"
       });
     };
     common_vendor.onShareAppMessage(() => {
       const inviteCode = utils_user.getInviteCode();
-      common_vendor.index.__f__("log", "at pages/shop/shop.vue:543", `[分享] 准备分享聚店页面给好友，邀请码: ${inviteCode}`);
+      common_vendor.index.__f__("log", "at pages/shop/shop.vue:547", `[分享] 准备分享聚店页面给好友，邀请码: ${inviteCode}`);
       let sharePath = "/pages/shop/shop";
       if (inviteCode) {
         sharePath += `?inviteCode=${inviteCode}`;
@@ -249,12 +255,12 @@ const _sfc_main = {
         imageUrl: bannerList.value.length > 0 ? bannerList.value[0].imageUrl : "https://img.gofor.club/logo.png"
         // 优先使用第一张轮播图作为分享封面
       };
-      common_vendor.index.__f__("log", "at pages/shop/shop.vue:560", "[分享] 分享给好友的内容:", JSON.stringify(shareContent));
+      common_vendor.index.__f__("log", "at pages/shop/shop.vue:564", "[分享] 分享给好友的内容:", JSON.stringify(shareContent));
       return shareContent;
     });
     common_vendor.onShareTimeline(() => {
       const inviteCode = utils_user.getInviteCode();
-      common_vendor.index.__f__("log", "at pages/shop/shop.vue:572", `[分享] 准备分享聚店页面到朋友圈，邀请码: ${inviteCode}`);
+      common_vendor.index.__f__("log", "at pages/shop/shop.vue:576", `[分享] 准备分享聚店页面到朋友圈，邀请码: ${inviteCode}`);
       let queryString = "";
       if (inviteCode) {
         queryString = `inviteCode=${inviteCode}`;
@@ -264,7 +270,7 @@ const _sfc_main = {
         query: queryString,
         imageUrl: bannerList.value.length > 0 ? bannerList.value[0].imageUrl : "https://img.gofor.club/logo.png"
       };
-      common_vendor.index.__f__("log", "at pages/shop/shop.vue:588", "[分享] 分享到朋友圈的内容:", JSON.stringify(shareContent));
+      common_vendor.index.__f__("log", "at pages/shop/shop.vue:592", "[分享] 分享到朋友圈的内容:", JSON.stringify(shareContent));
       return shareContent;
     });
     return (_ctx, _cache) => {

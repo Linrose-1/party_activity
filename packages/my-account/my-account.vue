@@ -541,7 +541,7 @@
 			name: '分享名片',
 			desc: '分享个人名片卡片',
 			points: '+5分/人',
-			path: '/pages/my-businessCard/my-businessCard'
+			path: '/packages/my-businessCard/my-businessCard'
 		},
 		{
 			icon: 'personadd',

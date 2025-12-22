@@ -313,11 +313,11 @@
 	};
 
 	/**
-	 * 【新增】跳转到发布商机页面的方法
+	 * 跳转到发布商机页面的方法
 	 */
 	const goToPublishPage = () => {
 		uni.navigateTo({
-			url: '/pages/home-opportunitiesPublish/home-opportunitiesPublish'
+			url: '/packages/home-opportunitiesPublish/home-opportunitiesPublish'
 		});
 	};
 

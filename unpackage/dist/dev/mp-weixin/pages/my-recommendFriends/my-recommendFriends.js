@@ -132,7 +132,7 @@ const _sfc_main = {
       const defaultAvatar = "/static/images/default-avatar.png";
       const name = user.nickname || user.realName || "匿名用户";
       const avatarUrl = user.avatar || defaultAvatar;
-      const url = `/pages/applicationBusinessCard/applicationBusinessCard?id=${user.id}&name=${encodeURIComponent(name)}&avatar=${encodeURIComponent(avatarUrl)}&fromShare=1`;
+      const url = `/packages/applicationBusinessCard/applicationBusinessCard?id=${user.id}&name=${encodeURIComponent(name)}&avatar=${encodeURIComponent(avatarUrl)}&fromShare=1`;
       common_vendor.index.__f__("log", "at pages/my-recommendFriends/my-recommendFriends.vue:212", "从推荐商友页跳转到名片申请页, URL:", url);
       common_vendor.index.navigateTo({
         url
@@ -188,7 +188,7 @@ const _sfc_main = {
       } : {}, {
         f: friendList.value.length === 0 && loadStatus.value === "noMore"
       }, friendList.value.length === 0 && loadStatus.value === "noMore" ? {
-        g: common_assets._imports_1
+        g: common_assets._imports_0$1
       } : {});
     };
   }
