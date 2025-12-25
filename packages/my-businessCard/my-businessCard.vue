@@ -341,7 +341,7 @@
 		// 2. 准备请求体
 		const payload = {
 			scene: scene,
-			path: "pages/my-businessCard/my-businessCard",
+			path: "packages/my-businessCard/my-businessCard",
 			width: 430,
 			autoColor: true,
 			checkPath: true,

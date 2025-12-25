@@ -28,6 +28,49 @@ const _sfc_main = {
   __name: "active-publish",
   setup(__props) {
     const isUserVerified = common_vendor.ref(true);
+    const formatTimestamp = (timestamp) => {
+      if (!timestamp)
+        return "";
+      const date = new Date(Number(timestamp));
+      const Y = date.getFullYear();
+      const M = (date.getMonth() + 1).toString().padStart(2, "0");
+      const D = date.getDate().toString().padStart(2, "0");
+      const h = date.getHours().toString().padStart(2, "0");
+      const m = date.getMinutes().toString().padStart(2, "0");
+      const s = date.getSeconds().toString().padStart(2, "0");
+      return `${Y}-${M}-${D} ${h}:${m}:${s}`;
+    };
+    const initDefaultTimes = () => {
+      const now = /* @__PURE__ */ new Date();
+      const year = now.getFullYear();
+      const month = (now.getMonth() + 1).toString().padStart(2, "0");
+      const day = now.getDate().toString().padStart(2, "0");
+      const todayStr = `${year}-${month}-${day}`;
+      enrollTimeRange.value = [`${todayStr} 09:00:00`, `${todayStr} 18:00:00`];
+      timeRange.value = [`${todayStr} 19:00:00`, `${todayStr} 21:00:00`];
+      common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:237", "已初始化默认时间:", todayStr);
+    };
+    const loadDraft = () => {
+      try {
+        const draftDataString = common_vendor.index.getStorageSync(DRAFT_STORAGE_KEY);
+        if (draftDataString) {
+          const parsedDraft = JSON.parse(draftDataString);
+          form.value = parsedDraft.form;
+          timeRange.value = parsedDraft.timeRange;
+          enrollTimeRange.value = parsedDraft.enrollTimeRange;
+          associatedStoreName.value = parsedDraft.associatedStoreName;
+          common_vendor.index.showToast({
+            title: "已恢复上次草稿",
+            icon: "none"
+          });
+          return true;
+        }
+      } catch (error) {
+        common_vendor.index.__f__("error", "at packages/active-publish/active-publish.vue:257", "加载草稿失败:", error);
+        common_vendor.index.removeStorageSync(DRAFT_STORAGE_KEY);
+      }
+      return false;
+    };
     common_vendor.onMounted(() => {
       checkUserVerificationStatus();
       getActiveType();
@@ -41,10 +84,10 @@ const _sfc_main = {
       });
       if (!error && data) {
         isUserVerified.value = !!data.idCard;
-        common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:229", "用户实名状态:", isUserVerified.value);
+        common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:279", "用户实名状态:", isUserVerified.value);
       } else {
         isUserVerified.value = false;
-        common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:233", "获取用户信息失败，无法确认实名状态。");
+        common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:283", "获取用户信息失败，无法确认实名状态。");
       }
     };
     const goToAuthPage = () => {
@@ -97,16 +140,16 @@ const _sfc_main = {
           type: "member_activity_category "
         }
       });
-      common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:299", "getActiveType result:", result);
+      common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:349", "getActiveType result:", result);
       tagOptions.value = result.data.map((item) => ({
         value: item.value,
         // 使用后端返回的value
         text: item.label
         // 使用后端返回的label
       }));
-      common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:304", "tagOptions updated:", tagOptions.value);
+      common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:354", "tagOptions updated:", tagOptions.value);
       if (result.error) {
-        common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:307", "请求失败:", result.error);
+        common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:357", "请求失败:", result.error);
       }
     };
     const enrollmentOptions = common_vendor.ref([
@@ -165,7 +208,7 @@ const _sfc_main = {
               icon: "none"
             });
           } else {
-            common_vendor.index.__f__("error", "at packages/active-publish/active-publish.vue:377", "上传失败:", result.error);
+            common_vendor.index.__f__("error", "at packages/active-publish/active-publish.vue:427", "上传失败:", result.error);
             common_vendor.index.showToast({
               title: result.error || "上传失败",
               icon: "none"
@@ -187,11 +230,11 @@ const _sfc_main = {
             cropScale: "5:4",
             // 裁剪比例
             success: (cropRes) => {
-              common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:402", "裁剪成功:", cropRes.tempFilePath);
+              common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:452", "裁剪成功:", cropRes.tempFilePath);
               uploadFileToCloud(cropRes.tempFilePath, "coverImageUrl", "activity-cover");
             },
             fail: (err) => {
-              common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:407", "用户取消裁剪或不支持:", err);
+              common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:457", "用户取消裁剪或不支持:", err);
               uploadFileToCloud(tempFilePath, "coverImageUrl", "activity-cover");
             }
           });
@@ -244,6 +287,7 @@ const _sfc_main = {
     }
     common_vendor.onLoad(async (options) => {
       if (options && options.mode === "edit" && options.id) {
+        common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:535", "进入编辑模式");
         mode.value = "edit";
         editActivityId.value = options.id;
         common_vendor.index.setNavigationBarTitle({
@@ -251,14 +295,17 @@ const _sfc_main = {
         });
         await loadActivityDetailForEdit(options.id);
       } else {
+        common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:547", "进入创建模式");
         mode.value = "create";
         common_vendor.index.setNavigationBarTitle({
           title: "发起聚会"
         });
-        loadDraft();
+        const hasDraft = loadDraft();
+        if (!hasDraft) {
+          initDefaultTimes();
+        }
       }
       if (options && options.storeId && options.storeName) {
-        common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:504", "从聚店页跳转而来，自动填充聚店信息...");
         form.value.associatedStoreId = options.storeId;
         associatedStoreName.value = decodeURIComponent(options.storeName);
         common_vendor.index.showToast({
@@ -266,34 +313,7 @@ const _sfc_main = {
           icon: "none"
         });
       }
-      try {
-        const draftDataString = common_vendor.index.getStorageSync(DRAFT_STORAGE_KEY);
-        if (draftDataString) {
-          const parsedDraft = JSON.parse(draftDataString);
-          form.value = parsedDraft.form;
-          timeRange.value = parsedDraft.timeRange;
-          enrollTimeRange.value = parsedDraft.enrollTimeRange;
-          associatedStoreName.value = parsedDraft.associatedStoreName;
-          common_vendor.index.showToast({
-            title: "已成功加载草稿",
-            icon: "none"
-          });
-          common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:532", "草稿已加载:", parsedDraft);
-        } else {
-          const now = /* @__PURE__ */ new Date();
-          const year = now.getFullYear();
-          const month = (now.getMonth() + 1).toString().padStart(2, "0");
-          const day = now.getDate().toString().padStart(2, "0");
-          const todayStr = `${year}-${month}-${day}`;
-          enrollTimeRange.value = [`${todayStr} 09:00:00`, `${todayStr} 18:00:00`];
-          timeRange.value = [`${todayStr} 19:00:00`, `${todayStr} 21:00:00`];
-        }
-      } catch (error) {
-        common_vendor.index.__f__("error", "at packages/active-publish/active-publish.vue:546", "加载草稿失败:", error);
-        common_vendor.index.removeStorageSync(DRAFT_STORAGE_KEY);
-      }
       common_vendor.index.$on("shopSelected", (shop) => {
-        common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:552", "接收到选择的店铺信息:", shop);
         form.value.associatedStoreId = shop.id;
         associatedStoreName.value = shop.storeName;
       });
@@ -305,34 +325,6 @@ const _sfc_main = {
     common_vendor.onUnload(() => {
       common_vendor.index.$off("shopSelected");
     });
-    const loadDraft = () => {
-      try {
-        const draftDataString = common_vendor.index.getStorageSync(DRAFT_STORAGE_KEY);
-        if (draftDataString) {
-          const parsedDraft = JSON.parse(draftDataString);
-          form.value = parsedDraft.form;
-          timeRange.value = parsedDraft.timeRange;
-          enrollTimeRange.value = parsedDraft.enrollTimeRange;
-          associatedStoreName.value = parsedDraft.associatedStoreName;
-          common_vendor.index.showToast({
-            title: "已恢复上次草稿",
-            icon: "none"
-          });
-          common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:584", "草稿已加载:", parsedDraft);
-        } else {
-          const now = /* @__PURE__ */ new Date();
-          const year = now.getFullYear();
-          const month = (now.getMonth() + 1).toString().padStart(2, "0");
-          const day = now.getDate().toString().padStart(2, "0");
-          const todayStr = `${year}-${month}-${day}`;
-          enrollTimeRange.value = [`${todayStr} 09:00:00`, `${todayStr} 18:00:00`];
-          timeRange.value = [`${todayStr} 19:00:00`, `${todayStr} 21:00:00`];
-        }
-      } catch (error) {
-        common_vendor.index.__f__("error", "at packages/active-publish/active-publish.vue:597", "加载草稿失败:", error);
-        common_vendor.index.removeStorageSync(DRAFT_STORAGE_KEY);
-      }
-    };
     const loadActivityDetailForEdit = async (id) => {
       common_vendor.index.showLoading({
         title: "加载中..."
@@ -368,7 +360,7 @@ const _sfc_main = {
         return;
       }
       const data = detailRes.data;
-      common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:646", "获取详情用于编辑:", data);
+      common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:630", "获取详情用于编辑:", data);
       form.value.activityTitle = data.activityTitle;
       form.value.activityDescription = data.activityDescription;
       form.value.totalSlots = data.totalSlots;
@@ -402,14 +394,14 @@ const _sfc_main = {
       form.value.tag = matchedValue;
       if (data.startDatetime && data.endDatetime) {
         timeRange.value = [
-          formatDateForPicker(data.startDatetime),
-          formatDateForPicker(data.endDatetime)
+          formatTimestamp(data.startDatetime),
+          formatTimestamp(data.endDatetime)
         ];
       }
       if (data.registrationStartDatetime && data.registrationEndDatetime) {
         enrollTimeRange.value = [
-          formatDateForPicker(data.registrationStartDatetime),
-          formatDateForPicker(data.registrationEndDatetime)
+          formatTimestamp(data.registrationStartDatetime),
+          formatTimestamp(data.registrationEndDatetime)
         ];
       }
       if (data.memberStoreRespVO) {
@@ -425,16 +417,6 @@ const _sfc_main = {
         }));
       }
     };
-    const formatDateForPicker = (timestamp) => {
-      const date = new Date(timestamp);
-      const Y = date.getFullYear();
-      const M = (date.getMonth() + 1).toString().padStart(2, "0");
-      const D = date.getDate().toString().padStart(2, "0");
-      const h = date.getHours().toString().padStart(2, "0");
-      const m = date.getMinutes().toString().padStart(2, "0");
-      const s = date.getSeconds().toString().padStart(2, "0");
-      return `${Y}-${M}-${D} ${h}:${m}:${s}`;
-    };
     function saveDraft() {
       const draftData = {
         form: form.value,
@@ -448,13 +430,13 @@ const _sfc_main = {
           title: "聚会已保存为草稿",
           icon: "none"
         });
-        common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:753", "草稿已保存:", draftData);
+        common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:738", "草稿已保存:", draftData);
       } catch (e) {
         common_vendor.index.showToast({
           title: "草稿保存失败",
           icon: "none"
         });
-        common_vendor.index.__f__("error", "at packages/active-publish/active-publish.vue:759", "保存草稿到本地存储失败:", e);
+        common_vendor.index.__f__("error", "at packages/active-publish/active-publish.vue:744", "保存草稿到本地存储失败:", e);
       }
     }
     async function publish() {
@@ -598,10 +580,10 @@ const _sfc_main = {
         let result;
         if (mode.value === "edit") {
           payload.id = editActivityId.value;
-          common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:958", "编辑提交 Payload:", payload);
+          common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:943", "编辑提交 Payload:", payload);
           result = await editActive(payload);
         } else {
-          common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:962", "创建提交 Payload:", payload);
+          common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:947", "创建提交 Payload:", payload);
           result = await createActive(payload);
         }
         if (result.success) {
@@ -649,7 +631,7 @@ const _sfc_main = {
           });
         }
       } catch (e) {
-        common_vendor.index.__f__("error", "at packages/active-publish/active-publish.vue:1038", "发布流程中发生未知错误:", e);
+        common_vendor.index.__f__("error", "at packages/active-publish/active-publish.vue:1023", "发布流程中发生未知错误:", e);
         common_vendor.index.showToast({
           title: "操作失败，请检查网络",
           icon: "none"
@@ -660,19 +642,19 @@ const _sfc_main = {
       }
     }
     const createActive = async (payload) => {
-      common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:1051", "payload", payload);
+      common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:1036", "payload", payload);
       const result = await utils_request.request("/app-api/member/activity/create", {
         method: "POST",
         data: payload
       });
       if (result && !result.error) {
-        common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:1059", "createActive result:", result);
+        common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:1044", "createActive result:", result);
         return {
           success: true,
           error: null
         };
       } else {
-        common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:1068", "请求失败:", result.error);
+        common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:1053", "请求失败:", result.error);
         return {
           success: false,
           error: result.error
@@ -698,7 +680,7 @@ const _sfc_main = {
     };
     common_vendor.onShareAppMessage(() => {
       const inviteCode = utils_user.getInviteCode();
-      common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:1103", `[活动发布页] 分享给好友，获取到邀请码: ${inviteCode}`);
+      common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:1088", `[活动发布页] 分享给好友，获取到邀请码: ${inviteCode}`);
       let sharePath = "/packages/active-publish/active-publish";
       if (inviteCode) {
         sharePath += `?inviteCode=${inviteCode}`;
@@ -709,12 +691,12 @@ const _sfc_main = {
         // 建议使用一个固定的、吸引人的分享图片
         imageUrl: "https://img.gofor.club/logo_share.jpg"
       };
-      common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:1119", "[活动发布页] 分享给好友的内容:", JSON.stringify(shareContent));
+      common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:1104", "[活动发布页] 分享给好友的内容:", JSON.stringify(shareContent));
       return shareContent;
     });
     common_vendor.onShareTimeline(() => {
       const inviteCode = utils_user.getInviteCode();
-      common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:1129", `[活动发布页] 分享到朋友圈，获取到邀请码: ${inviteCode}`);
+      common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:1114", `[活动发布页] 分享到朋友圈，获取到邀请码: ${inviteCode}`);
       let queryString = "";
       if (inviteCode) {
         queryString = `inviteCode=${inviteCode}`;
@@ -724,7 +706,7 @@ const _sfc_main = {
         query: queryString,
         imageUrl: "https://img.gofor.club/logo_share.jpg"
       };
-      common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:1144", "[活动发布页] 分享到朋友圈的内容:", JSON.stringify(shareContent));
+      common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:1129", "[活动发布页] 分享到朋友圈的内容:", JSON.stringify(shareContent));
       return shareContent;
     });
     return (_ctx, _cache) => {

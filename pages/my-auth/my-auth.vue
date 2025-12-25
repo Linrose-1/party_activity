@@ -48,6 +48,10 @@
 						<uni-forms-item label="身份证号" name="idCard">
 							<uni-easyinput v-model="realNameForm.idCard" placeholder="请输入您的身份证号码" />
 						</uni-forms-item>
+						<uni-forms-item label="手机号" name="phone">
+							<uni-easyinput type="number" maxlength="11" v-model="realNameForm.phone"
+								placeholder="选填,不填则默认使用登录手机号" />
+						</uni-forms-item>
 					</uni-forms>
 
 					<button class="submit-btn" @click="submitRealNameForm">立即认证</button>
@@ -290,6 +294,7 @@
 	const realNameForm = ref({
 		cardName: '',
 		idCard: '',
+		phone: ''
 	});
 
 	// 是否已实名认证的状态
@@ -334,6 +339,15 @@
 				errorMessage: '身份证号码格式不正确'
 			}]
 		},
+		phone: {
+			rules: [{
+				required: false, // 设置为非必填
+			}, {
+				// 正则校验：只有当有值时才会触发格式检查
+				pattern: /^1[3-9]\d{9}$/,
+				errorMessage: '手机号格式不正确'
+			}]
+		}
 	};
 	const submitRealNameForm = () => {
 		realNameFormRef.value.validate().then(async () => {
@@ -341,6 +355,7 @@
 				title: '认证中...',
 				mask: true
 			});
+			console.log('提交实名认证参数:', realNameForm.value);
 			const {
 				data,
 				error

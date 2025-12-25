@@ -150,7 +150,7 @@ const _sfc_main = {
       common_vendor.index.__f__("log", "at packages/my-businessCard/my-businessCard.vue:338", `✅ [二维码生成] 使用的 scene: ${scene}`);
       const payload = {
         scene,
-        path: "pages/my-businessCard/my-businessCard",
+        path: "packages/my-businessCard/my-businessCard",
         width: 430,
         autoColor: true,
         checkPath: true,

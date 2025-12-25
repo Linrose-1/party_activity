@@ -161,7 +161,8 @@ const _sfc_main = {
     const realNameFormRef = common_vendor.ref(null);
     const realNameForm = common_vendor.ref({
       cardName: "",
-      idCard: ""
+      idCard: "",
+      phone: ""
     });
     const isRealNameAuth = common_vendor.ref(false);
     common_vendor.onLoad(() => {
@@ -197,6 +198,16 @@ const _sfc_main = {
           pattern: /^[1-9]\d{5}(18|19|20)\d{2}((0[1-9])|(1[0-2]))(([0-2][1-9])|10|20|30|31)\d{3}[0-9Xx]$/,
           errorMessage: "身份证号码格式不正确"
         }]
+      },
+      phone: {
+        rules: [{
+          required: false
+          // 设置为非必填
+        }, {
+          // 正则校验：只有当有值时才会触发格式检查
+          pattern: /^1[3-9]\d{9}$/,
+          errorMessage: "手机号格式不正确"
+        }]
       }
     };
     const submitRealNameForm = () => {
@@ -205,6 +216,7 @@ const _sfc_main = {
           title: "认证中...",
           mask: true
         });
+        common_vendor.index.__f__("log", "at pages/my-auth/my-auth.vue:358", "提交实名认证参数:", realNameForm.value);
         const {
           data,
           error
@@ -228,7 +240,7 @@ const _sfc_main = {
           }, 1500);
         }
       }).catch((err) => {
-        common_vendor.index.__f__("log", "at pages/my-auth/my-auth.vue:367", "表单校验失败：", err);
+        common_vendor.index.__f__("log", "at pages/my-auth/my-auth.vue:382", "表单校验失败：", err);
       });
     };
     return (_ctx, _cache) => {
@@ -267,36 +279,47 @@ const _sfc_main = {
           label: "身份证号",
           name: "idCard"
         }),
-        p: common_vendor.sr(realNameFormRef, "32098fb6-1", {
+        p: common_vendor.o(($event) => realNameForm.value.phone = $event),
+        q: common_vendor.p({
+          type: "number",
+          maxlength: "11",
+          placeholder: "选填,不填则默认使用登录手机号",
+          modelValue: realNameForm.value.phone
+        }),
+        r: common_vendor.p({
+          label: "手机号",
+          name: "phone"
+        }),
+        s: common_vendor.sr(realNameFormRef, "32098fb6-1", {
           "k": "realNameFormRef"
         }),
-        q: common_vendor.p({
+        t: common_vendor.p({
           modelValue: realNameForm.value,
           rules
         }),
-        r: common_vendor.o(submitRealNameForm)
+        v: common_vendor.o(submitRealNameForm)
       }) : {}, {
-        s: activeTab.value === 2
+        w: activeTab.value === 2
       }, activeTab.value === 2 ? common_vendor.e({
-        t: common_vendor.o(($event) => certForm.certType = $event),
-        v: common_vendor.p({
+        x: common_vendor.o(($event) => certForm.certType = $event),
+        y: common_vendor.p({
           localdata: certTypeOptions,
           modelValue: certForm.certType
         }),
-        w: common_vendor.p({
+        z: common_vendor.p({
           label: "认证类型",
           required: true
         }),
-        x: common_vendor.o(($event) => certForm.certName = $event),
-        y: common_vendor.p({
+        A: common_vendor.o(($event) => certForm.certName = $event),
+        B: common_vendor.p({
           placeholder: "请输入企业/组织的全称",
           modelValue: certForm.certName
         }),
-        z: common_vendor.p({
+        C: common_vendor.p({
           label: "认证名称",
           required: true
         }),
-        A: common_vendor.f(certForm.certImages, (img, i, i0) => {
+        D: common_vendor.f(certForm.certImages, (img, i, i0) => {
           return {
             a: img,
             b: common_vendor.o(($event) => replaceCertImage(i), i),
@@ -304,30 +327,30 @@ const _sfc_main = {
             d: i
           };
         }),
-        B: certForm.certImages.length < 6
+        E: certForm.certImages.length < 6
       }, certForm.certImages.length < 6 ? {
-        C: common_vendor.p({
+        F: common_vendor.p({
           type: "plusempty",
           size: "24",
           color: "#ccc"
         }),
-        D: common_vendor.o(handleChooseCertImage)
+        G: common_vendor.o(handleChooseCertImage)
       } : {}, {
-        E: common_vendor.t(certRemark.value),
-        F: common_vendor.p({
+        H: common_vendor.t(certRemark.value),
+        I: common_vendor.p({
           label: "上传资料",
           required: true
         }),
-        G: common_vendor.sr(certFormRef, "32098fb6-6", {
+        J: common_vendor.sr(certFormRef, "32098fb6-8", {
           "k": "certFormRef"
         }),
-        H: common_vendor.p({
+        K: common_vendor.p({
           modelValue: certForm,
           ["label-width"]: 80
         }),
-        I: common_vendor.t(isSubmitting.value ? "提交中..." : "提交认证"),
-        J: common_vendor.o(submitCertForm),
-        K: isSubmitting.value
+        L: common_vendor.t(isSubmitting.value ? "提交中..." : "提交认证"),
+        M: common_vendor.o(submitCertForm),
+        N: isSubmitting.value
       }) : {});
     };
   }

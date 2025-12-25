@@ -210,6 +210,56 @@
 
 	const isUserVerified = ref(true);
 
+	// --- 【1】统一的时间格式化工具 (放在最前面，防止找不到) ---
+	const formatTimestamp = (timestamp) => {
+		if (!timestamp) return '';
+		const date = new Date(Number(timestamp));
+		const Y = date.getFullYear();
+		const M = (date.getMonth() + 1).toString().padStart(2, '0');
+		const D = date.getDate().toString().padStart(2, '0');
+		const h = date.getHours().toString().padStart(2, '0');
+		const m = date.getMinutes().toString().padStart(2, '0');
+		const s = date.getSeconds().toString().padStart(2, '0');
+		return `${Y}-${M}-${D} ${h}:${m}:${s}`;
+	};
+
+	// --- 【2】初始化默认时间 (仅用于创建模式) ---
+	const initDefaultTimes = () => {
+		const now = new Date();
+		const year = now.getFullYear();
+		const month = (now.getMonth() + 1).toString().padStart(2, '0');
+		const day = now.getDate().toString().padStart(2, '0');
+		const todayStr = `${year}-${month}-${day}`;
+
+		// 默认时间设置
+		enrollTimeRange.value = [`${todayStr} 09:00:00`, `${todayStr} 18:00:00`];
+		timeRange.value = [`${todayStr} 19:00:00`, `${todayStr} 21:00:00`];
+		console.log('已初始化默认时间:', todayStr);
+	};
+
+	// --- 【3】加载草稿 (仅用于创建模式) ---
+	const loadDraft = () => {
+		try {
+			const draftDataString = uni.getStorageSync(DRAFT_STORAGE_KEY);
+			if (draftDataString) {
+				const parsedDraft = JSON.parse(draftDataString);
+				form.value = parsedDraft.form;
+				timeRange.value = parsedDraft.timeRange;
+				enrollTimeRange.value = parsedDraft.enrollTimeRange;
+				associatedStoreName.value = parsedDraft.associatedStoreName;
+				uni.showToast({
+					title: '已恢复上次草稿',
+					icon: 'none'
+				});
+				return true; // 找到了草稿
+			}
+		} catch (error) {
+			console.error("加载草稿失败:", error);
+			uni.removeStorageSync(DRAFT_STORAGE_KEY);
+		}
+		return false; // 没找到草稿
+	};
+
 	onMounted(() => {
 		checkUserVerificationStatus();
 		getActiveType();
@@ -480,76 +530,45 @@
 	}
 
 	onLoad(async (options) => {
-		// 1. 检查是否有模式参数
+		// 1. 判断是否为【编辑模式】
 		if (options && options.mode === 'edit' && options.id) {
+			console.log("进入编辑模式");
 			mode.value = 'edit';
 			editActivityId.value = options.id;
 			uni.setNavigationBarTitle({
 				title: '编辑聚会'
 			});
 
-			// 加载详情数据进行回显
+			// 编辑模式下：只加载详情，**绝对不要**去加载草稿或设置默认时间
 			await loadActivityDetailForEdit(options.id);
-		} else {
+		}
+		// 2. 否则为【创建模式】
+		else {
+			console.log("进入创建模式");
 			mode.value = 'create';
 			uni.setNavigationBarTitle({
 				title: '发起聚会'
 			});
-			// 只有在创建模式下才尝试加载草稿 (原有逻辑放这里)
-			loadDraft();
+
+			// 创建模式下：先看有没有草稿，没有草稿才设置默认时间
+			const hasDraft = loadDraft();
+			if (!hasDraft) {
+				initDefaultTimes();
+			}
 		}
 
-		// 1. 检查 onLoad 的 options 中是否存在从聚店卡片传来的 storeId 和 storeName
+		// 3. 处理从店铺列表跳转过来的参数 (通用逻辑)
 		if (options && options.storeId && options.storeName) {
-			console.log('从聚店页跳转而来，自动填充聚店信息...');
-
-			// 2. 将获取到的值直接填充到表单数据中
 			form.value.associatedStoreId = options.storeId;
-			// 使用 decodeURIComponent 对店名进行解码，还原为原始文本
 			associatedStoreName.value = decodeURIComponent(options.storeName);
-
 			uni.showToast({
 				title: `已选择聚店: ${associatedStoreName.value}`,
 				icon: 'none'
 			});
 		}
-		// 2. 尝试从本地存储加载草稿数据
-		try {
-			const draftDataString = uni.getStorageSync(DRAFT_STORAGE_KEY);
-			if (draftDataString) {
-				const parsedDraft = JSON.parse(draftDataString);
 
-				// 2. 将草稿数据赋值给页面的 ref 变量
-				form.value = parsedDraft.form;
-				timeRange.value = parsedDraft.timeRange;
-				enrollTimeRange.value = parsedDraft.enrollTimeRange;
-				associatedStoreName.value = parsedDraft.associatedStoreName;
-
-				uni.showToast({
-					title: '已成功加载草稿',
-					icon: 'none'
-				});
-				console.log('草稿已加载:', parsedDraft);
-			} else {
-				const now = new Date();
-				const year = now.getFullYear();
-				const month = (now.getMonth() + 1).toString().padStart(2, '0');
-				const day = now.getDate().toString().padStart(2, '0');
-				const todayStr = `${year}-${month}-${day}`;
-
-				// 默认报名时间为当天 09:00 至 18:00
-				enrollTimeRange.value = [`${todayStr} 09:00:00`, `${todayStr} 18:00:00`];
-				// 默认聚会时间为当天 19:00 至 21:00
-				timeRange.value = [`${todayStr} 19:00:00`, `${todayStr} 21:00:00`];
-			}
-		} catch (error) {
-			console.error("加载草稿失败:", error);
-			uni.removeStorageSync(DRAFT_STORAGE_KEY); // 如果解析失败，清除损坏的草稿
-		}
-
-		// 3. 监听店铺选择结果 (保持不变)
+		// 4. 监听店铺选择事件
 		uni.$on('shopSelected', (shop) => {
-			console.log('接收到选择的店铺信息:', shop);
 			form.value.associatedStoreId = shop.id;
 			associatedStoreName.value = shop.storeName;
 		});
@@ -564,42 +583,7 @@
 		uni.$off('shopSelected');
 	});
 
-	// 【加载草稿的函数
-	const loadDraft = () => {
-		try {
-			const draftDataString = uni.getStorageSync(DRAFT_STORAGE_KEY);
-			if (draftDataString) {
-				const parsedDraft = JSON.parse(draftDataString);
-
-				// 将草稿数据赋值给页面的 ref 变量
-				form.value = parsedDraft.form;
-				timeRange.value = parsedDraft.timeRange;
-				enrollTimeRange.value = parsedDraft.enrollTimeRange;
-				associatedStoreName.value = parsedDraft.associatedStoreName;
-
-				uni.showToast({
-					title: '已恢复上次草稿',
-					icon: 'none'
-				});
-				console.log('草稿已加载:', parsedDraft);
-			} else {
-				// 如果没有草稿，初始化默认时间
-				const now = new Date();
-				const year = now.getFullYear();
-				const month = (now.getMonth() + 1).toString().padStart(2, '0');
-				const day = now.getDate().toString().padStart(2, '0');
-				const todayStr = `${year}-${month}-${day}`;
-
-				enrollTimeRange.value = [`${todayStr} 09:00:00`, `${todayStr} 18:00:00`];
-				timeRange.value = [`${todayStr} 19:00:00`, `${todayStr} 21:00:00`];
-			}
-		} catch (error) {
-			console.error("加载草稿失败:", error);
-			uni.removeStorageSync(DRAFT_STORAGE_KEY);
-		}
-	};
-
-	// --- 【新增】加载详情并回显数据 ---
+	// --- 加载详情并回显数据 ---
 	const loadActivityDetailForEdit = async (id) => {
 		uni.showLoading({
 			title: '加载中...'
@@ -691,17 +675,18 @@
 		form.value.tag = matchedValue;
 
 		// 3. 特殊字段处理：时间范围
-		// 需要将时间戳转回 'YYYY-MM-DD HH:mm:ss' 格式供 picker 显示
+		// 使用 formatTimestamp 工具函数将后端时间戳转为组件需要的字符串格式
 		if (data.startDatetime && data.endDatetime) {
 			timeRange.value = [
-				formatDateForPicker(data.startDatetime),
-				formatDateForPicker(data.endDatetime)
+				formatTimestamp(data.startDatetime),
+				formatTimestamp(data.endDatetime)
 			];
 		}
+
 		if (data.registrationStartDatetime && data.registrationEndDatetime) {
 			enrollTimeRange.value = [
-				formatDateForPicker(data.registrationStartDatetime),
-				formatDateForPicker(data.registrationEndDatetime)
+				formatTimestamp(data.registrationStartDatetime),
+				formatTimestamp(data.registrationEndDatetime)
 			];
 		}
 
@@ -723,16 +708,16 @@
 	};
 
 	// 辅助函数：时间戳转格式化字符串
-	const formatDateForPicker = (timestamp) => {
-		const date = new Date(timestamp);
-		const Y = date.getFullYear();
-		const M = (date.getMonth() + 1).toString().padStart(2, '0');
-		const D = date.getDate().toString().padStart(2, '0');
-		const h = date.getHours().toString().padStart(2, '0');
-		const m = date.getMinutes().toString().padStart(2, '0');
-		const s = date.getSeconds().toString().padStart(2, '0');
-		return `${Y}-${M}-${D} ${h}:${m}:${s}`;
-	};
+	// const formatDateForPicker = (timestamp) => {
+	// 	const date = new Date(timestamp);
+	// 	const Y = date.getFullYear();
+	// 	const M = (date.getMonth() + 1).toString().padStart(2, '0');
+	// 	const D = date.getDate().toString().padStart(2, '0');
+	// 	const h = date.getHours().toString().padStart(2, '0');
+	// 	const m = date.getMinutes().toString().padStart(2, '0');
+	// 	const s = date.getSeconds().toString().padStart(2, '0');
+	// 	return `${Y}-${M}-${D} ${h}:${m}:${s}`;
+	// };
 
 	function saveDraft() {
 		// 1. 将所有需要保存的数据打包成一个对象

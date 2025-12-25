@@ -1,6 +1,6 @@
 "use strict";
 const common_vendor = require("../common/vendor.js");
-const baseURL = "https://jyj.gofor.club";
+const baseURL = "https://test-api.gofor.club/local";
 const timeout = 1e4;
 const request = async (url, options = {}) => {
   const headers = {
@@ -21,7 +21,7 @@ const request = async (url, options = {}) => {
   };
   try {
     const res = await common_vendor.index.request(config);
-    common_vendor.index.__f__("log", "at utils/request.js:124", `[Response]`, res.statusCode, res.data);
+    common_vendor.index.__f__("log", "at utils/request.js:39", `[Response]`, res.statusCode, res.data);
     if (res.statusCode === 200) {
       if (res.data.code === 0) {
         return {
@@ -29,7 +29,7 @@ const request = async (url, options = {}) => {
           error: null
         };
       } else if (res.data.code === 401) {
-        common_vendor.index.__f__("warn", "at utils/request.js:135", "Token 失效 (401)，清除本地缓存");
+        common_vendor.index.__f__("warn", "at utils/request.js:50", "Token 失效 (401)，清除本地缓存");
         common_vendor.index.removeStorageSync("token");
         common_vendor.index.removeStorageSync("userId");
         return {
@@ -54,7 +54,7 @@ const request = async (url, options = {}) => {
       };
     }
   } catch (err) {
-    common_vendor.index.__f__("error", "at utils/request.js:163", "[Network Error]", err);
+    common_vendor.index.__f__("error", "at utils/request.js:78", "[Network Error]", err);
     return {
       data: null,
       error: err.message || "网络错误"
