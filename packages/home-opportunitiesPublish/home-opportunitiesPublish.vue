@@ -57,7 +57,7 @@
 				<view class="form-group">
 					<view class="form-label">上传图片或者视频</view>
 					<!-- Case 1: 还未选择任何媒体 -->
-					<view class="media-selector" v-if="form.images.length === 0 && !form.postVideo">
+					<view class="media-selector" v-show="form.images.length === 0 && !form.postVideo">
 						<view class="selector-btn" @click="handleChooseImage">
 							<uni-icons type="image-filled" size="30" color="#4CAF50"></uni-icons>
 							<text>发布图片</text>
@@ -69,8 +69,7 @@
 					</view>
 
 					<!-- Case 2: 已经选择了图片 -->
-					<view v-else-if="form.mediaType === 'image'" class="image-preview">
-						<!-- 图片的 3x3 网格布局 (代码保持不变) -->
+					<!-- <view v-else-if="form.mediaType === 'image'" class="image-preview">
 						<view v-for="(img, i) in form.images" :key="i" class="image-wrapper">
 							<image :src="img" mode="aspectFill" class="preview-img" @click="replaceImage(i)" />
 							<view class="delete-image-btn" @click.stop="deleteImage(i)">×</view>
@@ -79,10 +78,33 @@
 							<uni-icons type="plusempty" size="24" color="#ccc"></uni-icons>
 							<text>添加图片</text>
 						</view>
+					</view> -->
+					<view v-show="form.mediaType === 'image'" class="image-preview-area">
+
+						<!-- 使用我们自定义的 GridDrag -->
+						<GridDrag :list="form.images" :columns="3" :item-height-rpx="230" @change="handleDragChange">
+							<template #default="{ item, index }">
+								<view class="image-wrapper-drag">
+									 <view style="position:absolute; top:0; left:0; z-index:999; font-size:10px; background:white;">{{ item }}</view>
+									<image :src="item" mode="aspectFill" class="preview-img"
+										@click.stop="previewImage(index)" />
+									<view class="delete-btn" @click.stop="deleteImage(index)">×</view>
+								</view>
+							</template>
+						</GridDrag>
+
+						<!-- 添加按钮 -->
+						<view class="add-btn-wrapper" v-if="form.images.length < 9" @click="handleChooseImage">
+							<view class="add-img-placeholder">
+								<uni-icons type="plusempty" size="24" color="#ccc"></uni-icons>
+								<text>添加</text>
+							</view>
+						</view>
+
 					</view>
 
 					<!-- Case 3: 已经选择了视频 -->
-					<view v-else-if="form.mediaType === 'video' && form.postVideo" class="video-preview-wrapper">
+					<view v-show="form.mediaType === 'video' && form.postVideo" class="video-preview-wrapper">
 						<video :src="form.postVideo" class="preview-video" controls></video>
 						<view class="delete-video-btn" @click.stop="deleteVideo">×</view>
 					</view>
@@ -139,6 +161,28 @@
 
 	const tagSuggestions = ref([]); // 用于存储从API获取的标签建议
 	let tagSearchTimer = null; // 用于输入防抖
+
+	// 拖拽变化回调
+	const handleDragChange = (sortedList) => {
+		// 组件返回的是排序后的 form.images 数组
+		form.images = sortedList;
+		console.log('图片排序已更新:', form.images);
+	};
+
+	// 删除逻辑
+	const deleteImage = (index) => {
+		uni.showModal({
+			title: '提示',
+			content: '确定删除？',
+			success: (res) => {
+				if (res.confirm) {
+					// 直接删源数据，GridDrag 组件里的 watch 会自动监听到并重置
+					form.images.splice(index, 1);
+					console.log('当前点击的图片:', form.images[index]);
+				}
+			}
+		});
+	};
 
 	// --- 计算属性 ---
 	const contentPlaceholder = computed(() => {
@@ -461,6 +505,18 @@
 		});
 	}
 
+	// 预览图片
+	const previewImage = (index) => {
+		console.log('当前点击的图片:', form.images[index]);
+		if (!form.images || form.images.length === 0) return;
+
+		uni.previewImage({
+			urls: form.images, // 预览所有图片
+			current: index, // 当前显示的图片索引
+			loop: true // 是否循环预览
+		});
+	};
+
 	function replaceImage(index) {
 		uni.chooseImage({
 			count: 1,
@@ -496,17 +552,17 @@
 		});
 	}
 
-	function deleteImage(index) {
-		uni.showModal({
-			title: '提示',
-			content: '确定要删除这张图片吗？',
-			success: (res) => {
-				if (res.confirm) {
-					form.images.splice(index, 1);
-				}
-			}
-		});
-	}
+	// function deleteImage(index) {
+	// 	uni.showModal({
+	// 		title: '提示',
+	// 		content: '确定要删除这张图片吗？',
+	// 		success: (res) => {
+	// 			if (res.confirm) {
+	// 				form.images.splice(index, 1);
+	// 			}
+	// 		}
+	// 	});
+	// }
 
 	// --- 【新增】视频处理函数 ---
 	async function handleChooseVideo() {
@@ -996,7 +1052,7 @@
 		box-shadow: 0 6rpx 16rpx rgba(255, 106, 0, 0.3);
 	}
 
-	/* ==================== 【新增】媒体选择器和视频预览样式 ==================== */
+	/* ==================== 媒体选择器和视频预览样式 ==================== */
 	.media-selector {
 		display: flex;
 		gap: 30rpx;
@@ -1064,4 +1120,56 @@
 	}
 
 	/* ===================================================================== */
+
+	/* 容器 */
+	.image-preview-area {
+		width: 100%;
+		margin-top: 20rpx;
+		/* 给一个最小高度，如果 GridDrag 计算失败，至少能看到背景色排查问题 */
+		min-height: 200rpx;
+	}
+
+	.image-wrapper-drag {
+	    width: 100%;
+	    height: 100%;
+	    position: relative; /* 关键 */
+	    border-radius: 12rpx;
+	    overflow: hidden;
+	    background-color: #eee; /* 灰色背景 */
+	}
+	
+	.preview-img {
+	    /* 改用绝对定位撑满，防止高度塌陷 */
+	    position: absolute;
+	    top: 0;
+	    left: 0;
+	    width: 100%;
+	    height: 100%;
+	    display: block;
+	}
+
+	/* 添加按钮位置微调 */
+	.add-btn-wrapper {
+		/* 宽度保持 1/3，与组件内的格子一致 */
+		width: 33.33%;
+		height: 230rpx;
+		/* 与 item-height-rpx 一致 */
+		padding: 8rpx;
+		/* 与组件内的 padding 一致 */
+		box-sizing: border-box;
+		display: inline-block;
+		vertical-align: top;
+	}
+
+	.add-img-placeholder {
+		width: 100%;
+		height: 100%;
+		border: 2rpx dashed #ccc;
+		border-radius: 12rpx;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		color: #999;
+	}
 </style>

@@ -2,32 +2,84 @@
 	<view class="page-container">
 		<!-- 1. 顶部吸顶 Tab 导航 -->
 		<view class="main-nav">
-			<!-- 使用 v-for 动态生成 Tab -->
-			<text v-for="(level, index) in membershipLevels" :key="level.level" class="nav-link"
-				:class="{ 'active': currentTab === index }" @click="switchTab(index)">
-				{{ level.name.replace('会员', '') }} <!-- 简化显示，例如 "玄铁会员" -> "玄铁" -->
-			</text>
-		</view>
-
-		<!-- 2. 页面主内容区域 -->
-		<view class="content-wrapper">
-			<view class="header">
-				<text class="title">会员等级与权益</text>
-				<text class="subtitle">探索不同等级的专属权益，开启您的价值之旅</text>
+			<view v-for="(level, index) in membershipLevels" :key="level.level" class="nav-item"
+				@click="switchTab(index)">
+				<text class="nav-text" :class="{ 'active': currentTab === index }">
+					{{ level.shortName }}
+				</text>
+				<view class="nav-indicator" v-if="currentTab === index"></view>
 			</view>
-
-			<!-- 3. Swiper 滑动容器，用于展示权益图片 -->
-			<!-- 动态绑定 style，使其高度可变 -->
-			<swiper class="membership-swiper" :current="currentTab" :style="{ height: currentSwiperHeight }"
-				@change="onSwiperChange">
-				<swiper-item v-for="(level, index) in membershipLevels" :key="level.level" class="swiper-item">
-					<!-- 监听图片的 @load 事件以计算高度 -->
-					<image :src="level.backgroundUrl" class="benefit-image" mode="widthFix"
-						@load="onImageLoad($event, index)" />
-				</swiper-item>
-			</swiper>
-
 		</view>
+
+		<!-- 2. 内容区域 (Swiper + ScrollView) -->
+		<!-- 使用 flex 布局让 swiper 占据剩余高度 -->
+		<swiper class="content-swiper" :current="currentTab" @change="onSwiperChange">
+			<swiper-item v-for="(item, index) in membershipLevels" :key="item.level">
+				<scroll-view scroll-y class="card-scroll-view">
+					<view class="card-wrapper">
+
+						<!-- 核心卡片容器，根据等级动态绑定主题类名 -->
+						<view class="membership-card" :class="'theme-level-' + item.level">
+
+							<!-- A. 卡片头部 (渐变背景) -->
+							<view class="card-header">
+								<view class="icon-box">
+									<!-- 优先展示接口返回的 icon 图片 -->
+									<image v-if="item.icon" :src="item.icon" class="level-icon-img" mode="aspectFit" />
+
+									<!-- 如果接口 icon 为空，则降级显示 uni-icons 默认图标 -->
+									<!-- <uni-icons v-else :type="getLevelIcon(item.level)" size="48"
+										:color="item.themeColor"></uni-icons> -->
+								</view>
+								<text class="level-name">{{ item.name }}</text>
+								<view class="price-row">
+									<text class="price-val">{{ formatPrice(item.price) }}</text>
+									<text class="duration"> / {{ item.duration }}</text>
+								</view>
+							</view>
+
+							<!-- B. 数据统计条 (智米/贡分) -->
+							<view class="stats-box">
+								<view class="stat-item">
+									<text class="stat-label">智米：</text>
+									<text class="stat-value">{{ item.zhimiNum }} 个</text>
+								</view>
+								<view class="stat-divider"></view>
+								<view class="stat-item">
+									<text class="stat-label">贡分：</text>
+									<text class="stat-value">{{ item.gongfenNum }} 个</text>
+								</view>
+							</view>
+
+							<!-- C. 权益列表 -->
+							<view class="benefits-section">
+								<view class="section-title">基本权益</view>
+
+								<view class="benefit-list">
+									<view v-for="(benefit, bIndex) in item.parsedContent" :key="bIndex"
+										class="benefit-item">
+										<view class="check-icon">
+											<uni-icons type="checkmarkempty" size="16" color="#07c160"></uni-icons>
+										</view>
+										<text class="benefit-text">{{ benefit }}</text>
+									</view>
+
+									<!-- 如果没有权益内容 -->
+									<view v-if="!item.parsedContent || item.parsedContent.length === 0"
+										class="empty-benefit">
+										暂无特定权益描述
+									</view>
+								</view>
+							</view>
+
+						</view>
+
+						<!-- 底部占位 -->
+						<view style="height: 60rpx;"></view>
+					</view>
+				</scroll-view>
+			</swiper-item>
+		</swiper>
 	</view>
 </template>
 
@@ -40,39 +92,16 @@
 	import {
 		onLoad
 	} from '@dcloudio/uni-app';
-	// ‼️ 请确保此路径相对于您文件的位置是正确的
 	import request from '../../utils/request.js';
 
 	// ======================= 数据状态 =======================
-	// 存储从接口获取的会员等级列表
 	const membershipLevels = ref([]);
-	// 当前激活的 Tab 和 Swiper 的索引
 	const currentTab = ref(0);
-
-	// --- 动态高度计算所需状态 ---
-	// 1. 获取一次屏幕宽度，用于后续计算
-	const screenWidth = uni.getSystemInfoSync().windowWidth;
-	// 2. 创建一个数组，用于存储每张图片计算后的显示高度
-	const imageHeights = ref([]);
-
 	const initialTargetLevel = ref(null);
-
-	// 3. 创建一个计算属性，用于动态返回当前 Swiper 应有的高度 (单位: px)
-	const currentSwiperHeight = computed(() => {
-		const height = imageHeights.value[currentTab.value];
-		if (height) {
-			// 如果高度已计算出来，则使用该高度
-			return `${height}px`;
-		}
-		// 如果高度尚未计算（例如图片还未加载），给一个默认的最小高度防止塌陷
-		return '300px';
-	});
 
 	// ======================= 生命周期 =======================
 	onLoad((options) => {
-		// options 对象包含了上一个页面传递过来的所有参数
 		if (options && options.level) {
-			// 将字符串参数转为数字并存储起来
 			initialTargetLevel.value = Number(options.level);
 		}
 	});
@@ -81,10 +110,7 @@
 		fetchMembershipLevels();
 	});
 
-	// ======================= 数据获取 =======================
-	/**
-	 * @description 从接口获取会员等级列表
-	 */
+	// ======================= 数据处理 =======================
 	const fetchMembershipLevels = async () => {
 		uni.showLoading({
 			title: '加载中...'
@@ -97,22 +123,45 @@
 
 		if (error) {
 			uni.showToast({
-				title: `加载失败: ${error}`,
+				title: error,
 				icon: 'none'
 			});
 			return;
 		}
 
 		if (data && data.length > 0) {
-			// 按 level 字段排序，确保显示顺序正确
-			membershipLevels.value = data.sort((a, b) => a.level - b.level);
+			// 1. 排序
+			const sortedData = data.sort((a, b) => a.level - b.level);
 
+			// 2. 数据清洗与增强
+			membershipLevels.value = sortedData.map(item => {
+				// 解析 content JSON 字符串
+				let parsedContent = [];
+				try {
+					if (item.content) {
+						parsedContent = JSON.parse(item.content);
+					}
+				} catch (e) {
+					console.error('解析权益内容失败', e);
+					parsedContent = [item.content]; // 降级处理
+				}
+
+				// 获取主题色 (用于图标颜色)
+				const themeColor = getThemeColor(item.level);
+
+				return {
+					...item,
+					parsedContent,
+					themeColor,
+					// 简化 Tab 显示名称
+					shortName: item.name.replace('会员', '')
+				};
+			});
+
+			// 3. 处理初始跳转定位
 			if (initialTargetLevel.value !== null) {
-				// 查找目标 level 在数组中的索引
 				const targetIndex = membershipLevels.value.findIndex(item => item.level === initialTargetLevel
 					.value);
-
-				// 如果找到了（targetIndex !== -1），则设置 currentTab
 				if (targetIndex !== -1) {
 					currentTab.value = targetIndex;
 				}
@@ -120,149 +169,291 @@
 		}
 	};
 
-	// ======================= 交互逻辑 =======================
-	/**
-	 * @description 点击 Tab 时切换
-	 * @param {number} index - 被点击的 Tab 的索引
-	 */
+	// ======================= 辅助逻辑 =======================
+
 	const switchTab = (index) => {
-		if (currentTab.value !== index) {
-			currentTab.value = index;
-		}
+		currentTab.value = index;
 	};
 
-	/**
-	 * @description Swiper 滑动时触发，同步更新 Tab
-	 * @param {object} e - Swiper change 事件对象
-	 */
 	const onSwiperChange = (e) => {
-		// e.detail.current 是当前滑块的索引
 		currentTab.value = e.detail.current;
 	};
 
-	/**
-	 * @description 当图片加载完成时触发，计算并存储其应有的显示高度
-	 * @param {object} e - 图片 load 事件对象
-	 * @param {number} index - 当前图片的索引
-	 */
-	const onImageLoad = (e, index) => {
-		// 从事件对象中获取图片的原始宽度和高度
-		const originalWidth = e.detail.width;
-		const originalHeight = e.detail.height;
+	const formatPrice = (price) => {
+		return price == 0 ? '免费' : `¥${price}`;
+	};
 
-		// 计算图片在屏幕中的实际显示宽度
-		// 屏幕总宽度(px) - 左右内边距(40rpx * 2)
-		// 需要将 rpx 转换为 px: 1rpx = screenWidth / 750 px
-		const imagePaddingInPx = 80 * (screenWidth / 750);
-		const imageDisplayWidth = screenWidth - imagePaddingInPx;
+	// 根据等级 ID 返回对应的图标名称 (Uni-icons)
+	const getLevelIcon = (level) => {
+		// 1:玄铁, 2:青铜, 3:白银, 4:黄金, 5:黑钻
+		// 映射到 uni-icons 的图标名
+		switch (Number(level)) {
+			case 1:
+				return 'shield-filled'; // 玄铁-盾牌
+			case 2:
+				return 'medal-filled'; // 青铜-奖章
+			case 3:
+				return 'vip-filled'; // 白银-VIP
+			case 4:
+				return 'star-filled'; // 黄金-星星
+			case 5:
+				return 'pyq'; // 黑钻-皇冠(用朋友圈图标代替，或者换 color-filled)
+			default:
+				return 'vip-filled';
+		}
+	};
 
-		// 根据宽高比，计算图片应有的显示高度
-		const imageDisplayHeight = (imageDisplayWidth / originalWidth) * originalHeight;
-
-		// 将计算出的高度存入数组中对应的位置
-		imageHeights.value[index] = imageDisplayHeight;
+	// 获取主题文字颜色 (用于图标等)
+	const getThemeColor = (level) => {
+		switch (Number(level)) {
+			case 1:
+				return '#5F6C7B'; // 玄铁灰
+			case 2:
+				return '#CD7F32'; // 青铜色
+			case 3:
+				return '#7F9eb2'; // 白银蓝灰
+			case 4:
+				return '#E6A23C'; // 黄金
+			case 5:
+				return '#333333'; // 黑钻
+			default:
+				return '#333';
+		}
 	};
 </script>
 
 <style lang="scss" scoped>
-	/* --- 基础与布局 --- */
+	/* --- 页面布局 --- */
 	.page-container {
-		background-color: #f4f7f9;
-		min-height: 100vh;
+		background-color: #F5F7FA;
+		height: 100vh;
+		display: flex;
+		flex-direction: column;
 	}
 
-	.content-wrapper {
-		padding: 40rpx;
-	}
-
-	.header {
-		text-align: center;
-		margin-bottom: 40rpx;
-
-		.title {
-			display: block;
-			font-size: 52rpx;
-			font-weight: 800;
-			color: #2c3e50;
-			margin-bottom: 10rpx;
-		}
-
-		.subtitle {
-			display: block;
-			font-size: 28rpx;
-			color: #7f8c8d;
-		}
-	}
-
-	/* --- 吸顶导航 Tab --- */
+	/* --- 1. 顶部 Tab 导航 --- */
 	.main-nav {
-		position: sticky;
-		top: 0;
-		/* 如果有原生导航栏，H5端可能需要 var(--window-top) */
-		background-color: rgba(255, 255, 255, 0.9);
-		backdrop-filter: blur(10px);
-		-webkit-backdrop-filter: blur(10px);
-		z-index: 100;
-		padding: 15rpx 20rpx;
-		box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
+		background-color: #fff;
+		padding: 0 20rpx;
+		height: 90rpx;
 		display: flex;
 		justify-content: space-around;
-		/* 改为 space-around 使其均匀分布 */
 		align-items: center;
+		box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.03);
+		z-index: 10;
 	}
 
-	.nav-link {
-		color: #555;
-		font-weight: 500;
-		font-size: 28rpx;
-		padding: 15rpx 10rpx;
-		position: relative;
-		transition: color 0.3s ease, font-weight 0.3s ease;
-		text-align: center;
-	}
-
-	/* 激活状态的 Tab 样式 */
-	.nav-link.active {
-		color: #FF6B00;
-		font-weight: 700;
-	}
-
-	/* 激活状态的下划线 */
-	.nav-link.active::after {
-		content: '';
-		position: absolute;
-		bottom: 5rpx;
-		left: 50%;
-		transform: translateX(-50%);
-		width: 50%;
-		height: 6rpx;
-		background-color: #FF6B00;
-		border-radius: 3rpx;
-		transition: width 0.3s ease;
-	}
-
-	/* --- Swiper 容器和内容 --- */
-	.membership-swiper {
-		margin-top: 20rpx;
-		/* 移除固定的 height 属性，因为它现在由 style 动态控制 */
-		/* height: 1200rpx; */
-
-		/* 添加一个过渡效果，让高度变化更平滑 */
-		transition: height 0.3s ease-in-out;
-	}
-
-	.swiper-item {
+	.nav-item {
+		height: 100%;
 		display: flex;
+		flex-direction: column;
 		justify-content: center;
-		align-items: flex-start;
-		/* 图片从顶部开始显示 */
+		align-items: center;
+		position: relative;
+		padding: 0 20rpx;
 	}
 
-	.benefit-image {
-		width: 100%;
-		border-radius: 20rpx;
-		box-shadow: 0 10rpx 40rpx rgba(0, 0, 0, 0.1);
-		/* 防止图片下方因行内元素特性出现微小间距 */
-		vertical-align: top;
+	.nav-text {
+		font-size: 28rpx;
+		color: #666;
+		font-weight: 500;
+		transition: all 0.3s;
+
+		&.active {
+			font-size: 30rpx;
+			color: #333;
+			font-weight: bold;
+		}
+	}
+
+	.nav-indicator {
+		position: absolute;
+		bottom: 10rpx;
+		width: 40rpx;
+		height: 6rpx;
+		background: linear-gradient(90deg, #FF8C00, #FF6B00);
+		border-radius: 3rpx;
+	}
+
+	/* --- 2. Swiper 内容区 --- */
+	.content-swiper {
+		flex: 1;
+		/* 占据剩余高度 */
+		height: 0;
+		/* 配合 flex:1 使用 */
+	}
+
+	.card-scroll-view {
+		height: 100%;
+	}
+
+	.card-wrapper {
+		padding: 40rpx 30rpx;
+	}
+
+	/* --- 3. 会员卡片主体 --- */
+	.membership-card {
+		background-color: #fff;
+		border-radius: 24rpx;
+		box-shadow: 0 8rpx 30rpx rgba(0, 0, 0, 0.05);
+		overflow: hidden;
+		position: relative;
+	}
+
+	/* --- A. 头部设计 (根据等级变换颜色) --- */
+	.card-header {
+		height: 360rpx;
+		/* 增加高度，包含图标和文字 */
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		color: #333;
+		padding-bottom: 60rpx;
+		/* 留出空间给 Stats Box */
+	}
+
+	.icon-box {
+		margin-bottom: 20rpx;
+		opacity: 0.9;
+	}
+
+	.level-icon-img {
+		width: 100rpx;
+		/* 设置合适的宽度，约等于 size=48 的图标大小 */
+		height: 100rpx;
+		display: block;
+		/* 消除图片底部间隙 */
+	}
+
+	.level-name {
+		font-size: 48rpx;
+		font-weight: 800;
+		margin-bottom: 16rpx;
+		letter-spacing: 2rpx;
+	}
+
+	.price-row {
+		font-size: 30rpx;
+		opacity: 0.8;
+
+		.price-val {
+			font-weight: bold;
+			font-size: 34rpx;
+		}
+	}
+
+	/* --- 主题配色方案 (背景渐变) --- */
+	/* 1. 玄铁 (灰蓝/钢色) */
+	.theme-level-1 .card-header {
+		background: linear-gradient(180deg, #CFD9DF 0%, #E2EBF0 100%);
+		color: #4A5568;
+	}
+
+	/* 2. 青铜 (铜色/淡褐) */
+	.theme-level-2 .card-header {
+		background: linear-gradient(180deg, #E6DADA 0%, #F4EBEB 100%);
+		/* 或者用更像截图的浅色 */
+		background: linear-gradient(180deg, #EADBC8 0%, #F5EFE6 100%);
+		color: #8D6E63;
+	}
+
+	/* 3. 白银 (银白/灰) */
+	.theme-level-3 .card-header {
+		background: linear-gradient(180deg, #E0E0E0 0%, #F5F5F5 100%);
+		color: #616161;
+	}
+
+	/* 4. 黄金 (金黄/淡黄) */
+	.theme-level-4 .card-header {
+		background: linear-gradient(180deg, #FFE082 0%, #FFF8E1 100%);
+		color: #856404;
+	}
+
+	/* 5. 黑钻 (深灰/黑) */
+	.theme-level-5 .card-header {
+		background: linear-gradient(180deg, #424242 0%, #757575 100%);
+		color: #FFD700;
+		/* 金色文字 */
+	}
+
+	/* --- B. 悬浮数据统计条 --- */
+	.stats-box {
+		position: relative;
+		margin: -50rpx 30rpx 0;
+		/* 负 margin 实现悬浮覆盖效果 */
+		background-color: #fff;
+		border-radius: 16rpx;
+		padding: 30rpx 0;
+		display: flex;
+		align-items: center;
+		justify-content: space-around;
+		box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.06);
+		border: 1rpx solid #f0f0f0;
+	}
+
+	.stat-item {
+		display: flex;
+		align-items: center;
+		font-size: 28rpx;
+	}
+
+	.stat-label {
+		color: #666;
+	}
+
+	.stat-value {
+		font-weight: bold;
+		color: #333;
+		margin-left: 8rpx;
+	}
+
+	.stat-divider {
+		width: 1rpx;
+		height: 30rpx;
+		background-color: #eee;
+	}
+
+	/* --- C. 权益列表 --- */
+	.benefits-section {
+		padding: 50rpx 40rpx;
+	}
+
+	.section-title {
+		font-size: 34rpx;
+		font-weight: 800;
+		color: #2c3e50;
+		margin-bottom: 30rpx;
+	}
+
+	.benefit-list {
+		display: flex;
+		flex-direction: column;
+		gap: 30rpx;
+	}
+
+	.benefit-item {
+		display: flex;
+		align-items: flex-start;
+	}
+
+	.check-icon {
+		margin-top: 4rpx;
+		margin-right: 20rpx;
+		flex-shrink: 0;
+	}
+
+	.benefit-text {
+		font-size: 28rpx;
+		color: #555;
+		line-height: 1.6;
+		text-align: justify;
+	}
+
+	.empty-benefit {
+		text-align: center;
+		color: #999;
+		font-size: 26rpx;
+		padding: 20rpx 0;
 	}
 </style>

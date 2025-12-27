@@ -229,7 +229,7 @@ const _sfc_main = {
       const defaultAvatar = "/static/icon/default-avatar.png";
       const name = user.nickname || "匿名用户";
       const avatarUrl = user.avatar || defaultAvatar;
-      const url = `/pages/applicationBusinessCard/applicationBusinessCard?id=${user.id}&name=${encodeURIComponent(name)}&avatar=${encodeURIComponent(avatarUrl)}`;
+      const url = `/packages/applicationBusinessCard/applicationBusinessCard?id=${user.id}&name=${encodeURIComponent(name)}&avatar=${encodeURIComponent(avatarUrl)}`;
       common_vendor.index.__f__("log", "at pages/location/location.vue:375", "从摇一摇页跳转，URL:", url);
       common_vendor.index.navigateTo({
         url

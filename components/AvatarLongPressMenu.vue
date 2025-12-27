@@ -41,19 +41,19 @@
 					<text class="item-text">商友点评</text>
 				</view>
 
-				<view class="grid-item" @click="handleAction('removeCircle')">
+				<!-- <view class="grid-item" @click="handleAction('removeCircle')">
 					<view class="icon-box danger">
 						<uni-icons type="minus" size="24" color="#ff4d4f"></uni-icons>
 					</view>
 					<text class="item-text">一键脱圈</text>
-				</view>
+				</view> -->
 
-				<view class="grid-item" @click="handleAction('disconnect')">
+				<!-- <view class="grid-item" @click="handleAction('disconnect')">
 					<view class="icon-box danger">
 						<uni-icons type="closeempty" size="24" color="#ff4d4f"></uni-icons>
 					</view>
 					<text class="item-text">一键脱连</text>
-				</view>
+				</view> -->
 			</view>
 		</view>
 	</uni-popup>

@@ -1,7 +1,6 @@
 // const baseURL = 'https://jyj.gofor.club';
-const baseURL = 'https://test-api.gofor.club/local';
-// const baseURL = 'https://chuxia5207.top';
-// const baseURL = 'http://8.163.18.207:48080';s
+const baseURL = 'https://test-api.gofor.club';
+// const baseURL = 'https://test-api.gofor.club/local';
 const timeout = 10000;
 
 const request = async (url, options = {}) => {

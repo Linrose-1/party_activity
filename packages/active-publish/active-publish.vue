@@ -360,11 +360,11 @@
 
 	// 报名类型选项，值与后端定义一致
 	const enrollmentOptions = ref([{
-			text: 'AA',
+			text: 'AA/付费',
 			value: 1
 		},
 		{
-			text: '赞助',
+			text: '赞助/免费',
 			value: 2
 		}
 	]);

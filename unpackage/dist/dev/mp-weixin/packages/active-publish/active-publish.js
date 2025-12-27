@@ -154,11 +154,11 @@ const _sfc_main = {
     };
     const enrollmentOptions = common_vendor.ref([
       {
-        text: "AA",
+        text: "AA/付费",
         value: 1
       },
       {
-        text: "赞助",
+        text: "赞助/免费",
         value: 2
       }
     ]);

@@ -259,7 +259,7 @@
 		box-shadow: 0 6rpx 16rpx rgba(255, 106, 0, 0.3);
 }
 
-	/* ==================== 【新增】媒体选择器和视频预览样式 ==================== */
+	/* ==================== 媒体选择器和视频预览样式 ==================== */
 .media-selector.data-v-4f014bb0 {
 		display: flex;
 		gap: 30rpx;
@@ -319,3 +319,52 @@
 }
 
 	/* ===================================================================== */
+
+	/* 容器 */
+.image-preview-area.data-v-4f014bb0 {
+		width: 100%;
+		margin-top: 20rpx;
+		/* 给一个最小高度，如果 GridDrag 计算失败，至少能看到背景色排查问题 */
+		min-height: 200rpx;
+}
+.image-wrapper-drag.data-v-4f014bb0 {
+	    width: 100%;
+	    height: 100%;
+	    position: relative; /* 关键 */
+	    border-radius: 12rpx;
+	    overflow: hidden;
+	    background-color: #eee; /* 灰色背景 */
+}
+.preview-img.data-v-4f014bb0 {
+	    /* 改用绝对定位撑满，防止高度塌陷 */
+	    position: absolute;
+	    top: 0;
+	    left: 0;
+	    width: 100%;
+	    height: 100%;
+	    display: block;
+}
+
+	/* 添加按钮位置微调 */
+.add-btn-wrapper.data-v-4f014bb0 {
+		/* 宽度保持 1/3，与组件内的格子一致 */
+		width: 33.33%;
+		height: 230rpx;
+		/* 与 item-height-rpx 一致 */
+		padding: 8rpx;
+		/* 与组件内的 padding 一致 */
+		box-sizing: border-box;
+		display: inline-block;
+		vertical-align: top;
+}
+.add-img-placeholder.data-v-4f014bb0 {
+		width: 100%;
+		height: 100%;
+		border: 2rpx dashed #ccc;
+		border-radius: 12rpx;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		color: #999;
+}

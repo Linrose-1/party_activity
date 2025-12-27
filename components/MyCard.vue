@@ -9,7 +9,7 @@
 				</view>
 				<view class="identity">
 					<view class="name-line">
-						<text class="name">{{ name }}</text>
+						<text class="name" selectable>{{ name }}</text>
 						<!-- <text class="pinyin">{{ pinyinName }}</text> -->
 					</view>
 					<view class="tags-line">
@@ -45,7 +45,7 @@
 				<view class="info-item" v-for="(item, index) in contactInfo" :key="index">
 					<uni-icons :type="item.icon" size="18" color="#888" />
 					<text class="info-label">{{ item.label }}：</text>
-					<text class="info-value">{{ item.value }}</text>
+					<text class="info-value" selectable>{{ item.value }}</text>
 				</view>
 			</view>
 
@@ -56,7 +56,8 @@
 					<text>社会职务</text>
 				</view>
 				<view class="tag-list">
-					<text class="tag" v-for="(item, index) in professionalTitles" :key="index">{{ item }}</text>
+					<text class="tag" selectable v-for="(item, index) in professionalTitles"
+						:key="index">{{ item }}</text>
 				</view>
 			</view>
 
@@ -69,15 +70,15 @@
 				<view class="career-group" v-for="(group, index) in careerGroups" :key="index">
 					<view class="career-item">
 						<text class="career-label">公司：</text>
-						<text class="career-value">{{ group.company }}</text>
+						<text class="career-value" selectable>{{ group.company }}</text>
 					</view>
 					<view class="career-item">
 						<text class="career-label">职务：</text>
-						<text class="career-value">{{ group.position }}</text>
+						<text class="career-value" selectable>{{ group.position }}</text>
 					</view>
 					<view class="career-item">
 						<text class="career-label">行业：</text>
-						<text class="career-value">{{ group.industry }}</text>
+						<text class="career-value" selectable>{{ group.industry }}</text>
 					</view>
 				</view>
 			</view>
@@ -89,14 +90,14 @@
 						<uni-icons type="hand-up-filled" size="18" color="#28a745"></uni-icons>
 						<text>我有资源</text>
 					</view>
-					<view class="resource-content">{{ haveResources }}</view>
+					<view class="resource-content select-text">{{ haveResources }}</view>
 				</view>
 				<view v-if="needResources" class="resource-item">
 					<view class="resource-title need-title">
 						<uni-icons type="paperplane-filled" size="18" color="#007bff"></uni-icons>
 						<text>我需资源</text>
 					</view>
-					<view class="resource-content">{{ needResources }}</view>
+					<view class="resource-content select-text">{{ needResources }}</view>
 				</view>
 			</view>
 
@@ -104,12 +105,12 @@
 			<view class="section-block personal-bio-section" v-if="signature || personalBio">
 				<view v-if="signature" class="signature-item">
 					<text class="quote-start">“</text>
-					<text class="signature-text">{{ signature }}</text>
+					<text class="signature-text" selectable>{{ signature }}</text>
 					<text class="quote-end">”</text>
 				</view>
 				<view v-if="personalBio" class="bio-item">
 					<view class="bio-title">个人简介</view>
-					<view class="bio-content">{{ personalBio }}</view>
+					<view class="bio-content select-text">{{ personalBio }}</view>
 				</view>
 			</view>
 
@@ -371,6 +372,13 @@
 		overflow: hidden;
 		font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 		background-color: #f9f9f9;
+	}
+
+	.select-text {
+		user-select: text;
+		-webkit-user-select: text;
+		/* Safari/Chrome */
+		cursor: text;
 	}
 
 	// ===================================

@@ -1,15 +1,16 @@
 /* 水平间距 */
 /* 水平间距 */
+/* 保持原有样式不变 */
 .recharge-container.data-v-2984a38c {
   min-height: 100vh;
   background-color: #f5f6fa;
   display: flex;
   flex-direction: column;
-  /* 留出底部操作栏的高度 */
   padding-bottom: 350rpx;
 }
 
-/* 顶部 Tab */
+/* ... (此处省略未改动的样式，请保留你原有的样式代码) ... */
+/* 为了完整性，这里补充关键样式 */
 .tabs-header.data-v-2984a38c {
   display: flex;
   background-color: #fff;
@@ -130,6 +131,15 @@
   margin-bottom: 20rpx;
   margin-top: 10rpx;
 }
+.section-header .current-level-info.data-v-2984a38c {
+  font-size: 30rpx;
+  color: #333;
+  font-weight: bold;
+}
+.section-header .current-level-info .highlight.data-v-2984a38c {
+  color: #FF6E00;
+  margin-left: 10rpx;
+}
 
 /* 查看详情链接样式 */
 .details-link.data-v-2984a38c {
@@ -158,7 +168,6 @@
   position: relative;
   overflow: hidden;
   /* 推荐标签样式 */
-  /* 推荐的高亮样式 */
 }
 .member-card .recommend-tag.data-v-2984a38c {
   position: absolute;
@@ -174,22 +183,58 @@
   border-color: #FF6E00;
   background-color: #fff8f0;
 }
-.member-card.recommended.data-v-2984a38c {
-  /* border-color: #FFD700; */
+.member-card.disabled.data-v-2984a38c {
+  background-color: #f0f0f0;
+  opacity: 0.8;
+}
+.member-card.disabled .level-name.data-v-2984a38c,
+.member-card.disabled .original-price.data-v-2984a38c,
+.member-card.disabled .currency.data-v-2984a38c,
+.member-card.disabled .price.data-v-2984a38c {
+  color: #999 !important;
+}
+.member-card.disabled .radio-circle.data-v-2984a38c {
+  background-color: #e0e0e0;
+  border-color: #ccc;
+}
+.member-card .disabled-mask.data-v-2984a38c {
+  position: absolute;
+  right: 0;
+  top: 0;
+  background-color: #ccc;
+  color: #fff;
+  font-size: 20rpx;
+  padding: 4rpx 12rpx;
+  border-bottom-left-radius: 12rpx;
 }
 .member-card .card-left .level-name.data-v-2984a38c {
-  font-size: 30rpx;
+  font-size: 32rpx;
   font-weight: bold;
   color: #333;
-  margin-bottom: 8rpx;
 }
 .member-card .card-left .level-desc.data-v-2984a38c {
   font-size: 24rpx;
+  color: #666;
+}
+.member-card .card-left .original-price.data-v-2984a38c {
+  font-size: 24rpx;
   color: #999;
+  text-decoration: line-through;
+  margin-top: 4rpx;
 }
 .member-card .card-right.data-v-2984a38c {
   display: flex;
+  align-items: center;
+}
+.member-card .card-right .price-label.data-v-2984a38c {
+  font-size: 22rpx;
+  color: #999;
+  margin-right: 10rpx;
+}
+.member-card .card-right .price-wrapper.data-v-2984a38c {
+  display: flex;
   align-items: baseline;
+  margin-right: 20rpx;
 }
 .member-card .card-right .currency.data-v-2984a38c {
   font-size: 24rpx;
@@ -199,12 +244,7 @@
   font-size: 40rpx;
   font-weight: bold;
   color: #333;
-  margin: 0 4rpx;
-}
-.member-card .card-right .period.data-v-2984a38c {
-  font-size: 24rpx;
-  color: #999;
-  margin-right: 20rpx;
+  margin-left: 4rpx;
 }
 .member-card .card-right .radio-circle.data-v-2984a38c {
   width: 36rpx;
@@ -214,6 +254,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  background-color: #fff;
 }
 .member-card .card-right .radio-circle .radio-inner.data-v-2984a38c {
   width: 20rpx;
@@ -226,6 +267,21 @@
 }
 .member-card.active .price.data-v-2984a38c, .member-card.active .currency.data-v-2984a38c {
   color: #FF6E00;
+}
+.price-diff-tip.data-v-2984a38c {
+  margin-top: 30rpx;
+  font-size: 22rpx;
+  color: #999;
+  background-color: #f9f9f9;
+  padding: 20rpx;
+  border-radius: 12rpx;
+  display: flex;
+  align-items: flex-start;
+  line-height: 1.5;
+}
+.price-diff-tip uni-icons.data-v-2984a38c {
+  margin-right: 8rpx;
+  margin-top: 4rpx;
 }
 
 /* 底部结算栏 */
@@ -250,7 +306,6 @@
 }
 .action-area.data-v-2984a38c {
   padding: 20rpx 30rpx;
-  /* 适配 iPhone X 底部安全区 */
   padding-bottom: calc(20rpx + env(safe-area-inset-bottom));
   display: flex;
   align-items: center;

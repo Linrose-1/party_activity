@@ -81,7 +81,7 @@ const _sfc_main = {
         name: "未知"
       };
     });
-    const nextMembershipLevel = common_vendor.computed(() => {
+    common_vendor.computed(() => {
       if (membershipLevels.value.length === 0)
         return null;
       const currentIndex = membershipLevels.value.findIndex((level) => level.name === currentMembershipLevel.value.name);
@@ -89,13 +89,6 @@ const _sfc_main = {
         return membershipLevels.value[currentIndex + 1];
       }
       return null;
-    });
-    const amountToNextLevel = common_vendor.computed(() => {
-      if (nextMembershipLevel.value && userInfo.value) {
-        const needed = nextMembershipLevel.value.experience - userInfo.value.topUpExperience;
-        return Math.max(0, needed);
-      }
-      return 0;
     });
     const navigateToMemberDetails = (level) => {
       const url = "/pages/my-memberDetails/my-memberDetails";
@@ -141,6 +134,15 @@ const _sfc_main = {
         return "💎";
       return "👤";
     };
+    const formatDate = (timestamp) => {
+      if (!timestamp)
+        return "未开通";
+      const date = new Date(timestamp);
+      const Y = date.getFullYear();
+      const M = (date.getMonth() + 1).toString().padStart(2, "0");
+      const D = date.getDate().toString().padStart(2, "0");
+      return `${Y}-${M}-${D}`;
+    };
     return (_ctx, _cache) => {
       return common_vendor.e({
         a: userInfo.value
@@ -173,23 +175,22 @@ const _sfc_main = {
           color: "#FFD700"
         }),
         m: common_vendor.t(currentMembershipLevel.value.name),
-        n: common_vendor.t(userInfo.value.topUpExperience || 0),
-        o: amountToNextLevel.value > 0 && nextMembershipLevel.value
-      }, amountToNextLevel.value > 0 && nextMembershipLevel.value ? {
-        p: common_vendor.t(nextMembershipLevel.value.name),
-        q: common_vendor.t(amountToNextLevel.value)
+        n: userInfo.value.topUpLevel.nextLevelName
+      }, userInfo.value.topUpLevel.nextLevelName ? {
+        o: common_vendor.t(userInfo.value.topUpLevel.nextLevelName)
       } : {
-        r: common_vendor.p({
+        p: common_vendor.p({
           type: "cloud-upload",
           size: "18",
           color: "#28a745"
         })
       }, {
-        s: common_vendor.f(membershipLevels.value, (level, k0, i0) => {
+        q: common_vendor.t(formatDate(userInfo.value.topUpLevel.expirationTime)),
+        r: common_vendor.f(membershipLevels.value, (level, k0, i0) => {
           return {
             a: common_vendor.t(getLevelIcon(level.name)),
             b: common_vendor.t(level.name),
-            c: common_vendor.t(level.experience),
+            c: common_vendor.t(level.price),
             d: level.level,
             e: common_vendor.n(getMemberCardClass(level.name)),
             f: common_vendor.n({
@@ -198,20 +199,20 @@ const _sfc_main = {
             g: common_vendor.o(($event) => navigateToMemberDetails(level), level.level)
           };
         }),
-        t: common_vendor.p({
+        s: common_vendor.p({
           type: "list",
           size: "20",
           color: "#fff"
         }),
-        v: common_vendor.o(($event) => navigateToMemberDetails()),
-        w: common_vendor.p({
+        t: common_vendor.o(($event) => navigateToMemberDetails()),
+        v: common_vendor.p({
           type: "wallet",
           size: "20",
           color: "#fff"
         }),
-        x: common_vendor.o(navigateToMembershipRecharge)
+        w: common_vendor.o(navigateToMembershipRecharge)
       }) : {}) : {
-        y: common_vendor.p({
+        x: common_vendor.p({
           status: "loading",
           contentText: "正在加载您的会员信息..."
         })

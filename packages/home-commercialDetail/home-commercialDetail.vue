@@ -3,7 +3,6 @@
 		<view class="container">
 			<!-- 商机卡片 -->
 			<view class="opportunity-card">
-				<!-- ... 此处省略商机卡片的所有内容，保持原样即可 ... -->
 				<view class="author-info">
 					<view class="author-avatar-wrapper">
 						<image :src="postDetail.avatar" mode="" class="author-avatar"
@@ -92,7 +91,7 @@
 				</view>
 			</view>
 
-			<!-- ==================== 模板修改点 1: 评论区改造 ==================== -->
+			<!-- ==================== 评论区 ==================== -->
 			<template v-if="postDetail.commentFlag">
 				<view class="comments-section">
 					<view class="section-title">
@@ -104,7 +103,7 @@
 						<view class="comment" v-for="comment in comments" :key="comment.id"
 							:class="{ 'is-reply': comment.parentId !== 0 }">
 							<image :src="comment.avatar" mode="" class="comment-avatar"
-								@click="navigateToBusinessCard({ id: comment.userId, name: comment.user, avatar: comment.avatar })">
+								@click="!comment.anonymous && navigateToBusinessCard({ id: comment.userId, name: comment.user, avatar: comment.avatar })">
 							</image>
 							<view class="comment-content">
 								<view class="comment-header">
@@ -116,6 +115,12 @@
 									<view class="comment-action" @click="replyComment(comment)">
 										<uni-icons type="chatbubble" size="16" color="#666"></uni-icons> 回复
 									</view>
+
+									<!-- 只有当前登录用户 === 评论发布者时才显示 -->
+									<view v-if="loggedInUserId == comment.userId" class="comment-action delete-btn"
+										@click="deleteComment(comment.id)">
+										<uni-icons type="trash" size="14" color="#999"></uni-icons> 删除
+									</view>
 								</view>
 							</view>
 						</view>
@@ -126,11 +131,44 @@
 				</view>
 
 				<!-- 底部添加评论区域 -->
-				<view class="add-comment" :style="{ bottom: keyboardHeight + 'px' }">
+				<!-- <view class="add-comment" :style="{ bottom: keyboardHeight + 'px' }">
 					<textarea auto-height maxlength="200" v-model="newCommentText"
 						:placeholder="commentInputPlaceholder" :adjust-position="false"
 						class="comment-textarea"></textarea>
+
+					<view class="anonymous-checkbox" @click="isAnonymous = !isAnonymous">
+						<uni-icons :type="isAnonymous ? 'checkbox-filled' : 'circle'" size="20"
+							:color="isAnonymous ? '#FF6A00' : '#ccc'"></uni-icons>
+						<text>匿名</text>
+					</view>
+
 					<button @click="addComment">发送</button>
+				</view> -->
+				<!-- 底部悬浮评论栏 -->
+				<view class="add-comment-bar" :style="{ bottom: keyboardHeight + 'px' }">
+					<view class="input-container">
+						<!-- 匿名开关：放在输入框左侧内部 -->
+						<view class="anon-switch" :class="{ 'is-active': isAnonymous }"
+							@click="isAnonymous = !isAnonymous">
+							<uni-icons :type="isAnonymous ? 'eye-slash-filled' : 'eye-filled'" size="18"
+								:color="isAnonymous ? '#FF6A00' : '#999'"></uni-icons>
+							<text>{{ isAnonymous ? '匿名' : '公开' }}</text>
+						</view>
+
+						<!-- 分割线 -->
+						<view class="vertical-line"></view>
+
+						<!-- 输入框 -->
+						<textarea auto-height maxlength="200" v-model="newCommentText"
+							:placeholder="commentInputPlaceholder" :adjust-position="false" class="bar-textarea"
+							cursor-spacing="10"></textarea>
+					</view>
+
+					<!-- 发送按钮 -->
+					<view class="send-btn" :class="{ 'can-send': newCommentText.trim().length > 0 }"
+						@click="addComment">
+						<uni-icons type="paperplane-filled" size="20" color="#fff"></uni-icons>
+					</view>
 				</view>
 			</template>
 			<!-- 如果不允许评论，则显示提示信息 -->
@@ -236,6 +274,8 @@
 	const newCommentText = ref('');
 	const replyToCommentId = ref(0);
 	const replyToNickname = ref('');
+
+	const isAnonymous = ref(false);
 
 	const sharePopup = ref(null); // 用于获取 uni-popup 组件实例
 	const customShareTitle = ref(''); // 用于存储用户自定义的分享标题
@@ -556,21 +596,35 @@
 		if (!Array.isArray(apiComments)) return flatList;
 		apiComments.forEach(comment => {
 			const userVO = comment.memberUserBaseVO || {};
+
+			// ---【修改点 1：处理匿名逻辑】---
+			const isAnon = comment.anonymous === 1;
+			const displayName = isAnon ? '匿名用户' : (userVO.nickname || '匿名用户');
+			// 匿名时使用默认头像（你需要准备一个默认图），或者留空让模板处理
+			const displayAvatar = isAnon ? '/static/icon/default-avatar.png' : userVO.avatar;
+
+			// 处理回复时的文本显示
 			let displayText = comment.content;
 			if (replyToUser) {
 				displayText = `回复 @${replyToUser}: ${displayText}`;
 			}
+
 			flatList.push({
 				id: comment.id,
 				userId: comment.userId,
-				user: userVO.nickname || '匿名用户',
-				avatar: userVO.avatar,
+				user: displayName, // 使用处理后的名字
+				avatar: displayAvatar, // 使用处理后的头像
 				time: formatTimestamp(comment.createTime),
 				text: displayText,
-				parentId: comment.parentId
+				parentId: comment.parentId,
+				anonymous: isAnon, // 【新增】保存匿名状态
+				// 【新增】保存原始昵称，供子评论回复时引用（如果匿名，子评论回复时也应显示“回复 @匿名用户”）
+				rawNickname: displayName
 			});
+
+			// 递归处理子评论，传递当前处理后的名字作为 replyToUser
 			if (comment.childrenList && comment.childrenList.length > 0) {
-				const childComments = flattenComments(comment.childrenList, userVO.nickname || '匿名用户');
+				const childComments = flattenComments(comment.childrenList, displayName);
 				flatList = flatList.concat(childComments);
 			}
 		});
@@ -631,6 +685,7 @@
 				targetType: 'post',
 				parentId: replyToCommentId.value,
 				content: content,
+				anonymous: isAnonymous.value ? 1 : 0
 			};
 			const result = await request('/app-api/member/comment/create', {
 				method: 'POST',
@@ -656,6 +711,8 @@
 					type: 'comment',
 					totalCount: currentTotalCount // 直接告诉首页现在的总数是多少
 				});
+
+				isAnonymous.value = false; // 发送成功后重置勾选框
 			} else {
 				uni.showToast({
 					title: result.error?.message || '评论失败',
@@ -671,6 +728,43 @@
 		} finally {
 			uni.hideLoading();
 		}
+	};
+
+	// 删除评论函数
+	const deleteComment = (commentId) => {
+		uni.showModal({
+			title: '提示',
+			content: '确定删除这条评论吗？',
+			success: async (res) => {
+				if (res.confirm) {
+					uni.showLoading({
+						title: '删除中...'
+					});
+					const {
+						error
+					} = await request(`/app-api/member/comment/delete?id=${commentId}`, {
+						method: 'DELETE',
+						// data: {} 
+					});
+
+					uni.hideLoading();
+
+					if (!error) {
+						uni.showToast({
+							title: '删除成功',
+							icon: 'success'
+						});
+						getCommentList(); // 刷新列表
+						// 这里如果你想做得更细致，可以像发布评论一样更新首页的评论数
+					} else {
+						uni.showToast({
+							title: error || '删除失败',
+							icon: 'none'
+						});
+					}
+				}
+			}
+		});
 	};
 
 
@@ -1490,61 +1584,121 @@
 	 * 浮动与弹窗元素 (底部评论框, 分享弹窗, 引导蒙层)
 	 * ================================================================== */
 
-	/* --- 底部固定评论框 --- */
-	.add-comment {
+	/* =========================================
+	   底部悬浮评论栏 (新设计)
+	   ========================================= */
+	.add-comment-bar {
 		position: fixed;
 		bottom: 0;
 		left: 0;
 		width: 100%;
+		background: #fff;
+		padding: 20rpx 24rpx;
+		/* 适配底部安全区 */
+		padding-bottom: calc(20rpx + env(safe-area-inset-bottom));
+		box-shadow: 0 -2rpx 10rpx rgba(0, 0, 0, 0.05);
+		border-top: 1rpx solid #f0f0f0;
+		z-index: 999;
+		box-sizing: border-box;
+		display: flex;
+		align-items: flex-end;
+		/* 底部对齐，适应多行输入 */
+		gap: 20rpx;
+	}
+
+	/* 输入框容器 (胶囊状) */
+	.input-container {
+		flex: 1;
+		background: #f5f7fa;
+		border-radius: 40rpx;
+		/* 大圆角 */
+		padding: 14rpx 20rpx;
 		display: flex;
 		align-items: center;
-		background: white;
-		padding: 20rpx 30rpx;
-		padding-bottom: calc(10rpx + env(safe-area-inset-bottom));
-		box-shadow: 0 -10rpx 30rpx rgba(0, 0, 0, 0.05);
-		border-top: 2rpx solid #e0e0e0;
-		z-index: 99;
+		/* 垂直居中 */
+		min-height: 80rpx;
 		box-sizing: border-box;
-	}
-
-	.add-comment input {
-		flex-grow: 1;
-		background: #f5f5f5;
-		border: 2rpx solid #e0e0e0;
-		border-radius: 50rpx;
-		padding: 24rpx 40rpx;
-		font-size: 30rpx;
-		outline: none;
 		transition: all 0.3s;
-		margin-right: 24rpx;
+		border: 2rpx solid transparent;
 	}
 
-	.add-comment input:focus {
+	.input-container:focus-within {
+		background: #fff;
 		border-color: #FF6A00;
-		box-shadow: 0 0 0 4rpx rgba(255, 106, 0, 0.2);
+		box-shadow: 0 0 0 4rpx rgba(255, 106, 0, 0.1);
 	}
 
-	.add-comment button {
-		background: #FF6A00;
-		color: white;
-		border: none;
-		border-radius: 50rpx;
-		padding: 0 40rpx;
-		height: 80rpx;
-		line-height: 80rpx;
-		font-weight: 500;
-		transition: background 0.3s;
-		box-shadow: 0 6rpx 20rpx rgba(255, 106, 0, 0.3);
-		-webkit-appearance: none;
+	/* 匿名开关 */
+	.anon-switch {
+		display: flex;
+		align-items: center;
+		padding: 0 10rpx;
+		transition: all 0.3s;
 		flex-shrink: 0;
 	}
 
-	.add-comment button::after {
-		border: none;
+	.anon-switch uni-icons {
+		margin-right: 6rpx;
 	}
 
-	.add-comment button:active {
-		background: #e05a00;
+	.anon-switch text {
+		font-size: 24rpx;
+		color: #666;
+		font-weight: 500;
+	}
+
+	.anon-switch.is-active text {
+		color: #FF6A00;
+	}
+
+	/* 垂直分割线 */
+	.vertical-line {
+		width: 2rpx;
+		height: 32rpx;
+		background-color: #e0e0e0;
+		margin: 0 16rpx;
+		flex-shrink: 0;
+	}
+
+	/* 文本域 */
+	.bar-textarea {
+		flex: 1;
+		font-size: 28rpx;
+		color: #333;
+		width: 100%;
+		/* 移除默认内边距 */
+		padding: 0;
+		line-height: 1.5;
+		max-height: 200rpx;
+		/* 限制最大高度 */
+		min-height: 40rpx;
+	}
+
+	/* 发送按钮 (圆形) */
+	.send-btn {
+		width: 80rpx;
+		height: 80rpx;
+		border-radius: 50%;
+		background: #e0e0e0;
+		/* 默认禁用色 */
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		transition: all 0.3s;
+		flex-shrink: 0;
+		margin-bottom: 2rpx;
+		/* 微调对齐 */
+	}
+
+	/* 可发送状态 */
+	.send-btn.can-send {
+		background: linear-gradient(135deg, #FF8C00, #FF6A00);
+		box-shadow: 0 4rpx 12rpx rgba(255, 106, 0, 0.3);
+		transform: scale(1.05);
+	}
+
+	.send-btn:active {
+		transform: scale(0.95);
 	}
 
 	.comment-textarea {

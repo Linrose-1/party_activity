@@ -32,11 +32,11 @@
 				<text class="value">{{ formatTime(detail.createTime) }}</text>
 			</view>
 
-			<!-- 接口未提供明确支付时间，暂时隐藏或根据业务需求开启 -->
-			<!-- <view class="info-row" v-if="isPaid">
+			<!-- 【新增】支付时间：如果有值则显示 -->
+			<view class="info-row" v-if="detail.payTime">
 				<text class="label">支付时间</text>
-				<text class="value">{{ formatTime(detail.updateTime || detail.createTime) }}</text>
-			</view> -->
+				<text class="value">{{ formatTime(detail.payTime) }}</text>
+			</view>
 
 			<view class="divider"></view>
 
@@ -50,6 +50,12 @@
 			<view class="info-row">
 				<text class="label">商品描述</text>
 				<text class="value">{{ detail.remark || productName }}</text>
+			</view>
+
+			<!-- 【新增】会员有效期：如果有值则显示 -->
+			<view class="info-row" v-if="detail.expirationTime">
+				<text class="label">会员有效期至</text>
+				<text class="value highlight-time">{{ formatTime(detail.expirationTime) }}</text>
 			</view>
 
 			<view class="info-row">
@@ -159,6 +165,8 @@
 			if (error) throw new Error(error);
 
 			detail.value = data;
+			// 调试日志，查看新字段是否返回
+			console.log('订单详情数据:', data);
 		} catch (e) {
 			console.error('获取详情失败', e);
 			loadError.value = true;
@@ -349,6 +357,12 @@
 			&.bold {
 				font-weight: bold;
 			}
+		}
+
+		/* 高亮会员到期时间 */
+		.highlight-time {
+			color: #FF6E00;
+			font-weight: 500;
 		}
 
 		.copy-text {

@@ -63,22 +63,10 @@ const _sfc_main = {
           color: "#666"
         }),
         j: common_vendor.o(($event) => handleAction("comment")),
-        k: common_vendor.p({
-          type: "minus",
-          size: "24",
-          color: "#ff4d4f"
-        }),
-        l: common_vendor.o(($event) => handleAction("removeCircle")),
-        m: common_vendor.p({
-          type: "closeempty",
-          size: "24",
-          color: "#ff4d4f"
-        }),
-        n: common_vendor.o(($event) => handleAction("disconnect")),
-        o: common_vendor.sr(popup, "5571075f-0", {
+        k: common_vendor.sr(popup, "5571075f-0", {
           "k": "popup"
         }),
-        p: common_vendor.p({
+        l: common_vendor.p({
           type: "center",
           ["mask-click"]: true
         })

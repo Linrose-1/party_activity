@@ -5501,6 +5501,42 @@ function findScopedSlotInvoker(vueId, instance) {
     parent = parent.parent;
   }
 }
+function withScopedSlot(fn, { name, path, vueId }) {
+  const instance = getCurrentInstance();
+  fn.path = path;
+  const scopedSlots = instance.$ssi || (instance.$ssi = {});
+  const invoker = scopedSlots[vueId] || (scopedSlots[vueId] = createScopedSlotInvoker(instance));
+  if (!invoker.slots[name]) {
+    invoker.slots[name] = {
+      fn
+    };
+  } else {
+    invoker.slots[name].fn = fn;
+  }
+  return getValueByDataPath(instance.ctx.$scope.data, path);
+}
+function createScopedSlotInvoker(instance) {
+  const invoker = (slotName, args, index2) => {
+    const slot = invoker.slots[slotName];
+    if (!slot) {
+      return;
+    }
+    const hasIndex = typeof index2 !== "undefined";
+    index2 = index2 || 0;
+    const prevInstance = setCurrentRenderingInstance(instance);
+    const data = slot.fn(args, slotName + (hasIndex ? "-" + index2 : ""), index2);
+    const path = slot.fn.path;
+    setCurrentRenderingInstance(prevInstance);
+    (instance.$scopedSlotsData || (instance.$scopedSlotsData = [])).push({
+      path,
+      index: index2,
+      data
+    });
+    instance.$updateScopedSlots();
+  };
+  invoker.slots = {};
+  return invoker;
+}
 function setRef(ref2, id, opts = {}) {
   const { $templateRefs } = getCurrentInstance();
   $templateRefs.push({ i: id, r: ref2, k: opts.k, f: opts.f });
@@ -5529,6 +5565,7 @@ function withModelModifiers(fn, { number, trim }, isComponent = false) {
 const o$1 = (value, key) => vOn(value, key);
 const f$1 = (source, renderItem) => vFor(source, renderItem);
 const r$1 = (name, props, key) => renderSlot(name, props, key);
+const w$1 = (fn, options) => withScopedSlot(fn, options);
 const s$1 = (value) => stringifyStyle(value);
 const e$1 = (target, ...sources) => extend(target, ...sources);
 const n$1 = (value) => normalizeClass(value);
@@ -7299,7 +7336,7 @@ function initOnError() {
 function initRuntimeSocketService() {
   const hosts = "172.20.10.4,127.0.0.1";
   const port = "8090";
-  const id = "mp-weixin_d7BAmD";
+  const id = "mp-weixin_Fp30Yn";
   const lazy = typeof swan !== "undefined";
   let restoreError = lazy ? () => {
   } : initOnError();
@@ -11487,6 +11524,7 @@ exports.index = index;
 exports.initVueI18n = initVueI18n;
 exports.m = m$1;
 exports.n = n$1;
+exports.nextTick$1 = nextTick$1;
 exports.nr = nr;
 exports.o = o$1;
 exports.onBackPress = onBackPress;
@@ -11511,6 +11549,7 @@ exports.sr = sr;
 exports.t = t$1;
 exports.unref = unref;
 exports.useCssVars = useCssVars;
+exports.w = w$1;
 exports.watch = watch;
 exports.wx$1 = wx$1;
 //# sourceMappingURL=../../.sourcemap/mp-weixin/common/vendor.js.map

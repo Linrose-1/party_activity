@@ -5,11 +5,13 @@ const utils_upload = require("../../utils/upload.js");
 const utils_user = require("../../utils/user.js");
 if (!Array) {
   const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
-  _easycom_uni_icons2();
+  const _easycom_GridDrag2 = common_vendor.resolveComponent("GridDrag");
+  (_easycom_uni_icons2 + _easycom_GridDrag2)();
 }
 const _easycom_uni_icons = () => "../../uni_modules/uni-icons/components/uni-icons/uni-icons.js";
+const _easycom_GridDrag = () => "../../components/GridDrag/GridDrag.js";
 if (!Math) {
-  _easycom_uni_icons();
+  (_easycom_uni_icons + _easycom_GridDrag)();
 }
 const DRAFT_KEY = "post_draft_v2";
 const _sfc_main = {
@@ -28,6 +30,22 @@ const _sfc_main = {
     });
     const tagSuggestions = common_vendor.ref([]);
     let tagSearchTimer = null;
+    const handleDragChange = (sortedList) => {
+      form.images = sortedList;
+      common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:169", "图片排序已更新:", form.images);
+    };
+    const deleteImage = (index) => {
+      common_vendor.index.showModal({
+        title: "提示",
+        content: "确定删除？",
+        success: (res) => {
+          if (res.confirm) {
+            form.images.splice(index, 1);
+            common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:181", "当前点击的图片:", form.images[index]);
+          }
+        }
+      });
+    };
     const contentPlaceholder = common_vendor.computed(() => {
       if (form.topic === "创业猎伙") {
         return "发布寻找创业项目合伙人需求。";
@@ -72,7 +90,7 @@ const _sfc_main = {
     const saveDraft = (data) => {
       if (data.title || data.content || data.tags.length > 0 || data.images.length > 0) {
         common_vendor.index.setStorageSync(DRAFT_KEY, JSON.stringify(data));
-        common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:195", "📝 草稿已自动保存");
+        common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:239", "📝 草稿已自动保存");
       }
     };
     const checkDraft = () => {
@@ -96,7 +114,7 @@ const _sfc_main = {
     };
     const clearDraft = () => {
       common_vendor.index.removeStorageSync(DRAFT_KEY);
-      common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:221", "🧹 草稿已清除");
+      common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:265", "🧹 草稿已清除");
     };
     function topicChange(e) {
       form.topic = e.detail.value;
@@ -156,9 +174,9 @@ const _sfc_main = {
             type
           }
         });
-        common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:334", `标签历史 "${tagName}" 已记录`);
+        common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:378", `标签历史 "${tagName}" 已记录`);
       } catch (error) {
-        common_vendor.index.__f__("error", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:336", "记录标签历史失败:", error);
+        common_vendor.index.__f__("error", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:380", "记录标签历史失败:", error);
       }
     }
     common_vendor.watch(() => form.tagInput, (newValue) => {
@@ -193,7 +211,7 @@ const _sfc_main = {
         const suggestions = data.list.map((item) => item.name);
         tagSuggestions.value = [...new Set(suggestions)];
       } catch (e) {
-        common_vendor.index.__f__("error", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:385", "获取标签建议失败:", e);
+        common_vendor.index.__f__("error", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:429", "获取标签建议失败:", e);
         tagSuggestions.value = [];
       }
     }
@@ -228,7 +246,7 @@ const _sfc_main = {
             if (result.data)
               successfulUrls.push(result.data);
             else
-              common_vendor.index.__f__("error", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:450", "上传失败:", result.error);
+              common_vendor.index.__f__("error", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:494", "上传失败:", result.error);
           });
           form.images.push(...successfulUrls);
           if (successfulUrls.length < validFiles.length) {
@@ -240,50 +258,19 @@ const _sfc_main = {
         }
       });
     }
-    function replaceImage(index) {
-      common_vendor.index.chooseImage({
-        count: 1,
-        success: async (res) => {
-          const file = res.tempFiles[0];
-          if (file.size > 5 * 1024 * 1024)
-            return common_vendor.index.showToast({
-              title: "文件大小不能超过5MB",
-              icon: "none"
-            });
-          common_vendor.index.showLoading({
-            title: "正在替换...",
-            mask: true
-          });
-          const result = await utils_upload.uploadFile(file, {
-            directory: "post"
-          });
-          common_vendor.index.hideLoading();
-          if (result.data) {
-            form.images[index] = result.data;
-            common_vendor.index.showToast({
-              title: "图片已替换",
-              icon: "none"
-            });
-          } else {
-            common_vendor.index.showToast({
-              title: result.error || "替换失败",
-              icon: "error"
-            });
-          }
-        }
+    const previewImage = (index) => {
+      common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:510", "当前点击的图片:", form.images[index]);
+      if (!form.images || form.images.length === 0)
+        return;
+      common_vendor.index.previewImage({
+        urls: form.images,
+        // 预览所有图片
+        current: index,
+        // 当前显示的图片索引
+        loop: true
+        // 是否循环预览
       });
-    }
-    function deleteImage(index) {
-      common_vendor.index.showModal({
-        title: "提示",
-        content: "确定要删除这张图片吗？",
-        success: (res) => {
-          if (res.confirm) {
-            form.images.splice(index, 1);
-          }
-        }
-      });
-    }
+    };
     async function handleChooseVideo() {
       form.mediaType = "video";
       common_vendor.index.chooseVideo({
@@ -327,7 +314,7 @@ const _sfc_main = {
         },
         fail: (err) => {
           if (err.errMsg.indexOf("cancel") === -1) {
-            common_vendor.index.__f__("error", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:563", "选择视频失败:", err);
+            common_vendor.index.__f__("error", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:619", "选择视频失败:", err);
           }
         }
       });
@@ -415,7 +402,7 @@ const _sfc_main = {
     };
     common_vendor.onShareAppMessage(() => {
       const inviteCode = utils_user.getInviteCode();
-      common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:659", `[商机发布页] 分享给好友，获取到邀请码: ${inviteCode}`);
+      common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:715", `[商机发布页] 分享给好友，获取到邀请码: ${inviteCode}`);
       let sharePath = "/packages/home-opportunitiesPublish/home-opportunitiesPublish";
       if (inviteCode) {
         sharePath += `?inviteCode=${inviteCode}`;
@@ -426,12 +413,12 @@ const _sfc_main = {
         // 建议使用一个固定的、吸引人的分享图片
         imageUrl: "https://img.gofor.club/logo_share.jpg"
       };
-      common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:675", "[商机发布页] 分享给好友的内容:", JSON.stringify(shareContent));
+      common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:731", "[商机发布页] 分享给好友的内容:", JSON.stringify(shareContent));
       return shareContent;
     });
     common_vendor.onShareTimeline(() => {
       const inviteCode = utils_user.getInviteCode();
-      common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:685", `[商机发布页] 分享到朋友圈，获取到邀请码: ${inviteCode}`);
+      common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:741", `[商机发布页] 分享到朋友圈，获取到邀请码: ${inviteCode}`);
       let queryString = "";
       if (inviteCode) {
         queryString = `inviteCode=${inviteCode}`;
@@ -441,7 +428,7 @@ const _sfc_main = {
         query: queryString,
         imageUrl: "https://img.gofor.club/logo_share.jpg"
       };
-      common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:700", "[商机发布页] 分享到朋友圈的内容:", JSON.stringify(shareContent));
+      common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:756", "[商机发布页] 分享到朋友圈的内容:", JSON.stringify(shareContent));
       return shareContent;
     });
     return (_ctx, _cache) => {
@@ -474,47 +461,59 @@ const _sfc_main = {
         l: form.tagInput,
         m: common_vendor.o(($event) => form.tagInput = $event.detail.value),
         n: common_vendor.o(handleAddTagManually),
-        o: form.images.length === 0 && !form.postVideo
-      }, form.images.length === 0 && !form.postVideo ? {
-        p: common_vendor.p({
+        o: common_vendor.p({
           type: "image-filled",
           size: "30",
           color: "#4CAF50"
         }),
-        q: common_vendor.o(handleChooseImage),
-        r: common_vendor.p({
+        p: common_vendor.o(handleChooseImage),
+        q: common_vendor.p({
           type: "videocam-filled",
           size: "30",
           color: "#2196F3"
         }),
-        s: common_vendor.o(handleChooseVideo)
-      } : form.mediaType === "image" ? common_vendor.e({
-        v: common_vendor.f(form.images, (img, i, i0) => {
+        r: common_vendor.o(handleChooseVideo),
+        s: form.images.length === 0 && !form.postVideo,
+        t: common_vendor.w(({
+          item,
+          index
+        }, s0, i0) => {
           return {
-            a: img,
-            b: common_vendor.o(($event) => replaceImage(i), i),
-            c: common_vendor.o(($event) => deleteImage(i), i),
-            d: i
+            a: common_vendor.t(item),
+            b: item,
+            c: common_vendor.o(($event) => previewImage(index)),
+            d: common_vendor.o(($event) => deleteImage(index)),
+            e: i0,
+            f: s0
           };
+        }, {
+          name: "d",
+          path: "t",
+          vueId: "4f014bb0-2"
         }),
-        w: form.images.length < 9
+        v: common_vendor.o(handleDragChange),
+        w: common_vendor.p({
+          list: form.images,
+          columns: 3,
+          ["item-height-rpx"]: 230
+        }),
+        x: form.images.length < 9
       }, form.images.length < 9 ? {
-        x: common_vendor.p({
+        y: common_vendor.p({
           type: "plusempty",
           size: "24",
           color: "#ccc"
         }),
-        y: common_vendor.o(handleChooseImage)
-      } : {}) : form.mediaType === "video" && form.postVideo ? {
-        A: form.postVideo,
-        B: common_vendor.o(deleteVideo)
+        z: common_vendor.o(handleChooseImage)
       } : {}, {
-        t: form.mediaType === "image",
-        z: form.mediaType === "video" && form.postVideo,
-        C: common_vendor.t(form.mediaType === "image" ? "最多可上传9张图片" : "仅支持上传一个视频"),
-        D: form.showProfile,
-        E: common_vendor.o((e) => form.showProfile = e.detail.value),
-        F: common_vendor.o(submitPost)
+        A: form.mediaType === "image",
+        B: form.postVideo,
+        C: common_vendor.o(deleteVideo),
+        D: form.mediaType === "video" && form.postVideo,
+        E: common_vendor.t(form.mediaType === "image" ? "最多可上传9张图片" : "仅支持上传一个视频"),
+        F: form.showProfile,
+        G: common_vendor.o((e) => form.showProfile = e.detail.value),
+        H: common_vendor.o(submitPost)
       });
     };
   }

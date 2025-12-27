@@ -1,21 +1,20 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
 const utils_request = require("../../utils/request.js");
+if (!Array) {
+  const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
+  _easycom_uni_icons2();
+}
+const _easycom_uni_icons = () => "../../uni_modules/uni-icons/components/uni-icons/uni-icons.js";
+if (!Math) {
+  _easycom_uni_icons();
+}
 const _sfc_main = {
   __name: "my-memberDetails",
   setup(__props) {
     const membershipLevels = common_vendor.ref([]);
     const currentTab = common_vendor.ref(0);
-    const screenWidth = common_vendor.index.getSystemInfoSync().windowWidth;
-    const imageHeights = common_vendor.ref([]);
     const initialTargetLevel = common_vendor.ref(null);
-    const currentSwiperHeight = common_vendor.computed(() => {
-      const height = imageHeights.value[currentTab.value];
-      if (height) {
-        return `${height}px`;
-      }
-      return "300px";
-    });
     common_vendor.onLoad((options) => {
       if (options && options.level) {
         initialTargetLevel.value = Number(options.level);
@@ -35,13 +34,32 @@ const _sfc_main = {
       common_vendor.index.hideLoading();
       if (error) {
         common_vendor.index.showToast({
-          title: `加载失败: ${error}`,
+          title: error,
           icon: "none"
         });
         return;
       }
       if (data && data.length > 0) {
-        membershipLevels.value = data.sort((a, b) => a.level - b.level);
+        const sortedData = data.sort((a, b) => a.level - b.level);
+        membershipLevels.value = sortedData.map((item) => {
+          let parsedContent = [];
+          try {
+            if (item.content) {
+              parsedContent = JSON.parse(item.content);
+            }
+          } catch (e) {
+            common_vendor.index.__f__("error", "at pages/my-memberDetails/my-memberDetails.vue:145", "解析权益内容失败", e);
+            parsedContent = [item.content];
+          }
+          const themeColor = getThemeColor(item.level);
+          return {
+            ...item,
+            parsedContent,
+            themeColor,
+            // 简化 Tab 显示名称
+            shortName: item.name.replace("会员", "")
+          };
+        });
         if (initialTargetLevel.value !== null) {
           const targetIndex = membershipLevels.value.findIndex((item) => item.level === initialTargetLevel.value);
           if (targetIndex !== -1) {
@@ -51,40 +69,72 @@ const _sfc_main = {
       }
     };
     const switchTab = (index) => {
-      if (currentTab.value !== index) {
-        currentTab.value = index;
-      }
+      currentTab.value = index;
     };
     const onSwiperChange = (e) => {
       currentTab.value = e.detail.current;
     };
-    const onImageLoad = (e, index) => {
-      const originalWidth = e.detail.width;
-      const originalHeight = e.detail.height;
-      const imagePaddingInPx = 80 * (screenWidth / 750);
-      const imageDisplayWidth = screenWidth - imagePaddingInPx;
-      const imageDisplayHeight = imageDisplayWidth / originalWidth * originalHeight;
-      imageHeights.value[index] = imageDisplayHeight;
+    const formatPrice = (price) => {
+      return price == 0 ? "免费" : `¥${price}`;
+    };
+    const getThemeColor = (level) => {
+      switch (Number(level)) {
+        case 1:
+          return "#5F6C7B";
+        case 2:
+          return "#CD7F32";
+        case 3:
+          return "#7F9eb2";
+        case 4:
+          return "#E6A23C";
+        case 5:
+          return "#333333";
+        default:
+          return "#333";
+      }
     };
     return (_ctx, _cache) => {
       return {
         a: common_vendor.f(membershipLevels.value, (level, index, i0) => {
-          return {
-            a: common_vendor.t(level.name.replace("会员", "")),
-            b: level.level,
-            c: currentTab.value === index ? 1 : "",
-            d: common_vendor.o(($event) => switchTab(index), level.level)
-          };
+          return common_vendor.e({
+            a: common_vendor.t(level.shortName),
+            b: currentTab.value === index ? 1 : "",
+            c: currentTab.value === index
+          }, currentTab.value === index ? {} : {}, {
+            d: level.level,
+            e: common_vendor.o(($event) => switchTab(index), level.level)
+          });
         }),
-        b: common_vendor.f(membershipLevels.value, (level, index, i0) => {
-          return {
-            a: level.backgroundUrl,
-            b: common_vendor.o(($event) => onImageLoad($event, index), level.level),
-            c: level.level
-          };
+        b: common_vendor.f(membershipLevels.value, (item, index, i0) => {
+          return common_vendor.e({
+            a: item.icon
+          }, item.icon ? {
+            b: item.icon
+          } : {}, {
+            c: common_vendor.t(item.name),
+            d: common_vendor.t(formatPrice(item.price)),
+            e: common_vendor.t(item.duration),
+            f: common_vendor.t(item.zhimiNum),
+            g: common_vendor.t(item.gongfenNum),
+            h: common_vendor.f(item.parsedContent, (benefit, bIndex, i1) => {
+              return {
+                a: "abc533c5-0-" + i0 + "-" + i1,
+                b: common_vendor.t(benefit),
+                c: bIndex
+              };
+            }),
+            i: !item.parsedContent || item.parsedContent.length === 0
+          }, !item.parsedContent || item.parsedContent.length === 0 ? {} : {}, {
+            j: common_vendor.n("theme-level-" + item.level),
+            k: item.level
+          });
         }),
-        c: currentTab.value,
-        d: currentSwiperHeight.value,
+        c: common_vendor.p({
+          type: "checkmarkempty",
+          size: "16",
+          color: "#07c160"
+        }),
+        d: currentTab.value,
         e: common_vendor.o(onSwiperChange)
       };
     };

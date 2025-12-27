@@ -71,27 +71,27 @@
 					<uni-icons type="vip" size="24" color="#FFD700"></uni-icons> 会员等级晋升系统
 				</view>
 
-				<!-- 【【【修复 ①】】】: 恢复状态显示部分的 HTML 结构 -->
 				<view class="membership-status">
+					<!-- 1. 当前等级 -->
 					<view class="status-text">
 						当前等级: <span class="status-highlight">{{ currentMembershipLevel.name }}</span>
 					</view>
-					<view class="status-text">
-						已累计充值: <span class="status-highlight">{{ userInfo.topUpExperience || 0 }} 元</span>
+
+					<!-- 2. 下一级会员-->
+					<view class="status-text" v-if="userInfo.topUpLevel.nextLevelName">
+						下一级会员: <span class="next-level-name">{{ userInfo.topUpLevel.nextLevelName }}</span>
 					</view>
-					<view class="status-text next-level-progress" v-if="amountToNextLevel > 0 && nextMembershipLevel">
-						距离 <span class="next-level-name">{{ nextMembershipLevel.name }}</span> 还需
-						<span class="amount-needed">{{ amountToNextLevel }} 元</span>
-					</view>
+					<!-- 如果没有下一级（已经是最高级），显示提示 -->
 					<view class="status-text status-max-level" v-else>
 						<uni-icons type="cloud-upload" size="18" color="#28a745"></uni-icons>
 						恭喜您，已达到最高会员等级！
 					</view>
-				</view>
 
-				<p class="membership-description">
-					会员等级根据累计充值金额进行晋升
-				</p>
+					<!-- 3. 到期时间-->
+					<view class="status-text">
+						到期时间: <span class="status-highlight">{{ formatDate(userInfo.topUpLevel.expirationTime) }}</span>
+					</view>
+				</view>
 
 				<view class="membership-levels">
 					<view v-for="level in membershipLevels" :key="level.level" class="membership-level-item"
@@ -100,7 +100,7 @@
 
 						<view class="level-icon">{{ getLevelIcon(level.name) }}</view>
 						<view class="level-name">{{ level.name }}</view>
-						<view class="level-price">充值 {{ level.experience }} 元</view>
+						<view class="level-price">充值 {{ level.price }} 元</view>
 					</view>
 				</view>
 
@@ -228,13 +228,13 @@
 		return null; // 已是最高等级
 	});
 
-	const amountToNextLevel = computed(() => {
-		if (nextMembershipLevel.value && userInfo.value) {
-			const needed = nextMembershipLevel.value.experience - userInfo.value.topUpExperience;
-			return Math.max(0, needed);
-		}
-		return 0;
-	});
+	// const amountToNextLevel = computed(() => {
+	// 	if (nextMembershipLevel.value && userInfo.value) {
+	// 		const needed = nextMembershipLevel.value.experience - userInfo.value.topUpExperience;
+	// 		return Math.max(0, needed);
+	// 	}
+	// 	return 0;
+	// });
 
 	// ======================= 页面跳转方法 =======================
 	const navigateToMemberDetails = (level) => {
@@ -279,6 +279,16 @@
 		if (name.includes('黄金')) return '🌟';
 		if (name.includes('黑钻')) return '💎';
 		return '👤';
+	};
+
+	// --- 时间格式化 ---
+	const formatDate = (timestamp) => {
+		if (!timestamp) return '未开通';
+		const date = new Date(timestamp);
+		const Y = date.getFullYear();
+		const M = (date.getMonth() + 1).toString().padStart(2, '0');
+		const D = date.getDate().toString().padStart(2, '0');
+		return `${Y}-${M}-${D}`;
 	};
 </script>
 

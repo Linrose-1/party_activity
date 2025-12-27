@@ -1,0 +1,27 @@
+
+.grid-drag-container.data-v-15512d7a {
+		width: 100%;
+		position: relative;
+}
+.drag-area.data-v-15512d7a {
+		width: 100%;
+		/* 高度由 inline-style 控制 */
+}
+.drag-item.data-v-15512d7a {
+		position: absolute;
+		/* 【关键】确保 movable-view 内部内容能撑开 */
+		display: flex;
+		flex-direction: column;
+}
+.item-inner.data-v-15512d7a {
+		/* 【关键】宽高必须 100% */
+		width: 100%;
+		height: 100%;
+		/* 控制间距 */
+		padding: 8rpx;
+		/* 确保 padding 不会撑大盒子 */
+		box-sizing: border-box;
+		/* 让内部元素（插槽内容）能撑满 */
+		display: flex;
+		flex-direction: column;
+}

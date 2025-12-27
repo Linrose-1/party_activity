@@ -67,6 +67,7 @@
   margin-bottom: 24rpx;
   font-size: 28rpx;
   line-height: 1.5;
+  /* 高亮会员到期时间 */
 }
 .info-row .label.data-v-fc3d86e7 {
   color: #999;
@@ -80,6 +81,10 @@
 }
 .info-row .value.bold.data-v-fc3d86e7 {
   font-weight: bold;
+}
+.info-row .highlight-time.data-v-fc3d86e7 {
+  color: #FF6E00;
+  font-weight: 500;
 }
 .info-row .copy-text.data-v-fc3d86e7 {
   display: flex;

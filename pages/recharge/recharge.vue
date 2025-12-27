@@ -40,42 +40,67 @@
 
 			<!-- ==================== Tab 2: 会员充值 ==================== -->
 			<view v-if="currentTab === 2" class="tab-content">
+
+				<!-- 1. 当前等级与权益入口 -->
 				<view class="section-header">
-					<view class="section-title">👑 选择会员等级</view>
+					<view class="current-level-info">
+						当前等级：<text class="highlight">{{ currentMemberLevelName }}</text>
+					</view>
 					<view class="details-link" @click="goToMemberDetails">
 						查看权益详情
 						<uni-icons type="right" size="12" color="#FF6E00"></uni-icons>
 					</view>
 				</view>
 
+				<!-- 2. 会员列表 -->
 				<view class="member-list">
-					<view v-for="(level, index) in memberLevels" :key="index" class="member-card"
-						:class="{ active: selectedMemberId === level.id, recommended: level.isRecommended }"
-						@click="selectMemberLevel(level)">
+					<!-- 【修复】key 改为 level.level -->
+					<view v-for="(level, index) in memberLevels" :key="level.level" class="member-card" :class="{ 
+							active: selectedLevelNum === level.level, 
+							disabled: level.isChoice === 0 
+						}" @click="selectMemberLevel(level)">
 
-						<!-- 推荐标签 -->
-						<view v-if="level.isRecommended" class="recommend-tag">推荐</view>
+						<!-- 不可充值遮罩文字 -->
+						<view v-if="level.isChoice === 0" class="disabled-mask">
+							不可选
+						</view>
 
 						<view class="card-left">
 							<view class="level-name">{{ level.name }}</view>
-							<view class="level-desc">{{ level.desc }}</view>
+							<view class="level-desc">{{ level.duration || '永久' }}</view>
+							<!-- 原价显示 -->
+							<view class="original-price">
+								原价: ¥{{ level.price }}
+							</view>
 						</view>
+
 						<view class="card-right">
-							<text class="currency">¥</text>
-							<text class="price">{{ level.price }}</text>
-							<text class="period">/{{ level.period }}</text>
+							<view class="price-label">需付差价</view>
+							<view class="price-wrapper">
+								<text class="currency">¥</text>
+								<!-- 显示差价 -->
+								<text class="price">{{ level.experience }}</text>
+							</view>
+
+							<!-- 选中状态指示器 -->
 							<view class="radio-circle">
-								<view v-if="selectedMemberId === level.id" class="radio-inner"></view>
+								<!-- 【修复】判断条件改为 level.level -->
+								<view v-if="selectedLevelNum === level.level" class="radio-inner"></view>
 							</view>
 						</view>
 					</view>
+				</view>
+
+				<!-- 3. 差价说明 -->
+				<view class="price-diff-tip">
+					<uni-icons type="info" size="14" color="#999"></uni-icons>
+					<text>差价说明：高等级费用 - （ 当前等级费用 - （当前等级费用/365）* 已用天数）</text>
 				</view>
 			</view>
 		</view>
 
 		<!-- ==================== 底部结算区 ==================== -->
 		<view class="footer-bar">
-			<!-- 合规提示文案 -->
 			<view class="compliance-text">
 				基于国家对积分的管理条例，购买智米后，智米用于平台商业生态的服务与产品消耗，智米的使用余额不能提现与变现，请确认后支付。
 			</view>
@@ -83,9 +108,10 @@
 			<view class="action-area">
 				<view class="total-info">
 					<view class="label">应付金额：</view>
-					<view class="amount">¥ {{ payAmount || '0.00' }}</view>
+					<!-- 显示计算后的金额 -->
+					<view class="amount">¥ {{ payAmount }}</view>
 				</view>
-				<button class="pay-btn" @click="handleRecharge" :disabled="isPaying || payAmount <= 0"
+				<button class="pay-btn" @click="handleRecharge" :disabled="isPaying || parseFloat(payAmount) < 0"
 					:loading="isPaying">
 					{{ isPaying ? '支付中...' : '立即支付' }}
 				</button>
@@ -109,58 +135,22 @@
 	} from '@/utils/user.js';
 
 	// --- 状态变量 ---
-	const currentTab = ref(1); // 1-智米, 2-会员
+	const currentTab = ref(1);
 	const isPaying = ref(false);
 	const userInfo = ref(null);
 
 	// --- 智米充值数据 ---
 	const zhimiOptions = [10, 20, 50, 100, 500];
-	const selectedZhimiIndex = ref(0); // 默认选中第一个
+	const selectedZhimiIndex = ref(0);
 	const customAmount = ref('');
 
-	// --- 会员充值数据 (可以是静态配置，也可以从后台获取) ---
-	const memberLevels = ref([{
-			id: 1,
-			name: '玄铁会员',
-			price: 10,
-			period: '月',
-			desc: '基础功能体验',
-			isRecommended: false
-		},
-		{
-			id: 2,
-			name: '青铜会员',
-			price: 100,
-			period: '月',
-			desc: '进阶商友特权',
-			isRecommended: false
-		},
-		{
-			id: 3,
-			name: '白银会员',
-			price: 365,
-			period: '年',
-			desc: '超高性价比首选',
-			isRecommended: true
-		},
-		{
-			id: 4,
-			name: '黄金会员',
-			price: 3650,
-			period: '年',
-			desc: '尊享全部权益',
-			isRecommended: false
-		},
-		{
-			id: 5,
-			name: '黑钻会员',
-			price: 36500,
-			period: '年',
-			desc: '顶级身份象征',
-			isRecommended: false
-		}
-	]);
-	const selectedMemberId = ref(3); // 默认选中白银
+	// --- 会员充值数据 ---
+	const memberLevels = ref([]);
+
+	// 【修复】使用 selectedLevelNum 代替 selectedMemberId，因为接口可能没返回 id
+	const selectedLevelNum = ref(null);
+
+	const currentMemberLevelName = ref('加载中...');
 
 	// --- 计算属性 ---
 	const payAmount = computed(() => {
@@ -172,11 +162,12 @@
 			if (selectedZhimiIndex.value !== -1) {
 				return zhimiOptions[selectedZhimiIndex.value].toFixed(2);
 			}
-			return 0;
+			return '0.00';
 		} else {
-			// 会员模式
-			const level = memberLevels.value.find(item => item.id === selectedMemberId.value);
-			return level ? level.price.toFixed(2) : 0;
+			// 【修复】会员模式：使用 level 字段查找选中项
+			const level = memberLevels.value.find(item => item.level === selectedLevelNum.value);
+			// 返回 experience 差价
+			return level ? Number(level.experience).toFixed(2) : '0.00';
 		}
 	});
 
@@ -187,15 +178,14 @@
 		}
 	});
 
-	onMounted(() => {
-		fetchUserInfo();
-		// fetchMemberLevels();
+	onMounted(async () => {
+		await fetchUserInfo();
+		fetchMemberLevels();
 	});
 
 	// --- 交互逻辑 ---
 	const switchTab = (index) => {
 		currentTab.value = index;
-		// 切换时重置一些状态
 		if (index === 1) {
 			customAmount.value = '';
 			selectedZhimiIndex.value = 0;
@@ -204,78 +194,84 @@
 
 	const selectZhimiOption = (index) => {
 		selectedZhimiIndex.value = index;
-		customAmount.value = ''; // 清空自定义输入
+		customAmount.value = '';
 	};
 
 	const onCustomInput = () => {
 		if (customAmount.value) {
-			selectedZhimiIndex.value = -1; // 取消快捷选中
+			selectedZhimiIndex.value = -1;
 		}
 	};
 
 	const selectMemberLevel = (level) => {
-		selectedMemberId.value = level.id;
+		// 核心逻辑：isChoice 为 0 时不可选
+		if (level.isChoice === 0) {
+			uni.showToast({
+				title: '该等级不可选',
+				icon: 'none'
+			});
+			return;
+		}
+		// 【修复】使用 level 字段进行选中标记
+		selectedLevelNum.value = level.level;
 	};
 
 	const fetchUserInfo = async () => {
 		const {
 			data
 		} = await request('/app-api/member/user/get');
-		if (data) userInfo.value = data;
+		if (data) {
+			userInfo.value = data;
+			currentMemberLevelName.value = data.topUpLevel?.name || data.topUpLevelName || '普通用户';
+		}
 	};
 
-	// 从后端获取会员等级
-	// const fetchMemberLevels = async () => {
-	// 	const {
-	// 		data,
-	// 		error
-	// 	} = await request('/app-api/member/top-up-level/list');
-	// 	if (!error && data) {
-	// 		// 排序并设置默认选中
-	// 		memberLevels.value = data.sort((a, b) => a.experience - b.experience);
-	// 		// ... (设置 selectedMemberId 的逻辑)
-	// 	}
-	// };
+	const fetchMemberLevels = async () => {
+		const {
+			data,
+			error
+		} = await request('/app-api/member/top-up-level/list');
+		if (!error && data) {
+			// 排序
+			const sortedList = data.sort((a, b) => a.level - b.level);
+			memberLevels.value = sortedList;
 
-	// 跳转到会员详情页
+			// 自动选中：找到第一个 isChoice === 1 的等级
+			const firstChoice = sortedList.find(item => item.isChoice === 1);
+			if (firstChoice) {
+				// 【修复】使用 level 字段
+				selectedLevelNum.value = firstChoice.level;
+			}
+		}
+	};
+
 	const goToMemberDetails = () => {
-		// 找到当前选中的等级对象
-		const currentLevel = memberLevels.value.find(item => item.id === selectedMemberId.value);
-
-		// 获取对应的 level 值（后端用于排序的数字，例如 1, 2, 3）
-		// 如果没选中，默认传 1
-		const targetLevelNum = currentLevel ? currentLevel.level : 1;
-
+		// 【修复】使用 selectedLevelNum
 		uni.navigateTo({
-			// 带上参数，让详情页自动定位到对应的 Tab
-			url: `/pages/my-memberDetails/my-memberDetails?level=${targetLevelNum}`
+			url: `/pages/my-memberDetails/my-memberDetails?level=${selectedLevelNum.value || 1}`
 		});
 	};
 
 	// --- 核心支付逻辑 ---
 
-	/**
-	 * 第一步：创建订单
-	 * 根据后端新需求调整参数：
-	 * 1. 会员充值：传 payType=2, levelId, userId (不传 amount)
-	 * 2. 智米充值：传 payType=1, amount, userId
-	 */
 	const createOrder = async () => {
+		// 找到选中的对象
+		const selectedLevelObj = memberLevels.value.find(l => l.level === selectedLevelNum.value);
+
 		let payload = {
 			userId: userInfo.value.id,
-			payType: currentTab.value, // 1-智米, 2-会员
+			payType: currentTab.value,
 			remark: currentTab.value === 2 ?
-				`购买会员:${memberLevels.value.find(l=>l.id===selectedMemberId.value)?.name}` : '充值智米'
+				`购买会员:${selectedLevelObj?.name}` : '充值智米'
 		};
 
 		if (currentTab.value === 2) {
-			// --- 会员充值特殊逻辑 ---
-			// 1. 传递 levelId
-			payload.levelId = selectedMemberId.value;
-			// 2. 根据要求，不需要传 amount (后端自己算)
-			// 如果你原来的逻辑依赖 amount 做前端展示，没关系，这里不传给后端即可
+			// 会员充值
+			// 【修复】尝试传 id，如果 id 不存在，传 level，或者根据后端文档需求
+			// 这里优先取 id，没有则取 level (视后端接口定义而定)
+			payload.levelId = selectedLevelObj.id || selectedLevelObj.level;
 		} else {
-			// --- 智米充值逻辑 (保持不变) ---
+			// 智米充值
 			payload.amount = parseFloat(payAmount.value);
 		}
 
@@ -290,15 +286,9 @@
 		});
 
 		if (error) throw new Error(error);
-
-		// 后端直接返回 orderNo
 		return data;
 	};
 
-	/**
-	 * 2. 获取微信支付参数 (Step 2)
-	 * 调用 /pay 接口
-	 */
 	const getPayParams = async (orderNo) => {
 		console.log('正在获取支付签名，订单号:', orderNo);
 		const {
@@ -310,30 +300,17 @@
 				orderNo: orderNo.orderNo
 			}
 		});
-
 		if (error) throw new Error(error);
-		return data; // 返回 { timeStamp, nonceStr, package ... }
+		return data;
 	};
 
-	/**
-	 * 3. 调起微信支付 (Step 3)
-	 */
 	const requestWxPayment = (params) => {
 		return new Promise((resolve, reject) => {
 			uni.requestPayment({
 				provider: 'weixin',
-				timeStamp: params.timeStamp,
-				nonceStr: params.nonceStr,
-				package: params.package,
-				signType: params.signType,
-				paySign: params.paySign,
-				success: (res) => {
-					console.log('微信支付成功:', res);
-					resolve(res);
-				},
+				...params,
+				success: (res) => resolve(res),
 				fail: (err) => {
-					console.error('微信支付失败/取消:', err);
-					// 用户取消支付 err.errMsg 通常包含 'cancel'
 					if (err.errMsg.includes('cancel')) {
 						reject(new Error('用户取消支付'));
 					} else {
@@ -344,22 +321,19 @@
 		});
 	};
 
-	/**
-	 * 主支付流程
-	 */
 	const handleRecharge = async () => {
-		// 1. 权限与参数校验
 		if (!checkLoginGuard()) return;
 
-		if (parseFloat(payAmount.value) <= 0) {
+		const amount = parseFloat(payAmount.value);
+
+		// 允许 0 元订单 (如免费升级)
+		if (amount < 0) {
 			return uni.showToast({
 				title: '支付金额异常',
 				icon: 'none'
 			});
 		}
-
-		// 智米充值最小金额限制
-		if (currentTab.value === 1 && parseFloat(payAmount.value) < 1) {
+		if (currentTab.value === 1 && amount < 1) {
 			return uni.showToast({
 				title: '智米最小充值 1 元',
 				icon: 'none'
@@ -373,21 +347,17 @@
 		});
 
 		try {
-			// Step 1: 创建订单，获取 orderNo
 			const orderNo = await createOrder();
-			console.log('订单创建成功，订单号:', orderNo);
+
+			// 如果是 0 元订单，可能不需要拉起支付，视后端逻辑而定
+			// 这里假设所有订单都要走获取参数流程
 
 			uni.showLoading({
 				title: '请求支付中...'
 			});
-
-			// Step 2: 获取支付签名
 			const payParams = await getPayParams(orderNo);
-
-			// Step 3: 拉起微信支付
 			await requestWxPayment(payParams);
 
-			// Step 4: 支付成功处理
 			uni.hideLoading();
 			uni.showToast({
 				title: '支付成功',
@@ -395,19 +365,13 @@
 				duration: 2000
 			});
 
-			// 延迟刷新或返回
 			setTimeout(() => {
-				// 刷新用户信息以更新余额/会员状态
-				// fetchUserInfo(); 
-				// 或者返回上一页
 				uni.navigateBack();
 			}, 1500);
 
 		} catch (error) {
 			uni.hideLoading();
 			const msg = error.message || '支付异常';
-			console.error('支付流程中断:', error);
-
 			if (msg === '用户取消支付') {
 				uni.showToast({
 					title: '已取消支付',
@@ -427,6 +391,7 @@
 </script>
 
 <style lang="scss" scoped>
+	/* 保持原有样式不变 */
 	$theme-color: #FF6E00;
 	$bg-color: #f5f6fa;
 
@@ -435,11 +400,12 @@
 		background-color: $bg-color;
 		display: flex;
 		flex-direction: column;
-		/* 留出底部操作栏的高度 */
 		padding-bottom: 350rpx;
 	}
 
-	/* 顶部 Tab */
+	/* ... (此处省略未改动的样式，请保留你原有的样式代码) ... */
+
+	/* 为了完整性，这里补充关键样式 */
 	.tabs-header {
 		display: flex;
 		background-color: #fff;
@@ -575,6 +541,17 @@
 		align-items: center;
 		margin-bottom: 20rpx;
 		margin-top: 10rpx;
+
+		.current-level-info {
+			font-size: 30rpx;
+			color: #333;
+			font-weight: bold;
+
+			.highlight {
+				color: $theme-color;
+				margin-left: 10rpx;
+			}
+		}
 	}
 
 	/* 查看详情链接样式 */
@@ -624,28 +601,69 @@
 			background-color: #fff8f0;
 		}
 
-		/* 推荐的高亮样式 */
-		&.recommended {
-			/* border-color: #FFD700; */
+		&.disabled {
+			background-color: #f0f0f0;
+			opacity: 0.8;
+
+			.level-name,
+			.original-price,
+			.currency,
+			.price {
+				color: #999 !important;
+			}
+
+			.radio-circle {
+				background-color: #e0e0e0;
+				border-color: #ccc;
+			}
+		}
+
+		.disabled-mask {
+			position: absolute;
+			right: 0;
+			top: 0;
+			background-color: #ccc;
+			color: #fff;
+			font-size: 20rpx;
+			padding: 4rpx 12rpx;
+			border-bottom-left-radius: 12rpx;
 		}
 
 		.card-left {
 			.level-name {
-				font-size: 30rpx;
+				font-size: 32rpx;
 				font-weight: bold;
 				color: #333;
-				margin-bottom: 8rpx;
 			}
 
 			.level-desc {
 				font-size: 24rpx;
+				color: #666;
+			}
+
+			.original-price {
+				font-size: 24rpx;
 				color: #999;
+				text-decoration: line-through;
+				margin-top: 4rpx;
 			}
 		}
 
 		.card-right {
 			display: flex;
-			align-items: baseline;
+			align-items: center;
+
+			.price-label {
+				font-size: 22rpx;
+				color: #999;
+				margin-right: 10rpx;
+			}
+
+			.price-wrapper {
+				display: flex;
+				align-items: baseline;
+				margin-right: 20rpx;
+			}
 
 			.currency {
 				font-size: 24rpx;
@@ -656,13 +674,7 @@
 				font-size: 40rpx;
 				font-weight: bold;
 				color: #333;
-				margin: 0 4rpx;
-			}
-
-			.period {
-				font-size: 24rpx;
-				color: #999;
-				margin-right: 20rpx;
+				margin-left: 4rpx;
 			}
 
 			.radio-circle {
@@ -673,6 +685,7 @@
 				display: flex;
 				align-items: center;
 				justify-content: center;
+				background-color: #fff;
 
 				.radio-inner {
 					width: 20rpx;
@@ -690,6 +703,23 @@
 		&.active .price,
 		&.active .currency {
 			color: $theme-color;
+		}
+	}
+
+	.price-diff-tip {
+		margin-top: 30rpx;
+		font-size: 22rpx;
+		color: #999;
+		background-color: #f9f9f9;
+		padding: 20rpx;
+		border-radius: 12rpx;
+		display: flex;
+		align-items: flex-start;
+		line-height: 1.5;
+
+		uni-icons {
+			margin-right: 8rpx;
+			margin-top: 4rpx;
 		}
 	}
 
@@ -717,7 +747,6 @@
 
 	.action-area {
 		padding: 20rpx 30rpx;
-		/* 适配 iPhone X 底部安全区 */
 		padding-bottom: calc(20rpx + env(safe-area-inset-bottom));
 		display: flex;
 		align-items: center;

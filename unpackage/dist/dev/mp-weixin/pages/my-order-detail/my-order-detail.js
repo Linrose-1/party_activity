@@ -61,8 +61,9 @@ const _sfc_main = {
         if (error)
           throw new Error(error);
         detail.value = data;
+        common_vendor.index.__f__("log", "at pages/my-order-detail/my-order-detail.vue:169", "订单详情数据:", data);
       } catch (e) {
-        common_vendor.index.__f__("error", "at pages/my-order-detail/my-order-detail.vue:163", "获取详情失败", e);
+        common_vendor.index.__f__("error", "at pages/my-order-detail/my-order-detail.vue:171", "获取详情失败", e);
         loadError.value = true;
       } finally {
         isLoading.value = false;
@@ -184,34 +185,42 @@ const _sfc_main = {
         }),
         j: common_vendor.o(($event) => copyText(detail.value.orderNo)),
         k: common_vendor.t(formatTime(detail.value.createTime)),
-        l: common_vendor.t(productName.value),
-        m: common_vendor.t(detail.value.remark || productName.value),
-        n: detail.value.imageUrls
-      }, detail.value.imageUrls ? {
-        o: detail.value.imageUrls,
-        p: common_vendor.o(($event) => previewImage(detail.value.imageUrls))
+        l: detail.value.payTime
+      }, detail.value.payTime ? {
+        m: common_vendor.t(formatTime(detail.value.payTime))
       } : {}, {
-        q: common_vendor.t(detail.value.amount),
-        r: common_vendor.p({
+        n: common_vendor.t(productName.value),
+        o: common_vendor.t(detail.value.remark || productName.value),
+        p: detail.value.expirationTime
+      }, detail.value.expirationTime ? {
+        q: common_vendor.t(formatTime(detail.value.expirationTime))
+      } : {}, {
+        r: detail.value.imageUrls
+      }, detail.value.imageUrls ? {
+        s: detail.value.imageUrls,
+        t: common_vendor.o(($event) => previewImage(detail.value.imageUrls))
+      } : {}, {
+        v: common_vendor.t(detail.value.amount),
+        w: common_vendor.p({
           type: "headphones",
           size: "20",
           color: "#666"
         }),
-        s: common_vendor.o(handleContact),
-        t: !isPaid.value
+        x: common_vendor.o(handleContact),
+        y: !isPaid.value
       }, !isPaid.value ? {
-        v: common_vendor.o(handleRepay),
-        w: isPaying.value
+        z: common_vendor.o(handleRepay),
+        A: isPaying.value
       } : {}) : common_vendor.e({
-        x: isLoading.value
+        B: isLoading.value
       }, isLoading.value ? {
-        y: common_vendor.p({
+        C: common_vendor.p({
           status: "loading"
         })
       } : loadError.value ? {
-        A: common_vendor.o(fetchDetail)
+        E: common_vendor.o(fetchDetail)
       } : {}, {
-        z: loadError.value
+        D: loadError.value
       }));
     };
   }

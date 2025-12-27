@@ -1,95 +1,214 @@
 /* 水平间距 */
 /* 水平间距 */
-/* --- 基础与布局 --- */
+/* --- 页面布局 --- */
 .page-container.data-v-abc533c5 {
-  background-color: #f4f7f9;
-  min-height: 100vh;
-}
-.content-wrapper.data-v-abc533c5 {
-  padding: 40rpx;
-}
-.header.data-v-abc533c5 {
-  text-align: center;
-  margin-bottom: 40rpx;
-}
-.header .title.data-v-abc533c5 {
-  display: block;
-  font-size: 52rpx;
-  font-weight: 800;
-  color: #2c3e50;
-  margin-bottom: 10rpx;
-}
-.header .subtitle.data-v-abc533c5 {
-  display: block;
-  font-size: 28rpx;
-  color: #7f8c8d;
+  background-color: #F5F7FA;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
-/* --- 吸顶导航 Tab --- */
+/* --- 1. 顶部 Tab 导航 --- */
 .main-nav.data-v-abc533c5 {
-  position: -webkit-sticky;
-  position: sticky;
-  top: 0;
-  /* 如果有原生导航栏，H5端可能需要 var(--window-top) */
-  background-color: rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  z-index: 100;
-  padding: 15rpx 20rpx;
-  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
+  background-color: #fff;
+  padding: 0 20rpx;
+  height: 90rpx;
   display: flex;
   justify-content: space-around;
-  /* 改为 space-around 使其均匀分布 */
   align-items: center;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.03);
+  z-index: 10;
 }
-.nav-link.data-v-abc533c5 {
-  color: #555;
-  font-weight: 500;
-  font-size: 28rpx;
-  padding: 15rpx 10rpx;
-  position: relative;
-  transition: color 0.3s ease, font-weight 0.3s ease;
-  text-align: center;
-}
-
-/* 激活状态的 Tab 样式 */
-.nav-link.active.data-v-abc533c5 {
-  color: #FF6B00;
-  font-weight: 700;
-}
-
-/* 激活状态的下划线 */
-.nav-link.active.data-v-abc533c5::after {
-  content: "";
-  position: absolute;
-  bottom: 5rpx;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 50%;
-  height: 6rpx;
-  background-color: #FF6B00;
-  border-radius: 3rpx;
-  transition: width 0.3s ease;
-}
-
-/* --- Swiper 容器和内容 --- */
-.membership-swiper.data-v-abc533c5 {
-  margin-top: 20rpx;
-  /* 移除固定的 height 属性，因为它现在由 style 动态控制 */
-  /* height: 1200rpx; */
-  /* 添加一个过渡效果，让高度变化更平滑 */
-  transition: height 0.3s ease-in-out;
-}
-.swiper-item.data-v-abc533c5 {
+.nav-item.data-v-abc533c5 {
+  height: 100%;
   display: flex;
+  flex-direction: column;
   justify-content: center;
-  align-items: flex-start;
-  /* 图片从顶部开始显示 */
+  align-items: center;
+  position: relative;
+  padding: 0 20rpx;
 }
-.benefit-image.data-v-abc533c5 {
-  width: 100%;
-  border-radius: 20rpx;
-  box-shadow: 0 10rpx 40rpx rgba(0, 0, 0, 0.1);
-  /* 防止图片下方因行内元素特性出现微小间距 */
-  vertical-align: top;
+.nav-text.data-v-abc533c5 {
+  font-size: 28rpx;
+  color: #666;
+  font-weight: 500;
+  transition: all 0.3s;
+}
+.nav-text.active.data-v-abc533c5 {
+  font-size: 30rpx;
+  color: #333;
+  font-weight: bold;
+}
+.nav-indicator.data-v-abc533c5 {
+  position: absolute;
+  bottom: 10rpx;
+  width: 40rpx;
+  height: 6rpx;
+  background: linear-gradient(90deg, #FF8C00, #FF6B00);
+  border-radius: 3rpx;
+}
+
+/* --- 2. Swiper 内容区 --- */
+.content-swiper.data-v-abc533c5 {
+  flex: 1;
+  /* 占据剩余高度 */
+  height: 0;
+  /* 配合 flex:1 使用 */
+}
+.card-scroll-view.data-v-abc533c5 {
+  height: 100%;
+}
+.card-wrapper.data-v-abc533c5 {
+  padding: 40rpx 30rpx;
+}
+
+/* --- 3. 会员卡片主体 --- */
+.membership-card.data-v-abc533c5 {
+  background-color: #fff;
+  border-radius: 24rpx;
+  box-shadow: 0 8rpx 30rpx rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  position: relative;
+}
+
+/* --- A. 头部设计 (根据等级变换颜色) --- */
+.card-header.data-v-abc533c5 {
+  height: 360rpx;
+  /* 增加高度，包含图标和文字 */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #333;
+  padding-bottom: 60rpx;
+  /* 留出空间给 Stats Box */
+}
+.icon-box.data-v-abc533c5 {
+  margin-bottom: 20rpx;
+  opacity: 0.9;
+}
+.level-icon-img.data-v-abc533c5 {
+  width: 100rpx;
+  /* 设置合适的宽度，约等于 size=48 的图标大小 */
+  height: 100rpx;
+  display: block;
+  /* 消除图片底部间隙 */
+}
+.level-name.data-v-abc533c5 {
+  font-size: 48rpx;
+  font-weight: 800;
+  margin-bottom: 16rpx;
+  letter-spacing: 2rpx;
+}
+.price-row.data-v-abc533c5 {
+  font-size: 30rpx;
+  opacity: 0.8;
+}
+.price-row .price-val.data-v-abc533c5 {
+  font-weight: bold;
+  font-size: 34rpx;
+}
+
+/* --- 主题配色方案 (背景渐变) --- */
+/* 1. 玄铁 (灰蓝/钢色) */
+.theme-level-1 .card-header.data-v-abc533c5 {
+  background: linear-gradient(180deg, #CFD9DF 0%, #E2EBF0 100%);
+  color: #4A5568;
+}
+
+/* 2. 青铜 (铜色/淡褐) */
+.theme-level-2 .card-header.data-v-abc533c5 {
+  background: linear-gradient(180deg, #E6DADA 0%, #F4EBEB 100%);
+  /* 或者用更像截图的浅色 */
+  background: linear-gradient(180deg, #EADBC8 0%, #F5EFE6 100%);
+  color: #8D6E63;
+}
+
+/* 3. 白银 (银白/灰) */
+.theme-level-3 .card-header.data-v-abc533c5 {
+  background: linear-gradient(180deg, #E0E0E0 0%, #F5F5F5 100%);
+  color: #616161;
+}
+
+/* 4. 黄金 (金黄/淡黄) */
+.theme-level-4 .card-header.data-v-abc533c5 {
+  background: linear-gradient(180deg, #FFE082 0%, #FFF8E1 100%);
+  color: #856404;
+}
+
+/* 5. 黑钻 (深灰/黑) */
+.theme-level-5 .card-header.data-v-abc533c5 {
+  background: linear-gradient(180deg, #424242 0%, #757575 100%);
+  color: #FFD700;
+  /* 金色文字 */
+}
+
+/* --- B. 悬浮数据统计条 --- */
+.stats-box.data-v-abc533c5 {
+  position: relative;
+  margin: -50rpx 30rpx 0;
+  /* 负 margin 实现悬浮覆盖效果 */
+  background-color: #fff;
+  border-radius: 16rpx;
+  padding: 30rpx 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.06);
+  border: 1rpx solid #f0f0f0;
+}
+.stat-item.data-v-abc533c5 {
+  display: flex;
+  align-items: center;
+  font-size: 28rpx;
+}
+.stat-label.data-v-abc533c5 {
+  color: #666;
+}
+.stat-value.data-v-abc533c5 {
+  font-weight: bold;
+  color: #333;
+  margin-left: 8rpx;
+}
+.stat-divider.data-v-abc533c5 {
+  width: 1rpx;
+  height: 30rpx;
+  background-color: #eee;
+}
+
+/* --- C. 权益列表 --- */
+.benefits-section.data-v-abc533c5 {
+  padding: 50rpx 40rpx;
+}
+.section-title.data-v-abc533c5 {
+  font-size: 34rpx;
+  font-weight: 800;
+  color: #2c3e50;
+  margin-bottom: 30rpx;
+}
+.benefit-list.data-v-abc533c5 {
+  display: flex;
+  flex-direction: column;
+  gap: 30rpx;
+}
+.benefit-item.data-v-abc533c5 {
+  display: flex;
+  align-items: flex-start;
+}
+.check-icon.data-v-abc533c5 {
+  margin-top: 4rpx;
+  margin-right: 20rpx;
+  flex-shrink: 0;
+}
+.benefit-text.data-v-abc533c5 {
+  font-size: 28rpx;
+  color: #555;
+  line-height: 1.6;
+  text-align: justify;
+}
+.empty-benefit.data-v-abc533c5 {
+  text-align: center;
+  color: #999;
+  font-size: 26rpx;
+  padding: 20rpx 0;
 }

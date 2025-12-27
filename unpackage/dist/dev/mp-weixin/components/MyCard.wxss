@@ -10,6 +10,12 @@
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   background-color: #f9f9f9;
 }
+.select-text.data-v-0262bca8 {
+  user-select: text;
+  -webkit-user-select: text;
+  /* Safari/Chrome */
+  cursor: text;
+}
 .card-front.data-v-0262bca8 {
   background: linear-gradient(to bottom, #ffffff, #fdfdfd);
   padding: 40rpx;
