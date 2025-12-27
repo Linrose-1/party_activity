@@ -5,23 +5,17 @@
 }
 .drag-area.data-v-15512d7a {
 		width: 100%;
-		/* 高度由 inline-style 控制 */
 }
 .drag-item.data-v-15512d7a {
-		position: absolute;
-		/* 【关键】确保 movable-view 内部内容能撑开 */
-		display: flex;
-		flex-direction: column;
+		/* 注意：movable-view 不需要 absolute，它自带定位机制 */
+		/* 这里只控制 z-index，背景色等用于调试 */
+		z-index: 10;
 }
 .item-inner.data-v-15512d7a {
-		/* 【关键】宽高必须 100% */
 		width: 100%;
 		height: 100%;
-		/* 控制间距 */
-		padding: 8rpx;
-		/* 确保 padding 不会撑大盒子 */
+		/* 核心：利用 padding 制造格子之间的间距 */
+		padding: 10rpx;
 		box-sizing: border-box;
-		/* 让内部元素（插槽内容）能撑满 */
-		display: flex;
-		flex-direction: column;
+		display: block;
 }

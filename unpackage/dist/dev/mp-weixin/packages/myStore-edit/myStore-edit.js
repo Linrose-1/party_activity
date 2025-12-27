@@ -12,6 +12,8 @@ const _easycom_uni_icons = () => "../../uni_modules/uni-icons/components/uni-ico
 if (!Math) {
   (_easycom_uni_easyinput + _easycom_uni_icons)();
 }
+const dragColumns = 3;
+const dragItemHeightRpx = 210;
 const _sfc_main = {
   __name: "myStore-edit",
   setup(__props) {
@@ -115,7 +117,7 @@ const _sfc_main = {
       }
       if (data && Array.isArray(data)) {
         categoryList.value = data;
-        common_vendor.index.__f__("log", "at packages/myStore-edit/myStore-edit.vue:271", "成功获取聚店类别:", categoryList.value);
+        common_vendor.index.__f__("log", "at packages/myStore-edit/myStore-edit.vue:358", "成功获取聚店类别:", categoryList.value);
       }
     };
     const getStoreDetails = async (storeId) => {
@@ -169,7 +171,7 @@ const _sfc_main = {
           description: d.description || ""
         }));
       } catch (e) {
-        common_vendor.index.__f__("warn", "at packages/myStore-edit/myStore-edit.vue:338", "解析营业时间失败或为新建状态，将使用默认值:", e.message);
+        common_vendor.index.__f__("warn", "at packages/myStore-edit/myStore-edit.vue:425", "解析营业时间失败或为新建状态，将使用默认值:", e.message);
         editableHours.regular = weekdays.map((dayInfo) => ({
           key: dayInfo.key,
           label: dayInfo.label,
@@ -368,6 +370,116 @@ const _sfc_main = {
         setTimeout(() => common_vendor.index.navigateBack(), 1500);
       }
     };
+    const dragDisplayList = common_vendor.ref([]);
+    const dragItemWidth = common_vendor.ref(0);
+    const dragItemHeight = common_vendor.ref(0);
+    const dragAreaHeight = common_vendor.ref(0);
+    const isDragging = common_vendor.ref(false);
+    const dragIndex = common_vendor.ref(-1);
+    const initDragLayout = () => {
+      const sys = common_vendor.index.getSystemInfoSync();
+      const containerWidth = sys.windowWidth - common_vendor.index.upx2px(100);
+      dragItemWidth.value = containerWidth / dragColumns;
+      dragItemHeight.value = common_vendor.index.upx2px(dragItemHeightRpx);
+    };
+    common_vendor.watch(() => coverImages.value, (newVal) => {
+      if (!isDragging.value) {
+        initDragList(newVal);
+      }
+    }, {
+      deep: true
+    });
+    const initDragList = (originList) => {
+      if (!originList || originList.length === 0) {
+        dragDisplayList.value = [];
+        dragAreaHeight.value = 0;
+        return;
+      }
+      if (dragItemWidth.value === 0)
+        initDragLayout();
+      dragDisplayList.value = originList.map((url, index) => {
+        const {
+          x,
+          y
+        } = getPos(index);
+        return {
+          id: `img_${index}_${Math.random()}`,
+          data: url,
+          x,
+          y,
+          zIndex: 1,
+          realIndex: index
+        };
+      });
+      updateDragHeight();
+    };
+    const getPos = (index) => {
+      const row = Math.floor(index / dragColumns);
+      const col = index % dragColumns;
+      return {
+        x: col * dragItemWidth.value,
+        y: row * dragItemHeight.value
+      };
+    };
+    const updateDragHeight = () => {
+      const count = dragDisplayList.value.length;
+      const rows = Math.ceil(count / dragColumns);
+      dragAreaHeight.value = (rows || 1) * dragItemHeight.value;
+    };
+    const onMovableStart = (index) => {
+      isDragging.value = true;
+      dragIndex.value = index;
+      dragDisplayList.value[index].zIndex = 99;
+    };
+    const onMovableChange = (e, index) => {
+      if (!isDragging.value || index !== dragIndex.value)
+        return;
+      const x = e.detail.x;
+      const y = e.detail.y;
+      const centerX = x + dragItemWidth.value / 2;
+      const centerY = y + dragItemHeight.value / 2;
+      const col = Math.floor(centerX / dragItemWidth.value);
+      const row = Math.floor(centerY / dragItemHeight.value);
+      let targetIndex = row * dragColumns + col;
+      if (targetIndex < 0)
+        targetIndex = 0;
+      if (targetIndex >= dragDisplayList.value.length)
+        targetIndex = dragDisplayList.value.length - 1;
+      if (targetIndex !== dragIndex.value) {
+        const mover = dragDisplayList.value[dragIndex.value];
+        dragDisplayList.value.splice(dragIndex.value, 1);
+        dragDisplayList.value.splice(targetIndex, 0, mover);
+        dragDisplayList.value.forEach((item, idx) => {
+          if (idx !== targetIndex) {
+            const pos = getPos(idx);
+            item.x = pos.x;
+            item.y = pos.y;
+          }
+        });
+        dragIndex.value = targetIndex;
+      }
+    };
+    const onMovableEnd = () => {
+      isDragging.value = false;
+      if (dragIndex.value !== -1) {
+        const item = dragDisplayList.value[dragIndex.value];
+        item.zIndex = 1;
+        const pos = getPos(dragIndex.value);
+        common_vendor.nextTick$1(() => {
+          item.x = pos.x;
+          item.y = pos.y;
+        });
+        const sortedUrls = dragDisplayList.value.map((wrapper) => wrapper.data);
+        coverImages.value = sortedUrls;
+      }
+      dragIndex.value = -1;
+    };
+    const previewCoverImage = (index) => {
+      common_vendor.index.previewImage({
+        urls: coverImages.value,
+        current: index
+      });
+    };
     return (_ctx, _cache) => {
       return common_vendor.e({
         a: !isLoading.value
@@ -376,82 +488,120 @@ const _sfc_main = {
         c: common_vendor.p({
           placeholder: "请输入聚店名称",
           inputBorder: false,
+          styles: {
+            backgroundColor: "transparent"
+          },
+          placeholderStyle: "color:#bbb;font-size:28rpx;",
           modelValue: form.value.storeName
         }),
         d: common_vendor.t(categoryMap.value[form.value.category] || "请选择聚店类别"),
-        e: common_vendor.p({
+        e: common_vendor.n(form.value.category ? "is-value" : "is-placeholder"),
+        f: common_vendor.p({
           type: "right",
-          size: "16",
-          color: "#999"
-        }),
-        f: categoryOptions.value,
-        g: categoryOptions.value.indexOf(categoryMap.value[form.value.category]),
-        h: common_vendor.o(handleCategoryChange),
-        i: common_vendor.f(coverImages.value, (img, index, i0) => {
-          return {
-            a: img,
-            b: common_vendor.o(($event) => deleteCoverImage(index), index),
-            c: index
-          };
-        }),
-        j: coverImages.value.length < 9
-      }, coverImages.value.length < 9 ? {
-        k: common_vendor.p({
-          type: "plusempty",
-          size: "30",
+          size: "14",
           color: "#ccc"
         }),
-        l: common_vendor.o(handleCoverImageUpload)
-      } : {}, {
-        m: common_vendor.t(form.value.fullAddress || "点击选择位置"),
-        n: common_vendor.p({
-          type: "right",
-          size: "16",
-          color: "#999"
+        g: categoryOptions.value,
+        h: categoryOptions.value.indexOf(categoryMap.value[form.value.category]),
+        i: common_vendor.o(handleCategoryChange),
+        j: common_vendor.f(dragDisplayList.value, (item, index, i0) => {
+          return {
+            a: item.data,
+            b: common_vendor.o(($event) => previewCoverImage(item.realIndex), item.id),
+            c: "856a9ece-2-" + i0,
+            d: common_vendor.o(($event) => deleteCoverImage(item.realIndex), item.id),
+            e: item.id,
+            f: item.x,
+            g: item.y,
+            h: item.zIndex,
+            i: !isDragging.value && item.zIndex === 1,
+            j: common_vendor.o(($event) => onMovableChange($event, index), item.id),
+            k: common_vendor.o(($event) => onMovableStart(index), item.id),
+            l: common_vendor.o(onMovableEnd, item.id)
+          };
         }),
-        o: common_vendor.o(openMapToChooseLocation),
-        p: common_vendor.o(($event) => form.value.storeDescription = $event),
+        k: common_vendor.p({
+          type: "closeempty",
+          size: "12",
+          color: "#fff"
+        }),
+        l: dragItemWidth.value + "px",
+        m: dragItemHeight.value + "px",
+        n: dragAreaHeight.value + "px",
+        o: dragAreaHeight.value > 0 ? dragAreaHeight.value + "px" : "0",
+        p: coverImages.value.length < 9
+      }, coverImages.value.length < 9 ? {
         q: common_vendor.p({
+          type: "plusempty",
+          size: "28",
+          color: "#ccc"
+        }),
+        r: common_vendor.o(handleCoverImageUpload)
+      } : {}, {
+        s: common_vendor.p({
+          type: "info",
+          size: "14",
+          color: "#FF9800"
+        }),
+        t: common_vendor.p({
+          type: "location-filled",
+          size: "18",
+          color: "#FF6B00"
+        }),
+        v: common_vendor.t(form.value.fullAddress || "点击在地图上选择"),
+        w: common_vendor.n(form.value.fullAddress ? "is-value" : "is-placeholder"),
+        x: common_vendor.p({
+          type: "right",
+          size: "14",
+          color: "#ccc"
+        }),
+        y: common_vendor.o(openMapToChooseLocation),
+        z: common_vendor.o(($event) => form.value.storeDescription = $event),
+        A: common_vendor.p({
           type: "textarea",
-          placeholder: "请输入聚店简介",
+          placeholder: "请简要介绍您的店铺特色、服务内容等...",
           inputBorder: false,
+          styles: {
+            backgroundColor: "transparent"
+          },
+          placeholderStyle: "color:#bbb;font-size:28rpx;",
           modelValue: form.value.storeDescription
         }),
-        r: common_vendor.f(editableHours.regular, (day, index, i0) => {
+        B: common_vendor.f(editableHours.regular, (day, index, i0) => {
           return common_vendor.e({
             a: common_vendor.t(day.label),
             b: day.isOpen
           }, day.isOpen ? {
             c: common_vendor.t(day.openTime),
             d: day.openTime,
-            e: common_vendor.o((e) => day.openTime = e.detail.value, index)
+            e: common_vendor.o((e) => day.openTime = e.detail.value, index),
+            f: common_vendor.t(day.closeTime),
+            g: day.closeTime,
+            h: common_vendor.o((e) => day.closeTime = e.detail.value, index)
           } : {}, {
-            f: day.isOpen
-          }, day.isOpen ? {} : {}, {
-            g: day.isOpen
-          }, day.isOpen ? {
-            h: common_vendor.t(day.closeTime),
-            i: day.closeTime,
-            j: common_vendor.o((e) => day.closeTime = e.detail.value, index)
-          } : {}, {
-            k: day.isOpen,
-            l: common_vendor.o((e) => day.isOpen = e.detail.value, index),
-            m: index
+            i: day.isOpen,
+            j: common_vendor.o((e) => day.isOpen = e.detail.value, index),
+            k: index
           });
         }),
-        s: common_vendor.o(addSpecialHour),
-        t: editableHours.special.length === 0
+        C: common_vendor.p({
+          type: "plusempty",
+          size: "12",
+          color: "#FF6B00"
+        }),
+        D: common_vendor.o(addSpecialHour),
+        E: editableHours.special.length === 0
       }, editableHours.special.length === 0 ? {} : {}, {
-        v: common_vendor.f(editableHours.special, (specialDay, index, i0) => {
+        F: common_vendor.f(editableHours.special, (specialDay, index, i0) => {
           return common_vendor.e({
-            a: "856a9ece-5-" + i0,
+            a: "856a9ece-9-" + i0,
             b: common_vendor.t(specialDay.date || "选择日期"),
             c: specialDay.date,
             d: common_vendor.o((e) => specialDay.date = e.detail.value, index),
             e: specialDay.is_open,
             f: common_vendor.o((e) => specialDay.is_open = e.detail.value, index),
-            g: common_vendor.o(($event) => removeSpecialHour(index), index),
-            h: "856a9ece-6-" + i0,
+            g: "856a9ece-10-" + i0,
+            h: common_vendor.o(($event) => removeSpecialHour(index), index),
             i: specialDay.is_open
           }, specialDay.is_open ? {
             j: common_vendor.t(specialDay.open),
@@ -459,53 +609,63 @@ const _sfc_main = {
             l: common_vendor.o((e) => specialDay.open = e.detail.value, index),
             m: common_vendor.t(specialDay.close),
             n: specialDay.close,
-            o: common_vendor.o((e) => specialDay.close = e.detail.value, index)
+            o: common_vendor.o((e) => specialDay.close = e.detail.value, index),
+            p: specialDay.description,
+            q: common_vendor.o(($event) => specialDay.description = $event.detail.value, index)
           } : {}, {
-            p: "856a9ece-7-" + i0,
-            q: common_vendor.o(($event) => specialDay.description = $event, index),
-            r: common_vendor.p({
-              placeholder: "备注说明 (如：跨年夜延长)",
-              inputBorder: false,
-              modelValue: specialDay.description
-            }),
-            s: index
+            r: index
           });
         }),
-        w: common_vendor.p({
-          type: "calendar-filled",
-          size: "16",
+        G: common_vendor.p({
+          type: "calendar",
+          size: "14",
           color: "#666"
         }),
-        x: common_vendor.p({
-          type: "trash-filled",
-          size: "22",
-          color: "#e43d33"
+        H: common_vendor.p({
+          type: "trash",
+          size: "16",
+          color: "#999"
         }),
-        y: common_vendor.o(($event) => form.value.contactPhone = $event),
-        z: common_vendor.p({
-          type: "text",
-          placeholder: "请输入联系电话",
+        I: common_vendor.o(($event) => form.value.contactPhone = $event),
+        J: common_vendor.p({
+          type: "number",
+          placeholder: "请输入电话",
           inputBorder: false,
+          styles: {
+            backgroundColor: "transparent"
+          },
           modelValue: form.value.contactPhone
         }),
-        A: common_vendor.o(($event) => form.value.averageConsumptionRange = $event),
-        B: common_vendor.p({
+        K: common_vendor.o(($event) => form.value.averageConsumptionRange = $event),
+        L: common_vendor.p({
           type: "text",
-          placeholder: "例如：100-200",
+          placeholder: "如: 100-200",
           inputBorder: false,
+          styles: {
+            backgroundColor: "transparent"
+          },
           modelValue: form.value.averageConsumptionRange
         }),
-        C: form.value.contactWechatQrCodeUrl || "/static/images/placeholder-qr.png",
-        D: common_vendor.o(($event) => handleImageUpload("wechat")),
-        E: common_vendor.t(isSubmitting.value ? "提交中..." : form.value.id ? "提交修改" : "申请入驻"),
-        F: common_vendor.o(handleSubmit),
-        G: isSubmitting.value,
-        H: isSubmitting.value
-      }) : {
-        I: common_vendor.p({
-          type: "spinner-cycle",
+        M: form.value.contactWechatQrCodeUrl
+      }, form.value.contactWechatQrCodeUrl ? {
+        N: form.value.contactWechatQrCodeUrl
+      } : {
+        O: common_vendor.p({
+          type: "scan",
           size: "30",
-          color: "#999"
+          color: "#ccc"
+        })
+      }, {
+        P: common_vendor.o(($event) => handleImageUpload("wechat")),
+        Q: common_vendor.t(isSubmitting.value ? "正在提交..." : form.value.id ? "保存修改" : "立即入驻"),
+        R: common_vendor.o(handleSubmit),
+        S: isSubmitting.value,
+        T: isSubmitting.value
+      }) : {
+        U: common_vendor.p({
+          type: "spinner-cycle",
+          size: "40",
+          color: "#ccc"
         })
       });
     };

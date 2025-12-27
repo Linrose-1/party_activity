@@ -28,13 +28,9 @@ const _sfc_main = {
     const dragIndex = common_vendor.ref(-1);
     const initLayout = () => {
       const sys = common_vendor.index.getSystemInfoSync();
-      const containerWidth = sys.windowWidth - common_vendor.index.upx2px(40);
+      const containerWidth = sys.windowWidth - common_vendor.index.upx2px(60);
       itemWidth.value = containerWidth / props.columns;
       itemHeight.value = common_vendor.index.upx2px(props.itemHeightRpx);
-      common_vendor.index.__f__("log", "at components/GridDrag/GridDrag.vue:61", "📏 [GridDrag] 尺寸计算:", {
-        w: itemWidth.value,
-        h: itemHeight.value
-      });
     };
     const initList = (originList) => {
       if (itemWidth.value === 0)
@@ -44,14 +40,13 @@ const _sfc_main = {
         areaHeight.value = 0;
         return;
       }
-      common_vendor.index.__f__("log", "at components/GridDrag/GridDrag.vue:77", "🔄 [GridDrag] 初始化列表, 长度:", originList.length);
       displayList.value = originList.map((item, index) => {
         const {
           x,
           y
         } = getPos(index);
         return {
-          // 必须给一个随机ID，防止 Vue 复用导致图片不刷新
+          // 生成唯一ID，避免 Vue 复用导致闪烁
           id: `item_${index}_${Math.random().toString(36).substr(2)}`,
           data: item,
           x,
@@ -73,8 +68,7 @@ const _sfc_main = {
     const updateAreaHeight = () => {
       const count = displayList.value.length;
       const rows = Math.ceil(count / props.columns);
-      areaHeight.value = rows * itemHeight.value;
-      common_vendor.index.__f__("log", "at components/GridDrag/GridDrag.vue:114", "📏 [GridDrag] 容器高度更新:", areaHeight.value);
+      areaHeight.value = (rows || 1) * itemHeight.value;
     };
     common_vendor.onMounted(() => {
       initLayout();

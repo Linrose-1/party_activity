@@ -268,6 +268,7 @@
 		isFollowedUser: false,
 		cardFlag: true,
 		commentFlag: true,
+		businessCoverImageUrl: '',
 	});
 
 	const comments = ref([]);
@@ -472,10 +473,22 @@
 
 		console.log('分享商机（好友），携带邀请码:', inviteCode);
 
+		// 计算分享图片 URL
+		let shareImageUrl = 'https://img.gofor.club/logo_share.jpg'; // 默认图
+
+		if (postDetail.businessCoverImageUrl) {
+			// 1. 优先使用视频封面
+			shareImageUrl = postDetail.businessCoverImageUrl;
+		} else if (postDetail.images && postDetail.images.length > 0) {
+			// 2. 其次使用第一张配图
+			shareImageUrl = postDetail.images[0];
+		}
+
 		return {
 			title: finalTitle,
 			path: sharePath, // 使用拼接后的路径
-			imageUrl: postDetail.images.length > 0 ? postDetail.images[0] : 'https://img.gofor.club/logo_share.jpg'
+			imageUrl: shareImageUrl,
+			// imageUrl: postDetail.images.length > 0 ? postDetail.images[0] : 'https://img.gofor.club/logo_share.jpg'
 		};
 	});
 
@@ -506,11 +519,22 @@
 			queryString += `&inviteCode=${inviteCode}`;
 		}
 
+		// 计算分享图片 URL
+		let shareImageUrl = 'https://img.gofor.club/logo_share.jpg'; // 默认图
+
+		if (postDetail.businessCoverImageUrl) {
+			// 1. 优先使用视频封面
+			shareImageUrl = postDetail.businessCoverImageUrl;
+		} else if (postDetail.images && postDetail.images.length > 0) {
+			// 2. 其次使用第一张配图
+			shareImageUrl = postDetail.images[0];
+		}
+
 		// 4. 返回最终的分享对象
 		return {
 			title: finalTitle,
 			query: queryString, // 使用拼接后的 query
-			imageUrl: finalImageUrl
+			imageUrl: shareImageUrl,
 		}
 	});
 
@@ -556,6 +580,7 @@
 				postDetail.content = item.postContent;
 				postDetail.postTitle = item.postTitle;
 				postDetail.video = item.postVideo || '';
+				postDetail.businessCoverImageUrl = item.businessCoverImageUrl || '';
 				postDetail.images = item.postImg ? String(item.postImg).split(',').filter(img => img) : [];
 				postDetail.likes = item.likesCount || 0;
 				postDetail.dislikes = item.dislikesCount || 0;

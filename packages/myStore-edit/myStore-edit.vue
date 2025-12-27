@@ -1,145 +1,230 @@
 <template>
-	<view class="edit-store-container" v-if="!isLoading">
-		<scroll-view scroll-y class="form-scroll-view">
-			<view class="form-wrapper">
-				<view class="form-group">
-					<label class="form-label">聚店名称</label>
-					<uni-easyinput v-model="form.storeName" placeholder="请输入聚店名称" :inputBorder="false" />
-				</view>
+	<view class="page-container" v-if="!isLoading">
+		<scroll-view scroll-y class="content-scroll">
+			<view class="content-wrapper">
 
-				<!-- 聚店分类 -->
-				<view class="form-group">
-					<label class="form-label">聚店类别</label>
-					<picker mode="selector" :range="categoryOptions"
-						:value="categoryOptions.indexOf(categoryMap[form.category])" @change="handleCategoryChange">
-						<view class="location-picker">
-							<text class="location-text">{{ categoryMap[form.category] || '请选择聚店类别' }}</text>
-							<uni-icons type="right" size="16" color="#999"></uni-icons>
-						</view>
-					</picker>
-				</view>
+				<!-- 卡片 1: 基础信息 -->
+				<view class="card-box">
+					<view class="card-header">基础信息</view>
 
-				<view class="form-group">
-					<label class="form-label">聚店封面(最多9张)</label>
-					<view class="image-preview-grid">
-						<view v-for="(img, index) in coverImages" :key="index" class="image-wrapper">
-							<image :src="img" class="preview-image" mode="aspectFill" />
-							<view class="delete-btn" @click.stop="deleteCoverImage(index)">×</view>
-						</view>
-						<view v-if="coverImages.length < 9" class="add-placeholder" @click="handleCoverImageUpload">
-							<uni-icons type="plusempty" size="30" color="#ccc"></uni-icons>
+					<view class="field-item">
+						<text class="field-label required">聚店名称</text>
+						<view class="input-wrapper">
+							<uni-easyinput v-model="form.storeName" placeholder="请输入聚店名称" :inputBorder="false"
+								:styles="{backgroundColor: 'transparent'}"
+								placeholderStyle="color:#bbb;font-size:28rpx;" />
 						</view>
 					</view>
-					<view class="cover-tip">为了适应分享封面，首张图片建议使用5:4或4:3画幅比例上传，可使用相册自带的画幅剪切工具调整图片尺寸</view>
-				</view>
-				<view class="form-group">
-					<label class="form-label">聚店地址</label>
-					<view class="location-picker" @click="openMapToChooseLocation">
-						<text class="location-text">{{ form.fullAddress || '点击选择位置' }}</text>
-						<uni-icons type="right" size="16" color="#999"></uni-icons>
+
+					<view class="field-item">
+						<text class="field-label required">聚店类别</text>
+						<picker mode="selector" :range="categoryOptions"
+							:value="categoryOptions.indexOf(categoryMap[form.category])" @change="handleCategoryChange">
+							<view class="picker-wrapper">
+								<text :class="['picker-text', form.category ? 'is-value' : 'is-placeholder']">
+									{{ categoryMap[form.category] || '请选择聚店类别' }}
+								</text>
+								<uni-icons type="right" size="14" color="#ccc"></uni-icons>
+							</view>
+						</picker>
 					</view>
 				</view>
-				<view class="form-group">
-					<label class="form-label">聚店简介</label>
-					<uni-easyinput type="textarea" v-model="form.storeDescription" placeholder="请输入聚店简介"
-						:inputBorder="false" />
+
+				<!-- 卡片 2: 封面图 (拖拽区域) -->
+				<view class="card-box">
+					<view class="card-header">
+						<text>聚店图集</text>
+						<text class="sub-header">最多9张，长按拖拽排序</text>
+					</view>
+
+					<!-- 拖拽容器：增加 overflow: hidden 防止溢出遮挡 -->
+					<view class="drag-wrapper-box"
+						:style="{ height: dragAreaHeight > 0 ? dragAreaHeight + 'px' : '0' }">
+						<movable-area class="drag-area" :style="{ height: dragAreaHeight + 'px' }">
+							<movable-view v-for="(item, index) in dragDisplayList" :key="item.id" :x="item.x"
+								:y="item.y" direction="all" :z-index="item.zIndex"
+								:disabled="!isDragging && item.zIndex === 1" class="drag-item"
+								:style="{ width: dragItemWidth + 'px', height: dragItemHeight + 'px' }"
+								@change="onMovableChange($event, index)" @touchstart="onMovableStart(index)"
+								@touchend="onMovableEnd">
+								<view class="item-inner">
+									<view class="image-box">
+										<image :src="item.data" mode="aspectFill" class="img-content"
+											@click.stop="previewCoverImage(item.realIndex)" />
+										<view class="del-btn" @click.stop="deleteCoverImage(item.realIndex)">
+											<uni-icons type="closeempty" size="12" color="#fff"></uni-icons>
+										</view>
+									</view>
+								</view>
+							</movable-view>
+						</movable-area>
+					</view>
+
+					<!-- 添加按钮 -->
+					<view class="add-btn-container" v-if="coverImages.length < 9" @click="handleCoverImageUpload">
+						<view class="add-box">
+							<uni-icons type="plusempty" size="28" color="#ccc"></uni-icons>
+							<text>添加图片</text>
+						</view>
+					</view>
+
+					<view class="form-tip">
+						<uni-icons type="info" size="14" color="#FF9800"></uni-icons>
+						建议首图使用 5:4 或 4:3 比例，将作为分享封面展示。
+					</view>
 				</view>
-				<view class="form-group">
-					<label class="form-label">营业时间</label>
-					<view class="hours-editor">
-						<view class="hours-section-title">常规营业</view>
-						<view v-for="(day, index) in editableHours.regular" :key="index" class="day-item">
-							<text class="day-label">{{ day.label }}</text>
-							<view class="day-controls">
-								<picker v-if="day.isOpen" mode="time" :value="day.openTime"
-									@change="e => day.openTime = e.detail.value">
-									<view class="time-picker">{{ day.openTime }}</view>
-								</picker>
-								<text v-if="day.isOpen" class="time-separator">-</text>
-								<picker v-if="day.isOpen" mode="time" :value="day.closeTime"
-									@change="e => day.closeTime = e.detail.value">
-									<view class="time-picker">{{ day.closeTime }}</view>
-								</picker>
+
+				<!-- 卡片 3: 地址与简介 -->
+				<view class="card-box">
+					<view class="field-item">
+						<text class="field-label required">聚店地址</text>
+						<view class="picker-wrapper location-btn" @click="openMapToChooseLocation">
+							<view class="location-content">
+								<uni-icons type="location-filled" size="18" color="#FF6B00"
+									style="margin-right: 8rpx;"></uni-icons>
+								<text :class="['picker-text', form.fullAddress ? 'is-value' : 'is-placeholder']">
+									{{ form.fullAddress || '点击在地图上选择' }}
+								</text>
+							</view>
+							<uni-icons type="right" size="14" color="#ccc"></uni-icons>
+						</view>
+					</view>
+
+					<view class="field-item no-border">
+						<text class="field-label">聚店简介</text>
+						<view class="textarea-wrapper">
+							<uni-easyinput type="textarea" v-model="form.storeDescription"
+								placeholder="请简要介绍您的店铺特色、服务内容等..." :inputBorder="false"
+								:styles="{backgroundColor: 'transparent'}"
+								placeholderStyle="color:#bbb;font-size:28rpx;" />
+						</view>
+					</view>
+				</view>
+
+				<!-- 卡片 4: 营业时间 -->
+				<view class="card-box">
+					<view class="card-header">营业时间</view>
+
+					<!-- 常规时间 -->
+					<view class="hours-group">
+						<view v-for="(day, index) in editableHours.regular" :key="index" class="hour-row">
+							<text class="week-label">{{ day.label }}</text>
+							<view class="hour-controls">
+								<template v-if="day.isOpen">
+									<picker mode="time" :value="day.openTime"
+										@change="e => day.openTime = e.detail.value">
+										<view class="time-pill">{{ day.openTime }}</view>
+									</picker>
+									<text class="to-text">至</text>
+									<picker mode="time" :value="day.closeTime"
+										@change="e => day.closeTime = e.detail.value">
+										<view class="time-pill">{{ day.closeTime }}</view>
+									</picker>
+								</template>
+								<text v-else class="closed-text">休息</text>
 								<switch :checked="day.isOpen" @change="e => day.isOpen = e.detail.value" color="#FF6B00"
-									style="transform:scale(0.8)" />
+									style="transform:scale(0.7); margin-left: 10rpx;" />
 							</view>
 						</view>
 					</view>
-					<view class="hours-editor special-hours-section">
-						<view class="hours-section-title">
-							<text>特殊营业时间</text>
-							<button class="add-btn" size="mini" @click="addSpecialHour">+ 添加</button>
+
+					<!-- 特殊时间 -->
+					<view class="special-hours-group">
+						<view class="special-header">
+							<text>特殊日期安排</text>
+							<view class="add-special-btn" @click="addSpecialHour">
+								<uni-icons type="plusempty" size="12" color="#FF6B00"></uni-icons> 添加
+							</view>
 						</view>
-						<view v-if="editableHours.special.length === 0" class="no-special-hours">
-							<text>暂无特殊营业安排</text>
+
+						<view v-if="editableHours.special.length === 0" class="empty-special">
+							暂无特殊安排
 						</view>
-						<view v-for="(specialDay, index) in editableHours.special" :key="index"
-							class="special-day-item">
-							<view class="special-day-row">
+
+						<view v-for="(specialDay, index) in editableHours.special" :key="index" class="special-item">
+							<view class="special-top">
 								<picker mode="date" :value="specialDay.date"
 									@change="e => specialDay.date = e.detail.value">
-									<view class="date-picker">
-										<uni-icons type="calendar-filled" size="16" color="#666"></uni-icons>
-										<text>{{ specialDay.date || '选择日期' }}</text>
+									<view class="date-pill">
+										<uni-icons type="calendar" size="14" color="#666"></uni-icons>
+										{{ specialDay.date || '选择日期' }}
 									</view>
 								</picker>
-								<view class="special-controls">
-									<text class="switch-label">营业</text>
+								<view class="special-actions">
+									<text style="font-size: 24rpx; color: #666; margin-right: 10rpx;">营业</text>
 									<switch :checked="specialDay.is_open"
 										@change="e => specialDay.is_open = e.detail.value" color="#FF6B00"
-										style="transform:scale(0.7)" />
-									<uni-icons type="trash-filled" size="22" color="#e43d33"
-										@click="removeSpecialHour(index)"></uni-icons>
+										style="transform:scale(0.6)" />
+									<view class="del-special" @click="removeSpecialHour(index)">
+										<uni-icons type="trash" size="16" color="#999"></uni-icons>
+									</view>
 								</view>
 							</view>
-							<view v-if="specialDay.is_open" class="special-day-row">
+
+							<view v-if="specialDay.is_open" class="special-time-row">
 								<picker mode="time" :value="specialDay.open"
 									@change="e => specialDay.open = e.detail.value">
-									<view class="time-picker special-time-picker">{{ specialDay.open }}</view>
+									<view class="time-pill small">{{ specialDay.open }}</view>
 								</picker>
-								<text class="time-separator">-</text>
+								<text class="to-text">-</text>
 								<picker mode="time" :value="specialDay.close"
 									@change="e => specialDay.close = e.detail.value">
-									<view class="time-picker special-time-picker">{{ specialDay.close }}</view>
+									<view class="time-pill small">{{ specialDay.close }}</view>
 								</picker>
-							</view>
-							<view class="special-day-row">
-								<uni-easyinput v-model="specialDay.description" placeholder="备注说明 (如：跨年夜延长)"
-									:inputBorder="false" class="description-input" />
+								<input class="special-note" v-model="specialDay.description" placeholder="备注: 如节日" />
 							</view>
 						</view>
 					</view>
 				</view>
-				<view class="form-group">
-					<label class="form-label">联系电话</label>
-					<uni-easyinput type="text" v-model="form.contactPhone" placeholder="请输入联系电话" :inputBorder="false" />
-				</view>
-				<view class="form-group">
-					<label class="form-label">人均消费</label>
-					<uni-easyinput type="text" v-model="form.averageConsumptionRange" placeholder="例如：100-200"
-						:inputBorder="false" />
-				</view>
-				<view class="form-group">
-					<label class="form-label">微信二维码</label>
-					<view class="image-uploader">
-						<image :src="form.contactWechatQrCodeUrl || '/static/images/placeholder-qr.png'"
-							class="preview-image qr-code" mode="aspectFit" @click="handleImageUpload('wechat')"></image>
-						<view class="upload-tip">点击图片可更换二维码</view>
+
+				<!-- 卡片 5: 其他信息 -->
+				<view class="card-box">
+					<view class="card-header">其他设置</view>
+
+					<view class="field-item">
+						<text class="field-label">联系电话</text>
+						<view class="input-wrapper">
+							<uni-easyinput type="number" v-model="form.contactPhone" placeholder="请输入电话"
+								:inputBorder="false" :styles="{backgroundColor: 'transparent'}" />
+						</view>
+					</view>
+
+					<view class="field-item">
+						<text class="field-label">人均消费</text>
+						<view class="input-wrapper">
+							<uni-easyinput type="text" v-model="form.averageConsumptionRange" placeholder="如: 100-200"
+								:inputBorder="false" :styles="{backgroundColor: 'transparent'}" />
+						</view>
+					</view>
+
+					<view class="field-item no-border">
+						<text class="field-label">微信二维码</text>
+						<view class="qr-upload-area" @click="handleImageUpload('wechat')">
+							<image v-if="form.contactWechatQrCodeUrl" :src="form.contactWechatQrCodeUrl"
+								class="qr-preview" mode="aspectFit"></image>
+							<view v-else class="qr-placeholder">
+								<uni-icons type="scan" size="30" color="#ccc"></uni-icons>
+								<text>点击上传</text>
+							</view>
+						</view>
 					</view>
 				</view>
+
+				<view class="bottom-spacer"></view>
 			</view>
 		</scroll-view>
 
-		<view class="action-bar">
-			<button class="submit-btn" @click="handleSubmit" :loading="isSubmitting" :disabled="isSubmitting">
-				{{ isSubmitting ? '提交中...' : (form.id ? '提交修改' : '申请入驻') }}
+		<!-- 底部按钮 -->
+		<view class="footer-bar">
+			<button class="main-btn" @click="handleSubmit" :loading="isSubmitting" :disabled="isSubmitting">
+				{{ isSubmitting ? '正在提交...' : (form.id ? '保存修改' : '立即入驻') }}
 			</button>
 		</view>
 	</view>
 
-	<view v-else class="loading-state">
-		<uni-icons type="spinner-cycle" size="30" color="#999"></uni-icons>
-		<text>正在加载...</text>
+	<!-- 加载动画 -->
+	<view v-else class="page-loading">
+		<uni-icons type="spinner-cycle" size="40" color="#ccc" class="spin-icon"></uni-icons>
 	</view>
 </template>
 
@@ -147,7 +232,9 @@
 	import {
 		ref,
 		reactive,
-		computed
+		computed,
+		watch,
+		nextTick
 	} from 'vue';
 	import {
 		onLoad
@@ -569,303 +656,612 @@
 			setTimeout(() => uni.navigateBack(), 1500);
 		}
 	};
+
+	/* ========================================  图片拖拽移动编辑 ======================================== */
+
+	// --- 拖拽排序逻辑 (从发布页复制过来的) ---
+	const dragDisplayList = ref([]);
+	const dragItemWidth = ref(0);
+	const dragItemHeight = ref(0);
+	const dragAreaHeight = ref(0);
+	const isDragging = ref(false);
+	const dragIndex = ref(-1);
+	const dragColumns = 3;
+	const dragItemHeightRpx = 210; // 可以微调高度
+
+	// 1. 初始化尺寸
+	const initDragLayout = () => {
+		const sys = uni.getSystemInfoSync();
+		// 假设左右 padding 各 20rpx + form-group margin 20rpx -> 总共约 80rpx
+		// 这里的减数要根据你的页面实际 padding 来定，宁大勿小
+		const containerWidth = sys.windowWidth - uni.upx2px(100);
+
+		dragItemWidth.value = containerWidth / dragColumns;
+		dragItemHeight.value = uni.upx2px(dragItemHeightRpx);
+	};
+
+	// 2. 初始化列表 (监听 coverImages)
+	watch(() => coverImages.value, (newVal) => {
+		if (!isDragging.value) {
+			initDragList(newVal);
+		}
+	}, {
+		deep: true
+	});
+
+	// 在 onLoad 或 onMounted 里初始化一次
+	// 注意：如果你的图片是异步获取的(编辑模式)，getStoreDetails 赋值后 watch 会自动触发
+	// 但如果是新建模式，可能需要手动调一次 initDragLayout
+	// 建议在 onLoad 结束时调用一下 initDragLayout()
+
+	const initDragList = (originList) => {
+		if (!originList || originList.length === 0) {
+			dragDisplayList.value = [];
+			dragAreaHeight.value = 0; // 确保没图片时高度为0
+			return;
+		}
+		if (dragItemWidth.value === 0) initDragLayout();
+
+		dragDisplayList.value = originList.map((url, index) => {
+			const {
+				x,
+				y
+			} = getPos(index);
+			return {
+				id: `img_${index}_${Math.random()}`,
+				data: url,
+				x,
+				y,
+				zIndex: 1,
+				realIndex: index
+			};
+		});
+		updateDragHeight();
+	};
+
+	const getPos = (index) => {
+		const row = Math.floor(index / dragColumns);
+		const col = index % dragColumns;
+		return {
+			x: col * dragItemWidth.value,
+			y: row * dragItemHeight.value
+		};
+	};
+
+	const updateDragHeight = () => {
+		const count = dragDisplayList.value.length;
+		const rows = Math.ceil(count / dragColumns);
+		dragAreaHeight.value = (rows || 1) * dragItemHeight.value;
+	};
+
+	// --- 拖拽事件 ---
+	const onMovableStart = (index) => {
+		isDragging.value = true;
+		dragIndex.value = index;
+		dragDisplayList.value[index].zIndex = 99;
+	};
+
+	const onMovableChange = (e, index) => {
+		if (!isDragging.value || index !== dragIndex.value) return;
+		const x = e.detail.x;
+		const y = e.detail.y;
+
+		const centerX = x + dragItemWidth.value / 2;
+		const centerY = y + dragItemHeight.value / 2;
+		const col = Math.floor(centerX / dragItemWidth.value);
+		const row = Math.floor(centerY / dragItemHeight.value);
+		let targetIndex = row * dragColumns + col;
+
+		if (targetIndex < 0) targetIndex = 0;
+		if (targetIndex >= dragDisplayList.value.length) targetIndex = dragDisplayList.value.length - 1;
+
+		if (targetIndex !== dragIndex.value) {
+			const mover = dragDisplayList.value[dragIndex.value];
+			dragDisplayList.value.splice(dragIndex.value, 1);
+			dragDisplayList.value.splice(targetIndex, 0, mover);
+
+			dragDisplayList.value.forEach((item, idx) => {
+				if (idx !== targetIndex) {
+					const pos = getPos(idx);
+					item.x = pos.x;
+					item.y = pos.y;
+				}
+			});
+			dragIndex.value = targetIndex;
+		}
+	};
+
+	const onMovableEnd = () => {
+		isDragging.value = false;
+		if (dragIndex.value !== -1) {
+			const item = dragDisplayList.value[dragIndex.value];
+			item.zIndex = 1;
+			const pos = getPos(dragIndex.value);
+			nextTick(() => {
+				item.x = pos.x;
+				item.y = pos.y;
+			});
+
+			// 同步回 coverImages
+			const sortedUrls = dragDisplayList.value.map(wrapper => wrapper.data);
+			coverImages.value = sortedUrls;
+		}
+		dragIndex.value = -1;
+	};
+
+	// 补充预览方法
+	const previewCoverImage = (index) => {
+		uni.previewImage({
+			urls: coverImages.value,
+			current: index
+		});
+	};
 </script>
 
 
 <style lang="scss" scoped>
-	.edit-store-container {
+	/* 全局颜色变量 */
+	$primary-color: #FF6B00;
+	$bg-color: #f5f7fa;
+	$card-bg: #ffffff;
+	$text-main: #333333;
+	$text-sub: #666666;
+	$text-placeholder: #bbbbbb;
+	$border-color: #f0f0f0;
+	$input-bg: #f9f9f9;
+
+	.page-container {
 		display: flex;
 		flex-direction: column;
 		height: 100vh;
-		background-color: #f8f8f8;
+		background-color: $bg-color;
 	}
 
-	.form-scroll-view {
+	.content-scroll {
 		flex: 1;
-		overflow-y: auto;
+		height: 0;
 	}
 
-	.form-wrapper {
-		background-color: #fff;
+	.content-wrapper {
+		padding: 24rpx;
 	}
 
-	.form-group {
-		padding: 24rpx 30rpx;
-		border-bottom: 1rpx solid #f0f0f0;
-		margin-left: 20rpx;
-		margin-right: 20rpx;
-
-		&:last-child {
-			border-bottom: none;
-		}
-	}
-
-	.form-label {
-		font-size: 30rpx;
-		font-weight: 500;
-		color: #333;
-		margin-bottom: 20rpx;
-		display: block;
-	}
-
-	:deep(.uni-easyinput__content-input),
-	:deep(.uni-easyinput__content-textarea) {
-		padding-left: 0 !important;
-	}
-
-	.image-preview-grid {
-		display: grid;
-		grid-template-columns: repeat(3, 1fr);
-		gap: 16rpx;
-	}
-
-	.cover-tip {
-		margin-top: 16rpx;
-		font-size: 24rpx;
-		color: #999;
-		line-height: 1.4;
-	}
-
-	.image-wrapper {
-		position: relative;
-		width: 100%;
-		aspect-ratio: 1 / 1;
-		border-radius: 12rpx;
-		overflow: hidden;
-	}
-
-	.preview-image {
-		width: 100%;
-		height: 100%;
-	}
-
-	.delete-btn {
-		position: absolute;
-		top: 0;
-		right: 0;
-		width: 40rpx;
-		height: 40rpx;
-		background-color: rgba(0, 0, 0, 0.6);
-		color: white;
-		border-radius: 0 0 0 12rpx;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		font-size: 28rpx;
-	}
-
-	.add-placeholder {
-		width: 100%;
-		aspect-ratio: 1 / 1;
-		border: 2rpx dashed #ccc;
-		border-radius: 12rpx;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-	}
-
-	.image-uploader {
-		.preview-image {
-			width: 100%;
-			height: 320rpx;
-			border-radius: 16rpx;
-			background-color: #f0f0f0;
-
-			&.qr-code {
-				width: 240rpx;
-				height: 240rpx;
-			}
-		}
-
-		.upload-tip {
-			font-size: 24rpx;
-			color: #999;
-			text-align: center;
-			margin-top: 10rpx;
-		}
-	}
-
-	.location-picker {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		padding: 20rpx;
-		background-color: #f7f7f7;
-		border-radius: 12rpx;
-
-		.location-text {
-			flex: 1;
-			color: #333;
-			font-size: 28rpx;
-			overflow: hidden;
-			text-overflow: ellipsis;
-			white-space: nowrap;
-		}
-	}
-
-	.hours-editor {
-		padding-top: 20rpx;
-	}
-
-	.hours-section-title {
-		font-size: 28rpx;
-		font-weight: 500;
-		color: #666;
-		margin-bottom: 20rpx;
-	}
-
-	.day-item {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
+	/* 通用卡片样式 */
+	.card-box {
+		background-color: $card-bg;
+		border-radius: 24rpx;
+		padding: 30rpx;
 		margin-bottom: 24rpx;
+		box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.03);
+		position: relative;
+		/* 建立层叠上下文 */
+		z-index: 1;
+	}
 
-		&:last-child {
+	.card-header {
+		font-size: 32rpx;
+		font-weight: 700;
+		color: $text-main;
+		margin-bottom: 30rpx;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+
+		.sub-header {
+			font-size: 24rpx;
+			color: $text-placeholder;
+			font-weight: normal;
+		}
+	}
+
+	/* 表单项样式 */
+	.field-item {
+		margin-bottom: 30rpx;
+
+		&.no-border {
 			margin-bottom: 0;
 		}
 	}
 
-	.day-label {
+	.field-label {
+		display: block;
 		font-size: 28rpx;
-		color: #333;
-	}
-
-	.day-controls {
-		display: flex;
-		align-items: center;
-		gap: 10rpx;
-	}
-
-	.time-picker {
-		background-color: #fff;
-		border: 1rpx solid #e0e0e0;
-		padding: 8rpx 16rpx;
-		border-radius: 8rpx;
-		font-size: 26rpx;
-	}
-
-	.time-separator {
-		color: #999;
-	}
-
-	.action-bar {
-		padding: 20rpx 30rpx;
-		padding-bottom: calc(20rpx + env(safe-area-inset-bottom));
-		background-color: #fff;
-		border-top: 1rpx solid #f0f0f0;
-	}
-
-	.submit-btn {
-		background-color: #FF6B00;
-		color: #fff;
-		font-size: 32rpx;
+		color: $text-main;
 		font-weight: 500;
-		border-radius: 50rpx;
+		margin-bottom: 16rpx;
 
-		&::after {
-			border: none;
+		&.required::after {
+			content: '*';
+			color: #ff4d4f;
+			margin-left: 4rpx;
 		}
 	}
 
-	.loading-state {
+	/* 输入框容器（胶囊风格） */
+	.input-wrapper {
+		background-color: $input-bg;
+		border-radius: 12rpx;
+		padding: 4rpx 20rpx;
+		border: 2rpx solid transparent;
+		transition: border-color 0.3s;
+
+		&:focus-within {
+			border-color: rgba($primary-color, 0.3);
+			background-color: #fff;
+		}
+	}
+
+	/* 选择器容器 */
+	.picker-wrapper {
+		background-color: $input-bg;
+		border-radius: 12rpx;
+		padding: 24rpx 20rpx;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+
+		&.location-btn:active {
+			background-color: #f0f0f0;
+		}
+	}
+
+	.picker-text {
+		font-size: 28rpx;
+		flex: 1;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+
+		&.is-value {
+			color: $text-main;
+		}
+
+		&.is-placeholder {
+			color: $text-placeholder;
+		}
+	}
+
+	.location-content {
+		display: flex;
+		align-items: center;
+		flex: 1;
+		overflow: hidden;
+	}
+
+	.textarea-wrapper {
+		background-color: $input-bg;
+		border-radius: 12rpx;
+		padding: 20rpx;
+		min-height: 180rpx;
+	}
+
+	/* ---------------- 拖拽区域优化 ---------------- */
+	.drag-wrapper-box {
+		width: 100%;
+		position: relative;
+		overflow: hidden;
+		/* 关键：防止遮挡上方元素 */
+		/* background: #fafafa; 可选调试背景 */
+	}
+
+	.drag-area {
+		width: 100%;
+	}
+
+	.drag-item {
+		/* z-index: 10; movable-view 默认 */
+	}
+
+	.item-inner {
+		width: 100%;
+		height: 100%;
+		padding: 10rpx;
+		box-sizing: border-box;
+		display: block;
+	}
+
+	.image-box {
+		width: 100%;
+		height: 100%;
+		position: relative;
+		border-radius: 12rpx;
+		overflow: hidden;
+		background-color: #f0f0f0;
+	}
+
+	.img-content {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		display: block;
+	}
+
+	.del-btn {
+		position: absolute;
+		top: 0;
+		right: 0;
+		width: 44rpx;
+		height: 44rpx;
+		background-color: rgba(0, 0, 0, 0.5);
+		border-bottom-left-radius: 12rpx;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		z-index: 2;
+	}
+
+	.add-btn-container {
+		width: 33.33%;
+		height: 210rpx;
+		padding: 10rpx;
+		box-sizing: border-box;
+		display: inline-block;
+		vertical-align: top;
+	}
+
+	.add-box {
+		width: 100%;
+		height: 100%;
+		border: 2rpx dashed #ddd;
+		border-radius: 12rpx;
 		display: flex;
 		flex-direction: column;
 		align-items: center;
 		justify-content: center;
-		height: 100vh;
-		color: #999;
-		font-size: 28rpx;
+		color: $text-placeholder;
+		font-size: 24rpx;
+		background-color: #fafafa;
 
 		text {
 			margin-top: 10rpx;
 		}
 	}
 
-	.special-hours-section {
-		margin-top: 40rpx;
-		border-top: 1rpx solid #f0f0f0;
-		padding-top: 20rpx;
+	.form-tip {
+		margin-top: 20rpx;
+		font-size: 24rpx;
+		color: #FF9800;
+		background-color: #fff7e6;
+		padding: 12rpx 20rpx;
+		border-radius: 8rpx;
+		display: flex;
+		align-items: center;
+		gap: 10rpx;
+		line-height: 1.4;
 	}
 
-	.hours-section-title {
+	/* ---------------- 营业时间 ---------------- */
+	.hour-row {
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-
-		.add-btn {
-			background-color: #FF6B00;
-			color: white;
-			border-radius: 8rpx;
-			font-weight: normal;
-			line-height: 1.8;
-			padding: 0 20rpx;
-			margin: 0;
-		}
-	}
-
-	.no-special-hours {
-		text-align: center;
-		color: #999;
-		font-size: 26rpx;
-		padding: 40rpx 0;
-	}
-
-	.special-day-item {
-		padding: 24rpx 0;
-		border-bottom: 1rpx dashed #e0e0e0;
+		padding: 16rpx 0;
+		border-bottom: 1rpx solid #f9f9f9;
 
 		&:last-child {
 			border-bottom: none;
 		}
 	}
 
-	.special-day-row {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		margin-bottom: 20rpx;
-
-		&:last-child {
-			margin-bottom: 0;
-		}
-	}
-
-	.date-picker {
-		display: flex;
-		align-items: center;
-		gap: 10rpx;
-		background-color: #f7f7f7;
-		padding: 12rpx 20rpx;
-		border-radius: 8rpx;
+	.week-label {
 		font-size: 28rpx;
-		color: #333;
+		color: $text-main;
+		width: 80rpx;
 	}
 
-	.special-controls {
+	.hour-controls {
 		display: flex;
 		align-items: center;
-		gap: 20rpx;
-
-		.switch-label {
-			font-size: 26rpx;
-			color: #666;
-		}
+		flex: 1;
+		justify-content: flex-end;
 	}
 
-	.time-picker.special-time-picker {
-		background-color: #f7f7f7;
-		border: none;
-		flex: 1;
+	.time-pill {
+		background-color: $input-bg;
+		padding: 6rpx 20rpx;
+		border-radius: 30rpx;
+		font-size: 26rpx;
+		color: $text-main;
+		min-width: 90rpx;
 		text-align: center;
 	}
 
-	.description-input {
-		width: 100%;
-		background-color: #f7f7f7;
-		border-radius: 8rpx;
+	.to-text {
+		color: #ccc;
+		margin: 0 10rpx;
+	}
 
-		:deep(.uni-easyinput__content-input) {
-			padding: 16rpx !important;
+	.closed-text {
+		color: $text-placeholder;
+		font-size: 26rpx;
+		margin-right: 10rpx;
+	}
+
+	/* 特殊营业时间 */
+	.special-hours-group {
+		margin-top: 30rpx;
+		border-top: 2rpx dashed #eee;
+		padding-top: 20rpx;
+	}
+
+	.special-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		font-size: 28rpx;
+		color: $text-main;
+		margin-bottom: 20rpx;
+	}
+
+	.add-special-btn {
+		color: $primary-color;
+		display: flex;
+		align-items: center;
+		font-size: 26rpx;
+		padding: 6rpx 16rpx;
+		background-color: rgba($primary-color, 0.1);
+		border-radius: 30rpx;
+	}
+
+	.empty-special {
+		text-align: center;
+		color: #ccc;
+		font-size: 24rpx;
+		padding: 20rpx 0;
+	}
+
+	.special-item {
+		background-color: #f9f9f9;
+		border-radius: 12rpx;
+		padding: 20rpx;
+		margin-bottom: 16rpx;
+	}
+
+	.special-top {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 16rpx;
+	}
+
+	.date-pill {
+		display: flex;
+		align-items: center;
+		gap: 8rpx;
+		font-size: 26rpx;
+		color: $text-main;
+		background: #fff;
+		padding: 6rpx 16rpx;
+		border-radius: 8rpx;
+		border: 1rpx solid #eee;
+	}
+
+	.special-actions {
+		display: flex;
+		align-items: center;
+	}
+
+	.del-special {
+		margin-left: 20rpx;
+		padding: 10rpx;
+	}
+
+	.special-time-row {
+		display: flex;
+		align-items: center;
+	}
+
+	.time-pill.small {
+		font-size: 24rpx;
+		padding: 4rpx 12rpx;
+		background: #fff;
+		border: 1rpx solid #eee;
+	}
+
+	.special-note {
+		flex: 1;
+		font-size: 24rpx;
+		background: #fff;
+		margin-left: 16rpx;
+		padding: 6rpx 16rpx;
+		border-radius: 8rpx;
+		border: 1rpx solid #eee;
+	}
+
+	/* 二维码上传 */
+	.qr-upload-area {
+		width: 100%;
+		height: 300rpx;
+		border: 2rpx dashed #ddd;
+		border-radius: 16rpx;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		background-color: $input-bg;
+		overflow: hidden;
+	}
+
+	.qr-preview {
+		width: 100%;
+		height: 100%;
+	}
+
+	.qr-placeholder {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		color: #999;
+		font-size: 26rpx;
+
+		text {
+			margin-top: 10rpx;
+		}
+	}
+
+	.bottom-spacer {
+		height: 120rpx;
+	}
+
+	/* 底部悬浮 */
+	.footer-bar {
+		position: fixed;
+		bottom: 0;
+		left: 0;
+		width: 100%;
+		background: #fff;
+		box-sizing: border-box;
+		padding: 20rpx 30rpx;
+		padding-bottom: calc(20rpx + env(safe-area-inset-bottom));
+		box-shadow: 0 -4rpx 16rpx rgba(0, 0, 0, 0.05);
+		z-index: 100;
+	}
+
+	.main-btn {
+		background: linear-gradient(135deg, #FF8C37, #FF6B00);
+		color: #fff;
+		border-radius: 50rpx;
+		height: 88rpx;
+		line-height: 88rpx;
+		font-size: 32rpx;
+		font-weight: bold;
+		box-shadow: 0 8rpx 20rpx rgba(255, 106, 0, 0.3);
+
+		&::after {
+			border: none;
+		}
+
+		&:active {
+			opacity: 0.9;
+		}
+
+		&[disabled] {
+			background: #ccc;
+			box-shadow: none;
+			color: #fff;
+		}
+	}
+
+	.page-loading {
+		height: 100vh;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		background-color: #fff;
+	}
+
+	.spin-icon {
+		animation: spin 1s linear infinite;
+	}
+
+	@keyframes spin {
+		from {
+			transform: rotate(0deg);
+		}
+
+		to {
+			transform: rotate(360deg);
 		}
 	}
 </style>
