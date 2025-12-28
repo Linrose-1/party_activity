@@ -3,18 +3,32 @@
 	<view v-if="activityDetail" class="page">
 
 		<!-- 聚会封面 -->
-		<!-- 【修改】动态绑定封面图片和标题 -->
-		<view class="event-cover" :style="{ backgroundImage: `url(${activityDetail.coverImageUrl})` }">
-			<!-- 【修改】动态绑定聚会标签 -->
-			<text class="event-cover-text">{{ activityDetail.tags.join(' · ') }}</text>
+		<view class="banner-section">
+			<!-- 如果有图片才显示 swiper -->
+			<swiper v-if="bannerImages.length > 0" class="banner-swiper" circular indicator-dots autoplay
+				:interval="4000" :duration="500">
+				<swiper-item v-for="(img, index) in bannerImages" :key="index">
+					<image :src="img" class="banner-image" mode="aspectFill" @click="previewBanner(index)" />
+				</swiper-item>
+			</swiper>
+
+			<!-- 默认占位图 (防止没有图片时塌陷) -->
+			<view v-else class="banner-placeholder">
+				<uni-icons type="image" size="40" color="#ccc"></uni-icons>
+			</view>
+
+			<!-- 标签浮层 (保持在轮播图之上) -->
+			<view class="tags-overlay" v-if="activityDetail.tags && activityDetail.tags.length > 0">
+				<text class="event-cover-text">{{ activityDetail.tags.join(' · ') }}</text>
+			</view>
 		</view>
 
-		<!-- 【新增】聚会状态显示 -->
+		<!-- 聚会状态显示 -->
 		<view v-if="statusInfo.text" class="status-banner" :style="{ backgroundColor: statusInfo.color }">
 			{{ statusInfo.text }}
 		</view>
 
-		<!-- 【新增】最低起聚名额提示 -->
+		<!-- 最低起聚名额提示 -->
 		<view v-if="showLimitSlotsTip" class="limit-slots-tip">
 			<uni-icons type="info-filled" color="#e6a23c" size="16" style="margin-right: 10rpx;"></uni-icons>
 			当前报名人数未达到最低起聚名额 ({{ activityDetail.limitSlots }}人)，聚会可能被取消；若有收费聚会组织者将退回报名费用。
@@ -22,32 +36,32 @@
 
 		<!-- 聚会信息 -->
 		<view class="event-header">
-			<!-- 【修改】动态绑定聚会标题 -->
+			<!-- 动态绑定聚会标题 -->
 			<text class="event-title">{{ activityDetail.activityTitle }}</text>
 			<view class="event-meta">
 				<uni-icons type="calendar" size="18" color="#FF6B00" />
-				<!-- 【修改】动态绑定格式化后的聚会时间 -->
+				<!-- 动态绑定格式化后的聚会时间 -->
 				<text>{{ formattedActivityTime }}</text>
 			</view>
 			<view class="event-meta">
 				<uni-icons type="location" size="18" color="#FF6B00" />
-				<!-- 【修改】动态绑定聚会地点 -->
+				<!-- 动态绑定聚会地点 -->
 				<text>{{ activityDetail.locationAddress }}</text>
 			</view>
 			<view class="event-stats">
 				<view class="stat-item">
-					<!-- 【修改】动态绑定已报名人数 -->
+					<!-- 动态绑定已报名人数 -->
 					<view class="stat-value">{{ participantTotal || 0 }}</view>
 					<view class="stat-label">已报名</view>
 				</view>
 				<view class="stat-item">
-					<!-- 【修改】动态绑定总名额 -->
+					<!-- 动态绑定总名额 -->
 					<view class="stat-value">{{ activityDetail.totalSlots }}</view>
 					<view class="stat-label">总名额</view>
 				</view>
 				<view class="stat-item">
 					<view class="stat-value">
-						<!-- 【修改】根据 activityFunds 判断显示费用还是免费 -->
+						<!-- 根据 activityFunds 判断显示费用还是免费 -->
 						<text v-if="activityDetail.activityFunds === 1">¥{{ activityDetail.registrationFee }}</text>
 						<text v-else-if="activityDetail.activityFunds === 2">免费</text>
 					</view>
@@ -59,11 +73,11 @@
 		<!-- 聚会介绍 -->
 		<view class="event-content">
 			<view class="section-title">聚会介绍</view>
-			<!-- 【修改】动态绑定聚会介绍 -->
+			<!-- 动态绑定聚会介绍 -->
 			<view class="event-description">{{ activityDetail.activityDescription }}</view>
 
 			<text class="section-title">聚会内容</text>
-			<!-- 【修改】动态绑定聚会环节 -->
+			<!-- 动态绑定聚会环节 -->
 			<view class="activity-grid">
 				<view class="activity-item" v-for="item in activityDetail.memberActivitySessionList" :key="item.id">
 					<view class="activity-title">{{ item.sessionTitle }}</view>
@@ -81,28 +95,28 @@
 					<img :src="activityDetail.memberUser.avatar" alt="" class="organizer-avatar" />
 				</view>
 				<view>
-					<!-- 【修改】动态绑定组织者单位 -->
+					<!-- 动态绑定组织者单位 -->
 					<view class="organizer-name">{{ activityDetail.memberUser.nickname }}</view>
-					<!-- 【修改】动态绑定组织者联系电话 -->
+					<!-- 动态绑定组织者联系电话 -->
 					<view class="organizer-company">联系电话: {{ activityDetail.organizerContactPhone }}</view>
 				</view>
 			</view>
 		</view>
 
 		<!-- 商圈信息 -->
-		<!-- 【修改】使用 v-if 判断是否存在关联聚店信息 -->
+		<!-- 使用 v-if 判断是否存在关联聚店信息 -->
 		<view v-if="activityDetail.memberStoreRespVO" class="business-section"
 			@click="navigateToStoreDetail(activityDetail.memberStoreRespVO)">
 			<view class="business-title">聚会聚店</view>
 			<view class="business-info">
 				<view class="business-logo">
-					<!-- 【修改】可以使用聚店的封面图 -->
+					<!-- 可以使用聚店的封面图 -->
 					<image v-if="activityDetail.memberStoreRespVO.storeCoverImageUrl"
 						:src="activityDetail.memberStoreRespVO.storeCoverImageUrl" class="store-logo-image" />
 					<uni-icons v-else type="shop-filled" size="24" color="#fff" />
 				</view>
 				<view class="business-details">
-					<!-- 【修改】动态绑定聚店信息 -->
+					<!-- 动态绑定聚店信息 -->
 					<text class="business-name">{{ activityDetail.memberStoreRespVO.storeName }}</text>
 					<view class="business-meta">
 						<view style="font-size: 25rpx;margin: 10rpx 0;">
@@ -111,11 +125,7 @@
 						<view style="font-size: 25rpx;margin: 10rpx 0;">
 							{{ activityDetail.memberStoreRespVO.contactPhone }}
 						</view>
-						<!-- <view style="font-size: 25rpx;margin: 10rpx 0;">
-							<view v-for="(line, index) in formattedOperatingHours" :key="index" style="display: block;">
-								{{ line }}
-							</view>
-						</view> -->
+
 					</view>
 				</view>
 			</view>
@@ -125,11 +135,11 @@
 		<view class="organizer-section">
 			<view class="organizer-title">聚会贡分</view>
 			<view class="organizer-info">
-				<view class="organizer-name">参与本次聚会，聚会结束可以获得<span style="color: #ff6b00;">10</span>贡分</view>
+				<view class="organizer-name">参与本次聚会，聚会结束可以获得<span style="color: #ff6b00;">100</span>贡分</view>
 			</view>
 		</view>
 
-		<!-- 参与用户头像组（保持不变，等待独立接口） -->
+		<!-- 参与用户头像组 -->
 		<view class="participants-section">
 			<view class="participants-header">
 				<view class="participants-title">参与用户</view>
@@ -160,11 +170,11 @@
 			</view>
 		</view>
 
-		<!-- 【修改】根据 activityFunds 判断是否显示赞助商信息 -->
+		<!-- 根据 activityFunds 判断是否显示赞助商信息 -->
 		<view class="sponsor-section" v-if="activityDetail.activityFunds === 2">
 			<view class="section-title">赞助单位</view>
 			<view class="sponsor-info">
-				<!-- 【修改】动态绑定公司Logo和名称 -->
+				<!-- 动态绑定公司Logo和名称 -->
 				<image :src="activityDetail.companyLogo" class="sponsor-logo"></image>
 				<view class="sponsor-details">
 					<view class="sponsor-name">{{ activityDetail.companyName }}</view>
@@ -173,7 +183,7 @@
 			</view>
 		</view>
 
-		<!-- 【修改】动态绑定报名截止时间 -->
+		<!-- 动态绑定报名截止时间 -->
 		<view style="margin: 20rpx auto; flex: 1; text-align: center;">
 			报名时间：
 			<span style="color: #ff1a3c;">
@@ -197,7 +207,7 @@
 			</view>
 		</view>
 
-		<!-- 【新增】自定义分享弹窗 (与商机页完全一致) -->
+		<!-- 自定义分享弹窗  -->
 		<uni-popup ref="sharePopup" type="bottom" background-color="#fff" @change="onPopupChange">
 			<view class="share-popup-content">
 				<view class="share-popup-title">自定义分享内容</view>
@@ -221,7 +231,7 @@
 			</view>
 		</uni-popup>
 
-		<!-- 【新增】分享到朋友圈的引导遮罩层 (与商机页完全一致) -->
+		<!-- 分享到朋友圈的引导遮罩层 -->
 		<view v-if="showTimelineGuide" class="timeline-guide-mask" @click="hideTimelineGuide">
 			<image src="/static/icons/share-guide-arrow.png" class="guide-arrow"></image>
 			<view class="guide-text">
@@ -235,7 +245,7 @@
 <script setup>
 	import {
 		ref,
-		computed // 【新增】导入 computed
+		computed
 	} from 'vue'
 	import {
 		onLoad,
@@ -248,15 +258,15 @@
 	} from '../../utils/user.js';
 
 	const activityId = ref(null);
-	// 【新增】创建一个 ref 来存储整个聚会详情对象
+	// 创建一个 ref 来存储整个聚会详情对象
 	const activityDetail = ref(null);
 
-	// 【新增】分享弹窗和引导蒙层的状态变量
+	// 分享弹窗和引导蒙层的状态变量
 	const sharePopup = ref(null);
 	const customShareTitle = ref('');
 	const showTimelineGuide = ref(false);
 
-	// 【新增】用于控制底部操作栏显示/隐藏的状态变量
+	// 用于控制底部操作栏显示/隐藏的状态变量
 	const isActionBarHidden = ref(false);
 
 	//获取当前登录用户的ID
@@ -289,7 +299,7 @@
 			});
 		}
 
-		// ==================== 【新增】处理分享点击加分逻辑 ====================
+		// ==================== 处理分享点击加分逻辑 ====================
 		if (options && options.sharerId) {
 			const sharerId = options.sharerId;
 			const bizId = options.id; // 聚会ID就是 bizId
@@ -364,13 +374,13 @@
 		return `${Y}-${M}-${D} ${h}:${m}`;
 	};
 
-	// 【新增】uni-popup 状态变化时的事件处理函数
+	// uni-popup 状态变化时的事件处理函数
 	const onPopupChange = (e) => {
 		// e.show 是 uni-popup 派发出来的值，true 表示弹窗打开，false 表示弹窗关闭
 		isActionBarHidden.value = e.show;
 	};
 
-	// 【新增】用于聚会时间的计算属性
+	// 用于聚会时间的计算属性
 	const formattedActivityTime = computed(() => {
 		if (!activityDetail.value) return '';
 		const start = formatDateTime(activityDetail.value.startDatetime);
@@ -378,7 +388,7 @@
 		return `${start} 至 ${end}`;
 	});
 
-	// 【新增】用于报名截止时间的计算属性
+	//用于报名截止时间的计算属性
 	const formattedRegistrationEndTime = computed(() => {
 		if (!activityDetail.value) return '';
 		return formatDateTime(activityDetail.value.registrationEndDatetime);
@@ -396,7 +406,7 @@
 	});
 
 
-	// 【新增】用于聚会状态显示的计算属性
+	// 用于聚会状态显示的计算属性
 	const statusInfo = computed(() => {
 		if (!activityDetail.value) return {
 			text: '',
@@ -438,7 +448,7 @@
 		};
 	});
 
-	// 【新增】用于判断是否显示“起聚名额”提示的计算属性
+	// 用于判断是否显示“起聚名额”提示的计算属性
 	const showLimitSlotsTip = computed(() => {
 		if (!activityDetail.value) return false;
 		// 只有在“未开始”或“报名中”且报名人数少于最低名额时显示
@@ -464,7 +474,7 @@
 		}
 	};
 
-	// 【新增】获取报名用户列表的方法
+	// 获取报名用户列表的方法
 	const getParticipantList = async () => {
 		if (!activityId.value) return;
 
@@ -494,7 +504,7 @@
 		}
 	};
 
-	// 【新增】用于格式化聚店营业时间的计算属性
+	// 用于格式化聚店营业时间的计算属性
 	// 【请使用这个最终修正版的函数】
 	const formattedOperatingHours = computed(() => {
 		const operatingHoursStr = activityDetail.value?.memberStoreRespVO?.operatingHours;
@@ -576,30 +586,30 @@
 	});
 
 
-	// 【新增】打开分享弹窗的方法
+	// 打开分享弹窗的方法
 	const openSharePopup = () => {
 		// 设置输入框的默认值为聚会标题
 		customShareTitle.value = activityDetail.value.activityTitle || '发现一个很棒的聚会，快来看看吧！';
 		sharePopup.value.open();
 	};
 
-	// 【新增】关闭分享弹窗的方法
+	// 关闭分享弹窗的方法
 	const closeSharePopup = () => {
 		sharePopup.value.close();
 	};
 
-	// 【新增】引导用户分享到朋友圈的方法
+	// 引导用户分享到朋友圈的方法
 	const guideShareTimeline = () => {
 		closeSharePopup();
 		showTimelineGuide.value = true;
 	};
 
-	// 【新增】隐藏引导遮罩的方法
+	// 隐藏引导遮罩的方法
 	const hideTimelineGuide = () => {
 		showTimelineGuide.value = false;
 	};
 
-	// 【新增】调用分享命中接口的函数
+	// 调用分享命中接口的函数
 	const triggerShareHitApi = async (sharerId, bizId) => {
 		if (!sharerId || !bizId) return;
 
@@ -623,7 +633,33 @@
 		}
 	};
 
-	// 【升级 onShareAppMessage 逻辑
+	//轮播图数据源
+	const bannerImages = computed(() => {
+		if (!activityDetail.value) return [];
+
+		// 1. 优先使用新字段：聚会图集
+		if (activityDetail.value.activityCoverImageUrls && activityDetail.value.activityCoverImageUrls.length >
+			0) {
+			return activityDetail.value.activityCoverImageUrls;
+		}
+
+		// 2. 降级使用旧字段：封面图
+		if (activityDetail.value.coverImageUrl) {
+			return [activityDetail.value.coverImageUrl];
+		}
+
+		return [];
+	});
+
+	// 预览轮播图
+	const previewBanner = (index) => {
+		uni.previewImage({
+			urls: bannerImages.value,
+			current: index
+		});
+	};
+
+	// onShareAppMessage 逻辑
 	onShareAppMessage((res) => {
 		console.log("触发分享给好友", res);
 		closeSharePopup();
@@ -655,19 +691,19 @@
 	onShareTimeline(() => {
 		console.log("触发分享到朋友圈");
 
-		// 【新增】获取分享者自己的用户ID
+		// 获取分享者自己的用户ID
 		const sharerId = uni.getStorageSync('userId');
 		const finalTitle = customShareTitle.value || activityDetail.value.activityTitle || '发现一个很棒的聚会，快来看看吧！';
 
-		// 【新增】获取邀请码
+		// 获取邀请码
 		const inviteCode = getInviteCode();
 
-		// 【核心修改】在 query 中添加 sharerId 和 inviteCode 参数
+		// 在 query 中添加 sharerId 和 inviteCode 参数
 		let queryString = `id=${activityDetail.value.id}&from=timeline`;
 		if (sharerId) {
 			queryString += `&sharerId=${sharerId}`;
 		}
-		// 【新增】如果邀请码存在，则拼接到 query 中
+		//如果邀请码存在，则拼接到 query 中
 		if (inviteCode) {
 			queryString += `&inviteCode=${inviteCode}`;
 		}
@@ -773,9 +809,6 @@
 			return;
 		}
 
-		// 【重要修正】您提供的目标路径是 /pages/active-publish/active-publish，这似乎是“发布聚会”的页面。
-		// 通常聚店详情页的路径可能是 /pages/shop-detail/shop-detail。
-		// 这里我将使用您提供的路径，但请确认它是否正确。
 		const targetPath = '/pages/shop-detail/shop-detail'; // <--- 请确认此路径是否正确！
 
 		// 2. 构建URL
@@ -812,6 +845,54 @@
 	 * ================================================================== */
 
 	/* --- 聚会封面 --- */
+	/* 轮播图容器 */
+	.banner-section {
+		position: relative;
+		width: 100%;
+		/* 保持 5:4 比例，或者固定高度，根据设计稿来 */
+		/* 100vw * 0.8 = 750rpx * 0.8 = 600rpx */
+		height: 600rpx;
+		background-color: #f0f0f0;
+	}
+
+	.banner-swiper {
+		width: 100%;
+		height: 100%;
+	}
+
+	.banner-image {
+		width: 100%;
+		height: 100%;
+		display: block;
+	}
+
+	.banner-placeholder {
+		width: 100%;
+		height: 100%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		background-color: #eee;
+	}
+
+	/* 标签浮层 (复用之前的文字样式，调整定位) */
+	.tags-overlay {
+		position: absolute;
+		bottom: 20rpx;
+		left: 20rpx;
+		z-index: 10;
+	}
+
+	.event-cover-text {
+		/* 保持原有的文字样式 */
+		color: white;
+		font-size: 26rpx;
+		font-weight: bold;
+		padding: 8rpx 16rpx;
+		background-color: rgba(0, 0, 0, 0.4);
+		border-radius: 8rpx;
+	}
+
 	.event-cover {
 		width: 100%;
 		aspect-ratio: 5 / 4;

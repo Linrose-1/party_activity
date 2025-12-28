@@ -11,7 +11,7 @@
 		<view class="form-section">
 			<view class="section-title">基本信息</view>
 
-			<uni-forms :label-width="80">
+			<uni-forms :label-width="80" label-position="top">
 				<!-- activityTitle -->
 				<uni-forms-item label="聚会主题" required>
 					<uni-easyinput v-model="form.activityTitle" placeholder="请输入聚会主题" />
@@ -33,7 +33,41 @@
 					请使用5:4或4:3画幅比例上传图片，可使用相册自带的画幅剪切工具调整图片尺寸
 				</view>
 
-				<!-- 【修改】聚会时间选择器 -->
+				<uni-forms-item label="聚会图集">
+					<view class="image-drag-container"
+						:style="{ height: dragAreaHeight > 0 ? dragAreaHeight + 'px' : '0px' }">
+						<movable-area class="drag-area" :style="{ height: dragAreaHeight + 'px' }">
+							<movable-view v-for="(item, index) in dragDisplayList" :key="item.id" :x="item.x"
+								:y="item.y" direction="all" :z-index="item.zIndex"
+								:disabled="!isDragging && item.zIndex === 1" class="drag-item"
+								:style="{ width: dragItemWidth + 'px', height: dragItemHeight + 'px' }"
+								@change="onMovableChange($event, index)" @touchstart="onMovableStart(index)"
+								@touchend="onMovableEnd">
+								<view class="item-inner">
+									<view class="image-wrapper-drag">
+										<!-- item.data 存的就是图片URL -->
+										<image :src="item.data" mode="aspectFill" class="preview-image"
+											@click.stop="previewActivityImage(item.realIndex)" />
+										<!-- 删除按钮 -->
+										<view class="delete-btn" @click.stop="deleteActivityImage(item.realIndex)">×
+										</view>
+									</view>
+								</view>
+							</movable-view>
+						</movable-area>
+					</view>
+					<!-- 添加按钮 -->
+					<view class="add-btn-wrapper" v-if="form.activityCoverImageUrls.length < 9"
+						@click="handleActivityImagesUpload">
+						<view class="add-placeholder">
+							<uni-icons type="plusempty" size="30" color="#ccc"></uni-icons>
+							<text>添加</text>
+						</view>
+					</view>
+				</uni-forms-item>
+				<view class="tips">聚会图集将在详情页顶部轮播展示，建议上传现场环境、往期精彩瞬间等。</view>
+
+				<!-- 聚会时间选择器 -->
 				<uni-forms-item label="聚会时间" required>
 					<!-- 用一个 view 包裹并监听点击事件来打开 picker -->
 					<view @click="isPickerOpen = true">
@@ -43,7 +77,7 @@
 				</uni-forms-item>
 
 
-				<!-- 【修改】报名时间选择器 -->
+				<!-- 报名时间选择器 -->
 				<uni-forms-item label="报名时间" required>
 					<!-- 同样用 view 包裹 -->
 					<view @click="isPickerOpen = true">
@@ -159,18 +193,6 @@
 			到底啦，请发起聚会吧！
 		</view>
 
-		<!-- <view class="form-section">
-			<view class="section-title">商圈信息</view>
-			<uni-forms-item label="合作聚店" required :label-width="80">
-				<view class="uni-list-cell-db">
-					<view @click="goToSelectShop" class="uni-input">
-						<text v-if="associatedStoreName">{{ associatedStoreName }}</text>
-						<text v-else class="placeholder">点击选择合作店铺</text>
-						<text class="arrow">></text>
-					</view>
-				</view>
-			</uni-forms-item>
-		</view> -->
 
 		<!-- 底部操作栏 -->
 		<view class="action-bar" :class="{ 'z-index-low': isPickerOpen }">
@@ -181,12 +203,6 @@
 				{{ isPublishing ? '处理中...' : (mode === 'edit' ? '保存修改' : '发起聚会') }}
 			</view>
 		</view>
-		<!-- <view class="action-bar" :class="{ 'z-index-low': isPickerOpen }">
-			<view class="action-btn save-btn" @click="saveDraft">保存草稿</view>
-			<view class="action-btn publish-btn" :class="{ 'disabled': isPublishing }" @click="publish">
-				{{ isPublishing ? '发布中...' : '发起聚会' }}
-			</view>
-		</view> -->
 	</view>
 </template>
 
@@ -194,7 +210,9 @@
 	import {
 		ref,
 		onMounted,
-		computed
+		computed,
+		watch,
+		nextTick
 	} from 'vue';
 	import {
 		onLoad,
@@ -243,6 +261,9 @@
 			const draftDataString = uni.getStorageSync(DRAFT_STORAGE_KEY);
 			if (draftDataString) {
 				const parsedDraft = JSON.parse(draftDataString);
+				if (!parsedDraft.form.activityCoverImageUrls) {
+					parsedDraft.form.activityCoverImageUrls = [];
+				}
 				form.value = parsedDraft.form;
 				timeRange.value = parsedDraft.timeRange;
 				enrollTimeRange.value = parsedDraft.enrollTimeRange;
@@ -263,6 +284,7 @@
 	onMounted(() => {
 		checkUserVerificationStatus();
 		getActiveType();
+		initDragLayout();
 	});
 
 	// 检查用户实名认证状态的函数
@@ -323,6 +345,7 @@
 		latitude: null, // 由地图选择填充
 		longitude: null, // 由地图选择填充
 		coverImageUrl: '',
+		activityCoverImageUrls: [],
 		organizerUnitName: '',
 		organizerContactPhone: '',
 		organizerPaymentQrCodeUrl: '',
@@ -469,6 +492,64 @@
 			}
 		});
 	}
+
+	// 图集上传 (多图)
+	const handleActivityImagesUpload = () => {
+		uni.chooseImage({
+			count: 9 - form.value.activityCoverImageUrls.length,
+			sizeType: ['compressed'],
+			sourceType: ['album', 'camera'],
+			success: async (res) => {
+				uni.showLoading({
+					title: '上传中...'
+				});
+
+				const uploadPromises = res.tempFiles.map(file => uploadFile({
+					path: file.path
+				}, {
+					directory: 'activity-gallery'
+				}));
+
+				try {
+					const results = await Promise.all(uploadPromises);
+					uni.hideLoading();
+
+					const successfulUrls = results.filter(r => r.data).map(r => r.data);
+					if (successfulUrls.length > 0) {
+						form.value.activityCoverImageUrls.push(...successfulUrls);
+					}
+
+					if (results.some(r => r.error)) {
+						uni.showToast({
+							title: '部分图片上传失败',
+							icon: 'none'
+						});
+					}
+				} catch (error) {
+					uni.hideLoading();
+					console.error("上传异常:", error);
+					uni.showToast({
+						title: '上传出错',
+						icon: 'none'
+					});
+				}
+			}
+		});
+	};
+
+	// 删除图集图片
+	const deleteActivityImage = (index) => {
+		form.value.activityCoverImageUrls.splice(index, 1);
+	};
+
+	// 预览图集图片
+	const previewActivityImage = (index) => {
+		uni.previewImage({
+			urls: form.value.activityCoverImageUrls,
+			current: index
+		});
+	};
+
 
 	// 抽离上传逻辑
 	const uploadFileToCloud = async (filePath, field, directory) => {
@@ -644,7 +725,14 @@
 		form.value.locationAddress = data.locationAddress;
 		form.value.latitude = data.latitude;
 		form.value.longitude = data.longitude;
+		// 回显封面
 		form.value.coverImageUrl = data.coverImageUrl;
+		// 回显图集 (如果后端返回了该字段)
+		if (data.activityCoverImageUrls && data.activityCoverImageUrls.length > 0) {
+			form.value.activityCoverImageUrls = data.activityCoverImageUrls;
+		} else {
+			form.value.activityCoverImageUrls = []; // 【关键修复】兜底为空数组
+		}
 		form.value.organizerUnitName = data.organizerUnitName;
 		form.value.organizerContactPhone = data.organizerContactPhone;
 		form.value.organizerPaymentQrCodeUrl = data.organizerPaymentQrCodeUrl;
@@ -910,6 +998,7 @@
 		try {
 			// --- 构建最终提交给后端的 payload ---
 			const payload = JSON.parse(JSON.stringify(form.value));
+			payload.activityCoverImageUrls = form.value.activityCoverImageUrls;
 			payload.startDatetime = new Date(timeRange.value[0]).getTime();
 			payload.endDatetime = new Date(timeRange.value[1]).getTime();
 			payload.registrationStartDatetime = new Date(enrollTimeRange.value[0]).getTime();
@@ -1129,6 +1218,133 @@
 		console.log('[活动发布页] 分享到朋友圈的内容:', JSON.stringify(shareContent));
 		return shareContent;
 	});
+
+
+
+	/* ==================== 拖拽排序逻辑 (新增) ==================== */
+	const dragDisplayList = ref([]);
+	const dragItemWidth = ref(0);
+	const dragItemHeight = ref(0);
+	const dragAreaHeight = ref(0);
+	const isDragging = ref(false);
+	const dragIndex = ref(-1);
+	const dragColumns = 3;
+	const dragItemHeightRpx = 210;
+
+	// 1. 初始化尺寸
+	const initDragLayout = () => {
+		const sys = uni.getSystemInfoSync();
+		// 假设左右 padding 各 20rpx + margin，估算减去 100rpx
+		const containerWidth = sys.windowWidth - uni.upx2px(100);
+		dragItemWidth.value = containerWidth / dragColumns;
+		dragItemHeight.value = uni.upx2px(dragItemHeightRpx);
+	};
+
+	// 2. 监听数组变化，自动同步到拖拽列表
+	watch(() => form.value.activityCoverImageUrls, (newVal) => {
+		if (!isDragging.value) {
+			initDragList(newVal || []);
+		}
+	}, {
+		deep: true
+	});
+
+	// 3. 初始化列表
+	const initDragList = (originList) => {
+		if (!originList) {
+			dragDisplayList.value = [];
+			dragAreaHeight.value = 0;
+			return;
+		}
+		if (dragItemWidth.value === 0) initDragLayout();
+
+		dragDisplayList.value = originList.map((url, index) => {
+			const {
+				x,
+				y
+			} = getPos(index);
+			return {
+				id: `img_${index}_${Math.random()}`,
+				data: url,
+				x,
+				y,
+				zIndex: 1,
+				realIndex: index
+			};
+		});
+		updateDragHeight();
+	};
+
+	const getPos = (index) => {
+		const row = Math.floor(index / dragColumns);
+		const col = index % dragColumns;
+		return {
+			x: col * dragItemWidth.value,
+			y: row * dragItemHeight.value
+		};
+	};
+
+	const updateDragHeight = () => {
+		const count = dragDisplayList.value.length;
+		const rows = Math.ceil(count / dragColumns);
+		dragAreaHeight.value = (rows || 1) * dragItemHeight.value;
+	};
+
+	// --- 拖拽事件 ---
+	const onMovableStart = (index) => {
+		isDragging.value = true;
+		dragIndex.value = index;
+		dragDisplayList.value[index].zIndex = 99;
+	};
+
+	const onMovableChange = (e, index) => {
+		if (!isDragging.value || index !== dragIndex.value) return;
+		const x = e.detail.x;
+		const y = e.detail.y;
+
+		const centerX = x + dragItemWidth.value / 2;
+		const centerY = y + dragItemHeight.value / 2;
+		const col = Math.floor(centerX / dragItemWidth.value);
+		const row = Math.floor(centerY / dragItemHeight.value);
+		let targetIndex = row * dragColumns + col;
+
+		if (targetIndex < 0) targetIndex = 0;
+		if (targetIndex >= dragDisplayList.value.length) targetIndex = dragDisplayList.value.length - 1;
+
+		if (targetIndex !== dragIndex.value) {
+			const mover = dragDisplayList.value[dragIndex.value];
+			dragDisplayList.value.splice(dragIndex.value, 1);
+			dragDisplayList.value.splice(targetIndex, 0, mover);
+
+			dragDisplayList.value.forEach((item, idx) => {
+				if (idx !== targetIndex) {
+					const pos = getPos(idx);
+					item.x = pos.x;
+					item.y = pos.y;
+				}
+			});
+			dragIndex.value = targetIndex;
+		}
+	};
+
+	const onMovableEnd = () => {
+		isDragging.value = false;
+		if (dragIndex.value !== -1) {
+			const item = dragDisplayList.value[dragIndex.value];
+			item.zIndex = 1;
+			const pos = getPos(dragIndex.value);
+			nextTick(() => {
+				item.x = pos.x;
+				item.y = pos.y;
+			});
+
+			// 同步回源数据
+			const sortedUrls = dragDisplayList.value.map(wrapper => wrapper.data);
+			form.value.activityCoverImageUrls = sortedUrls;
+		}
+		dragIndex.value = -1;
+	};
+	/* ============================================================ */
 </script>
 
 <style lang="scss" scoped>
@@ -1411,5 +1627,94 @@
 	.reminder-arrow {
 		font-size: 32rpx;
 		color: #c0c4cc;
+	}
+
+	/* ==================== 拖拽排序相关样式 ==================== */
+	.image-drag-container {
+		width: 100%;
+		position: relative;
+		overflow: hidden;
+		margin-top: 10rpx;
+		z-index: 1;
+		/* 防止遮挡 */
+	}
+
+	.drag-area {
+		width: 100%;
+	}
+
+	.drag-item {
+		z-index: 10;
+	}
+
+	.item-inner {
+		width: 100%;
+		height: 100%;
+		padding: 8rpx;
+		box-sizing: border-box;
+		display: block;
+	}
+
+	.image-wrapper-drag {
+		width: 100%;
+		height: 100%;
+		position: relative;
+		border-radius: 12rpx;
+		overflow: hidden;
+		background-color: #f0f0f0;
+	}
+
+	.preview-image {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		display: block;
+	}
+
+	.delete-btn {
+		position: absolute;
+		top: 0;
+		right: 0;
+		width: 40rpx;
+		height: 40rpx;
+		background-color: rgba(0, 0, 0, 0.6);
+		color: white;
+		border-radius: 0 0 0 12rpx;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 28rpx;
+		z-index: 20;
+	}
+
+	/* 添加按钮样式 */
+	.add-btn-wrapper {
+		width: 33.33%;
+		height: 210rpx;
+		padding: 8rpx;
+		box-sizing: border-box;
+		display: inline-block;
+		vertical-align: top;
+	}
+
+	.add-placeholder {
+		width: 100%;
+		height: 100%;
+		border: 2rpx dashed #ccc;
+		border-radius: 12rpx;
+		display: flex;
+		flex-direction: column;
+		/* 垂直排列图标和文字 */
+		align-items: center;
+		justify-content: center;
+		background-color: #fafafa;
+		color: #999;
+	}
+
+	.add-placeholder text {
+		margin-top: 10rpx;
+		font-size: 24rpx;
 	}
 </style>

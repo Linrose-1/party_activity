@@ -232,3 +232,84 @@
   font-size: 32rpx;
   color: #c0c4cc;
 }
+
+/* ==================== 拖拽排序相关样式 ==================== */
+.image-drag-container.data-v-5d3444db {
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+  margin-top: 10rpx;
+  z-index: 1;
+  /* 防止遮挡 */
+}
+.drag-area.data-v-5d3444db {
+  width: 100%;
+}
+.drag-item.data-v-5d3444db {
+  z-index: 10;
+}
+.item-inner.data-v-5d3444db {
+  width: 100%;
+  height: 100%;
+  padding: 8rpx;
+  box-sizing: border-box;
+  display: block;
+}
+.image-wrapper-drag.data-v-5d3444db {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  border-radius: 12rpx;
+  overflow: hidden;
+  background-color: #f0f0f0;
+}
+.preview-image.data-v-5d3444db {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.delete-btn.data-v-5d3444db {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 40rpx;
+  height: 40rpx;
+  background-color: rgba(0, 0, 0, 0.6);
+  color: white;
+  border-radius: 0 0 0 12rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28rpx;
+  z-index: 20;
+}
+
+/* 添加按钮样式 */
+.add-btn-wrapper.data-v-5d3444db {
+  width: 33.33%;
+  height: 210rpx;
+  padding: 8rpx;
+  box-sizing: border-box;
+  display: inline-block;
+  vertical-align: top;
+}
+.add-placeholder.data-v-5d3444db {
+  width: 100%;
+  height: 100%;
+  border: 2rpx dashed #ccc;
+  border-radius: 12rpx;
+  display: flex;
+  flex-direction: column;
+  /* 垂直排列图标和文字 */
+  align-items: center;
+  justify-content: center;
+  background-color: #fafafa;
+  color: #999;
+}
+.add-placeholder text.data-v-5d3444db {
+  margin-top: 10rpx;
+  font-size: 24rpx;
+}

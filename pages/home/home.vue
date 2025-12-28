@@ -77,9 +77,13 @@
 					</button>
 				</view>
 
-				<!-- 3.2 卡片内容 (公开) -->
+				<!-- 3.2 卡片内容-->
 				<!-- 为标题添加新的 longpress 事件 -->
-				<view class="post-content-title" @longpress.stop="handleLongPress(post.title)">{{ post.title }}</view>
+				<view class="post-content-title" @longpress.stop="handleLongPress(post.title)">
+					<text v-if="post.postType === 1" class="type-tag hunter">创业猎伙</text>
+					<text v-else class="type-tag business">商机分享</text>
+					{{ post.title }}
+				</view>
 
 				<!-- 为内容预览区域添加新的 longpress 事件 -->
 				<view v-if="post.displayContent" class="post-content-preview"
@@ -596,6 +600,7 @@
 				return {
 					id: item.id,
 					title: item.postTitle,
+					postType: item.postType || 0,
 					fullContent: plainText, // 完整纯文本内容，为长按复制做准备
 					displayContent: displayContent, // 用于显示的内容
 					isTruncated: isTruncated, // 是否被截断的标志
@@ -1665,6 +1670,34 @@
 		margin-top: 30rpx;
 		color: #444;
 		font-weight: 700;
+	}
+
+	/* 类型标签基础样式 */
+	.type-tag {
+		font-size: 20rpx;
+		padding: 2rpx 8rpx;
+		border-radius: 6rpx;
+		margin-right: 12rpx;
+		font-weight: normal;
+		display: inline-block;
+		vertical-align: middle;
+		line-height: 1.2;
+		transform: translateY(-2rpx);
+		/* 微调垂直对齐 */
+	}
+
+	/* 商机样式 (橙色系) */
+	.type-tag.business {
+		color: #FF6A00;
+		background-color: #FFF0E6;
+		border: 1rpx solid rgba(255, 106, 0, 0.3);
+	}
+
+	/* 猎伙样式 (蓝色系，突出显示) */
+	.type-tag.hunter {
+		color: #1890FF;
+		background-color: #E6F7FF;
+		border: 1rpx solid rgba(24, 144, 255, 0.3);
 	}
 
 	.post-content-preview {

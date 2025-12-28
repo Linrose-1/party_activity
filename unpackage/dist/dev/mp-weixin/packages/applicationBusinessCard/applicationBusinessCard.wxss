@@ -641,6 +641,25 @@ to {
 		text-align: left;
 		/* 确保内容左对齐 */
 }
+.remark-item.data-v-fd2d3e1c {
+		/* 增加点击区域和反馈 */
+		padding: 16rpx 0;
+		/* 稍微加大一点垂直间距 */
+		border-bottom: 1rpx dashed #eee;
+		/* 可选分隔线 */
+		cursor: pointer;
+}
+.remark-item.data-v-fd2d3e1c:active {
+		opacity: 0.7;
+}
+.remark-highlight.data-v-fd2d3e1c {
+		font-weight: bold;
+		color: #333;
+}
+.placeholder-text.data-v-fd2d3e1c {
+		color: #999;
+		font-style: italic;
+}
 .detail-item.data-v-fd2d3e1c {
 		display: flex;
 		align-items: flex-start;

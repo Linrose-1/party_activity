@@ -189,6 +189,26 @@
 		/* 点击时颜色变深一点 */
 }
 
+	/* 详情页标签样式 */
+.detail-type-tag.data-v-8303b14f {
+		font-size: 22rpx;
+		padding: 4rpx 10rpx;
+		border-radius: 8rpx;
+		margin-right: 12rpx;
+		font-weight: normal;
+		display: inline-block;
+		vertical-align: middle;
+		transform: translateY(-4rpx);
+}
+.detail-type-tag.business.data-v-8303b14f {
+		color: #FF6A00;
+		background-color: #FFF0E6;
+}
+.detail-type-tag.hunter.data-v-8303b14f {
+		color: #1890FF;
+		background-color: #E6F7FF;
+}
+
 	/* --- 商机内容、图片、标签 --- */
 .opportunity-content.data-v-8303b14f {
 		white-space: pre-line;

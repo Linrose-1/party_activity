@@ -349,6 +349,34 @@
 		color: #444;
 		font-weight: 700;
 }
+
+	/* 类型标签基础样式 */
+.type-tag.data-v-07e72d3c {
+		font-size: 20rpx;
+		padding: 2rpx 8rpx;
+		border-radius: 6rpx;
+		margin-right: 12rpx;
+		font-weight: normal;
+		display: inline-block;
+		vertical-align: middle;
+		line-height: 1.2;
+		transform: translateY(-2rpx);
+		/* 微调垂直对齐 */
+}
+
+	/* 商机样式 (橙色系) */
+.type-tag.business.data-v-07e72d3c {
+		color: #FF6A00;
+		background-color: #FFF0E6;
+		border: 1rpx solid rgba(255, 106, 0, 0.3);
+}
+
+	/* 猎伙样式 (蓝色系，突出显示) */
+.type-tag.hunter.data-v-07e72d3c {
+		color: #1890FF;
+		background-color: #E6F7FF;
+		border: 1rpx solid rgba(24, 144, 255, 0.3);
+}
 .post-content-preview.data-v-07e72d3c {
 		font-size: 28rpx;
 		line-height: 1.6;

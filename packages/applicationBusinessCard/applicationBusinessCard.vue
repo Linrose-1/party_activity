@@ -23,6 +23,16 @@
 
 				<!-- ==================== 用户信息预览区 ==================== -->
 				<view class="target-details">
+					<view class="detail-item remark-item" @click="handleEditRemark">
+						<uni-icons type="compose" size="16" color="#888"></uni-icons>
+						<text class="detail-label">备注名:</text>
+						<!-- 有备注显示备注，无备注显示提示 -->
+						<text v-if="targetUserInfo.remarkName"
+							class="detail-value remark-highlight">{{ targetUserInfo.remarkName }}</text>
+						<text v-else class="detail-value placeholder-text">点击设置备注</text>
+						<uni-icons type="right" size="14" color="#ccc" style="margin-left: auto;"></uni-icons>
+					</view>
+
 					<view v-if="targetUserInfo.companyName" class="detail-item">
 						<uni-icons type="flag" size="16" color="#888"></uni-icons>
 						<text class="detail-label">公司:</text>
@@ -260,7 +270,7 @@
 			data,
 			error
 		} = await request('/app-api/member/user/getSimpleUserInfo', {
-			method: 'GET', 
+			method: 'GET',
 			data: {
 				readUserId: targetUserId.value,
 				notPay: 1 // 固定传 1
@@ -366,6 +376,54 @@
 				duration: 2000
 			});
 		}
+	};
+
+	const handleEditRemark = () => {
+		uni.showModal({
+			title: '设置备注名',
+			content: targetUserInfo.value.remarkName || '',
+			editable: true,
+			placeholderText: '请输入备注名',
+			success: async (res) => {
+				if (res.confirm) {
+					const newRemarkName = res.content.trim();
+					const success = await saveUserRemark(newRemarkName);
+					if (success) {
+						// 更新本地显示
+						// 注意：这里更新的是 targetUserInfo 对象，界面会自动响应
+						targetUserInfo.value = {
+							...targetUserInfo.value,
+							remarkName: newRemarkName
+						};
+						uni.showToast({
+							title: '备注已保存',
+							icon: 'success'
+						});
+					}
+				}
+			}
+		});
+	};
+
+	const saveUserRemark = async (remark) => {
+		if (!targetUserId.value) return false;
+		const {
+			error
+		} = await request('/app-api/member/user-remark/addOrUpdateRemarkName', {
+			method: 'POST',
+			data: {
+				toUserId: targetUserId.value,
+				remarkName: remark,
+			}
+		});
+		if (error) {
+			uni.showToast({
+				title: `保存失败: ${error}`,
+				icon: 'none'
+			});
+			return false;
+		}
+		return true;
 	};
 
 	// --- 辅助功能 ---
@@ -1105,6 +1163,29 @@
 		gap: 20rpx;
 		text-align: left;
 		/* 确保内容左对齐 */
+	}
+
+	.remark-item {
+		/* 增加点击区域和反馈 */
+		padding: 16rpx 0;
+		/* 稍微加大一点垂直间距 */
+		border-bottom: 1rpx dashed #eee;
+		/* 可选分隔线 */
+		cursor: pointer;
+	}
+
+	.remark-item:active {
+		opacity: 0.7;
+	}
+
+	.remark-highlight {
+		font-weight: bold;
+		color: #333;
+	}
+
+	.placeholder-text {
+		color: #999;
+		font-style: italic;
 	}
 
 	.detail-item {

@@ -33,6 +33,8 @@
 				</view>
 				<view style="font-weight: 700;font-size: 36rpx;"
 					@longpress.stop="handleLongPress(postDetail.postTitle)">
+					<text v-if="postDetail.postType === 1" class="detail-type-tag hunter">创业猎伙</text>
+					<text v-else class="detail-type-tag business">商机分享</text>
 					{{postDetail.postTitle}}
 				</view>
 				<view class="opportunity-content" @longpress.stop="handleLongPress(postDetail.content)">
@@ -269,6 +271,7 @@
 		cardFlag: true,
 		commentFlag: true,
 		businessCoverImageUrl: '',
+		postType: 0,
 	});
 
 	const comments = ref([]);
@@ -593,6 +596,7 @@
 				postDetail.userAction = item.userLikeStr || null;
 				postDetail.cardFlag = item.cardFlag;
 				postDetail.commentFlag = item.commentFlag;
+				postDetail.postType = item.postType || 0;
 
 				if (loggedInUserId.value && item.userId && loggedInUserId.value != item.userId) {
 					showFollowButton.value = true;
@@ -1331,6 +1335,28 @@
 	.delete-post-button:active {
 		background-color: #e0e0e0;
 		/* 点击时颜色变深一点 */
+	}
+
+	/* 详情页标签样式 */
+	.detail-type-tag {
+		font-size: 22rpx;
+		padding: 4rpx 10rpx;
+		border-radius: 8rpx;
+		margin-right: 12rpx;
+		font-weight: normal;
+		display: inline-block;
+		vertical-align: middle;
+		transform: translateY(-4rpx);
+	}
+
+	.detail-type-tag.business {
+		color: #FF6A00;
+		background-color: #FFF0E6;
+	}
+
+	.detail-type-tag.hunter {
+		color: #1890FF;
+		background-color: #E6F7FF;
 	}
 
 	/* --- 商机内容、图片、标签 --- */

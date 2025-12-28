@@ -74,7 +74,7 @@
 	} from 'vue';
 	import request from '../utils/request.js';
 	import {
-		checkLoginGuard // 【新增】导入权限卫士
+		checkLoginGuard // 导入权限卫士
 	} from '../utils/user.js';
 
 	const props = defineProps({

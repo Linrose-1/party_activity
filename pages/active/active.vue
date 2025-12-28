@@ -169,7 +169,7 @@
 	// --- 生命周期函数 ---
 
 	/**
-	 * 【核心修改 3】使用 onShow 刷新所有数据
+	 * 使用 onShow 刷新所有数据
 	 * 每次进入页面时都会触发，确保数据是最新的
 	 */
 	onShow(() => {
@@ -433,30 +433,13 @@
 	// 发布聚会
 	const publishActivity = () => {
 		if (!checkLoginGuard()) return;
-		// if (!isLogin.value) {
-		// 	uni.showModal({
-		// 		title: '温馨提示',
-		// 		content: '登录后才能发布聚会，是否立即登录？',
-		// 		confirmText: '去登录',
-		// 		cancelText: '再看看',
-		// 		success: (res) => {
-		// 			if (res.confirm) {
-		// 				uni.navigateTo({
-		// 					// url: '/pages/login/login'
-		// 					url: '/pages/index/index'
-		// 				});
-		// 			}
-		// 		}
-		// 	});
-		// 	return;
-		// }
 		uni.navigateTo({
 			url: '/packages/active-publish/active-publish'
 		});
 	};
 
 	/**
-	 * 【新增】处理轮播图点击事件的函数
+	 * 处理轮播图点击事件的函数
 	 * @param {object} banner - 被点击的轮播图数据对象
 	 */
 	const handleBannerClick = (banner) => {
@@ -473,8 +456,6 @@
 
 		// 3. 执行页面跳转
 		uni.navigateTo({
-			// 【重要】请根据您的项目结构，确认聚会详情页的正确路径
-			// 假设路径为 /packages/active/active-detail
 			url: `/packages/active-detail/active-detail?id=${activityId}`
 		});
 	};
