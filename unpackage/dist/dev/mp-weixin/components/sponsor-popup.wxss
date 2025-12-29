@@ -1,0 +1,267 @@
+/* 水平间距 */
+/* 水平间距 */
+/* 遮罩层 */
+.popup-mask.data-v-4df7dc31 {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+.popup-mask.visible.data-v-4df7dc31 {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* 内容层 */
+.popup-content.data-v-4df7dc31 {
+  background-color: #fff;
+  border-radius: 30rpx 30rpx 0 0;
+  height: 85vh;
+  display: flex;
+  flex-direction: column;
+  transform: translateY(100%);
+  transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+.popup-content.slide-up.data-v-4df7dc31 {
+  transform: translateY(0);
+}
+
+/* 头部 */
+.popup-header.data-v-4df7dc31 {
+  height: 100rpx;
+  min-height: 100rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 30rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+.popup-header .title.data-v-4df7dc31 {
+  font-size: 34rpx;
+  font-weight: bold;
+  color: #333;
+}
+.popup-header .btn-cancel.data-v-4df7dc31 {
+  font-size: 30rpx;
+  color: #999;
+  padding: 20rpx;
+}
+.popup-header .btn-confirm.data-v-4df7dc31 {
+  font-size: 30rpx;
+  color: #FF6F00;
+  font-weight: bold;
+  padding: 20rpx;
+}
+
+/* 滚动区 */
+.popup-scroll-view.data-v-4df7dc31 {
+  flex: 1;
+  height: 0;
+  overflow-y: scroll;
+}
+.form-wrapper.data-v-4df7dc31 {
+  padding: 30rpx;
+}
+
+/* ======== 样式精修区 ======== */
+/* 1. 标准输入框样式：淡灰色边框 + 白色背景 */
+.standard-input.data-v-4df7dc31 .uni-easyinput__content {
+  border: 1px solid #E5E5E5 !important;
+  /* 淡灰色边框 */
+  border-radius: 8rpx;
+  height: 76rpx;
+  /* 固定高度，方便对齐 */
+  background-color: #fff !important;
+  padding-left: 10rpx;
+}
+.standard-textarea.data-v-4df7dc31 .uni-easyinput__content {
+  border: 1px solid #E5E5E5 !important;
+  border-radius: 8rpx;
+  background-color: #fff !important;
+  padding: 10rpx;
+}
+
+/* 2. 上传框 */
+.upload-box.data-v-4df7dc31 {
+  width: 200rpx;
+  height: 200rpx;
+  background-color: #FAFAFA;
+  border: 1px dashed #E5E5E5;
+  border-radius: 12rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+}
+.upload-box .uploaded-img.data-v-4df7dc31 {
+  width: 100%;
+  height: 100%;
+}
+.upload-box .upload-placeholder.data-v-4df7dc31 {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10rpx;
+  color: #999;
+  font-size: 24rpx;
+}
+
+/* 3. 赞助类型选择 */
+.type-selector.data-v-4df7dc31 {
+  display: flex;
+  gap: 20rpx;
+}
+.type-selector .type-item.data-v-4df7dc31 {
+  flex: 1;
+  height: 76rpx;
+  background: #fff;
+  border: 1px solid #E5E5E5;
+  border-radius: 8rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666;
+  font-size: 28rpx;
+  transition: all 0.2s;
+}
+.type-selector .type-item.active.data-v-4df7dc31 {
+  background: #FFF6E6;
+  border-color: #FF6F00;
+  color: #FF6F00;
+  font-weight: bold;
+}
+.row-inputs.data-v-4df7dc31 {
+  display: flex;
+  justify-content: space-between;
+  gap: 20rpx;
+}
+.row-inputs .half-item.data-v-4df7dc31 {
+  flex: 1;
+  width: 0;
+}
+
+/* 4. 负责人：完全水平对齐布局 */
+.contact-row.data-v-4df7dc31 {
+  display: flex;
+  align-items: center;
+  /* 垂直居中对齐 */
+  gap: 24rpx;
+  padding-top: 10rpx;
+  /* 稍微与标签拉开距离 */
+}
+
+/* 头像容器 */
+.avatar-wrapper.data-v-4df7dc31 {
+  width: 76rpx;
+  height: 76rpx;
+  /* 与输入框高度严格一致 */
+  border-radius: 50%;
+  background: #FAFAFA;
+  border: 1px dashed #E5E5E5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  flex-shrink: 0;
+  /* 防止被挤压 */
+  /* 悬浮提示文字 */
+}
+.avatar-wrapper .avatar-img.data-v-4df7dc31 {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+}
+.avatar-wrapper .avatar-tip.data-v-4df7dc31 {
+  position: absolute;
+  bottom: -32rpx;
+  font-size: 20rpx;
+  color: #999;
+  width: 100%;
+  text-align: center;
+}
+
+/* 姓名输入容器 */
+.name-wrapper.data-v-4df7dc31 {
+  flex: 1;
+  /* 占据剩余宽度 */
+}
+
+/* 分隔线 */
+.section-divider.data-v-4df7dc31 {
+  height: 1px;
+  background-color: #F0F0F0;
+  margin: 30rpx 0;
+}
+
+/* 拖拽相关 */
+.gallery-container.data-v-4df7dc31 {
+  position: relative;
+  width: 100%;
+}
+.drag-area.data-v-4df7dc31 {
+  width: 100%;
+}
+.drag-item.data-v-4df7dc31 {
+  z-index: 10;
+}
+.item-inner.data-v-4df7dc31 {
+  width: 100%;
+  height: 100%;
+  padding: 10rpx;
+  box-sizing: border-box;
+}
+.img-wrap.data-v-4df7dc31 {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  border-radius: 8rpx;
+  overflow: hidden;
+  background: #eee;
+}
+.img-wrap image.data-v-4df7dc31 {
+  width: 100%;
+  height: 100%;
+}
+.del-tag.data-v-4df7dc31 {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 40rpx;
+  height: 40rpx;
+  background: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom-left-radius: 8rpx;
+  z-index: 20;
+}
+.add-btn-slot.data-v-4df7dc31 {
+  position: absolute;
+  z-index: 5;
+}
+.upload-placeholder.small.data-v-4df7dc31 {
+  width: 100%;
+  height: 100%;
+  background: #FAFAFA;
+  border: 1px dashed #E5E5E5;
+  border-radius: 8rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.data-v-4df7dc31 .uni-forms-item__label {
+  font-weight: bold;
+  color: #333;
+  padding-bottom: 10rpx;
+}

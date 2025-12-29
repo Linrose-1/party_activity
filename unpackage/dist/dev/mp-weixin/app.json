@@ -32,7 +32,8 @@
     "pages/my-systemSuggestions/my-systemSuggestions",
     "pages/my-auth/my-auth",
     "pages/platform-intro/platform-intro",
-    "pages/my-order-detail/my-order-detail"
+    "pages/my-order-detail/my-order-detail",
+    "pages/sponsor-detail/sponsor-detail"
   ],
   "subPackages": [
     {

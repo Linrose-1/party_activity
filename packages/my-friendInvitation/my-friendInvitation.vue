@@ -140,10 +140,25 @@
 			<view v-show="currentTab === 1" class="tab-panel">
 
 				<!-- 1. 顶部搜索 (圈友专属) -->
-				<view class="search-wrapper sticky-header-circle">
-					<uni-easyinput prefixIcon="search" v-model="circleSearchKey" placeholder="搜索圈友姓名"
-						@confirm="handleCircleSearch" @clear="handleCircleSearch"></uni-easyinput>
+				<view class="sticky-header-circle">
+					<view class="search-wrapper">
+						<uni-easyinput prefixIcon="search" v-model="circleSearchKey" placeholder="搜索圈友姓名"
+							@confirm="handleCircleSearch" @clear="handleCircleSearch"></uni-easyinput>
+					</view>
+
+					<!-- 【新增】圈友类型筛选 Tab -->
+					<view class="circle-sub-tabs">
+						<view class="sub-tab-item" :class="{ active: circleAddInitiator === 0 }"
+							@click="switchCircleFilter(0)">
+							我圈的人
+						</view>
+						<view class="sub-tab-item" :class="{ active: circleAddInitiator === 1 }"
+							@click="switchCircleFilter(1)">
+							圈我的人
+						</view>
+					</view>
 				</view>
+
 
 				<!-- 2. 新申请入口 -->
 				<!-- 只有当有新申请或者想要常驻显示时展示 -->
@@ -256,6 +271,7 @@
 	const circlePageNo = ref(1);
 	const circleLoadStatus = ref('more'); // 'more', 'loading', 'noMore'
 	const circleSearchKey = ref(''); // 圈友专属搜索框
+	const circleAddInitiator = ref(0);
 
 	// --- 新申请相关状态 ---
 	const newApplyList = ref([]); // 申请列表数据
@@ -413,13 +429,36 @@
 	// 	currentTab.value = e.currentIndex;
 	// };
 	const handleTabClick = (e) => {
+		// 如果点击当前 tab，不做操作
+		if (currentTab.value === e.currentIndex) return;
+
 		currentTab.value = e.currentIndex;
+
 		// 切换 Tab 时滚动回顶部
 		uni.pageScrollTo({
 			scrollTop: 0,
 			duration: 0
 		});
+
+		// 【新增】根据 Tab 索引刷新对应数据
+		if (currentTab.value === 0) {
+			// 切换到“我的商友”：刷新商友列表和用户信息
+			getShareUserList(true);
+			fetchUserInfo();
+		} else if (currentTab.value === 1) {
+			// 切换到“我的圈友”：刷新圈友列表和新申请
+			getCircleFriendList(true);
+			getNewApplyList();
+		}
 	};
+
+	const switchCircleFilter = (type) => {
+		if (circleAddInitiator.value === type) return;
+		circleAddInitiator.value = type;
+		// 切换后立即刷新列表
+		getCircleFriendList(true);
+	};
+
 
 	/**
 	 * @description 获取当前用户信息 (用于"我的邀请人")
@@ -553,6 +592,7 @@
 				pageNo: circlePageNo.value,
 				pageSize: pageSize.value,
 				status: 1, // 1: 好友位 (全部圈友)
+				addInitiator: circleAddInitiator.value
 			};
 			if (circleSearchKey.value.trim()) {
 				params.searchKey = circleSearchKey.value.trim();
@@ -1231,13 +1271,53 @@
 
 
 	/* 圈友列表的吸顶搜索栏 */
+	/* 圈友列表的吸顶容器 */
 	.sticky-header-circle {
 		position: sticky;
 		top: 100rpx;
-		/* 与商友列表保持一致，适配 Tab 高度 */
 		z-index: 10;
 		background-color: #f7f8fa;
 		padding-bottom: 20rpx;
+		/* 移除之前的 padding-bottom: 20rpx，改由子元素控制间距 */
+	}
+
+	/* 子 Tab 筛选样式 */
+	.circle-sub-tabs {
+		display: flex;
+		background-color: #fff;
+		padding: 10rpx 20rpx;
+		margin-top: 2rpx;
+		/* 稍微与搜索框隔开一点 */
+		border-bottom: 1rpx solid #eee;
+	}
+
+	.sub-tab-item {
+		flex: 1;
+		text-align: center;
+		font-size: 28rpx;
+		color: #666;
+		padding: 20rpx 0;
+		position: relative;
+		transition: all 0.3s;
+		font-weight: 500;
+
+		&.active {
+			color: #FF6E00;
+			/* 主题色 */
+			font-weight: bold;
+
+			&::after {
+				content: '';
+				position: absolute;
+				bottom: 0;
+				left: 50%;
+				transform: translateX(-50%);
+				width: 40rpx;
+				height: 4rpx;
+				background-color: #FF6E00;
+				border-radius: 2rpx;
+			}
+		}
 	}
 
 	.friend-status {

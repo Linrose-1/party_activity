@@ -281,6 +281,13 @@
 			{
 				"navigationBarTitleText" : "订单详情"
 			}
+		},
+		{
+			"path" : "pages/sponsor-detail/sponsor-detail",
+			"style" : 
+			{
+				"navigationBarTitleText" : "赞助信息详情"
+			}
 		}
 	],
 
@@ -422,7 +429,7 @@
 				"style": {
 					"navigationBarTitleText": "我的收藏"
 				}
-			},
+			}
 			// 如果还有其他页面要放进这个分包，继续在这里加
 		]
 	}],

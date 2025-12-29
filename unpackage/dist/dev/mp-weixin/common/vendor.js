@@ -8451,6 +8451,12 @@ const pages = [
     style: {
       navigationBarTitleText: "订单详情"
     }
+  },
+  {
+    path: "pages/sponsor-detail/sponsor-detail",
+    style: {
+      navigationBarTitleText: "赞助信息详情"
+    }
   }
 ];
 const subPackages = [

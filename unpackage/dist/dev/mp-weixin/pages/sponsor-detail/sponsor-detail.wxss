@@ -1,0 +1,135 @@
+/* 水平间距 */
+/* 水平间距 */
+.page.data-v-5a2ebc52 {
+  min-height: 100vh;
+  background-color: #f8f8f8;
+  padding-bottom: 40rpx;
+}
+
+/* 头部 */
+.header-banner.data-v-5a2ebc52 {
+  height: 400rpx;
+  position: relative;
+}
+.header-banner .bg-img.data-v-5a2ebc52 {
+  width: 100%;
+  height: 100%;
+}
+.header-banner .header-mask.data-v-5a2ebc52 {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+}
+.header-banner .header-mask .sponsor-logo.data-v-5a2ebc52 {
+  width: 140rpx;
+  height: 140rpx;
+  border-radius: 12rpx;
+  background: #fff;
+  margin-bottom: 20rpx;
+}
+.header-banner .header-mask .sp-name.data-v-5a2ebc52 {
+  font-size: 36rpx;
+  font-weight: bold;
+  margin-bottom: 10rpx;
+}
+.header-banner .header-mask .sp-loc.data-v-5a2ebc52 {
+  font-size: 24rpx;
+  opacity: 0.9;
+}
+
+/* 卡片通用 */
+.card-section.data-v-5a2ebc52 {
+  background: #fff;
+  margin: 24rpx;
+  padding: 30rpx;
+  border-radius: 20rpx;
+}
+.card-section .section-title.data-v-5a2ebc52 {
+  font-size: 30rpx;
+  font-weight: bold;
+  margin-bottom: 20rpx;
+  padding-left: 16rpx;
+  border-left: 8rpx solid #FF6F00;
+  color: #333;
+}
+
+/* 核心高亮数据 */
+.sponsor-highlight.data-v-5a2ebc52 {
+  display: flex;
+  align-items: center;
+  background: #fff9f0;
+  padding: 30rpx;
+  border-radius: 12rpx;
+}
+.sponsor-highlight .highlight-item.data-v-5a2ebc52 {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.sponsor-highlight .highlight-item.full-width.data-v-5a2ebc52 {
+  align-items: flex-start;
+}
+.sponsor-highlight .highlight-item .label.data-v-5a2ebc52 {
+  font-size: 24rpx;
+  color: #999;
+  margin-bottom: 8rpx;
+}
+.sponsor-highlight .highlight-item .value.data-v-5a2ebc52 {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+}
+.sponsor-highlight .highlight-item .value.money.data-v-5a2ebc52 {
+  color: #FF6F00;
+  font-size: 36rpx;
+}
+.sponsor-highlight .highlight-item .value.goods.data-v-5a2ebc52 {
+  font-size: 30rpx;
+  color: #333;
+}
+.sponsor-highlight .divider.data-v-5a2ebc52 {
+  width: 2rpx;
+  height: 60rpx;
+  background: #eee;
+  margin: 0 20rpx;
+}
+.intro-text.data-v-5a2ebc52 {
+  font-size: 28rpx;
+  color: #555;
+  line-height: 1.6;
+}
+.gallery-swiper.data-v-5a2ebc52 {
+  width: 100%;
+  height: 360rpx;
+  border-radius: 12rpx;
+  overflow: hidden;
+}
+.gallery-swiper .gallery-img.data-v-5a2ebc52 {
+  width: 100%;
+  height: 100%;
+}
+.contact-row.data-v-5a2ebc52 {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+}
+.contact-row .contact-avatar.data-v-5a2ebc52 {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 50%;
+  background: #eee;
+}
+.contact-row .contact-name.data-v-5a2ebc52 {
+  font-size: 30rpx;
+  font-weight: bold;
+  color: #333;
+}

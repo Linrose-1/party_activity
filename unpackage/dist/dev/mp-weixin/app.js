@@ -36,6 +36,7 @@ if (!Math) {
   "./pages/my-auth/my-auth.js";
   "./pages/platform-intro/platform-intro.js";
   "./pages/my-order-detail/my-order-detail.js";
+  "./pages/sponsor-detail/sponsor-detail.js";
   "./packages/my-account-informationDetails/my-account-informationDetails.js";
   "./packages/my-account/my-account.js";
   "./packages/home-opportunitiesPublish/home-opportunitiesPublish.js";

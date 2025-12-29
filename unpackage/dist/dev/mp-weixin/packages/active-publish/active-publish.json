@@ -7,6 +7,7 @@
     "uni-data-select": "../../uni_modules/uni-data-select/components/uni-data-select/uni-data-select",
     "uni-datetime-picker": "../../uni_modules/uni-datetime-picker/components/uni-datetime-picker/uni-datetime-picker",
     "uni-data-checkbox": "../../uni_modules/uni-data-checkbox/components/uni-data-checkbox/uni-data-checkbox",
-    "uni-forms": "../../uni_modules/uni-forms/components/uni-forms/uni-forms"
+    "uni-forms": "../../uni_modules/uni-forms/components/uni-forms/uni-forms",
+    "sponsor-popup": "../../components/sponsor-popup"
   }
 }

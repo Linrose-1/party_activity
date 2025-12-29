@@ -41,6 +41,7 @@ const _sfc_main = {
     const circlePageNo = common_vendor.ref(1);
     const circleLoadStatus = common_vendor.ref("more");
     const circleSearchKey = common_vendor.ref("");
+    const circleAddInitiator = common_vendor.ref(0);
     const newApplyList = common_vendor.ref([]);
     const newApplyCount = common_vendor.ref(0);
     const applyPopupRef = common_vendor.ref(null);
@@ -109,7 +110,7 @@ const _sfc_main = {
       fetchUserInfo();
     });
     common_vendor.onPullDownRefresh(async () => {
-      common_vendor.index.__f__("log", "at packages/my-friendInvitation/my-friendInvitation.vue:351", "触发下拉刷新...");
+      common_vendor.index.__f__("log", "at packages/my-friendInvitation/my-friendInvitation.vue:367", "触发下拉刷新...");
       try {
         if (currentTab.value === 0) {
           await Promise.all([getShareUserList(true), fetchUserInfo()]);
@@ -122,9 +123,9 @@ const _sfc_main = {
           ]);
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at packages/my-friendInvitation/my-friendInvitation.vue:365", "下拉刷新时发生错误:", error);
+        common_vendor.index.__f__("error", "at packages/my-friendInvitation/my-friendInvitation.vue:381", "下拉刷新时发生错误:", error);
       } finally {
-        common_vendor.index.__f__("log", "at packages/my-friendInvitation/my-friendInvitation.vue:368", "刷新操作完成，停止动画。");
+        common_vendor.index.__f__("log", "at packages/my-friendInvitation/my-friendInvitation.vue:384", "刷新操作完成，停止动画。");
         common_vendor.index.stopPullDownRefresh();
       }
     });
@@ -149,11 +150,26 @@ const _sfc_main = {
       common_vendor.index.stopPullDownRefresh();
     };
     const handleTabClick = (e) => {
+      if (currentTab.value === e.currentIndex)
+        return;
       currentTab.value = e.currentIndex;
       common_vendor.index.pageScrollTo({
         scrollTop: 0,
         duration: 0
       });
+      if (currentTab.value === 0) {
+        getShareUserList(true);
+        fetchUserInfo();
+      } else if (currentTab.value === 1) {
+        getCircleFriendList(true);
+        getNewApplyList();
+      }
+    };
+    const switchCircleFilter = (type) => {
+      if (circleAddInitiator.value === type)
+        return;
+      circleAddInitiator.value = type;
+      getCircleFriendList(true);
     };
     const fetchUserInfo = async () => {
       const {
@@ -221,7 +237,7 @@ const _sfc_main = {
           loadStatus.value = "noMore";
         }
       } catch (err) {
-        common_vendor.index.__f__("error", "at packages/my-friendInvitation/my-friendInvitation.vue:533", "获取邀请列表失败:", err);
+        common_vendor.index.__f__("error", "at packages/my-friendInvitation/my-friendInvitation.vue:572", "获取邀请列表失败:", err);
         loadStatus.value = "more";
       }
     };
@@ -239,8 +255,9 @@ const _sfc_main = {
         const params = {
           pageNo: circlePageNo.value,
           pageSize: pageSize.value,
-          status: 1
+          status: 1,
           // 1: 好友位 (全部圈友)
+          addInitiator: circleAddInitiator.value
         };
         if (circleSearchKey.value.trim()) {
           params.searchKey = circleSearchKey.value.trim();
@@ -267,7 +284,7 @@ const _sfc_main = {
           circleLoadStatus.value = "noMore";
         }
       } catch (e) {
-        common_vendor.index.__f__("error", "at packages/my-friendInvitation/my-friendInvitation.vue:585", "获取圈友列表失败:", e);
+        common_vendor.index.__f__("error", "at packages/my-friendInvitation/my-friendInvitation.vue:625", "获取圈友列表失败:", e);
         circleLoadStatus.value = "more";
       } finally {
         if (isRefresh)
@@ -294,7 +311,7 @@ const _sfc_main = {
           newApplyCount.value = data.total;
         }
       } catch (e) {
-        common_vendor.index.__f__("error", "at packages/my-friendInvitation/my-friendInvitation.vue:612", "获取新申请失败", e);
+        common_vendor.index.__f__("error", "at packages/my-friendInvitation/my-friendInvitation.vue:652", "获取新申请失败", e);
       }
     };
     common_vendor.watch(searchKey, (newValue, oldValue) => {
@@ -310,7 +327,7 @@ const _sfc_main = {
         common_vendor.index.navigateTo({
           url: item.path,
           fail: (err) => {
-            common_vendor.index.__f__("error", "at packages/my-friendInvitation/my-friendInvitation.vue:632", "跳转失败", err);
+            common_vendor.index.__f__("error", "at packages/my-friendInvitation/my-friendInvitation.vue:672", "跳转失败", err);
             common_vendor.index.showToast({
               title: "页面路径未配置",
               icon: "none"
@@ -450,7 +467,7 @@ const _sfc_main = {
       const name = user.nickname || user.realName || "匿名用户";
       const avatarUrl = user.avatar || defaultAvatar;
       const url = `/packages/applicationBusinessCard/applicationBusinessCard?id=${user.id}&name=${encodeURIComponent(name)}&avatar=${encodeURIComponent(avatarUrl)}&fromShare=1`;
-      common_vendor.index.__f__("log", "at packages/my-friendInvitation/my-friendInvitation.vue:841", "从推荐商友页跳转到名片申请页, URL:", url);
+      common_vendor.index.__f__("log", "at packages/my-friendInvitation/my-friendInvitation.vue:881", "从推荐商友页跳转到名片申请页, URL:", url);
       common_vendor.index.navigateTo({
         url
       });
@@ -571,22 +588,26 @@ const _sfc_main = {
           placeholder: "搜索圈友姓名",
           modelValue: circleSearchKey.value
         }),
-        I: common_vendor.p({
+        I: circleAddInitiator.value === 0 ? 1 : "",
+        J: common_vendor.o(($event) => switchCircleFilter(0)),
+        K: circleAddInitiator.value === 1 ? 1 : "",
+        L: common_vendor.o(($event) => switchCircleFilter(1)),
+        M: common_vendor.p({
           type: "personadd-filled",
           size: "24",
           color: "#fff"
         }),
-        J: newApplyCount.value > 0
+        N: newApplyCount.value > 0
       }, newApplyCount.value > 0 ? {
-        K: common_vendor.t(newApplyCount.value)
+        O: common_vendor.t(newApplyCount.value)
       } : {}, {
-        L: common_vendor.p({
+        P: common_vendor.p({
           type: "right",
           size: "16",
           color: "#ccc"
         }),
-        M: common_vendor.o(openApplyPopup),
-        N: common_vendor.f(circleFriendList.value, (friend, k0, i0) => {
+        Q: common_vendor.o(openApplyPopup),
+        R: common_vendor.f(circleFriendList.value, (friend, k0, i0) => {
           return common_vendor.e({
             a: friend.avatar || "/static/images/default-avatar.png",
             b: common_vendor.t(friend.realName || friend.nickname || "匿名用户"),
@@ -608,32 +629,32 @@ const _sfc_main = {
             m: common_vendor.o(($event) => navigateToBusinessCard(friend), friend.id)
           });
         }),
-        O: common_vendor.p({
+        S: common_vendor.p({
           type: "briefcase-filled",
           size: "14",
           color: "#888"
         }),
-        P: common_vendor.p({
+        T: common_vendor.p({
           type: "checkbox-filled",
           size: "20",
           color: "#4cd964"
         }),
-        Q: circleFriendList.value.length > 0 || circleLoadStatus.value === "loading"
+        U: circleFriendList.value.length > 0 || circleLoadStatus.value === "loading"
       }, circleFriendList.value.length > 0 || circleLoadStatus.value === "loading" ? {
-        R: common_vendor.p({
+        V: common_vendor.p({
           status: circleLoadStatus.value
         })
       } : {}, {
-        S: circleFriendList.value.length === 0 && circleLoadStatus.value === "noMore"
+        W: circleFriendList.value.length === 0 && circleLoadStatus.value === "noMore"
       }, circleFriendList.value.length === 0 && circleLoadStatus.value === "noMore" ? {
-        T: common_assets._imports_0$1
+        X: common_assets._imports_0$1
       } : {}, {
-        U: currentTab.value === 1,
-        V: common_vendor.sr(applyPopupRef, "a29497fd-11", {
+        Y: currentTab.value === 1,
+        Z: common_vendor.sr(applyPopupRef, "a29497fd-11", {
           "k": "applyPopupRef"
         }),
-        W: common_vendor.o(handleAuditSuccess),
-        X: common_vendor.s(_ctx.__cssVars())
+        aa: common_vendor.o(handleAuditSuccess),
+        ab: common_vendor.s(_ctx.__cssVars())
       });
     };
   }

@@ -170,17 +170,31 @@
 			</view>
 		</view>
 
-		<!-- 根据 activityFunds 判断是否显示赞助商信息 -->
-		<view class="sponsor-section" v-if="activityDetail.activityFunds === 2">
-			<view class="section-title">赞助单位</view>
-			<view class="sponsor-info">
-				<!-- 动态绑定公司Logo和名称 -->
-				<image :src="activityDetail.companyLogo" class="sponsor-logo"></image>
-				<view class="sponsor-details">
-					<view class="sponsor-name">{{ activityDetail.companyName }}</view>
-					<view class="sponsor-description">感谢{{ activityDetail.companyName }}对本次聚会的大力支持！</view>
-				</view>
+		<!-- 赞助商信息 (修改后：横向滚动品牌墙) -->
+		<view class="sponsor-section" v-if="sponsorList && sponsorList.length > 0">
+			<view class="section-title">
+				赞助单位 <text style="font-size: 24rpx; color:#999; margin-left: 10rpx;">({{ sponsorList.length }})</text>
 			</view>
+
+			<scroll-view scroll-x class="sponsor-scroll" enable-flex>
+				<view class="sponsor-item-card" v-for="(item, index) in sponsorList" :key="item.id"
+					@click="navigateToSponsorDetail(item)">
+					<!-- Logo: 有图显示图，没图显示默认图标 -->
+					<image v-if="item.logoUrl" :src="item.logoUrl" mode="aspectFit" class="sp-logo"></image>
+					<view v-else class="sp-logo-placeholder">
+						<text>LOGO</text>
+					</view>
+
+					<view class="sp-name text-ellipsis">{{ item.sponsorName }}</view>
+
+					<!-- 标签：显示类型（现金/物品） -->
+					<view class="sp-tag-row">
+						<view class="sp-tag" :class="item.sponsorType === 1 ? 'money' : 'goods'">
+							{{ item.sponsorType === 1 ? '现金' : '物品' }}
+						</view>
+					</view>
+				</view>
+			</scroll-view>
 		</view>
 
 		<!-- 动态绑定报名截止时间 -->
@@ -260,6 +274,8 @@
 	const activityId = ref(null);
 	// 创建一个 ref 来存储整个聚会详情对象
 	const activityDetail = ref(null);
+
+	const sponsorList = ref([]);
 
 	// 分享弹窗和引导蒙层的状态变量
 	const sharePopup = ref(null);
@@ -468,7 +484,14 @@
 		if (result && !result.error) {
 			// 【修改】将获取到的数据赋值给 activityDetail
 			activityDetail.value = result.data;
+			if (result.data.memberSponsorList && Array.isArray(result.data.memberSponsorList)) {
+				sponsorList.value = result.data.memberSponsorList;
+			} else {
+				sponsorList.value = [];
+			}
+
 			console.log('getActiveDetail result:', activityDetail.value);
+			console.log('解析到的赞助商列表:', sponsorList.value);
 		} else {
 			console.log('请求失败:', result ? result.error : '无返回结果');
 		}
@@ -758,6 +781,15 @@
 			url: url
 		});
 	}
+
+	// 【新增】跳转到赞助商详情页的方法
+	const navigateToSponsorDetail = (item) => {
+		if (!item.id) return;
+		// 携带 sponsorId 和 activityId 跳转
+		uni.navigateTo({
+			url: `/pages/sponsor-detail/sponsor-detail?sponsorId=${item.id}&activityId=${activityId.value}`
+		});
+	};
 
 
 	/**
@@ -1329,5 +1361,93 @@
 		text-align: center;
 		color: #999;
 		font-size: 26rpx;
+	}
+
+
+
+	/* 赞助商横向滚动容器 */
+	.sponsor-scroll {
+		display: flex;
+		white-space: nowrap;
+		width: 100%;
+		padding: 10rpx 0;
+	}
+
+	.sponsor-item-card {
+		display: inline-flex;
+		flex-direction: column;
+		align-items: center;
+		width: 200rpx;
+		/* 卡片宽度 */
+		margin-right: 24rpx;
+		background: #fff;
+		border: 1rpx solid #f0f0f0;
+		border-radius: 16rpx;
+		padding: 24rpx 16rpx;
+		box-sizing: border-box;
+		flex-shrink: 0;
+		box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.03);
+	}
+
+	.sp-logo {
+		width: 100rpx;
+		height: 100rpx;
+		border-radius: 50%;
+		/* 圆形Logo */
+		background: #fff;
+		margin-bottom: 16rpx;
+		border: 1rpx solid #f5f5f5;
+	}
+
+	.sp-logo-placeholder {
+		width: 100rpx;
+		height: 100rpx;
+		border-radius: 50%;
+		background: #f0f0f0;
+		margin-bottom: 16rpx;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		color: #ccc;
+		font-size: 20rpx;
+		font-weight: bold;
+	}
+
+	.sp-name {
+		font-size: 26rpx;
+		font-weight: bold;
+		color: #333;
+		width: 100%;
+		text-align: center;
+		margin-bottom: 12rpx;
+	}
+
+	/* 单行省略 */
+	.text-ellipsis {
+		overflow: hidden;
+		white-space: nowrap;
+		text-overflow: ellipsis;
+	}
+
+	.sp-tag-row {
+		display: flex;
+		justify-content: center;
+	}
+
+	.sp-tag {
+		font-size: 20rpx;
+		padding: 4rpx 12rpx;
+		border-radius: 8rpx;
+		font-weight: bold;
+
+		&.money {
+			color: #FF6F00;
+			background: #FFF0E0;
+		}
+
+		&.goods {
+			color: #19be6b;
+			background: #e1f3d8;
+		}
 	}
 </style>

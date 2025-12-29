@@ -308,14 +308,51 @@
 }
 
 /* 圈友列表的吸顶搜索栏 */
+/* 圈友列表的吸顶容器 */
 .sticky-header-circle.data-v-a29497fd {
   position: -webkit-sticky;
   position: sticky;
   top: 100rpx;
-  /* 与商友列表保持一致，适配 Tab 高度 */
   z-index: 10;
   background-color: #f7f8fa;
   padding-bottom: 20rpx;
+  /* 移除之前的 padding-bottom: 20rpx，改由子元素控制间距 */
+}
+
+/* 子 Tab 筛选样式 */
+.circle-sub-tabs.data-v-a29497fd {
+  display: flex;
+  background-color: #fff;
+  padding: 10rpx 20rpx;
+  margin-top: 2rpx;
+  /* 稍微与搜索框隔开一点 */
+  border-bottom: 1rpx solid #eee;
+}
+.sub-tab-item.data-v-a29497fd {
+  flex: 1;
+  text-align: center;
+  font-size: 28rpx;
+  color: #666;
+  padding: 20rpx 0;
+  position: relative;
+  transition: all 0.3s;
+  font-weight: 500;
+}
+.sub-tab-item.active.data-v-a29497fd {
+  color: #FF6E00;
+  /* 主题色 */
+  font-weight: bold;
+}
+.sub-tab-item.active.data-v-a29497fd::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40rpx;
+  height: 4rpx;
+  background-color: #FF6E00;
+  border-radius: 2rpx;
 }
 .friend-status.data-v-a29497fd {
   font-size: 24rpx;
