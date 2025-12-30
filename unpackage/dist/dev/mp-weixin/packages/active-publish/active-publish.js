@@ -28,79 +28,32 @@ const _sfc_main = {
   __name: "active-publish",
   setup(__props) {
     const isUserVerified = common_vendor.ref(true);
-    const formatTimestamp = (ts) => {
-      if (!ts)
-        return "";
-      const d = new Date(Number(ts));
-      const pad = (n) => n.toString().padStart(2, "0");
-      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
-    };
-    const initDefaultTimes = () => {
-      const now = /* @__PURE__ */ new Date();
-      const day = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, "0")}-${now.getDate().toString().padStart(2, "0")}`;
-      enrollTimeRange.value = [`${day} 09:00:00`, `${day} 18:00:00`];
-      timeRange.value = [`${day} 19:00:00`, `${day} 21:00:00`];
-    };
-    const isSponsorExpanded = common_vendor.ref(false);
-    const showSponsorPopup = common_vendor.ref(false);
-    const sponsorsList = common_vendor.ref([]);
-    const deletedSponsorIds = common_vendor.ref([]);
-    const currentSponsorIndex = common_vendor.ref(-1);
-    const currentSponsorData = common_vendor.ref(null);
-    const handleAddSponsor = () => {
-      currentSponsorIndex.value = -1;
-      currentSponsorData.value = null;
-      showSponsorPopup.value = true;
-    };
-    const handleEditSponsor = (index) => {
-      currentSponsorIndex.value = index;
-      currentSponsorData.value = sponsorsList.value[index];
-      showSponsorPopup.value = true;
-    };
-    const handleDeleteSponsor = (index) => {
-      common_vendor.index.showModal({
-        title: "提示",
-        content: "确定移除该赞助商吗？",
-        success: (res) => {
-          if (res.confirm) {
-            const item = sponsorsList.value[index];
-            if (item.id) {
-              deletedSponsorIds.value.push(item.id);
-            }
-            sponsorsList.value.splice(index, 1);
-          }
-        }
-      });
-    };
-    const handleSponsorSave = (data) => {
-      if (currentSponsorIndex.value === -1) {
-        sponsorsList.value.push(data);
-      } else {
-        sponsorsList.value.splice(currentSponsorIndex.value, 1, data);
-      }
-      showSponsorPopup.value = false;
-    };
     const isPublishing = common_vendor.ref(false);
     const isPickerOpen = common_vendor.ref(false);
+    const mode = common_vendor.ref("create");
+    const editActivityId = common_vendor.ref(null);
     const timeRange = common_vendor.ref([]);
     const enrollTimeRange = common_vendor.ref([]);
     const associatedStoreName = common_vendor.ref("");
-    const mode = common_vendor.ref("create");
-    const editActivityId = common_vendor.ref(null);
     const tagOptions = common_vendor.ref([]);
-    const enrollmentOptions = common_vendor.ref([{
-      text: "AA/付费",
-      value: 1
-    }, {
-      text: "赞助/免费",
-      value: 2
-    }]);
+    const enrollmentOptions = common_vendor.ref([
+      // 报名类型选项
+      {
+        text: "AA/付费",
+        value: 1
+      },
+      {
+        text: "赞助/免费",
+        value: 2
+      }
+    ]);
     const form = common_vendor.ref({
       activityTitle: "",
       activityDescription: "",
       totalSlots: null,
       limitSlots: null,
       activityFunds: 1,
+      // 1: AA, 2: 赞助
       registrationFee: null,
       locationAddress: "",
       latitude: null,
@@ -117,6 +70,18 @@ const _sfc_main = {
         sessionDescription: "环节描述"
       }]
     });
+    const isSponsorExpanded = common_vendor.ref(false);
+    const showSponsorPopup = common_vendor.ref(false);
+    const sponsorsList = common_vendor.ref([]);
+    const deletedSponsorIds = common_vendor.ref([]);
+    const currentSponsorIndex = common_vendor.ref(-1);
+    const currentSponsorData = common_vendor.ref(null);
+    const dragDisplayList = common_vendor.ref([]);
+    const dragItemWidth = common_vendor.ref(0);
+    const dragItemHeight = common_vendor.ref(0);
+    const dragAreaHeight = common_vendor.ref(0);
+    const isDragging = common_vendor.ref(false);
+    const dragIndex = common_vendor.ref(-1);
     common_vendor.onMounted(() => {
       checkUserVerificationStatus();
       getActiveType();
@@ -151,6 +116,191 @@ const _sfc_main = {
     common_vendor.onUnload(() => {
       common_vendor.index.$off("shopSelected");
     });
+    const formatTimestamp = (ts) => {
+      if (!ts)
+        return "";
+      const d = new Date(Number(ts));
+      const pad = (n) => n.toString().padStart(2, "0");
+      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+    };
+    const initDefaultTimes = () => {
+      const now = /* @__PURE__ */ new Date();
+      const day = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, "0")}-${now.getDate().toString().padStart(2, "0")}`;
+      enrollTimeRange.value = [`${day} 09:00:00`, `${day} 18:00:00`];
+      timeRange.value = [`${day} 19:00:00`, `${day} 21:00:00`];
+    };
+    const checkUserVerificationStatus = async () => {
+    };
+    const getActiveType = async () => {
+      const res = await utils_request.request("/app-api/system/dict-data/type", {
+        method: "GET",
+        data: {
+          type: "member_activity_category "
+        }
+      });
+      if (res.data)
+        tagOptions.value = res.data.map((i) => ({
+          value: i.value,
+          text: i.label
+        }));
+    };
+    const openMapToChooseLocation = () => {
+      common_vendor.index.chooseLocation({
+        success: (res) => {
+          form.value.locationAddress = res.address;
+          form.value.latitude = res.latitude;
+          form.value.longitude = res.longitude;
+        }
+      });
+    };
+    const goToSelectShop = () => common_vendor.index.navigateTo({
+      url: "/pages/shop-list/shop-list"
+    });
+    const uploadCover = () => {
+      common_vendor.index.chooseImage({
+        count: 1,
+        sizeType: ["original", "compressed"],
+        sourceType: ["album", "camera"],
+        success: (res) => {
+          const tempFilePath = res.tempFilePaths[0];
+          common_vendor.wx$1.cropImage({
+            src: tempFilePath,
+            // 图片路径
+            cropScale: "5:4",
+            // 【关键】设置裁剪比例为 5:4
+            success: (cropRes) => {
+              common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:435", "裁剪成功:", cropRes.tempFilePath);
+              processUpload(cropRes.tempFilePath);
+            },
+            fail: (err) => {
+              common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:440", "用户取消裁剪或失败:", err);
+            }
+          });
+        }
+      });
+    };
+    const processUpload = async (filePath) => {
+      common_vendor.index.showLoading({
+        title: "上传中..."
+      });
+      const result = await utils_upload.uploadFile({
+        path: filePath
+      }, {
+        directory: "cover"
+        // 上传目录
+      });
+      common_vendor.index.hideLoading();
+      if (result.data) {
+        form.value.coverImageUrl = result.data;
+        common_vendor.index.showToast({
+          title: "封面已设置",
+          icon: "success"
+        });
+      } else {
+        common_vendor.index.showToast({
+          title: "上传失败",
+          icon: "none"
+        });
+      }
+    };
+    const handleActivityImagesUpload = () => {
+      common_vendor.index.chooseImage({
+        count: 9 - form.value.activityCoverImageUrls.length,
+        success: async (res) => {
+          const list = await Promise.all(res.tempFiles.map((f) => utils_upload.uploadFile({
+            path: f.path
+          }, {
+            directory: "gallery"
+          })));
+          form.value.activityCoverImageUrls.push(...list.filter((r) => r.data).map((r) => r.data));
+        }
+      });
+    };
+    const deleteActivityImage = (i) => form.value.activityCoverImageUrls.splice(i, 1);
+    const previewActivityImage = (i) => common_vendor.index.previewImage({
+      urls: form.value.activityCoverImageUrls,
+      current: i
+    });
+    const uploadCode = async () => {
+      common_vendor.index.chooseImage({
+        success: async (res) => {
+          const r = await utils_upload.uploadFile({
+            path: res.tempFilePaths[0]
+          }, {
+            directory: "qrcode"
+          });
+          if (r.data)
+            form.value.organizerPaymentQrCodeUrl = r.data;
+        }
+      });
+    };
+    const addAgenda = () => form.value.activitySessions.push({
+      sessionTitle: "",
+      sessionDescription: ""
+    });
+    const removeAgenda = (i) => form.value.activitySessions.splice(i, 1);
+    const handleAddSponsor = () => {
+      currentSponsorIndex.value = -1;
+      currentSponsorData.value = null;
+      showSponsorPopup.value = true;
+    };
+    const handleEditSponsor = (index) => {
+      currentSponsorIndex.value = index;
+      currentSponsorData.value = sponsorsList.value[index];
+      showSponsorPopup.value = true;
+    };
+    const handleDeleteSponsor = (index) => {
+      common_vendor.index.showModal({
+        title: "提示",
+        content: "确定移除该赞助商吗？",
+        success: (res) => {
+          if (res.confirm) {
+            const item = sponsorsList.value[index];
+            if (item.id) {
+              deletedSponsorIds.value.push(item.id);
+            }
+            sponsorsList.value.splice(index, 1);
+          }
+        }
+      });
+    };
+    const handleSponsorSave = (data) => {
+      if (currentSponsorIndex.value === -1) {
+        sponsorsList.value.push(data);
+      } else {
+        sponsorsList.value.splice(currentSponsorIndex.value, 1, data);
+      }
+      showSponsorPopup.value = false;
+    };
+    const syncSponsorsInline = async (activityId) => {
+      common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:577", "开始同步赞助商:", activityId);
+      const userId = common_vendor.index.getStorageSync("userId");
+      for (const id of deletedSponsorIds.value) {
+        await utils_request.request(`/app-api/member/sponsor/delete?id=${id}`, {
+          method: "DELETE"
+        });
+      }
+      sponsorsList.value.forEach((item, index) => item.displaySort = index);
+      for (const item of sponsorsList.value) {
+        const sponsorPayload = {
+          ...item,
+          userId,
+          activityId,
+          galleryImageUrls: JSON.stringify(item.galleryImageUrls || [])
+        };
+        if (item.id) {
+          await utils_request.request("/app-api/member/sponsor-activity-record/update-in-activity", {
+            method: "PUT",
+            data: sponsorPayload
+          });
+        } else {
+          await utils_request.request("/app-api/member/sponsor-activity-record/create-in-activity", {
+            method: "POST",
+            data: sponsorPayload
+          });
+        }
+      }
+    };
     const loadDraft = () => {
       try {
         const str = common_vendor.index.getStorageSync(DRAFT_STORAGE_KEY);
@@ -173,6 +323,20 @@ const _sfc_main = {
       } catch (e) {
       }
       return false;
+    };
+    const saveDraft = () => {
+      const draft = {
+        form: form.value,
+        timeRange: timeRange.value,
+        enrollTimeRange: enrollTimeRange.value,
+        associatedStoreName: associatedStoreName.value,
+        sponsorsList: sponsorsList.value
+      };
+      common_vendor.index.setStorageSync(DRAFT_STORAGE_KEY, JSON.stringify(draft));
+      common_vendor.index.showToast({
+        title: "草稿已保存",
+        icon: "none"
+      });
     };
     const loadActivityDetailForEdit = async (id) => {
       common_vendor.index.showLoading({
@@ -208,7 +372,7 @@ const _sfc_main = {
         return;
       }
       const data = detailRes.data;
-      common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:440", "获取详情用于编辑:", data);
+      common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:699", "获取详情用于编辑:", data);
       form.value.activityTitle = data.activityTitle;
       form.value.activityDescription = data.activityDescription;
       form.value.totalSlots = data.totalSlots;
@@ -264,34 +428,18 @@ const _sfc_main = {
               gallery = item.galleryImageUrls;
             }
           } catch (e) {
-            common_vendor.index.__f__("error", "at packages/active-publish/active-publish.vue:515", "解析赞助商图集失败:", e);
+            common_vendor.index.__f__("error", "at packages/active-publish/active-publish.vue:770", "解析赞助商图集失败:", e);
             gallery = [];
           }
           return {
             ...item,
-            // 包含 id, sponsorName, logoUrl 等所有字段
             galleryImageUrls: gallery
-            // 覆盖为解析后的数组
           };
         });
-        common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:525", "赞助商回显完成:", sponsorsList.value);
+        common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:778", "赞助商回显完成:", sponsorsList.value);
       } else {
         sponsorsList.value = [];
       }
-    };
-    const saveDraft = () => {
-      const draft = {
-        form: form.value,
-        timeRange: timeRange.value,
-        enrollTimeRange: enrollTimeRange.value,
-        associatedStoreName: associatedStoreName.value,
-        sponsorsList: sponsorsList.value
-      };
-      common_vendor.index.setStorageSync(DRAFT_STORAGE_KEY, JSON.stringify(draft));
-      common_vendor.index.showToast({
-        title: "草稿已保存",
-        icon: "none"
-      });
     };
     const publish = async () => {
       if (isPublishing.value)
@@ -382,7 +530,7 @@ const _sfc_main = {
           })
         });
       } catch (e) {
-        common_vendor.index.__f__("error", "at packages/active-publish/active-publish.vue:642", e);
+        common_vendor.index.__f__("error", "at packages/active-publish/active-publish.vue:882", e);
         common_vendor.index.showToast({
           title: e.message || "系统异常",
           icon: "none"
@@ -391,123 +539,6 @@ const _sfc_main = {
         isPublishing.value = false;
         common_vendor.index.hideLoading();
       }
-    };
-    const syncSponsorsInline = async (activityId) => {
-      common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:655", "开始同步赞助商:", activityId);
-      const userId = common_vendor.index.getStorageSync("userId");
-      for (const id of deletedSponsorIds.value) {
-        await utils_request.request(`/app-api/member/sponsor/delete?id=${id}`, {
-          method: "DELETE"
-        });
-      }
-      sponsorsList.value.forEach((item, index) => item.displaySort = index);
-      for (const item of sponsorsList.value) {
-        const sponsorPayload = {
-          ...item,
-          userId,
-          activityId,
-          galleryImageUrls: JSON.stringify(item.galleryImageUrls || [])
-        };
-        if (item.id) {
-          await utils_request.request("/app-api/member/sponsor-activity-record/update_in_activity", {
-            method: "PUT",
-            data: sponsorPayload
-          });
-        } else {
-          await utils_request.request("/app-api/member/sponsor-activity-record/create_in_activity", {
-            method: "POST",
-            data: sponsorPayload
-          });
-        }
-      }
-    };
-    const checkUserVerificationStatus = async () => {
-    };
-    const getActiveType = async () => {
-      const res = await utils_request.request("/app-api/system/dict-data/type", {
-        method: "GET",
-        data: {
-          type: "member_activity_category "
-        }
-      });
-      if (res.data)
-        tagOptions.value = res.data.map((i) => ({
-          value: i.value,
-          text: i.label
-        }));
-    };
-    const openMapToChooseLocation = () => {
-      common_vendor.index.chooseLocation({
-        success: (res) => {
-          form.value.locationAddress = res.address;
-          form.value.latitude = res.latitude;
-          form.value.longitude = res.longitude;
-        }
-      });
-    };
-    const uploadCover = () => {
-      common_vendor.index.chooseImage({
-        count: 1,
-        success: async (res) => {
-          const r = await utils_upload.uploadFile({
-            path: res.tempFilePaths[0]
-          }, {
-            directory: "cover"
-          });
-          if (r.data)
-            form.value.coverImageUrl = r.data;
-        }
-      });
-    };
-    const handleActivityImagesUpload = () => {
-      common_vendor.index.chooseImage({
-        count: 9 - form.value.activityCoverImageUrls.length,
-        success: async (res) => {
-          const list = await Promise.all(res.tempFiles.map((f) => utils_upload.uploadFile({
-            path: f.path
-          }, {
-            directory: "gallery"
-          })));
-          form.value.activityCoverImageUrls.push(...list.filter((r) => r.data).map((r) => r.data));
-        }
-      });
-    };
-    const deleteActivityImage = (i) => form.value.activityCoverImageUrls.splice(i, 1);
-    const previewActivityImage = (i) => common_vendor.index.previewImage({
-      urls: form.value.activityCoverImageUrls,
-      current: i
-    });
-    const uploadCode = async () => {
-      common_vendor.index.chooseImage({
-        success: async (res) => {
-          const r = await utils_upload.uploadFile({
-            path: res.tempFilePaths[0]
-          }, {
-            directory: "qrcode"
-          });
-          if (r.data)
-            form.value.organizerPaymentQrCodeUrl = r.data;
-        }
-      });
-    };
-    const addAgenda = () => form.value.activitySessions.push({
-      sessionTitle: "",
-      sessionDescription: ""
-    });
-    const removeAgenda = (i) => form.value.activitySessions.splice(i, 1);
-    const goToSelectShop = () => common_vendor.index.navigateTo({
-      url: "/pages/shop-list/shop-list"
-    });
-    const dragDisplayList = common_vendor.ref([]);
-    const dragItemWidth = common_vendor.ref(0);
-    const dragItemHeight = common_vendor.ref(0);
-    const dragAreaHeight = common_vendor.ref(0);
-    const isDragging = common_vendor.ref(false);
-    const dragIndex = common_vendor.ref(-1);
-    const initDragLayout = () => {
-      const sys = common_vendor.index.getSystemInfoSync();
-      dragItemWidth.value = (sys.windowWidth - common_vendor.index.upx2px(100)) / 3;
-      dragItemHeight.value = common_vendor.index.upx2px(210);
     };
     common_vendor.watch(() => form.value.activityCoverImageUrls, (val) => {
       if (!isDragging.value) {
@@ -527,6 +558,11 @@ const _sfc_main = {
     }, {
       deep: true
     });
+    const initDragLayout = () => {
+      const sys = common_vendor.index.getSystemInfoSync();
+      dragItemWidth.value = (sys.windowWidth - common_vendor.index.upx2px(100)) / 3;
+      dragItemHeight.value = common_vendor.index.upx2px(210);
+    };
     const onMovableStart = (i) => {
       isDragging.value = true;
       dragIndex.value = i;
@@ -585,11 +621,11 @@ const _sfc_main = {
       } : {}, {
         d: common_vendor.o(($event) => form.value.activityTitle = $event),
         e: common_vendor.p({
-          placeholder: "请输入聚会主题",
+          placeholder: "请输入聚会名称",
           modelValue: form.value.activityTitle
         }),
         f: common_vendor.p({
-          label: "聚会主题",
+          label: "聚会名称",
           required: true
         }),
         g: common_vendor.o(($event) => form.value.tag = $event),
@@ -780,78 +816,83 @@ const _sfc_main = {
           required: true,
           ["label-width"]: 80
         }),
-        ar: common_vendor.f(form.value.activitySessions, (item, index, i0) => {
+        ar: common_vendor.p({
+          ["label-width"]: 80,
+          ["label-position"]: "top"
+        }),
+        as: common_vendor.f(form.value.activitySessions, (item, index, i0) => {
           return {
-            a: "5d3444db-29-" + i0,
+            a: "5d3444db-30-" + i0,
             b: common_vendor.o(($event) => item.sessionTitle = $event, index),
             c: common_vendor.p({
               placeholder: "环节标题",
               modelValue: item.sessionTitle
             }),
-            d: "5d3444db-30-" + i0,
+            d: "5d3444db-31-" + i0,
             e: common_vendor.o(($event) => item.sessionDescription = $event, index),
             f: common_vendor.p({
               placeholder: "环节描述",
               modelValue: item.sessionDescription
             }),
             g: common_vendor.o(($event) => removeAgenda(index), index),
-            h: "5d3444db-31-" + i0,
+            h: "5d3444db-32-" + i0,
             i: index
           };
         }),
-        as: common_vendor.p({
+        at: common_vendor.p({
           type: "close"
         }),
-        at: common_vendor.p({
+        av: common_vendor.p({
           type: "plusempty",
           color: "red"
         }),
-        av: common_vendor.o(addAgenda),
-        aw: common_vendor.o(($event) => form.value.organizerUnitName = $event),
-        ax: common_vendor.p({
+        aw: common_vendor.o(addAgenda),
+        ax: common_vendor.o(($event) => form.value.organizerUnitName = $event),
+        ay: common_vendor.p({
           placeholder: "请输入组织者名称",
           modelValue: form.value.organizerUnitName
         }),
-        ay: common_vendor.p({
+        az: common_vendor.p({
           label: "组织者",
           required: true
         }),
-        az: common_vendor.o(($event) => form.value.organizerContactPhone = $event),
-        aA: common_vendor.p({
+        aA: common_vendor.o(($event) => form.value.organizerContactPhone = $event),
+        aB: common_vendor.p({
           type: "number",
           placeholder: "请输入联系电话",
           modelValue: form.value.organizerContactPhone
         }),
-        aB: common_vendor.p({
+        aC: common_vendor.p({
           label: "联系电话",
           required: true
         }),
-        aC: form.value.activityFunds === 1
+        aD: form.value.activityFunds === 1
       }, form.value.activityFunds === 1 ? common_vendor.e({
-        aD: form.value.organizerPaymentQrCodeUrl
-      }, form.value.organizerPaymentQrCodeUrl ? {
         aE: form.value.organizerPaymentQrCodeUrl
+      }, form.value.organizerPaymentQrCodeUrl ? {
+        aF: form.value.organizerPaymentQrCodeUrl
       } : {}, {
-        aF: common_vendor.o(uploadCode),
-        aG: common_vendor.p({
+        aG: common_vendor.o(uploadCode),
+        aH: common_vendor.p({
           label: "收款码",
           required: true
         })
       }) : {}, {
-        aH: common_vendor.p({
-          ["label-width"]: 80
+        aI: common_vendor.p({
+          ["label-width"]: 80,
+          ["label-position"]: "top"
         }),
-        aI: mode.value === "create"
+        aJ: mode.value === "create"
       }, mode.value === "create" ? {
-        aJ: common_vendor.o(saveDraft)
+        aK: common_vendor.o(saveDraft)
       } : {}, {
-        aK: common_vendor.t(isPublishing.value ? "处理中..." : mode.value === "edit" ? "保存修改" : "发起聚会"),
-        aL: isPublishing.value ? 1 : "",
-        aM: common_vendor.o(publish),
-        aN: isPickerOpen.value ? 1 : "",
-        aO: common_vendor.o(($event) => showSponsorPopup.value = false),
-        aP: common_vendor.o(handleSponsorSave),
-        aQ: common_vendor.p({
+        aL: common_vendor.t(isPublishing.value ? "处理中..." : mode.value === "edit" ? "保存修改" : "发起聚会"),
+        aM: isPublishing.value ? 1 : "",
+        aN: common_vendor.o(publish),
+        aO: isPickerOpen.value ? 1 : "",
+        aP: common_vendor.o(($event) => showSponsorPopup.value = false),
+        aQ: common_vendor.o(handleSponsorSave),
+        aR: common_vendor.p({
           visible: showSponsorPopup.value,
           data: currentSponsorData.value
         })

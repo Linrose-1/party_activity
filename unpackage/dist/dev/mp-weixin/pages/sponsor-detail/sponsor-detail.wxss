@@ -62,45 +62,85 @@
 }
 
 /* 核心高亮数据 */
-.sponsor-highlight.data-v-5a2ebc52 {
+.sponsor-highlight-box.data-v-5a2ebc52 {
+  background: #fff9f0;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  border: 1rpx solid #ffe4ba;
+}
+.highlight-row.data-v-5a2ebc52 {
   display: flex;
   align-items: center;
-  background: #fff9f0;
-  padding: 30rpx;
-  border-radius: 12rpx;
+  padding-bottom: 10rpx;
 }
-.sponsor-highlight .highlight-item.data-v-5a2ebc52 {
+.highlight-row .h-item.data-v-5a2ebc52 {
   flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
 }
-.sponsor-highlight .highlight-item.full-width.data-v-5a2ebc52 {
-  align-items: flex-start;
-}
-.sponsor-highlight .highlight-item .label.data-v-5a2ebc52 {
+.highlight-row .h-item .label.data-v-5a2ebc52 {
   font-size: 24rpx;
   color: #999;
-  margin-bottom: 8rpx;
+  margin-bottom: 6rpx;
 }
-.sponsor-highlight .highlight-item .value.data-v-5a2ebc52 {
+.highlight-row .h-item .value.data-v-5a2ebc52 {
   font-size: 32rpx;
   font-weight: bold;
   color: #333;
 }
-.sponsor-highlight .highlight-item .value.money.data-v-5a2ebc52 {
+.highlight-row .h-item .value.money.data-v-5a2ebc52 {
   color: #FF6F00;
-  font-size: 36rpx;
+  font-size: 40rpx;
+  font-family: DINAlternate-Bold, sans-serif;
+  /* 如果有数字字体 */
 }
-.sponsor-highlight .highlight-item .value.goods.data-v-5a2ebc52 {
-  font-size: 30rpx;
-  color: #333;
-}
-.sponsor-highlight .divider.data-v-5a2ebc52 {
+.highlight-row .v-line.data-v-5a2ebc52 {
   width: 2rpx;
-  height: 60rpx;
-  background: #eee;
+  height: 50rpx;
+  background: #e0e0e0;
   margin: 0 20rpx;
+}
+.row-divider.data-v-5a2ebc52 {
+  height: 2rpx;
+  background: #eee;
+  /* 或者 dashed */
+  margin: 20rpx 0;
+  width: 100%;
+}
+.highlight-goods-col.data-v-5a2ebc52 {
+  display: flex;
+  flex-direction: column;
+}
+.highlight-goods-col .label.data-v-5a2ebc52 {
+  font-size: 24rpx;
+  color: #999;
+  display: block;
+}
+.highlight-goods-col .label.mb-10.data-v-5a2ebc52 {
+  margin-bottom: 16rpx;
+}
+.highlight-goods-col .goods-list.data-v-5a2ebc52 {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+}
+.highlight-goods-col .goods-item-tag.data-v-5a2ebc52 {
+  background: #fff;
+  padding: 10rpx 24rpx;
+  border-radius: 30rpx;
+  font-size: 28rpx;
+  color: #333;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.03);
+  border: 1rpx solid #e1f3d8;
+  /* 淡淡的绿色边框 */
+}
+.highlight-goods-col .empty-goods.data-v-5a2ebc52 {
+  font-size: 26rpx;
+  color: #ccc;
+  font-style: italic;
 }
 .intro-text.data-v-5a2ebc52 {
   font-size: 28rpx;

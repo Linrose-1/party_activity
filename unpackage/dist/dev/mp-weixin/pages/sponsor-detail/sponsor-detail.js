@@ -1,6 +1,14 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
 const utils_request = require("../../utils/request.js");
+if (!Array) {
+  const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
+  _easycom_uni_icons2();
+}
+const _easycom_uni_icons = () => "../../uni_modules/uni-icons/components/uni-icons/uni-icons.js";
+if (!Math) {
+  _easycom_uni_icons();
+}
 const _sfc_main = {
   __name: "sponsor-detail",
   setup(__props) {
@@ -40,6 +48,27 @@ const _sfc_main = {
         return [];
       }
     });
+    const parsedGoodsList = common_vendor.computed(() => {
+      if (!detail.value || !detail.value.goodsDescription)
+        return [];
+      try {
+        const raw = detail.value.goodsDescription;
+        if (Array.isArray(raw))
+          return raw;
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) {
+          return parsed.map((item) => {
+            if (typeof item === "object" && item !== null) {
+              return item.desc || item.name || JSON.stringify(item);
+            }
+            return String(item);
+          });
+        }
+        return [String(parsed)];
+      } catch (e) {
+        return [detail.value.goodsDescription];
+      }
+    });
     const previewGallery = (current) => {
       common_vendor.index.previewImage({
         urls: galleryImages.value,
@@ -57,18 +86,34 @@ const _sfc_main = {
       }, detail.value.location ? {
         f: common_vendor.t(detail.value.location)
       } : {}, {
-        g: detail.value.sponsorType === 1
-      }, detail.value.sponsorType === 1 ? {
+        g: detail.value.sponsorType === 1 || detail.value.sponsorType === 3
+      }, detail.value.sponsorType === 1 || detail.value.sponsorType === 3 ? {
         h: common_vendor.t(detail.value.cashAmount),
         i: common_vendor.t(detail.value.perCapitalAmount)
-      } : {
-        j: common_vendor.t(detail.value.goodsDescription),
-        k: common_vendor.t(detail.value.goodsNum)
-      }, {
-        l: common_vendor.t(detail.value.introduction),
-        m: galleryImages.value.length > 0
+      } : {}, {
+        j: detail.value.sponsorType === 3
+      }, detail.value.sponsorType === 3 ? {} : {}, {
+        k: detail.value.sponsorType === 2 || detail.value.sponsorType === 3
+      }, detail.value.sponsorType === 2 || detail.value.sponsorType === 3 ? common_vendor.e({
+        l: parsedGoodsList.value.length > 0
+      }, parsedGoodsList.value.length > 0 ? {
+        m: common_vendor.f(parsedGoodsList.value, (item, index, i0) => {
+          return {
+            a: "5a2ebc52-0-" + i0,
+            b: common_vendor.t(item),
+            c: index
+          };
+        }),
+        n: common_vendor.p({
+          type: "gift-filled",
+          size: "14",
+          color: "#19be6b"
+        })
+      } : {}) : {}, {
+        o: common_vendor.t(detail.value.introduction),
+        p: galleryImages.value.length > 0
       }, galleryImages.value.length > 0 ? {
-        n: common_vendor.f(galleryImages.value, (img, idx, i0) => {
+        q: common_vendor.f(galleryImages.value, (img, idx, i0) => {
           return {
             a: img,
             b: common_vendor.o(($event) => previewGallery(idx), idx),
@@ -76,10 +121,10 @@ const _sfc_main = {
           };
         })
       } : {}, {
-        o: detail.value.contactName
+        r: detail.value.contactName
       }, detail.value.contactName ? {
-        p: detail.value.contactAvatar || "/static/default-avatar.png",
-        q: common_vendor.t(detail.value.contactName)
+        s: detail.value.contactAvatar || "/static/default-avatar.png",
+        t: common_vendor.t(detail.value.contactName)
       } : {}) : {});
     };
   }

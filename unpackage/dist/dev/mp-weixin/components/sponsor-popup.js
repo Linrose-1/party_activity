@@ -18,21 +18,13 @@ if (!Math) {
 const _sfc_main = {
   __name: "sponsor-popup",
   props: {
-    visible: {
-      type: Boolean,
-      default: false
-    },
-    data: {
-      type: Object,
-      default: null
-    }
+    visible: Boolean,
+    data: Object
   },
   emits: ["close", "confirm"],
   setup(__props, { emit: __emit }) {
     const props = __props;
     const emit = __emit;
-    const isEdit = common_vendor.ref(false);
-    const form = common_vendor.ref({});
     const getDefaultForm = () => ({
       id: null,
       sponsorName: "",
@@ -46,30 +38,83 @@ const _sfc_main = {
       cashAmount: null,
       perCapitalAmount: null,
       goodsDescription: "",
-      goodsNum: null,
       displaySort: 0
     });
+    const isEdit = common_vendor.ref(false);
+    const form = common_vendor.ref(getDefaultForm());
+    const goodsList = common_vendor.ref([]);
     common_vendor.watch(() => props.visible, (val) => {
       if (val) {
         if (props.data) {
           isEdit.value = true;
-          form.value = JSON.parse(JSON.stringify(props.data));
-          if (typeof form.value.galleryImageUrls === "string") {
+          const newData = JSON.parse(JSON.stringify(props.data));
+          if (typeof newData.galleryImageUrls === "string") {
             try {
-              form.value.galleryImageUrls = JSON.parse(form.value.galleryImageUrls);
+              newData.galleryImageUrls = JSON.parse(newData.galleryImageUrls);
             } catch (e) {
-              form.value.galleryImageUrls = [];
+              newData.galleryImageUrls = [];
             }
-          } else if (!form.value.galleryImageUrls) {
-            form.value.galleryImageUrls = [];
+          } else if (!Array.isArray(newData.galleryImageUrls)) {
+            newData.galleryImageUrls = [];
           }
+          if (newData.goodsDescription) {
+            try {
+              const parsed = JSON.parse(newData.goodsDescription);
+              if (Array.isArray(parsed)) {
+                goodsList.value = parsed.map((i) => {
+                  if (typeof i === "string")
+                    return {
+                      desc: i
+                    };
+                  if (i.name)
+                    return {
+                      desc: i.name + (i.count ? ` ${i.count}` : "")
+                    };
+                  return {
+                    desc: i.desc || ""
+                  };
+                });
+              } else {
+                goodsList.value = [{
+                  desc: newData.goodsDescription
+                }];
+              }
+            } catch (e) {
+              goodsList.value = [{
+                desc: newData.goodsDescription
+              }];
+            }
+          } else {
+            goodsList.value = [{
+              desc: ""
+            }];
+          }
+          form.value = newData;
         } else {
           isEdit.value = false;
           form.value = getDefaultForm();
+          goodsList.value = [{
+            desc: ""
+          }];
         }
         common_vendor.nextTick$1(() => initDragList(form.value.galleryImageUrls));
       }
     });
+    const chooseLocation = () => {
+      common_vendor.index.chooseLocation({
+        success: (res) => {
+          form.value.location = res.name || res.address;
+        }
+      });
+    };
+    const addGoodsItem = () => {
+      goodsList.value.push({
+        desc: ""
+      });
+    };
+    const removeGoodsItem = (index) => {
+      goodsList.value.splice(index, 1);
+    };
     const close = () => {
       emit("close");
     };
@@ -77,26 +122,34 @@ const _sfc_main = {
       const f = form.value;
       if (!f.sponsorName)
         return common_vendor.index.showToast({
-          title: "请输入赞助商名称",
+          title: "请输入名称",
           icon: "none"
         });
       if (!f.introduction)
         return common_vendor.index.showToast({
-          title: "请输入品牌简介",
+          title: "请输入简介",
           icon: "none"
         });
-      if (f.sponsorType === 1) {
+      if (f.sponsorType === 1 || f.sponsorType === 3) {
         if (!f.cashAmount || !f.perCapitalAmount)
           return common_vendor.index.showToast({
-            title: "请完善金额信息",
+            title: "请完善现金信息",
             icon: "none"
           });
       } else {
-        if (!f.goodsDescription || !f.goodsNum)
+        f.cashAmount = null;
+        f.perCapitalAmount = null;
+      }
+      if (f.sponsorType === 2 || f.sponsorType === 3) {
+        const validGoods = goodsList.value.filter((g) => g.desc && g.desc.trim() !== "").map((g) => g.desc);
+        if (validGoods.length === 0)
           return common_vendor.index.showToast({
-            title: "请完善物品信息",
+            title: "请填写赞助物品",
             icon: "none"
           });
+        f.goodsDescription = JSON.stringify(validGoods);
+      } else {
+        f.goodsDescription = "";
       }
       emit("confirm", JSON.parse(JSON.stringify(f)));
     };
@@ -104,13 +157,13 @@ const _sfc_main = {
       common_vendor.index.chooseImage({
         count: 1,
         success: async (res) => {
-          const result = await utils_upload.uploadFile({
+          const r = await utils_upload.uploadFile({
             path: res.tempFilePaths[0]
           }, {
             directory: "sponsor-logo"
           });
-          if (result.data)
-            form.value.logoUrl = result.data;
+          if (r.data)
+            form.value.logoUrl = r.data;
         }
       });
     };
@@ -118,37 +171,39 @@ const _sfc_main = {
       common_vendor.index.chooseImage({
         count: 1,
         success: async (res) => {
-          const result = await utils_upload.uploadFile({
+          const r = await utils_upload.uploadFile({
             path: res.tempFilePaths[0]
           }, {
             directory: "sponsor-avatar"
           });
-          if (result.data)
-            form.value.contactAvatar = result.data;
+          if (r.data)
+            form.value.contactAvatar = r.data;
         }
       });
     };
     const uploadGallery = () => {
+      if (!form.value.galleryImageUrls)
+        form.value.galleryImageUrls = [];
       common_vendor.index.chooseImage({
         count: 9 - form.value.galleryImageUrls.length,
         success: async (res) => {
           common_vendor.index.showLoading({
-            title: "上传中"
+            title: "上传"
           });
-          const promises = res.tempFiles.map((f) => utils_upload.uploadFile({
+          const ps = res.tempFiles.map((f) => utils_upload.uploadFile({
             path: f.path
           }, {
             directory: "sponsor-gallery"
           }));
-          const results = await Promise.all(promises);
+          const rs = await Promise.all(ps);
           common_vendor.index.hideLoading();
-          const urls = results.filter((r) => r.data).map((r) => r.data);
-          form.value.galleryImageUrls.push(...urls);
+          form.value.galleryImageUrls.push(...rs.filter((r) => r.data).map((r) => r.data));
         }
       });
     };
-    const deleteImage = (index) => {
-      form.value.galleryImageUrls.splice(index, 1);
+    const deleteImage = (i) => {
+      if (form.value.galleryImageUrls)
+        form.value.galleryImageUrls.splice(i, 1);
     };
     const dragDisplayList = common_vendor.ref([]);
     const dragItemWidth = common_vendor.ref(0);
@@ -157,59 +212,55 @@ const _sfc_main = {
     const isDragging = common_vendor.ref(false);
     const dragIndex = common_vendor.ref(-1);
     const addBtnPos = common_vendor.computed(() => {
-      const count = form.value.galleryImageUrls.length;
-      if (count >= 9)
+      const c = (form.value.galleryImageUrls || []).length;
+      if (c >= 9)
         return {
           left: 0,
           top: 0
         };
-      const r = Math.floor(count / 3);
-      const c = count % 3;
+      const r = Math.floor(c / 3), col = c % 3;
       return {
-        left: c * dragItemWidth.value,
+        left: col * dragItemWidth.value,
         top: r * dragItemHeight.value
       };
     });
-    common_vendor.watch(() => form.value.galleryImageUrls, (newVal) => {
-      if (!isDragging.value && props.visible) {
-        initDragList(newVal || []);
-      }
+    common_vendor.watch(() => form.value.galleryImageUrls, (v) => {
+      if (!isDragging.value && props.visible)
+        initDragList(v || []);
     }, {
       deep: true
     });
-    const initDragList = (list) => {
+    const initDragList = (l) => {
       const sys = common_vendor.index.getSystemInfoSync();
-      const containerWidth = sys.windowWidth - common_vendor.index.upx2px(60);
-      dragItemWidth.value = containerWidth / 3;
+      const w = sys.windowWidth - common_vendor.index.upx2px(60);
+      dragItemWidth.value = w / 3;
       dragItemHeight.value = dragItemWidth.value;
-      dragDisplayList.value = (list || []).map((url, i) => {
+      dragDisplayList.value = (l || []).map((u, i) => {
         const {
           x,
           y
         } = getPos(i);
         return {
-          id: `sp_img_${i}_${Math.random()}`,
-          data: url,
+          id: `sp_${i}_${Math.random()}`,
+          data: u,
           x,
           y,
           zIndex: 1,
           realIndex: i
         };
       });
-      updateDragHeight(list.length);
+      updateDragHeight(l ? l.length : 0);
     };
     const getPos = (i) => {
-      const r = Math.floor(i / 3);
-      const c = i % 3;
+      const r = Math.floor(i / 3), c = i % 3;
       return {
         x: c * dragItemWidth.value,
         y: r * dragItemHeight.value
       };
     };
-    const updateDragHeight = (count) => {
-      const totalCount = count < 9 ? count + 1 : count;
-      const rows = Math.ceil(totalCount / 3);
-      dragAreaHeight.value = (rows || 1) * dragItemHeight.value;
+    const updateDragHeight = (c) => {
+      const t = c < 9 ? c + 1 : c;
+      dragAreaHeight.value = Math.ceil(t / 3) * dragItemHeight.value;
     };
     const onMovableStart = (i) => {
       isDragging.value = true;
@@ -219,40 +270,37 @@ const _sfc_main = {
     const onMovableChange = (e, i) => {
       if (!isDragging.value || i !== dragIndex.value)
         return;
-      const x = e.detail.x;
-      const y = e.detail.y;
-      const c = Math.floor((x + dragItemWidth.value / 2) / dragItemWidth.value);
-      const r = Math.floor((y + dragItemHeight.value / 2) / dragItemHeight.value);
-      let target = r * 3 + c;
-      if (target < 0)
-        target = 0;
-      if (target >= dragDisplayList.value.length)
-        target = dragDisplayList.value.length - 1;
-      if (target !== dragIndex.value) {
-        const mover = dragDisplayList.value[dragIndex.value];
+      const x = e.detail.x, y = e.detail.y, c = Math.floor((x + dragItemWidth.value / 2) / dragItemWidth.value), r = Math.floor((y + dragItemHeight.value / 2) / dragItemHeight.value);
+      let t = r * 3 + c;
+      if (t < 0)
+        t = 0;
+      if (t >= dragDisplayList.value.length)
+        t = dragDisplayList.value.length - 1;
+      if (t !== dragIndex.value) {
+        const m = dragDisplayList.value[dragIndex.value];
         dragDisplayList.value.splice(dragIndex.value, 1);
-        dragDisplayList.value.splice(target, 0, mover);
-        dragDisplayList.value.forEach((item, idx) => {
-          if (idx !== target) {
-            const p = getPos(idx);
-            item.x = p.x;
-            item.y = p.y;
+        dragDisplayList.value.splice(t, 0, m);
+        dragDisplayList.value.forEach((o, k) => {
+          if (k !== t) {
+            const p = getPos(k);
+            o.x = p.x;
+            o.y = p.y;
           }
         });
-        dragIndex.value = target;
+        dragIndex.value = t;
       }
     };
     const onMovableEnd = () => {
       isDragging.value = false;
       if (dragIndex.value !== -1) {
-        const item = dragDisplayList.value[dragIndex.value];
-        item.zIndex = 1;
+        const o = dragDisplayList.value[dragIndex.value];
+        o.zIndex = 1;
         const p = getPos(dragIndex.value);
         common_vendor.nextTick$1(() => {
-          item.x = p.x;
-          item.y = p.y;
+          o.x = p.x;
+          o.y = p.y;
         });
-        form.value.galleryImageUrls = dragDisplayList.value.map((o) => o.data);
+        form.value.galleryImageUrls = dragDisplayList.value.map((x) => x.data);
       }
       dragIndex.value = -1;
     };
@@ -296,68 +344,79 @@ const _sfc_main = {
           label: "品牌简介",
           required: true
         }),
-        o: form.value.sponsorType === 1 ? 1 : "",
-        p: common_vendor.o(($event) => form.value.sponsorType = 1),
-        q: form.value.sponsorType === 2 ? 1 : "",
-        r: common_vendor.o(($event) => form.value.sponsorType = 2),
+        o: common_vendor.t(form.value.location || "点击选择位置"),
+        p: !form.value.location ? 1 : "",
+        q: common_vendor.p({
+          type: "location",
+          size: "20",
+          color: "#FF6F00"
+        }),
+        r: common_vendor.o(chooseLocation),
         s: common_vendor.p({
+          label: "赞助商位置"
+        }),
+        t: form.value.sponsorType === 1 ? 1 : "",
+        v: common_vendor.o(($event) => form.value.sponsorType = 1),
+        w: form.value.sponsorType === 2 ? 1 : "",
+        x: common_vendor.o(($event) => form.value.sponsorType = 2),
+        y: form.value.sponsorType === 3 ? 1 : "",
+        z: common_vendor.o(($event) => form.value.sponsorType = 3),
+        A: common_vendor.p({
           label: "赞助类型",
           required: true
         }),
-        t: form.value.sponsorType === 1
-      }, form.value.sponsorType === 1 ? {
-        v: common_vendor.o(($event) => form.value.cashAmount = $event),
-        w: common_vendor.p({
+        B: form.value.sponsorType === 1 || form.value.sponsorType === 3
+      }, form.value.sponsorType === 1 || form.value.sponsorType === 3 ? {
+        C: common_vendor.o(($event) => form.value.cashAmount = $event),
+        D: common_vendor.p({
           type: "digit",
           placeholder: "0.00",
           modelValue: form.value.cashAmount
         }),
-        x: common_vendor.p({
+        E: common_vendor.p({
           label: "总金额 (元)",
           required: true
         }),
-        y: common_vendor.o(($event) => form.value.perCapitalAmount = $event),
-        z: common_vendor.p({
+        F: common_vendor.o(($event) => form.value.perCapitalAmount = $event),
+        G: common_vendor.p({
           type: "digit",
           placeholder: "0.00",
           modelValue: form.value.perCapitalAmount
         }),
-        A: common_vendor.p({
+        H: common_vendor.p({
           label: "人均金额 (元)",
           required: true
         })
       } : {}, {
-        B: form.value.sponsorType === 2
-      }, form.value.sponsorType === 2 ? {
-        C: common_vendor.o(($event) => form.value.goodsDescription = $event),
-        D: common_vendor.p({
-          placeholder: "例如: 矿泉水50箱",
-          modelValue: form.value.goodsDescription
-        }),
-        E: common_vendor.p({
-          label: "物品描述",
-          required: true
-        }),
-        F: common_vendor.o(($event) => form.value.goodsNum = $event),
-        G: common_vendor.p({
-          type: "number",
-          placeholder: "请输入数量",
-          modelValue: form.value.goodsNum
-        }),
-        H: common_vendor.p({
-          label: "物品数量",
-          required: true
-        })
-      } : {}, {
-        I: common_vendor.o(($event) => form.value.location = $event),
+        I: form.value.sponsorType === 2 || form.value.sponsorType === 3
+      }, form.value.sponsorType === 2 || form.value.sponsorType === 3 ? common_vendor.e({
         J: common_vendor.p({
-          placeholder: "选填，如：A区-01展位",
-          modelValue: form.value.location
+          type: "plusempty",
+          size: "12",
+          color: "#FF6F00"
         }),
-        K: common_vendor.p({
-          label: "赞助商位置"
+        K: common_vendor.o(addGoodsItem),
+        L: common_vendor.f(goodsList.value, (item, index, i0) => {
+          return {
+            a: "4df7dc31-15-" + i0 + ",4df7dc31-0",
+            b: common_vendor.o(($event) => item.desc = $event, index),
+            c: common_vendor.p({
+              placeholder: "请输入物品描述 (如: 矿泉水50箱)",
+              modelValue: item.desc
+            }),
+            d: "4df7dc31-16-" + i0 + ",4df7dc31-0",
+            e: common_vendor.o(($event) => removeGoodsItem(index), index),
+            f: index
+          };
         }),
-        L: common_vendor.f(dragDisplayList.value, (item, index, i0) => {
+        M: common_vendor.p({
+          type: "trash",
+          size: "18",
+          color: "#ff4d4f"
+        }),
+        N: goodsList.value.length === 0
+      }, goodsList.value.length === 0 ? {} : {}) : {}, {
+        O: common_vendor.f(dragDisplayList.value, (item, index, i0) => {
           return {
             a: item.data,
             b: common_vendor.o(($event) => deleteImage(item.realIndex), item.id),
@@ -371,55 +430,55 @@ const _sfc_main = {
             j: common_vendor.o(onMovableEnd, item.id)
           };
         }),
-        M: dragItemWidth.value + "px",
-        N: dragItemHeight.value + "px",
-        O: form.value.galleryImageUrls.length < 9
+        P: dragItemWidth.value + "px",
+        Q: dragItemHeight.value + "px",
+        R: form.value.galleryImageUrls.length < 9
       }, form.value.galleryImageUrls.length < 9 ? {
-        P: common_vendor.p({
+        S: common_vendor.p({
           type: "plusempty",
           size: "24",
           color: "#ccc"
         }),
-        Q: dragItemWidth.value + "px",
-        R: dragItemHeight.value + "px",
-        S: addBtnPos.value.left + "px",
-        T: addBtnPos.value.top + "px",
-        U: common_vendor.o(uploadGallery)
+        T: dragItemWidth.value + "px",
+        U: dragItemHeight.value + "px",
+        V: addBtnPos.value.left + "px",
+        W: addBtnPos.value.top + "px",
+        X: common_vendor.o(uploadGallery)
       } : {}, {
-        V: dragAreaHeight.value + "px",
-        W: dragAreaHeight.value + "px",
-        X: common_vendor.p({
-          label: "品牌图集 (支持拖拽排序)"
-        }),
-        Y: form.value.contactAvatar
-      }, form.value.contactAvatar ? {
-        Z: form.value.contactAvatar
-      } : {
+        Y: dragAreaHeight.value + "px",
+        Z: dragAreaHeight.value + "px",
         aa: common_vendor.p({
+          label: "品牌图集"
+        }),
+        ab: form.value.contactAvatar
+      }, form.value.contactAvatar ? {
+        ac: form.value.contactAvatar
+      } : {
+        ad: common_vendor.p({
           type: "camera-filled",
           size: "20",
           color: "#999"
         })
       }, {
-        ab: common_vendor.o(uploadAvatar),
-        ac: common_vendor.o(($event) => form.value.contactName = $event),
-        ad: common_vendor.p({
+        ae: common_vendor.o(uploadAvatar),
+        af: common_vendor.o(($event) => form.value.contactName = $event),
+        ag: common_vendor.p({
           placeholder: "请输入负责人姓名",
           modelValue: form.value.contactName
         }),
-        ae: common_vendor.p({
+        ah: common_vendor.p({
           label: "负责人信息 (选填)"
         }),
-        af: common_vendor.p({
+        ai: common_vendor.p({
           model: form.value,
           ["label-position"]: "top",
           ["label-width"]: "100%"
         }),
-        ag: __props.visible ? 1 : "",
-        ah: common_vendor.o(() => {
+        aj: __props.visible ? 1 : "",
+        ak: common_vendor.o(() => {
         }),
-        ai: __props.visible ? 1 : "",
-        aj: common_vendor.o(close)
+        al: __props.visible ? 1 : "",
+        am: common_vendor.o(close)
       });
     };
   }

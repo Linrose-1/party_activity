@@ -520,18 +520,33 @@
 .sp-tag-row.data-v-9217aa1c {
   display: flex;
   justify-content: center;
+  margin-top: 8rpx;
 }
 .sp-tag.data-v-9217aa1c {
   font-size: 20rpx;
   padding: 4rpx 12rpx;
   border-radius: 8rpx;
   font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .sp-tag.money.data-v-9217aa1c {
   color: #FF6F00;
   background: #FFF0E0;
+  border: 1rpx solid rgba(255, 111, 0, 0.2);
 }
 .sp-tag.goods.data-v-9217aa1c {
   color: #19be6b;
   background: #e1f3d8;
+  border: 1rpx solid rgba(25, 190, 107, 0.2);
+}
+.sp-tag.mixed.data-v-9217aa1c {
+  color: #722ed1;
+  background: #f9f0ff;
+  border: 1rpx solid rgba(114, 46, 209, 0.2);
+}
+.tag-icon.data-v-9217aa1c {
+  font-size: 18rpx;
+  margin: 0 2rpx;
 }

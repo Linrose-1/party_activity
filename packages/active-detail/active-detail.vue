@@ -187,10 +187,15 @@
 
 					<view class="sp-name text-ellipsis">{{ item.sponsorName }}</view>
 
-					<!-- 标签：显示类型（现金/物品） -->
+					<!-- 标签：显示类型（现金/物品/混合） -->
 					<view class="sp-tag-row">
-						<view class="sp-tag" :class="item.sponsorType === 1 ? 'money' : 'goods'">
-							{{ item.sponsorType === 1 ? '现金' : '物品' }}
+						<!-- 情况1：纯现金 -->
+						<view v-if="item.sponsorType === 1" class="sp-tag money">现金</view>
+						<!-- 情况2：纯物品 -->
+						<view v-else-if="item.sponsorType === 2" class="sp-tag goods">物品</view>
+						<!-- 情况3：混合 (现金+物品) -->
+						<view v-else-if="item.sponsorType === 3" class="sp-tag mixed">
+							<text class="tag-icon">💰</text>+<text class="tag-icon">🎁</text>
 						</view>
 					</view>
 				</view>
@@ -1432,6 +1437,7 @@
 	.sp-tag-row {
 		display: flex;
 		justify-content: center;
+		margin-top: 8rpx;
 	}
 
 	.sp-tag {
@@ -1439,15 +1445,31 @@
 		padding: 4rpx 12rpx;
 		border-radius: 8rpx;
 		font-weight: bold;
+		display: flex;
+		align-items: center;
+		justify-content: center;
 
 		&.money {
 			color: #FF6F00;
 			background: #FFF0E0;
+			border: 1rpx solid rgba(255, 111, 0, 0.2);
 		}
 
 		&.goods {
 			color: #19be6b;
 			background: #e1f3d8;
+			border: 1rpx solid rgba(25, 190, 107, 0.2);
 		}
+
+		&.mixed {
+			color: #722ed1;
+			background: #f9f0ff;
+			border: 1rpx solid rgba(114, 46, 209, 0.2);
+		}
+	}
+
+	.tag-icon {
+		font-size: 18rpx;
+		margin: 0 2rpx;
 	}
 </style>

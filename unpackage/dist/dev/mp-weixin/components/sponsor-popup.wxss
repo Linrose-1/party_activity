@@ -1,6 +1,5 @@
 /* 水平间距 */
 /* 水平间距 */
-/* 遮罩层 */
 .popup-mask.data-v-4df7dc31 {
   position: fixed;
   top: 0;
@@ -20,8 +19,6 @@
   opacity: 1;
   visibility: visible;
 }
-
-/* 内容层 */
 .popup-content.data-v-4df7dc31 {
   background-color: #fff;
   border-radius: 30rpx 30rpx 0 0;
@@ -34,8 +31,6 @@
 .popup-content.slide-up.data-v-4df7dc31 {
   transform: translateY(0);
 }
-
-/* 头部 */
 .popup-header.data-v-4df7dc31 {
   height: 100rpx;
   min-height: 100rpx;
@@ -61,8 +56,6 @@
   font-weight: bold;
   padding: 20rpx;
 }
-
-/* 滚动区 */
 .popup-scroll-view.data-v-4df7dc31 {
   flex: 1;
   height: 0;
@@ -71,31 +64,100 @@
 .form-wrapper.data-v-4df7dc31 {
   padding: 30rpx;
 }
-
-/* ======== 样式精修区 ======== */
-/* 1. 标准输入框样式：淡灰色边框 + 白色背景 */
 .standard-input.data-v-4df7dc31 .uni-easyinput__content {
-  border: 1px solid #E5E5E5 !important;
-  /* 淡灰色边框 */
+  border: 1px solid #DCDFE6 !important;
   border-radius: 8rpx;
   height: 76rpx;
-  /* 固定高度，方便对齐 */
   background-color: #fff !important;
   padding-left: 10rpx;
 }
 .standard-textarea.data-v-4df7dc31 .uni-easyinput__content {
-  border: 1px solid #E5E5E5 !important;
+  border: 1px solid #DCDFE6 !important;
   border-radius: 8rpx;
   background-color: #fff !important;
   padding: 10rpx;
 }
-
-/* 2. 上传框 */
+.location-select.data-v-4df7dc31 {
+  height: 76rpx;
+  border: 1px solid #DCDFE6;
+  border-radius: 8rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20rpx;
+  background: #fff;
+}
+.location-select .loc-text.data-v-4df7dc31 {
+  font-size: 28rpx;
+  color: #333;
+  flex: 1;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.location-select .loc-text.empty.data-v-4df7dc31 {
+  color: #999;
+}
+.type-selector.data-v-4df7dc31 {
+  display: flex;
+  gap: 20rpx;
+}
+.type-selector .type-item.data-v-4df7dc31 {
+  flex: 1;
+  height: 76rpx;
+  background: #fff;
+  border: 1px solid #DCDFE6;
+  border-radius: 8rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666;
+  font-size: 26rpx;
+}
+.type-selector .type-item.active.data-v-4df7dc31 {
+  background: #FFF6E6;
+  border-color: #FF6F00;
+  color: #FF6F00;
+  font-weight: bold;
+}
+.section-subtitle.data-v-4df7dc31 {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #333;
+  margin: 30rpx 0 20rpx;
+}
+.add-goods-btn.data-v-4df7dc31 {
+  font-size: 24rpx;
+  color: #FF6F00;
+  border: 1rpx solid #FF6F00;
+  padding: 4rpx 12rpx;
+  border-radius: 20rpx;
+}
+.goods-row.data-v-4df7dc31 {
+  display: flex;
+  gap: 20rpx;
+  margin-bottom: 20rpx;
+  align-items: center;
+}
+.goods-row .goods-input-wrapper.full.data-v-4df7dc31 {
+  flex: 1;
+}
+.goods-row .goods-del.data-v-4df7dc31 {
+  padding: 10rpx;
+}
+.empty-goods-tip.data-v-4df7dc31 {
+  text-align: center;
+  color: #ccc;
+  font-size: 24rpx;
+  padding: 20rpx;
+  background: #f9f9f9;
+  border-radius: 8rpx;
+}
 .upload-box.data-v-4df7dc31 {
   width: 200rpx;
   height: 200rpx;
   background-color: #FAFAFA;
-  border: 1px dashed #E5E5E5;
+  border: 1px dashed #DCDFE6;
   border-radius: 12rpx;
   display: flex;
   align-items: center;
@@ -115,31 +177,6 @@
   color: #999;
   font-size: 24rpx;
 }
-
-/* 3. 赞助类型选择 */
-.type-selector.data-v-4df7dc31 {
-  display: flex;
-  gap: 20rpx;
-}
-.type-selector .type-item.data-v-4df7dc31 {
-  flex: 1;
-  height: 76rpx;
-  background: #fff;
-  border: 1px solid #E5E5E5;
-  border-radius: 8rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #666;
-  font-size: 28rpx;
-  transition: all 0.2s;
-}
-.type-selector .type-item.active.data-v-4df7dc31 {
-  background: #FFF6E6;
-  border-color: #FF6F00;
-  color: #FF6F00;
-  font-weight: bold;
-}
 .row-inputs.data-v-4df7dc31 {
   display: flex;
   justify-content: space-between;
@@ -149,32 +186,23 @@
   flex: 1;
   width: 0;
 }
-
-/* 4. 负责人：完全水平对齐布局 */
 .contact-row.data-v-4df7dc31 {
   display: flex;
   align-items: center;
-  /* 垂直居中对齐 */
   gap: 24rpx;
-  padding-top: 10rpx;
-  /* 稍微与标签拉开距离 */
+  margin-top: 8rpx;
 }
-
-/* 头像容器 */
 .avatar-wrapper.data-v-4df7dc31 {
   width: 76rpx;
   height: 76rpx;
-  /* 与输入框高度严格一致 */
   border-radius: 50%;
   background: #FAFAFA;
-  border: 1px dashed #E5E5E5;
+  border: 1px dashed #DCDFE6;
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
   flex-shrink: 0;
-  /* 防止被挤压 */
-  /* 悬浮提示文字 */
 }
 .avatar-wrapper .avatar-img.data-v-4df7dc31 {
   width: 100%;
@@ -189,21 +217,14 @@
   width: 100%;
   text-align: center;
 }
-
-/* 姓名输入容器 */
 .name-wrapper.data-v-4df7dc31 {
   flex: 1;
-  /* 占据剩余宽度 */
 }
-
-/* 分隔线 */
 .section-divider.data-v-4df7dc31 {
   height: 1px;
   background-color: #F0F0F0;
   margin: 30rpx 0;
 }
-
-/* 拖拽相关 */
 .gallery-container.data-v-4df7dc31 {
   position: relative;
   width: 100%;
@@ -254,7 +275,7 @@
   width: 100%;
   height: 100%;
   background: #FAFAFA;
-  border: 1px dashed #E5E5E5;
+  border: 1px dashed #DCDFE6;
   border-radius: 8rpx;
   display: flex;
   align-items: center;

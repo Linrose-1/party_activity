@@ -1,9 +1,10 @@
 /* 水平间距 */
 /* 水平间距 */
-/* 保持原样式，仅补充赞助商模块相关 */
+/* ============ 页面容器与全局 ============ */
 .page.data-v-5d3444db {
   background-color: #f8f8f8;
-  padding-bottom: 160rpx;
+  padding-bottom: 200rpx;
+  /* 底部留白，防止内容被底部栏遮挡 */
 }
 .form-section.data-v-5d3444db {
   background: #fff;
@@ -19,6 +20,60 @@
   border-left: 10rpx solid #FF6F00;
   padding-left: 20rpx;
 }
+
+/* ============ 顶部实名认证提示 ============ */
+.auth-reminder.data-v-5d3444db {
+  display: flex;
+  align-items: center;
+  padding: 20rpx;
+  margin: 20rpx;
+  background: #fdf6ec;
+  border-radius: 12rpx;
+  color: #e6a23c;
+}
+.auth-reminder .reminder-text.data-v-5d3444db {
+  flex: 1;
+  margin: 0 10rpx;
+}
+
+/* ============ 上传组件通用样式 ============ */
+.cover-upload.data-v-5d3444db {
+  border: 2rpx dashed #ccc;
+  border-radius: 16rpx;
+  background-color: #fafafa;
+  color: #999;
+  width: 100%;
+  aspect-ratio: 5/4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+}
+.cover-upload image.data-v-5d3444db {
+  width: 100%;
+  height: 100%;
+}
+.add-btn-wrapper.data-v-5d3444db {
+  width: 33.33%;
+  height: 210rpx;
+  padding: 8rpx;
+  display: inline-block;
+  box-sizing: border-box;
+  vertical-align: top;
+}
+.add-placeholder.data-v-5d3444db {
+  width: 100%;
+  height: 100%;
+  border: 2rpx dashed #ccc;
+  border-radius: 12rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
+/* ============ 赞助商模块样式 ============ */
 .section-header.data-v-5d3444db {
   display: flex;
   justify-content: space-between;
@@ -81,37 +136,8 @@
   justify-content: center;
   gap: 10rpx;
 }
-.cover-upload.data-v-5d3444db {
-  border: 2rpx dashed #ccc;
-  border-radius: 16rpx;
-  background-color: #fafafa;
-  color: #999;
-  width: 100%;
-  aspect-ratio: 5/4;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  position: relative;
-}
-.cover-upload image.data-v-5d3444db {
-  width: 100%;
-  height: 100%;
-}
-.add-btn.data-v-5d3444db {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #FF6F00;
-  font-weight: bold;
-  margin-top: 20rpx;
-  gap: 10rpx;
-}
-.form-bottom.data-v-5d3444db {
-  text-align: center;
-  font-size: 24rpx;
-  color: #999;
-}
+
+/* ============ 底部操作栏 ============ */
 .action-bar.data-v-5d3444db {
   position: fixed;
   bottom: 0;
@@ -120,6 +146,7 @@
   background-color: #fff;
   padding: 20rpx 0;
   z-index: 99;
+  /* 当时间选择器打开时降低层级 */
 }
 .action-bar.z-index-low.data-v-5d3444db {
   z-index: 1;
@@ -146,7 +173,7 @@
   pointer-events: none;
 }
 
-/* 拖拽通用样式 */
+/* ============ 拖拽通用样式 ============ */
 .image-drag-container.data-v-5d3444db {
   width: 100%;
   position: relative;
@@ -191,26 +218,8 @@
   z-index: 20;
   border-radius: 0 0 0 10rpx;
 }
-.add-btn-wrapper.data-v-5d3444db {
-  width: 33.33%;
-  height: 210rpx;
-  padding: 8rpx;
-  display: inline-block;
-  box-sizing: border-box;
-  vertical-align: top;
-}
-.add-placeholder.data-v-5d3444db {
-  width: 100%;
-  height: 100%;
-  border: 2rpx dashed #ccc;
-  border-radius: 12rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-}
 
-/* 修复 uni-list-cell-db 样式 */
+/* ============ 其他辅助样式 ============ */
 .uni-list-cell-db.data-v-5d3444db {
   border: #e2e2e2 solid 1rpx;
   border-radius: 10rpx;
@@ -227,18 +236,19 @@
 .uni-list-cell-db .uni-input .arrow.data-v-5d3444db {
   color: #999;
 }
-.auth-reminder.data-v-5d3444db {
+.add-btn.data-v-5d3444db {
   display: flex;
   align-items: center;
-  padding: 20rpx;
-  margin: 20rpx;
-  background: #fdf6ec;
-  border-radius: 12rpx;
-  color: #e6a23c;
+  justify-content: center;
+  color: #FF6F00;
+  font-weight: bold;
+  margin-top: 20rpx;
+  gap: 10rpx;
 }
-.auth-reminder .reminder-text.data-v-5d3444db {
-  flex: 1;
-  margin: 0 10rpx;
+.form-bottom.data-v-5d3444db {
+  text-align: center;
+  font-size: 24rpx;
+  color: #999;
 }
 .input-group.data-v-5d3444db {
   display: flex;
