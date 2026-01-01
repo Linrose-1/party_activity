@@ -88,31 +88,8 @@
 						</template>
 
 						<uni-forms-item label="品牌图集">
-							<view class="gallery-container" :style="{ height: dragAreaHeight + 'px' }">
-								<movable-area class="drag-area" :style="{ height: dragAreaHeight + 'px' }">
-									<movable-view v-for="(item, index) in dragDisplayList" :key="item.id" :x="item.x"
-										:y="item.y" direction="all" :z-index="item.zIndex"
-										:disabled="!isDragging && item.zIndex === 1" class="drag-item"
-										:style="{ width: dragItemWidth + 'px', height: dragItemHeight + 'px' }"
-										@change="onMovableChange($event, index)" @touchstart="onMovableStart(index)"
-										@touchend="onMovableEnd">
-										<view class="item-inner">
-											<view class="img-wrap">
-												<image :src="item.data" mode="aspectFill" />
-												<view class="del-tag" @click.stop="deleteImage(item.realIndex)">×</view>
-											</view>
-										</view>
-									</movable-view>
-									<view v-if="form.galleryImageUrls.length < 9" class="add-btn-slot"
-										:style="{ width: dragItemWidth + 'px', height: dragItemHeight + 'px', left: addBtnPos.left + 'px', top: addBtnPos.top + 'px' }"
-										@click="uploadGallery">
-										<view class="item-inner">
-											<view class="upload-placeholder small"><uni-icons type="plusempty" size="24"
-													color="#ccc"></uni-icons></view>
-										</view>
-									</view>
-								</movable-area>
-							</view>
+							<DragImageUploader v-model="form.galleryImageUrls" :max-count="9"
+								@add-image="uploadGallery" />
 						</uni-forms-item>
 
 						<view class="section-divider"></view>
@@ -232,7 +209,7 @@
 					desc: ''
 				}];
 			}
-			nextTick(() => initDragList(form.value.galleryImageUrls));
+			// nextTick(() => initDragList(form.value.galleryImageUrls));
 		}
 	});
 
@@ -323,127 +300,133 @@
 		});
 	};
 	const uploadGallery = () => {
+		// 确保数组存在
 		if (!form.value.galleryImageUrls) form.value.galleryImageUrls = [];
+
 		uni.chooseImage({
 			count: 9 - form.value.galleryImageUrls.length,
 			success: async (res) => {
 				uni.showLoading({
-					title: '上传'
+					title: '上传中...'
 				});
+
 				const ps = res.tempFiles.map(f => uploadFile({
 					path: f.path
 				}, {
 					directory: 'sponsor-gallery'
 				}));
 				const rs = await Promise.all(ps);
-				uni.hideLoading();
-				form.value.galleryImageUrls.push(...rs.filter(r => r.data).map(r => r.data));
-			}
-		});
-	};
-	const deleteImage = (i) => {
-		if (form.value.galleryImageUrls) form.value.galleryImageUrls.splice(i, 1);
-	};
 
-	const dragDisplayList = ref([]);
-	const dragItemWidth = ref(0);
-	const dragItemHeight = ref(0);
-	const dragAreaHeight = ref(0);
-	const isDragging = ref(false);
-	const dragIndex = ref(-1);
-	const addBtnPos = computed(() => {
-		const c = (form.value.galleryImageUrls || []).length;
-		if (c >= 9) return {
-			left: 0,
-			top: 0
-		};
-		const r = Math.floor(c / 3),
-			col = c % 3;
-		return {
-			left: col * dragItemWidth.value,
-			top: r * dragItemHeight.value
-		};
-	});
-	watch(() => form.value.galleryImageUrls, (v) => {
-		if (!isDragging.value && props.visible) initDragList(v || []);
-	}, {
-		deep: true
-	});
-	const initDragList = (l) => {
-		const sys = uni.getSystemInfoSync();
-		const w = sys.windowWidth - uni.upx2px(60);
-		dragItemWidth.value = w / 3;
-		dragItemHeight.value = dragItemWidth.value;
-		dragDisplayList.value = (l || []).map((u, i) => {
-			const {
-				x,
-				y
-			} = getPos(i);
-			return {
-				id: `sp_${i}_${Math.random()}`,
-				data: u,
-				x,
-				y,
-				zIndex: 1,
-				realIndex: i
+				uni.hideLoading();
+
+				const successUrls = rs.filter(r => r.data).map(r => r.data);
+				form.value.galleryImageUrls.push(...successUrls);
 			}
 		});
-		updateDragHeight(l ? l.length : 0);
 	};
-	const getPos = (i) => {
-		const r = Math.floor(i / 3),
-			c = i % 3;
-		return {
-			x: c * dragItemWidth.value,
-			y: r * dragItemHeight.value
-		};
-	};
-	const updateDragHeight = (c) => {
-		const t = c < 9 ? c + 1 : c;
-		dragAreaHeight.value = Math.ceil(t / 3) * dragItemHeight.value;
-	};
-	const onMovableStart = (i) => {
-		isDragging.value = true;
-		dragIndex.value = i;
-		dragDisplayList.value[i].zIndex = 99;
-	};
-	const onMovableChange = (e, i) => {
-		if (!isDragging.value || i !== dragIndex.value) return;
-		const x = e.detail.x,
-			y = e.detail.y,
-			c = Math.floor((x + dragItemWidth.value / 2) / dragItemWidth.value),
-			r = Math.floor((y + dragItemHeight.value / 2) / dragItemHeight.value);
-		let t = r * 3 + c;
-		if (t < 0) t = 0;
-		if (t >= dragDisplayList.value.length) t = dragDisplayList.value.length - 1;
-		if (t !== dragIndex.value) {
-			const m = dragDisplayList.value[dragIndex.value];
-			dragDisplayList.value.splice(dragIndex.value, 1);
-			dragDisplayList.value.splice(t, 0, m);
-			dragDisplayList.value.forEach((o, k) => {
-				if (k !== t) {
-					const p = getPos(k);
-					o.x = p.x;
-					o.y = p.y;
-				}
-			});
-			dragIndex.value = t;
-		}
-	};
-	const onMovableEnd = () => {
-		isDragging.value = false;
-		if (dragIndex.value !== -1) {
-			const o = dragDisplayList.value[dragIndex.value];
-			o.zIndex = 1;
-			const p = getPos(dragIndex.value);
-			nextTick(() => {
-				o.x = p.x;
-				o.y = p.y;
-			});
-			form.value.galleryImageUrls = dragDisplayList.value.map(x => x.data);
-		}
-		dragIndex.value = -1;
-	};
+	// const deleteImage = (i) => {
+	// 	if (form.value.galleryImageUrls) form.value.galleryImageUrls.splice(i, 1);
+	// };
+
+	// const dragDisplayList = ref([]);
+	// const dragItemWidth = ref(0);
+	// const dragItemHeight = ref(0);
+	// const dragAreaHeight = ref(0);
+	// const isDragging = ref(false);
+	// const dragIndex = ref(-1);
+	// const addBtnPos = computed(() => {
+	// 	const c = (form.value.galleryImageUrls || []).length;
+	// 	if (c >= 9) return {
+	// 		left: 0,
+	// 		top: 0
+	// 	};
+	// 	const r = Math.floor(c / 3),
+	// 		col = c % 3;
+	// 	return {
+	// 		left: col * dragItemWidth.value,
+	// 		top: r * dragItemHeight.value
+	// 	};
+	// });
+	// watch(() => form.value.galleryImageUrls, (v) => {
+	// 	if (!isDragging.value && props.visible) initDragList(v || []);
+	// }, {
+	// 	deep: true
+	// });
+	// const initDragList = (l) => {
+	// 	const sys = uni.getSystemInfoSync();
+	// 	const w = sys.windowWidth - uni.upx2px(60);
+	// 	dragItemWidth.value = w / 3;
+	// 	dragItemHeight.value = dragItemWidth.value;
+	// 	dragDisplayList.value = (l || []).map((u, i) => {
+	// 		const {
+	// 			x,
+	// 			y
+	// 		} = getPos(i);
+	// 		return {
+	// 			id: `sp_${i}_${Math.random()}`,
+	// 			data: u,
+	// 			x,
+	// 			y,
+	// 			zIndex: 1,
+	// 			realIndex: i
+	// 		}
+	// 	});
+	// 	updateDragHeight(l ? l.length : 0);
+	// };
+	// const getPos = (i) => {
+	// 	const r = Math.floor(i / 3),
+	// 		c = i % 3;
+	// 	return {
+	// 		x: c * dragItemWidth.value,
+	// 		y: r * dragItemHeight.value
+	// 	};
+	// };
+	// const updateDragHeight = (c) => {
+	// 	const t = c < 9 ? c + 1 : c;
+	// 	dragAreaHeight.value = Math.ceil(t / 3) * dragItemHeight.value;
+	// };
+	// const onMovableStart = (i) => {
+	// 	isDragging.value = true;
+	// 	dragIndex.value = i;
+	// 	dragDisplayList.value[i].zIndex = 99;
+	// };
+	// const onMovableChange = (e, i) => {
+	// 	if (!isDragging.value || i !== dragIndex.value) return;
+	// 	const x = e.detail.x,
+	// 		y = e.detail.y,
+	// 		c = Math.floor((x + dragItemWidth.value / 2) / dragItemWidth.value),
+	// 		r = Math.floor((y + dragItemHeight.value / 2) / dragItemHeight.value);
+	// 	let t = r * 3 + c;
+	// 	if (t < 0) t = 0;
+	// 	if (t >= dragDisplayList.value.length) t = dragDisplayList.value.length - 1;
+	// 	if (t !== dragIndex.value) {
+	// 		const m = dragDisplayList.value[dragIndex.value];
+	// 		dragDisplayList.value.splice(dragIndex.value, 1);
+	// 		dragDisplayList.value.splice(t, 0, m);
+	// 		dragDisplayList.value.forEach((o, k) => {
+	// 			if (k !== t) {
+	// 				const p = getPos(k);
+	// 				o.x = p.x;
+	// 				o.y = p.y;
+	// 			}
+	// 		});
+	// 		dragIndex.value = t;
+	// 	}
+	// };
+	// const onMovableEnd = () => {
+	// 	isDragging.value = false;
+	// 	if (dragIndex.value !== -1) {
+	// 		const o = dragDisplayList.value[dragIndex.value];
+	// 		o.zIndex = 1;
+	// 		const p = getPos(dragIndex.value);
+	// 		nextTick(() => {
+	// 			o.x = p.x;
+	// 			o.y = p.y;
+	// 		});
+	// 		form.value.galleryImageUrls = dragDisplayList.value.map(x => x.data);
+	// 	}
+	// 	dragIndex.value = -1;
+	// };
 </script>
 
 <style lang="scss" scoped>
@@ -713,74 +696,74 @@
 		margin: 30rpx 0;
 	}
 
-	.gallery-container {
-		position: relative;
-		width: 100%;
-	}
+	// .gallery-container {
+	// 	position: relative;
+	// 	width: 100%;
+	// }
 
-	.drag-area {
-		width: 100%;
-	}
+	// .drag-area {
+	// 	width: 100%;
+	// }
 
-	.drag-item {
-		z-index: 10;
-	}
+	// .drag-item {
+	// 	z-index: 10;
+	// }
 
-	.item-inner {
-		width: 100%;
-		height: 100%;
-		padding: 10rpx;
-		box-sizing: border-box;
-	}
+	// .item-inner {
+	// 	width: 100%;
+	// 	height: 100%;
+	// 	padding: 10rpx;
+	// 	box-sizing: border-box;
+	// }
 
-	.img-wrap {
-		width: 100%;
-		height: 100%;
-		position: relative;
-		border-radius: 8rpx;
-		overflow: hidden;
-		background: #eee;
+	// .img-wrap {
+	// 	width: 100%;
+	// 	height: 100%;
+	// 	position: relative;
+	// 	border-radius: 8rpx;
+	// 	overflow: hidden;
+	// 	background: #eee;
 
-		image {
-			width: 100%;
-			height: 100%;
-		}
-	}
+	// 	image {
+	// 		width: 100%;
+	// 		height: 100%;
+	// 	}
+	// }
 
-	.del-tag {
-		position: absolute;
-		top: 0;
-		right: 0;
-		width: 40rpx;
-		height: 40rpx;
-		background: rgba(0, 0, 0, 0.5);
-		color: #fff;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		border-bottom-left-radius: 8rpx;
-		z-index: 20;
-	}
+	// .del-tag {
+	// 	position: absolute;
+	// 	top: 0;
+	// 	right: 0;
+	// 	width: 40rpx;
+	// 	height: 40rpx;
+	// 	background: rgba(0, 0, 0, 0.5);
+	// 	color: #fff;
+	// 	display: flex;
+	// 	align-items: center;
+	// 	justify-content: center;
+	// 	border-bottom-left-radius: 8rpx;
+	// 	z-index: 20;
+	// }
 
-	.add-btn-slot {
-		position: absolute;
-		z-index: 5;
-	}
+	// .add-btn-slot {
+	// 	position: absolute;
+	// 	z-index: 5;
+	// }
 
-	.upload-placeholder.small {
-		width: 100%;
-		height: 100%;
-		background: #FAFAFA;
-		border: 1px dashed #DCDFE6;
-		border-radius: 8rpx;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-	}
+	// .upload-placeholder.small {
+	// 	width: 100%;
+	// 	height: 100%;
+	// 	background: #FAFAFA;
+	// 	border: 1px dashed #DCDFE6;
+	// 	border-radius: 8rpx;
+	// 	display: flex;
+	// 	align-items: center;
+	// 	justify-content: center;
+	// }
 
-	:deep(.uni-forms-item__label) {
-		font-weight: bold;
-		color: #333;
-		padding-bottom: 10rpx;
-	}
+	// :deep(.uni-forms-item__label) {
+	// 	font-weight: bold;
+	// 	color: #333;
+	// 	padding-bottom: 10rpx;
+	// }
 </style>

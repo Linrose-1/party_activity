@@ -753,8 +753,8 @@ const _sfc_main = {
         l: common_vendor.o(deletePost)
       } : {}, {
         j: loggedInUserId.value && loggedInUserId.value === postDetail.userId,
-        m: postDetail.postType === 1
-      }, postDetail.postType === 1 ? {} : {}, {
+        m: postDetail.postType == 1
+      }, postDetail.postType == 1 ? {} : {}, {
         n: common_vendor.t(postDetail.postTitle),
         o: common_vendor.o(($event) => handleLongPress(postDetail.postTitle)),
         p: common_vendor.t(postDetail.content),
@@ -900,7 +900,7 @@ const _sfc_main = {
         }),
         am: showTimelineGuide.value
       }, showTimelineGuide.value ? {
-        an: common_assets._imports_0$3,
+        an: common_assets._imports_0$2,
         ao: common_vendor.o(hideTimelineGuide)
       } : {}, {
         ap: copyMenu.show

@@ -69,43 +69,8 @@
 					</view>
 
 					<!-- Case 2: 图片区域 -->
-					<view class="image-preview-area" :class="{ 'is-hidden': form.images.length === 0 }">
-
-						<!-- 1. 拖拽区域容器 -->
-						<view class="drag-container" :style="{ height: dragAreaHeight + 'px' }">
-							<movable-area class="drag-area" :style="{ height: dragAreaHeight + 'px' }">
-
-								<!-- 循环渲染拖拽项 -->
-								<movable-view v-for="(item, index) in dragDisplayList" :key="item.id" :x="item.x"
-									:y="item.y" direction="all" :z-index="item.zIndex"
-									:disabled="!isDragging && item.zIndex === 1" class="drag-item"
-									:style="{ width: dragItemWidth + 'px', height: dragItemHeight + 'px' }"
-									@change="onMovableChange($event, index)" @touchstart="onMovableStart(index)"
-									@touchend="onMovableEnd">
-									<view class="item-inner">
-										<view class="image-wrapper-drag">
-											<!-- 直接渲染 form.images 里的图片 URL -->
-											<!-- item.data 存的就是 url -->
-											<image :src="item.data" mode="aspectFill" class="preview-img"
-												@click.stop="previewImage(item.realIndex)" />
-											<view class="delete-btn" @click.stop="deleteImage(item.realIndex)">×</view>
-										</view>
-									</view>
-								</movable-view>
-
-							</movable-area>
-						</view>
-
-						<!-- 2. 添加按钮 -->
-						<view class="add-btn-wrapper"
-							v-if="form.mediaType === 'image' && form.images.length > 0 && form.images.length < 9"
-							@click="handleChooseImage">
-							<view class="add-img-placeholder">
-								<uni-icons type="plusempty" size="24" color="#ccc"></uni-icons>
-								<text>添加</text>
-							</view>
-						</view>
-
+					<view v-if="form.mediaType === 'image' && form.images.length > 0" class="image-preview-area">
+						<DragImageUploader v-model="form.images" :max-count="9" @add-image="handleChooseImage" />
 					</view>
 
 					<!-- Case 3: 已经选择了视频 -->
@@ -420,30 +385,36 @@
 	 * @param {string} type - 'image' 或 'video'
 	 */
 	function selectMediaType(type) {
-		if (form.images.length > 0 || form.postVideo) {
+		// 如果已经有内容，提示清空
+		if ((type === 'image' && form.postVideo) || (type === 'video' && form.images.length > 0)) {
 			uni.showModal({
 				title: '提示',
-				content: '切换类型将清空已上传的图片或视频，是否继续？',
+				content: '切换类型将清空当前内容，是否继续？',
 				success: (res) => {
 					if (res.confirm) {
 						form.mediaType = type;
 						form.images = [];
 						form.postVideo = '';
-						// 切换后立即打开选择器
+						form.businessCoverImageUrl = '';
+
 						if (type === 'image') handleChooseImage();
 						if (type === 'video') handleChooseVideo();
 					}
 				}
 			});
 		} else {
+			// 无冲突，直接开始
 			form.mediaType = type;
 			if (type === 'image') handleChooseImage();
 			if (type === 'video') handleChooseVideo();
 		}
 	}
 
-	// --- 图片处理函数 (现在都操作 form.images) ---
+	// --- 图片处理函数 ---
 	async function handleChooseImage() {
+		// 确保模式正确
+		if (form.mediaType !== 'image') form.mediaType = 'image';
+
 		uni.chooseImage({
 			count: 9 - form.images.length,
 			sourceType: ['album', 'camera'],
@@ -458,7 +429,7 @@
 				if (validFiles.length === 0) return;
 
 				uni.showLoading({
-					title: `正在上传 ${validFiles.length} 张图片...`,
+					title: `正在上传...`,
 					mask: true
 				});
 
@@ -474,16 +445,19 @@
 					else console.error('上传失败:', result.error);
 				});
 
+				// 将新图片追加到数组，DragImageUploader 会自动响应
 				form.images.push(...successfulUrls);
+
 				if (successfulUrls.length < validFiles.length) {
 					uni.showToast({
-						title: `${validFiles.length - successfulUrls.length} 张图片上传失败`,
+						title: '部分图片上传失败',
 						icon: 'none'
 					});
 				}
 			},
 		});
 	}
+
 
 	// 预览图片
 	const previewImage = (index) => {
@@ -534,26 +508,31 @@
 
 	// --- 视频处理函数 ---
 	async function handleChooseVideo() {
-		// 确保 mediaType 是 video
-		form.mediaType = 'video';
-		form.images = []; // 清空图片
-		initDragList([]); // 重置拖拽列表
+		// 1. 清理可能存在的图片
+		if (form.images.length > 0) {
+			// 这里可以直接清空，或者询问用户。为了体验流畅，直接清空并切换模式。
+			form.images = [];
+		}
 
+		// 2. 调用系统选择视频
 		uni.chooseVideo({
 			sourceType: ['album', 'camera'],
-			maxDuration: 60, // 限制最长60秒
-			compressed: true, // 建议压缩
+			maxDuration: 60,
+			compressed: true,
 			success: async (res) => {
+				// 选到了视频，设置模式
+				form.mediaType = 'video';
+
 				const videoFile = {
 					path: res.tempFilePath,
-					size: res.size,
-					name: res.tempFilePath.substring(res.tempFilePath.lastIndexOf('/') + 1)
+					size: res.size
 				};
 
-				// 前端校验视频大小 (例如：限制50MB)
+				// 校验大小
 				if (videoFile.size > 50 * 1024 * 1024) {
+					form.mediaType = ''; // 恢复初始状态
 					return uni.showToast({
-						title: '视频大小不能超过50MB',
+						title: '视频超过50MB',
 						icon: 'none'
 					});
 				}
@@ -563,7 +542,6 @@
 					mask: true
 				});
 
-				// 调用 uploadFile (它应该也能处理视频文件)
 				const result = await uploadFile(videoFile, {
 					directory: 'post_videos'
 				});
@@ -571,23 +549,23 @@
 				uni.hideLoading();
 
 				if (result.data) {
-					form.postVideo = result.data; // 将返回的URL存入 postVideo
+					form.postVideo = result.data;
 					uni.showToast({
 						title: '视频上传成功',
 						icon: 'success'
 					});
 				} else {
+					// 失败了恢复状态
+					form.mediaType = '';
 					uni.showToast({
-						title: result.error || '视频上传失败',
+						title: '上传失败',
 						icon: 'none'
 					});
 				}
 			},
 			fail: (err) => {
-				// 用户取消选择时，不提示错误
-				if (err.errMsg.indexOf('cancel') === -1) {
-					console.error('选择视频失败:', err);
-				}
+				// 用户取消了，不做任何改变，保持显示大按钮的状态
+				console.log('取消选择视频');
 			}
 		});
 	}
@@ -599,9 +577,11 @@
 			success: (res) => {
 				if (res.confirm) {
 					form.postVideo = '';
-					form.mediaType = ''; // 重置回初始状态，显示两个大按钮
 					form.businessCoverImageUrl = '';
-					form.mediaType = '';
+					// 如果删除了视频，且没有图片，重置状态以显示大按钮
+					if (form.images.length === 0) {
+						form.mediaType = '';
+					}
 				}
 			}
 		});
@@ -798,156 +778,156 @@
 	/* ========================================  图片拖拽移动编辑 ======================================== */
 
 	// 删除逻辑
-	const deleteImage = (index) => {
-		uni.showModal({
-			title: '提示',
-			content: '确定删除？',
-			success: (res) => {
-				if (res.confirm) {
-					form.images.splice(index, 1);
-					initDragList(form.images);
+	// const deleteImage = (index) => {
+	// 	uni.showModal({
+	// 		title: '提示',
+	// 		content: '确定删除？',
+	// 		success: (res) => {
+	// 			if (res.confirm) {
+	// 				form.images.splice(index, 1);
+	// 				initDragList(form.images);
 
-					// 如果删光了，重置回初始状态
-					if (form.images.length === 0) {
-						form.mediaType = '';
-					}
-				}
-			}
-		});
-	};
+	// 				// 如果删光了，重置回初始状态
+	// 				if (form.images.length === 0) {
+	// 					form.mediaType = '';
+	// 				}
+	// 			}
+	// 		}
+	// 	});
+	// };
 
 	// --- 拖拽排序相关状态 ---
-	const dragDisplayList = ref([]);
-	const dragItemWidth = ref(0);
-	const dragItemHeight = ref(0);
-	const dragAreaHeight = ref(0);
-	const isDragging = ref(false);
-	const dragIndex = ref(-1);
-	const dragColumns = 3;
-	const dragItemHeightRpx = 230;
+	// const dragDisplayList = ref([]);
+	// const dragItemWidth = ref(0);
+	// const dragItemHeight = ref(0);
+	// const dragAreaHeight = ref(0);
+	// const isDragging = ref(false);
+	// const dragIndex = ref(-1);
+	// const dragColumns = 3;
+	// const dragItemHeightRpx = 230;
 
 	// 1. 初始化尺寸
-	const initDragLayout = () => {
-		const sys = uni.getSystemInfoSync();
+	// const initDragLayout = () => {
+	// 	const sys = uni.getSystemInfoSync();
 
-		// 假设页面左右 padding 各 20rpx，总共 40rpx
-		// 【关键】这里多减一点，比如减 60rpx 或 70rpx，确保宽度绝对不会溢出
-		// 如果你的 .page padding 是 20rpx，那这里减 40rpx 是不够的，因为还有 item 之间的间隙
-		// 建议减去 (20rpx * 2) + 稍微多一点的冗余
-		const containerWidth = sys.windowWidth - uni.upx2px(100);
+	// 	// 假设页面左右 padding 各 20rpx，总共 40rpx
+	// 	// 【关键】这里多减一点，比如减 60rpx 或 70rpx，确保宽度绝对不会溢出
+	// 	// 如果你的 .page padding 是 20rpx，那这里减 40rpx 是不够的，因为还有 item 之间的间隙
+	// 	// 建议减去 (20rpx * 2) + 稍微多一点的冗余
+	// 	const containerWidth = sys.windowWidth - uni.upx2px(100);
 
-		// 计算单格宽度
-		dragItemWidth.value = containerWidth / dragColumns;
-		dragItemHeight.value = uni.upx2px(dragItemHeightRpx);
-	};
+	// 	// 计算单格宽度
+	// 	dragItemWidth.value = containerWidth / dragColumns;
+	// 	dragItemHeight.value = uni.upx2px(dragItemHeightRpx);
+	// };
 
-	// 2. 初始化列表 (监听 form.images)
-	watch(() => form.images, (newVal) => {
-		if (!isDragging.value) {
-			initDragList(newVal);
-		}
-	}, {
-		deep: true
-	}); // 移除 immediate，手动调一次即可
+	// // 2. 初始化列表 (监听 form.images)
+	// watch(() => form.images, (newVal) => {
+	// 	if (!isDragging.value) {
+	// 		initDragList(newVal);
+	// 	}
+	// }, {
+	// 	deep: true
+	// }); // 移除 immediate，手动调一次即可
 
-	// 在 onLoad 或 onMounted 里初始化一次
-	onMounted(() => {
-		initDragLayout();
-		// 如果有草稿恢复的数据
-		if (form.images.length > 0) initDragList(form.images);
-	});
+	// // 在 onLoad 或 onMounted 里初始化一次
+	// onMounted(() => {
+	// 	initDragLayout();
+	// 	// 如果有草稿恢复的数据
+	// 	if (form.images.length > 0) initDragList(form.images);
+	// });
 
-	const initDragList = (originList) => {
-		if (!originList) return;
-		// 确保尺寸已计算
-		if (dragItemWidth.value === 0) initDragLayout();
+	// const initDragList = (originList) => {
+	// 	if (!originList) return;
+	// 	// 确保尺寸已计算
+	// 	if (dragItemWidth.value === 0) initDragLayout();
 
-		dragDisplayList.value = originList.map((url, index) => {
-			const {
-				x,
-				y
-			} = getPos(index);
-			return {
-				id: `img_${index}_${Math.random()}`, // 唯一KEY
-				data: url,
-				x,
-				y,
-				zIndex: 1,
-				realIndex: index
-			};
-		});
-		updateDragHeight();
-	};
+	// 	dragDisplayList.value = originList.map((url, index) => {
+	// 		const {
+	// 			x,
+	// 			y
+	// 		} = getPos(index);
+	// 		return {
+	// 			id: `img_${index}_${Math.random()}`, // 唯一KEY
+	// 			data: url,
+	// 			x,
+	// 			y,
+	// 			zIndex: 1,
+	// 			realIndex: index
+	// 		};
+	// 	});
+	// 	updateDragHeight();
+	// };
 
-	const getPos = (index) => {
-		const row = Math.floor(index / dragColumns);
-		const col = index % dragColumns;
-		return {
-			x: col * dragItemWidth.value,
-			y: row * dragItemHeight.value
-		};
-	};
+	// const getPos = (index) => {
+	// 	const row = Math.floor(index / dragColumns);
+	// 	const col = index % dragColumns;
+	// 	return {
+	// 		x: col * dragItemWidth.value,
+	// 		y: row * dragItemHeight.value
+	// 	};
+	// };
 
-	const updateDragHeight = () => {
-		const count = dragDisplayList.value.length;
-		const rows = Math.ceil(count / dragColumns);
-		dragAreaHeight.value = (rows || 1) * dragItemHeight.value;
-	};
+	// const updateDragHeight = () => {
+	// 	const count = dragDisplayList.value.length;
+	// 	const rows = Math.ceil(count / dragColumns);
+	// 	dragAreaHeight.value = (rows || 1) * dragItemHeight.value;
+	// };
 
-	// --- 拖拽事件 ---
-	const onMovableStart = (index) => {
-		isDragging.value = true;
-		dragIndex.value = index;
-		dragDisplayList.value[index].zIndex = 99;
-	};
+	// // --- 拖拽事件 ---
+	// const onMovableStart = (index) => {
+	// 	isDragging.value = true;
+	// 	dragIndex.value = index;
+	// 	dragDisplayList.value[index].zIndex = 99;
+	// };
 
-	const onMovableChange = (e, index) => {
-		if (!isDragging.value || index !== dragIndex.value) return;
-		const x = e.detail.x;
-		const y = e.detail.y;
+	// const onMovableChange = (e, index) => {
+	// 	if (!isDragging.value || index !== dragIndex.value) return;
+	// 	const x = e.detail.x;
+	// 	const y = e.detail.y;
 
-		const centerX = x + dragItemWidth.value / 2;
-		const centerY = y + dragItemHeight.value / 2;
-		const col = Math.floor(centerX / dragItemWidth.value);
-		const row = Math.floor(centerY / dragItemHeight.value);
-		let targetIndex = row * dragColumns + col;
+	// 	const centerX = x + dragItemWidth.value / 2;
+	// 	const centerY = y + dragItemHeight.value / 2;
+	// 	const col = Math.floor(centerX / dragItemWidth.value);
+	// 	const row = Math.floor(centerY / dragItemHeight.value);
+	// 	let targetIndex = row * dragColumns + col;
 
-		if (targetIndex < 0) targetIndex = 0;
-		if (targetIndex >= dragDisplayList.value.length) targetIndex = dragDisplayList.value.length - 1;
+	// 	if (targetIndex < 0) targetIndex = 0;
+	// 	if (targetIndex >= dragDisplayList.value.length) targetIndex = dragDisplayList.value.length - 1;
 
-		if (targetIndex !== dragIndex.value) {
-			const mover = dragDisplayList.value[dragIndex.value];
-			dragDisplayList.value.splice(dragIndex.value, 1);
-			dragDisplayList.value.splice(targetIndex, 0, mover);
+	// 	if (targetIndex !== dragIndex.value) {
+	// 		const mover = dragDisplayList.value[dragIndex.value];
+	// 		dragDisplayList.value.splice(dragIndex.value, 1);
+	// 		dragDisplayList.value.splice(targetIndex, 0, mover);
 
-			dragDisplayList.value.forEach((item, idx) => {
-				if (idx !== targetIndex) {
-					const pos = getPos(idx);
-					item.x = pos.x;
-					item.y = pos.y;
-				}
-			});
-			dragIndex.value = targetIndex;
-		}
-	};
+	// 		dragDisplayList.value.forEach((item, idx) => {
+	// 			if (idx !== targetIndex) {
+	// 				const pos = getPos(idx);
+	// 				item.x = pos.x;
+	// 				item.y = pos.y;
+	// 			}
+	// 		});
+	// 		dragIndex.value = targetIndex;
+	// 	}
+	// };
 
-	const onMovableEnd = () => {
-		isDragging.value = false;
-		if (dragIndex.value !== -1) {
-			const item = dragDisplayList.value[dragIndex.value];
-			item.zIndex = 1;
-			const pos = getPos(dragIndex.value);
-			nextTick(() => {
-				item.x = pos.x;
-				item.y = pos.y;
-			});
+	// const onMovableEnd = () => {
+	// 	isDragging.value = false;
+	// 	if (dragIndex.value !== -1) {
+	// 		const item = dragDisplayList.value[dragIndex.value];
+	// 		item.zIndex = 1;
+	// 		const pos = getPos(dragIndex.value);
+	// 		nextTick(() => {
+	// 			item.x = pos.x;
+	// 			item.y = pos.y;
+	// 		});
 
-			// 同步回 form.images
-			const sortedUrls = dragDisplayList.value.map(wrapper => wrapper.data);
-			form.images = sortedUrls;
-		}
-		dragIndex.value = -1;
-	};
+	// 		// 同步回 form.images
+	// 		const sortedUrls = dragDisplayList.value.map(wrapper => wrapper.data);
+	// 		form.images = sortedUrls;
+	// 	}
+	// 	dragIndex.value = -1;
+	// };
 
 	/* ========================================  图片拖拽移动编辑 ======================================== */
 </script>
@@ -1371,114 +1351,5 @@
 
 	.delete-video-btn:active {
 		background-color: rgba(0, 0, 0, 0.7);
-	}
-
-	/* ===================================================================== */
-
-	/* 容器 */
-	.image-preview-area {
-		width: 100%;
-		margin-top: 20rpx;
-		/* 最小高度，确保区域存在 */
-		min-height: 230rpx;
-		position: relative;
-		opacity: 1;
-		transition: opacity 0.3s;
-	}
-
-	/* 隐藏状态：不销毁 DOM，但不可见且不占空间 */
-	.image-preview-area.is-hidden {
-		position: absolute;
-		/* 脱离文档流 */
-		top: -9999px;
-		/* 移出屏幕 */
-		left: -9999px;
-		width: 0;
-		height: 0;
-		min-height: 0;
-		/* 覆盖上面的 min-height */
-		opacity: 0;
-		overflow: hidden;
-	}
-
-	/* 拖拽项容器 */
-	.image-wrapper-drag {
-		width: 100%;
-		height: 100%;
-		position: relative;
-		border-radius: 12rpx;
-		overflow: hidden;
-		background-color: #f0f0f0;
-	}
-
-	.preview-img {
-		position: absolute;
-		top: 0;
-		left: 0;
-		width: 100%;
-		height: 100%;
-		display: block;
-	}
-
-	/* 删除按钮 */
-	.delete-btn {
-		position: absolute;
-		top: 0;
-		right: 0;
-		width: 40rpx;
-		height: 40rpx;
-		background: rgba(0, 0, 0, 0.5);
-		color: #fff;
-		text-align: center;
-		line-height: 40rpx;
-		font-size: 32rpx;
-		z-index: 20;
-		border-bottom-left-radius: 12rpx;
-	}
-
-	/* 添加按钮样式 */
-	.add-btn-wrapper {
-		width: 33.33%;
-		height: 230rpx;
-		padding: 8rpx;
-		box-sizing: border-box;
-		display: inline-block;
-		vertical-align: top;
-	}
-
-	.add-img-placeholder {
-		width: 100%;
-		height: 100%;
-		border: 2rpx dashed #ccc;
-		border-radius: 12rpx;
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: center;
-		color: #999;
-		background-color: #fff;
-	}
-
-	/* 拖拽相关 */
-	.drag-container {
-		width: 100%;
-		position: relative;
-	}
-
-	.drag-area {
-		width: 100%;
-	}
-
-	.drag-item {
-		/* movable-view 默认是 absolute */
-		z-index: 10;
-	}
-
-	.item-inner {
-		width: 100%;
-		height: 100%;
-		padding: 12rpx;
-		box-sizing: border-box;
-		display: block;
 	}
 </style>

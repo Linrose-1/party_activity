@@ -1,5 +1,9 @@
 <template>
 	<view class="followed-users-page">
+		<view class="segmented-wrapper">
+			<uni-segmented-control :current="currentTab" :values="tabs" @clickItem="switchTab" style-type="button"
+				active-color="#FF6B00" />
+		</view>
 		<scroll-view scroll-y class="content-scroll" refresher-enabled :refresher-triggered="refreshing"
 			@refresherrefresh="onRefresh" @scrolltolower="loadMore">
 			<view v-if="followedUsers.length > 0" class="user-list">
@@ -12,8 +16,7 @@
 					@click="viewUserDetail(item.userRespVO)">
 					<!-- 使用 userRespVO 中的头像，如果为空则提供一个默认头像 -->
 					<image :src="item.userRespVO.avatar || '/static/images/default-avatar.png'" mode="aspectFill"
-						class="user-avatar" />
-
+						class="user-avatar" @click.stop="handleAvatarClick(item.userRespVO)" />
 					<view class="user-info">
 						<!-- 显示昵称 -->
 						<view class="user-name">{{ item.userRespVO.nickname }}</view>
@@ -23,6 +26,10 @@
 							<uni-icons type="flag" size="14" color="#888" />
 							<text>{{ item.userRespVO.companyName }}</text>
 						</view>
+
+						<view class="follow-time">
+							<text>关注于 {{ formatTimestamp(item.createTime) }}</text>
+						</view>
 					</view>
 
 					<!-- 
@@ -30,7 +37,7 @@
 						- @click.stop 防止事件冒泡触发卡片点击
 						- 传入 item.id (关注记录ID)
 					-->
-					<button class="unfollow-btn" @click.stop="cancelFollow(item.id)">
+					<button v-if="currentTab === 0" class="unfollow-btn" @click.stop="cancelFollow(item.id)">
 						取消关注
 					</button>
 				</view>
@@ -45,6 +52,10 @@
 				<button class="primary-btn" @click="goToDiscover">去发现商友</button>
 			</view>
 		</scroll-view>
+
+		<AvatarActionPopup ref="avatarPopupRef" @action="handleMenuAction" />
+
+		<AddCircleConfirmPopup ref="addCirclePopupRef" />
 	</view>
 </template>
 
@@ -56,6 +67,8 @@
 		onLoad
 	} from '@dcloudio/uni-app';
 	import request from '../../utils/request.js'; // 引入我们熟悉的请求工具
+	import AvatarLongPressMenu from '@/components/AvatarLongPressMenu.vue';
+	import AddCircleConfirmPopup from '@/components/AddCircleConfirmPopup.vue';
 
 	// --- 状态管理 ---
 	const followedUsers = ref([]);
@@ -64,6 +77,10 @@
 	const loadingStatus = ref('more'); // 'more', 'loading', 'noMore'
 	const refreshing = ref(false); // 下拉刷新状态
 	const userId = ref(null);
+	const currentTab = ref(0); // 0: 我关注的, 1: 关注我的
+	const tabs = ref(['我关注的', '关注我的']);
+	const avatarPopupRef = ref(null);
+	const addCirclePopupRef = ref(null);
 
 	// --- 生命周期 ---
 	onLoad(() => {
@@ -81,6 +98,13 @@
 	});
 
 	// --- 核心方法 ---
+
+	const switchTab = (e) => {
+		if (currentTab.value === e.currentIndex) return;
+		currentTab.value = e.currentIndex;
+		// 切换后立即刷新列表
+		getFollowedUsers(true);
+	};
 
 	/**
 	 * 获取关注的商友列表
@@ -105,7 +129,8 @@
 			pageNo: pageNo.value,
 			pageSize: pageSize,
 			userId: userId.value,
-			targetType: 'user' // 【关键】指定目标类型为用户
+			targetType: 'user',
+			followType: currentTab.value
 		};
 
 		try {
@@ -153,6 +178,68 @@
 		}
 	};
 
+	const handleAvatarClick = (user) => {
+		if (avatarPopupRef.value) {
+			avatarPopupRef.value.open(user);
+		}
+	};
+
+	const handleMenuAction = ({
+		type,
+		user
+	}) => {
+		switch (type) {
+			case 'viewCard':
+				viewUserDetail(user);
+				break;
+			case 'addCircle':
+				// 打开入圈确认弹窗 (如果组件逻辑里包含了API调用，这里只需要open)
+				if (addCirclePopupRef.value) {
+					// 假设 AddCircleConfirmPopup 有 open 方法
+					addCirclePopupRef.value.open(user);
+				} else {
+					// 如果没有 confirm 组件，直接调用申请逻辑
+					handleApplyCircle(user);
+				}
+				break;
+			case 'comment':
+				uni.showToast({
+					title: '点评功能开发中',
+					icon: 'none'
+				});
+				break;
+		}
+	};
+
+	// 简单的入圈申请逻辑 (如果 AddCircleConfirmPopup 不可用时的兜底)
+	const handleApplyCircle = (targetUser) => {
+		uni.showModal({
+			title: '申请入圈',
+			content: `确定申请加入 ${targetUser.nickname} 的圈子吗？`,
+			success: async (res) => {
+				if (res.confirm) {
+					uni.showLoading({
+						title: '申请中...'
+					});
+					const {
+						error
+					} = await request(`/app-api/member/user/friend/apply/${targetUser.id}`, {
+						method: 'POST'
+					});
+					uni.hideLoading();
+					if (!error) uni.showToast({
+						title: '申请已发送',
+						icon: 'success'
+					});
+					else uni.showToast({
+						title: error || '失败',
+						icon: 'none'
+					});
+				}
+			}
+		});
+	};
+
 	/**
 	 * 取消关注
 	 * @param {number} followId - 关注记录的ID
@@ -197,6 +284,16 @@
 
 	// --- 事件处理 ---
 
+	// 时间格式化
+	const formatTimestamp = (timestamp) => {
+		if (!timestamp) return '';
+		const date = new Date(timestamp);
+		const Y = date.getFullYear();
+		const M = (date.getMonth() + 1).toString().padStart(2, '0');
+		const D = date.getDate().toString().padStart(2, '0');
+		return `${Y}-${M}-${D}`; // 关注时间通常精确到天即可
+	};
+
 	// 下拉刷新
 	const onRefresh = () => {
 		refreshing.value = true;
@@ -225,7 +322,7 @@
 
 		// 只拼接基础参数：id, name, avatar
 		// 【关键】不再添加 '&fromShare=1'
-		const url = `/pages/applicationBusinessCard/applicationBusinessCard?id=${user.id}` +
+		const url = `/packages/applicationBusinessCard/applicationBusinessCard?id=${user.id}` +
 			`&name=${encodeURIComponent(user.nickname)}` +
 			`&avatar=${encodeURIComponent(user.avatar || '')}`;
 
@@ -254,6 +351,14 @@
 		flex-direction: column;
 		height: 100vh;
 		background-color: #f8f9fa;
+	}
+
+	.segmented-wrapper {
+		background-color: #fff;
+		padding: 20rpx 30rpx;
+		// 设置吸顶或者固定高度
+		box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.02);
+		z-index: 10;
 	}
 
 	.content-scroll {
@@ -310,6 +415,7 @@
 		color: #888;
 		display: flex;
 		align-items: center;
+		margin-bottom: 6rpx;
 
 		text {
 			margin-left: 8rpx;
@@ -317,6 +423,11 @@
 			overflow: hidden;
 			text-overflow: ellipsis;
 		}
+	}
+
+	.follow-time {
+		font-size: 22rpx;
+		color: #bbb;
 	}
 
 	.unfollow-btn {
@@ -327,7 +438,7 @@
 		height: 60rpx;
 		line-height: 60rpx;
 		border-radius: 40rpx;
-		font-size: 26rpx;
+		font-size: 24rpx;
 		margin-left: 20rpx;
 		flex-shrink: 0; // 防止按钮被挤压
 

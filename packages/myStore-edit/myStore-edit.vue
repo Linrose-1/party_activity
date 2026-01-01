@@ -37,36 +37,8 @@
 						<text class="sub-header">最多9张，长按拖拽排序</text>
 					</view>
 
-					<!-- 拖拽容器：增加 overflow: hidden 防止溢出遮挡 -->
-					<view class="drag-wrapper-box"
-						:style="{ height: dragAreaHeight > 0 ? dragAreaHeight + 'px' : '0' }">
-						<movable-area class="drag-area" :style="{ height: dragAreaHeight + 'px' }">
-							<movable-view v-for="(item, index) in dragDisplayList" :key="item.id" :x="item.x"
-								:y="item.y" direction="all" :z-index="item.zIndex"
-								:disabled="!isDragging && item.zIndex === 1" class="drag-item"
-								:style="{ width: dragItemWidth + 'px', height: dragItemHeight + 'px' }"
-								@change="onMovableChange($event, index)" @touchstart="onMovableStart(index)"
-								@touchend="onMovableEnd">
-								<view class="item-inner">
-									<view class="image-box">
-										<image :src="item.data" mode="aspectFill" class="img-content"
-											@click.stop="previewCoverImage(item.realIndex)" />
-										<view class="del-btn" @click.stop="deleteCoverImage(item.realIndex)">
-											<uni-icons type="closeempty" size="12" color="#fff"></uni-icons>
-										</view>
-									</view>
-								</view>
-							</movable-view>
-						</movable-area>
-					</view>
-
-					<!-- 添加按钮 -->
-					<view class="add-btn-container" v-if="coverImages.length < 9" @click="handleCoverImageUpload">
-						<view class="add-box">
-							<uni-icons type="plusempty" size="28" color="#ccc"></uni-icons>
-							<text>添加图片</text>
-						</view>
-					</view>
+					<!-- 替换为组件 -->
+					<DragImageUploader v-model="coverImages" :max-count="9" @add-image="handleCoverImageUpload" />
 
 					<view class="form-tip">
 						<uni-icons type="info" size="14" color="#FF9800"></uni-icons>
@@ -522,6 +494,9 @@
 
 	// 封面图上传相关函数
 	const handleCoverImageUpload = () => {
+		// 检查数量是否已满
+		if (coverImages.value.length >= 9) return;
+
 		uni.chooseImage({
 			count: 9 - coverImages.value.length,
 			success: async (res) => {
@@ -537,11 +512,13 @@
 				uni.hideLoading();
 
 				const successfulUrls = results.filter(r => r.data).map(r => r.data);
+
+				// 直接 push 到数组，组件会自动响应
 				coverImages.value.push(...successfulUrls);
 
 				if (results.some(r => r.error)) {
 					uni.showToast({
-						title: '部分图片上传失败',
+						title: '部分上传失败',
 						icon: 'none'
 					});
 				}
@@ -549,9 +526,9 @@
 		});
 	};
 
-	const deleteCoverImage = (index) => {
-		coverImages.value.splice(index, 1);
-	};
+	// const deleteCoverImage = (index) => {
+	// 	coverImages.value.splice(index, 1);
+	// };
 
 	const openMapToChooseLocation = () => {
 		uni.chooseLocation({
@@ -659,143 +636,143 @@
 
 	/* ========================================  图片拖拽移动编辑 ======================================== */
 
-	// --- 拖拽排序逻辑 (从发布页复制过来的) ---
-	const dragDisplayList = ref([]);
-	const dragItemWidth = ref(0);
-	const dragItemHeight = ref(0);
-	const dragAreaHeight = ref(0);
-	const isDragging = ref(false);
-	const dragIndex = ref(-1);
-	const dragColumns = 3;
-	const dragItemHeightRpx = 210; // 可以微调高度
+	// // --- 拖拽排序逻辑 (从发布页复制过来的) ---
+	// const dragDisplayList = ref([]);
+	// const dragItemWidth = ref(0);
+	// const dragItemHeight = ref(0);
+	// const dragAreaHeight = ref(0);
+	// const isDragging = ref(false);
+	// const dragIndex = ref(-1);
+	// const dragColumns = 3;
+	// const dragItemHeightRpx = 210; // 可以微调高度
 
-	// 1. 初始化尺寸
-	const initDragLayout = () => {
-		const sys = uni.getSystemInfoSync();
-		// 假设左右 padding 各 20rpx + form-group margin 20rpx -> 总共约 80rpx
-		// 这里的减数要根据你的页面实际 padding 来定，宁大勿小
-		const containerWidth = sys.windowWidth - uni.upx2px(100);
+	// // 1. 初始化尺寸
+	// const initDragLayout = () => {
+	// 	const sys = uni.getSystemInfoSync();
+	// 	// 假设左右 padding 各 20rpx + form-group margin 20rpx -> 总共约 80rpx
+	// 	// 这里的减数要根据你的页面实际 padding 来定，宁大勿小
+	// 	const containerWidth = sys.windowWidth - uni.upx2px(100);
 
-		dragItemWidth.value = containerWidth / dragColumns;
-		dragItemHeight.value = uni.upx2px(dragItemHeightRpx);
-	};
+	// 	dragItemWidth.value = containerWidth / dragColumns;
+	// 	dragItemHeight.value = uni.upx2px(dragItemHeightRpx);
+	// };
 
-	// 2. 初始化列表 (监听 coverImages)
-	watch(() => coverImages.value, (newVal) => {
-		if (!isDragging.value) {
-			initDragList(newVal);
-		}
-	}, {
-		deep: true
-	});
+	// // 2. 初始化列表 (监听 coverImages)
+	// watch(() => coverImages.value, (newVal) => {
+	// 	if (!isDragging.value) {
+	// 		initDragList(newVal);
+	// 	}
+	// }, {
+	// 	deep: true
+	// });
 
-	// 在 onLoad 或 onMounted 里初始化一次
-	// 注意：如果你的图片是异步获取的(编辑模式)，getStoreDetails 赋值后 watch 会自动触发
-	// 但如果是新建模式，可能需要手动调一次 initDragLayout
-	// 建议在 onLoad 结束时调用一下 initDragLayout()
+	// // 在 onLoad 或 onMounted 里初始化一次
+	// // 注意：如果你的图片是异步获取的(编辑模式)，getStoreDetails 赋值后 watch 会自动触发
+	// // 但如果是新建模式，可能需要手动调一次 initDragLayout
+	// // 建议在 onLoad 结束时调用一下 initDragLayout()
 
-	const initDragList = (originList) => {
-		if (!originList || originList.length === 0) {
-			dragDisplayList.value = [];
-			dragAreaHeight.value = 0; // 确保没图片时高度为0
-			return;
-		}
-		if (dragItemWidth.value === 0) initDragLayout();
+	// const initDragList = (originList) => {
+	// 	if (!originList || originList.length === 0) {
+	// 		dragDisplayList.value = [];
+	// 		dragAreaHeight.value = 0; // 确保没图片时高度为0
+	// 		return;
+	// 	}
+	// 	if (dragItemWidth.value === 0) initDragLayout();
 
-		dragDisplayList.value = originList.map((url, index) => {
-			const {
-				x,
-				y
-			} = getPos(index);
-			return {
-				id: `img_${index}_${Math.random()}`,
-				data: url,
-				x,
-				y,
-				zIndex: 1,
-				realIndex: index
-			};
-		});
-		updateDragHeight();
-	};
+	// 	dragDisplayList.value = originList.map((url, index) => {
+	// 		const {
+	// 			x,
+	// 			y
+	// 		} = getPos(index);
+	// 		return {
+	// 			id: `img_${index}_${Math.random()}`,
+	// 			data: url,
+	// 			x,
+	// 			y,
+	// 			zIndex: 1,
+	// 			realIndex: index
+	// 		};
+	// 	});
+	// 	updateDragHeight();
+	// };
 
-	const getPos = (index) => {
-		const row = Math.floor(index / dragColumns);
-		const col = index % dragColumns;
-		return {
-			x: col * dragItemWidth.value,
-			y: row * dragItemHeight.value
-		};
-	};
+	// const getPos = (index) => {
+	// 	const row = Math.floor(index / dragColumns);
+	// 	const col = index % dragColumns;
+	// 	return {
+	// 		x: col * dragItemWidth.value,
+	// 		y: row * dragItemHeight.value
+	// 	};
+	// };
 
-	const updateDragHeight = () => {
-		const count = dragDisplayList.value.length;
-		const rows = Math.ceil(count / dragColumns);
-		dragAreaHeight.value = (rows || 1) * dragItemHeight.value;
-	};
+	// const updateDragHeight = () => {
+	// 	const count = dragDisplayList.value.length;
+	// 	const rows = Math.ceil(count / dragColumns);
+	// 	dragAreaHeight.value = (rows || 1) * dragItemHeight.value;
+	// };
 
-	// --- 拖拽事件 ---
-	const onMovableStart = (index) => {
-		isDragging.value = true;
-		dragIndex.value = index;
-		dragDisplayList.value[index].zIndex = 99;
-	};
+	// // --- 拖拽事件 ---
+	// const onMovableStart = (index) => {
+	// 	isDragging.value = true;
+	// 	dragIndex.value = index;
+	// 	dragDisplayList.value[index].zIndex = 99;
+	// };
 
-	const onMovableChange = (e, index) => {
-		if (!isDragging.value || index !== dragIndex.value) return;
-		const x = e.detail.x;
-		const y = e.detail.y;
+	// const onMovableChange = (e, index) => {
+	// 	if (!isDragging.value || index !== dragIndex.value) return;
+	// 	const x = e.detail.x;
+	// 	const y = e.detail.y;
 
-		const centerX = x + dragItemWidth.value / 2;
-		const centerY = y + dragItemHeight.value / 2;
-		const col = Math.floor(centerX / dragItemWidth.value);
-		const row = Math.floor(centerY / dragItemHeight.value);
-		let targetIndex = row * dragColumns + col;
+	// 	const centerX = x + dragItemWidth.value / 2;
+	// 	const centerY = y + dragItemHeight.value / 2;
+	// 	const col = Math.floor(centerX / dragItemWidth.value);
+	// 	const row = Math.floor(centerY / dragItemHeight.value);
+	// 	let targetIndex = row * dragColumns + col;
 
-		if (targetIndex < 0) targetIndex = 0;
-		if (targetIndex >= dragDisplayList.value.length) targetIndex = dragDisplayList.value.length - 1;
+	// 	if (targetIndex < 0) targetIndex = 0;
+	// 	if (targetIndex >= dragDisplayList.value.length) targetIndex = dragDisplayList.value.length - 1;
 
-		if (targetIndex !== dragIndex.value) {
-			const mover = dragDisplayList.value[dragIndex.value];
-			dragDisplayList.value.splice(dragIndex.value, 1);
-			dragDisplayList.value.splice(targetIndex, 0, mover);
+	// 	if (targetIndex !== dragIndex.value) {
+	// 		const mover = dragDisplayList.value[dragIndex.value];
+	// 		dragDisplayList.value.splice(dragIndex.value, 1);
+	// 		dragDisplayList.value.splice(targetIndex, 0, mover);
 
-			dragDisplayList.value.forEach((item, idx) => {
-				if (idx !== targetIndex) {
-					const pos = getPos(idx);
-					item.x = pos.x;
-					item.y = pos.y;
-				}
-			});
-			dragIndex.value = targetIndex;
-		}
-	};
+	// 		dragDisplayList.value.forEach((item, idx) => {
+	// 			if (idx !== targetIndex) {
+	// 				const pos = getPos(idx);
+	// 				item.x = pos.x;
+	// 				item.y = pos.y;
+	// 			}
+	// 		});
+	// 		dragIndex.value = targetIndex;
+	// 	}
+	// };
 
-	const onMovableEnd = () => {
-		isDragging.value = false;
-		if (dragIndex.value !== -1) {
-			const item = dragDisplayList.value[dragIndex.value];
-			item.zIndex = 1;
-			const pos = getPos(dragIndex.value);
-			nextTick(() => {
-				item.x = pos.x;
-				item.y = pos.y;
-			});
+	// const onMovableEnd = () => {
+	// 	isDragging.value = false;
+	// 	if (dragIndex.value !== -1) {
+	// 		const item = dragDisplayList.value[dragIndex.value];
+	// 		item.zIndex = 1;
+	// 		const pos = getPos(dragIndex.value);
+	// 		nextTick(() => {
+	// 			item.x = pos.x;
+	// 			item.y = pos.y;
+	// 		});
 
-			// 同步回 coverImages
-			const sortedUrls = dragDisplayList.value.map(wrapper => wrapper.data);
-			coverImages.value = sortedUrls;
-		}
-		dragIndex.value = -1;
-	};
+	// 		// 同步回 coverImages
+	// 		const sortedUrls = dragDisplayList.value.map(wrapper => wrapper.data);
+	// 		coverImages.value = sortedUrls;
+	// 	}
+	// 	dragIndex.value = -1;
+	// };
 
-	// 补充预览方法
-	const previewCoverImage = (index) => {
-		uni.previewImage({
-			urls: coverImages.value,
-			current: index
-		});
-	};
+	// // 补充预览方法
+	// const previewCoverImage = (index) => {
+	// 	uni.previewImage({
+	// 		urls: coverImages.value,
+	// 		current: index
+	// 	});
+	// };
 </script>
 
 
@@ -936,88 +913,88 @@
 	}
 
 	/* ---------------- 拖拽区域优化 ---------------- */
-	.drag-wrapper-box {
-		width: 100%;
-		position: relative;
-		overflow: hidden;
-		/* 关键：防止遮挡上方元素 */
-		/* background: #fafafa; 可选调试背景 */
-	}
+	// .drag-wrapper-box {
+	// 	width: 100%;
+	// 	position: relative;
+	// 	overflow: hidden;
+	// 	/* 关键：防止遮挡上方元素 */
+	// 	/* background: #fafafa; 可选调试背景 */
+	// }
 
-	.drag-area {
-		width: 100%;
-	}
+	// .drag-area {
+	// 	width: 100%;
+	// }
 
-	.drag-item {
-		/* z-index: 10; movable-view 默认 */
-	}
+	// .drag-item {
+	// 	/* z-index: 10; movable-view 默认 */
+	// }
 
-	.item-inner {
-		width: 100%;
-		height: 100%;
-		padding: 10rpx;
-		box-sizing: border-box;
-		display: block;
-	}
+	// .item-inner {
+	// 	width: 100%;
+	// 	height: 100%;
+	// 	padding: 10rpx;
+	// 	box-sizing: border-box;
+	// 	display: block;
+	// }
 
-	.image-box {
-		width: 100%;
-		height: 100%;
-		position: relative;
-		border-radius: 12rpx;
-		overflow: hidden;
-		background-color: #f0f0f0;
-	}
+	// .image-box {
+	// 	width: 100%;
+	// 	height: 100%;
+	// 	position: relative;
+	// 	border-radius: 12rpx;
+	// 	overflow: hidden;
+	// 	background-color: #f0f0f0;
+	// }
 
-	.img-content {
-		position: absolute;
-		top: 0;
-		left: 0;
-		width: 100%;
-		height: 100%;
-		display: block;
-	}
+	// .img-content {
+	// 	position: absolute;
+	// 	top: 0;
+	// 	left: 0;
+	// 	width: 100%;
+	// 	height: 100%;
+	// 	display: block;
+	// }
 
-	.del-btn {
-		position: absolute;
-		top: 0;
-		right: 0;
-		width: 44rpx;
-		height: 44rpx;
-		background-color: rgba(0, 0, 0, 0.5);
-		border-bottom-left-radius: 12rpx;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		z-index: 2;
-	}
+	// .del-btn {
+	// 	position: absolute;
+	// 	top: 0;
+	// 	right: 0;
+	// 	width: 44rpx;
+	// 	height: 44rpx;
+	// 	background-color: rgba(0, 0, 0, 0.5);
+	// 	border-bottom-left-radius: 12rpx;
+	// 	display: flex;
+	// 	align-items: center;
+	// 	justify-content: center;
+	// 	z-index: 2;
+	// }
 
-	.add-btn-container {
-		width: 33.33%;
-		height: 210rpx;
-		padding: 10rpx;
-		box-sizing: border-box;
-		display: inline-block;
-		vertical-align: top;
-	}
+	// .add-btn-container {
+	// 	width: 33.33%;
+	// 	height: 210rpx;
+	// 	padding: 10rpx;
+	// 	box-sizing: border-box;
+	// 	display: inline-block;
+	// 	vertical-align: top;
+	// }
 
-	.add-box {
-		width: 100%;
-		height: 100%;
-		border: 2rpx dashed #ddd;
-		border-radius: 12rpx;
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: center;
-		color: $text-placeholder;
-		font-size: 24rpx;
-		background-color: #fafafa;
+	// .add-box {
+	// 	width: 100%;
+	// 	height: 100%;
+	// 	border: 2rpx dashed #ddd;
+	// 	border-radius: 12rpx;
+	// 	display: flex;
+	// 	flex-direction: column;
+	// 	align-items: center;
+	// 	justify-content: center;
+	// 	color: $text-placeholder;
+	// 	font-size: 24rpx;
+	// 	background-color: #fafafa;
 
-		text {
-			margin-top: 10rpx;
-		}
-	}
+	// 	text {
+	// 		margin-top: 10rpx;
+	// 	}
+	// }
 
 	.form-tip {
 		margin-top: 20rpx;

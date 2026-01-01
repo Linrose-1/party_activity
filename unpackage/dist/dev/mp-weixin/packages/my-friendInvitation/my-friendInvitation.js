@@ -52,7 +52,7 @@ const _sfc_main = {
       getNewApplyList();
       getCircleFriendList(true);
     };
-    const shouldShowPlatformCard = common_vendor.computed(() => {
+    common_vendor.computed(() => {
       if (!platformInfo.value.name)
         return false;
       if (!userInfo.value)
@@ -110,7 +110,7 @@ const _sfc_main = {
       fetchUserInfo();
     });
     common_vendor.onPullDownRefresh(async () => {
-      common_vendor.index.__f__("log", "at packages/my-friendInvitation/my-friendInvitation.vue:367", "触发下拉刷新...");
+      common_vendor.index.__f__("log", "at packages/my-friendInvitation/my-friendInvitation.vue:365", "触发下拉刷新...");
       try {
         if (currentTab.value === 0) {
           await Promise.all([getShareUserList(true), fetchUserInfo()]);
@@ -123,9 +123,9 @@ const _sfc_main = {
           ]);
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at packages/my-friendInvitation/my-friendInvitation.vue:381", "下拉刷新时发生错误:", error);
+        common_vendor.index.__f__("error", "at packages/my-friendInvitation/my-friendInvitation.vue:379", "下拉刷新时发生错误:", error);
       } finally {
-        common_vendor.index.__f__("log", "at packages/my-friendInvitation/my-friendInvitation.vue:384", "刷新操作完成，停止动画。");
+        common_vendor.index.__f__("log", "at packages/my-friendInvitation/my-friendInvitation.vue:382", "刷新操作完成，停止动画。");
         common_vendor.index.stopPullDownRefresh();
       }
     });
@@ -189,12 +189,13 @@ const _sfc_main = {
         return;
       }
       if (userInfo.value.parentName === "猩聚社") {
+        goToPlatformIntro();
         return;
       }
       const targetId = userInfo.value.parentId;
       const name = userInfo.value.parentName || "邀请人";
       const avatar = userInfo.value.parentAvatar || "";
-      const url = `/pages/applicationBusinessCard/applicationBusinessCard?id=${targetId}&name=${encodeURIComponent(name)}&avatar=${encodeURIComponent(avatar)}&fromShare=1`;
+      const url = `/packages/applicationBusinessCard/applicationBusinessCard?id=${targetId}&name=${encodeURIComponent(name)}&avatar=${encodeURIComponent(avatar)}&fromShare=1`;
       common_vendor.index.navigateTo({
         url
       });
@@ -237,7 +238,7 @@ const _sfc_main = {
           loadStatus.value = "noMore";
         }
       } catch (err) {
-        common_vendor.index.__f__("error", "at packages/my-friendInvitation/my-friendInvitation.vue:572", "获取邀请列表失败:", err);
+        common_vendor.index.__f__("error", "at packages/my-friendInvitation/my-friendInvitation.vue:571", "获取邀请列表失败:", err);
         loadStatus.value = "more";
       }
     };
@@ -284,7 +285,7 @@ const _sfc_main = {
           circleLoadStatus.value = "noMore";
         }
       } catch (e) {
-        common_vendor.index.__f__("error", "at packages/my-friendInvitation/my-friendInvitation.vue:625", "获取圈友列表失败:", e);
+        common_vendor.index.__f__("error", "at packages/my-friendInvitation/my-friendInvitation.vue:624", "获取圈友列表失败:", e);
         circleLoadStatus.value = "more";
       } finally {
         if (isRefresh)
@@ -311,7 +312,7 @@ const _sfc_main = {
           newApplyCount.value = data.total;
         }
       } catch (e) {
-        common_vendor.index.__f__("error", "at packages/my-friendInvitation/my-friendInvitation.vue:652", "获取新申请失败", e);
+        common_vendor.index.__f__("error", "at packages/my-friendInvitation/my-friendInvitation.vue:651", "获取新申请失败", e);
       }
     };
     common_vendor.watch(searchKey, (newValue, oldValue) => {
@@ -327,7 +328,7 @@ const _sfc_main = {
         common_vendor.index.navigateTo({
           url: item.path,
           fail: (err) => {
-            common_vendor.index.__f__("error", "at packages/my-friendInvitation/my-friendInvitation.vue:672", "跳转失败", err);
+            common_vendor.index.__f__("error", "at packages/my-friendInvitation/my-friendInvitation.vue:671", "跳转失败", err);
             common_vendor.index.showToast({
               title: "页面路径未配置",
               icon: "none"
@@ -467,7 +468,7 @@ const _sfc_main = {
       const name = user.nickname || user.realName || "匿名用户";
       const avatarUrl = user.avatar || defaultAvatar;
       const url = `/packages/applicationBusinessCard/applicationBusinessCard?id=${user.id}&name=${encodeURIComponent(name)}&avatar=${encodeURIComponent(avatarUrl)}&fromShare=1`;
-      common_vendor.index.__f__("log", "at packages/my-friendInvitation/my-friendInvitation.vue:881", "从推荐商友页跳转到名片申请页, URL:", url);
+      common_vendor.index.__f__("log", "at packages/my-friendInvitation/my-friendInvitation.vue:880", "从推荐商友页跳转到名片申请页, URL:", url);
       common_vendor.index.navigateTo({
         url
       });
@@ -501,19 +502,19 @@ const _sfc_main = {
             e: common_vendor.o(($event) => handleToolClick(item), index)
           };
         }),
-        d: userInfo.value && userInfo.value.parentName
-      }, userInfo.value && userInfo.value.parentName ? common_vendor.e({
-        e: shouldShowPlatformCard.value
-      }, shouldShowPlatformCard.value ? {
-        f: platformInfo.value.img,
-        g: common_vendor.t(platformInfo.value.name),
-        h: common_vendor.p({
+        d: platformInfo.value.name
+      }, platformInfo.value.name ? {
+        e: platformInfo.value.img,
+        f: common_vendor.t(platformInfo.value.name),
+        g: common_vendor.p({
           type: "right",
           size: "16",
           color: "#ccc"
         }),
-        i: common_vendor.o(goToPlatformIntro)
+        h: common_vendor.o(goToPlatformIntro)
       } : {}, {
+        i: userInfo.value && userInfo.value.parentName
+      }, userInfo.value && userInfo.value.parentName ? {} : {}, {
         j: userInfo.value && userInfo.value.parentName
       }, userInfo.value && userInfo.value.parentName ? common_vendor.e({
         k: userInfo.value.parentAvatar
@@ -527,19 +528,17 @@ const _sfc_main = {
       }, userInfo.value.parentName === "猩聚社" ? {} : {}, {
         p: common_vendor.o(viewParentCard)
       }) : {}, {
-        q: !shouldShowPlatformCard.value && (!userInfo.value || !userInfo.value.parentName)
-      }, !shouldShowPlatformCard.value && (!userInfo.value || !userInfo.value.parentName) ? {
-        r: common_assets._imports_0$1
-      } : {}) : {}, {
+        q: userInfo.value && !userInfo.value.parentName
+      }, userInfo.value && !userInfo.value.parentName ? {} : {}, {
+        r: common_vendor.o(handleSearch),
         s: common_vendor.o(handleSearch),
-        t: common_vendor.o(handleSearch),
-        v: common_vendor.o(($event) => searchKey.value = $event),
-        w: common_vendor.p({
+        t: common_vendor.o(($event) => searchKey.value = $event),
+        v: common_vendor.p({
           prefixIcon: "search",
           placeholder: "搜索商友姓名/昵称/公司,同学/同行/同乡/同圈",
           modelValue: searchKey.value
         }),
-        x: common_vendor.f(friendList.value, (friend, k0, i0) => {
+        w: common_vendor.f(friendList.value, (friend, k0, i0) => {
           return common_vendor.e({
             a: friend.avatar || "/static/images/default-avatar.png",
             b: common_vendor.t(friend.nickname || friend.realName || "匿名用户"),
@@ -564,50 +563,50 @@ const _sfc_main = {
             o: common_vendor.o(($event) => navigateToBusinessCard(friend), friend.id)
           });
         }),
-        y: common_vendor.p({
+        x: common_vendor.p({
           type: "briefcase-filled",
           size: "14",
           color: "#888"
         }),
-        z: friendList.value.length > 0 || loadStatus.value === "loading"
+        y: friendList.value.length > 0 || loadStatus.value === "loading"
       }, friendList.value.length > 0 || loadStatus.value === "loading" ? {
-        A: common_vendor.p({
+        z: common_vendor.p({
           status: loadStatus.value
         })
       } : {}, {
-        B: friendList.value.length === 0 && loadStatus.value === "noMore"
+        A: friendList.value.length === 0 && loadStatus.value === "noMore"
       }, friendList.value.length === 0 && loadStatus.value === "noMore" ? {
-        C: common_assets._imports_1
+        B: common_assets._imports_0$3
       } : {}, {
-        D: currentTab.value === 0,
+        C: currentTab.value === 0,
+        D: common_vendor.o(handleCircleSearch),
         E: common_vendor.o(handleCircleSearch),
-        F: common_vendor.o(handleCircleSearch),
-        G: common_vendor.o(($event) => circleSearchKey.value = $event),
-        H: common_vendor.p({
+        F: common_vendor.o(($event) => circleSearchKey.value = $event),
+        G: common_vendor.p({
           prefixIcon: "search",
           placeholder: "搜索圈友姓名",
           modelValue: circleSearchKey.value
         }),
-        I: circleAddInitiator.value === 0 ? 1 : "",
-        J: common_vendor.o(($event) => switchCircleFilter(0)),
-        K: circleAddInitiator.value === 1 ? 1 : "",
-        L: common_vendor.o(($event) => switchCircleFilter(1)),
-        M: common_vendor.p({
+        H: circleAddInitiator.value === 0 ? 1 : "",
+        I: common_vendor.o(($event) => switchCircleFilter(0)),
+        J: circleAddInitiator.value === 1 ? 1 : "",
+        K: common_vendor.o(($event) => switchCircleFilter(1)),
+        L: common_vendor.p({
           type: "personadd-filled",
           size: "24",
           color: "#fff"
         }),
-        N: newApplyCount.value > 0
+        M: newApplyCount.value > 0
       }, newApplyCount.value > 0 ? {
-        O: common_vendor.t(newApplyCount.value)
+        N: common_vendor.t(newApplyCount.value)
       } : {}, {
-        P: common_vendor.p({
+        O: common_vendor.p({
           type: "right",
           size: "16",
           color: "#ccc"
         }),
-        Q: common_vendor.o(openApplyPopup),
-        R: common_vendor.f(circleFriendList.value, (friend, k0, i0) => {
+        P: common_vendor.o(openApplyPopup),
+        Q: common_vendor.f(circleFriendList.value, (friend, k0, i0) => {
           return common_vendor.e({
             a: friend.avatar || "/static/images/default-avatar.png",
             b: common_vendor.t(friend.realName || friend.nickname || "匿名用户"),
@@ -629,32 +628,32 @@ const _sfc_main = {
             m: common_vendor.o(($event) => navigateToBusinessCard(friend), friend.id)
           });
         }),
-        S: common_vendor.p({
+        R: common_vendor.p({
           type: "briefcase-filled",
           size: "14",
           color: "#888"
         }),
-        T: common_vendor.p({
+        S: common_vendor.p({
           type: "checkbox-filled",
           size: "20",
           color: "#4cd964"
         }),
-        U: circleFriendList.value.length > 0 || circleLoadStatus.value === "loading"
+        T: circleFriendList.value.length > 0 || circleLoadStatus.value === "loading"
       }, circleFriendList.value.length > 0 || circleLoadStatus.value === "loading" ? {
-        V: common_vendor.p({
+        U: common_vendor.p({
           status: circleLoadStatus.value
         })
       } : {}, {
-        W: circleFriendList.value.length === 0 && circleLoadStatus.value === "noMore"
+        V: circleFriendList.value.length === 0 && circleLoadStatus.value === "noMore"
       }, circleFriendList.value.length === 0 && circleLoadStatus.value === "noMore" ? {
-        X: common_assets._imports_0$1
+        W: common_assets._imports_1
       } : {}, {
-        Y: currentTab.value === 1,
-        Z: common_vendor.sr(applyPopupRef, "a29497fd-11", {
+        X: currentTab.value === 1,
+        Y: common_vendor.sr(applyPopupRef, "a29497fd-11", {
           "k": "applyPopupRef"
         }),
-        aa: common_vendor.o(handleAuditSuccess),
-        ab: common_vendor.s(_ctx.__cssVars())
+        Z: common_vendor.o(handleAuditSuccess),
+        aa: common_vendor.s(_ctx.__cssVars())
       });
     };
   }

@@ -7,20 +7,22 @@ if (!Array) {
   const _easycom_uni_easyinput2 = common_vendor.resolveComponent("uni-easyinput");
   const _easycom_uni_forms_item2 = common_vendor.resolveComponent("uni-forms-item");
   const _easycom_uni_data_select2 = common_vendor.resolveComponent("uni-data-select");
+  const _easycom_DragImageUploader2 = common_vendor.resolveComponent("DragImageUploader");
   const _easycom_uni_datetime_picker2 = common_vendor.resolveComponent("uni-datetime-picker");
   const _easycom_uni_data_checkbox2 = common_vendor.resolveComponent("uni-data-checkbox");
   const _easycom_uni_forms2 = common_vendor.resolveComponent("uni-forms");
-  (_easycom_uni_icons2 + _easycom_uni_easyinput2 + _easycom_uni_forms_item2 + _easycom_uni_data_select2 + _easycom_uni_datetime_picker2 + _easycom_uni_data_checkbox2 + _easycom_uni_forms2)();
+  (_easycom_uni_icons2 + _easycom_uni_easyinput2 + _easycom_uni_forms_item2 + _easycom_uni_data_select2 + _easycom_DragImageUploader2 + _easycom_uni_datetime_picker2 + _easycom_uni_data_checkbox2 + _easycom_uni_forms2)();
 }
 const _easycom_uni_icons = () => "../../uni_modules/uni-icons/components/uni-icons/uni-icons.js";
 const _easycom_uni_easyinput = () => "../../uni_modules/uni-easyinput/components/uni-easyinput/uni-easyinput.js";
 const _easycom_uni_forms_item = () => "../../uni_modules/uni-forms/components/uni-forms-item/uni-forms-item.js";
 const _easycom_uni_data_select = () => "../../uni_modules/uni-data-select/components/uni-data-select/uni-data-select.js";
+const _easycom_DragImageUploader = () => "../../components/DragImageUploader/DragImageUploader.js";
 const _easycom_uni_datetime_picker = () => "../../uni_modules/uni-datetime-picker/components/uni-datetime-picker/uni-datetime-picker.js";
 const _easycom_uni_data_checkbox = () => "../../uni_modules/uni-data-checkbox/components/uni-data-checkbox/uni-data-checkbox.js";
 const _easycom_uni_forms = () => "../../uni_modules/uni-forms/components/uni-forms/uni-forms.js";
 if (!Math) {
-  (_easycom_uni_icons + _easycom_uni_easyinput + _easycom_uni_forms_item + _easycom_uni_data_select + _easycom_uni_datetime_picker + _easycom_uni_data_checkbox + _easycom_uni_forms + SponsorPopup)();
+  (_easycom_uni_icons + _easycom_uni_easyinput + _easycom_uni_forms_item + _easycom_uni_data_select + _easycom_DragImageUploader + _easycom_uni_datetime_picker + _easycom_uni_data_checkbox + _easycom_uni_forms + SponsorPopup)();
 }
 const SponsorPopup = () => "../../components/sponsor-popup.js";
 const DRAFT_STORAGE_KEY = "activity_draft";
@@ -76,16 +78,9 @@ const _sfc_main = {
     const deletedSponsorIds = common_vendor.ref([]);
     const currentSponsorIndex = common_vendor.ref(-1);
     const currentSponsorData = common_vendor.ref(null);
-    const dragDisplayList = common_vendor.ref([]);
-    const dragItemWidth = common_vendor.ref(0);
-    const dragItemHeight = common_vendor.ref(0);
-    const dragAreaHeight = common_vendor.ref(0);
-    const isDragging = common_vendor.ref(false);
-    const dragIndex = common_vendor.ref(-1);
     common_vendor.onMounted(() => {
       checkUserVerificationStatus();
       getActiveType();
-      initDragLayout();
     });
     common_vendor.onLoad(async (options) => {
       if (options && options.mode === "edit" && options.id) {
@@ -169,11 +164,11 @@ const _sfc_main = {
             cropScale: "5:4",
             // 【关键】设置裁剪比例为 5:4
             success: (cropRes) => {
-              common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:435", "裁剪成功:", cropRes.tempFilePath);
+              common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:461", "裁剪成功:", cropRes.tempFilePath);
               processUpload(cropRes.tempFilePath);
             },
             fail: (err) => {
-              common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:440", "用户取消裁剪或失败:", err);
+              common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:466", "用户取消裁剪或失败:", err);
             }
           });
         }
@@ -206,21 +201,53 @@ const _sfc_main = {
     const handleActivityImagesUpload = () => {
       common_vendor.index.chooseImage({
         count: 9 - form.value.activityCoverImageUrls.length,
+        sizeType: ["original", "compressed"],
+        // 建议加上这个
+        sourceType: ["album", "camera"],
+        // 建议加上这个
         success: async (res) => {
-          const list = await Promise.all(res.tempFiles.map((f) => utils_upload.uploadFile({
-            path: f.path
-          }, {
-            directory: "gallery"
-          })));
-          form.value.activityCoverImageUrls.push(...list.filter((r) => r.data).map((r) => r.data));
+          common_vendor.index.showLoading({
+            title: "正在上传...",
+            mask: true
+          });
+          try {
+            const uploadPromises = res.tempFiles.map((file) => utils_upload.uploadFile({
+              path: file.path
+              // 适配你的 uploadFile 接口参数格式
+            }, {
+              directory: "gallery"
+            }));
+            const results = await Promise.all(uploadPromises);
+            const successfulUrls = results.filter((res2) => res2.data).map((res2) => res2.data);
+            if (successfulUrls.length > 0) {
+              form.value.activityCoverImageUrls.push(...successfulUrls);
+            }
+            if (successfulUrls.length < res.tempFiles.length) {
+              common_vendor.index.showToast({
+                title: "部分图片上传失败",
+                icon: "none"
+              });
+            }
+          } catch (error) {
+            common_vendor.index.__f__("error", "at packages/active-publish/active-publish.vue:555", "上传异常:", error);
+            common_vendor.index.showToast({
+              title: "上传出错",
+              icon: "none"
+            });
+          } finally {
+            common_vendor.index.hideLoading();
+          }
+        },
+        fail: (err) => {
+          if (err.errMsg.indexOf("cancel") === -1) {
+            common_vendor.index.showToast({
+              title: "选择图片失败",
+              icon: "none"
+            });
+          }
         }
       });
     };
-    const deleteActivityImage = (i) => form.value.activityCoverImageUrls.splice(i, 1);
-    const previewActivityImage = (i) => common_vendor.index.previewImage({
-      urls: form.value.activityCoverImageUrls,
-      current: i
-    });
     const uploadCode = async () => {
       common_vendor.index.chooseImage({
         success: async (res) => {
@@ -273,7 +300,7 @@ const _sfc_main = {
       showSponsorPopup.value = false;
     };
     const syncSponsorsInline = async (activityId) => {
-      common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:577", "开始同步赞助商:", activityId);
+      common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:645", "开始同步赞助商:", activityId);
       const userId = common_vendor.index.getStorageSync("userId");
       for (const id of deletedSponsorIds.value) {
         await utils_request.request(`/app-api/member/sponsor/delete?id=${id}`, {
@@ -372,7 +399,7 @@ const _sfc_main = {
         return;
       }
       const data = detailRes.data;
-      common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:699", "获取详情用于编辑:", data);
+      common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:767", "获取详情用于编辑:", data);
       form.value.activityTitle = data.activityTitle;
       form.value.activityDescription = data.activityDescription;
       form.value.totalSlots = data.totalSlots;
@@ -428,7 +455,7 @@ const _sfc_main = {
               gallery = item.galleryImageUrls;
             }
           } catch (e) {
-            common_vendor.index.__f__("error", "at packages/active-publish/active-publish.vue:770", "解析赞助商图集失败:", e);
+            common_vendor.index.__f__("error", "at packages/active-publish/active-publish.vue:838", "解析赞助商图集失败:", e);
             gallery = [];
           }
           return {
@@ -436,7 +463,7 @@ const _sfc_main = {
             galleryImageUrls: gallery
           };
         });
-        common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:778", "赞助商回显完成:", sponsorsList.value);
+        common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:846", "赞助商回显完成:", sponsorsList.value);
       } else {
         sponsorsList.value = [];
       }
@@ -530,7 +557,7 @@ const _sfc_main = {
           })
         });
       } catch (e) {
-        common_vendor.index.__f__("error", "at packages/active-publish/active-publish.vue:882", e);
+        common_vendor.index.__f__("error", "at packages/active-publish/active-publish.vue:950", e);
         common_vendor.index.showToast({
           title: e.message || "系统异常",
           icon: "none"
@@ -540,74 +567,6 @@ const _sfc_main = {
         common_vendor.index.hideLoading();
       }
     };
-    common_vendor.watch(() => form.value.activityCoverImageUrls, (val) => {
-      if (!isDragging.value) {
-        dragDisplayList.value = (val || []).map((u, i) => {
-          const r = Math.floor(i / 3), c = i % 3;
-          return {
-            id: `pg_${i}`,
-            data: u,
-            x: c * dragItemWidth.value,
-            y: r * dragItemHeight.value,
-            zIndex: 1,
-            realIndex: i
-          };
-        });
-        dragAreaHeight.value = Math.ceil((val || []).length / 3) * dragItemHeight.value;
-      }
-    }, {
-      deep: true
-    });
-    const initDragLayout = () => {
-      const sys = common_vendor.index.getSystemInfoSync();
-      dragItemWidth.value = (sys.windowWidth - common_vendor.index.upx2px(100)) / 3;
-      dragItemHeight.value = common_vendor.index.upx2px(210);
-    };
-    const onMovableStart = (i) => {
-      isDragging.value = true;
-      dragIndex.value = i;
-      dragDisplayList.value[i].zIndex = 99;
-    };
-    const onMovableChange = (e, i) => {
-      if (!isDragging.value || i !== dragIndex.value)
-        return;
-      const x = e.detail.x;
-      const y = e.detail.y;
-      const c = Math.floor((x + dragItemWidth.value / 2) / dragItemWidth.value);
-      const r = Math.floor((y + dragItemHeight.value / 2) / dragItemHeight.value);
-      let target = r * 3 + c;
-      if (target < 0)
-        target = 0;
-      if (target >= dragDisplayList.value.length)
-        target = dragDisplayList.value.length - 1;
-      if (target !== dragIndex.value) {
-        const m = dragDisplayList.value[dragIndex.value];
-        dragDisplayList.value.splice(dragIndex.value, 1);
-        dragDisplayList.value.splice(target, 0, m);
-        dragDisplayList.value.forEach((item, idx) => {
-          if (idx !== target) {
-            const nr = Math.floor(idx / 3), nc = idx % 3;
-            item.x = nc * dragItemWidth.value;
-            item.y = nr * dragItemHeight.value;
-          }
-        });
-        dragIndex.value = target;
-      }
-    };
-    const onMovableEnd = () => {
-      isDragging.value = false;
-      if (dragIndex.value !== -1) {
-        const item = dragDisplayList.value[dragIndex.value];
-        item.zIndex = 1;
-        const r = Math.floor(dragIndex.value / 3), c = dragIndex.value % 3;
-        common_vendor.nextTick$1(() => {
-          item.x = c * dragItemWidth.value;
-          item.y = r * dragItemHeight.value;
-        });
-        form.value.activityCoverImageUrls = dragDisplayList.value.map((o) => o.data);
-      }
-      dragIndex.value = -1;
-    };
     return (_ctx, _cache) => {
       return common_vendor.e({
         a: !isUserVerified.value
@@ -615,161 +574,173 @@ const _sfc_main = {
         b: common_vendor.p({
           type: "info-filled",
           size: "18",
-          color: "#e6a23c"
+          color: "#FF6F00"
         }),
-        c: common_vendor.o((...args) => _ctx.goToAuthPage && _ctx.goToAuthPage(...args))
+        c: common_vendor.p({
+          type: "right",
+          size: "12",
+          color: "#FF6F00"
+        }),
+        d: common_vendor.o((...args) => _ctx.goToAuthPage && _ctx.goToAuthPage(...args))
       } : {}, {
-        d: common_vendor.o(($event) => form.value.activityTitle = $event),
-        e: common_vendor.p({
+        e: common_vendor.o(($event) => form.value.activityTitle = $event),
+        f: common_vendor.p({
           placeholder: "请输入聚会名称",
+          inputBorder: true,
+          primaryColor: "#FF6F00",
+          styles: _ctx.inputStyles,
           modelValue: form.value.activityTitle
         }),
-        f: common_vendor.p({
+        g: common_vendor.p({
           label: "聚会名称",
           required: true
         }),
-        g: common_vendor.o(($event) => form.value.tag = $event),
-        h: common_vendor.p({
+        h: common_vendor.o(($event) => form.value.tag = $event),
+        i: common_vendor.p({
           localdata: tagOptions.value,
           placeholder: "请选择类型",
+          clear: false,
           modelValue: form.value.tag
         }),
-        i: common_vendor.p({
+        j: common_vendor.p({
           label: "聚会类型",
           required: true
         }),
-        j: form.value.coverImageUrl
-      }, form.value.coverImageUrl ? {
         k: form.value.coverImageUrl
-      } : {}, {
-        l: common_vendor.o(uploadCover),
+      }, form.value.coverImageUrl ? {
+        l: form.value.coverImageUrl
+      } : {
         m: common_vendor.p({
+          type: "camera-filled",
+          size: "32",
+          color: "#FF6F00"
+        })
+      }, {
+        n: common_vendor.o(uploadCover),
+        o: common_vendor.p({
           label: "聚会封面"
         }),
-        n: common_vendor.f(dragDisplayList.value, (item, index, i0) => {
-          return {
-            a: item.data,
-            b: common_vendor.o(($event) => previewActivityImage(item.realIndex), item.id),
-            c: common_vendor.o(($event) => deleteActivityImage(item.realIndex), item.id),
-            d: item.id,
-            e: item.x,
-            f: item.y,
-            g: item.zIndex,
-            h: !isDragging.value && item.zIndex === 1,
-            i: common_vendor.o(($event) => onMovableChange($event, index), item.id),
-            j: common_vendor.o(($event) => onMovableStart(index), item.id),
-            k: common_vendor.o(onMovableEnd, item.id)
-          };
+        p: common_vendor.o(handleActivityImagesUpload),
+        q: common_vendor.o(($event) => form.value.activityCoverImageUrls = $event),
+        r: common_vendor.p({
+          ["max-count"]: 9,
+          modelValue: form.value.activityCoverImageUrls
         }),
-        o: dragItemWidth.value + "px",
-        p: dragItemHeight.value + "px",
-        q: dragAreaHeight.value + "px",
-        r: dragAreaHeight.value > 0 ? dragAreaHeight.value + "px" : "0px",
-        s: form.value.activityCoverImageUrls.length < 9
-      }, form.value.activityCoverImageUrls.length < 9 ? {
-        t: common_vendor.p({
-          type: "plusempty",
-          size: "30",
-          color: "#ccc"
-        }),
-        v: common_vendor.o(handleActivityImagesUpload)
-      } : {}, {
-        w: common_vendor.p({
+        s: common_vendor.p({
           label: "聚会图集"
         }),
-        x: common_vendor.o(($event) => isPickerOpen.value = false),
-        y: common_vendor.o(($event) => isPickerOpen.value = false),
-        z: common_vendor.o(($event) => timeRange.value = $event),
-        A: common_vendor.p({
+        t: common_vendor.o(($event) => isPickerOpen.value = false),
+        v: common_vendor.o(($event) => isPickerOpen.value = false),
+        w: common_vendor.o(($event) => timeRange.value = $event),
+        x: common_vendor.p({
           type: "datetimerange",
-          rangeSeparator: "至",
+          rangeSeparator: " 至 ",
           modelValue: timeRange.value
         }),
-        B: common_vendor.o(($event) => isPickerOpen.value = true),
-        C: common_vendor.p({
+        y: common_vendor.o(($event) => isPickerOpen.value = true),
+        z: common_vendor.p({
           label: "聚会时间",
           required: true
         }),
-        D: common_vendor.o(($event) => isPickerOpen.value = false),
-        E: common_vendor.o(($event) => isPickerOpen.value = false),
-        F: common_vendor.o(($event) => enrollTimeRange.value = $event),
-        G: common_vendor.p({
+        A: common_vendor.o(($event) => isPickerOpen.value = false),
+        B: common_vendor.o(($event) => isPickerOpen.value = false),
+        C: common_vendor.o(($event) => enrollTimeRange.value = $event),
+        D: common_vendor.p({
           type: "datetimerange",
-          rangeSeparator: "至",
+          rangeSeparator: " 至 ",
           modelValue: enrollTimeRange.value
         }),
-        H: common_vendor.o(($event) => isPickerOpen.value = true),
-        I: common_vendor.p({
+        E: common_vendor.o(($event) => isPickerOpen.value = true),
+        F: common_vendor.p({
           label: "报名时间",
           required: true
         }),
-        J: form.value.locationAddress
+        G: form.value.locationAddress
       }, form.value.locationAddress ? {
-        K: common_vendor.t(form.value.locationAddress)
+        H: common_vendor.t(form.value.locationAddress)
       } : {}, {
-        L: common_vendor.o(openMapToChooseLocation),
-        M: common_vendor.p({
+        I: common_vendor.p({
+          type: "location",
+          size: "20",
+          color: "#FF6F00"
+        }),
+        J: common_vendor.o(openMapToChooseLocation),
+        K: common_vendor.p({
           label: "聚会地点",
           required: true
         }),
-        N: associatedStoreName.value
+        L: associatedStoreName.value
       }, associatedStoreName.value ? {
-        O: common_vendor.t(associatedStoreName.value)
+        M: common_vendor.t(associatedStoreName.value)
       } : {}, {
-        P: common_vendor.o(goToSelectShop),
-        Q: common_vendor.p({
-          label: "合作聚店",
-          ["label-width"]: 80
+        N: common_vendor.p({
+          type: "right",
+          size: "16",
+          color: "#ccc"
         }),
-        R: common_vendor.o(($event) => form.value.totalSlots = $event),
-        S: common_vendor.p({
+        O: common_vendor.o(goToSelectShop),
+        P: common_vendor.p({
+          label: "合作聚店"
+        }),
+        Q: common_vendor.o(($event) => form.value.totalSlots = $event),
+        R: common_vendor.p({
           type: "number",
-          placeholder: "超过人数上限,不能报名",
+          placeholder: "0",
+          inputBorder: true,
+          styles: _ctx.inputStyles,
           modelValue: form.value.totalSlots
         }),
-        T: common_vendor.p({
+        S: common_vendor.p({
           label: "人数上限"
         }),
-        U: common_vendor.o(($event) => form.value.limitSlots = $event),
-        V: common_vendor.p({
+        T: common_vendor.o(($event) => form.value.limitSlots = $event),
+        U: common_vendor.p({
           type: "number",
-          placeholder: "不达起聚人数,聚会取消",
+          placeholder: "0",
+          inputBorder: true,
+          styles: _ctx.inputStyles,
           modelValue: form.value.limitSlots
         }),
-        W: common_vendor.p({
+        V: common_vendor.p({
           label: "起聚人数"
         }),
-        X: common_vendor.o(($event) => form.value.activityFunds = $event),
-        Y: common_vendor.p({
+        W: common_vendor.o(($event) => form.value.activityFunds = $event),
+        X: common_vendor.p({
           localdata: enrollmentOptions.value,
-          mode: "button",
+          mode: "tag",
+          selectedColor: "#FF6F00",
+          selectedTextColor: "#FF6F00",
           modelValue: form.value.activityFunds
         }),
-        Z: common_vendor.p({
+        Y: common_vendor.p({
           label: "报名类型",
           required: true
         }),
-        aa: form.value.activityFunds === 1
+        Z: form.value.activityFunds === 1
       }, form.value.activityFunds === 1 ? {
-        ab: common_vendor.o(($event) => form.value.registrationFee = $event),
-        ac: common_vendor.p({
+        aa: common_vendor.o(($event) => form.value.registrationFee = $event),
+        ab: common_vendor.p({
           type: "digit",
           placeholder: "请输入聚会费用(元)",
+          inputBorder: true,
+          styles: _ctx.inputStyles,
           modelValue: form.value.registrationFee
         }),
-        ad: common_vendor.p({
+        ac: common_vendor.p({
           label: "单人费用",
           required: true
         })
       } : {}, {
-        ae: common_vendor.p({
+        ad: common_vendor.p({
           ["label-width"]: 80,
           ["label-position"]: "top"
         }),
+        ae: form.value.activityFunds !== 1
+      }, form.value.activityFunds !== 1 ? common_vendor.e({
         af: common_vendor.t(sponsorsList.value.length > 0 ? `已添加 ${sponsorsList.value.length} 位` : "暂无赞助商"),
         ag: common_vendor.p({
           type: isSponsorExpanded.value ? "top" : "bottom",
-          size: "16",
+          size: "14",
           color: "#999"
         }),
         ah: common_vendor.o(($event) => isSponsorExpanded.value = !isSponsorExpanded.value),
@@ -779,42 +750,44 @@ const _sfc_main = {
           return {
             a: item.logoUrl,
             b: common_vendor.t(item.sponsorName),
-            c: common_vendor.t(item.sponsorType === 1 ? `现金 ￥${item.cashAmount}` : `物品: ${item.goodsDescription}`),
-            d: "5d3444db-24-" + i0,
-            e: common_vendor.o(($event) => handleEditSponsor(index), index),
-            f: "5d3444db-25-" + i0,
-            g: common_vendor.o(($event) => handleDeleteSponsor(index), index),
-            h: index
+            c: common_vendor.t(item.sponsorType === 1 ? "现金" : item.sponsorType === 2 ? "物品" : "混合"),
+            d: common_vendor.t(item.sponsorType === 1 ? `￥${item.cashAmount}` : item.goodsDescription),
+            e: "5d3444db-28-" + i0,
+            f: common_vendor.o(($event) => handleEditSponsor(index), index),
+            g: "5d3444db-29-" + i0,
+            h: common_vendor.o(($event) => handleDeleteSponsor(index), index),
+            i: index
           };
         }),
         ak: common_vendor.p({
           type: "compose",
-          size: "20",
+          size: "18",
           color: "#FF6F00"
         }),
         al: common_vendor.p({
           type: "trash",
-          size: "20",
-          color: "#dd524d"
+          size: "18",
+          color: "#ff4d4f"
         }),
         am: common_vendor.p({
           type: "plusempty",
-          size: "18",
+          size: "16",
           color: "#FF6F00"
         }),
         an: common_vendor.o(handleAddSponsor)
-      } : {}, {
+      } : {}) : {}, {
         ao: common_vendor.o(($event) => form.value.activityDescription = $event),
         ap: common_vendor.p({
           type: "textarea",
           autoHeight: true,
-          placeholder: "请输入聚会详细介绍",
+          placeholder: "请输入聚会详细介绍，让大家更了解活动内容~",
+          inputBorder: true,
+          styles: _ctx.inputStyles,
           modelValue: form.value.activityDescription
         }),
         aq: common_vendor.p({
           label: "聚会介绍",
-          required: true,
-          ["label-width"]: 80
+          required: true
         }),
         ar: common_vendor.p({
           ["label-width"]: 80,
@@ -822,34 +795,44 @@ const _sfc_main = {
         }),
         as: common_vendor.f(form.value.activitySessions, (item, index, i0) => {
           return {
-            a: "5d3444db-30-" + i0,
-            b: common_vendor.o(($event) => item.sessionTitle = $event, index),
-            c: common_vendor.p({
-              placeholder: "环节标题",
+            a: common_vendor.t(index + 1),
+            b: "5d3444db-34-" + i0,
+            c: common_vendor.o(($event) => removeAgenda(index), index),
+            d: "5d3444db-35-" + i0,
+            e: common_vendor.o(($event) => item.sessionTitle = $event, index),
+            f: common_vendor.p({
+              placeholder: "请输入环节标题",
+              inputBorder: true,
+              styles: _ctx.inputStyles,
               modelValue: item.sessionTitle
             }),
-            d: "5d3444db-31-" + i0,
-            e: common_vendor.o(($event) => item.sessionDescription = $event, index),
-            f: common_vendor.p({
-              placeholder: "环节描述",
+            g: "5d3444db-36-" + i0,
+            h: common_vendor.o(($event) => item.sessionDescription = $event, index),
+            i: common_vendor.p({
+              placeholder: "请输入环节描述",
+              inputBorder: true,
+              styles: _ctx.inputStyles,
               modelValue: item.sessionDescription
             }),
-            g: common_vendor.o(($event) => removeAgenda(index), index),
-            h: "5d3444db-32-" + i0,
-            i: index
+            j: index
           };
         }),
         at: common_vendor.p({
-          type: "close"
+          type: "trash",
+          size: "16",
+          color: "#999"
         }),
         av: common_vendor.p({
           type: "plusempty",
-          color: "red"
+          size: "16",
+          color: "#FF6F00"
         }),
         aw: common_vendor.o(addAgenda),
         ax: common_vendor.o(($event) => form.value.organizerUnitName = $event),
         ay: common_vendor.p({
           placeholder: "请输入组织者名称",
+          inputBorder: true,
+          styles: _ctx.inputStyles,
           modelValue: form.value.organizerUnitName
         }),
         az: common_vendor.p({
@@ -860,6 +843,8 @@ const _sfc_main = {
         aB: common_vendor.p({
           type: "number",
           placeholder: "请输入联系电话",
+          inputBorder: true,
+          styles: _ctx.inputStyles,
           modelValue: form.value.organizerContactPhone
         }),
         aC: common_vendor.p({
@@ -871,28 +856,39 @@ const _sfc_main = {
         aE: form.value.organizerPaymentQrCodeUrl
       }, form.value.organizerPaymentQrCodeUrl ? {
         aF: form.value.organizerPaymentQrCodeUrl
-      } : {}, {
-        aG: common_vendor.o(uploadCode),
-        aH: common_vendor.p({
+      } : {
+        aG: common_vendor.p({
+          type: "scan",
+          size: "28",
+          color: "#ccc"
+        })
+      }, {
+        aH: common_vendor.o(uploadCode),
+        aI: common_vendor.p({
           label: "收款码",
           required: true
         })
       }) : {}, {
-        aI: common_vendor.p({
+        aJ: common_vendor.p({
           ["label-width"]: 80,
           ["label-position"]: "top"
         }),
-        aJ: mode.value === "create"
+        aK: mode.value === "create"
       }, mode.value === "create" ? {
-        aK: common_vendor.o(saveDraft)
+        aL: common_vendor.p({
+          type: "download",
+          size: "16",
+          color: "#666"
+        }),
+        aM: common_vendor.o(saveDraft)
       } : {}, {
-        aL: common_vendor.t(isPublishing.value ? "处理中..." : mode.value === "edit" ? "保存修改" : "发起聚会"),
-        aM: isPublishing.value ? 1 : "",
-        aN: common_vendor.o(publish),
-        aO: isPickerOpen.value ? 1 : "",
-        aP: common_vendor.o(($event) => showSponsorPopup.value = false),
-        aQ: common_vendor.o(handleSponsorSave),
-        aR: common_vendor.p({
+        aN: common_vendor.t(isPublishing.value ? "处理中..." : mode.value === "edit" ? "保存修改" : "发起聚会"),
+        aO: isPublishing.value ? 1 : "",
+        aP: common_vendor.o(publish),
+        aQ: isPickerOpen.value ? 1 : "",
+        aR: common_vendor.o(($event) => showSponsorPopup.value = false),
+        aS: common_vendor.o(handleSponsorSave),
+        aT: common_vendor.p({
           visible: showSponsorPopup.value,
           data: currentSponsorData.value
         })

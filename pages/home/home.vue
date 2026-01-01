@@ -80,7 +80,7 @@
 				<!-- 3.2 卡片内容-->
 				<!-- 为标题添加新的 longpress 事件 -->
 				<view class="post-content-title" @longpress.stop="handleLongPress(post.title)">
-					<text v-if="post.postType === 1" class="type-tag hunter">创业猎伙</text>
+					<text v-if="post.postType == 1" class="type-tag hunter">创业猎伙</text>
 					<text v-else class="type-tag business">商机分享</text>
 					{{ post.title }}
 				</view>

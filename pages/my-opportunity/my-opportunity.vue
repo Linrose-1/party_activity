@@ -1,6 +1,11 @@
 <template>
 	<view class="my-opportunities-app">
 
+		<view class="segmented-wrapper">
+			<uni-segmented-control :current="currentTab" :values="tabs" @clickItem="switchTab" style-type="button"
+				active-color="#FF6B00" />
+		</view>
+
 		<!-- 帖子列表 -->
 		<view class="post-list">
 			<view v-for="post in postList" :key="post.id" class="post-card" @click="skipCommercialDetail(post.id)">
@@ -16,7 +21,6 @@
 							</view>
 						</view>
 					</view>
-					<!-- 【修改】原删除按钮位置改为显示状态 -->
 					<view class="status-tag" :class="getStatusInfo(post).class">
 						{{ getStatusInfo(post).text }}
 					</view>
@@ -26,7 +30,7 @@
 					{{ post.postContent }}
 				</view>
 
-				<!-- ==================== 【核心替换/新增区域】 ==================== -->
+				<!-- ======================================== -->
 
 				<!-- Case 1: 如果存在视频，则优先渲染视频播放器 -->
 				<view v-if="post.video" class="post-video-container">
@@ -54,7 +58,7 @@
 					<!-- ... -->
 				</view>
 
-				<!-- 【新增】底部操作按钮区域 -->
+				<!-- 底部操作按钮区域 -->
 				<view class="card-actions">
 					<button class="action-btn delete-btn" @click.stop="deleteOpportunity(post.id)">
 						<uni-icons type="trash" size="16" color="#e74c3c"></uni-icons>
@@ -93,6 +97,7 @@
 		ref
 	} from 'vue';
 	import {
+		onShow,
 		onLoad,
 		onReachBottom,
 		onPullDownRefresh
@@ -105,8 +110,10 @@
 	const pageSize = ref(10);
 	const total = ref(0);
 	const loadStatus = ref('more');
+	const currentTab = ref(0); // 0: 普通商机, 1: 创业猎伙
+	const tabs = ref(['普通商机', '创业猎伙']);
 
-	// 【新增】申诉弹窗相关状态
+	// 申诉弹窗相关状态
 	const appealPopup = ref(null); // 弹窗实例
 	const currentAppealPost = ref(null); // 当前正在申诉的帖子对象
 
@@ -124,7 +131,7 @@
 	};
 
 	/**
-	 * 【新增】根据状态码返回文本和样式类
+	 * 根据状态码返回文本和样式类
 	 */
 	const getStatusInfo = (post) => {
 		switch (post.status) {
@@ -158,50 +165,76 @@
 
 	// --- 核心数据请求函数 ---
 	const getMyOpportunitiesList = async (isRefresh = false) => {
-		// ... 数据请求逻辑保持不变 ...
-		if (loadStatus.value === 'loading' || (loadStatus.value === 'noMore' && !isRefresh)) return;
+		if (loadStatus.value === 'loading') return;
+		if (!isRefresh && loadStatus.value === 'noMore') return;
+
 		if (isRefresh) {
 			pageNo.value = 1;
 			postList.value = [];
 			loadStatus.value = 'more';
 		}
+
 		loadStatus.value = 'loading';
-		const userId = uni.getStorageSync('userId'); // 动态获取userId
-		const {
-			data,
-			error
-		} = await request('/app-api/member/business-opportunities/my-list', {
-			method: 'GET',
-			data: {
-				pageNo: pageNo.value,
-				pageSize: pageSize.value,
-				userId: userId
-			}
-		});
-		if (isRefresh) uni.stopPullDownRefresh();
-		if (error) {
-			loadStatus.value = 'more';
-			return;
-		}
-		if (data && data.list && data.list.length > 0) {
-			const mappedList = data.list.map(item => {
-				// 返回一个新对象，包含我们处理过的 video 和 images 字段
-				return {
-					...item, // 复制原始 item 的所有属性
-					video: item.postVideo || '', // 提取视频URL
-					images: item.postImg ? String(item.postImg).split(',').filter(img => img) :
-					[] // 提取图片URL数组
-				};
+		const userId = uni.getStorageSync('userId');
+
+		// 【新增】构造参数，加入 postType
+		const params = {
+			pageNo: pageNo.value,
+			pageSize: pageSize.value,
+			userId: userId,
+			postType: currentTab.value // 0 或 1
+		};
+
+		try {
+			const {
+				data,
+				error
+			} = await request('/app-api/member/business-opportunities/my-list', {
+				method: 'GET',
+				data: params
 			});
 
-			postList.value = [...postList.value, ...mappedList]; // 将映射后的数据合并			total.value = data.total;
-			loadStatus.value = postList.value.length >= total.value ? 'noMore' : 'more';
-			if (loadStatus.value === 'more') pageNo.value++;
-		} else {
-			if (pageNo.value === 1) {
-				postList.value = [];
+			if (isRefresh) uni.stopPullDownRefresh();
+
+			if (error) {
+				loadStatus.value = 'more';
+				return;
 			}
-			loadStatus.value = 'noMore';
+
+			if (data && data.list && data.list.length > 0) {
+				const mappedList = data.list.map(item => {
+					// 【优化】更安全的图片解析逻辑，防止 item.postImg 为 null 报错
+					let imgList = [];
+					if (item.postImg) {
+						// 过滤掉空字符串
+						imgList = String(item.postImg).split(',').filter(s => s && s.trim());
+					}
+
+					return {
+						...item,
+						video: item.postVideo || '',
+						images: imgList
+					};
+				});
+
+				postList.value = isRefresh ? mappedList : [...postList.value, ...mappedList];
+				total.value = data.total || 0;
+
+				// 判断是否还有更多
+				if (postList.value.length >= total.value) {
+					loadStatus.value = 'noMore';
+				} else {
+					loadStatus.value = 'more';
+					pageNo.value++;
+				}
+			} else {
+				if (isRefresh) postList.value = []; // 如果刷新且没数据，清空列表
+				loadStatus.value = 'noMore';
+			}
+		} catch (e) {
+			console.error(e);
+			loadStatus.value = 'more';
+			if (isRefresh) uni.stopPullDownRefresh();
 		}
 	};
 
@@ -214,8 +247,14 @@
 	};
 
 	// --- 事件处理函数 ---
+	const switchTab = (e) => {
+		if (currentTab.value === e.currentIndex) return;
+		currentTab.value = e.currentIndex;
+		// 切换后立即刷新列表
+		getMyOpportunitiesList(true);
+	};
+
 	const deleteOpportunity = (id) => {
-		// ... 删除逻辑保持不变 ...
 		uni.showModal({
 			title: '确认删除',
 			content: '您确定要删除这条商机吗？删除后将无法恢复。',
@@ -251,7 +290,7 @@
 	};
 
 	/**
-	 * 【新增】打开申诉弹窗
+	 * 打开申诉弹窗
 	 * @param {object} post - 要申诉的帖子对象
 	 */
 	const openAppealModal = (post) => {
@@ -260,7 +299,7 @@
 	};
 
 	/**
-	 * 【新增】确认并提交申诉
+	 * 确认并提交申诉
 	 * @param {string} appealContent - 用户在弹窗中输入的申诉内容
 	 */
 	const confirmAppeal = async (appealContent) => {
@@ -305,7 +344,10 @@
 	};
 
 	// --- 页面跳转函数 ---
-	// ... skip* 和 previewImage 函数保持不变 ...
+	const skipApplicationBusinessCard = (userId) => {
+		// 暂时打印日志，防止报错。
+		console.log('点击用户头像 ID:', userId);
+	};
 	const skipCommercialDetail = (id) => {
 		uni.navigateTo({
 			url: `/packages/home-commercialDetail/home-commercialDetail?id=${id}`
@@ -322,17 +364,28 @@
 	};
 
 	// --- Uni-app 页面生命周期钩子 ---
-	onLoad(() => getMyOpportunitiesList(true));
+	onShow(() => {
+		// 每次页面显示都刷新第一页数据
+		getMyOpportunitiesList(true);
+	});
 	onReachBottom(() => getMyOpportunitiesList());
 	onPullDownRefresh(() => getMyOpportunitiesList(true));
 </script>
 
 <style scoped>
-	/* ... .my-opportunities-app, .post-list, .post-card 等大部分样式保持不变 ... */
-
 	.my-opportunities-app {
 		background-color: #f9f9f9;
 		min-height: 100vh;
+	}
+
+	.segmented-wrapper {
+		background-color: #fff;
+		padding: 20rpx 30rpx;
+		position: sticky;
+		/* 吸顶效果 */
+		top: 0;
+		z-index: 99;
+		border-bottom: 1rpx solid #eee;
 	}
 
 	.post-list {
@@ -437,7 +490,6 @@
 		/* 消除 image 标签底部空隙 */
 	}
 
-	/* ==================== 【新增】视频容器和播放器样式 ==================== */
 	.post-video-container {
 		width: 100%;
 		aspect-ratio: 16 / 9;
@@ -454,11 +506,6 @@
 		height: 100%;
 		display: block;
 	}
-
-	/* ===================================================================== */
-
-
-	/* --- 核心：根据图片数量调整网格布局 --- */
 
 	/* 默认（3张及以上）: 3列网格 */
 	.post-images {
@@ -515,7 +562,7 @@
 		margin-right: 8rpx;
 	}
 
-	/* 【新增】底部操作按钮样式 */
+	/* 底部操作按钮样式 */
 	.card-actions {
 		display: flex;
 		justify-content: flex-end;
@@ -565,7 +612,7 @@
 	}
 
 
-	/* 【新增】空状态引导容器的样式 */
+	/* 空状态引导容器的样式 */
 	.empty-state-container {
 		display: flex;
 		flex-direction: column;

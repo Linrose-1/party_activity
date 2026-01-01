@@ -5,15 +5,15 @@ const utils_upload = require("../../utils/upload.js");
 const utils_user = require("../../utils/user.js");
 if (!Array) {
   const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
-  _easycom_uni_icons2();
+  const _easycom_DragImageUploader2 = common_vendor.resolveComponent("DragImageUploader");
+  (_easycom_uni_icons2 + _easycom_DragImageUploader2)();
 }
 const _easycom_uni_icons = () => "../../uni_modules/uni-icons/components/uni-icons/uni-icons.js";
+const _easycom_DragImageUploader = () => "../../components/DragImageUploader/DragImageUploader.js";
 if (!Math) {
-  _easycom_uni_icons();
+  (_easycom_uni_icons + _easycom_DragImageUploader)();
 }
 const DRAFT_KEY = "post_draft_v2";
-const dragColumns = 3;
-const dragItemHeightRpx = 230;
 const _sfc_main = {
   __name: "home-opportunitiesPublish",
   setup(__props) {
@@ -75,7 +75,7 @@ const _sfc_main = {
     const saveDraft = (data) => {
       if (data.title || data.content || data.tags.length > 0 || data.images.length > 0) {
         common_vendor.index.setStorageSync(DRAFT_KEY, JSON.stringify(data));
-        common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:244", "📝 草稿已自动保存");
+        common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:209", "📝 草稿已自动保存");
       }
     };
     const checkDraft = () => {
@@ -99,7 +99,7 @@ const _sfc_main = {
     };
     const clearDraft = () => {
       common_vendor.index.removeStorageSync(DRAFT_KEY);
-      common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:270", "🧹 草稿已清除");
+      common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:235", "🧹 草稿已清除");
     };
     function topicChange(e) {
       form.topic = e.detail.value;
@@ -159,9 +159,9 @@ const _sfc_main = {
             type
           }
         });
-        common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:358", `标签历史 "${tagName}" 已记录`);
+        common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:323", `标签历史 "${tagName}" 已记录`);
       } catch (error) {
-        common_vendor.index.__f__("error", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:360", "记录标签历史失败:", error);
+        common_vendor.index.__f__("error", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:325", "记录标签历史失败:", error);
       }
     }
     common_vendor.watch(() => form.tagInput, (newValue) => {
@@ -196,7 +196,7 @@ const _sfc_main = {
         const suggestions = data.list.map((item) => item.name);
         tagSuggestions.value = [...new Set(suggestions)];
       } catch (e) {
-        common_vendor.index.__f__("error", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:409", "获取标签建议失败:", e);
+        common_vendor.index.__f__("error", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:374", "获取标签建议失败:", e);
         tagSuggestions.value = [];
       }
     }
@@ -204,6 +204,8 @@ const _sfc_main = {
       form.tags.splice(index, 1);
     }
     async function handleChooseImage() {
+      if (form.mediaType !== "image")
+        form.mediaType = "image";
       common_vendor.index.chooseImage({
         count: 9 - form.images.length,
         sourceType: ["album", "camera"],
@@ -218,7 +220,7 @@ const _sfc_main = {
           if (validFiles.length === 0)
             return;
           common_vendor.index.showLoading({
-            title: `正在上传 ${validFiles.length} 张图片...`,
+            title: `正在上传...`,
             mask: true
           });
           const uploadPromises = validFiles.map((file) => utils_upload.uploadFile(file, {
@@ -231,50 +233,36 @@ const _sfc_main = {
             if (result.data)
               successfulUrls.push(result.data);
             else
-              common_vendor.index.__f__("error", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:474", "上传失败:", result.error);
+              common_vendor.index.__f__("error", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:445", "上传失败:", result.error);
           });
           form.images.push(...successfulUrls);
           if (successfulUrls.length < validFiles.length) {
             common_vendor.index.showToast({
-              title: `${validFiles.length - successfulUrls.length} 张图片上传失败`,
+              title: "部分图片上传失败",
               icon: "none"
             });
           }
         }
       });
     }
-    const previewImage = (index) => {
-      common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:490", "当前点击的图片:", form.images[index]);
-      if (!form.images || form.images.length === 0)
-        return;
-      common_vendor.index.previewImage({
-        urls: form.images,
-        // 预览所有图片
-        current: index,
-        // 当前显示的图片索引
-        loop: true
-        // 是否循环预览
-      });
-    };
     async function handleChooseVideo() {
-      form.mediaType = "video";
-      form.images = [];
-      initDragList([]);
+      if (form.images.length > 0) {
+        form.images = [];
+      }
       common_vendor.index.chooseVideo({
         sourceType: ["album", "camera"],
         maxDuration: 60,
-        // 限制最长60秒
         compressed: true,
-        // 建议压缩
         success: async (res) => {
+          form.mediaType = "video";
           const videoFile = {
             path: res.tempFilePath,
-            size: res.size,
-            name: res.tempFilePath.substring(res.tempFilePath.lastIndexOf("/") + 1)
+            size: res.size
           };
           if (videoFile.size > 50 * 1024 * 1024) {
+            form.mediaType = "";
             return common_vendor.index.showToast({
-              title: "视频大小不能超过50MB",
+              title: "视频超过50MB",
               icon: "none"
             });
           }
@@ -293,16 +281,15 @@ const _sfc_main = {
               icon: "success"
             });
           } else {
+            form.mediaType = "";
             common_vendor.index.showToast({
-              title: result.error || "视频上传失败",
+              title: "上传失败",
               icon: "none"
             });
           }
         },
         fail: (err) => {
-          if (err.errMsg.indexOf("cancel") === -1) {
-            common_vendor.index.__f__("error", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:589", "选择视频失败:", err);
-          }
+          common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:568", "取消选择视频");
         }
       });
     }
@@ -313,9 +300,10 @@ const _sfc_main = {
         success: (res) => {
           if (res.confirm) {
             form.postVideo = "";
-            form.mediaType = "";
             form.businessCoverImageUrl = "";
-            form.mediaType = "";
+            if (form.images.length === 0) {
+              form.mediaType = "";
+            }
           }
         }
       });
@@ -332,11 +320,11 @@ const _sfc_main = {
             cropScale: "5:4",
             // 【关键】强制 5:4 比例
             success: (cropRes) => {
-              common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:625", "裁剪成功:", cropRes.tempFilePath);
+              common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:605", "裁剪成功:", cropRes.tempFilePath);
               uploadCoverToCloud(cropRes.tempFilePath);
             },
             fail: (err) => {
-              common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:629", "用户取消裁剪或失败:", err);
+              common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:609", "用户取消裁剪或失败:", err);
             }
           });
         }
@@ -438,7 +426,7 @@ const _sfc_main = {
     };
     common_vendor.onShareAppMessage(() => {
       const inviteCode = utils_user.getInviteCode();
-      common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:753", `[商机发布页] 分享给好友，获取到邀请码: ${inviteCode}`);
+      common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:733", `[商机发布页] 分享给好友，获取到邀请码: ${inviteCode}`);
       let sharePath = "/packages/home-opportunitiesPublish/home-opportunitiesPublish";
       if (inviteCode) {
         sharePath += `?inviteCode=${inviteCode}`;
@@ -449,12 +437,12 @@ const _sfc_main = {
         // 建议使用一个固定的、吸引人的分享图片
         imageUrl: "https://img.gofor.club/logo_share.jpg"
       };
-      common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:769", "[商机发布页] 分享给好友的内容:", JSON.stringify(shareContent));
+      common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:749", "[商机发布页] 分享给好友的内容:", JSON.stringify(shareContent));
       return shareContent;
     });
     common_vendor.onShareTimeline(() => {
       const inviteCode = utils_user.getInviteCode();
-      common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:779", `[商机发布页] 分享到朋友圈，获取到邀请码: ${inviteCode}`);
+      common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:759", `[商机发布页] 分享到朋友圈，获取到邀请码: ${inviteCode}`);
       let queryString = "";
       if (inviteCode) {
         queryString = `inviteCode=${inviteCode}`;
@@ -464,131 +452,9 @@ const _sfc_main = {
         query: queryString,
         imageUrl: "https://img.gofor.club/logo_share.jpg"
       };
-      common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:794", "[商机发布页] 分享到朋友圈的内容:", JSON.stringify(shareContent));
+      common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:774", "[商机发布页] 分享到朋友圈的内容:", JSON.stringify(shareContent));
       return shareContent;
     });
-    const deleteImage = (index) => {
-      common_vendor.index.showModal({
-        title: "提示",
-        content: "确定删除？",
-        success: (res) => {
-          if (res.confirm) {
-            form.images.splice(index, 1);
-            initDragList(form.images);
-            if (form.images.length === 0) {
-              form.mediaType = "";
-            }
-          }
-        }
-      });
-    };
-    const dragDisplayList = common_vendor.ref([]);
-    const dragItemWidth = common_vendor.ref(0);
-    const dragItemHeight = common_vendor.ref(0);
-    const dragAreaHeight = common_vendor.ref(0);
-    const isDragging = common_vendor.ref(false);
-    const dragIndex = common_vendor.ref(-1);
-    const initDragLayout = () => {
-      const sys = common_vendor.index.getSystemInfoSync();
-      const containerWidth = sys.windowWidth - common_vendor.index.upx2px(100);
-      dragItemWidth.value = containerWidth / dragColumns;
-      dragItemHeight.value = common_vendor.index.upx2px(dragItemHeightRpx);
-    };
-    common_vendor.watch(() => form.images, (newVal) => {
-      if (!isDragging.value) {
-        initDragList(newVal);
-      }
-    }, {
-      deep: true
-    });
-    common_vendor.onMounted(() => {
-      initDragLayout();
-      if (form.images.length > 0)
-        initDragList(form.images);
-    });
-    const initDragList = (originList) => {
-      if (!originList)
-        return;
-      if (dragItemWidth.value === 0)
-        initDragLayout();
-      dragDisplayList.value = originList.map((url, index) => {
-        const {
-          x,
-          y
-        } = getPos(index);
-        return {
-          id: `img_${index}_${Math.random()}`,
-          // 唯一KEY
-          data: url,
-          x,
-          y,
-          zIndex: 1,
-          realIndex: index
-        };
-      });
-      updateDragHeight();
-    };
-    const getPos = (index) => {
-      const row = Math.floor(index / dragColumns);
-      const col = index % dragColumns;
-      return {
-        x: col * dragItemWidth.value,
-        y: row * dragItemHeight.value
-      };
-    };
-    const updateDragHeight = () => {
-      const count = dragDisplayList.value.length;
-      const rows = Math.ceil(count / dragColumns);
-      dragAreaHeight.value = (rows || 1) * dragItemHeight.value;
-    };
-    const onMovableStart = (index) => {
-      isDragging.value = true;
-      dragIndex.value = index;
-      dragDisplayList.value[index].zIndex = 99;
-    };
-    const onMovableChange = (e, index) => {
-      if (!isDragging.value || index !== dragIndex.value)
-        return;
-      const x = e.detail.x;
-      const y = e.detail.y;
-      const centerX = x + dragItemWidth.value / 2;
-      const centerY = y + dragItemHeight.value / 2;
-      const col = Math.floor(centerX / dragItemWidth.value);
-      const row = Math.floor(centerY / dragItemHeight.value);
-      let targetIndex = row * dragColumns + col;
-      if (targetIndex < 0)
-        targetIndex = 0;
-      if (targetIndex >= dragDisplayList.value.length)
-        targetIndex = dragDisplayList.value.length - 1;
-      if (targetIndex !== dragIndex.value) {
-        const mover = dragDisplayList.value[dragIndex.value];
-        dragDisplayList.value.splice(dragIndex.value, 1);
-        dragDisplayList.value.splice(targetIndex, 0, mover);
-        dragDisplayList.value.forEach((item, idx) => {
-          if (idx !== targetIndex) {
-            const pos = getPos(idx);
-            item.x = pos.x;
-            item.y = pos.y;
-          }
-        });
-        dragIndex.value = targetIndex;
-      }
-    };
-    const onMovableEnd = () => {
-      isDragging.value = false;
-      if (dragIndex.value !== -1) {
-        const item = dragDisplayList.value[dragIndex.value];
-        item.zIndex = 1;
-        const pos = getPos(dragIndex.value);
-        common_vendor.nextTick$1(() => {
-          item.x = pos.x;
-          item.y = pos.y;
-        });
-        const sortedUrls = dragDisplayList.value.map((wrapper) => wrapper.data);
-        form.images = sortedUrls;
-      }
-      dragIndex.value = -1;
-    };
     return (_ctx, _cache) => {
       return common_vendor.e({
         a: form.title,
@@ -634,55 +500,35 @@ const _sfc_main = {
         }),
         s: common_vendor.o(handleChooseVideo)
       } : {}, {
-        t: common_vendor.f(dragDisplayList.value, (item, index, i0) => {
-          return {
-            a: item.data,
-            b: common_vendor.o(($event) => previewImage(item.realIndex), item.id),
-            c: common_vendor.o(($event) => deleteImage(item.realIndex), item.id),
-            d: item.id,
-            e: item.x,
-            f: item.y,
-            g: item.zIndex,
-            h: !isDragging.value && item.zIndex === 1,
-            i: common_vendor.o(($event) => onMovableChange($event, index), item.id),
-            j: common_vendor.o(($event) => onMovableStart(index), item.id),
-            k: common_vendor.o(onMovableEnd, item.id)
-          };
-        }),
-        v: dragItemWidth.value + "px",
-        w: dragItemHeight.value + "px",
-        x: dragAreaHeight.value + "px",
-        y: dragAreaHeight.value + "px",
-        z: form.mediaType === "image" && form.images.length > 0 && form.images.length < 9
-      }, form.mediaType === "image" && form.images.length > 0 && form.images.length < 9 ? {
-        A: common_vendor.p({
-          type: "plusempty",
-          size: "24",
-          color: "#ccc"
-        }),
-        B: common_vendor.o(handleChooseImage)
+        t: form.mediaType === "image" && form.images.length > 0
+      }, form.mediaType === "image" && form.images.length > 0 ? {
+        v: common_vendor.o(handleChooseImage),
+        w: common_vendor.o(($event) => form.images = $event),
+        x: common_vendor.p({
+          ["max-count"]: 9,
+          modelValue: form.images
+        })
       } : {}, {
-        C: form.images.length === 0 ? 1 : "",
-        D: form.mediaType === "video" && form.postVideo
+        y: form.mediaType === "video" && form.postVideo
       }, form.mediaType === "video" && form.postVideo ? common_vendor.e({
-        E: form.postVideo,
-        F: common_vendor.o(deleteVideo),
-        G: form.businessCoverImageUrl
+        z: form.postVideo,
+        A: common_vendor.o(deleteVideo),
+        B: form.businessCoverImageUrl
       }, form.businessCoverImageUrl ? {
-        H: form.businessCoverImageUrl
+        C: form.businessCoverImageUrl
       } : {
-        I: common_vendor.p({
+        D: common_vendor.p({
           type: "image",
           size: "24",
           color: "#999"
         })
       }, {
-        J: common_vendor.o(handleChooseVideoCover)
+        E: common_vendor.o(handleChooseVideoCover)
       }) : {}, {
-        K: common_vendor.t(form.mediaType === "image" ? "最多可上传9张图片" : "仅支持上传一个视频"),
-        L: form.showProfile,
-        M: common_vendor.o((e) => form.showProfile = e.detail.value),
-        N: common_vendor.o(submitPost)
+        F: common_vendor.t(form.mediaType === "image" ? "最多可上传9张图片" : "仅支持上传一个视频"),
+        G: form.showProfile,
+        H: common_vendor.o((e) => form.showProfile = e.detail.value),
+        I: common_vendor.o(submitPost)
       });
     };
   }

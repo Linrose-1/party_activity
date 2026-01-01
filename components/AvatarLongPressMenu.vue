@@ -19,11 +19,11 @@
 			<!-- 2. 操作按钮区 -->
 			<view class="action-grid">
 				<!-- 主要操作 -->
-				<view class="grid-item primary" @click="handleAction('addCircle')">
+				<view class="grid-item" :class="isSelf ? 'disabled' : 'primary'" @click="handleAction('addCircle')">
 					<view class="icon-box">
 						<uni-icons type="plusempty" size="28" color="#fff"></uni-icons>
 					</view>
-					<text class="item-text">申请入圈</text>
+					<text class="item-text">{{ isSelf ? '本人' : '申请入圈' }}</text>
 				</view>
 
 				<view class="grid-item" @click="handleAction('viewCard')">
@@ -61,15 +61,26 @@
 
 <script setup>
 	import {
-		ref
+		ref,
+		computed
 	} from 'vue';
 
 	const popup = ref(null);
 	const targetUser = ref({});
 	const emit = defineEmits(['action']);
+	const currentUserId = ref(null);
+
+	// 计算属性：是否是本人
+	const isSelf = computed(() => {
+		// 确保 ID 存在且类型安全转换后相等
+		return currentUserId.value && targetUser.value.id && String(currentUserId.value) === String(targetUser
+			.value.id);
+	});
 
 	const open = (user) => {
 		targetUser.value = user || {};
+		// 每次打开时重新获取当前用户ID，确保状态最新
+		currentUserId.value = uni.getStorageSync('userId');
 		popup.value.open();
 	};
 
@@ -78,12 +89,18 @@
 	};
 
 	const handleAction = (type) => {
+		// 如果是申请入圈操作，且是本人，直接拦截
+		if (type === 'addCircle' && isSelf.value) {
+			return;
+		}
+
 		close();
 		emit('action', {
 			type,
 			user: targetUser.value
 		});
 	};
+
 
 	defineExpose({
 		open,
@@ -185,6 +202,22 @@
 	.grid-item.primary .icon-box {
 		background: linear-gradient(135deg, #FF7009, #FF8C00);
 		box-shadow: 0 6rpx 16rpx rgba(255, 112, 9, 0.3);
+	}
+
+	.grid-item.disabled {
+		pointer-events: none;
+		/* 禁止点击 */
+
+		.icon-box {
+			background-color: #dcdcdc;
+			/* 灰色背景 */
+			box-shadow: none;
+		}
+
+		.item-text {
+			color: #999;
+			/* 灰色文字 */
+		}
 	}
 
 	.icon-box.secondary {

@@ -858,8 +858,8 @@ const _sfc_main = {
             j: post.isFollowedUser ? 1 : "",
             k: common_vendor.o(($event) => toggleFollow(post), post.id)
           } : {}, {
-            l: post.postType === 1
-          }, post.postType === 1 ? {} : {}, {
+            l: post.postType == 1
+          }, post.postType == 1 ? {} : {}, {
             m: common_vendor.t(post.title),
             n: common_vendor.o(($event) => handleLongPress(post.title), post.id),
             o: post.displayContent

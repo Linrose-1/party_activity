@@ -33,7 +33,7 @@
 				</view>
 				<view style="font-weight: 700;font-size: 36rpx;"
 					@longpress.stop="handleLongPress(postDetail.postTitle)">
-					<text v-if="postDetail.postType === 1" class="detail-type-tag hunter">创业猎伙</text>
+					<text v-if="postDetail.postType == 1" class="detail-type-tag hunter">创业猎伙</text>
 					<text v-else class="detail-type-tag business">商机分享</text>
 					{{postDetail.postTitle}}
 				</view>

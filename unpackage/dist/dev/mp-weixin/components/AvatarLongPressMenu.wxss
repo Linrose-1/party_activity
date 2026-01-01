@@ -85,6 +85,19 @@
   background: linear-gradient(135deg, #FF7009, #FF8C00);
   box-shadow: 0 6rpx 16rpx rgba(255, 112, 9, 0.3);
 }
+.grid-item.disabled.data-v-5571075f {
+  pointer-events: none;
+  /* 禁止点击 */
+}
+.grid-item.disabled .icon-box.data-v-5571075f {
+  background-color: #dcdcdc;
+  /* 灰色背景 */
+  box-shadow: none;
+}
+.grid-item.disabled .item-text.data-v-5571075f {
+  color: #999;
+  /* 灰色文字 */
+}
 .icon-box.secondary.data-v-5571075f {
   background-color: #FFF3E0;
   /* 浅橙色 */

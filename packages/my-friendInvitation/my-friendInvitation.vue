@@ -31,14 +31,14 @@
 				</view>
 
 				<!-- 我邀请的人 -->
-				<view v-if="userInfo && userInfo.parentName" class="inviter-section">
-					<view class="section-title">我的邀请人</view>
+				<view class="inviter-section">
 
-					<!-- A. 平台邀请人卡片 (始终显示，或者仅在有中间人时显示) -->
-					<!-- 您的需求：如果 parentName 不是 "猩聚社"，则显示平台 -->
-					<view v-if="shouldShowPlatformCard" class="inviter-card platform-card" @click="goToPlatformIntro">
+					<!-- 1. 平台邀请人卡片 (移到最上方，固定显示) -->
+					<!-- 只要平台数据加载到了就显示，不再依赖 shouldShowPlatformCard -->
+					<view v-if="platformInfo.name" class="inviter-card platform-card" @click="goToPlatformIntro">
 						<view class="inviter-avatar">
-							<image :src="platformInfo.img" class="inviter-avatar-img" mode="aspectFill"></image>
+							<image :src="platformInfo.img" class="inviter-avatar-img platform-img" mode="aspectFill">
+							</image>
 						</view>
 						<view class="inviter-info">
 							<view class="inviter-name">{{ platformInfo.name }} <text class="tag-platform">平台</text>
@@ -47,7 +47,13 @@
 						</view>
 						<uni-icons type="right" size="16" color="#ccc"></uni-icons>
 					</view>
-					<!-- B. 个人上级邀请人 (UserInfo 中的 parent) -->
+
+					<!-- 2. "我的邀请人" 标题 (下移到这里) -->
+					<!-- 只有当有真实上级时才显示标题和卡片 -->
+					<view v-if="userInfo && userInfo.parentName" class="section-title" style="margin-top: 30rpx;">我的邀请人
+					</view>
+
+					<!-- 3. 个人上级邀请人 (UserInfo 中的 parent) -->
 					<view v-if="userInfo && userInfo.parentName" class="inviter-card" @click="viewParentCard">
 						<view class="inviter-avatar">
 							<image v-if="userInfo.parentAvatar" :src="userInfo.parentAvatar" class="inviter-avatar-img"
@@ -56,26 +62,18 @@
 						</view>
 						<view class="inviter-info">
 							<view class="inviter-name">{{ userInfo.parentName }}</view>
-							<!-- 如果 parentName 就是平台名，可以加个备注 -->
 							<view v-if="userInfo.parentName === '猩聚社'" class="inviter-desc">平台直属</view>
 						</view>
 					</view>
-					<!-- C. 如果既没有平台信息(网络错误?)也没有个人上级 -->
-					<view v-if="!shouldShowPlatformCard && (!userInfo || !userInfo.parentName)" class="empty-container">
-						<image class="empty-image" src="/static/images/empty-box.png" mode="widthFix"></image>
-						<text class="empty-text">您不是通过邀请加入的哦</text>
+
+					<!-- 4. 空状态 (如果既没有个人上级) -->
+					<!-- 注意：之前这里有个 !shouldShowPlatformCard 判断，现在去掉了，因为平台始终显示 -->
+					<!-- 现在的逻辑是：如果没有上级 parentName，则显示"不是通过邀请加入"的提示 -->
+					<view v-if="userInfo && !userInfo.parentName" class="empty-container"
+						style="padding-top: 40rpx; padding-bottom: 20rpx;">
+						<text class="empty-text" style="font-size: 24rpx;">您不是通过个人邀请加入的哦</text>
 					</view>
 
-					<!-- <view class="inviter-card">
-						<view class="inviter-avatar">
-							<image v-if="userInfo.parentAvatar" :src="userInfo.parentAvatar" class="inviter-avatar-img"
-								mode="aspectFill"></image>
-							<view v-else class="avatar-placeholder">{{ userInfo.parentName.charAt(0) }}</view>
-						</view>
-						<view class="inviter-info">
-							<view class="inviter-name">{{ userInfo.parentName }}</view>
-						</view>
-					</view> -->
 				</view>
 				<!-- <view v-else class="empty-container">
 					<image class="empty-image" src="/static/images/empty-box.png" mode="widthFix"></image>
@@ -490,7 +488,8 @@
 
 		// 3. 如果上级是平台（ID为0或特定值，或者名字是猩聚社），可能不跳转或跳转平台介绍
 		if (userInfo.value.parentName === '猩聚社') {
-			return; // 或者 goToPlatformIntro()
+			goToPlatformIntro();
+			return;
 		}
 
 		// 4. 构建参数
@@ -500,7 +499,7 @@
 
 		// 5. 跳转名片页
 		// 关键：带上 fromShare=1，后端接口会根据这个参数判断是否免支付查看
-		const url = `/pages/applicationBusinessCard/applicationBusinessCard?id=${targetId}` +
+		const url = `/packages/applicationBusinessCard/applicationBusinessCard?id=${targetId}` +
 			`&name=${encodeURIComponent(name)}` +
 			`&avatar=${encodeURIComponent(avatar)}` +
 			`&fromShare=1`; // 【关键参数】
@@ -1176,6 +1175,21 @@
 		height: 100%;
 	}
 
+	/* 专门给平台头像加个白色背景，看起来更像 logo */
+	.platform-avatar-bg {
+		background: #fff !important;
+		/* 覆盖原来的渐变色 */
+		border: 1rpx solid #eee;
+		/* 加个边框防止和白底混在一起 */
+	}
+
+	/* 控制图片大小，不要撑满，留点呼吸感 */
+	.platform-img {
+		width: 70% !important;
+		/* 缩小到 70% */
+		height: 70% !important;
+	}
+
 	.inviter-info {
 		flex: 1;
 	}
@@ -1386,5 +1400,20 @@
 		padding: 4rpx 12rpx;
 		border-radius: 20rpx;
 		margin-right: 10rpx;
+	}
+
+	/* 平台头像优化 */
+	.platform-card .inviter-avatar {
+		background: #fff !important;
+		/* 白色底 */
+		border: 1rpx solid #f0f0f0;
+	}
+
+	.platform-card .inviter-avatar-img {
+		width: 75% !important;
+		/* 缩小图片比例 */
+		height: 75% !important;
+		border-radius: 0;
+		/* 如果 logo 是方形的，这里可以去掉圆角；如果是圆框内的logo，保持父级overflow:hidden即可 */
 	}
 </style>

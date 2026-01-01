@@ -17,14 +17,22 @@ const _sfc_main = {
     const popup = common_vendor.ref(null);
     const targetUser = common_vendor.ref({});
     const emit = __emit;
+    const currentUserId = common_vendor.ref(null);
+    const isSelf = common_vendor.computed(() => {
+      return currentUserId.value && targetUser.value.id && String(currentUserId.value) === String(targetUser.value.id);
+    });
     const open = (user) => {
       targetUser.value = user || {};
+      currentUserId.value = common_vendor.index.getStorageSync("userId");
       popup.value.open();
     };
     const close = () => {
       popup.value.close();
     };
     const handleAction = (type) => {
+      if (type === "addCircle" && isSelf.value) {
+        return;
+      }
       close();
       emit("action", {
         type,
@@ -50,23 +58,25 @@ const _sfc_main = {
           size: "28",
           color: "#fff"
         }),
-        f: common_vendor.o(($event) => handleAction("addCircle")),
-        g: common_vendor.p({
+        f: common_vendor.t(isSelf.value ? "本人" : "申请入圈"),
+        g: common_vendor.n(isSelf.value ? "disabled" : "primary"),
+        h: common_vendor.o(($event) => handleAction("addCircle")),
+        i: common_vendor.p({
           type: "person",
           size: "28",
           color: "#FF7009"
         }),
-        h: common_vendor.o(($event) => handleAction("viewCard")),
-        i: common_vendor.p({
+        j: common_vendor.o(($event) => handleAction("viewCard")),
+        k: common_vendor.p({
           type: "star",
           size: "24",
           color: "#666"
         }),
-        j: common_vendor.o(($event) => handleAction("comment")),
-        k: common_vendor.sr(popup, "5571075f-0", {
+        l: common_vendor.o(($event) => handleAction("comment")),
+        m: common_vendor.sr(popup, "5571075f-0", {
           "k": "popup"
         }),
-        l: common_vendor.p({
+        n: common_vendor.p({
           type: "center",
           ["mask-click"]: true
         })

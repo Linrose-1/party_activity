@@ -5,15 +5,17 @@ if (!Array) {
   const _easycom_uni_easyinput2 = common_vendor.resolveComponent("uni-easyinput");
   const _easycom_uni_forms_item2 = common_vendor.resolveComponent("uni-forms-item");
   const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
+  const _easycom_DragImageUploader2 = common_vendor.resolveComponent("DragImageUploader");
   const _easycom_uni_forms2 = common_vendor.resolveComponent("uni-forms");
-  (_easycom_uni_easyinput2 + _easycom_uni_forms_item2 + _easycom_uni_icons2 + _easycom_uni_forms2)();
+  (_easycom_uni_easyinput2 + _easycom_uni_forms_item2 + _easycom_uni_icons2 + _easycom_DragImageUploader2 + _easycom_uni_forms2)();
 }
 const _easycom_uni_easyinput = () => "../uni_modules/uni-easyinput/components/uni-easyinput/uni-easyinput.js";
 const _easycom_uni_forms_item = () => "../uni_modules/uni-forms/components/uni-forms-item/uni-forms-item.js";
 const _easycom_uni_icons = () => "../uni_modules/uni-icons/components/uni-icons/uni-icons.js";
+const _easycom_DragImageUploader = () => "./DragImageUploader/DragImageUploader.js";
 const _easycom_uni_forms = () => "../uni_modules/uni-forms/components/uni-forms/uni-forms.js";
 if (!Math) {
-  (_easycom_uni_easyinput + _easycom_uni_forms_item + _easycom_uni_icons + _easycom_uni_forms)();
+  (_easycom_uni_easyinput + _easycom_uni_forms_item + _easycom_uni_icons + _easycom_DragImageUploader + _easycom_uni_forms)();
 }
 const _sfc_main = {
   __name: "sponsor-popup",
@@ -97,7 +99,6 @@ const _sfc_main = {
             desc: ""
           }];
         }
-        common_vendor.nextTick$1(() => initDragList(form.value.galleryImageUrls));
       }
     });
     const chooseLocation = () => {
@@ -188,7 +189,7 @@ const _sfc_main = {
         count: 9 - form.value.galleryImageUrls.length,
         success: async (res) => {
           common_vendor.index.showLoading({
-            title: "上传"
+            title: "上传中..."
           });
           const ps = res.tempFiles.map((f) => utils_upload.uploadFile({
             path: f.path
@@ -197,112 +198,10 @@ const _sfc_main = {
           }));
           const rs = await Promise.all(ps);
           common_vendor.index.hideLoading();
-          form.value.galleryImageUrls.push(...rs.filter((r) => r.data).map((r) => r.data));
+          const successUrls = rs.filter((r) => r.data).map((r) => r.data);
+          form.value.galleryImageUrls.push(...successUrls);
         }
       });
-    };
-    const deleteImage = (i) => {
-      if (form.value.galleryImageUrls)
-        form.value.galleryImageUrls.splice(i, 1);
-    };
-    const dragDisplayList = common_vendor.ref([]);
-    const dragItemWidth = common_vendor.ref(0);
-    const dragItemHeight = common_vendor.ref(0);
-    const dragAreaHeight = common_vendor.ref(0);
-    const isDragging = common_vendor.ref(false);
-    const dragIndex = common_vendor.ref(-1);
-    const addBtnPos = common_vendor.computed(() => {
-      const c = (form.value.galleryImageUrls || []).length;
-      if (c >= 9)
-        return {
-          left: 0,
-          top: 0
-        };
-      const r = Math.floor(c / 3), col = c % 3;
-      return {
-        left: col * dragItemWidth.value,
-        top: r * dragItemHeight.value
-      };
-    });
-    common_vendor.watch(() => form.value.galleryImageUrls, (v) => {
-      if (!isDragging.value && props.visible)
-        initDragList(v || []);
-    }, {
-      deep: true
-    });
-    const initDragList = (l) => {
-      const sys = common_vendor.index.getSystemInfoSync();
-      const w = sys.windowWidth - common_vendor.index.upx2px(60);
-      dragItemWidth.value = w / 3;
-      dragItemHeight.value = dragItemWidth.value;
-      dragDisplayList.value = (l || []).map((u, i) => {
-        const {
-          x,
-          y
-        } = getPos(i);
-        return {
-          id: `sp_${i}_${Math.random()}`,
-          data: u,
-          x,
-          y,
-          zIndex: 1,
-          realIndex: i
-        };
-      });
-      updateDragHeight(l ? l.length : 0);
-    };
-    const getPos = (i) => {
-      const r = Math.floor(i / 3), c = i % 3;
-      return {
-        x: c * dragItemWidth.value,
-        y: r * dragItemHeight.value
-      };
-    };
-    const updateDragHeight = (c) => {
-      const t = c < 9 ? c + 1 : c;
-      dragAreaHeight.value = Math.ceil(t / 3) * dragItemHeight.value;
-    };
-    const onMovableStart = (i) => {
-      isDragging.value = true;
-      dragIndex.value = i;
-      dragDisplayList.value[i].zIndex = 99;
-    };
-    const onMovableChange = (e, i) => {
-      if (!isDragging.value || i !== dragIndex.value)
-        return;
-      const x = e.detail.x, y = e.detail.y, c = Math.floor((x + dragItemWidth.value / 2) / dragItemWidth.value), r = Math.floor((y + dragItemHeight.value / 2) / dragItemHeight.value);
-      let t = r * 3 + c;
-      if (t < 0)
-        t = 0;
-      if (t >= dragDisplayList.value.length)
-        t = dragDisplayList.value.length - 1;
-      if (t !== dragIndex.value) {
-        const m = dragDisplayList.value[dragIndex.value];
-        dragDisplayList.value.splice(dragIndex.value, 1);
-        dragDisplayList.value.splice(t, 0, m);
-        dragDisplayList.value.forEach((o, k) => {
-          if (k !== t) {
-            const p = getPos(k);
-            o.x = p.x;
-            o.y = p.y;
-          }
-        });
-        dragIndex.value = t;
-      }
-    };
-    const onMovableEnd = () => {
-      isDragging.value = false;
-      if (dragIndex.value !== -1) {
-        const o = dragDisplayList.value[dragIndex.value];
-        o.zIndex = 1;
-        const p = getPos(dragIndex.value);
-        common_vendor.nextTick$1(() => {
-          o.x = p.x;
-          o.y = p.y;
-        });
-        form.value.galleryImageUrls = dragDisplayList.value.map((x) => x.data);
-      }
-      dragIndex.value = -1;
     };
     return (_ctx, _cache) => {
       return common_vendor.e({
@@ -416,69 +315,44 @@ const _sfc_main = {
         }),
         N: goodsList.value.length === 0
       }, goodsList.value.length === 0 ? {} : {}) : {}, {
-        O: common_vendor.f(dragDisplayList.value, (item, index, i0) => {
-          return {
-            a: item.data,
-            b: common_vendor.o(($event) => deleteImage(item.realIndex), item.id),
-            c: item.id,
-            d: item.x,
-            e: item.y,
-            f: item.zIndex,
-            g: !isDragging.value && item.zIndex === 1,
-            h: common_vendor.o(($event) => onMovableChange($event, index), item.id),
-            i: common_vendor.o(($event) => onMovableStart(index), item.id),
-            j: common_vendor.o(onMovableEnd, item.id)
-          };
+        O: common_vendor.o(uploadGallery),
+        P: common_vendor.o(($event) => form.value.galleryImageUrls = $event),
+        Q: common_vendor.p({
+          ["max-count"]: 9,
+          modelValue: form.value.galleryImageUrls
         }),
-        P: dragItemWidth.value + "px",
-        Q: dragItemHeight.value + "px",
-        R: form.value.galleryImageUrls.length < 9
-      }, form.value.galleryImageUrls.length < 9 ? {
-        S: common_vendor.p({
-          type: "plusempty",
-          size: "24",
-          color: "#ccc"
-        }),
-        T: dragItemWidth.value + "px",
-        U: dragItemHeight.value + "px",
-        V: addBtnPos.value.left + "px",
-        W: addBtnPos.value.top + "px",
-        X: common_vendor.o(uploadGallery)
-      } : {}, {
-        Y: dragAreaHeight.value + "px",
-        Z: dragAreaHeight.value + "px",
-        aa: common_vendor.p({
+        R: common_vendor.p({
           label: "品牌图集"
         }),
-        ab: form.value.contactAvatar
+        S: form.value.contactAvatar
       }, form.value.contactAvatar ? {
-        ac: form.value.contactAvatar
+        T: form.value.contactAvatar
       } : {
-        ad: common_vendor.p({
+        U: common_vendor.p({
           type: "camera-filled",
           size: "20",
           color: "#999"
         })
       }, {
-        ae: common_vendor.o(uploadAvatar),
-        af: common_vendor.o(($event) => form.value.contactName = $event),
-        ag: common_vendor.p({
+        V: common_vendor.o(uploadAvatar),
+        W: common_vendor.o(($event) => form.value.contactName = $event),
+        X: common_vendor.p({
           placeholder: "请输入负责人姓名",
           modelValue: form.value.contactName
         }),
-        ah: common_vendor.p({
+        Y: common_vendor.p({
           label: "负责人信息 (选填)"
         }),
-        ai: common_vendor.p({
+        Z: common_vendor.p({
           model: form.value,
           ["label-position"]: "top",
           ["label-width"]: "100%"
         }),
-        aj: __props.visible ? 1 : "",
-        ak: common_vendor.o(() => {
+        aa: __props.visible ? 1 : "",
+        ab: common_vendor.o(() => {
         }),
-        al: __props.visible ? 1 : "",
-        am: common_vendor.o(close)
+        ac: __props.visible ? 1 : "",
+        ad: common_vendor.o(close)
       });
     };
   }

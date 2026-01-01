@@ -1,216 +1,250 @@
 <template>
 	<view class="page">
 		<!-- ================== 顶部提示区 ================== -->
-		<!-- 实名认证提示 -->
 		<view v-if="!isUserVerified" class="auth-reminder" @click="goToAuthPage">
-			<uni-icons type="info-filled" size="18" color="#e6a23c"></uni-icons>
-			<text class="reminder-text">为保障活动用户安全，请先进行实名认证，点击前往</text>
-			<text class="reminder-arrow">›</text>
+			<view class="reminder-content">
+				<uni-icons type="info-filled" size="18" color="#FF6F00"></uni-icons>
+				<text class="reminder-text">为保障活动用户安全，请先进行实名认证</text>
+			</view>
+			<view class="reminder-action">
+				<text>去认证</text>
+				<uni-icons type="right" size="12" color="#FF6F00"></uni-icons>
+			</view>
 		</view>
 
-		<!-- ================== 1. 基本信息表单 ================== -->
-		<view class="form-section">
-			<view class="section-title">基本信息</view>
-			<uni-forms :label-width="80" label-position="top">
-				<!-- 聚会名称 -->
-				<uni-forms-item label="聚会名称" required>
-					<uni-easyinput v-model="form.activityTitle" placeholder="请输入聚会名称" />
-				</uni-forms-item>
+		<scroll-view scroll-y class="main-scroll">
+			<!-- ================== 1. 基本信息表单 ================== -->
+			<view class="form-card">
+				<view class="card-header">
+					<view class="header-line"></view>
+					<text class="header-title">基本信息</text>
+				</view>
 
-				<!-- 聚会类型 -->
-				<uni-forms-item label="聚会类型" required>
-					<uni-data-select v-model="form.tag" :localdata="tagOptions" placeholder="请选择类型"></uni-data-select>
-				</uni-forms-item>
+				<uni-forms :label-width="80" label-position="top" class="custom-forms">
+					<!-- 聚会名称 -->
+					<uni-forms-item label="聚会名称" required>
+						<uni-easyinput v-model="form.activityTitle" placeholder="请输入聚会名称" :inputBorder="true"
+							primaryColor="#FF6F00" :styles="inputStyles" />
+					</uni-forms-item>
 
-				<!-- 聚会封面 -->
-				<uni-forms-item label="聚会封面">
-					<view class="cover-upload" @click="uploadCover">
-						<image v-if="form.coverImageUrl" :src="form.coverImageUrl" mode="aspectFill"></image>
-						<text v-else>点击上传封面 (5:4或4:3)</text>
-					</view>
-				</uni-forms-item>
+					<!-- 聚会类型 -->
+					<uni-forms-item label="聚会类型" required>
+						<uni-data-select v-model="form.tag" :localdata="tagOptions" placeholder="请选择类型"
+							:clear="false"></uni-data-select>
+					</uni-forms-item>
 
-				<!-- 聚会图集 (支持拖拽排序) -->
-				<uni-forms-item label="聚会图集">
-					<view class="image-drag-container"
-						:style="{ height: dragAreaHeight > 0 ? dragAreaHeight + 'px' : '0px' }">
-						<movable-area class="drag-area" :style="{ height: dragAreaHeight + 'px' }">
-							<movable-view v-for="(item, index) in dragDisplayList" :key="item.id" :x="item.x"
-								:y="item.y" direction="all" :z-index="item.zIndex"
-								:disabled="!isDragging && item.zIndex === 1" class="drag-item"
-								:style="{ width: dragItemWidth + 'px', height: dragItemHeight + 'px' }"
-								@change="onMovableChange($event, index)" @touchstart="onMovableStart(index)"
-								@touchend="onMovableEnd">
-								<view class="item-inner">
-									<view class="image-wrapper-drag">
-										<image :src="item.data" mode="aspectFill" class="preview-image"
-											@click.stop="previewActivityImage(item.realIndex)" />
-										<view class="delete-btn" @click.stop="deleteActivityImage(item.realIndex)">×
-										</view>
-									</view>
+					<!-- 聚会封面 (5:4 比例) -->
+					<uni-forms-item label="聚会封面">
+						<view class="cover-upload-box" @click="uploadCover">
+							<image v-if="form.coverImageUrl" :src="form.coverImageUrl" mode="aspectFill"
+								class="uploaded-cover"></image>
+							<view v-else class="upload-placeholder">
+								<view class="icon-circle">
+									<uni-icons type="camera-filled" size="32" color="#FF6F00"></uni-icons>
 								</view>
-							</movable-view>
-						</movable-area>
-					</view>
-					<!-- 添加图片按钮 -->
-					<view class="add-btn-wrapper" v-if="form.activityCoverImageUrls.length < 9"
-						@click="handleActivityImagesUpload">
-						<view class="add-placeholder">
-							<uni-icons type="plusempty" size="30" color="#ccc"></uni-icons>
-							<text>添加</text>
+								<text class="tip-text">点击上传封面</text>
+								<text class="sub-tip">(建议比例 5:4 或 4:3)</text>
+							</view>
 						</view>
-					</view>
-				</uni-forms-item>
+					</uni-forms-item>
 
-				<!-- 时间选择 -->
-				<uni-forms-item label="聚会时间" required>
-					<view @click="isPickerOpen = true">
-						<uni-datetime-picker type="datetimerange" v-model="timeRange" rangeSeparator="至"
-							@change="isPickerOpen = false" @maskClick="isPickerOpen = false" />
-					</view>
-				</uni-forms-item>
+					<!-- 聚会图集 -->
+					<uni-forms-item label="聚会图集">
+						<DragImageUploader v-model="form.activityCoverImageUrls" :max-count="9"
+							@add-image="handleActivityImagesUpload" />
+					</uni-forms-item>
 
-				<uni-forms-item label="报名时间" required>
-					<view @click="isPickerOpen = true">
-						<uni-datetime-picker type="datetimerange" v-model="enrollTimeRange" rangeSeparator="至"
-							@change="isPickerOpen = false" @maskClick="isPickerOpen = false" />
-					</view>
-				</uni-forms-item>
-
-				<!-- 地点选择 -->
-				<uni-forms-item label="聚会地点" required>
-					<view class="uni-list-cell-db">
-						<view @click="openMapToChooseLocation" class="uni-input">
-							<text v-if="form.locationAddress">{{ form.locationAddress }}</text>
-							<text v-else class="placeholder">点击选择位置</text>
-							<text class="arrow">></text>
+					<!-- 时间选择 (各占一行) -->
+					<uni-forms-item label="聚会时间" required>
+						<view @click="isPickerOpen = true" class="picker-trigger-box">
+							<uni-datetime-picker type="datetimerange" v-model="timeRange" rangeSeparator=" 至 "
+								@change="isPickerOpen = false" @maskClick="isPickerOpen = false" />
+							<!-- <uni-icons type="calendar" size="18" color="#999" class="picker-icon"></uni-icons> -->
 						</view>
-					</view>
-				</uni-forms-item>
+					</uni-forms-item>
 
-				<!-- 合作店铺 -->
-				<uni-forms-item label="合作聚店" :label-width="80">
-					<view class="uni-list-cell-db">
-						<view @click="goToSelectShop" class="uni-input">
-							<text v-if="associatedStoreName">{{ associatedStoreName }}</text>
-							<text v-else class="placeholder">点击选择合作店铺</text>
-							<text class="arrow">></text>
+					<uni-forms-item label="报名时间" required>
+						<view @click="isPickerOpen = true" class="picker-trigger-box">
+							<uni-datetime-picker type="datetimerange" v-model="enrollTimeRange" rangeSeparator=" 至 "
+								@change="isPickerOpen = false" @maskClick="isPickerOpen = false" />
+							<!-- <uni-icons type="calendar" size="18" color="#999" class="picker-icon"></uni-icons> -->
 						</view>
+					</uni-forms-item>
+
+					<!-- 地点选择 (全边框样式) -->
+					<uni-forms-item label="聚会地点" required>
+						<view @click="openMapToChooseLocation" class="custom-picker-box">
+							<view class="picker-content">
+								<text v-if="form.locationAddress" class="has-value">{{ form.locationAddress }}</text>
+								<text v-else class="placeholder">点击选择位置</text>
+							</view>
+							<uni-icons type="location" size="20" color="#FF6F00"></uni-icons>
+						</view>
+					</uni-forms-item>
+
+					<!-- 合作店铺 -->
+					<uni-forms-item label="合作聚店">
+						<view @click="goToSelectShop" class="custom-picker-box">
+							<view class="picker-content">
+								<text v-if="associatedStoreName" class="has-value">{{ associatedStoreName }}</text>
+								<text v-else class="placeholder">点击选择合作店铺</text>
+							</view>
+							<uni-icons type="right" size="16" color="#ccc"></uni-icons>
+						</view>
+					</uni-forms-item>
+
+					<!-- 人数设置 -->
+					<view class="row-inputs">
+						<uni-forms-item label="人数上限" class="half-item">
+							<uni-easyinput type="number" v-model="form.totalSlots" placeholder="0" :inputBorder="true"
+								:styles="inputStyles" />
+						</uni-forms-item>
+						<uni-forms-item label="起聚人数" class="half-item">
+							<uni-easyinput type="number" v-model="form.limitSlots" placeholder="0" :inputBorder="true"
+								:styles="inputStyles" />
+						</uni-forms-item>
 					</view>
-				</uni-forms-item>
 
-				<!-- 人数设置 -->
-				<uni-forms-item label="人数上限">
-					<uni-easyinput type="number" v-model="form.totalSlots" placeholder="超过人数上限,不能报名" />
-				</uni-forms-item>
+					<!-- 费用类型 -->
+					<uni-forms-item label="报名类型" required>
+						<uni-data-checkbox v-model="form.activityFunds" :localdata="enrollmentOptions" mode="tag"
+							selectedColor="#FF6F00" selectedTextColor="#FF6F00"></uni-data-checkbox>
+					</uni-forms-item>
 
-				<uni-forms-item label="起聚人数">
-					<uni-easyinput type="number" v-model="form.limitSlots" placeholder="不达起聚人数,聚会取消" />
-				</uni-forms-item>
-
-				<!-- 费用类型 -->
-				<uni-forms-item label="报名类型" required>
-					<uni-data-checkbox v-model="form.activityFunds" :localdata="enrollmentOptions"
-						mode="button"></uni-data-checkbox>
-				</uni-forms-item>
-
-				<uni-forms-item label="单人费用" v-if="form.activityFunds === 1" required>
-					<uni-easyinput type="digit" v-model="form.registrationFee" placeholder="请输入聚会费用(元)" />
-				</uni-forms-item>
-			</uni-forms>
-		</view>
-
-		<!-- ============ 2. 赞助商管理模块 ============ -->
-		<view class="form-section">
-			<!-- 头部：标题与折叠状态 -->
-			<view class="section-header" @click="isSponsorExpanded = !isSponsorExpanded">
-				<view class="section-title" style="margin-bottom:0; border:none;">赞助信息</view>
-				<view class="header-right">
-					<text class="status-text">
-						{{ sponsorsList.length > 0 ? `已添加 ${sponsorsList.length} 位` : '暂无赞助商' }}
-					</text>
-					<uni-icons :type="isSponsorExpanded ? 'top' : 'bottom'" size="16" color="#999"></uni-icons>
-				</view>
+					<uni-forms-item label="单人费用" v-if="form.activityFunds === 1" required>
+						<uni-easyinput type="digit" v-model="form.registrationFee" placeholder="请输入聚会费用(元)"
+							:inputBorder="true" :styles="inputStyles">
+							<template #right>
+								<text style="padding-right: 20rpx; color: #666;">元</text>
+							</template>
+						</uni-easyinput>
+					</uni-forms-item>
+				</uni-forms>
 			</view>
 
-			<!-- 展开的内容：赞助商列表 -->
-			<view v-if="isSponsorExpanded" class="sponsor-content">
-				<view v-for="(item, index) in sponsorsList" :key="index" class="sponsor-card">
-					<image :src="item.logoUrl" mode="aspectFill" class="sponsor-logo-mini"></image>
-					<view class="sponsor-info-mini">
-						<text class="s-name">{{ item.sponsorName }}</text>
-						<text class="s-desc">
-							{{ item.sponsorType === 1 ? `现金 ￥${item.cashAmount}` : `物品: ${item.goodsDescription}` }}
+			<!-- ============ 2. 赞助商管理模块 ============ -->
+			<view class="form-card" v-if="form.activityFunds !== 1">
+				<view class="section-header" @click="isSponsorExpanded = !isSponsorExpanded">
+					<view class="header-left">
+						<view class="header-line"></view>
+						<text class="header-title">赞助信息</text>
+					</view>
+					<view class="header-right">
+						<text class="status-text">
+							{{ sponsorsList.length > 0 ? `已添加 ${sponsorsList.length} 位` : '暂无赞助商' }}
 						</text>
+						<uni-icons :type="isSponsorExpanded ? 'top' : 'bottom'" size="14" color="#999"></uni-icons>
 					</view>
-					<view class="sponsor-actions">
-						<view class="action-icon edit" @click.stop="handleEditSponsor(index)">
-							<uni-icons type="compose" size="20" color="#FF6F00"></uni-icons>
+				</view>
+
+				<view v-if="isSponsorExpanded" class="sponsor-content">
+					<view v-for="(item, index) in sponsorsList" :key="index" class="sponsor-card">
+						<image :src="item.logoUrl" mode="aspectFill" class="sponsor-logo-mini"></image>
+						<view class="sponsor-info-mini">
+							<text class="s-name">{{ item.sponsorName }}</text>
+							<view class="s-tag-wrap">
+								<text
+									class="s-tag">{{ item.sponsorType === 1 ? '现金' : (item.sponsorType === 2 ? '物品' : '混合') }}</text>
+								<text class="s-desc-text">
+									{{ item.sponsorType === 1 ? `￥${item.cashAmount}` : item.goodsDescription }}
+								</text>
+							</view>
 						</view>
-						<view class="action-icon del" @click.stop="handleDeleteSponsor(index)">
-							<uni-icons type="trash" size="20" color="#dd524d"></uni-icons>
+						<view class="sponsor-actions">
+							<view class="icon-btn edit" @click.stop="handleEditSponsor(index)">
+								<uni-icons type="compose" size="18" color="#FF6F00"></uni-icons>
+							</view>
+							<view class="icon-btn del" @click.stop="handleDeleteSponsor(index)">
+								<uni-icons type="trash" size="18" color="#ff4d4f"></uni-icons>
+							</view>
 						</view>
 					</view>
-				</view>
 
-				<!-- 添加赞助商按钮 -->
-				<view class="add-sponsor-btn" @click="handleAddSponsor">
-					<uni-icons type="plusempty" size="18" color="#FF6F00"></uni-icons>
-					<text>添加赞助商</text>
-				</view>
-			</view>
-		</view>
-
-		<!-- ============ 3. 聚会详情与环节 ============ -->
-		<view class="form-section">
-			<view class="section-title">聚会详情</view>
-
-			<uni-forms :label-width="80" label-position="top">
-				<uni-forms-item label="聚会介绍" required :label-width="80">
-					<uni-easyinput type="textarea" autoHeight v-model="form.activityDescription"
-						placeholder="请输入聚会详细介绍" />
-				</uni-forms-item>
-			</uni-forms>
-
-			<!-- 动态环节列表 -->
-			<view v-for="(item, index) in form.activitySessions" :key="index" class="activity-item">
-				<view class="input-group">
-					<uni-easyinput v-model="item.sessionTitle" placeholder="环节标题" />
-					<uni-easyinput v-model="item.sessionDescription" placeholder="环节描述" />
-					<uni-icons type="close" @click="removeAgenda(index)" />
-				</view>
-			</view>
-			<view class="add-btn" @click="addAgenda">
-				<uni-icons type="plusempty" color="red" /><text>添加聚会环节</text>
-			</view>
-		</view>
-
-		<!-- ============ 4. 组织者信息 ============ -->
-		<view class="form-section">
-			<view class="section-title">组织者信息</view>
-			<uni-forms :label-width="80" label-position="top">
-				<uni-forms-item label="组织者" required>
-					<uni-easyinput v-model="form.organizerUnitName" placeholder="请输入组织者名称" />
-				</uni-forms-item>
-				<uni-forms-item label="联系电话" required>
-					<uni-easyinput type="number" v-model="form.organizerContactPhone" placeholder="请输入联系电话" />
-				</uni-forms-item>
-				<uni-forms-item label="收款码" v-if="form.activityFunds === 1" :required="true">
-					<view class="cover-upload" @click="uploadCode">
-						<image v-if="form.organizerPaymentQrCodeUrl" :src="form.organizerPaymentQrCodeUrl"
-							mode="aspectFit"></image>
-						<text v-else>点击上传收款码</text>
+					<view class="add-dashed-btn" @click="handleAddSponsor">
+						<uni-icons type="plusempty" size="16" color="#FF6F00"></uni-icons>
+						<text>添加赞助商</text>
 					</view>
-				</uni-forms-item>
-			</uni-forms>
-		</view>
+				</view>
+			</view>
 
-		<view class="form-bottom">到底啦，请发起聚会吧！</view>
+			<!-- ============ 3. 聚会详情与环节 ============ -->
+			<view class="form-card">
+				<view class="card-header">
+					<view class="header-line"></view>
+					<text class="header-title">聚会详情</text>
+				</view>
+
+				<uni-forms :label-width="80" label-position="top">
+					<uni-forms-item label="聚会介绍" required>
+						<uni-easyinput type="textarea" autoHeight v-model="form.activityDescription"
+							placeholder="请输入聚会详细介绍，让大家更了解活动内容~" :inputBorder="true" :styles="inputStyles" />
+					</uni-forms-item>
+				</uni-forms>
+
+				<!-- 聚会环节 Label -->
+				<view class="subsection-title">聚会环节</view>
+
+				<view v-for="(item, index) in form.activitySessions" :key="index" class="session-card">
+					<view class="session-header">
+						<text class="session-index">环节 {{ index + 1 }}</text>
+						<view class="session-del" @click="removeAgenda(index)">
+							<uni-icons type="trash" size="16" color="#999"></uni-icons>
+						</view>
+					</view>
+					<view class="session-inputs">
+						<uni-easyinput v-model="item.sessionTitle" placeholder="请输入环节标题" :inputBorder="true"
+							class="mb-20" :styles="inputStyles" />
+						<uni-easyinput v-model="item.sessionDescription" placeholder="请输入环节描述" :inputBorder="true"
+							:styles="inputStyles" />
+					</view>
+				</view>
+
+				<view class="add-dashed-btn" @click="addAgenda">
+					<uni-icons type="plusempty" size="16" color="#FF6F00"></uni-icons>
+					<text>添加聚会环节</text>
+				</view>
+			</view>
+
+			<!-- ============ 4. 组织者信息 ============ -->
+			<view class="form-card">
+				<view class="card-header">
+					<view class="header-line"></view>
+					<text class="header-title">组织者信息</text>
+				</view>
+				<uni-forms :label-width="80" label-position="top">
+					<uni-forms-item label="组织者" required>
+						<uni-easyinput v-model="form.organizerUnitName" placeholder="请输入组织者名称" :inputBorder="true"
+							:styles="inputStyles" />
+					</uni-forms-item>
+					<uni-forms-item label="联系电话" required>
+						<uni-easyinput type="number" v-model="form.organizerContactPhone" placeholder="请输入联系电话"
+							:inputBorder="true" :styles="inputStyles" />
+					</uni-forms-item>
+					<uni-forms-item label="收款码" v-if="form.activityFunds === 1" required>
+						<view class="qrcode-upload-box" @click="uploadCode">
+							<image v-if="form.organizerPaymentQrCodeUrl" :src="form.organizerPaymentQrCodeUrl"
+								mode="aspectFit" class="uploaded-qr"></image>
+							<view v-else class="upload-placeholder">
+								<uni-icons type="scan" size="28" color="#ccc"></uni-icons>
+								<text class="tip-text">上传收款码</text>
+							</view>
+						</view>
+					</uni-forms-item>
+				</uni-forms>
+			</view>
+
+			<view class="form-bottom">
+				<text>— 到底啦，请发起聚会吧 —</text>
+			</view>
+			<view style="height: 140rpx;"></view>
+		</scroll-view>
 
 		<!-- ============ 底部操作栏 ============ -->
-		<!-- z-index-low 用于解决被时间选择器遮挡的问题 -->
 		<view class="action-bar" :class="{ 'z-index-low': isPickerOpen }">
-			<view v-if="mode === 'create'" class="action-btn save-btn" @click="saveDraft">保存草稿</view>
+			<view v-if="mode === 'create'" class="action-btn save-btn" @click="saveDraft">
+				<uni-icons type="download" size="16" color="#666"></uni-icons>
+				<text>存草稿</text>
+			</view>
 			<view class="action-btn publish-btn" :class="{ 'disabled': isPublishing }" @click="publish">
 				{{ isPublishing ? '处理中...' : (mode === 'edit' ? '保存修改' : '发起聚会') }}
 			</view>
@@ -305,21 +339,13 @@
 	const currentSponsorIndex = ref(-1); // 当前正在编辑的索引
 	const currentSponsorData = ref(null); // 传递给弹窗的编辑数据
 
-	// --- 拖拽排序状态 ---
-	const dragDisplayList = ref([]); // 拖拽显示列表
-	const dragItemWidth = ref(0); // 拖拽项宽度
-	const dragItemHeight = ref(0); // 拖拽项高度
-	const dragAreaHeight = ref(0); // 拖拽区域总高度
-	const isDragging = ref(false); // 是否正在拖拽
-	const dragIndex = ref(-1); // 当前拖拽的索引
-
 	// ==============================================================================
 	// 3. 生命周期 (Lifecycle Hooks)
 	// ==============================================================================
 	onMounted(() => {
 		checkUserVerificationStatus();
 		getActiveType();
-		initDragLayout();
+		// initDragLayout();
 	});
 
 	onLoad(async (options) => {
@@ -488,23 +514,65 @@
 	const handleActivityImagesUpload = () => {
 		uni.chooseImage({
 			count: 9 - form.value.activityCoverImageUrls.length,
+			sizeType: ['original', 'compressed'], // 建议加上这个
+			sourceType: ['album', 'camera'], // 建议加上这个
 			success: async (res) => {
-				const list = await Promise.all(res.tempFiles.map(f => uploadFile({
-					path: f.path
-				}, {
-					directory: 'gallery'
-				})));
-				form.value.activityCoverImageUrls.push(...list.filter(r => r.data).map(r => r.data));
+				// 1. 显示加载提示，mask=true 防止用户在上传时误触其他按钮
+				uni.showLoading({
+					title: '正在上传...',
+					mask: true
+				});
+
+				try {
+					// 2. 并发上传所有选中的图片
+					// 注意：这里我们假设 res.tempFiles 是正确的文件数组
+					const uploadPromises = res.tempFiles.map(file => uploadFile({
+						path: file.path // 适配你的 uploadFile 接口参数格式
+					}, {
+						directory: 'gallery'
+					}));
+
+					const results = await Promise.all(uploadPromises);
+
+					// 3. 提取成功的 URL
+					const successfulUrls = results
+						.filter(res => res.data) // 过滤掉失败的
+						.map(res => res.data); // 提取 URL
+
+					// 4. 将新图片追加到表单数据中
+					if (successfulUrls.length > 0) {
+						form.value.activityCoverImageUrls.push(...successfulUrls);
+					}
+
+					// 可选：如果部分失败，提示一下
+					if (successfulUrls.length < res.tempFiles.length) {
+						uni.showToast({
+							title: '部分图片上传失败',
+							icon: 'none'
+						});
+					}
+				} catch (error) {
+					console.error('上传异常:', error);
+					uni.showToast({
+						title: '上传出错',
+						icon: 'none'
+					});
+				} finally {
+					// 5. 无论成功失败，一定要隐藏 Loading
+					uni.hideLoading();
+				}
+			},
+			fail: (err) => {
+				// 用户取消选择通常不需要提示错误
+				if (err.errMsg.indexOf('cancel') === -1) {
+					uni.showToast({
+						title: '选择图片失败',
+						icon: 'none'
+					});
+				}
 			}
 		});
 	};
-
-	const deleteActivityImage = (i) => form.value.activityCoverImageUrls.splice(i, 1);
-
-	const previewActivityImage = (i) => uni.previewImage({
-		urls: form.value.activityCoverImageUrls,
-		current: i
-	});
 
 	const uploadCode = async () => {
 		uni.chooseImage({
@@ -889,381 +957,504 @@
 			uni.hideLoading();
 		}
 	};
-
-	// ==============================================================================
-	// 8. 拖拽排序实现 (Drag & Drop Implementation)
-	// ==============================================================================
-	watch(() => form.value.activityCoverImageUrls, (val) => {
-		if (!isDragging.value) {
-			dragDisplayList.value = (val || []).map((u, i) => {
-				const r = Math.floor(i / 3),
-					c = i % 3;
-				return {
-					id: `pg_${i}`,
-					data: u,
-					x: c * dragItemWidth.value,
-					y: r * dragItemHeight.value,
-					zIndex: 1,
-					realIndex: i
-				};
-			});
-			dragAreaHeight.value = Math.ceil((val || []).length / 3) * dragItemHeight.value;
-		}
-	}, {
-		deep: true
-	});
-
-	const initDragLayout = () => {
-		const sys = uni.getSystemInfoSync();
-		dragItemWidth.value = (sys.windowWidth - uni.upx2px(100)) / 3;
-		dragItemHeight.value = uni.upx2px(210);
-	};
-
-	const onMovableStart = (i) => {
-		isDragging.value = true;
-		dragIndex.value = i;
-		dragDisplayList.value[i].zIndex = 99;
-	};
-
-	const onMovableChange = (e, i) => {
-		if (!isDragging.value || i !== dragIndex.value) return;
-		const x = e.detail.x;
-		const y = e.detail.y;
-		const c = Math.floor((x + dragItemWidth.value / 2) / dragItemWidth.value);
-		const r = Math.floor((y + dragItemHeight.value / 2) / dragItemHeight.value);
-		let target = r * 3 + c;
-		if (target < 0) target = 0;
-		if (target >= dragDisplayList.value.length) target = dragDisplayList.value.length - 1;
-		if (target !== dragIndex.value) {
-			const m = dragDisplayList.value[dragIndex.value];
-			dragDisplayList.value.splice(dragIndex.value, 1);
-			dragDisplayList.value.splice(target, 0, m);
-			dragDisplayList.value.forEach((item, idx) => {
-				if (idx !== target) {
-					const nr = Math.floor(idx / 3),
-						nc = idx % 3;
-					item.x = nc * dragItemWidth.value;
-					item.y = nr * dragItemHeight.value;
-				}
-			});
-			dragIndex.value = target;
-		}
-	};
-
-	const onMovableEnd = () => {
-		isDragging.value = false;
-		if (dragIndex.value !== -1) {
-			const item = dragDisplayList.value[dragIndex.value];
-			item.zIndex = 1;
-			const r = Math.floor(dragIndex.value / 3),
-				c = dragIndex.value % 3;
-			nextTick(() => {
-				item.x = c * dragItemWidth.value;
-				item.y = r * dragItemHeight.value;
-			});
-			form.value.activityCoverImageUrls = dragDisplayList.value.map(o => o.data);
-		}
-		dragIndex.value = -1;
-	};
 </script>
 
 <style lang="scss" scoped>
-	/* ============ 页面容器与全局 ============ */
+	/* 定义主题变量 */
+	$theme-color: #FF6F00;
+	$bg-color: #f5f7fa;
+	$card-bg: #ffffff;
+	$border-color: #e5e5e5;
+	$text-main: #333333;
+	$text-sub: #666666;
+	$input-border: #dcdfe6;
+
 	.page {
-		background-color: #f8f8f8;
-		padding-bottom: 200rpx;
-		/* 底部留白，防止内容被底部栏遮挡 */
-	}
-
-	.form-section {
-		background: #fff;
-		margin: 20rpx;
-		padding: 30rpx;
-		border-radius: 20rpx;
-	}
-
-	.section-title {
-		font-size: 32rpx;
-		font-weight: bold;
-		color: #FF6F00;
-		margin-bottom: 20rpx;
-		border-left: 10rpx solid #FF6F00;
-		padding-left: 20rpx;
-	}
-
-	/* ============ 顶部实名认证提示 ============ */
-	.auth-reminder {
+		background-color: $bg-color;
+		height: 100vh;
 		display: flex;
-		align-items: center;
-		padding: 20rpx;
-		margin: 20rpx;
-		background: #fdf6ec;
-		border-radius: 12rpx;
-		color: #e6a23c;
-
-		.reminder-text {
-			flex: 1;
-			margin: 0 10rpx;
-		}
-	}
-
-	/* ============ 上传组件通用样式 ============ */
-	.cover-upload {
-		border: 2rpx dashed #ccc;
-		border-radius: 16rpx;
-		background-color: #fafafa;
-		color: #999;
-		width: 100%;
-		aspect-ratio: 5 / 4;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		overflow: hidden;
-		position: relative;
-
-		image {
-			width: 100%;
-			height: 100%;
-		}
-	}
-
-	.add-btn-wrapper {
-		width: 33.33%;
-		height: 210rpx;
-		padding: 8rpx;
-		display: inline-block;
-		box-sizing: border-box;
-		vertical-align: top;
-	}
-
-	.add-placeholder {
-		width: 100%;
-		height: 100%;
-		border: 2rpx dashed #ccc;
-		border-radius: 12rpx;
-		display: flex;
-		align-items: center;
-		justify-content: center;
 		flex-direction: column;
 	}
 
-	/* ============ 赞助商模块样式 ============ */
+	.main-scroll {
+		flex: 1;
+		height: 0;
+	}
+
+	/* 卡片通用样式 */
+	.form-card {
+		background: $card-bg;
+		margin: 24rpx;
+		padding: 32rpx;
+		border-radius: 24rpx;
+		box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.03);
+	}
+
+	.card-header {
+		display: flex;
+		align-items: center;
+		margin-bottom: 30rpx;
+	}
+
+	.header-line {
+		width: 8rpx;
+		height: 32rpx;
+		background: linear-gradient(to bottom, $theme-color, lighten($theme-color, 20%));
+		border-radius: 4rpx;
+		margin-right: 16rpx;
+	}
+
+	.header-title {
+		font-size: 32rpx;
+		font-weight: bold;
+		color: $text-main;
+	}
+
+	/* 顶部实名认证提示 */
+	.auth-reminder {
+		margin: 24rpx 24rpx 0;
+		padding: 20rpx 24rpx;
+		background: #FFF8E1;
+		/* 浅橙色背景 */
+		border-radius: 16rpx;
+		border: 1px solid #FFE0B2;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+
+		.reminder-content {
+			display: flex;
+			align-items: center;
+			gap: 12rpx;
+		}
+
+		.reminder-text {
+			font-size: 26rpx;
+			color: #FF8F00;
+		}
+
+		.reminder-action {
+			display: flex;
+			align-items: center;
+			font-size: 24rpx;
+			color: $theme-color;
+			font-weight: bold;
+		}
+	}
+
+	/* 表单样式优化 */
+	:deep(.uni-forms-item__label) {
+		font-size: 28rpx;
+		color: #333;
+		font-weight: 600;
+		padding-bottom: 12rpx;
+	}
+
+	:deep(.uni-data-checklist .checklist-group .checklist-box.is--tag.is-checked) {
+		border-color: $theme-color !important;
+		background-color: rgba($theme-color, 0.1) !important;
+		color: $theme-color !important;
+	}
+
+	/* 封面上传框 (5:4 比例) */
+	.cover-upload-box {
+		width: 100%;
+		aspect-ratio: 5 / 4;
+		/* 核心比例 */
+		background-color: #fafafa;
+		border: 2rpx dashed $input-border;
+		border-radius: 16rpx;
+		overflow: hidden;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		position: relative;
+		transition: border-color 0.3s;
+
+		&:active {
+			border-color: $theme-color;
+			background-color: #fffaf5;
+		}
+
+		.uploaded-cover {
+			width: 100%;
+			height: 100%;
+		}
+
+		.upload-placeholder {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			color: #999;
+		}
+
+		.icon-circle {
+			width: 80rpx;
+			height: 80rpx;
+			background: #fff;
+			border-radius: 50%;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			margin-bottom: 16rpx;
+			box-shadow: 0 4rpx 10rpx rgba(0, 0, 0, 0.05);
+		}
+
+		.tip-text {
+			font-size: 28rpx;
+			color: #666;
+			font-weight: 500;
+		}
+
+		.sub-tip {
+			font-size: 22rpx;
+			color: #bbb;
+			margin-top: 6rpx;
+		}
+	}
+
+	/* 自定义选择框 (模仿输入框外观) */
+	.custom-picker-box {
+		width: 100%;
+		height: 72rpx;
+		/* 与 uni-easyinput 高度对齐 */
+		border: 1px solid $input-border;
+		border-radius: 8rpx;
+		padding: 0 20rpx;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		background-color: #fff;
+		box-sizing: border-box;
+
+		&:active {
+			border-color: $theme-color;
+		}
+
+		.picker-content {
+			flex: 1;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+		}
+
+		.has-value {
+			font-size: 28rpx;
+			color: $text-main;
+		}
+
+		.placeholder {
+			font-size: 28rpx;
+			color: #999;
+			/* 占位符颜色 */
+		}
+	}
+
+	/* 时间选择器触发框 */
+	.picker-trigger-box {
+		position: relative;
+
+		/* 让 uni-datetime-picker 撑开容器，并通过 deep 样式美化 */
+		:deep(.uni-date-x--border) {
+			border: 1px solid $input-border !important;
+			border-radius: 8rpx !important;
+			height: 72rpx !important;
+			box-sizing: border-box;
+		}
+
+		/* 隐藏原组件图标，使用自定义图标定位 */
+		:deep(.uni-date__icon-clear) {
+			right: 50rpx;
+		}
+
+		.picker-icon {
+			position: absolute;
+			right: 20rpx;
+			top: 50%;
+			transform: translateY(-50%);
+			pointer-events: none;
+		}
+	}
+
+	/* 布局辅助 */
+	.row-inputs {
+		display: flex;
+		gap: 24rpx;
+
+		.half-item {
+			flex: 1;
+			/* 解决 flex 子元素宽度溢出 */
+			min-width: 0;
+		}
+	}
+
+	.mb-20 {
+		margin-bottom: 20rpx;
+	}
+
+	/* 赞助商模块 */
 	.section-header {
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		padding-bottom: 20rpx;
+		padding-bottom: 10rpx;
+
+		.header-left {
+			display: flex;
+			align-items: center;
+		}
+
+		.header-right {
+			display: flex;
+			align-items: center;
+			gap: 8rpx;
+			font-size: 24rpx;
+			color: #999;
+		}
 	}
 
-	.header-right {
-		font-size: 26rpx;
-		color: #999;
-		display: flex;
-		align-items: center;
-		gap: 10rpx;
+	.sponsor-content {
+		margin-top: 20rpx;
 	}
 
 	.sponsor-card {
-		display: flex;
-		align-items: center;
 		background: #f9f9f9;
-		padding: 20rpx;
+		padding: 24rpx;
+		border-radius: 16rpx;
 		margin-bottom: 20rpx;
-		border-radius: 12rpx;
-	}
-
-	.sponsor-logo-mini {
-		width: 80rpx;
-		height: 80rpx;
-		border-radius: 8rpx;
-		margin-right: 20rpx;
-		background: #eee;
-	}
-
-	.sponsor-info-mini {
-		flex: 1;
-		display: flex;
-		flex-direction: column;
-	}
-
-	.s-name {
-		font-size: 28rpx;
-		font-weight: bold;
-		color: #333;
-	}
-
-	.s-desc {
-		font-size: 24rpx;
-		color: #666;
-		margin-top: 6rpx;
-	}
-
-	.sponsor-actions {
-		display: flex;
-		gap: 20rpx;
-	}
-
-	.action-icon {
-		padding: 10rpx;
-	}
-
-	.add-sponsor-btn {
-		border: 2rpx dashed #FF6F00;
-		color: #FF6F00;
-		padding: 20rpx;
-		text-align: center;
-		border-radius: 12rpx;
-		font-size: 28rpx;
 		display: flex;
 		align-items: center;
-		justify-content: center;
-		gap: 10rpx;
-	}
+		border: 1px solid #eee;
 
-	/* ============ 底部操作栏 ============ */
-	.action-bar {
-		position: fixed;
-		bottom: 0;
-		width: 100%;
-		display: flex;
-		background-color: #fff;
-		padding: 20rpx 0;
-		z-index: 99;
+		.sponsor-logo-mini {
+			width: 88rpx;
+			height: 88rpx;
+			border-radius: 12rpx;
+			margin-right: 24rpx;
+			background: #e0e0e0;
+			border: 1px solid #eee;
+		}
 
-		/* 当时间选择器打开时降低层级 */
-		&.z-index-low {
-			z-index: 1;
+		.sponsor-info-mini {
+			flex: 1;
+			display: flex;
+			flex-direction: column;
+			gap: 8rpx;
+		}
+
+		.s-name {
+			font-size: 28rpx;
+			font-weight: bold;
+			color: $text-main;
+		}
+
+		.s-tag-wrap {
+			display: flex;
+			align-items: center;
+			gap: 10rpx;
+		}
+
+		.s-tag {
+			font-size: 20rpx;
+			color: $theme-color;
+			background: rgba($theme-color, 0.1);
+			padding: 2rpx 10rpx;
+			border-radius: 8rpx;
+		}
+
+		.s-desc-text {
+			font-size: 24rpx;
+			color: $text-sub;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+			max-width: 300rpx;
+		}
+
+		.sponsor-actions {
+			display: flex;
+			gap: 16rpx;
+		}
+
+		.icon-btn {
+			width: 60rpx;
+			height: 60rpx;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			background: #fff;
+			border-radius: 50%;
+			box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.05);
+
+			&:active {
+				background: #f0f0f0;
+			}
 		}
 	}
 
-	.action-btn {
-		flex: 1;
-		margin: 10rpx;
-		padding: 24rpx;
-		text-align: center;
+	/* 虚线添加按钮 */
+	.add-dashed-btn {
+		width: 100%;
+		height: 88rpx;
+		border: 2rpx dashed $theme-color;
 		border-radius: 16rpx;
-		font-weight: bold;
-		font-size: 28rpx;
-	}
-
-	.save-btn {
-		background-color: #f0f0f0;
-		color: #666;
-	}
-
-	.publish-btn {
-		background-color: #FF6F00;
-		color: #fff;
-	}
-
-	.disabled {
-		opacity: 0.6;
-		pointer-events: none;
-	}
-
-	/* ============ 拖拽通用样式 ============ */
-	.image-drag-container {
-		width: 100%;
-		position: relative;
-		margin-top: 10rpx;
-		min-height: 200rpx;
-	}
-
-	.drag-area {
-		width: 100%;
-	}
-
-	.drag-item {
-		z-index: 10;
-	}
-
-	.item-inner {
-		width: 100%;
-		height: 100%;
-		padding: 8rpx;
-		box-sizing: border-box;
-	}
-
-	.image-wrapper-drag {
-		width: 100%;
-		height: 100%;
-		position: relative;
-		border-radius: 12rpx;
-		overflow: hidden;
-		background-color: #f0f0f0;
-	}
-
-	.preview-image {
-		width: 100%;
-		height: 100%;
-	}
-
-	.delete-btn {
-		position: absolute;
-		top: 0;
-		right: 0;
-		width: 40rpx;
-		height: 40rpx;
-		background: rgba(0, 0, 0, 0.6);
-		color: white;
+		background: rgba($theme-color, 0.02);
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		z-index: 20;
-		border-radius: 0 0 0 10rpx;
+		gap: 12rpx;
+		font-size: 28rpx;
+		color: $theme-color;
+		font-weight: 500;
+		margin-top: 10rpx;
+
+		&:active {
+			background: rgba($theme-color, 0.08);
+		}
 	}
 
-	/* ============ 其他辅助样式 ============ */
-	.uni-list-cell-db {
-		border: #e2e2e2 solid 1rpx;
-		border-radius: 10rpx;
-		padding: 20rpx;
+	/* 聚会环节 */
+	.subsection-title {
+		font-size: 30rpx;
+		font-weight: bold;
+		color: $text-main;
+		margin: 20rpx 0;
+		padding-left: 10rpx;
+		border-left: 6rpx solid $theme-color;
+	}
 
-		.uni-input {
+	.session-card {
+		background: #f9f9f9;
+		padding: 24rpx;
+		border-radius: 16rpx;
+		margin-bottom: 24rpx;
+		border: 1px solid #eee;
+
+		.session-header {
 			display: flex;
 			justify-content: space-between;
-			color: #333;
+			align-items: center;
+			margin-bottom: 16rpx;
 
-			.placeholder {
-				color: #999;
+			.session-index {
+				font-size: 26rpx;
+				font-weight: bold;
+				color: $theme-color;
+				background: #fff;
+				padding: 4rpx 16rpx;
+				border-radius: 20rpx;
+				box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.05);
 			}
 
-			.arrow {
-				color: #999;
+			.session-del {
+				padding: 10rpx;
 			}
 		}
 	}
 
-	.add-btn {
+	/* 二维码上传 */
+	.qrcode-upload-box {
+		width: 200rpx;
+		height: 200rpx;
+		border: 2rpx dashed $input-border;
+		border-radius: 12rpx;
+		background: #fafafa;
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		color: #FF6F00;
-		font-weight: bold;
-		margin-top: 20rpx;
-		gap: 10rpx;
+		overflow: hidden;
+
+		.uploaded-qr {
+			width: 100%;
+			height: 100%;
+		}
+
+		.upload-placeholder {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			gap: 8rpx;
+			color: #ccc;
+		}
+
+		.tip-text {
+			font-size: 22rpx;
+		}
 	}
 
 	.form-bottom {
 		text-align: center;
+		padding: 40rpx 0;
+		color: #ccc;
 		font-size: 24rpx;
-		color: #999;
 	}
 
-	.input-group {
+	/* 底部操作栏 */
+	.action-bar {
+		position: fixed;
+		bottom: 0;
+		width: 100%;
+		background: rgba(255, 255, 255, 0.98);
+		padding: 20rpx 32rpx;
+		padding-bottom: calc(20rpx + env(safe-area-inset-bottom));
+		box-shadow: 0 -4rpx 20rpx rgba(0, 0, 0, 0.05);
 		display: flex;
-		flex-direction: column;
-		gap: 20rpx;
-		position: relative;
-		margin-bottom: 20rpx;
-		padding: 20rpx;
-		background: #f9f9f9;
-		border-radius: 10rpx;
+		gap: 24rpx;
+		z-index: 99;
+		box-sizing: border-box;
 
-		.uni-icons {
-			position: absolute;
-			right: 20rpx;
-			top: 20rpx;
+		&.z-index-low {
+			z-index: -1 !important;
+			/* 关键：变成负数 */
+			opacity: 0;
+			/* 关键：选择时间时隐藏底部栏，体验更佳 */
 		}
+
+		.action-btn {
+			height: 88rpx;
+			border-radius: 44rpx;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			font-size: 30rpx;
+			font-weight: 600;
+		}
+
+		.save-btn {
+			flex: 1;
+			background: #f5f5f5;
+			color: $text-sub;
+			gap: 10rpx;
+			border: 1px solid #eee;
+
+			&:active {
+				background: #eeeeee;
+			}
+		}
+
+		.publish-btn {
+			flex: 2;
+			background: linear-gradient(135deg, lighten($theme-color, 5%), darken($theme-color, 5%));
+			color: #fff;
+			box-shadow: 0 8rpx 20rpx rgba($theme-color, 0.3);
+
+			&:active {
+				opacity: 0.9;
+			}
+
+			&.disabled {
+				background: #ccc;
+				box-shadow: none;
+				pointer-events: none;
+			}
+		}
+	}
+
+	/* 2. 暴力提升时间选择器层级 (防止被其他元素遮挡) */
+	:deep(.uni-date-mask),
+	:deep(.uni-date-range-popup),
+	:deep(.uni-datetime-picker--mask),
+	:deep(.uni-datetime-picker--popup) {
+		z-index: 9999 !important;
 	}
 </style>

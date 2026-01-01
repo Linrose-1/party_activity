@@ -1,0 +1,72 @@
+
+.drag-uploader-wrap.data-v-cd345a4e {
+		position: relative;
+		width: 100%;
+}
+.drag-container.data-v-cd345a4e {
+		width: 100%;
+		position: relative;
+}
+.drag-area.data-v-cd345a4e {
+		width: 100%;
+}
+.drag-item.data-v-cd345a4e {
+		/* movable-view 默认是 absolute */
+		z-index: 10;
+}
+
+	/* 绝对定位的添加按钮 */
+.add-btn-absolute.data-v-cd345a4e {
+		position: absolute;
+		z-index: 5;
+		/* 比默认图片的1高，比拖拽中的99低 */
+		transition: all 0.2s;
+		/* 让它在列表变化时平滑移动 */
+}
+.item-inner.data-v-cd345a4e {
+		width: 100%;
+		height: 100%;
+		padding: 12rpx;
+		/* 间距 */
+		box-sizing: border-box;
+		display: block;
+}
+.image-wrapper-drag.data-v-cd345a4e {
+		width: 100%;
+		height: 100%;
+		position: relative;
+		border-radius: 12rpx;
+		overflow: hidden;
+		background-color: #f0f0f0;
+}
+.preview-img.data-v-cd345a4e {
+		width: 100%;
+		height: 100%;
+		display: block;
+}
+.delete-btn.data-v-cd345a4e {
+		position: absolute;
+		top: 0;
+		right: 0;
+		width: 40rpx;
+		height: 40rpx;
+		background: rgba(0, 0, 0, 0.5);
+		color: #fff;
+		text-align: center;
+		line-height: 40rpx;
+		font-size: 32rpx;
+		z-index: 20;
+		border-bottom-left-radius: 12rpx;
+}
+.add-img-placeholder.data-v-cd345a4e {
+		width: 100%;
+		height: 100%;
+		border: 2rpx dashed #ccc;
+		border-radius: 12rpx;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		color: #999;
+		background-color: #fff;
+}

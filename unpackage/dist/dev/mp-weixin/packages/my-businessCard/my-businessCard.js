@@ -572,7 +572,7 @@ const _sfc_main = {
       }) : {}, {
         y: showTimelineGuide.value
       }, showTimelineGuide.value ? {
-        z: common_assets._imports_0$3,
+        z: common_assets._imports_0$2,
         A: common_vendor.o(hideTimelineGuide)
       } : {}, {
         B: customShareTitle.value,
