@@ -5,15 +5,15 @@ if (!Array) {
   const _easycom_uni_segmented_control2 = common_vendor.resolveComponent("uni-segmented-control");
   const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
   const _easycom_uni_load_more2 = common_vendor.resolveComponent("uni-load-more");
-  const _component_AvatarActionPopup = common_vendor.resolveComponent("AvatarActionPopup");
-  (_easycom_uni_segmented_control2 + _easycom_uni_icons2 + _easycom_uni_load_more2 + _component_AvatarActionPopup)();
+  (_easycom_uni_segmented_control2 + _easycom_uni_icons2 + _easycom_uni_load_more2)();
 }
 const _easycom_uni_segmented_control = () => "../../uni_modules/uni-segmented-control/components/uni-segmented-control/uni-segmented-control.js";
 const _easycom_uni_icons = () => "../../uni_modules/uni-icons/components/uni-icons/uni-icons.js";
 const _easycom_uni_load_more = () => "../../uni_modules/uni-load-more/components/uni-load-more/uni-load-more.js";
 if (!Math) {
-  (_easycom_uni_segmented_control + _easycom_uni_icons + _easycom_uni_load_more + AddCircleConfirmPopup)();
+  (_easycom_uni_segmented_control + _easycom_uni_icons + _easycom_uni_load_more + AvatarLongPressMenu + AddCircleConfirmPopup)();
 }
+const AvatarLongPressMenu = () => "../../components/AvatarLongPressMenu.js";
 const AddCircleConfirmPopup = () => "../../components/AddCircleConfirmPopup.js";
 const pageSize = 15;
 const _sfc_main = {
@@ -256,7 +256,7 @@ const _sfc_main = {
           } : {}, {
             h: common_vendor.t(formatTimestamp(item.createTime))
           }, currentTab.value === 0 ? {
-            i: common_vendor.o(($event) => cancelFollow(item.id), item.id)
+            i: common_vendor.o(($event) => cancelFollow(item.targetId), item.id)
           } : {}, {
             j: item.id,
             k: common_vendor.o(($event) => viewUserDetail(item.userRespVO), item.id)

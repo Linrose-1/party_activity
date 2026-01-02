@@ -856,7 +856,7 @@ const _sfc_main = {
           size: "18",
           color: isAnonymous.value ? "#FF6A00" : "#999"
         }),
-        T: common_vendor.t(isAnonymous.value ? "匿名" : "公开"),
+        T: common_vendor.t(isAnonymous.value ? "匿名" : "显名"),
         U: isAnonymous.value ? 1 : "",
         V: common_vendor.o(($event) => isAnonymous.value = !isAnonymous.value),
         W: commentInputPlaceholder.value,

@@ -130,6 +130,18 @@
   color: #bbb;
   margin-top: 6rpx;
 }
+.uploader-wrapper.data-v-5d3444db {
+  width: 100%;
+  min-height: 200rpx;
+  /* 给一个最小高度，防止未加载时完全坍塌 */
+  overflow: hidden;
+  /* 触发 BFC，清除浮动，防止子元素外溢 */
+  display: block;
+  /* 确保是块级元素 */
+  /* 如果 DragImageUploader 内部有 transform 动画，可能需要加这个 */
+  position: relative;
+  z-index: 1;
+}
 
 /* 自定义选择框 (模仿输入框外观) */
 .custom-picker-box.data-v-5d3444db {

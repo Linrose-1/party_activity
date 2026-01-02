@@ -1,282 +1,420 @@
 /* 水平间距 */
 /* 水平间距 */
-/* --- 1. 页面基础与布局 --- */
+/* --- 全局容器与变量 --- */
 .page-container.data-v-2d637515 {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background-color: #f9f9f9;
+  background-color: #f5f6fa;
 }
-.tabs-container.data-v-2d637515 {
-  background-color: #fff;
-  padding: 20rpx 30rpx;
-  border-bottom: 1rpx solid #eee;
-  flex-shrink: 0;
+
+/* --- Tab 样式优化 --- */
+.tabs-wrapper.data-v-2d637515 {
+  background-color: #ffffff;
+  padding: 10rpx 0;
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0;
+  z-index: 99;
+  box-shadow: 0 4rpx 10rpx rgba(0, 0, 0, 0.03);
+}
+
+/* 去除 uni-segmented-control 的默认边框，使用下划线风格 */
+.data-v-2d637515 .custom-tabs {
+  width: 60%;
+  margin: 0 auto;
+}
+.data-v-2d637515 .custom-tabs .segmented-control__item--text {
+  font-size: 30rpx;
+  font-weight: 500;
+  color: #999999;
+}
+.data-v-2d637515 .custom-tabs .segmented-control__item--button--active {
+  background: none;
+}
+.data-v-2d637515 .custom-tabs .segmented-control__item--button--active .segmented-control__text {
+  color: #FF8700 !important;
+  font-weight: bold;
+  font-size: 32rpx;
+}
+.tab-line.data-v-2d637515 {
+  width: 60rpx;
+  height: 6rpx;
+  background-color: #FF8700;
+  border-radius: 6rpx;
+  position: absolute;
+  bottom: 0;
+  transform: translateX(-50%);
+  transition: left 0.3s ease;
 }
 .content-area.data-v-2d637515 {
-  padding: 20rpx 30rpx 40rpx;
-  flex: 1;
-  overflow-y: auto;
-}
-
-/* --- 2. 表单通用样式 --- */
-.form-section.data-v-2d637515 {
-  background-color: #fff;
   padding: 30rpx;
-  border-radius: 20rpx;
-  margin-bottom: 20rpx;
+  flex: 1;
 }
-.section-header .section-title.data-v-2d637515 {
-  font-size: 36rpx;
-  font-weight: bold;
+
+/* --- 通用卡片样式 --- */
+.form-card.data-v-2d637515 {
+  background-color: #ffffff;
+  border-radius: 24rpx;
+  padding: 30rpx;
   margin-bottom: 30rpx;
-  display: block;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.02);
+}
+.card-title.data-v-2d637515 {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #333333;
+  margin-bottom: 30rpx;
+  position: relative;
+  padding-left: 20rpx;
+}
+.card-title.data-v-2d637515::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 8rpx;
+  height: 32rpx;
+  background: linear-gradient(to bottom, #FF8700, #ffb347);
+  border-radius: 4rpx;
+}
+.card-header-row.data-v-2d637515 {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30rpx;
+}
+.card-header-row .card-title.data-v-2d637515 {
+  margin-bottom: 0;
+}
+.divider.data-v-2d637515 {
+  height: 1rpx;
+  background-color: #f9f9f9;
+  margin: 0 20rpx;
 }
 
-/* --- 3. uni-forms 组件深度样式修复 --- */
-/* 统一所有表单项的标签与内容布局 */
-.data-v-2d637515 .uni-forms-item {
+/* --- 头像区域 --- */
+.avatar-card.data-v-2d637515 {
   display: flex;
+  justify-content: center;
+  padding: 40rpx 30rpx;
+  background: linear-gradient(to bottom, #fff, #fff);
+}
+.avatar-form-item.data-v-2d637515 {
+  margin-bottom: 0;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+.avatar-uploader-center.data-v-2d637515 {
+  display: flex;
+  flex-direction: column;
   align-items: center;
+}
+.avatar-box.data-v-2d637515 {
+  position: relative;
+  width: 160rpx;
+  height: 160rpx;
   margin-bottom: 20rpx;
-}
-.data-v-2d637515 .uni-forms-item .uni-forms-item__label {
-  width: 160rpx !important;
-  font-size: 28rpx;
-  color: #333;
-  flex-shrink: 0;
-  padding-right: 20rpx;
-  box-sizing: border-box;
-}
-.data-v-2d637515 .uni-forms-item .uni-forms-item__content {
-  flex: 1;
-  min-width: 0;
-}
-
-/* 强制内容区组件撑满 */
-.data-v-2d637515 .uni-easyinput,.data-v-2d637515 .uni-data-select,.data-v-2d637515 .uni-datetime-picker,.data-v-2d637515 .uni-data-picker {
-  width: 100% !important;
-}
-
-/* 禁用状态的手机号输入框样式 */
-.phone-text.data-v-2d637515 .uni-easyinput__content-input {
-  color: #999 !important;
-}
-
-/* 修复 uni-data-picker 文本溢出问题 */
-.data-v-2d637515 .uni-data-picker .uni-data-tree-input {
-  display: flex !important;
-  align-items: center;
-  width: 100% !important;
-  height: 36px;
-  border: 1px solid #e5e5e5;
-  border-radius: 4px;
-  padding: 0 10px;
-  box-sizing: border-box;
-  overflow: hidden;
-}
-.data-v-2d637515 .uni-data-picker .uni-data-tree-input .input-value {
-  flex: 1;
-  min-width: 0;
-  display: block;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-/* --- 4. 特定表单项样式 (头像、二维码、爱好) --- */
-.avatar-uploader.data-v-2d637515,
-.qr-uploader.data-v-2d637515 {
-  display: flex;
-  align-items: center;
-  gap: 30rpx;
 }
 .avatar-img.data-v-2d637515 {
-  width: 120rpx;
-  height: 120rpx;
-  border-radius: 50%;
-}
-.qr-img.data-v-2d637515 {
-  width: 120rpx;
-  height: 120rpx;
-  border-radius: 8rpx;
-  border: 1px solid #eee;
-}
-.upload-btn.data-v-2d637515 {
-  height: 60rpx;
-  line-height: 60rpx;
-  margin: 0;
-  padding: 0 30rpx;
-  background-color: #f5f5f5;
-  color: #333;
-  font-size: 26rpx;
-}
-.upload-btn.data-v-2d637515::after {
-  border: none;
-}
-.other-hobby-input.data-v-2d637515 {
-  margin-top: 20rpx;
-}
-.switch-container.data-v-2d637515 {
-  display: flex;
-  align-items: center;
   width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 4rpx solid #fff;
+  box-shadow: 0 8rpx 20rpx rgba(255, 135, 0, 0.2);
 }
-.switch-label.data-v-2d637515 {
-  font-size: 28rpx;
-  color: #666;
-  margin-left: 20rpx;
-}
-
-/* --- 5. 动态增删区块样式 --- */
-.dynamic-section.data-v-2d637515 {
-  margin-top: 40rpx;
-  margin-bottom: 20rpx;
-  padding-top: 30rpx;
-  border-top: 1px solid #f0f0f0;
-}
-.dynamic-header.data-v-2d637515 {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20rpx;
-}
-.dynamic-label.data-v-2d637515 {
-  font-size: 32rpx;
-  font-weight: bold;
-  color: #333;
-}
-
-/* 动态项 - 单行 (职业、学校) */
-.dynamic-item.data-v-2d637515 {
-  display: flex;
-  align-items: center;
-  gap: 20rpx;
-  margin-bottom: 20rpx;
-}
-.dynamic-item .uni-easyinput.data-v-2d637515 {
-  flex: 1;
-}
-
-/* 动态项 - 分组 (公司/行业) */
-.dynamic-group.data-v-2d637515 {
-  margin-bottom: 20rpx;
-  padding: 30rpx;
-  background-color: #f9f9f9;
-  border: 1px solid #eee;
-  border-radius: 12rpx;
-}
-.dynamic-group .group-header.data-v-2d637515 {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 30rpx;
-}
-.dynamic-group .group-title.data-v-2d637515 {
-  font-size: 28rpx;
-  font-weight: bold;
-  color: #555;
-}
-
-/* 动态项 - 添加/删除按钮 */
-.add-btn-small.data-v-2d637515 {
-  display: flex;
-  align-items: center;
-  height: 50rpx;
-  line-height: 50rpx;
-  margin: 0;
-  padding: 0 20rpx;
-  background-color: #f0f7ff;
-  color: #007bff;
-  font-size: 24rpx;
-  border: 1px solid #d2e7ff;
-}
-.add-btn-small.data-v-2d637515::after {
-  border: none;
-}
-.add-btn-small uni-icons.data-v-2d637515 {
-  margin-right: 8rpx;
-}
-.remove-btn-small.data-v-2d637515 {
+.camera-icon.data-v-2d637515 {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  background-color: #FF8700;
   width: 50rpx;
   height: 50rpx;
-  line-height: 50rpx;
-  margin: 0;
-  padding: 0;
-  background-color: #fef0f0;
-  color: #f56c6c;
-  font-size: 28rpx;
-  font-weight: bold;
-  border: none;
   border-radius: 50%;
-  flex-shrink: 0;
-}
-.remove-btn-small.data-v-2d637515::after {
-  border: none;
-}
-.remove-btn.data-v-2d637515 {
-  height: 50rpx;
-  line-height: 50rpx;
-  margin: 0;
-  padding: 0 20rpx;
-  background-color: #fef0f0;
-  color: #f56c6c;
-  font-size: 24rpx;
-  border: 1px solid #fde2e2;
-}
-.remove-btn.data-v-2d637515::after {
-  border: none;
-}
-
-/* --- 6. 数字标签页面样式 --- */
-.digital-label-section.data-v-2d637515 {
-  /* 继承 .form-section 的基础样式 */
-}
-.label-info-card .info-text.data-v-2d637515 {
-  font-size: 28rpx;
-  color: #666;
-  line-height: 1.7;
-  margin-bottom: 20rpx;
-}
-.label-info-card .info-list.data-v-2d637515 {
-  list-style: none;
-  padding-left: 0;
-  margin: 30rpx 0;
-}
-.label-info-card .info-list li.data-v-2d637515 {
-  display: flex;
-  align-items: center;
-  margin-bottom: 15rpx;
-  font-size: 28rpx;
-  color: #333;
-}
-.label-info-card .info-list li .uni-icons.data-v-2d637515 {
-  margin-right: 15rpx;
-}
-
-/* --- 7. 页面底部操作按钮 --- */
-.save-btn.data-v-2d637515,
-.label-btn.data-v-2d637515 {
-  width: 100%;
-  height: 88rpx;
-  line-height: 88rpx;
-  border-radius: 44rpx;
-  font-size: 32rpx;
-  color: white;
-  border: none;
-}
-.save-btn.data-v-2d637515::after,
-.label-btn.data-v-2d637515::after {
-  border: none;
-}
-.save-btn.data-v-2d637515 {
-  margin-top: 40rpx;
-  background: linear-gradient(to right, #FF8C00, #FF6B00);
-}
-.label-btn.data-v-2d637515 {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-top: 50rpx;
-  background: linear-gradient(to right, #007bff, #0056b3);
+  border: 4rpx solid #fff;
+}
+.upload-text.data-v-2d637515 {
+  font-size: 26rpx;
+  color: #999999;
+}
+
+/* --- 表单项优化 --- */
+.data-v-2d637515 .uni-forms-item {
+  border-bottom: 1rpx solid #f8f8f8;
+  padding-bottom: 10rpx;
+  margin-bottom: 24rpx;
+  /* 去除最后一个的边框 */
+  /* 顶部对齐模式 */
+}
+.data-v-2d637515 .uni-forms-item:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+.data-v-2d637515 .uni-forms-item__label {
+  font-size: 28rpx;
+  color: #666;
+  height: auto;
+  padding-top: 10rpx;
+}
+.data-v-2d637515 .uni-forms-item--top .uni-forms-item__label {
+  margin-bottom: 16rpx;
+}
+
+/* 优化输入框 */
+.data-v-2d637515 .uni-easyinput__content {
+  background-color: transparent !important;
+  min-height: 60rpx;
+}
+.data-v-2d637515 .uni-easyinput__content-input {
+  font-size: 28rpx;
+  color: #333333;
+  text-align: left;
+  /* 右对齐输入看起来更整洁 */
+}
+
+/* 优化选择器 */
+.data-v-2d637515 .uni-data-tree-input,.data-v-2d637515 .uni-stat__select {
+  background-color: transparent !important;
+  padding-right: 0;
+}
+.data-v-2d637515 .uni-data-tree-input .input-value,.data-v-2d637515 .uni-stat__select .input-value {
+  text-align: right;
+  color: #333333;
+}
+.data-v-2d637515 .uni-data-tree-input .uni-icons,.data-v-2d637515 .uni-stat__select .uni-icons {
+  color: #ccc !important;
+}
+
+/* 文本域背景 */
+.textarea-bg.data-v-2d637515 .uni-easyinput__content {
+  background-color: #f9f9f9 !important;
+  border-radius: 12rpx;
+  padding: 20rpx;
+  text-align: left;
+  /* 文本域左对齐 */
+}
+.textarea-bg.data-v-2d637515 .uni-easyinput__content-textarea {
+  text-align: left;
+  min-height: 160rpx;
+}
+
+/* --- 动态列表样式 (职业、学校) --- */
+.add-text-btn.data-v-2d637515 {
+  font-size: 26rpx;
+  color: #FF8700;
+  display: flex;
+  align-items: center;
+  background-color: rgba(255, 135, 0, 0.1);
+  padding: 8rpx 20rpx;
+  border-radius: 30rpx;
+}
+.dynamic-row-item.data-v-2d637515 {
+  display: flex;
+  align-items: center;
+  background-color: #f9f9f9;
+  padding: 0 20rpx;
+  border-radius: 12rpx;
+  margin-bottom: 20rpx;
+  height: 80rpx;
+}
+.dynamic-row-item.data-v-2d637515 .uni-easyinput__content-input {
+  text-align: left;
+}
+.dynamic-row-item .delete-icon.data-v-2d637515 {
+  padding: 20rpx;
+  margin-right: -20rpx;
+}
+
+/* --- 动态块样式 (公司/行业) --- */
+.dynamic-block-item.data-v-2d637515 {
+  background-color: #fbfbfb;
+  border: 1rpx solid #f0f0f0;
+  border-radius: 16rpx;
+  padding: 20rpx 30rpx;
+  margin-bottom: 30rpx;
+  position: relative;
+  /* 块内的输入框强制左对齐，且去除底部边框 */
+}
+.dynamic-block-item .block-header.data-v-2d637515 {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+.dynamic-block-item .block-header .block-index.data-v-2d637515 {
+  font-size: 24rpx;
+  color: #fff;
+  background-color: #ccc;
+  padding: 2rpx 12rpx;
+  border-radius: 8rpx;
+}
+.dynamic-block-item .block-header .delete-text.data-v-2d637515 {
+  font-size: 24rpx;
+  color: #ff4d4f;
+}
+.dynamic-block-item.data-v-2d637515 .uni-forms-item {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+.dynamic-block-item.data-v-2d637515 .uni-forms-item__label {
+  font-size: 26rpx;
+}
+.dynamic-block-item.data-v-2d637515 .input-value,
+.dynamic-block-item.data-v-2d637515 .uni-easyinput__content-input {
+  text-align: left;
+  font-size: 28rpx;
+}
+
+/* --- 新版居中大二维码样式 --- */
+.qr-uploader-centered.data-v-2d637515 {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20rpx 0;
+  background-color: #fcfcfc;
+  border-radius: 16rpx;
+  border: 1rpx dashed #eee;
+}
+.qr-box.data-v-2d637515 {
+  width: 300rpx;
+  /* 增大尺寸 */
+  height: 300rpx;
+  background-color: #fff;
+  border-radius: 12rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  margin-bottom: 20rpx;
+  border: 1rpx solid #f0f0f0;
+}
+.qr-img-large.data-v-2d637515 {
+  width: 100%;
+  height: 100%;
+}
+.qr-placeholder-large.data-v-2d637515 {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.placeholder-text.data-v-2d637515 {
+  font-size: 24rpx;
+  color: #ccc;
+  margin-top: 10rpx;
+}
+.upload-action.data-v-2d637515 {
+  display: flex;
+  align-items: center;
+  background-color: rgba(255, 135, 0, 0.08);
+  /* 淡橙色背景 */
+  padding: 8rpx 24rpx;
+  border-radius: 30rpx;
+}
+.action-text.data-v-2d637515 {
+  font-size: 26rpx;
+  color: #FF8700;
+  /* 主题色 */
+  font-weight: 500;
+}
+
+/* --- 底部按钮 --- */
+.save-btn.data-v-2d637515 {
+  background: linear-gradient(135deg, #FF9A44, #FF8700);
+  color: white;
+  border-radius: 50rpx;
+  height: 90rpx;
+  line-height: 90rpx;
+  font-size: 32rpx;
+  font-weight: bold;
+  box-shadow: 0 10rpx 20rpx rgba(255, 135, 0, 0.3);
+  margin-top: 40rpx;
+}
+.save-btn.data-v-2d637515:active {
+  transform: scale(0.98);
+}
+.save-btn.data-v-2d637515::after {
+  border: none;
+}
+.bottom-spacer.data-v-2d637515 {
+  height: 60rpx;
+}
+
+/* --- 数字标签页样式 --- */
+.info-card.data-v-2d637515 {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 60rpx 40rpx;
+  text-align: center;
+}
+.info-header.data-v-2d637515 {
+  display: flex;
+  align-items: center;
+  margin-bottom: 30rpx;
+  gap: 16rpx;
+}
+.info-title.data-v-2d637515 {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #333333;
+}
+.info-desc.data-v-2d637515 {
+  font-size: 28rpx;
+  color: #666;
+  line-height: 1.6;
+  margin-bottom: 40rpx;
+  display: block;
+  text-align: left;
+}
+.benefit-list.data-v-2d637515 {
+  width: 100%;
+  margin-bottom: 50rpx;
+}
+.benefit-item.data-v-2d637515 {
+  display: flex;
+  align-items: center;
+  margin-bottom: 24rpx;
+  background-color: #fff9f0;
+  padding: 20rpx 30rpx;
+  border-radius: 16rpx;
+}
+.benefit-item .check-circle.data-v-2d637515 {
+  width: 36rpx;
+  height: 36rpx;
+  border-radius: 50%;
+  background-color: #FF8700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 20rpx;
+}
+.benefit-item text.data-v-2d637515 {
+  font-size: 30rpx;
+  color: #333;
+  font-weight: 500;
+}
+.label-btn.data-v-2d637515 {
+  width: 100%;
+  background: #333;
+  /* 黑色背景，突出高级感 */
+  color: #fff;
+  border-radius: 50rpx;
+  height: 88rpx;
+  line-height: 88rpx;
+  font-size: 30rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.label-btn.data-v-2d637515::after {
+  border: none;
 }

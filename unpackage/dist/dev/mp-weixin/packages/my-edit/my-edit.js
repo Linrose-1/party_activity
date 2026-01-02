@@ -1,58 +1,39 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
+const common_assets = require("../../common/assets.js");
 const utils_request = require("../../utils/request.js");
 const utils_upload = require("../../utils/upload.js");
 if (!Array) {
   const _easycom_uni_segmented_control2 = common_vendor.resolveComponent("uni-segmented-control");
+  const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
   const _easycom_uni_forms_item2 = common_vendor.resolveComponent("uni-forms-item");
   const _easycom_uni_easyinput2 = common_vendor.resolveComponent("uni-easyinput");
   const _easycom_uni_data_select2 = common_vendor.resolveComponent("uni-data-select");
   const _easycom_uni_data_picker2 = common_vendor.resolveComponent("uni-data-picker");
-  const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
   const _easycom_uni_data_checkbox2 = common_vendor.resolveComponent("uni-data-checkbox");
   const _easycom_uni_forms2 = common_vendor.resolveComponent("uni-forms");
-  (_easycom_uni_segmented_control2 + _easycom_uni_forms_item2 + _easycom_uni_easyinput2 + _easycom_uni_data_select2 + _easycom_uni_data_picker2 + _easycom_uni_icons2 + _easycom_uni_data_checkbox2 + _easycom_uni_forms2)();
+  (_easycom_uni_segmented_control2 + _easycom_uni_icons2 + _easycom_uni_forms_item2 + _easycom_uni_easyinput2 + _easycom_uni_data_select2 + _easycom_uni_data_picker2 + _easycom_uni_data_checkbox2 + _easycom_uni_forms2)();
 }
 const _easycom_uni_segmented_control = () => "../../uni_modules/uni-segmented-control/components/uni-segmented-control/uni-segmented-control.js";
+const _easycom_uni_icons = () => "../../uni_modules/uni-icons/components/uni-icons/uni-icons.js";
 const _easycom_uni_forms_item = () => "../../uni_modules/uni-forms/components/uni-forms-item/uni-forms-item.js";
 const _easycom_uni_easyinput = () => "../../uni_modules/uni-easyinput/components/uni-easyinput/uni-easyinput.js";
 const _easycom_uni_data_select = () => "../../uni_modules/uni-data-select/components/uni-data-select/uni-data-select.js";
 const _easycom_uni_data_picker = () => "../../uni_modules/uni-data-picker/components/uni-data-picker/uni-data-picker.js";
-const _easycom_uni_icons = () => "../../uni_modules/uni-icons/components/uni-icons/uni-icons.js";
 const _easycom_uni_data_checkbox = () => "../../uni_modules/uni-data-checkbox/components/uni-data-checkbox/uni-data-checkbox.js";
 const _easycom_uni_forms = () => "../../uni_modules/uni-forms/components/uni-forms/uni-forms.js";
 if (!Math) {
-  (_easycom_uni_segmented_control + _easycom_uni_forms_item + _easycom_uni_easyinput + _easycom_uni_data_select + _easycom_uni_data_picker + _easycom_uni_icons + _easycom_uni_data_checkbox + _easycom_uni_forms)();
+  (_easycom_uni_segmented_control + _easycom_uni_icons + _easycom_uni_forms_item + _easycom_uni_easyinput + _easycom_uni_data_select + _easycom_uni_data_picker + _easycom_uni_data_checkbox + _easycom_uni_forms)();
 }
+const DRAFT_KEY = "user_profile_draft_v3";
 const _sfc_main = {
   __name: "my-edit",
   setup(__props) {
     const currentTab = common_vendor.ref(0);
-    const tabItems = ["普通资料", "数字标签"];
-    const initialDataState = common_vendor.ref("");
-    const watchAndSanitize = (target, key = null) => {
-      common_vendor.watch(target, (newValue) => {
-        if (Array.isArray(newValue)) {
-          newValue.forEach((item, index) => {
-            if (key && typeof item === "object") {
-              if (item[key] && typeof item[key] === "string" && item[key].includes(",")) {
-                target.value[index][key] = item[key].replace(/,/g, "");
-              }
-            } else if (typeof item === "string" && item.includes(",")) {
-              target.value[index] = item.replace(/,/g, "");
-            }
-          });
-        } else if (typeof newValue === "string" && newValue.includes(",")) {
-          target.value = newValue.replace(/,/g, "");
-        }
-      }, {
-        deep: true
-      });
-    };
-    watchAndSanitize(professionsList);
-    watchAndSanitize(schoolsList);
-    watchAndSanitize(companyAndIndustryList, "name");
-    watchAndSanitize(otherHobbyText);
+    const tabItems = ["基本信息", "数字标签"];
+    common_vendor.ref("");
+    const isDataLoaded = common_vendor.ref(false);
+    let draftTimer = null;
     const formRef = common_vendor.ref(null);
     const form = common_vendor.ref({
       nickname: "",
@@ -149,6 +130,62 @@ const _sfc_main = {
         }]
       }
     };
+    const watchAndSanitize = (target, key = null) => {
+      common_vendor.watch(target, (newValue) => {
+        if (Array.isArray(newValue)) {
+          newValue.forEach((item, index) => {
+            if (key && typeof item === "object") {
+              if (item[key] && typeof item[key] === "string" && item[key].includes(",")) {
+                target.value[index][key] = item[key].replace(/,/g, "");
+              }
+            } else if (typeof item === "string" && item.includes(",")) {
+              target.value[index] = item.replace(/,/g, "");
+            }
+          });
+        } else if (typeof newValue === "string" && newValue.includes(",")) {
+          target.value = newValue.replace(/,/g, "");
+        }
+      }, {
+        deep: true
+      });
+    };
+    const dataSnapshot = common_vendor.computed(() => {
+      return {
+        // 解构 form 的内容，确保深层变化能被感知
+        ...form.value,
+        // 包含动态数组
+        professionsList: professionsList.value,
+        schoolsList: schoolsList.value,
+        companyAndIndustryList: companyAndIndustryList.value,
+        selectedHobbies: selectedHobbies.value,
+        otherHobbyText: otherHobbyText.value
+      };
+    });
+    common_vendor.watch(dataSnapshot, (newVal) => {
+      if (!isDataLoaded.value) {
+        return;
+      }
+      clearTimeout(draftTimer);
+      draftTimer = setTimeout(() => {
+        const draftData = {
+          ...newVal,
+          // 直接使用计算属性的值
+          timestamp: Date.now()
+        };
+        try {
+          common_vendor.index.setStorageSync(DRAFT_KEY, JSON.stringify(draftData));
+          common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:442", "✅ [自动保存] 资料已写入缓存", (/* @__PURE__ */ new Date()).toLocaleTimeString());
+        } catch (e) {
+          common_vendor.index.__f__("error", "at packages/my-edit/my-edit.vue:444", "保存缓存失败", e);
+        }
+      }, 1e3);
+    }, {
+      deep: true
+    });
+    watchAndSanitize(professionsList);
+    watchAndSanitize(schoolsList);
+    watchAndSanitize(companyAndIndustryList, "name");
+    watchAndSanitize(otherHobbyText);
     const Api = {
       getAreaTree: () => utils_request.request("/app-api/system/area/tree", {
         method: "GET"
@@ -215,7 +252,7 @@ const _sfc_main = {
         error
       } = await Api.getAreaTree();
       if (error) {
-        common_vendor.index.__f__("error", "at packages/my-edit/my-edit.vue:440", "获取地区树失败:", error);
+        common_vendor.index.__f__("error", "at packages/my-edit/my-edit.vue:558", "获取地区树失败:", error);
       } else {
         areaTree.value = data || [];
       }
@@ -244,10 +281,10 @@ const _sfc_main = {
         error
       } = await Api.getIndustryTree();
       if (error) {
-        common_vendor.index.__f__("error", "at packages/my-edit/my-edit.vue:487", "获取行业树失败:", error);
+        common_vendor.index.__f__("error", "at packages/my-edit/my-edit.vue:605", "获取行业树失败:", error);
       } else {
         industryTree.value = processIndustryTree(data || []);
-        common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:491", "处理后的行业树:", industryTree.value);
+        common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:609", "处理后的行业树:", industryTree.value);
       }
     };
     function findPathById(tree, targetId) {
@@ -338,15 +375,51 @@ const _sfc_main = {
           const date = new Date(userInfo.birthday);
           form.value.birthday = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, "0")}-${date.getDate().toString().padStart(2, "0")}`;
         }
-        initialDataState.value = JSON.stringify({
-          form: form.value,
-          professionsList: professionsList.value,
-          schoolsList: schoolsList.value,
-          companyAndIndustryList: companyAndIndustryList.value,
-          selectedHobbies: selectedHobbies.value,
-          otherHobbyText: otherHobbyText.value
-        });
       }
+      setTimeout(() => {
+        isDataLoaded.value = true;
+        common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:769", "✅ [系统状态] 数据初始化完成，开始监听修改...");
+        checkAndRestoreDraft();
+      }, 500);
+    };
+    const checkAndRestoreDraft = () => {
+      const draftStr = common_vendor.index.getStorageSync(DRAFT_KEY);
+      if (!draftStr) {
+        common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:780", "📭 [缓存检查] 无本地草稿");
+        return;
+      }
+      common_vendor.index.showModal({
+        title: "恢复编辑",
+        content: "检测到您有上次未保存的资料，是否恢复？",
+        confirmText: "恢复",
+        cancelText: "放弃",
+        success: (res) => {
+          if (res.confirm) {
+            try {
+              const draft = JSON.parse(draftStr);
+              Object.assign(form.value, draft.form || draft);
+              if (draft.professionsList)
+                professionsList.value = draft.professionsList;
+              if (draft.schoolsList)
+                schoolsList.value = draft.schoolsList;
+              if (draft.companyAndIndustryList)
+                companyAndIndustryList.value = draft.companyAndIndustryList;
+              if (draft.selectedHobbies)
+                selectedHobbies.value = draft.selectedHobbies;
+              if (draft.otherHobbyText)
+                otherHobbyText.value = draft.otherHobbyText;
+              common_vendor.index.showToast({
+                title: "已恢复",
+                icon: "none"
+              });
+            } catch (e) {
+              common_vendor.index.removeStorageSync(DRAFT_KEY);
+            }
+          } else if (res.cancel) {
+            common_vendor.index.removeStorageSync(DRAFT_KEY);
+          }
+        }
+      });
     };
     common_vendor.computed(() => {
       return form.value.cardName || "信息已隐藏";
@@ -424,7 +497,7 @@ const _sfc_main = {
             src: tempFilePath,
             cropScale: "1:1",
             success: (cropRes) => uploadAvatar(cropRes.tempFilePath),
-            fail: (err) => common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:737", "用户取消裁剪或裁剪失败:", err)
+            fail: (err) => common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:911", "用户取消裁剪或裁剪失败:", err)
           });
         }
       });
@@ -453,39 +526,49 @@ const _sfc_main = {
         });
       }
     };
-    function chooseWechatQr() {
-      handleImageUpload("wechatQrCodeUrl", "qrcode");
-    }
-    const handleImageUpload = (field, directory) => {
+    const chooseWechatQr = () => {
       common_vendor.index.chooseImage({
         count: 1,
         sourceType: ["album", "camera"],
-        success: async (res) => {
-          const file = res.tempFiles[0];
-          if (file.size > 5 * 1024 * 1024) {
-            return common_vendor.index.showToast({
-              title: "文件大小不能超过5MB",
-              icon: "none"
-            });
-          }
-          common_vendor.index.showLoading({
-            title: "上传中...",
-            mask: true
+        success: (res) => {
+          const tempFilePath = res.tempFilePaths[0];
+          common_vendor.wx$1.cropImage({
+            src: tempFilePath,
+            cropScale: "1:1",
+            success: (cropRes) => {
+              common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:963", "二维码裁剪成功");
+              uploadQrCode(cropRes.tempFilePath);
+            },
+            fail: (err) => {
+              common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:967", "取消裁剪或失败:", err);
+            }
           });
-          const result = await utils_upload.uploadFile(file, {
-            directory
-          });
-          common_vendor.index.hideLoading();
-          if (result.data) {
-            form.value[field] = result.data;
-          } else {
-            common_vendor.index.showToast({
-              title: result.error || "上传失败",
-              icon: "none"
-            });
-          }
         }
       });
+    };
+    const uploadQrCode = async (filePath) => {
+      common_vendor.index.showLoading({
+        title: "上传中...",
+        mask: true
+      });
+      const result = await utils_upload.uploadFile({
+        path: filePath
+      }, {
+        directory: "qrcode"
+      });
+      common_vendor.index.hideLoading();
+      if (result.data) {
+        form.value.wechatQrCodeUrl = result.data;
+        common_vendor.index.showToast({
+          title: "二维码上传成功",
+          icon: "success"
+        });
+      } else {
+        common_vendor.index.showToast({
+          title: result.error || "上传失败",
+          icon: "none"
+        });
+      }
     };
     const previewImage = (url) => {
       common_vendor.index.previewImage({
@@ -529,6 +612,8 @@ const _sfc_main = {
             icon: "none"
           });
         } else {
+          common_vendor.index.removeStorageSync(DRAFT_KEY);
+          common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:1129", "🧹 [提交成功] 草稿已清除");
           common_vendor.index.showToast({
             title: "资料保存成功",
             icon: "success"
@@ -550,7 +635,7 @@ const _sfc_main = {
           }, 800);
         }
       }).catch((err) => {
-        common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:925", "表单验证失败：", err);
+        common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:1157", "表单验证失败：", err);
       });
     };
     const handleAutoPost = async () => {
@@ -594,59 +679,116 @@ const _sfc_main = {
         b: common_vendor.p({
           current: currentTab.value,
           values: tabItems,
-          ["style-type"]: "button",
-          ["active-color"]: "#FF6B00"
+          ["style-type"]: "text",
+          ["active-color"]: "#FF8700"
         }),
         c: form.value.avatar
       }, form.value.avatar ? {
         d: form.value.avatar
-      } : {}, {
-        e: common_vendor.t(form.value.avatar ? "更换头像" : "上传头像"),
-        f: common_vendor.o(chooseAvatar),
-        g: common_vendor.p({
-          label: "头像",
+      } : {
+        e: common_assets._imports_0$3
+      }, {
+        f: common_vendor.p({
+          type: "camera-filled",
+          size: "18",
+          color: "#fff"
+        }),
+        g: common_vendor.t(form.value.avatar ? "点击更换头像" : "上传头像"),
+        h: common_vendor.o(chooseAvatar),
+        i: common_vendor.p({
           name: "avatar"
         }),
-        h: common_vendor.o(($event) => form.value.nickname = $event),
-        i: common_vendor.p({
+        j: common_vendor.o(($event) => form.value.nickname = $event),
+        k: common_vendor.p({
           placeholder: "请输入用户昵称",
           modelValue: form.value.nickname
         }),
-        j: common_vendor.p({
+        l: common_vendor.p({
           label: "用户昵称",
           name: "nickname"
         }),
-        k: common_vendor.o(($event) => form.value.realName = $event),
-        l: common_vendor.p({
+        m: common_vendor.o(($event) => form.value.realName = $event),
+        n: common_vendor.p({
           placeholder: "请输入真实姓名",
+          disabled: true,
           modelValue: form.value.realName
         }),
-        m: common_vendor.p({
+        o: common_vendor.p({
           label: "真实姓名",
           name: "realName"
         }),
-        n: common_vendor.o(($event) => form.value.sex = $event),
-        o: common_vendor.p({
+        p: common_vendor.o(($event) => form.value.sex = $event),
+        q: common_vendor.p({
           localdata: genderOptions,
           placeholder: "请选择性别",
+          clear: false,
           modelValue: form.value.sex
         }),
-        p: common_vendor.p({
+        r: common_vendor.p({
           label: "性别",
           name: "sex"
         }),
-        q: common_vendor.o(($event) => form.value.era = $event),
-        r: common_vendor.p({
+        s: common_vendor.o(($event) => form.value.era = $event),
+        t: common_vendor.p({
           localdata: eraOptions,
           placeholder: "请选择出生年代",
+          clear: false,
           modelValue: form.value.era
         }),
-        s: common_vendor.p({
+        v: common_vendor.p({
           label: "出生年代",
           name: "era"
         }),
-        t: common_vendor.o(($event) => form.value.locationAddress = $event),
-        v: common_vendor.p({
+        w: common_vendor.o(($event) => form.value.mobile = $event),
+        x: common_vendor.p({
+          disabled: true,
+          modelValue: form.value.mobile
+        }),
+        y: common_vendor.p({
+          label: "手机号码",
+          name: "mobile"
+        }),
+        z: common_vendor.o(($event) => form.value.contactEmail = $event),
+        A: common_vendor.p({
+          placeholder: "请输入邮箱",
+          modelValue: form.value.contactEmail
+        }),
+        B: common_vendor.p({
+          label: "常用邮箱",
+          name: "contactEmail"
+        }),
+        C: form.value.wechatQrCodeUrl
+      }, form.value.wechatQrCodeUrl ? {
+        D: form.value.wechatQrCodeUrl,
+        E: common_vendor.o(($event) => previewImage(form.value.wechatQrCodeUrl))
+      } : {
+        F: common_vendor.p({
+          type: "scan",
+          size: "32",
+          color: "#ccc"
+        })
+      }, {
+        G: common_vendor.p({
+          type: "camera",
+          size: "16",
+          color: "#FF8700"
+        }),
+        H: common_vendor.t(form.value.wechatQrCodeUrl ? "点击更换" : "点击上传"),
+        I: common_vendor.o(chooseWechatQr),
+        J: common_vendor.p({
+          label: "微信二维码",
+          name: "wechatQrCodeUrl",
+          ["label-position"]: "top"
+        }),
+        K: common_vendor.t(form.value.enterpriseIdCert === 1 ? "已开启" : "未开启"),
+        L: form.value.enterpriseIdCert === 1,
+        M: common_vendor.o(onEnterpriseSwitchChange),
+        N: common_vendor.p({
+          label: "企业号认证",
+          name: "enterpriseIdCert"
+        }),
+        O: common_vendor.o(($event) => form.value.locationAddress = $event),
+        P: common_vendor.p({
           placeholder: "请选择常住地",
           ["popup-title"]: "请选择省市区",
           localdata: areaTree.value,
@@ -656,12 +798,12 @@ const _sfc_main = {
           },
           modelValue: form.value.locationAddress
         }),
-        w: common_vendor.p({
+        Q: common_vendor.p({
           label: "常住地",
           name: "locationAddress"
         }),
-        x: common_vendor.o(($event) => form.value.birthplace = $event),
-        y: common_vendor.p({
+        R: common_vendor.o(($event) => form.value.birthplace = $event),
+        S: common_vendor.p({
           placeholder: "请选择出生地",
           ["popup-title"]: "请选择省市区",
           localdata: areaTree.value,
@@ -671,12 +813,12 @@ const _sfc_main = {
           },
           modelValue: form.value.birthplace
         }),
-        z: common_vendor.p({
+        T: common_vendor.p({
           label: "出生地",
           name: "birthplace"
         }),
-        A: common_vendor.o(($event) => form.value.nativePlace = $event),
-        B: common_vendor.p({
+        U: common_vendor.o(($event) => form.value.nativePlace = $event),
+        V: common_vendor.p({
           placeholder: "请选择籍贯",
           ["popup-title"]: "请选择省市区",
           localdata: areaTree.value,
@@ -686,53 +828,60 @@ const _sfc_main = {
           },
           modelValue: form.value.nativePlace
         }),
-        C: common_vendor.p({
+        W: common_vendor.p({
           label: "籍贯",
           name: "nativePlace"
         }),
-        D: professionsList.value.length < 3
+        X: professionsList.value.length < 3
       }, professionsList.value.length < 3 ? {
-        E: common_vendor.p({
+        Y: common_vendor.p({
           type: "plusempty",
           size: "14",
-          color: "#007bff"
+          color: "#FF8700"
         }),
-        F: common_vendor.o(addProfession)
+        Z: common_vendor.o(addProfession)
       } : {}, {
-        G: common_vendor.f(professionsList.value, (profession, index, i0) => {
+        aa: common_vendor.f(professionsList.value, (profession, index, i0) => {
           return common_vendor.e({
-            a: "2d637515-18-" + i0 + ",2d637515-1",
+            a: "2d637515-27-" + i0 + ",2d637515-1",
             b: common_vendor.o(($event) => professionsList.value[index] = $event, index),
             c: common_vendor.p({
-              placeholder: "示例：XXX商会/会长，XXX协会/理事",
+              placeholder: "示例：XXX商会/会长",
+              inputBorder: false,
               modelValue: professionsList.value[index]
             })
           }, professionsList.value.length > 1 ? {
-            d: common_vendor.o(($event) => removeProfession(index), index)
+            d: "2d637515-28-" + i0 + ",2d637515-1",
+            e: common_vendor.p({
+              type: "trash",
+              size: "18",
+              color: "#999"
+            }),
+            f: common_vendor.o(($event) => removeProfession(index), index)
           } : {}, {
-            e: index
+            g: index
           });
         }),
-        H: professionsList.value.length > 1,
-        I: companyAndIndustryList.value.length < 3
+        ab: professionsList.value.length > 1,
+        ac: companyAndIndustryList.value.length < 3
       }, companyAndIndustryList.value.length < 3 ? {
-        J: common_vendor.p({
+        ad: common_vendor.p({
           type: "plusempty",
           size: "14",
-          color: "#007bff"
+          color: "#FF8700"
         }),
-        K: common_vendor.o(addCompany)
+        ae: common_vendor.o(addCompany)
       } : {}, {
-        L: common_vendor.f(companyAndIndustryList.value, (company, index, i0) => {
+        af: common_vendor.f(companyAndIndustryList.value, (company, index, i0) => {
           return common_vendor.e({
             a: common_vendor.t(index + 1)
           }, companyAndIndustryList.value.length > 1 ? {
             b: common_vendor.o(($event) => removeCompany(index), index)
           } : {}, {
-            c: "2d637515-21-" + i0 + "," + ("2d637515-20-" + i0),
+            c: "2d637515-31-" + i0 + "," + ("2d637515-30-" + i0),
             d: common_vendor.o(($event) => company.industryName = $event, index),
             e: common_vendor.p({
-              placeholder: "请选择所在行业",
+              placeholder: "请选择行业",
               ["popup-title"]: "请选择行业",
               localdata: industryTree.value,
               map: {
@@ -741,183 +890,178 @@ const _sfc_main = {
               },
               modelValue: company.industryName
             }),
-            f: "2d637515-20-" + i0 + ",2d637515-1",
+            f: "2d637515-30-" + i0 + ",2d637515-1",
             g: common_vendor.p({
-              label: `行业`,
-              name: `industry_${index}`
+              label: `所在行业`,
+              name: `industry_${index}`,
+              ["label-width"]: "70px"
             }),
-            h: "2d637515-23-" + i0 + "," + ("2d637515-22-" + i0),
+            h: "2d637515-33-" + i0 + "," + ("2d637515-32-" + i0),
             i: common_vendor.o(($event) => company.name = $event, index),
             j: common_vendor.p({
               placeholder: "请输入公司或机构名称",
               modelValue: company.name
             }),
-            k: "2d637515-22-" + i0 + ",2d637515-1",
+            k: "2d637515-32-" + i0 + ",2d637515-1",
             l: common_vendor.p({
-              label: `公司`,
-              name: `company_${index}`
+              label: `公司名称`,
+              name: `company_${index}`,
+              ["label-width"]: "70px"
             }),
-            m: "2d637515-25-" + i0 + "," + ("2d637515-24-" + i0),
+            m: "2d637515-35-" + i0 + "," + ("2d637515-34-" + i0),
             n: common_vendor.o(($event) => company.positionTitle = $event, index),
             o: common_vendor.p({
               placeholder: "请输入您的职务",
               modelValue: company.positionTitle
             }),
-            p: "2d637515-24-" + i0 + ",2d637515-1",
+            p: "2d637515-34-" + i0 + ",2d637515-1",
             q: common_vendor.p({
-              label: `职务`,
-              name: `position_${index}`
+              label: `担任职务`,
+              name: `position_${index}`,
+              ["label-width"]: "70px"
             }),
             r: index
           });
         }),
-        M: companyAndIndustryList.value.length > 1,
-        N: schoolsList.value.length < 6
+        ag: companyAndIndustryList.value.length > 1,
+        ah: schoolsList.value.length < 6
       }, schoolsList.value.length < 6 ? {
-        O: common_vendor.p({
+        ai: common_vendor.p({
           type: "plusempty",
           size: "14",
-          color: "#007bff"
+          color: "#FF8700"
         }),
-        P: common_vendor.o(addSchool)
+        aj: common_vendor.o(addSchool)
       } : {}, {
-        Q: common_vendor.f(schoolsList.value, (school, index, i0) => {
+        ak: common_vendor.f(schoolsList.value, (school, index, i0) => {
           return common_vendor.e({
-            a: "2d637515-27-" + i0 + ",2d637515-1",
+            a: "2d637515-37-" + i0 + ",2d637515-1",
             b: common_vendor.o(($event) => schoolsList.value[index] = $event, index),
             c: common_vendor.p({
-              placeholder: "可以多填,用以查同学会",
+              placeholder: "请输入学校名称",
               modelValue: schoolsList.value[index]
             })
           }, schoolsList.value.length > 1 ? {
-            d: common_vendor.o(($event) => removeSchool(index), index)
+            d: "2d637515-38-" + i0 + ",2d637515-1",
+            e: common_vendor.p({
+              type: "trash",
+              size: "18",
+              color: "#999"
+            }),
+            f: common_vendor.o(($event) => removeSchool(index), index)
           } : {}, {
-            e: index
+            g: index
           });
         }),
-        R: schoolsList.value.length > 1,
-        S: common_vendor.o(($event) => form.value.mobile = $event),
-        T: common_vendor.p({
-          disabled: true,
-          modelValue: form.value.mobile
-        }),
-        U: common_vendor.p({
-          label: "手机号码",
-          name: "mobile"
-        }),
-        V: common_vendor.o(($event) => form.value.contactEmail = $event),
-        W: common_vendor.p({
-          placeholder: "请输入邮箱",
-          modelValue: form.value.contactEmail
-        }),
-        X: common_vendor.p({
-          label: "邮箱",
-          name: "contactEmail"
-        }),
-        Y: form.value.wechatQrCodeUrl
-      }, form.value.wechatQrCodeUrl ? {
-        Z: form.value.wechatQrCodeUrl,
-        aa: common_vendor.o(($event) => previewImage(form.value.wechatQrCodeUrl))
-      } : {}, {
-        ab: common_vendor.t(form.value.wechatQrCodeUrl ? "更换二维码" : "上传二维码"),
-        ac: common_vendor.o(chooseWechatQr),
-        ad: common_vendor.p({
-          label: "微信二维码",
-          name: "wechatQrCodeUrl"
-        }),
-        ae: form.value.enterpriseIdCert === 1,
-        af: common_vendor.o(onEnterpriseSwitchChange),
-        ag: common_vendor.t(form.value.enterpriseIdCert === 1 ? "已开启" : "未开启"),
-        ah: common_vendor.p({
-          label: "企业号",
-          name: "enterpriseIdCert"
-        }),
-        ai: common_vendor.o(onHobbyChange),
-        aj: common_vendor.o(($event) => selectedHobbies.value = $event),
-        ak: common_vendor.p({
+        al: schoolsList.value.length > 1,
+        am: common_vendor.o(onHobbyChange),
+        an: common_vendor.o(($event) => selectedHobbies.value = $event),
+        ao: common_vendor.p({
           localdata: hobbyOptions.value,
           multiple: true,
+          selectedColor: "#FF8700",
+          selectedTextColor: "#FF8700",
           modelValue: selectedHobbies.value
         }),
-        al: isOtherHobbySelected.value
+        ap: isOtherHobbySelected.value
       }, isOtherHobbySelected.value ? {
-        am: common_vendor.o(($event) => otherHobbyText.value = $event),
-        an: common_vendor.p({
+        aq: common_vendor.o(($event) => otherHobbyText.value = $event),
+        ar: common_vendor.p({
           placeholder: "请输入您的其他爱好",
           modelValue: otherHobbyText.value
         })
       } : {}, {
-        ao: common_vendor.p({
-          label: "爱好",
-          name: "hobby"
+        as: common_vendor.p({
+          label: "个人爱好",
+          name: "hobby",
+          ["label-position"]: "top"
         }),
-        ap: common_vendor.o(($event) => form.value.signature = $event),
-        aq: common_vendor.p({
+        at: common_vendor.o(($event) => form.value.signature = $event),
+        av: common_vendor.p({
           placeholder: "设置一个独特的个性签名吧",
+          type: "textarea",
+          autoHeight: true,
           modelValue: form.value.signature
         }),
-        ar: common_vendor.p({
+        aw: common_vendor.p({
           label: "个性签名",
-          name: "signature"
+          name: "signature",
+          ["label-position"]: "top"
         }),
-        as: common_vendor.o(($event) => form.value.personalBio = $event),
-        at: common_vendor.p({
-          type: "textarea",
+        ax: common_vendor.o(($event) => form.value.personalBio = $event),
+        ay: common_vendor.p({
           placeholder: "介绍一下自己...",
+          type: "textarea",
+          autoHeight: true,
           modelValue: form.value.personalBio
         }),
-        av: common_vendor.p({
+        az: common_vendor.p({
           label: "个人简介",
-          name: "personalBio"
+          name: "personalBio",
+          ["label-position"]: "top"
         }),
-        aw: common_vendor.o(($event) => form.value.haveResources = $event),
-        ax: common_vendor.p({
-          type: "textarea",
+        aA: common_vendor.o(($event) => form.value.haveResources = $event),
+        aB: common_vendor.p({
           placeholder: "用来智能匹配商友资源",
+          type: "textarea",
+          autoHeight: true,
           modelValue: form.value.haveResources
         }),
-        ay: common_vendor.p({
+        aC: common_vendor.p({
           label: "我有资源",
-          name: "haveResources"
+          name: "haveResources",
+          ["label-position"]: "top"
         }),
-        az: common_vendor.o(($event) => form.value.needResources = $event),
-        aA: common_vendor.p({
-          type: "textarea",
+        aD: common_vendor.o(($event) => form.value.needResources = $event),
+        aE: common_vendor.p({
           placeholder: "用来智能匹配商友资源",
+          type: "textarea",
+          autoHeight: true,
           modelValue: form.value.needResources
         }),
-        aB: common_vendor.p({
+        aF: common_vendor.p({
           label: "我需资源",
-          name: "needResources"
+          name: "needResources",
+          ["label-position"]: "top"
         }),
-        aC: common_vendor.sr(formRef, "2d637515-1", {
+        aG: common_vendor.sr(formRef, "2d637515-1", {
           "k": "formRef"
         }),
-        aD: common_vendor.p({
-          modelValue: form.value,
-          rules
-        }),
-        aE: common_vendor.o(submitForm),
-        aF: currentTab.value === 0,
-        aG: common_vendor.p({
-          type: "checkmarkempty",
-          color: "#00C777"
-        }),
         aH: common_vendor.p({
-          type: "checkmarkempty",
-          color: "#00C777"
+          modelValue: form.value,
+          rules,
+          ["label-width"]: "85px",
+          ["label-position"]: "top"
         }),
-        aI: common_vendor.p({
-          type: "checkmarkempty",
-          color: "#00C777"
+        aI: common_vendor.o(submitForm),
+        aJ: currentTab.value === 0,
+        aK: common_vendor.p({
+          type: "info",
+          size: "24",
+          color: "#FF8700"
         }),
-        aJ: common_vendor.p({
+        aL: common_vendor.p({
+          type: "checkmarkempty",
+          size: "14",
+          color: "#fff"
+        }),
+        aM: common_vendor.p({
+          type: "checkmarkempty",
+          size: "14",
+          color: "#fff"
+        }),
+        aN: common_vendor.p({
+          type: "checkmarkempty",
+          size: "14",
+          color: "#fff"
+        }),
+        aO: common_vendor.p({
           type: "compose",
           color: "#fff",
-          size: "20"
+          size: "18"
         }),
-        aK: common_vendor.o(goToLabelEditPage),
-        aL: currentTab.value === 1
+        aP: common_vendor.o(goToLabelEditPage),
+        aQ: currentTab.value === 1
       });
     };
   }

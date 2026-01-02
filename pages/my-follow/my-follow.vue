@@ -37,7 +37,7 @@
 						- @click.stop 防止事件冒泡触发卡片点击
 						- 传入 item.id (关注记录ID)
 					-->
-					<button v-if="currentTab === 0" class="unfollow-btn" @click.stop="cancelFollow(item.id)">
+					<button v-if="currentTab === 0" class="unfollow-btn" @click.stop="cancelFollow(item.targetId)">
 						取消关注
 					</button>
 				</view>
@@ -53,7 +53,7 @@
 			</view>
 		</scroll-view>
 
-		<AvatarActionPopup ref="avatarPopupRef" @action="handleMenuAction" />
+		<AvatarLongPressMenu ref="avatarPopupRef" @action="handleMenuAction" />
 
 		<AddCircleConfirmPopup ref="addCirclePopupRef" />
 	</view>

@@ -1,8 +1,9 @@
 <template>
 	<view class="container">
 		<view class="page-header">
-			<text class="page-title">我的数字标签</text>
+			<text class="page-title">数字标签（自我评价）</text>
 			<text class="page-subtitle">请对自己以下维度的表现进行1-10分评估</text>
+			<text class="page-subtitle">（评分标准：杰出10分，优秀8-9分，较好6-7分，一般4-5分，较差2-3分，极差0-1分）</text>
 		</view>
 
 		<!-- 评分区域 -->
@@ -78,7 +79,7 @@ const scoreCategories = ref([
     ]
   },
   {
-    title: '协助态度',
+    title: '协作态度',
     items: [
       { label: '真诚', key: 'sincere' },
       { label: '包容', key: 'tolerance' },

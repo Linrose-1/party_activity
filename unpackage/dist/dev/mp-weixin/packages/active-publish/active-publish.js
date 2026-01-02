@@ -164,11 +164,11 @@ const _sfc_main = {
             cropScale: "5:4",
             // 【关键】设置裁剪比例为 5:4
             success: (cropRes) => {
-              common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:461", "裁剪成功:", cropRes.tempFilePath);
+              common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:463", "裁剪成功:", cropRes.tempFilePath);
               processUpload(cropRes.tempFilePath);
             },
             fail: (err) => {
-              common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:466", "用户取消裁剪或失败:", err);
+              common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:468", "用户取消裁剪或失败:", err);
             }
           });
         }
@@ -229,7 +229,7 @@ const _sfc_main = {
               });
             }
           } catch (error) {
-            common_vendor.index.__f__("error", "at packages/active-publish/active-publish.vue:555", "上传异常:", error);
+            common_vendor.index.__f__("error", "at packages/active-publish/active-publish.vue:557", "上传异常:", error);
             common_vendor.index.showToast({
               title: "上传出错",
               icon: "none"
@@ -300,7 +300,7 @@ const _sfc_main = {
       showSponsorPopup.value = false;
     };
     const syncSponsorsInline = async (activityId) => {
-      common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:645", "开始同步赞助商:", activityId);
+      common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:647", "开始同步赞助商:", activityId);
       const userId = common_vendor.index.getStorageSync("userId");
       for (const id of deletedSponsorIds.value) {
         await utils_request.request(`/app-api/member/sponsor/delete?id=${id}`, {
@@ -399,7 +399,7 @@ const _sfc_main = {
         return;
       }
       const data = detailRes.data;
-      common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:767", "获取详情用于编辑:", data);
+      common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:769", "获取详情用于编辑:", data);
       form.value.activityTitle = data.activityTitle;
       form.value.activityDescription = data.activityDescription;
       form.value.totalSlots = data.totalSlots;
@@ -455,7 +455,7 @@ const _sfc_main = {
               gallery = item.galleryImageUrls;
             }
           } catch (e) {
-            common_vendor.index.__f__("error", "at packages/active-publish/active-publish.vue:838", "解析赞助商图集失败:", e);
+            common_vendor.index.__f__("error", "at packages/active-publish/active-publish.vue:840", "解析赞助商图集失败:", e);
             gallery = [];
           }
           return {
@@ -463,7 +463,7 @@ const _sfc_main = {
             galleryImageUrls: gallery
           };
         });
-        common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:846", "赞助商回显完成:", sponsorsList.value);
+        common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:848", "赞助商回显完成:", sponsorsList.value);
       } else {
         sponsorsList.value = [];
       }
@@ -557,7 +557,7 @@ const _sfc_main = {
           })
         });
       } catch (e) {
-        common_vendor.index.__f__("error", "at packages/active-publish/active-publish.vue:950", e);
+        common_vendor.index.__f__("error", "at packages/active-publish/active-publish.vue:952", e);
         common_vendor.index.showToast({
           title: e.message || "系统异常",
           icon: "none"

@@ -45,7 +45,7 @@ const _sfc_main = {
         ]
       },
       {
-        title: "协助态度",
+        title: "协作态度",
         items: [
           { label: "真诚", key: "sincere" },
           { label: "包容", key: "tolerance" },
@@ -103,11 +103,11 @@ const _sfc_main = {
       const { data: userScores, error } = await ScoreApi.getMyScores(userId);
       common_vendor.index.hideLoading();
       if (error) {
-        common_vendor.index.__f__("warn", "at pages/my-edit-label/my-edit-label.vue:138", "获取已有评分失败:", error);
+        common_vendor.index.__f__("warn", "at pages/my-edit-label/my-edit-label.vue:139", "获取已有评分失败:", error);
         return;
       }
       if (userScores) {
-        common_vendor.index.__f__("log", "at pages/my-edit-label/my-edit-label.vue:144", "成功获取到已有评分:", userScores);
+        common_vendor.index.__f__("log", "at pages/my-edit-label/my-edit-label.vue:145", "成功获取到已有评分:", userScores);
         scoreRecordId.value = userScores.id;
         Object.keys(scores.value).forEach((key) => {
           if (userScores[key] !== void 0 && userScores[key] !== null) {
@@ -115,7 +115,7 @@ const _sfc_main = {
           }
         });
       } else {
-        common_vendor.index.__f__("log", "at pages/my-edit-label/my-edit-label.vue:154", "用户尚未评分，将使用默认值。");
+        common_vendor.index.__f__("log", "at pages/my-edit-label/my-edit-label.vue:155", "用户尚未评分，将使用默认值。");
       }
     });
     const submitScores = async () => {
@@ -140,7 +140,7 @@ const _sfc_main = {
       common_vendor.index.hideLoading();
       isSubmitting.value = false;
       if (error) {
-        common_vendor.index.__f__("error", "at pages/my-edit-label/my-edit-label.vue:189", "评分保存失败:", error);
+        common_vendor.index.__f__("error", "at pages/my-edit-label/my-edit-label.vue:190", "评分保存失败:", error);
         common_vendor.index.showToast({ title: `保存失败: ${error}`, icon: "none" });
         return;
       }

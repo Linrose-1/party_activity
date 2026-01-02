@@ -518,7 +518,7 @@ const _sfc_main = {
         })
       }, {
         J: common_vendor.o(($event) => handleImageUpload("wechat")),
-        K: common_vendor.t(isSubmitting.value ? "正在提交..." : form.value.id ? "保存修改" : "立即入驻"),
+        K: common_vendor.t(isSubmitting.value ? "正在提交..." : form.value.id ? "保存修改" : "自荐聚店"),
         L: common_vendor.o(handleSubmit),
         M: isSubmitting.value,
         N: isSubmitting.value

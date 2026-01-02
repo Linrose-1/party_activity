@@ -1,187 +1,256 @@
 <template>
 	<view class="page-container">
-		<view class="tabs-container">
+		<!-- 顶部 Tab -->
+		<view class="tabs-wrapper">
 			<uni-segmented-control :current="currentTab" :values="tabItems" @clickItem="handleTabClick"
-				style-type="button" active-color="#FF6B00" />
+				style-type="text" active-color="#FF8700" class="custom-tabs" />
+			<!-- <view class="tab-line" :style="{ left: currentTab === 0 ? '25%' : '75%' }"></view> -->
 		</view>
-
 
 		<view class="content-area">
+			<!-- Tab 0: 普通资料 -->
 			<view v-show="currentTab === 0">
-				<!-- 基本资料表单 -->
-				<view class="form-section">
+				<uni-forms ref="formRef" :modelValue="form" :rules="rules" label-width="85px" label-position="top">
 
-					<view class="form-content">
-						<uni-forms ref="formRef" :modelValue="form" :rules="rules">
-							<!-- 头像 -->
-							<uni-forms-item label="头像" name="avatar">
-								<view class="avatar-uploader">
+					<!-- 模块：头像与基础信息 -->
+					<view class="form-card avatar-card">
+						<uni-forms-item name="avatar" class="avatar-form-item">
+							<view class="avatar-uploader-center" @click="chooseAvatar">
+								<view class="avatar-box">
 									<image v-if="form.avatar" :src="form.avatar" class="avatar-img" mode="aspectFill" />
-									<button class="upload-btn"
-										@click="chooseAvatar">{{ form.avatar ? '更换头像' : '上传头像' }}</button>
-								</view>
-							</uni-forms-item>
-
-							<!-- 其他简单输入项 -->
-							<uni-forms-item label="用户昵称" name="nickname"><uni-easyinput v-model="form.nickname"
-									placeholder="请输入用户昵称" /></uni-forms-item>
-							<uni-forms-item label="真实姓名" name="realName"><uni-easyinput v-model="form.realName"
-									placeholder="请输入真实姓名" /></uni-forms-item>
-							<uni-forms-item label="性别" name="sex"><uni-data-select v-model="form.sex"
-									:localdata="genderOptions" placeholder="请选择性别" /></uni-forms-item>
-							<uni-forms-item label="出生年代" name="era">
-								<uni-data-select v-model="form.era" :localdata="eraOptions" placeholder="请选择出生年代" />
-							</uni-forms-item>
-
-							<!-- 地区选择器 -->
-							<uni-forms-item label="常住地" name="locationAddress"><uni-data-picker placeholder="请选择常住地"
-									popup-title="请选择省市区" :localdata="areaTree" :map="{text: 'name', value: 'id'}"
-									v-model="form.locationAddress" /></uni-forms-item>
-							<uni-forms-item label="出生地" name="birthplace"><uni-data-picker placeholder="请选择出生地"
-									popup-title="请选择省市区" :localdata="areaTree" :map="{text: 'name', value: 'id'}"
-									v-model="form.birthplace" /></uni-forms-item>
-
-							<!-- 更多简单输入项 -->
-							<uni-forms-item label="籍贯" name="nativePlace">
-								<uni-data-picker placeholder="请选择籍贯" popup-title="请选择省市区" :localdata="areaTree"
-									:map="{text: 'name', value: 'id'}" v-model="form.nativePlace" />
-							</uni-forms-item>
-							<view class="dynamic-section">
-								<view class="dynamic-header">
-									<text class="dynamic-label">商会/协会与职务</text>
-									<button v-if="professionsList.length < 3" class="add-btn-small"
-										@click="addProfession">
-										<uni-icons type="plusempty" size="14" color="#007bff"></uni-icons>
-										添加
-									</button>
-								</view>
-								<view v-for="(profession, index) in professionsList" :key="index" class="dynamic-item">
-									<uni-easyinput v-model="professionsList[index]"
-										placeholder="示例：XXX商会/会长，XXX协会/理事" />
-									<button v-if="professionsList.length > 1" class="remove-btn-small"
-										@click="removeProfession(index)">×</button>
-								</view>
-							</view>
-							<view class="dynamic-section">
-								<view class="dynamic-header">
-									<text class="dynamic-label">公司/机构与行业</text>
-									<button v-if="companyAndIndustryList.length < 3" class="add-btn-small"
-										@click="addCompany">
-										<uni-icons type="plusempty" size="14" color="#007bff"></uni-icons>
-										添加
-									</button>
-								</view>
-								<view v-for="(company, index) in companyAndIndustryList" :key="index"
-									class="dynamic-group">
-									<view class="group-header">
-										<text class="group-title">第 {{ index + 1 }} 组</text>
-										<button v-if="companyAndIndustryList.length > 1" class="remove-btn"
-											@click="removeCompany(index)">删除</button>
+									<image v-else src="/static/images/default-avatar.png" class="avatar-img placeholder"
+										mode="aspectFill" />
+									<view class="camera-icon">
+										<uni-icons type="camera-filled" size="18" color="#fff"></uni-icons>
 									</view>
-									<!-- 【样式修复关键】uni-forms-item 放在循环内，并使用动态 name -->
-									<uni-forms-item :label="`行业`" :name="`industry_${index}`">
-										<uni-data-picker class="dynamic-picker" placeholder="请选择所在行业"
-											popup-title="请选择行业" :localdata="industryTree"
-											:map="{text: 'name', value: 'name'}" v-model="company.industryName" />
-									</uni-forms-item>
-									<uni-forms-item :label="`公司`" :name="`company_${index}`">
-										<uni-easyinput v-model="company.name" placeholder="请输入公司或机构名称" />
-									</uni-forms-item>
-									<uni-forms-item :label="`职务`" :name="`position_${index}`">
-										<uni-easyinput v-model="company.positionTitle" placeholder="请输入您的职务" />
-									</uni-forms-item>
-
 								</view>
+								<text class="upload-text">{{ form.avatar ? '点击更换头像' : '上传头像' }}</text>
 							</view>
-							<view class="dynamic-section">
-								<view class="dynamic-header">
-									<text class="dynamic-label">毕业学校</text>
-									<button v-if="schoolsList.length < 6" class="add-btn-small" @click="addSchool">
-										<uni-icons type="plusempty" size="14" color="#007bff"></uni-icons>
-										添加
-									</button>
-								</view>
-								<view v-for="(school, index) in schoolsList" :key="index" class="dynamic-item">
-									<uni-easyinput v-model="schoolsList[index]" placeholder="可以多填,用以查同学会" />
-									<button v-if="schoolsList.length > 1" class="remove-btn-small"
-										@click="removeSchool(index)">×</button>
-								</view>
-							</view>
-							<uni-forms-item label="手机号码" name="mobile"><uni-easyinput class="phone-text"
-									v-model="form.mobile" :disabled="true" /></uni-forms-item>
-							<uni-forms-item label="邮箱" name="contactEmail"><uni-easyinput v-model="form.contactEmail"
-									placeholder="请输入邮箱" /></uni-forms-item>
-
-							<!-- 微信二维码 -->
-							<uni-forms-item label="微信二维码" name="wechatQrCodeUrl">
-								<view class="qr-uploader">
-									<image v-if="form.wechatQrCodeUrl" :src="form.wechatQrCodeUrl" class="qr-img"
-										mode="aspectFit" @click="previewImage(form.wechatQrCodeUrl)" />
-									<button class="upload-btn"
-										@click="chooseWechatQr">{{ form.wechatQrCodeUrl ? '更换二维码' : '上传二维码' }}</button>
-								</view>
-							</uni-forms-item>
-
-							<uni-forms-item label="企业号" name="enterpriseIdCert">
-								<view class="switch-container">
-									<switch :checked="form.enterpriseIdCert === 1" @change="onEnterpriseSwitchChange"
-										color="#FF6A00" />
-									<text class="switch-label">{{ form.enterpriseIdCert === 1 ? '已开启' : '未开启' }}</text>
-								</view>
-							</uni-forms-item>
-
-							<!-- 爱好和简介 -->
-							<uni-forms-item label="爱好" name="hobby">
-								<uni-data-checkbox v-model="selectedHobbies" :localdata="hobbyOptions" multiple
-									@change="onHobbyChange" />
-								<!-- 当“其他”被选中时，显示输入框 -->
-								<uni-easyinput v-if="isOtherHobbySelected" v-model="otherHobbyText"
-									placeholder="请输入您的其他爱好" class="other-hobby-input" />
-							</uni-forms-item>
-							<uni-forms-item label="个性签名" name="signature">
-								<uni-easyinput v-model="form.signature" placeholder="设置一个独特的个性签名吧" />
-							</uni-forms-item>
-							<uni-forms-item label="个人简介" name="personalBio"><uni-easyinput type="textarea"
-									v-model="form.personalBio" placeholder="介绍一下自己..." /></uni-forms-item>
-
-							<!-- 我有资源 -->
-							<uni-forms-item label="我有资源" name="haveResources">
-								<uni-easyinput type="textarea" v-model="form.haveResources" placeholder="用来智能匹配商友资源" />
-							</uni-forms-item>
-
-							<!-- 我需资源 -->
-							<uni-forms-item label="我需资源" name="needResources">
-								<uni-easyinput type="textarea" v-model="form.needResources" placeholder="用来智能匹配商友资源" />
-							</uni-forms-item>
-						</uni-forms>
-
-						<button class="save-btn" @click="submitForm">保存资料</button>
+						</uni-forms-item>
 					</view>
-				</view>
+
+					<view class="form-card">
+						<view class="card-title">基础信息</view>
+						<uni-forms-item label="用户昵称" name="nickname">
+							<uni-easyinput v-model="form.nickname" placeholder="请输入用户昵称" />
+						</uni-forms-item>
+						<uni-forms-item label="真实姓名" name="realName">
+							<uni-easyinput v-model="form.realName" placeholder="请输入真实姓名" :disabled="true" />
+						</uni-forms-item>
+						<uni-forms-item label="性别" name="sex">
+							<uni-data-select v-model="form.sex" :localdata="genderOptions" placeholder="请选择性别"
+								:clear="false" />
+						</uni-forms-item>
+						<uni-forms-item label="出生年代" name="era">
+							<uni-data-select v-model="form.era" :localdata="eraOptions" placeholder="请选择出生年代"
+								:clear="false" />
+						</uni-forms-item>
+					</view>
+
+					<!-- 模块：联系与认证 -->
+					<view class="form-card">
+						<view class="card-title">联系与认证</view>
+						<uni-forms-item label="手机号码" name="mobile">
+							<uni-easyinput class="phone-text" v-model="form.mobile" :disabled="true" />
+						</uni-forms-item>
+						<uni-forms-item label="常用邮箱" name="contactEmail">
+							<uni-easyinput v-model="form.contactEmail" placeholder="请输入邮箱" />
+						</uni-forms-item>
+
+						<uni-forms-item label="微信二维码" name="wechatQrCodeUrl" label-position="top">
+							<view class="qr-uploader-centered" @click="chooseWechatQr">
+								<view class="qr-box">
+									<!-- 有图片时显示大图 -->
+									<image v-if="form.wechatQrCodeUrl" :src="form.wechatQrCodeUrl" class="qr-img-large"
+										mode="aspectFill" @click.stop="previewImage(form.wechatQrCodeUrl)" />
+
+									<!-- 无图片时显示占位符 -->
+									<view v-else class="qr-placeholder-large">
+										<uni-icons type="scan" size="32" color="#ccc"></uni-icons>
+										<text class="placeholder-text">上传二维码</text>
+									</view>
+								</view>
+								<!-- 底部提示文字 -->
+								<view class="upload-action">
+									<uni-icons type="camera" size="16" color="#FF8700"
+										style="margin-right: 4rpx;"></uni-icons>
+									<text class="action-text">{{ form.wechatQrCodeUrl ? '点击更换' : '点击上传' }}</text>
+								</view>
+							</view>
+						</uni-forms-item>
+
+						<uni-forms-item label="企业号认证" name="enterpriseIdCert">
+							<view class="switch-row">
+								<text class="switch-status">{{ form.enterpriseIdCert === 1 ? '已开启' : '未开启' }}</text>
+								<switch :checked="form.enterpriseIdCert === 1" @change="onEnterpriseSwitchChange"
+									color="#FF8700" style="transform:scale(0.8)" />
+							</view>
+						</uni-forms-item>
+					</view>
+
+					<!-- 模块：地域信息 -->
+					<view class="form-card">
+						<view class="card-title">地域分布</view>
+						<uni-forms-item label="常住地" name="locationAddress">
+							<uni-data-picker placeholder="请选择常住地" popup-title="请选择省市区" :localdata="areaTree"
+								:map="{text: 'name', value: 'id'}" v-model="form.locationAddress" />
+						</uni-forms-item>
+						<uni-forms-item label="出生地" name="birthplace">
+							<uni-data-picker placeholder="请选择出生地" popup-title="请选择省市区" :localdata="areaTree"
+								:map="{text: 'name', value: 'id'}" v-model="form.birthplace" />
+						</uni-forms-item>
+						<uni-forms-item label="籍贯" name="nativePlace">
+							<uni-data-picker placeholder="请选择籍贯" popup-title="请选择省市区" :localdata="areaTree"
+								:map="{text: 'name', value: 'id'}" v-model="form.nativePlace" />
+						</uni-forms-item>
+					</view>
+
+					<!-- 模块：职业背景 (动态) -->
+					<view class="form-card">
+						<view class="card-header-row">
+							<view class="card-title">商会/协会与职务</view>
+							<view v-if="professionsList.length < 3" class="add-text-btn" @click="addProfession">
+								<uni-icons type="plusempty" size="14" color="#FF8700"></uni-icons> 添加
+							</view>
+						</view>
+
+						<view v-for="(profession, index) in professionsList" :key="index" class="dynamic-row-item">
+							<uni-easyinput v-model="professionsList[index]" placeholder="示例：XXX商会/会长"
+								:inputBorder="false" />
+							<view v-if="professionsList.length > 1" class="delete-icon"
+								@click="removeProfession(index)">
+								<uni-icons type="trash" size="18" color="#999"></uni-icons>
+							</view>
+						</view>
+					</view>
+
+					<view class="form-card">
+						<view class="card-header-row">
+							<view class="card-title">公司/机构与行业</view>
+							<view v-if="companyAndIndustryList.length < 3" class="add-text-btn" @click="addCompany">
+								<uni-icons type="plusempty" size="14" color="#FF8700"></uni-icons> 添加
+							</view>
+						</view>
+
+						<view v-for="(company, index) in companyAndIndustryList" :key="index"
+							class="dynamic-block-item">
+							<view class="block-header">
+								<text class="block-index">#{{ index + 1 }}</text>
+								<view v-if="companyAndIndustryList.length > 1" class="delete-text"
+									@click="removeCompany(index)">删除</view>
+							</view>
+
+							<uni-forms-item :label="`所在行业`" :name="`industry_${index}`" label-width="70px">
+								<uni-data-picker class="simple-picker" placeholder="请选择行业" popup-title="请选择行业"
+									:localdata="industryTree" :map="{text: 'name', value: 'name'}"
+									v-model="company.industryName" />
+							</uni-forms-item>
+							<view class="divider"></view>
+							<uni-forms-item :label="`公司名称`" :name="`company_${index}`" label-width="70px">
+								<uni-easyinput v-model="company.name" placeholder="请输入公司或机构名称" />
+							</uni-forms-item>
+							<view class="divider"></view>
+							<uni-forms-item :label="`担任职务`" :name="`position_${index}`" label-width="70px">
+								<uni-easyinput v-model="company.positionTitle" placeholder="请输入您的职务" />
+							</uni-forms-item>
+						</view>
+					</view>
+
+					<!-- 模块：教育背景 (动态) -->
+					<view class="form-card">
+						<view class="card-header-row">
+							<view class="card-title">毕业学校</view>
+							<view v-if="schoolsList.length < 6" class="add-text-btn" @click="addSchool">
+								<uni-icons type="plusempty" size="14" color="#FF8700"></uni-icons> 添加
+							</view>
+						</view>
+
+						<view v-for="(school, index) in schoolsList" :key="index" class="dynamic-row-item">
+							<uni-easyinput v-model="schoolsList[index]" placeholder="请输入学校名称" />
+							<view v-if="schoolsList.length > 1" class="delete-icon" @click="removeSchool(index)">
+								<uni-icons type="trash" size="18" color="#999"></uni-icons>
+							</view>
+						</view>
+					</view>
+
+					<!-- 模块：个性化信息 -->
+					<view class="form-card">
+						<view class="card-title">个性化信息</view>
+						<uni-forms-item label="个人爱好" name="hobby" label-position="top">
+							<view class="checkbox-group-wrapper">
+								<uni-data-checkbox v-model="selectedHobbies" :localdata="hobbyOptions" multiple
+									@change="onHobbyChange" selectedColor="#FF8700" selectedTextColor="#FF8700" />
+							</view>
+							<uni-easyinput v-if="isOtherHobbySelected" v-model="otherHobbyText" placeholder="请输入您的其他爱好"
+								class="other-hobby-input"
+								style="background:#f9f9f9; padding:0 20rpx; border-radius:10rpx; margin-top:20rpx;" />
+						</uni-forms-item>
+
+						<uni-forms-item label="个性签名" name="signature" label-position="top">
+							<uni-easyinput v-model="form.signature" placeholder="设置一个独特的个性签名吧" type="textarea"
+								autoHeight class="textarea-bg" />
+						</uni-forms-item>
+
+						<uni-forms-item label="个人简介" name="personalBio" label-position="top">
+							<uni-easyinput v-model="form.personalBio" placeholder="介绍一下自己..." type="textarea" autoHeight
+								class="textarea-bg" />
+						</uni-forms-item>
+					</view>
+
+					<!-- 模块：资源供需 -->
+					<view class="form-card">
+						<view class="card-title">资源供需</view>
+						<uni-forms-item label="我有资源" name="haveResources" label-position="top">
+							<uni-easyinput v-model="form.haveResources" placeholder="用来智能匹配商友资源" type="textarea"
+								autoHeight class="textarea-bg" />
+						</uni-forms-item>
+
+						<uni-forms-item label="我需资源" name="needResources" label-position="top">
+							<uni-easyinput v-model="form.needResources" placeholder="用来智能匹配商友资源" type="textarea"
+								autoHeight class="textarea-bg" />
+						</uni-forms-item>
+					</view>
+
+				</uni-forms>
+
+				<button class="save-btn" @click="submitForm">保存资料</button>
+				<view class="bottom-spacer"></view>
 			</view>
 
+			<!-- Tab 1: 数字标签 (保持原有逻辑，优化UI) -->
 			<view v-show="currentTab === 1">
-				<view class="form-section digital-label-section">
-					<view class="section-header">
-						<text class="section-title">什么是数字标签？</text>
+				<view class="form-card info-card">
+					<view class="info-header">
+						<text class="info-title">什么是数字标签？</text>
+						<uni-icons type="info" size="24" color="#FF8700"></uni-icons>
 					</view>
-					<view class="label-info-card">
-						<p class="info-text">数字标签是您在平台上的个性化身份标识，它们能帮助其他商友快速了解您的专业领域、资源优势和合作需求。</p>
-						<p class="info-text">通过精心设置您的数字标签，您可以：</p>
-						<ul class="info-list">
-							<li><uni-icons type="checkmarkempty" color="#00C777"></uni-icons> 提高个人辨识度</li>
-							<li><uni-icons type="checkmarkempty" color="#00C777"></uni-icons> 吸引潜在的合作伙伴</li>
-							<li><uni-icons type="checkmarkempty" color="#00C777"></uni-icons> 获得更精准的资源匹配</li>
-						</ul>
-						<button class="label-btn" @click="goToLabelEditPage">
-							<uni-icons type="compose" color="#fff" size="20" style="margin-right: 10rpx;"></uni-icons>
-							前往编辑数字标签
-						</button>
+					<view class="info-body">
+						<text class="info-desc">数字标签是您在平台上的个性化身份标识，它们能帮助其他商友快速了解您的基础信用、协作态度、专业能力、精神格局等不同维度的深度信息。</text>
+						<view class="benefit-list">
+							<view class="benefit-item">
+								<view class="check-circle"><uni-icons type="checkmarkempty" size="14"
+										color="#fff"></uni-icons></view>
+								<text>提高个人辨识度</text>
+							</view>
+							<view class="benefit-item">
+								<view class="check-circle"><uni-icons type="checkmarkempty" size="14"
+										color="#fff"></uni-icons></view>
+								<text>吸引潜在的合作伙伴</text>
+							</view>
+							<view class="benefit-item">
+								<view class="check-circle"><uni-icons type="checkmarkempty" size="14"
+										color="#fff"></uni-icons></view>
+								<text>获得更精准的资源匹配</text>
+							</view>
+						</view>
 					</view>
+					<button class="label-btn" @click="goToLabelEditPage">
+						<uni-icons type="compose" color="#fff" size="18" style="margin-right: 12rpx;"></uni-icons>
+						前往编辑数字标签
+					</button>
 				</view>
 			</view>
 		</view>
-
 	</view>
 </template>
 
@@ -200,42 +269,12 @@
 
 	// --- 1. 响应式状态定义 ---
 	const currentTab = ref(0);
-	const tabItems = ['普通资料', '数字标签'];
+	const tabItems = ['基本信息', '数字标签'];
 	const initialDataState = ref('');
-
-	/**
-	 * @description 创建一个通用的侦听器来处理输入限制
-	 * @param {Ref<Array<string>|Array<object>|string>} target - 要侦听的目标 ref
-	 * @param {string|null} key - 如果目标是对象数组，则指定要检查的属性名
-	 */
-	const watchAndSanitize = (target, key = null) => {
-		watch(target, (newValue) => {
-			if (Array.isArray(newValue)) {
-				newValue.forEach((item, index) => {
-					if (key && typeof item === 'object') {
-						// 处理对象数组，如 companyAndIndustryList
-						if (item[key] && typeof item[key] === 'string' && item[key].includes(',')) {
-							target.value[index][key] = item[key].replace(/,/g, '');
-						}
-					} else if (typeof item === 'string' && item.includes(',')) {
-						// 处理字符串数组，如 professionsList, schoolsList
-						target.value[index] = item.replace(/,/g, '');
-					}
-				});
-			} else if (typeof newValue === 'string' && newValue.includes(',')) {
-				// 处理单个字符串，如 otherHobbyText
-				target.value = newValue.replace(/,/g, '');
-			}
-		}, {
-			deep: true
-		}); // 使用 deep: true 来侦听对象数组内部属性的变化
-	};
-
-	// 应用侦听器到所有需要限制的字段
-	watchAndSanitize(professionsList);
-	watchAndSanitize(schoolsList);
-	watchAndSanitize(companyAndIndustryList, 'name'); // 只限制公司名称字段
-	watchAndSanitize(otherHobbyText);
+	// --- 草稿缓存相关变量 ---
+	const DRAFT_KEY = 'user_profile_draft_v3'; // 换个新 Key，防止旧缓存干扰
+	const isDataLoaded = ref(false); // 【关键】标记后端数据是否已填充完毕
+	let draftTimer = null; // 防抖定时器
 
 	const formRef = ref(null);
 	const form = ref({
@@ -336,6 +375,85 @@
 			}]
 		},
 	};
+
+
+	/**
+	 * @description 创建一个通用的侦听器来处理输入限制
+	 * @param {Ref<Array<string>|Array<object>|string>} target - 要侦听的目标 ref
+	 * @param {string|null} key - 如果目标是对象数组，则指定要检查的属性名
+	 */
+	const watchAndSanitize = (target, key = null) => {
+		watch(target, (newValue) => {
+			if (Array.isArray(newValue)) {
+				newValue.forEach((item, index) => {
+					if (key && typeof item === 'object') {
+						// 处理对象数组，如 companyAndIndustryList
+						if (item[key] && typeof item[key] === 'string' && item[key].includes(',')) {
+							target.value[index][key] = item[key].replace(/,/g, '');
+						}
+					} else if (typeof item === 'string' && item.includes(',')) {
+						// 处理字符串数组，如 professionsList, schoolsList
+						target.value[index] = item.replace(/,/g, '');
+					}
+				});
+			} else if (typeof newValue === 'string' && newValue.includes(',')) {
+				// 处理单个字符串，如 otherHobbyText
+				target.value = newValue.replace(/,/g, '');
+			}
+		}, {
+			deep: true
+		}); // 使用 deep: true 来侦听对象数组内部属性的变化
+	};
+
+	// --- 自动保存逻辑 ---
+	// 1. 创建一个计算属性，聚合所有需要保存的数据
+	// 这样做的目的是为了让 watch 能绝对稳定地监听这些数据的变化
+	const dataSnapshot = computed(() => {
+		return {
+			// 解构 form 的内容，确保深层变化能被感知
+			...form.value,
+			// 包含动态数组
+			professionsList: professionsList.value,
+			schoolsList: schoolsList.value,
+			companyAndIndustryList: companyAndIndustryList.value,
+			selectedHobbies: selectedHobbies.value,
+			otherHobbyText: otherHobbyText.value
+		};
+	});
+
+	// 2. 监听这个快照的变化
+	watch(dataSnapshot, (newVal) => {
+		// A. 如果后端数据还没加载完，绝对不要保存
+		if (!isDataLoaded.value) {
+			return;
+		}
+
+		// B. 防抖处理：停止输入 1 秒后才执行保存
+		clearTimeout(draftTimer);
+		draftTimer = setTimeout(() => {
+			const draftData = {
+				...newVal, // 直接使用计算属性的值
+				timestamp: Date.now()
+			};
+
+			// C. 执行保存
+			try {
+				uni.setStorageSync(DRAFT_KEY, JSON.stringify(draftData));
+				console.log('✅ [自动保存] 资料已写入缓存', new Date().toLocaleTimeString());
+			} catch (e) {
+				console.error('保存缓存失败', e);
+			}
+		}, 1000); // 1秒防抖
+	}, {
+		deep: true
+	});
+
+
+	// 应用侦听器到所有需要限制的字段
+	watchAndSanitize(professionsList);
+	watchAndSanitize(schoolsList);
+	watchAndSanitize(companyAndIndustryList, 'name'); // 只限制公司名称字段
+	watchAndSanitize(otherHobbyText);
 
 
 	// --- 2. API 封装 ---
@@ -622,7 +740,7 @@
 				}];
 			}
 
-			// 【关键】处理生日回显：时间戳 -> YYYY-MM-DD
+			// 处理生日回显：时间戳 -> YYYY-MM-DD
 			if (userInfo.birthday && typeof userInfo.birthday === 'number') {
 				const date = new Date(userInfo.birthday);
 				form.value.birthday =
@@ -630,15 +748,71 @@
 			}
 
 			// 在所有数据填充完毕后，记录初始状态
-			initialDataState.value = JSON.stringify({
-				form: form.value,
-				professionsList: professionsList.value,
-				schoolsList: schoolsList.value,
-				companyAndIndustryList: companyAndIndustryList.value,
-				selectedHobbies: selectedHobbies.value,
-				otherHobbyText: otherHobbyText.value
-			});
+			// initialDataState.value = JSON.stringify({
+			// 	form: form.value,
+			// 	professionsList: professionsList.value,
+			// 	schoolsList: schoolsList.value,
+			// 	companyAndIndustryList: companyAndIndustryList.value,
+			// 	selectedHobbies: selectedHobbies.value,
+			// 	otherHobbyText: otherHobbyText.value
+			// });
 		}
+
+		// ============================================
+		// 【关键点 1】后端数据填充完毕，允许 Watch 工作
+		// ============================================
+		// 使用 nextTick 确保 Vue 完成了上面的数据更新，再开启标志位
+		// 这样避免 "填充后端数据" 这个动作本身触发了 "保存草稿"
+		setTimeout(() => {
+			// 1. 先开启标志位，允许后续的修改触发保存
+			isDataLoaded.value = true;
+			console.log('✅ [系统状态] 数据初始化完成，开始监听修改...');
+
+			// 2. 检查是否有旧草稿需要恢复
+			// 注意：这里调用后，如果用户点恢复，会触发上面的 watch 再保存一次，这是正常的
+			checkAndRestoreDraft();
+		}, 500);
+	};
+
+	const checkAndRestoreDraft = () => {
+		const draftStr = uni.getStorageSync(DRAFT_KEY);
+		if (!draftStr) {
+			console.log('📭 [缓存检查] 无本地草稿');
+			return;
+		}
+
+		uni.showModal({
+			title: '恢复编辑',
+			content: '检测到您有上次未保存的资料，是否恢复？',
+			confirmText: '恢复',
+			cancelText: '放弃',
+			success: (res) => {
+				if (res.confirm) {
+					try {
+						const draft = JSON.parse(draftStr);
+						// 恢复数据
+						Object.assign(form.value, draft.form || draft); // 兼容一下结构
+
+						// 恢复数组
+						if (draft.professionsList) professionsList.value = draft.professionsList;
+						if (draft.schoolsList) schoolsList.value = draft.schoolsList;
+						if (draft.companyAndIndustryList) companyAndIndustryList.value = draft
+							.companyAndIndustryList;
+						if (draft.selectedHobbies) selectedHobbies.value = draft.selectedHobbies;
+						if (draft.otherHobbyText) otherHobbyText.value = draft.otherHobbyText;
+
+						uni.showToast({
+							title: '已恢复',
+							icon: 'none'
+						});
+					} catch (e) {
+						uni.removeStorageSync(DRAFT_KEY);
+					}
+				} else if (res.cancel) {
+					uni.removeStorageSync(DRAFT_KEY);
+				}
+			}
+		});
 	};
 
 	// 两个计算属性用于信息脱敏
@@ -770,9 +944,68 @@
 	};
 
 
-	function chooseWechatQr() {
-		handleImageUpload('wechatQrCodeUrl', 'qrcode');
-	}
+	// --- 微信二维码上传逻辑 (含裁剪) ---
+
+	// 1. 选择图片并触发裁剪
+	const chooseWechatQr = () => {
+		uni.chooseImage({
+			count: 1,
+			sourceType: ['album', 'camera'],
+			success: (res) => {
+				const tempFilePath = res.tempFilePaths[0];
+
+				// #ifdef MP-WEIXIN
+				// 微信小程序端：调用原生裁剪，比例 1:1 (正方形)
+				wx.cropImage({
+					src: tempFilePath,
+					cropScale: '1:1',
+					success: (cropRes) => {
+						console.log('二维码裁剪成功');
+						uploadQrCode(cropRes.tempFilePath);
+					},
+					fail: (err) => {
+						console.log('取消裁剪或失败:', err);
+					}
+				});
+				// #endif
+
+				// #ifndef MP-WEIXIN
+				// 非小程序端直接上传
+				uploadQrCode(tempFilePath);
+				// #endif
+			}
+		});
+	};
+
+	// 2. 上传裁剪后的图片
+	const uploadQrCode = async (filePath) => {
+		uni.showLoading({
+			title: '上传中...',
+			mask: true
+		});
+
+		// 调用封装好的 uploadFile 工具
+		const result = await uploadFile({
+			path: filePath
+		}, {
+			directory: 'qrcode'
+		});
+
+		uni.hideLoading();
+
+		if (result.data) {
+			form.value.wechatQrCodeUrl = result.data;
+			uni.showToast({
+				title: '二维码上传成功',
+				icon: 'success'
+			});
+		} else {
+			uni.showToast({
+				title: result.error || '上传失败',
+				icon: 'none'
+			});
+		}
+	};
 
 	const handleImageUpload = (field, directory) => {
 		uni.chooseImage({
@@ -892,14 +1125,13 @@
 				// });
 				// setTimeout(() => uni.navigateBack(), 1500);
 				// ==================== 【核心修改区域】 ====================
-				// 1. 先提示保存成功
+				uni.removeStorageSync(DRAFT_KEY);
+				console.log('🧹 [提交成功] 草稿已清除');
+
 				uni.showToast({
 					title: '资料保存成功',
 					icon: 'success'
 				});
-
-				// 2. 移除原来的自动返回逻辑
-				// setTimeout(() => uni.navigateBack(), 1500);
 
 				// 3. 延迟一小段时间后，弹出新的引导弹窗
 				setTimeout(() => {
@@ -979,324 +1211,485 @@
 </script>
 
 <style scoped lang="scss">
-	/* --- 1. 页面基础与布局 --- */
+	/* --- 全局容器与变量 --- */
+	$theme-color: #FF8700;
+	$bg-color: #f5f6fa;
+	$card-bg: #ffffff;
+	$text-main: #333333;
+	$text-sub: #999999;
+	$border-color: #eeeeee;
+
 	.page-container {
 		display: flex;
 		flex-direction: column;
 		min-height: 100vh;
-		background-color: #f9f9f9;
+		background-color: $bg-color;
 	}
 
-	.tabs-container {
-		background-color: #fff;
-		padding: 20rpx 30rpx;
-		border-bottom: 1rpx solid #eee;
-		flex-shrink: 0;
+	/* --- Tab 样式优化 --- */
+	.tabs-wrapper {
+		background-color: $card-bg;
+		padding: 10rpx 0;
+		position: sticky;
+		top: 0;
+		z-index: 99;
+		box-shadow: 0 4rpx 10rpx rgba(0, 0, 0, 0.03);
 	}
 
-	.content-area {
-		padding: 20rpx 30rpx 40rpx;
-		flex: 1;
-		overflow-y: auto;
-	}
+	/* 去除 uni-segmented-control 的默认边框，使用下划线风格 */
+	::v-deep .custom-tabs {
+		width: 60%;
+		margin: 0 auto;
 
-	/* --- 2. 表单通用样式 --- */
-	.form-section {
-		background-color: #fff;
-		padding: 30rpx;
-		border-radius: 20rpx;
-		margin-bottom: 20rpx;
-	}
-
-	.section-header {
-		.section-title {
-			font-size: 36rpx;
-			font-weight: bold;
-			margin-bottom: 30rpx;
-			display: block;
-		}
-	}
-
-	/* --- 3. uni-forms 组件深度样式修复 --- */
-
-	/* 统一所有表单项的标签与内容布局 */
-	::v-deep .uni-forms-item {
-		display: flex;
-		align-items: center;
-		margin-bottom: 20rpx;
-
-		.uni-forms-item__label {
-			width: 160rpx !important;
-			font-size: 28rpx;
-			color: #333;
-			flex-shrink: 0;
-			padding-right: 20rpx;
-			box-sizing: border-box;
+		.segmented-control__item--text {
+			font-size: 30rpx;
+			font-weight: 500;
+			color: $text-sub;
 		}
 
-		.uni-forms-item__content {
-			flex: 1;
-			min-width: 0;
-		}
-	}
+		.segmented-control__item--button--active {
+			background: none;
 
-	/* 强制内容区组件撑满 */
-	::v-deep .uni-easyinput,
-	::v-deep .uni-data-select,
-	::v-deep .uni-datetime-picker,
-	::v-deep .uni-data-picker {
-		width: 100% !important;
-	}
-
-	/* 禁用状态的手机号输入框样式 */
-	.phone-text ::v-deep .uni-easyinput__content-input {
-		color: #999 !important;
-	}
-
-	/* 修复 uni-data-picker 文本溢出问题 */
-	::v-deep .uni-data-picker .uni-data-tree-input {
-		display: flex !important;
-		align-items: center;
-		width: 100% !important;
-		height: 36px;
-		border: 1px solid #e5e5e5;
-		border-radius: 4px;
-		padding: 0 10px;
-		box-sizing: border-box;
-		overflow: hidden;
-
-		.input-value {
-			flex: 1;
-			min-width: 0;
-			display: block;
-			overflow: hidden;
-			text-overflow: ellipsis;
-			white-space: nowrap;
-		}
-	}
-
-	/* --- 4. 特定表单项样式 (头像、二维码、爱好) --- */
-	.avatar-uploader,
-	.qr-uploader {
-		display: flex;
-		align-items: center;
-		gap: 30rpx;
-	}
-
-	.avatar-img {
-		width: 120rpx;
-		height: 120rpx;
-		border-radius: 50%;
-	}
-
-	.qr-img {
-		width: 120rpx;
-		height: 120rpx;
-		border-radius: 8rpx;
-		border: 1px solid #eee;
-	}
-
-	.upload-btn {
-		height: 60rpx;
-		line-height: 60rpx;
-		margin: 0;
-		padding: 0 30rpx;
-		background-color: #f5f5f5;
-		color: #333;
-		font-size: 26rpx;
-
-		&::after {
-			border: none;
-		}
-	}
-
-	.other-hobby-input {
-		margin-top: 20rpx;
-	}
-
-	.switch-container {
-		display: flex;
-		align-items: center;
-		width: 100%;
-		// uni-forms-item 已经有 padding, 这里可能不需要额外的高度
-		// height: 80rpx; 
-	}
-
-	.switch-label {
-		font-size: 28rpx;
-		color: #666;
-		margin-left: 20rpx;
-	}
-
-	/* --- 5. 动态增删区块样式 --- */
-	.dynamic-section {
-		margin-top: 40rpx;
-		margin-bottom: 20rpx;
-		padding-top: 30rpx;
-		border-top: 1px solid #f0f0f0;
-	}
-
-	.dynamic-header {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		margin-bottom: 20rpx;
-	}
-
-	.dynamic-label {
-		font-size: 32rpx;
-		font-weight: bold;
-		color: #333;
-	}
-
-	/* 动态项 - 单行 (职业、学校) */
-	.dynamic-item {
-		display: flex;
-		align-items: center;
-		gap: 20rpx;
-		margin-bottom: 20rpx;
-
-		.uni-easyinput {
-			flex: 1;
-		}
-	}
-
-	/* 动态项 - 分组 (公司/行业) */
-	.dynamic-group {
-		margin-bottom: 20rpx;
-		padding: 30rpx;
-		background-color: #f9f9f9;
-		border: 1px solid #eee;
-		border-radius: 12rpx;
-
-		.group-header {
-			display: flex;
-			justify-content: space-between;
-			align-items: center;
-			margin-bottom: 30rpx;
-		}
-
-		.group-title {
-			font-size: 28rpx;
-			font-weight: bold;
-			color: #555;
-		}
-	}
-
-	/* 动态项 - 添加/删除按钮 */
-	.add-btn-small {
-		display: flex;
-		align-items: center;
-		height: 50rpx;
-		line-height: 50rpx;
-		margin: 0;
-		padding: 0 20rpx;
-		background-color: #f0f7ff;
-		color: #007bff;
-		font-size: 24rpx;
-		border: 1px solid #d2e7ff;
-
-		&::after {
-			border: none;
-		}
-
-		uni-icons {
-			margin-right: 8rpx;
-		}
-	}
-
-	.remove-btn-small {
-		width: 50rpx;
-		height: 50rpx;
-		line-height: 50rpx;
-		margin: 0;
-		padding: 0;
-		background-color: #fef0f0;
-		color: #f56c6c;
-		font-size: 28rpx;
-		font-weight: bold;
-		border: none;
-		border-radius: 50%;
-		flex-shrink: 0;
-
-		&::after {
-			border: none;
-		}
-	}
-
-	.remove-btn {
-		height: 50rpx;
-		line-height: 50rpx;
-		margin: 0;
-		padding: 0 20rpx;
-		background-color: #fef0f0;
-		color: #f56c6c;
-		font-size: 24rpx;
-		border: 1px solid #fde2e2;
-
-		&::after {
-			border: none;
-		}
-	}
-
-	/* --- 6. 数字标签页面样式 --- */
-	.digital-label-section {
-		/* 继承 .form-section 的基础样式 */
-	}
-
-	.label-info-card {
-		.info-text {
-			font-size: 28rpx;
-			color: #666;
-			line-height: 1.7;
-			margin-bottom: 20rpx;
-		}
-
-		.info-list {
-			list-style: none;
-			padding-left: 0;
-			margin: 30rpx 0;
-
-			li {
-				display: flex;
-				align-items: center;
-				margin-bottom: 15rpx;
-				font-size: 28rpx;
-				color: #333;
-
-				.uni-icons {
-					margin-right: 15rpx;
-				}
+			.segmented-control__text {
+				color: $theme-color !important;
+				font-weight: bold;
+				font-size: 32rpx;
 			}
 		}
 	}
 
-	/* --- 7. 页面底部操作按钮 --- */
-	.save-btn,
-	.label-btn {
-		width: 100%;
-		height: 88rpx;
-		line-height: 88rpx;
-		border-radius: 44rpx;
+	.tab-line {
+		width: 60rpx;
+		height: 6rpx;
+		background-color: $theme-color;
+		border-radius: 6rpx;
+		position: absolute;
+		bottom: 0;
+		transform: translateX(-50%);
+		transition: left 0.3s ease;
+	}
+
+
+	.content-area {
+		padding: 30rpx;
+		flex: 1;
+	}
+
+	/* --- 通用卡片样式 --- */
+	.form-card {
+		background-color: $card-bg;
+		border-radius: 24rpx;
+		padding: 30rpx;
+		margin-bottom: 30rpx;
+		box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.02);
+	}
+
+	.card-title {
 		font-size: 32rpx;
+		font-weight: 700;
+		color: $text-main;
+		margin-bottom: 30rpx;
+		position: relative;
+		padding-left: 20rpx;
+
+		&::before {
+			content: '';
+			position: absolute;
+			left: 0;
+			top: 50%;
+			transform: translateY(-50%);
+			width: 8rpx;
+			height: 32rpx;
+			background: linear-gradient(to bottom, $theme-color, #ffb347);
+			border-radius: 4rpx;
+		}
+	}
+
+	.card-header-row {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 30rpx;
+
+		.card-title {
+			margin-bottom: 0;
+		}
+	}
+
+	.divider {
+		height: 1rpx;
+		background-color: #f9f9f9;
+		margin: 0 20rpx;
+	}
+
+	/* --- 头像区域 --- */
+	.avatar-card {
+		display: flex;
+		justify-content: center;
+		padding: 40rpx 30rpx;
+		background: linear-gradient(to bottom, #fff, #fff);
+	}
+
+	.avatar-form-item {
+		margin-bottom: 0;
+		width: 100%;
+		display: flex;
+		justify-content: center;
+	}
+
+	.avatar-uploader-center {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+	}
+
+	.avatar-box {
+		position: relative;
+		width: 160rpx;
+		height: 160rpx;
+		margin-bottom: 20rpx;
+	}
+
+	.avatar-img {
+		width: 100%;
+		height: 100%;
+		border-radius: 50%;
+		border: 4rpx solid #fff;
+		box-shadow: 0 8rpx 20rpx rgba(255, 135, 0, 0.2);
+	}
+
+	.camera-icon {
+		position: absolute;
+		bottom: 0;
+		right: 0;
+		background-color: $theme-color;
+		width: 50rpx;
+		height: 50rpx;
+		border-radius: 50%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		border: 4rpx solid #fff;
+	}
+
+	.upload-text {
+		font-size: 26rpx;
+		color: $text-sub;
+	}
+
+	/* --- 表单项优化 --- */
+	::v-deep .uni-forms-item {
+		border-bottom: 1rpx solid #f8f8f8;
+		padding-bottom: 10rpx;
+		margin-bottom: 24rpx;
+
+		/* 去除最后一个的边框 */
+		&:last-child {
+			border-bottom: none;
+			margin-bottom: 0;
+			padding-bottom: 0;
+		}
+
+		&__label {
+			font-size: 28rpx;
+			color: #666;
+			height: auto;
+			padding-top: 10rpx;
+		}
+
+		/* 顶部对齐模式 */
+		&--top {
+			.uni-forms-item__label {
+				margin-bottom: 16rpx;
+			}
+		}
+	}
+
+	/* 优化输入框 */
+	::v-deep .uni-easyinput__content {
+		background-color: transparent !important;
+		min-height: 60rpx;
+	}
+
+	::v-deep .uni-easyinput__content-input {
+		font-size: 28rpx;
+		color: $text-main;
+		text-align: left;
+		/* 右对齐输入看起来更整洁 */
+	}
+
+	/* 优化选择器 */
+	::v-deep .uni-data-tree-input,
+	::v-deep .uni-stat__select {
+		background-color: transparent !important;
+		padding-right: 0;
+
+		.input-value {
+			text-align: right;
+			color: $text-main;
+		}
+
+		.uni-icons {
+			color: #ccc !important;
+		}
+	}
+
+	/* 文本域背景 */
+	.textarea-bg {
+		::v-deep .uni-easyinput__content {
+			background-color: #f9f9f9 !important;
+			border-radius: 12rpx;
+			padding: 20rpx;
+			text-align: left;
+			/* 文本域左对齐 */
+		}
+
+		::v-deep .uni-easyinput__content-textarea {
+			text-align: left;
+			min-height: 160rpx;
+		}
+	}
+
+	/* --- 动态列表样式 (职业、学校) --- */
+	.add-text-btn {
+		font-size: 26rpx;
+		color: $theme-color;
+		display: flex;
+		align-items: center;
+		background-color: rgba(255, 135, 0, 0.1);
+		padding: 8rpx 20rpx;
+		border-radius: 30rpx;
+	}
+
+	.dynamic-row-item {
+		display: flex;
+		align-items: center;
+		background-color: #f9f9f9;
+		padding: 0 20rpx;
+		border-radius: 12rpx;
+		margin-bottom: 20rpx;
+		height: 80rpx;
+
+		::v-deep .uni-easyinput__content-input {
+			text-align: left;
+		}
+
+		.delete-icon {
+			padding: 20rpx;
+			margin-right: -20rpx;
+		}
+	}
+
+	/* --- 动态块样式 (公司/行业) --- */
+	.dynamic-block-item {
+		background-color: #fbfbfb;
+		border: 1rpx solid #f0f0f0;
+		border-radius: 16rpx;
+		padding: 20rpx 30rpx;
+		margin-bottom: 30rpx;
+		position: relative;
+
+		.block-header {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			margin-bottom: 20rpx;
+
+			.block-index {
+				font-size: 24rpx;
+				color: #fff;
+				background-color: #ccc;
+				padding: 2rpx 12rpx;
+				border-radius: 8rpx;
+			}
+
+			.delete-text {
+				font-size: 24rpx;
+				color: #ff4d4f;
+			}
+		}
+
+		/* 块内的输入框强制左对齐，且去除底部边框 */
+		::v-deep .uni-forms-item {
+			border-bottom: none;
+			margin-bottom: 0;
+
+			&__label {
+				font-size: 26rpx;
+			}
+		}
+
+		::v-deep .input-value,
+		::v-deep .uni-easyinput__content-input {
+			text-align: left;
+			font-size: 28rpx;
+		}
+	}
+
+	/* --- 新版居中大二维码样式 --- */
+	.qr-uploader-centered {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		padding: 20rpx 0;
+		background-color: #fcfcfc;
+		border-radius: 16rpx;
+		border: 1rpx dashed #eee;
+	}
+
+	.qr-box {
+		width: 300rpx;
+		/* 增大尺寸 */
+		height: 300rpx;
+		background-color: #fff;
+		border-radius: 12rpx;
+		box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		overflow: hidden;
+		margin-bottom: 20rpx;
+		border: 1rpx solid #f0f0f0;
+	}
+
+	.qr-img-large {
+		width: 100%;
+		height: 100%;
+	}
+
+	.qr-placeholder-large {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.placeholder-text {
+		font-size: 24rpx;
+		color: #ccc;
+		margin-top: 10rpx;
+	}
+
+	.upload-action {
+		display: flex;
+		align-items: center;
+		background-color: rgba(255, 135, 0, 0.08);
+		/* 淡橙色背景 */
+		padding: 8rpx 24rpx;
+		border-radius: 30rpx;
+	}
+
+	.action-text {
+		font-size: 26rpx;
+		color: #FF8700;
+		/* 主题色 */
+		font-weight: 500;
+	}
+
+	/* --- 底部按钮 --- */
+	.save-btn {
+		background: linear-gradient(135deg, #FF9A44, $theme-color);
 		color: white;
-		border: none;
+		border-radius: 50rpx;
+		height: 90rpx;
+		line-height: 90rpx;
+		font-size: 32rpx;
+		font-weight: bold;
+		box-shadow: 0 10rpx 20rpx rgba(255, 135, 0, 0.3);
+		margin-top: 40rpx;
+
+		&:active {
+			transform: scale(0.98);
+		}
 
 		&::after {
 			border: none;
 		}
 	}
 
-	.save-btn {
-		margin-top: 40rpx;
-		background: linear-gradient(to right, #FF8C00, #FF6B00);
+	.bottom-spacer {
+		height: 60rpx;
+	}
+
+
+	/* --- 数字标签页样式 --- */
+	.info-card {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		padding: 60rpx 40rpx;
+		text-align: center;
+	}
+
+	.info-header {
+		display: flex;
+		align-items: center;
+		margin-bottom: 30rpx;
+		gap: 16rpx;
+	}
+
+	.info-title {
+		font-size: 36rpx;
+		font-weight: bold;
+		color: $text-main;
+	}
+
+	.info-desc {
+		font-size: 28rpx;
+		color: #666;
+		line-height: 1.6;
+		margin-bottom: 40rpx;
+		display: block;
+		text-align: left;
+	}
+
+	.benefit-list {
+		width: 100%;
+		margin-bottom: 50rpx;
+	}
+
+	.benefit-item {
+		display: flex;
+		align-items: center;
+		margin-bottom: 24rpx;
+		background-color: #fff9f0;
+		padding: 20rpx 30rpx;
+		border-radius: 16rpx;
+
+		.check-circle {
+			width: 36rpx;
+			height: 36rpx;
+			border-radius: 50%;
+			background-color: $theme-color;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			margin-right: 20rpx;
+		}
+
+		text {
+			font-size: 30rpx;
+			color: #333;
+			font-weight: 500;
+		}
 	}
 
 	.label-btn {
+		width: 100%;
+		background: #333;
+		/* 黑色背景，突出高级感 */
+		color: #fff;
+		border-radius: 50rpx;
+		height: 88rpx;
+		line-height: 88rpx;
+		font-size: 30rpx;
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		margin-top: 50rpx;
-		background: linear-gradient(to right, #007bff, #0056b3);
+
+		&::after {
+			border: none;
+		}
 	}
 </style>

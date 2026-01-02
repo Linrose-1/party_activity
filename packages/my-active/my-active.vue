@@ -142,17 +142,17 @@
 										type="error"></uni-badge>
 								</button>
 
-								<button v-if="['未开始', '报名中', '聚会即将开始', '进行中'].includes(item.statusStr)"
+								<button v-if="['未开始', '报名中', '活动即将开始', '进行中'].includes(item.statusStr)"
 									class="btn btn-cancel" @click.stop="cancelActivity(item.id)">
 									取消聚会
 								</button>
 
-								<button v-if="item.statusStr === '聚会取消'" class="btn btn-refund-manage"
+								<button v-if="item.statusStr === '活动取消'" class="btn btn-refund-manage"
 									@click.stop="manageRefunds(item, 'all')">
 									处理退款
 								</button>
 
-								<button v-if="item.statusStr !== '聚会取消'" class="btn btn-view-users"
+								<button v-if="item.statusStr !== '活动取消'" class="btn btn-view-users"
 									@click.stop="navigateToRegisteredUsers(item)">
 									报名用户
 								</button>
@@ -328,6 +328,7 @@
 			// 我的报名状态
 			'待支付': 'pending_payment', // 假设用 pending 样式
 			'已支付': 'enrolled', // 假设用 enrolled 样式
+			'待确定': 'pending', 
 			'待退款': 'refund_pending',
 			'已退款': 'ended', // 假设用 ended 样式
 			'替补': 'upcoming', // 假设用 upcoming 样式
@@ -337,7 +338,7 @@
 			'已取消': 'canceled',
 			'未开始': 'upcoming',
 			'报名中': 'enrolled',
-			'即将开始': 'upcoming',
+			'活动即将开始': 'upcoming',
 			'进行中': 'ongoing',
 			'已结束': 'ended'
 		};

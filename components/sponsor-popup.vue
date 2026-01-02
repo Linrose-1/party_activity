@@ -16,7 +16,7 @@
 							<uni-easyinput v-model="form.sponsorName" placeholder="请输入赞助商名称" class="standard-input" />
 						</uni-forms-item>
 
-						<uni-forms-item label="品牌Logo" required>
+						<uni-forms-item label="品牌Logo" >
 							<view class="upload-box logo-upload" @click="uploadLogo">
 								<image v-if="form.logoUrl" :src="form.logoUrl" mode="aspectFit" class="uploaded-img">
 								</image>
@@ -27,7 +27,7 @@
 							</view>
 						</uni-forms-item>
 
-						<uni-forms-item label="品牌简介" required>
+						<uni-forms-item label="品牌简介" >
 							<uni-easyinput type="textarea" v-model="form.introduction" placeholder="请输入200字以内的简介"
 								maxlength="200" class="standard-textarea" />
 						</uni-forms-item>
@@ -244,10 +244,10 @@
 		// 	title: '请上传Logo',
 		// 	icon: 'none'
 		// });
-		if (!f.introduction) return uni.showToast({
-			title: '请输入简介',
-			icon: 'none'
-		});
+		// if (!f.introduction) return uni.showToast({
+		// 	title: '请输入简介',
+		// 	icon: 'none'
+		// });
 
 		if (f.sponsorType === 1 || f.sponsorType === 3) {
 			if (!f.cashAmount || !f.perCapitalAmount) return uni.showToast({

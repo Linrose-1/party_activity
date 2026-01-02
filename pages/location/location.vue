@@ -87,7 +87,8 @@
 
 <script setup>
 	import {
-		ref
+		ref,
+		nextTick
 	} from 'vue';
 	import {
 		onReachBottom,
@@ -114,7 +115,7 @@
 
 	// --- 状态管理 ---
 	const currentTab = ref(0);
-	const tabItems = ['商友', '聚会'];
+	const tabItems = ref(['商友', '聚会']);
 	const shaken = ref(false); // 是否已经摇过并显示结果
 	const loading = ref(false); // 是否正在加载数据（摇动后）
 	const shakeDebounce = ref(true); // 摇一摇的防抖
@@ -131,7 +132,7 @@
 	const activities = ref([]);
 	const businesses = ref([]);
 
-	// --- 【核心修改】重置页面状态的函数 ---
+	// --- 重置页面状态的函数 ---
 	const resetState = () => {
 		console.log("页面状态已重置");
 		shaken.value = false;
@@ -154,11 +155,16 @@
 
 
 	const handleTabClick = (e) => {
+		if (loading.value) return;
 		currentTab.value = e.currentIndex;
+		console.log("🔥点击切换tab！当前 Tab 索引为:", currentTab.value); // 调试日志
 	};
 
 	const triggerShakeSequence = () => {
-		// if (!shakeDebounce.value) return;
+		// 1. 立即捕获当前的 Tab
+		const savedTabIndex = currentTab.value;
+
+		console.log("🔥 摇一摇触发！当前 Tab 索引为:", savedTabIndex); // 调试日志
 
 		lockShake();
 
@@ -167,15 +173,16 @@
 			shakeAudioContext.play();
 		}
 
-		// shakeDebounce.value = false;
-		getLocationAndProceed();
+		// 2. 将捕获到的 Tab 传给下一步
+		getLocationAndProceed(savedTabIndex);
 	};
 
-	const getLocationAndProceed = () => {
+	const getLocationAndProceed = (savedTabIndex = 0) => {
 		uni.showLoading({
 			title: '正在定位...',
 			mask: true
 		});
+
 		uni.getLocation({
 			type: 'gcj02',
 			success: async (res) => {
@@ -184,34 +191,39 @@
 					latitude: res.latitude,
 					longitude: res.longitude,
 				};
-				shaken.value = true; // 标记为已摇过
-				loading.value = true; // 开始显示加载动画
+
+				shaken.value = true;
+				loading.value = true;
 				uni.vibrateShort();
 
+				// 确保 Tab 还是摇动前那个（防止意外变动）
+				currentTab.value = savedTabIndex;
+
 				try {
-					// 并发请求聚会和商友列表
+					// 两个接口都请求，这样切换 Tab 时数据都在
 					await Promise.all([
 						getNearbyActivities(true),
 						getNearbyBusinesses(true)
 					]);
 				} catch (error) {
-					console.error('加载初始数据时发生错误:', error);
+					console.error('加载错误:', error);
 				} finally {
-					loading.value = false; // 结束加载动画，显示结果
-					// setTimeout(() => {
-					// 	shakeDebounce.value = true;
-					// }, 1000); // 1秒后允许再次摇动
+					loading.value = false;
+
+					// 再次确保 Tab 没变
+					if (currentTab.value !== savedTabIndex) {
+						currentTab.value = savedTabIndex;
+					}
 				}
 			},
 			fail: (err) => {
-				// 如果定位失败，也应该提前结束，此时可以提前解锁让用户重试
 				uni.hideLoading();
 				uni.showToast({
-					title: '获取位置失败',
+					title: '定位失败',
 					icon: 'none'
 				});
-				// 定位失败时，可以设置一个较短的解锁时间
-				lockShake(1000); // 锁1秒后允许重试
+				// 解锁摇一摇
+				// if (typeof lockShake === 'function') lockShake(1000);
 			}
 		});
 	};
@@ -286,7 +298,7 @@
 		}
 	};
 
-	// --- 【核心修改】关注/取关功能 ---
+	// --- 关注/取关功能 ---
 	const handleFollowAction = async (user) => {
 		if (isFollowActionInProgress.value) return;
 
@@ -382,6 +394,7 @@
 
 	// --- 生命周期钩子 ---
 	onLoad((options) => {
+		resetState();
 		// 这个钩子只在页面首次加载时运行一次
 		if (options.autoShake === 'true') {
 			console.log("onLoad: 接收到自动摇一摇指令");
@@ -393,26 +406,24 @@
 	onShow(() => {
 		checkLoginStatus();
 
-		// 1. 保证音效实例最先被创建
-		shakeAudioContext = uni.createInnerAudioContext();
-		shakeAudioContext.src = 'https://img.gofor.club/wechat_shake.mp3';
-
-		// 2. 每次进入页面，都先重置到初始状态
-		//    这能确保 shakeDebounce.value 为 true，为摇一摇做好准备
-		resetState();
-
-		// 3. 在状态重置后，再检查是否需要自动触发
-		if (autoShakeOnLoad.value) {
-			console.log("onShow: 执行自动摇一摇流程");
-			// 直接触发摇一摇的完整流程
-			triggerShakeSequence();
-			// 【重要】用完后立即重置该指令，防止下次 onShow 时重复触发
-			autoShakeOnLoad.value = false;
-		} else {
-			console.log("onShow: 正常进入，等待用户手动触发");
+		// 初始化音频
+		if (!shakeAudioContext) {
+			shakeAudioContext = uni.createInnerAudioContext();
+			shakeAudioContext.src = 'https://img.gofor.club/wechat_shake.mp3';
 		}
 
-		// 4. 最后，为手动摇一摇开启监听
+		// 只有在明确收到“自动摇”指令时才重置
+		if (autoShakeOnLoad.value) {
+			console.log("onShow: 执行自动摇一摇流程");
+			// 只有自动摇的时候，才强制重置状态
+			resetState();
+			// 自动摇默认应该在商友页，或者你可以指定
+			// currentTab.value = 0;
+			triggerShakeSequence();
+			autoShakeOnLoad.value = false;
+		}
+
+		// 监听摇一摇
 		uni.onAccelerometerChange((res) => {
 			if (Math.abs(res.x) > 1.2 && Math.abs(res.y) > 1.2) {
 				if (!isShakeLocked.value) {

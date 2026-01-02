@@ -111,7 +111,7 @@
 		</uni-popup>
 
 	</view>
-	
+
 	<AddCircleConfirmPopup ref="addCirclePopup" />
 </template>
 
@@ -144,7 +144,7 @@
 	const customShareTitle = ref('');
 	const showTimelineGuide = ref(false);
 	const isPopupOpen = ref(false);
-	
+
 	const addCirclePopup = ref(null);
 
 	// 假设后端返回的名片信息里有一个字段表示是否互圈，比如 isFriend
@@ -193,6 +193,7 @@
 				}
 			});
 			console.log('✅ [名片页] scene 解析结果:', sceneParams);
+			console.log('测试');
 			// 将解析后的 scene 参数合并到 finalOptions 中
 			finalOptions = {
 				...finalOptions,
@@ -219,9 +220,25 @@
 		const loggedInUserId = uni.getStorageSync('userId');
 		const targetId = finalOptions.i || finalOptions.id;
 
-		if (finalOptions.fromShare && finalOptions.fromShare === '1') {
+		// if (finalOptions.fromShare && finalOptions.fromShare === '1') {
+		// 	fromShare.value = true;
+		// }
+		// if ((finalOptions.fromShare && finalOptions.fromShare === '1') ||
+		// 	(finalOptions.fs && finalOptions.fs === '1')) {
+		// 	fromShare.value = true;
+		// }
+		// --- 替换开始 ---
+		const isFromShareStr = finalOptions.fromShare || finalOptions.fs;
+		console.log('🔍 [Debug] fromShare/fs 原始值:', isFromShareStr);
+
+		if (isFromShareStr === '1' || isFromShareStr === 1) {
 			fromShare.value = true;
+			console.log('✅ [Debug] 已识别为分享来源，fromShare = true');
+		} else {
+			console.log('❌ [Debug] 未识别为分享来源');
 		}
+		// --- 替换结束 ---
+		console.log("打印结束")
 
 		if (targetId) {
 			// 情况 A: 有目标ID -> 查看他人 (无论是否登录)
@@ -251,7 +268,9 @@
 
 		// 6. 执行页面初始化 (加载数据)
 		// 注意：fetchTargetUserInfo 调用的接口需要后端放行 Auth
-		initializePage();
+		// 重新定义一个明确的布尔值，用于传参
+		const isShareSource = (fromShare.value === true);
+		initializePage(isShareSource);
 
 		// 7. 处理分享奖励 (内部有判断 loggedInUserId，游客调用安全)
 		handleShareReward(finalOptions);
@@ -260,15 +279,17 @@
 	/**
 	 * @description 页面初始化总函数，负责数据加载和状态管理
 	 */
-	const initializePage = async () => {
+	const initializePage = async (isFromShare = false) => {
 		isLoading.value = true;
 		errorMsg.value = '';
 		userInfo.value = null; // 每次加载前重置
 
+		console.log('🔄 [initializePage] 接收到的 isFromShare:', isFromShare);
+
 		try {
 			const rawData = isViewingOwnCard.value ?
 				await fetchOwnUserInfo() :
-				await fetchTargetUserInfo(targetUserId.value);
+				await fetchTargetUserInfo(targetUserId.value, isFromShare);
 
 			if (!rawData) throw new Error('未能获取到名片信息');
 
@@ -419,12 +440,15 @@
 	/**
 	 * @description 获取他人的名片信息
 	 */
-	const fetchTargetUserInfo = async (userId) => {
+	const fetchTargetUserInfo = async (userId, forceFree = false) => {
 		const requestData = {
 			readUserId: userId
 		};
+
+		console.log('🛠 [fetchTargetUserInfo] forceFree:', forceFree);
+
 		// 如果是分享链接进来的，加上这个参数（按后端要求）
-		if (fromShare.value) {
+		if (forceFree) {
 			requestData.notPay = 1;
 		}
 

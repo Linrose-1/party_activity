@@ -50,8 +50,10 @@
 
 					<!-- 聚会图集 -->
 					<uni-forms-item label="聚会图集">
-						<DragImageUploader v-model="form.activityCoverImageUrls" :max-count="9"
-							@add-image="handleActivityImagesUpload" />
+						<view class="uploader-wrapper">
+							<DragImageUploader v-model="form.activityCoverImageUrls" :max-count="9"
+								@add-image="handleActivityImagesUpload" />
+						</view>
 					</uni-forms-item>
 
 					<!-- 时间选择 (各占一行) -->
@@ -1111,6 +1113,19 @@
 			color: #bbb;
 			margin-top: 6rpx;
 		}
+	}
+
+	.uploader-wrapper {
+		width: 100%;
+		min-height: 200rpx;
+		/* 给一个最小高度，防止未加载时完全坍塌 */
+		overflow: hidden;
+		/* 触发 BFC，清除浮动，防止子元素外溢 */
+		display: block;
+		/* 确保是块级元素 */
+		/* 如果 DragImageUploader 内部有 transform 动画，可能需要加这个 */
+		position: relative;
+		z-index: 1;
 	}
 
 	/* 自定义选择框 (模仿输入框外观) */

@@ -154,7 +154,7 @@
 							@click="isAnonymous = !isAnonymous">
 							<uni-icons :type="isAnonymous ? 'eye-slash-filled' : 'eye-filled'" size="18"
 								:color="isAnonymous ? '#FF6A00' : '#999'"></uni-icons>
-							<text>{{ isAnonymous ? '匿名' : '公开' }}</text>
+							<text>{{ isAnonymous ? '匿名' : '显名' }}</text>
 						</view>
 
 						<!-- 分割线 -->

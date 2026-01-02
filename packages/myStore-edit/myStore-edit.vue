@@ -189,7 +189,7 @@
 		<!-- 底部按钮 -->
 		<view class="footer-bar">
 			<button class="main-btn" @click="handleSubmit" :loading="isSubmitting" :disabled="isSubmitting">
-				{{ isSubmitting ? '正在提交...' : (form.id ? '保存修改' : '立即入驻') }}
+				{{ isSubmitting ? '正在提交...' : (form.id ? '保存修改' : '自荐聚店') }}
 			</button>
 		</view>
 	</view>

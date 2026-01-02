@@ -126,11 +126,6 @@ const _sfc_main = {
           title: "请输入名称",
           icon: "none"
         });
-      if (!f.introduction)
-        return common_vendor.index.showToast({
-          title: "请输入简介",
-          icon: "none"
-        });
       if (f.sponsorType === 1 || f.sponsorType === 3) {
         if (!f.cashAmount || !f.perCapitalAmount)
           return common_vendor.index.showToast({
@@ -229,8 +224,7 @@ const _sfc_main = {
       }, {
         j: common_vendor.o(uploadLogo),
         k: common_vendor.p({
-          label: "品牌Logo",
-          required: true
+          label: "品牌Logo"
         }),
         l: common_vendor.o(($event) => form.value.introduction = $event),
         m: common_vendor.p({
@@ -240,8 +234,7 @@ const _sfc_main = {
           modelValue: form.value.introduction
         }),
         n: common_vendor.p({
-          label: "品牌简介",
-          required: true
+          label: "品牌简介"
         }),
         o: common_vendor.t(form.value.location || "点击选择位置"),
         p: !form.value.location ? 1 : "",

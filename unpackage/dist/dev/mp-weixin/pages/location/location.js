@@ -26,7 +26,7 @@ const _sfc_main = {
     const isUserLoggedIn = common_vendor.ref(false);
     const autoShakeOnLoad = common_vendor.ref(false);
     const currentTab = common_vendor.ref(0);
-    const tabItems = ["商友", "聚会"];
+    const tabItems = common_vendor.ref(["商友", "聚会"]);
     const shaken = common_vendor.ref(false);
     const loading = common_vendor.ref(false);
     common_vendor.ref(true);
@@ -39,7 +39,7 @@ const _sfc_main = {
     const activities = common_vendor.ref([]);
     const businesses = common_vendor.ref([]);
     const resetState = () => {
-      common_vendor.index.__f__("log", "at pages/location/location.vue:136", "页面状态已重置");
+      common_vendor.index.__f__("log", "at pages/location/location.vue:137", "页面状态已重置");
       shaken.value = false;
       loading.value = false;
       activities.value = [];
@@ -54,17 +54,22 @@ const _sfc_main = {
       isUserLoggedIn.value = !!token;
     };
     const handleTabClick = (e) => {
+      if (loading.value)
+        return;
       currentTab.value = e.currentIndex;
+      common_vendor.index.__f__("log", "at pages/location/location.vue:160", "🔥点击切换tab！当前 Tab 索引为:", currentTab.value);
     };
     const triggerShakeSequence = () => {
+      const savedTabIndex = currentTab.value;
+      common_vendor.index.__f__("log", "at pages/location/location.vue:167", "🔥 摇一摇触发！当前 Tab 索引为:", savedTabIndex);
       lockShake();
       if (shakeAudioContext) {
         shakeAudioContext.stop();
         shakeAudioContext.play();
       }
-      getLocationAndProceed();
+      getLocationAndProceed(savedTabIndex);
     };
-    const getLocationAndProceed = () => {
+    const getLocationAndProceed = (savedTabIndex = 0) => {
       common_vendor.index.showLoading({
         title: "正在定位...",
         mask: true
@@ -80,24 +85,27 @@ const _sfc_main = {
           shaken.value = true;
           loading.value = true;
           common_vendor.index.vibrateShort();
+          currentTab.value = savedTabIndex;
           try {
             await Promise.all([
               getNearbyActivities(true),
               getNearbyBusinesses(true)
             ]);
           } catch (error) {
-            common_vendor.index.__f__("error", "at pages/location/location.vue:198", "加载初始数据时发生错误:", error);
+            common_vendor.index.__f__("error", "at pages/location/location.vue:209", "加载错误:", error);
           } finally {
             loading.value = false;
+            if (currentTab.value !== savedTabIndex) {
+              currentTab.value = savedTabIndex;
+            }
           }
         },
         fail: (err) => {
           common_vendor.index.hideLoading();
           common_vendor.index.showToast({
-            title: "获取位置失败",
+            title: "定位失败",
             icon: "none"
           });
-          lockShake(1e3);
         }
       });
     };
@@ -230,28 +238,29 @@ const _sfc_main = {
       const name = user.nickname || "匿名用户";
       const avatarUrl = user.avatar || defaultAvatar;
       const url = `/packages/applicationBusinessCard/applicationBusinessCard?id=${user.id}&name=${encodeURIComponent(name)}&avatar=${encodeURIComponent(avatarUrl)}`;
-      common_vendor.index.__f__("log", "at pages/location/location.vue:375", "从摇一摇页跳转，URL:", url);
+      common_vendor.index.__f__("log", "at pages/location/location.vue:387", "从摇一摇页跳转，URL:", url);
       common_vendor.index.navigateTo({
         url
       });
     };
     common_vendor.onLoad((options) => {
+      resetState();
       if (options.autoShake === "true") {
-        common_vendor.index.__f__("log", "at pages/location/location.vue:387", "onLoad: 接收到自动摇一摇指令");
+        common_vendor.index.__f__("log", "at pages/location/location.vue:400", "onLoad: 接收到自动摇一摇指令");
         autoShakeOnLoad.value = true;
       }
     });
     common_vendor.onShow(() => {
       checkLoginStatus();
-      shakeAudioContext = common_vendor.index.createInnerAudioContext();
-      shakeAudioContext.src = "https://img.gofor.club/wechat_shake.mp3";
-      resetState();
+      if (!shakeAudioContext) {
+        shakeAudioContext = common_vendor.index.createInnerAudioContext();
+        shakeAudioContext.src = "https://img.gofor.club/wechat_shake.mp3";
+      }
       if (autoShakeOnLoad.value) {
-        common_vendor.index.__f__("log", "at pages/location/location.vue:406", "onShow: 执行自动摇一摇流程");
+        common_vendor.index.__f__("log", "at pages/location/location.vue:417", "onShow: 执行自动摇一摇流程");
+        resetState();
         triggerShakeSequence();
         autoShakeOnLoad.value = false;
-      } else {
-        common_vendor.index.__f__("log", "at pages/location/location.vue:412", "onShow: 正常进入，等待用户手动触发");
       }
       common_vendor.index.onAccelerometerChange((res) => {
         if (Math.abs(res.x) > 1.2 && Math.abs(res.y) > 1.2) {
@@ -272,13 +281,13 @@ const _sfc_main = {
       switch (currentTab.value) {
         case 0:
           if (businessLoadingStatus.value === "more") {
-            common_vendor.index.__f__("log", "at pages/location/location.vue:442", "触底加载更多商友...");
+            common_vendor.index.__f__("log", "at pages/location/location.vue:453", "触底加载更多商友...");
             getNearbyBusinesses();
           }
           break;
         case 1:
           if (activityLoadingStatus.value === "more") {
-            common_vendor.index.__f__("log", "at pages/location/location.vue:449", "触底加载更多聚会...");
+            common_vendor.index.__f__("log", "at pages/location/location.vue:460", "触底加载更多聚会...");
             getNearbyActivities();
           }
           break;
@@ -289,7 +298,7 @@ const _sfc_main = {
         a: common_vendor.o(handleTabClick),
         b: common_vendor.p({
           current: currentTab.value,
-          values: tabItems,
+          values: tabItems.value,
           ["style-type"]: "button",
           ["active-color"]: "#FF6B00"
         }),

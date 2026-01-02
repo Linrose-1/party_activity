@@ -156,19 +156,19 @@ const _sfc_main = {
       },
       {
         name: "名片分享",
-        desc: "您的电子名片",
+        desc: "连接精英商友",
         icon: "../../static/icon/我的名片.png",
         iconBg: "linear-gradient(135deg, #30CFD0, #330867)",
         path: "/packages/my-businessCard/my-businessCard"
       },
       {
-        name: "邀请注册",
-        desc: "连接精英商友",
+        name: "猩球榜单",
+        desc: "猩球贡献榜单",
         icon: "../../static/icon/注册.png",
         iconBg: "linear-gradient(135deg, #30CFD0, #330867)",
-        path: "/pages/index/index"
+        key: "membershipCenter"
+        // path: '/pages/index/index'
       }
-      // 新增
       // {
       // 	name: '精准投放',
       // 	desc: '广告精准触达',
@@ -346,10 +346,10 @@ const _sfc_main = {
         common_vendor.index.makePhoneCall({
           phoneNumber: item.phone,
           success: () => {
-            common_vendor.index.__f__("log", "at pages/my/my.vue:550", "拨打电话成功");
+            common_vendor.index.__f__("log", "at pages/my/my.vue:551", "拨打电话成功");
           },
           fail: (err) => {
-            common_vendor.index.__f__("log", "at pages/my/my.vue:553", "拨打电话失败:", err);
+            common_vendor.index.__f__("log", "at pages/my/my.vue:554", "拨打电话失败:", err);
           }
         });
         return;

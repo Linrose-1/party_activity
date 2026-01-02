@@ -105,6 +105,7 @@ const _sfc_main = {
         // 假设用 pending 样式
         "已支付": "enrolled",
         // 假设用 enrolled 样式
+        "待确定": "pending",
         "待退款": "refund_pending",
         "已退款": "ended",
         // 假设用 ended 样式
@@ -115,7 +116,7 @@ const _sfc_main = {
         "已取消": "canceled",
         "未开始": "upcoming",
         "报名中": "enrolled",
-        "即将开始": "upcoming",
+        "活动即将开始": "upcoming",
         "进行中": "ongoing",
         "已结束": "ended"
       };
@@ -182,7 +183,7 @@ const _sfc_main = {
       });
     };
     const cancelActivity = (activityId) => {
-      common_vendor.index.__f__("log", "at packages/my-active/my-active.vue:415", "一进来就调用");
+      common_vendor.index.__f__("log", "at packages/my-active/my-active.vue:416", "一进来就调用");
       common_vendor.index.showModal({
         title: "警告",
         content: "确定要取消您发布的此聚会吗？此操作不可逆。",
@@ -352,16 +353,16 @@ const _sfc_main = {
             }),
             o: common_vendor.o(($event) => manageRefunds(item, "individual"), item.id)
           } : {}, {
-            p: ["未开始", "报名中", "聚会即将开始", "进行中"].includes(item.statusStr)
-          }, ["未开始", "报名中", "聚会即将开始", "进行中"].includes(item.statusStr) ? {
+            p: ["未开始", "报名中", "活动即将开始", "进行中"].includes(item.statusStr)
+          }, ["未开始", "报名中", "活动即将开始", "进行中"].includes(item.statusStr) ? {
             q: common_vendor.o(($event) => cancelActivity(item.id), item.id)
           } : {}, {
-            r: item.statusStr === "聚会取消"
-          }, item.statusStr === "聚会取消" ? {
+            r: item.statusStr === "活动取消"
+          }, item.statusStr === "活动取消" ? {
             s: common_vendor.o(($event) => manageRefunds(item, "all"), item.id)
           } : {}, {
-            t: item.statusStr !== "聚会取消"
-          }, item.statusStr !== "聚会取消" ? {
+            t: item.statusStr !== "活动取消"
+          }, item.statusStr !== "活动取消" ? {
             v: common_vendor.o(($event) => navigateToRegisteredUsers(item), item.id)
           } : {}, {
             w: common_vendor.o(($event) => navigateToEdit(item.id), item.id),
