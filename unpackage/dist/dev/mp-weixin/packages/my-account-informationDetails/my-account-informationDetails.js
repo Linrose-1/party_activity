@@ -158,22 +158,21 @@ const _sfc_main = {
         i: common_vendor.t(formatSex(userInfo.value.sex)),
         j: common_vendor.t(userInfo.value.era || "未填写"),
         k: common_vendor.t(userInfo.value.locationAddressStr || "未填写"),
-        l: common_vendor.t(userInfo.value.birthplaceStr || "未填写"),
-        m: common_vendor.t(userInfo.value.nativePlaceStr || "未填写"),
-        n: common_vendor.p({
+        l: common_vendor.t(userInfo.value.nativePlaceStr || "未填写"),
+        m: common_vendor.p({
           type: "flag-filled",
           size: "24",
           color: themeColor
         }),
-        o: common_vendor.f(splitToArray(userInfo.value.professionalTitle), (item, index, i0) => {
+        n: common_vendor.f(splitToArray(userInfo.value.professionalTitle), (item, index, i0) => {
           return {
             a: common_vendor.t(item),
             b: index
           };
         }),
-        p: !userInfo.value.professionalTitle
+        o: !userInfo.value.professionalTitle
       }, !userInfo.value.professionalTitle ? {} : {}, {
-        q: common_vendor.f(formattedCompanies.value, (company, index, i0) => {
+        p: common_vendor.f(formattedCompanies.value, (company, index, i0) => {
           return {
             a: common_vendor.t(company.name || "公司名称未填写"),
             b: common_vendor.t(company.industry || "行业未填写"),
@@ -181,84 +180,84 @@ const _sfc_main = {
             d: index
           };
         }),
-        r: formattedCompanies.value.length === 0
+        q: formattedCompanies.value.length === 0
       }, formattedCompanies.value.length === 0 ? {} : {}, {
-        s: common_vendor.f(splitToArray(userInfo.value.school), (item, index, i0) => {
+        r: common_vendor.f(splitToArray(userInfo.value.school), (item, index, i0) => {
           return {
             a: common_vendor.t(item),
             b: index
           };
         }),
-        t: !userInfo.value.school
+        s: !userInfo.value.school
       }, !userInfo.value.school ? {} : {}, {
-        v: common_vendor.f(splitToArray(userInfo.value.hobby), (item, index, i0) => {
+        t: common_vendor.f(splitToArray(userInfo.value.hobby), (item, index, i0) => {
           return {
             a: common_vendor.t(item),
             b: index
           };
         }),
-        w: !userInfo.value.hobby
+        v: !userInfo.value.hobby
       }, !userInfo.value.hobby ? {} : {}, {
-        x: common_vendor.t(userInfo.value.contactEmail || "未填写"),
-        y: userInfo.value.wechatQrCodeUrl
+        w: common_vendor.t(userInfo.value.contactEmail || "未填写"),
+        x: userInfo.value.wechatQrCodeUrl
       }, userInfo.value.wechatQrCodeUrl ? {
-        z: userInfo.value.wechatQrCodeUrl,
-        A: common_vendor.o(($event) => previewImage(userInfo.value.wechatQrCodeUrl))
+        y: userInfo.value.wechatQrCodeUrl,
+        z: common_vendor.o(($event) => previewImage(userInfo.value.wechatQrCodeUrl))
       } : {}, {
-        B: common_vendor.p({
+        A: common_vendor.p({
           type: "chat-filled",
           size: "24",
           color: themeColor
         }),
-        C: common_vendor.p({
+        B: common_vendor.p({
           type: "sound",
           size: "20",
           color: "#666"
         }),
-        D: common_vendor.t(userInfo.value.signature || "这位朋友很酷，什么也没留下。"),
-        E: common_vendor.p({
+        C: common_vendor.t(userInfo.value.signature || "这位朋友很酷，什么也没留下。"),
+        D: common_vendor.p({
           type: "sound-filled",
           size: "20",
           color: "#666"
         }),
-        F: common_vendor.t(userInfo.value.personalBio || "未填写"),
-        G: userInfo.value.haveResources
+        E: common_vendor.t(userInfo.value.personalBio || "未填写"),
+        F: userInfo.value.haveResources
       }, userInfo.value.haveResources ? {
-        H: common_vendor.t(userInfo.value.haveResources)
+        G: common_vendor.t(userInfo.value.haveResources)
       } : {}, {
-        I: userInfo.value.needResources
+        H: userInfo.value.needResources
       }, userInfo.value.needResources ? {
-        J: common_vendor.t(userInfo.value.needResources)
+        I: common_vendor.t(userInfo.value.needResources)
       } : {}, {
-        K: common_vendor.p({
+        J: common_vendor.p({
           type: "link",
           size: "20",
           color: "#fff"
         }),
-        L: common_vendor.o(goToResourceMatch),
-        M: common_vendor.p({
+        K: common_vendor.o(goToResourceMatch),
+        L: common_vendor.p({
           type: "map-filled",
           size: "24",
           color: themeColor
         }),
-        N: radarSeriesData.value.length > 0
+        M: radarSeriesData.value.length > 0
       }, radarSeriesData.value.length > 0 ? {
-        O: common_vendor.p({
+        N: common_vendor.p({
           categories: radarCategories.value,
           ["series-data"]: radarSeriesData.value,
           ["theme-color"]: themeColor
         })
       } : {}, {
-        P: radarSeriesData.value.length > 0
+        O: radarSeriesData.value.length > 0
       }, radarSeriesData.value.length > 0 ? {
-        Q: common_vendor.f(radarCategories.value, (item, index, i0) => {
+        P: common_vendor.f(radarCategories.value, (item, index, i0) => {
           return {
             a: common_vendor.t(item),
             b: common_vendor.t(radarSeriesData.value[index]),
             c: index
           };
         }),
-        R: themeColor
+        Q: themeColor
       } : {}) : {});
     };
   }

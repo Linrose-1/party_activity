@@ -1,5 +1,17 @@
 /* 水平间距 */
 /* 水平间距 */
+/* 样式部分保持不变，或者根据需要微调 apply-type-tip 的样式 */
+.apply-type-tip.data-v-8f869322 {
+  font-size: 22rpx;
+  color: #999;
+  margin-top: 8rpx;
+  background-color: #f9f9f9;
+  padding: 4rpx 10rpx;
+  border-radius: 6rpx;
+  display: inline-block;
+}
+
+/* ... 之前的 CSS ... */
 .apply-popup-container.data-v-8f869322 {
   height: 80vh;
   background-color: #f5f7fa;

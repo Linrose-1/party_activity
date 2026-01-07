@@ -789,7 +789,7 @@ const _sfc_main = {
         }),
         O: common_vendor.o(($event) => form.value.locationAddress = $event),
         P: common_vendor.p({
-          placeholder: "请选择常住地",
+          placeholder: "请选择商务/办公地",
           ["popup-title"]: "请选择省市区",
           localdata: areaTree.value,
           map: {
@@ -799,27 +799,12 @@ const _sfc_main = {
           modelValue: form.value.locationAddress
         }),
         Q: common_vendor.p({
-          label: "常住地",
+          label: "商务/办公地",
           name: "locationAddress"
         }),
-        R: common_vendor.o(($event) => form.value.birthplace = $event),
+        R: common_vendor.o(($event) => form.value.nativePlace = $event),
         S: common_vendor.p({
-          placeholder: "请选择出生地",
-          ["popup-title"]: "请选择省市区",
-          localdata: areaTree.value,
-          map: {
-            text: "name",
-            value: "id"
-          },
-          modelValue: form.value.birthplace
-        }),
-        T: common_vendor.p({
-          label: "出生地",
-          name: "birthplace"
-        }),
-        U: common_vendor.o(($event) => form.value.nativePlace = $event),
-        V: common_vendor.p({
-          placeholder: "请选择籍贯",
+          placeholder: "请选择籍贯/出生地",
           ["popup-title"]: "请选择省市区",
           localdata: areaTree.value,
           map: {
@@ -828,22 +813,22 @@ const _sfc_main = {
           },
           modelValue: form.value.nativePlace
         }),
-        W: common_vendor.p({
-          label: "籍贯",
+        T: common_vendor.p({
+          label: "籍贯/出生地",
           name: "nativePlace"
         }),
-        X: professionsList.value.length < 3
+        U: professionsList.value.length < 3
       }, professionsList.value.length < 3 ? {
-        Y: common_vendor.p({
+        V: common_vendor.p({
           type: "plusempty",
           size: "14",
           color: "#FF8700"
         }),
-        Z: common_vendor.o(addProfession)
+        W: common_vendor.o(addProfession)
       } : {}, {
-        aa: common_vendor.f(professionsList.value, (profession, index, i0) => {
+        X: common_vendor.f(professionsList.value, (profession, index, i0) => {
           return common_vendor.e({
-            a: "2d637515-27-" + i0 + ",2d637515-1",
+            a: "2d637515-25-" + i0 + ",2d637515-1",
             b: common_vendor.o(($event) => professionsList.value[index] = $event, index),
             c: common_vendor.p({
               placeholder: "示例：XXX商会/会长",
@@ -851,7 +836,7 @@ const _sfc_main = {
               modelValue: professionsList.value[index]
             })
           }, professionsList.value.length > 1 ? {
-            d: "2d637515-28-" + i0 + ",2d637515-1",
+            d: "2d637515-26-" + i0 + ",2d637515-1",
             e: common_vendor.p({
               type: "trash",
               size: "18",
@@ -862,23 +847,23 @@ const _sfc_main = {
             g: index
           });
         }),
-        ab: professionsList.value.length > 1,
-        ac: companyAndIndustryList.value.length < 3
+        Y: professionsList.value.length > 1,
+        Z: companyAndIndustryList.value.length < 3
       }, companyAndIndustryList.value.length < 3 ? {
-        ad: common_vendor.p({
+        aa: common_vendor.p({
           type: "plusempty",
           size: "14",
           color: "#FF8700"
         }),
-        ae: common_vendor.o(addCompany)
+        ab: common_vendor.o(addCompany)
       } : {}, {
-        af: common_vendor.f(companyAndIndustryList.value, (company, index, i0) => {
+        ac: common_vendor.f(companyAndIndustryList.value, (company, index, i0) => {
           return common_vendor.e({
             a: common_vendor.t(index + 1)
           }, companyAndIndustryList.value.length > 1 ? {
             b: common_vendor.o(($event) => removeCompany(index), index)
           } : {}, {
-            c: "2d637515-31-" + i0 + "," + ("2d637515-30-" + i0),
+            c: "2d637515-29-" + i0 + "," + ("2d637515-28-" + i0),
             d: common_vendor.o(($event) => company.industryName = $event, index),
             e: common_vendor.p({
               placeholder: "请选择行业",
@@ -890,31 +875,31 @@ const _sfc_main = {
               },
               modelValue: company.industryName
             }),
-            f: "2d637515-30-" + i0 + ",2d637515-1",
+            f: "2d637515-28-" + i0 + ",2d637515-1",
             g: common_vendor.p({
               label: `所在行业`,
               name: `industry_${index}`,
               ["label-width"]: "70px"
             }),
-            h: "2d637515-33-" + i0 + "," + ("2d637515-32-" + i0),
+            h: "2d637515-31-" + i0 + "," + ("2d637515-30-" + i0),
             i: common_vendor.o(($event) => company.name = $event, index),
             j: common_vendor.p({
               placeholder: "请输入公司名称",
               modelValue: company.name
             }),
-            k: "2d637515-32-" + i0 + ",2d637515-1",
+            k: "2d637515-30-" + i0 + ",2d637515-1",
             l: common_vendor.p({
               label: `公司名称`,
               name: `company_${index}`,
               ["label-width"]: "70px"
             }),
-            m: "2d637515-35-" + i0 + "," + ("2d637515-34-" + i0),
+            m: "2d637515-33-" + i0 + "," + ("2d637515-32-" + i0),
             n: common_vendor.o(($event) => company.positionTitle = $event, index),
             o: common_vendor.p({
               placeholder: "请输入您的职务",
               modelValue: company.positionTitle
             }),
-            p: "2d637515-34-" + i0 + ",2d637515-1",
+            p: "2d637515-32-" + i0 + ",2d637515-1",
             q: common_vendor.p({
               label: `担任职务`,
               name: `position_${index}`,
@@ -923,26 +908,26 @@ const _sfc_main = {
             r: index
           });
         }),
-        ag: companyAndIndustryList.value.length > 1,
-        ah: schoolsList.value.length < 6
+        ad: companyAndIndustryList.value.length > 1,
+        ae: schoolsList.value.length < 6
       }, schoolsList.value.length < 6 ? {
-        ai: common_vendor.p({
+        af: common_vendor.p({
           type: "plusempty",
           size: "14",
           color: "#FF8700"
         }),
-        aj: common_vendor.o(addSchool)
+        ag: common_vendor.o(addSchool)
       } : {}, {
-        ak: common_vendor.f(schoolsList.value, (school, index, i0) => {
+        ah: common_vendor.f(schoolsList.value, (school, index, i0) => {
           return common_vendor.e({
-            a: "2d637515-37-" + i0 + ",2d637515-1",
+            a: "2d637515-35-" + i0 + ",2d637515-1",
             b: common_vendor.o(($event) => schoolsList.value[index] = $event, index),
             c: common_vendor.p({
               placeholder: "请输入学校名称",
               modelValue: schoolsList.value[index]
             })
           }, schoolsList.value.length > 1 ? {
-            d: "2d637515-38-" + i0 + ",2d637515-1",
+            d: "2d637515-36-" + i0 + ",2d637515-1",
             e: common_vendor.p({
               type: "trash",
               size: "18",
@@ -953,115 +938,115 @@ const _sfc_main = {
             g: index
           });
         }),
-        al: schoolsList.value.length > 1,
-        am: common_vendor.o(onHobbyChange),
-        an: common_vendor.o(($event) => selectedHobbies.value = $event),
-        ao: common_vendor.p({
+        ai: schoolsList.value.length > 1,
+        aj: common_vendor.o(onHobbyChange),
+        ak: common_vendor.o(($event) => selectedHobbies.value = $event),
+        al: common_vendor.p({
           localdata: hobbyOptions.value,
           multiple: true,
           selectedColor: "#FF8700",
           selectedTextColor: "#FF8700",
           modelValue: selectedHobbies.value
         }),
-        ap: isOtherHobbySelected.value
+        am: isOtherHobbySelected.value
       }, isOtherHobbySelected.value ? {
-        aq: common_vendor.o(($event) => otherHobbyText.value = $event),
-        ar: common_vendor.p({
+        an: common_vendor.o(($event) => otherHobbyText.value = $event),
+        ao: common_vendor.p({
           placeholder: "请输入您的其他爱好",
           modelValue: otherHobbyText.value
         })
       } : {}, {
-        as: common_vendor.p({
+        ap: common_vendor.p({
           label: "个人爱好",
           name: "hobby",
           ["label-position"]: "top"
         }),
-        at: common_vendor.o(($event) => form.value.signature = $event),
-        av: common_vendor.p({
+        aq: common_vendor.o(($event) => form.value.signature = $event),
+        ar: common_vendor.p({
           placeholder: "设置一个独特的个性签名吧",
           type: "textarea",
           autoHeight: true,
           modelValue: form.value.signature
         }),
-        aw: common_vendor.p({
+        as: common_vendor.p({
           label: "个性签名",
           name: "signature",
           ["label-position"]: "top"
         }),
-        ax: common_vendor.o(($event) => form.value.personalBio = $event),
-        ay: common_vendor.p({
+        at: common_vendor.o(($event) => form.value.personalBio = $event),
+        av: common_vendor.p({
           placeholder: "介绍一下自己...",
           type: "textarea",
           autoHeight: true,
           modelValue: form.value.personalBio
         }),
-        az: common_vendor.p({
+        aw: common_vendor.p({
           label: "个人简介",
           name: "personalBio",
           ["label-position"]: "top"
         }),
-        aA: common_vendor.o(($event) => form.value.haveResources = $event),
-        aB: common_vendor.p({
+        ax: common_vendor.o(($event) => form.value.haveResources = $event),
+        ay: common_vendor.p({
           placeholder: "用来智能匹配商友资源",
           type: "textarea",
           autoHeight: true,
           modelValue: form.value.haveResources
         }),
-        aC: common_vendor.p({
+        az: common_vendor.p({
           label: "我有资源",
           name: "haveResources",
           ["label-position"]: "top"
         }),
-        aD: common_vendor.o(($event) => form.value.needResources = $event),
-        aE: common_vendor.p({
+        aA: common_vendor.o(($event) => form.value.needResources = $event),
+        aB: common_vendor.p({
           placeholder: "用来智能匹配商友资源",
           type: "textarea",
           autoHeight: true,
           modelValue: form.value.needResources
         }),
-        aF: common_vendor.p({
+        aC: common_vendor.p({
           label: "我需资源",
           name: "needResources",
           ["label-position"]: "top"
         }),
-        aG: common_vendor.sr(formRef, "2d637515-1", {
+        aD: common_vendor.sr(formRef, "2d637515-1", {
           "k": "formRef"
         }),
-        aH: common_vendor.p({
+        aE: common_vendor.p({
           modelValue: form.value,
           rules,
           ["label-width"]: "85px",
           ["label-position"]: "top"
         }),
-        aI: common_vendor.o(submitForm),
-        aJ: currentTab.value === 0,
-        aK: common_vendor.p({
+        aF: common_vendor.o(submitForm),
+        aG: currentTab.value === 0,
+        aH: common_vendor.p({
           type: "info",
           size: "24",
           color: "#FF8700"
         }),
+        aI: common_vendor.p({
+          type: "checkmarkempty",
+          size: "14",
+          color: "#fff"
+        }),
+        aJ: common_vendor.p({
+          type: "checkmarkempty",
+          size: "14",
+          color: "#fff"
+        }),
+        aK: common_vendor.p({
+          type: "checkmarkempty",
+          size: "14",
+          color: "#fff"
+        }),
         aL: common_vendor.p({
-          type: "checkmarkempty",
-          size: "14",
-          color: "#fff"
-        }),
-        aM: common_vendor.p({
-          type: "checkmarkempty",
-          size: "14",
-          color: "#fff"
-        }),
-        aN: common_vendor.p({
-          type: "checkmarkempty",
-          size: "14",
-          color: "#fff"
-        }),
-        aO: common_vendor.p({
           type: "compose",
           color: "#fff",
           size: "18"
         }),
-        aP: common_vendor.o(goToLabelEditPage),
-        aQ: currentTab.value === 1
+        aM: common_vendor.o(goToLabelEditPage),
+        aN: currentTab.value === 1
       });
     };
   }

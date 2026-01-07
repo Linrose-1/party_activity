@@ -8,15 +8,17 @@
 				<uni-icons type="closeempty" size="24" color="#999" @click="close"></uni-icons>
 			</view>
 
-			<!-- 2. Tab 切换 -->
+			<!-- 2. Tab 切换 (修复点击逻辑) -->
 			<view class="popup-tabs">
-				<view class="tab-item" :class="{ active: currentTab === 1 }" @click="switchTab(1)">
-					申请入我圈
-					<!-- 只有在待处理 Tab 显示红点 (如果外部传进来了 count) -->
-					<view class="badge-dot" v-if="pendingCount > 0 && currentTab !== 1"></view>
-				</view>
+				<!-- Tab 0: 申请入我圈 (addInitiator=0) -->
 				<view class="tab-item" :class="{ active: currentTab === 0 }" @click="switchTab(0)">
-					 邀请入TA圈
+					申请入我圈
+					<!-- 红点逻辑：假设外部传入的 pendingCount 是总数，这里简单处理，或者你需要分开统计 -->
+					<view class="badge-dot" v-if="pendingCount > 0 && currentTab !== 0"></view>
+				</view>
+				<!-- Tab 1: 邀请入TA圈 (addInitiator=1) -->
+				<view class="tab-item" :class="{ active: currentTab === 1 }" @click="switchTab(1)">
+					邀请入TA圈
 				</view>
 			</view>
 
@@ -46,28 +48,18 @@
 									<text v-if="item.classmateFlag === 1" class="tag">同学</text>
 								</view>
 
-								<!-- 申请说明 (可选) -->
-								<!-- <view class="apply-msg" v-if="currentTab === 1">请求加入您的圈子</view> -->
+								<!-- 【新增】根据 Tab 显示不同的申请类型文案 -->
+								<view class="apply-type-tip">
+									{{ currentTab === 0 ? '申请加入您的圈子' : '邀请您加入TA的圈子' }}
+								</view>
 							</view>
 						</view>
 
-						<!-- 4. 操作区 (根据 Tab 动态展示) -->
+						<!-- 4. 操作区 (修复：两个Tab都需要操作) -->
 						<view class="action-row">
-
-							<!-- Tab 1 (待处理): 显示拒绝/同意 -->
-							<template v-if="currentTab === 1">
-								<button class="btn reject" @click="handleAudit(item, false)">拒绝</button>
-								<button class="btn agree" @click="handleAudit(item, true)">同意</button>
-							</template>
-
-							<!-- Tab 0 (我发出的): 显示状态 -->
-							<template v-else>
-								<view class="status-text">
-									<uni-icons type="paperplane" size="16" color="#999"></uni-icons>
-									<text>等待对方验证</text>
-								</view>
-							</template>
-
+							<!-- 无论哪个 Tab，都是待处理状态，都需要同意/拒绝 -->
+							<button class="btn reject" @click="handleAudit(item, false)">拒绝</button>
+							<button class="btn agree" @click="handleAudit(item, true)">同意</button>
 						</view>
 					</view>
 
@@ -78,7 +70,7 @@
 				<!-- 空状态 -->
 				<view v-else-if="!loading" class="empty-tip">
 					<uni-icons type="email" size="40" color="#ddd"></uni-icons>
-					<view class="empty-text">暂无{{ currentTab === 1 ? '待处理申请' : '已发出申请' }}</view>
+					<view class="empty-text">暂无{{ currentTab === 0 ? '入圈申请' : '入圈邀请' }}</view>
 				</view>
 			</scroll-view>
 		</view>
@@ -93,30 +85,25 @@
 
 	const popup = ref(null);
 	const list = ref([]);
-	const currentTab = ref(1); // 默认显示待处理 (addInitiator=1)
+	const currentTab = ref(0); // 默认 Tab 0 (申请入我圈)
 	const pageNo = ref(1);
 	const pageSize = 10;
 	const loadingStatus = ref('more');
 	const loading = ref(false);
-	const pendingCount = ref(0); // 外部传入的待处理数量
+	const pendingCount = ref(0);
 
 	const emit = defineEmits(['refresh']);
 
 	// 打开弹窗
-	// newApplyList: 外部传进来的初始列表(通常是Tab1的第一页)
-	// totalCount: 外部传进来的总数(用于红点逻辑)
 	const open = (newApplyList, totalCount = 0) => {
-		currentTab.value = 1; // 默认选中待处理
+		// 默认显示 Tab 0 (申请入我圈)，这是最常见的场景
+		currentTab.value = 0;
 		pendingCount.value = totalCount;
 
-		// 如果外部传了数据，直接用，否则自己加载
-		if (newApplyList && newApplyList.length > 0) {
-			list.value = newApplyList;
-			pageNo.value = 1; // 假定外部给的是第一页
-			if (newApplyList.length < pageSize) loadingStatus.value = 'noMore';
-		} else {
-			loadData(true);
-		}
+		// 这里的逻辑需要注意：
+		// 如果 newApplyList 是从外部传进来的，要确认它是属于 Tab 0 的数据还是 Tab 1 的数据？
+		// 既然有了 Tab 切换，建议打开时重新加载当前 Tab 的数据，保证准确性。
+		loadData(true);
 
 		popup.value.open();
 	};
@@ -153,7 +140,7 @@
 					pageNo: pageNo.value,
 					pageSize: pageSize,
 					status: 0, // 0 表示申请中
-					addInitiator: currentTab.value // 1=别人发给我的(待处理), 0=我发给别人的
+					addInitiator: currentTab.value // 0=TA申请入我圈, 1=TA邀请我入TA圈
 				}
 			});
 
@@ -190,14 +177,10 @@
 			title: '处理中...'
 		});
 		try {
-			// 这里调用 /friend/agree 接口
-			// 注意：接口文档里参数是 id 和 status
-			// 根据列表接口返回，这里应该传 item.fid (关系ID)
-			const url = `/app-api/member/user/friend/agree`;
-
+			const url = `/app-api/member/user/friend/review`;
 			const payload = {
-				id: item.fid,
-				status: isAgree
+				id: item.fid, // 关系记录ID
+				// status: isAgree
 			};
 
 			const {
@@ -209,16 +192,20 @@
 
 			if (!error) {
 				uni.showToast({
-					title: '操作成功',
+					title: isAgree ? '已同意' : '已拒绝',
 					icon: 'success'
 				});
-				// 移除已处理项
+
+				// 移除列表项
 				list.value = list.value.filter(i => i.id !== item.id);
 
-				// 如果处理完了当前页所有数据，且是第一页，尝试重新加载以获取后续数据
+				// 刷新
 				if (list.value.length === 0 && pageNo.value > 1) {
 					loadData(true);
 				}
+
+				// 通知外部刷新红点等
+				emit('refresh');
 			} else {
 				uni.showToast({
 					title: error || '操作失败',
@@ -237,14 +224,14 @@
 
 	const onPopupChange = (e) => {
 		if (!e.show) {
-			emit('refresh'); // 关闭时通知父组件刷新红点
+			emit('refresh');
 		}
 	};
 
 	const formatTime = (time) => {
 		if (!time) return '';
 		const date = new Date(time);
-		return `${date.getMonth() + 1}-${date.getDate()}`; // 简单显示月-日
+		return `${date.getMonth() + 1}-${date.getDate()}`;
 	};
 
 	defineExpose({
@@ -254,6 +241,18 @@
 </script>
 
 <style lang="scss" scoped>
+	/* 样式部分保持不变，或者根据需要微调 apply-type-tip 的样式 */
+	.apply-type-tip {
+		font-size: 22rpx;
+		color: #999;
+		margin-top: 8rpx;
+		background-color: #f9f9f9;
+		padding: 4rpx 10rpx;
+		border-radius: 6rpx;
+		display: inline-block;
+	}
+
+	/* ... 之前的 CSS ... */
 	.apply-popup-container {
 		height: 80vh;
 		background-color: #f5f7fa;

@@ -20,23 +20,16 @@ const _sfc_main = {
   setup(__props, { expose: __expose, emit: __emit }) {
     const popup = common_vendor.ref(null);
     const list = common_vendor.ref([]);
-    const currentTab = common_vendor.ref(1);
+    const currentTab = common_vendor.ref(0);
     const pageNo = common_vendor.ref(1);
     const loadingStatus = common_vendor.ref("more");
     const loading = common_vendor.ref(false);
     const pendingCount = common_vendor.ref(0);
     const emit = __emit;
     const open = (newApplyList, totalCount = 0) => {
-      currentTab.value = 1;
+      currentTab.value = 0;
       pendingCount.value = totalCount;
-      if (newApplyList && newApplyList.length > 0) {
-        list.value = newApplyList;
-        pageNo.value = 1;
-        if (newApplyList.length < pageSize)
-          loadingStatus.value = "noMore";
-      } else {
-        loadData(true);
-      }
+      loadData(true);
       popup.value.open();
     };
     const close = () => {
@@ -69,7 +62,7 @@ const _sfc_main = {
             status: 0,
             // 0 表示申请中
             addInitiator: currentTab.value
-            // 1=别人发给我的(待处理), 0=我发给别人的
+            // 0=TA申请入我圈, 1=TA邀请我入TA圈
           }
         });
         if (!error && data) {
@@ -85,7 +78,7 @@ const _sfc_main = {
           loadingStatus.value = "noMore";
         }
       } catch (e) {
-        common_vendor.index.__f__("error", "at components/CircleApplyPopup.vue:174", e);
+        common_vendor.index.__f__("error", "at components/CircleApplyPopup.vue:161", e);
         loadingStatus.value = "more";
       } finally {
         loading.value = false;
@@ -101,10 +94,11 @@ const _sfc_main = {
         title: "处理中..."
       });
       try {
-        const url = `/app-api/member/user/friend/agree`;
+        const url = `/app-api/member/user/friend/review`;
         const payload = {
-          id: item.fid,
-          status: isAgree
+          id: item.fid
+          // 关系记录ID
+          // status: isAgree
         };
         const {
           error
@@ -114,13 +108,14 @@ const _sfc_main = {
         });
         if (!error) {
           common_vendor.index.showToast({
-            title: "操作成功",
+            title: isAgree ? "已同意" : "已拒绝",
             icon: "success"
           });
           list.value = list.value.filter((i) => i.id !== item.id);
           if (list.value.length === 0 && pageNo.value > 1) {
             loadData(true);
           }
+          emit("refresh");
         } else {
           common_vendor.index.showToast({
             title: error || "操作失败",
@@ -159,12 +154,12 @@ const _sfc_main = {
           size: "24",
           color: "#999"
         }),
-        c: pendingCount.value > 0 && currentTab.value !== 1
-      }, pendingCount.value > 0 && currentTab.value !== 1 ? {} : {}, {
-        d: currentTab.value === 1 ? 1 : "",
-        e: common_vendor.o(($event) => switchTab(1)),
-        f: currentTab.value === 0 ? 1 : "",
-        g: common_vendor.o(($event) => switchTab(0)),
+        c: pendingCount.value > 0 && currentTab.value !== 0
+      }, pendingCount.value > 0 && currentTab.value !== 0 ? {} : {}, {
+        d: currentTab.value === 0 ? 1 : "",
+        e: common_vendor.o(($event) => switchTab(0)),
+        f: currentTab.value === 1 ? 1 : "",
+        g: common_vendor.o(($event) => switchTab(1)),
         h: list.value.length > 0
       }, list.value.length > 0 ? common_vendor.e({
         i: common_vendor.f(list.value, (item, index, i0) => {
@@ -182,21 +177,13 @@ const _sfc_main = {
             h: item.peerFlag === 1
           }, item.peerFlag === 1 ? {} : {}, {
             i: item.classmateFlag === 1
-          }, item.classmateFlag === 1 ? {} : {}, currentTab.value === 1 ? {
+          }, item.classmateFlag === 1 ? {} : {}, {
             j: common_vendor.o(($event) => handleAudit(item, false), item.id),
-            k: common_vendor.o(($event) => handleAudit(item, true), item.id)
-          } : {
-            l: "8f869322-2-" + i0 + ",8f869322-0",
-            m: common_vendor.p({
-              type: "paperplane",
-              size: "16",
-              color: "#999"
-            })
-          }, {
-            n: item.id
+            k: common_vendor.o(($event) => handleAudit(item, true), item.id),
+            l: item.id
           });
         }),
-        j: currentTab.value === 1,
+        j: common_vendor.t(currentTab.value === 0 ? "申请加入您的圈子" : "邀请您加入TA的圈子"),
         k: list.value.length >= 10 || loadingStatus.value === "loading"
       }, list.value.length >= 10 || loadingStatus.value === "loading" ? {
         l: common_vendor.p({
@@ -208,7 +195,7 @@ const _sfc_main = {
           size: "40",
           color: "#ddd"
         }),
-        o: common_vendor.t(currentTab.value === 1 ? "待处理申请" : "已发出申请")
+        o: common_vendor.t(currentTab.value === 0 ? "入圈申请" : "入圈邀请")
       } : {}, {
         m: !loading.value,
         p: common_vendor.o(loadMore),

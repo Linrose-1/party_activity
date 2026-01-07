@@ -38,15 +38,15 @@
 					<text class="value">{{ userInfo.era || '未填写' }}</text>
 				</view>
 				<view class="info-item">
-					<text class="label">常住地</text>
+					<text class="label">商务/办公地</text>
 					<text class="value">{{ userInfo.locationAddressStr || '未填写' }}</text>
 				</view>
-				<view class="info-item">
+				<!-- <view class="info-item">
 					<text class="label">出生地</text>
 					<text class="value">{{ userInfo.birthplaceStr || '未填写' }}</text>
-				</view>
+				</view> -->
 				<view class="info-item">
-					<text class="label">籍贯</text>
+					<text class="label">籍贯/出生地</text>
 					<text class="value">{{ userInfo.nativePlaceStr || '未填写' }}</text>
 				</view>
 			</view>

@@ -91,16 +91,16 @@
 					<!-- 模块：地域信息 -->
 					<view class="form-card">
 						<view class="card-title">地域分布</view>
-						<uni-forms-item label="常住地" name="locationAddress">
-							<uni-data-picker placeholder="请选择常住地" popup-title="请选择省市区" :localdata="areaTree"
+						<uni-forms-item label="商务/办公地" name="locationAddress">
+							<uni-data-picker placeholder="请选择商务/办公地" popup-title="请选择省市区" :localdata="areaTree"
 								:map="{text: 'name', value: 'id'}" v-model="form.locationAddress" />
 						</uni-forms-item>
-						<uni-forms-item label="出生地" name="birthplace">
+						<!-- <uni-forms-item label="出生地" name="birthplace">
 							<uni-data-picker placeholder="请选择出生地" popup-title="请选择省市区" :localdata="areaTree"
 								:map="{text: 'name', value: 'id'}" v-model="form.birthplace" />
-						</uni-forms-item>
-						<uni-forms-item label="籍贯" name="nativePlace">
-							<uni-data-picker placeholder="请选择籍贯" popup-title="请选择省市区" :localdata="areaTree"
+						</uni-forms-item> -->
+						<uni-forms-item label="籍贯/出生地" name="nativePlace">
+							<uni-data-picker placeholder="请选择籍贯/出生地" popup-title="请选择省市区" :localdata="areaTree"
 								:map="{text: 'name', value: 'id'}" v-model="form.nativePlace" />
 						</uni-forms-item>
 					</view>
