@@ -70,18 +70,44 @@
 			</view>
 		</view>
 
-		<!-- 聚会介绍 -->
+		<!-- 聚会介绍与环节 -->
 		<view class="event-content">
-			<view class="section-title">聚会介绍</view>
-			<!-- 动态绑定聚会介绍 -->
-			<view class="event-description">{{ activityDetail.activityDescription }}</view>
+			<!-- 模块：聚会介绍 -->
+			<view class="content-section">
+				<view class="section-header-row">
+					<view class="header-mark"></view>
+					<text class="section-title">聚会介绍</text>
+				</view>
+				<!-- 支持换行的文本容器 -->
+				<view class="event-description-text">
+					{{ activityDetail.activityDescription }}
+				</view>
+			</view>
 
-			<text class="section-title">聚会内容</text>
-			<!-- 动态绑定聚会环节 -->
-			<view class="activity-grid">
-				<view class="activity-item" v-for="item in activityDetail.memberActivitySessionList" :key="item.id">
-					<view class="activity-title">{{ item.sessionTitle }}</view>
-					<view class="activity-desc">{{ item.sessionDescription }}</view>
+			<!-- 模块：聚会环节 (时间轴样式) -->
+			<view class="content-section" style="margin-top: 40rpx;">
+				<view class="section-header-row">
+					<view class="header-mark"></view>
+					<text class="section-title">聚会内容</text>
+				</view>
+
+				<view class="timeline-box">
+					<view class="timeline-item" v-for="(item, index) in activityDetail.memberActivitySessionList"
+						:key="item.id">
+						<!-- 左侧线条 -->
+						<view class="timeline-line-col">
+							<view class="dot"></view>
+							<!-- 最后一项不显示连接线 -->
+							<view class="line" v-if="index !== activityDetail.memberActivitySessionList.length - 1">
+							</view>
+						</view>
+
+						<!-- 右侧内容 -->
+						<view class="timeline-content-col">
+							<view class="session-name">{{ item.sessionTitle }}</view>
+							<view class="session-detail">{{ item.sessionDescription }}</view>
+						</view>
+					</view>
 				</view>
 			</view>
 		</view>
@@ -258,6 +284,9 @@
 				<text>分享到朋友圈</text>
 			</view>
 		</view>
+
+
+		<PointsFeedbackPopup ref="pointsPopup" />
 	</view>
 </template>
 
@@ -275,6 +304,7 @@
 	import {
 		getInviteCode
 	} from '../../utils/user.js';
+	import PointsFeedbackPopup from '@/components/PointsFeedbackPopup.vue';
 
 	const activityId = ref(null);
 	// 创建一个 ref 来存储整个聚会详情对象
@@ -296,6 +326,8 @@
 	// 创建 ref 存储报名用户列表和总数
 	const participantList = ref([]);
 	const participantTotal = ref(0);
+
+	const pointsPopup = ref(null);
 
 	onLoad((options) => {
 		if (options && options.inviteCode) {
@@ -493,6 +525,14 @@
 				sponsorList.value = result.data.memberSponsorList;
 			} else {
 				sponsorList.value = [];
+			}
+
+			if (result.data.checkContribution === 1) {
+				setTimeout(() => {
+					if (pointsPopup.value) {
+						pointsPopup.value.show('阅读聚会详情', 10);
+					}
+				}, 500);
 			}
 
 			console.log('getActiveDetail result:', activityDetail.value);
@@ -1047,38 +1087,114 @@
 		color: #888;
 	}
 
-	/* --- 聚会介绍 (Content Card) --- */
-	.event-description {
+	/* --- 内容区域容器 --- */
+	.event-content {
+		background: #fff;
+		margin: 24rpx;
+		padding: 40rpx 30rpx;
+		border-radius: 20rpx;
+		box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.03);
+	}
+
+	.section-header-row {
+		display: flex;
+		align-items: center;
+		margin-bottom: 24rpx;
+	}
+
+	.header-mark {
+		width: 8rpx;
+		height: 32rpx;
+		background: linear-gradient(to bottom, #FF6B00, #ffb347);
+		border-radius: 4rpx;
+		margin-right: 16rpx;
+	}
+
+	.section-title {
+		font-size: 32rpx;
+		font-weight: 700;
+		color: #333;
+	}
+
+	/* --- 聚会介绍文本优化 --- */
+	.event-description-text {
 		font-size: 28rpx;
 		color: #555;
 		line-height: 1.8;
-		margin-bottom: 20rpx;
+		/* 增加行高，提升阅读体验 */
+		text-align: justify;
+		/* 两端对齐 */
+		white-space: pre-wrap;
+		/* 【关键】保留换行符和空格 */
+		word-break: break-all;
+		/* 防止长单词溢出 */
 	}
 
-	.activity-grid {
-		display: grid;
-		grid-template-columns: 1fr 1fr;
-		gap: 30rpx;
-		margin-top: 20rpx;
+	/* --- 时间轴样式 (Timeline) --- */
+	.timeline-box {
+		padding-left: 10rpx;
+		/* 稍微缩进 */
 	}
 
-	.activity-item {
-		background: #f9f9f9;
-		border-radius: 20rpx;
-		padding: 30rpx;
-		text-align: center;
+	.timeline-item {
+		display: flex;
+		/* 不需要 margin-bottom，靠内容撑开 */
 	}
 
-	.activity-title {
-		color: #FF6B00;
-		font-weight: bold;
-		font-size: 32rpx;
-		margin-bottom: 10rpx;
+	.timeline-line-col {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		width: 40rpx;
+		margin-right: 20rpx;
+		flex-shrink: 0;
 	}
 
-	.activity-desc {
-		font-size: 24rpx;
+	.dot {
+		width: 20rpx;
+		height: 20rpx;
+		border-radius: 50%;
+		background-color: #fff;
+		border: 6rpx solid #FF6B00;
+		margin-top: 8rpx;
+		/* 微调对齐标题 */
+		box-sizing: border-box;
+	}
+
+	.line {
+		width: 2rpx;
+		background-color: #e0e0e0;
+		flex: 1;
+		/* 自动填满高度 */
+		margin-top: 8rpx;
+		min-height: 40rpx;
+		/* 保证最小高度 */
+	}
+
+	.timeline-content-col {
+		flex: 1;
+		padding-bottom: 40rpx;
+		/* 每个环节的下间距 */
+	}
+
+	.session-name {
+		font-size: 30rpx;
+		font-weight: 600;
+		color: #333;
+		margin-bottom: 12rpx;
+		line-height: 1.4;
+	}
+
+	.session-detail {
+		font-size: 26rpx;
 		color: #666;
+		line-height: 1.6;
+		background-color: #f9f9f9;
+		/* 给描述加个浅底色 */
+		padding: 20rpx;
+		border-radius: 12rpx;
+		white-space: pre-wrap;
+		/* 描述也支持换行 */
 	}
 
 	/* --- 组织者、商圈、赞助商通用样式 --- */

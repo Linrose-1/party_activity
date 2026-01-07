@@ -1,40 +1,85 @@
 <template>
 	<uni-popup ref="popup" type="bottom" background-color="#f5f7fa" @change="onPopupChange">
 		<view class="apply-popup-container">
+
+			<!-- 1. 顶部 Header -->
 			<view class="popup-header">
-				<text class="title">新的圈友申请 ({{ list.length }})</text>
+				<text class="title">新的圈友</text>
 				<uni-icons type="closeempty" size="24" color="#999" @click="close"></uni-icons>
 			</view>
 
-			<scroll-view scroll-y class="apply-list">
-				<view v-for="(item, index) in list" :key="item.id" class="apply-card">
-					<view class="user-info">
-						<image :src="item.avatar || '/static/icon/default-avatar.png'" class="avatar" mode="aspectFill">
-						</image>
-						<view class="info-content">
-							<view class="name-row">
-								<text class="name">{{ item.realName || item.nickname }}</text>
-								<text class="time">{{ formatTime(item.createTime) }}</text>
-							</view>
-							<view class="desc">{{ item.companyName || '暂无公司' }} | {{ item.positionTitle || '暂无职位' }}
-							</view>
+			<!-- 2. Tab 切换 -->
+			<view class="popup-tabs">
+				<view class="tab-item" :class="{ active: currentTab === 1 }" @click="switchTab(1)">
+					申请入我圈
+					<!-- 只有在待处理 Tab 显示红点 (如果外部传进来了 count) -->
+					<view class="badge-dot" v-if="pendingCount > 0 && currentTab !== 1"></view>
+				</view>
+				<view class="tab-item" :class="{ active: currentTab === 0 }" @click="switchTab(0)">
+					 邀请入TA圈
+				</view>
+			</view>
 
-							<!-- 共同点展示 -->
-							<view class="common-tags">
-								<text v-if="item.fellowTownspeopleFlag === 1" class="tag">同乡</text>
-								<text v-if="item.peerFlag === 1" class="tag">同行</text>
-								<text v-if="item.classmateFlag === 1" class="tag">同学</text>
+			<!-- 3. 列表区域 -->
+			<scroll-view scroll-y class="apply-list" @scrolltolower="loadMore">
+				<view v-if="list.length > 0">
+					<view v-for="(item, index) in list" :key="item.id" class="apply-card">
+						<view class="user-info">
+							<image :src="item.avatar || '/static/images/default-avatar.png'" class="avatar"
+								mode="aspectFill"></image>
+							<view class="info-content">
+								<view class="name-row">
+									<text class="name">{{ item.realName || item.nickname }}</text>
+									<text class="time">{{ formatTime(item.createTime) }}</text>
+								</view>
+
+								<!-- 公司/职位 -->
+								<view class="desc">
+									{{ item.companyName || '暂无公司' }}
+									<text v-if="item.positionTitle"> | {{ item.positionTitle }}</text>
+								</view>
+
+								<!-- 共同点标签 -->
+								<view class="common-tags">
+									<text v-if="item.fellowTownspeopleFlag === 1" class="tag">同乡</text>
+									<text v-if="item.peerFlag === 1" class="tag">同行</text>
+									<text v-if="item.classmateFlag === 1" class="tag">同学</text>
+								</view>
+
+								<!-- 申请说明 (可选) -->
+								<!-- <view class="apply-msg" v-if="currentTab === 1">请求加入您的圈子</view> -->
 							</view>
+						</view>
+
+						<!-- 4. 操作区 (根据 Tab 动态展示) -->
+						<view class="action-row">
+
+							<!-- Tab 1 (待处理): 显示拒绝/同意 -->
+							<template v-if="currentTab === 1">
+								<button class="btn reject" @click="handleAudit(item, false)">拒绝</button>
+								<button class="btn agree" @click="handleAudit(item, true)">同意</button>
+							</template>
+
+							<!-- Tab 0 (我发出的): 显示状态 -->
+							<template v-else>
+								<view class="status-text">
+									<uni-icons type="paperplane" size="16" color="#999"></uni-icons>
+									<text>等待对方验证</text>
+								</view>
+							</template>
+
 						</view>
 					</view>
 
-					<view class="action-row">
-						<button class="btn reject" @click="handleAudit(item, false)">拒绝</button>
-						<button class="btn agree" @click="handleAudit(item, true)">同意</button>
-					</view>
+					<uni-load-more :status="loadingStatus"
+						v-if="list.length >= 10 || loadingStatus === 'loading'"></uni-load-more>
 				</view>
 
-				<view v-if="list.length === 0" class="empty-tip">暂无待处理申请</view>
+				<!-- 空状态 -->
+				<view v-else-if="!loading" class="empty-tip">
+					<uni-icons type="email" size="40" color="#ddd"></uni-icons>
+					<view class="empty-text">暂无{{ currentTab === 1 ? '待处理申请' : '已发出申请' }}</view>
+				</view>
 			</scroll-view>
 		</view>
 	</uni-popup>
@@ -48,15 +93,95 @@
 
 	const popup = ref(null);
 	const list = ref([]);
+	const currentTab = ref(1); // 默认显示待处理 (addInitiator=1)
+	const pageNo = ref(1);
+	const pageSize = 10;
+	const loadingStatus = ref('more');
+	const loading = ref(false);
+	const pendingCount = ref(0); // 外部传入的待处理数量
+
 	const emit = defineEmits(['refresh']);
 
-	const open = (dataList) => {
-		list.value = dataList || [];
+	// 打开弹窗
+	// newApplyList: 外部传进来的初始列表(通常是Tab1的第一页)
+	// totalCount: 外部传进来的总数(用于红点逻辑)
+	const open = (newApplyList, totalCount = 0) => {
+		currentTab.value = 1; // 默认选中待处理
+		pendingCount.value = totalCount;
+
+		// 如果外部传了数据，直接用，否则自己加载
+		if (newApplyList && newApplyList.length > 0) {
+			list.value = newApplyList;
+			pageNo.value = 1; // 假定外部给的是第一页
+			if (newApplyList.length < pageSize) loadingStatus.value = 'noMore';
+		} else {
+			loadData(true);
+		}
+
 		popup.value.open();
 	};
 
 	const close = () => {
 		popup.value.close();
+	};
+
+	// 切换 Tab
+	const switchTab = (tabIndex) => {
+		if (currentTab.value === tabIndex) return;
+		currentTab.value = tabIndex;
+		loadData(true);
+	};
+
+	// 加载数据
+	const loadData = async (isRefresh = false) => {
+		if (loadingStatus.value === 'loading') return;
+
+		if (isRefresh) {
+			pageNo.value = 1;
+			list.value = [];
+			loadingStatus.value = 'loading';
+			loading.value = true;
+		}
+
+		try {
+			const {
+				data,
+				error
+			} = await request('/app-api/member/user/friend/list', {
+				method: 'GET',
+				data: {
+					pageNo: pageNo.value,
+					pageSize: pageSize,
+					status: 0, // 0 表示申请中
+					addInitiator: currentTab.value // 1=别人发给我的(待处理), 0=我发给别人的
+				}
+			});
+
+			if (!error && data) {
+				const newList = data.list || [];
+				list.value = isRefresh ? newList : [...list.value, ...newList];
+
+				if (list.value.length >= data.total) {
+					loadingStatus.value = 'noMore';
+				} else {
+					loadingStatus.value = 'more';
+					pageNo.value++;
+				}
+			} else {
+				loadingStatus.value = 'noMore';
+			}
+		} catch (e) {
+			console.error(e);
+			loadingStatus.value = 'more';
+		} finally {
+			loading.value = false;
+		}
+	};
+
+	const loadMore = () => {
+		if (loadingStatus.value === 'more') {
+			loadData(false);
+		}
 	};
 
 	// 审批操作
@@ -65,12 +190,11 @@
 			title: '处理中...'
 		});
 		try {
-			// 真实接口 URL
-			const url = `/app-api/member/user/friend/review`;
+			// 这里调用 /friend/agree 接口
+			// 注意：接口文档里参数是 id 和 status
+			// 根据列表接口返回，这里应该传 item.fid (关系ID)
+			const url = `/app-api/member/user/friend/agree`;
 
-			// 【关键】参数构造
-			// item.fid 来自列表接口返回的 fid (圈友关系ID)
-			// 如果后端要求传用户ID，请改回 item.id。通常审核接口是对“关系记录”进行审核，所以是 fid。
 			const payload = {
 				id: item.fid,
 				status: isAgree
@@ -88,21 +212,13 @@
 					title: '操作成功',
 					icon: 'success'
 				});
-
-				// 1. 从列表中移除已处理项
+				// 移除已处理项
 				list.value = list.value.filter(i => i.id !== item.id);
 
-				// 2. 通知父组件刷新外部数据 (红点数、圈友列表)
-				// emit('refresh');
-
-				// 3. 【修改】只有当列表清空时，才自动关闭弹窗
-				if (list.value.length === 0) {
-					// 给用户一点反应时间看到最后一条消失，体验更好
-					setTimeout(() => {
-						close();
-					}, 500);
+				// 如果处理完了当前页所有数据，且是第一页，尝试重新加载以获取后续数据
+				if (list.value.length === 0 && pageNo.value > 1) {
+					loadData(true);
 				}
-				// 如果还有数据，什么都不做，让用户继续操作下一条
 			} else {
 				uni.showToast({
 					title: error || '操作失败',
@@ -114,25 +230,21 @@
 				title: '网络异常',
 				icon: 'none'
 			});
-			console.error(e);
 		} finally {
 			uni.hideLoading();
 		}
 	};
 
-	// 监听弹窗状态变化
 	const onPopupChange = (e) => {
-		// 当弹窗关闭时 (e.show === false)
 		if (!e.show) {
-			// 告诉父组件：我关门了，你可以刷新数据了
-			emit('refresh');
+			emit('refresh'); // 关闭时通知父组件刷新红点
 		}
 	};
 
 	const formatTime = (time) => {
-		// 简单的时间格式化
 		if (!time) return '';
-		return new Date(time).toLocaleDateString();
+		const date = new Date(time);
+		return `${date.getMonth() + 1}-${date.getDate()}`; // 简单显示月-日
 	};
 
 	defineExpose({
@@ -144,7 +256,6 @@
 <style lang="scss" scoped>
 	.apply-popup-container {
 		height: 80vh;
-		/* 半屏高度 */
 		background-color: #f5f7fa;
 		border-radius: 24rpx 24rpx 0 0;
 		display: flex;
@@ -159,11 +270,56 @@
 		align-items: center;
 		border-radius: 24rpx 24rpx 0 0;
 		border-bottom: 1rpx solid #eee;
+
+		.title {
+			font-size: 32rpx;
+			font-weight: bold;
+			color: #333;
+		}
 	}
 
-	.title {
-		font-size: 32rpx;
-		font-weight: bold;
+	/* Tab 样式 */
+	.popup-tabs {
+		display: flex;
+		background-color: #fff;
+		margin-bottom: 2rpx;
+
+		.tab-item {
+			flex: 1;
+			text-align: center;
+			padding: 24rpx 0;
+			font-size: 28rpx;
+			color: #666;
+			position: relative;
+			font-weight: 500;
+
+			&.active {
+				color: #FF6E00;
+				font-weight: bold;
+
+				&::after {
+					content: '';
+					position: absolute;
+					bottom: 0;
+					left: 50%;
+					transform: translateX(-50%);
+					width: 40rpx;
+					height: 4rpx;
+					background-color: #FF6E00;
+					border-radius: 2rpx;
+				}
+			}
+
+			.badge-dot {
+				position: absolute;
+				top: 20rpx;
+				right: 60rpx;
+				width: 12rpx;
+				height: 12rpx;
+				background-color: #ff4d4f;
+				border-radius: 50%;
+			}
+		}
 	}
 
 	.apply-list {
@@ -178,73 +334,86 @@
 		border-radius: 16rpx;
 		padding: 30rpx;
 		margin-bottom: 20rpx;
+		box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.02);
 	}
 
 	.user-info {
 		display: flex;
-		margin-bottom: 30rpx;
+		margin-bottom: 24rpx;
 	}
 
 	.avatar {
-		width: 100rpx;
-		height: 100rpx;
+		width: 90rpx;
+		height: 90rpx;
 		border-radius: 50%;
 		margin-right: 24rpx;
-		border: 1rpx solid #eee;
+		border: 1rpx solid #f0f0f0;
+		flex-shrink: 0;
 	}
 
 	.info-content {
 		flex: 1;
+		min-width: 0;
 	}
 
 	.name-row {
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		margin-bottom: 8rpx;
+		margin-bottom: 6rpx;
 	}
 
 	.name {
-		font-size: 32rpx;
+		font-size: 30rpx;
 		font-weight: bold;
 		color: #333;
 	}
 
 	.time {
-		font-size: 24rpx;
+		font-size: 22rpx;
 		color: #999;
 	}
 
 	.desc {
-		font-size: 26rpx;
+		font-size: 24rpx;
 		color: #666;
-		margin-bottom: 10rpx;
+		margin-bottom: 12rpx;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
 	}
 
 	.common-tags {
 		display: flex;
+		flex-wrap: wrap;
 		gap: 12rpx;
 	}
 
 	.tag {
-		font-size: 22rpx;
+		font-size: 20rpx;
 		color: #FF6E00;
 		background-color: #fff0e6;
-		padding: 4rpx 12rpx;
+		padding: 2rpx 10rpx;
 		border-radius: 6rpx;
 	}
 
 	.action-row {
 		display: flex;
+		justify-content: flex-end;
+		/* 按钮靠右 */
 		gap: 20rpx;
+		padding-top: 20rpx;
+		border-top: 1rpx solid #f9f9f9;
 	}
 
 	.btn {
-		flex: 1;
-		height: 70rpx;
-		line-height: 70rpx;
-		font-size: 28rpx;
-		border-radius: 35rpx;
+		min-width: 140rpx;
+		height: 60rpx;
+		line-height: 60rpx;
+		font-size: 26rpx;
+		border-radius: 30rpx;
+		margin: 0;
+		padding: 0 20rpx;
 
 		&::after {
 			border: none;
@@ -261,9 +430,27 @@
 		color: #fff;
 	}
 
-	.empty-tip {
-		text-align: center;
+	.status-text {
+		display: flex;
+		align-items: center;
+		gap: 8rpx;
+		font-size: 26rpx;
 		color: #999;
-		padding-top: 100rpx;
+		padding: 10rpx 0;
+	}
+
+	.empty-tip {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		padding-top: 150rpx;
+		color: #ddd;
+
+		.empty-text {
+			margin-top: 20rpx;
+			font-size: 26rpx;
+			color: #999;
+		}
 	}
 </style>

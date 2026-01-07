@@ -11,11 +11,13 @@ if (!Array) {
 const _easycom_uni_icons = () => "../../uni_modules/uni-icons/components/uni-icons/uni-icons.js";
 const _easycom_uni_load_more = () => "../../uni_modules/uni-load-more/components/uni-load-more/uni-load-more.js";
 if (!Math) {
-  (_easycom_uni_icons + _easycom_uni_load_more + GuidePopup + AvatarLongPressMenu + AddCircleConfirmPopup)();
+  (_easycom_uni_icons + _easycom_uni_load_more + GuidePopup + AvatarLongPressMenu + AddCircleConfirmPopup + InviteCircleConfirmPopup + ScrollPointsPopup)();
 }
 const GuidePopup = () => "../../components/GuidePopup.js";
 const AvatarLongPressMenu = () => "../../components/AvatarLongPressMenu.js";
 const AddCircleConfirmPopup = () => "../../components/AddCircleConfirmPopup.js";
+const InviteCircleConfirmPopup = () => "../../components/InviteCircleConfirmPopup.js";
+const ScrollPointsPopup = () => "../../components/ScrollPointsPopup.js";
 const defaultAvatarUrl = "/static/icon/default-avatar.png";
 const _sfc_main = {
   __name: "home",
@@ -35,10 +37,14 @@ const _sfc_main = {
       longitude: "",
       latitude: ""
     });
+    const scrollBarData = common_vendor.ref([]);
+    const pointsDetailData = common_vendor.ref(null);
     const isInitialLoad = common_vendor.ref(true);
     const guidePopupRef = common_vendor.ref(null);
     const avatarMenuRef = common_vendor.ref(null);
     const addCirclePopup = common_vendor.ref(null);
+    const invitePopupRef = common_vendor.ref(null);
+    const scrollPointsPopup = common_vendor.ref(null);
     common_vendor.computed(() => {
       const info = currentUserInfo.value || utils_user.getCachedUserInfo();
       return (info == null ? void 0 : info.homeTitle) || "猩聚社";
@@ -87,7 +93,7 @@ const _sfc_main = {
       return paidLevels.includes(member.value);
     });
     common_vendor.onMounted(() => {
-      common_vendor.index.__f__("log", "at pages/home/home.vue:334", "首页 onMounted: 开始监听 postUpdated 事件");
+      common_vendor.index.__f__("log", "at pages/home/home.vue:369", "首页 onMounted: 开始监听 postUpdated 事件");
       common_vendor.index.$on("postUpdated", handlePostUpdate);
       common_vendor.index.$on("userFollowStatusChanged", handleUserFollowStatusChange);
       common_vendor.index.$on("postInteractionChanged", handlePostInteractionChange);
@@ -99,7 +105,7 @@ const _sfc_main = {
       }, 2e3);
     });
     common_vendor.onUnmounted(() => {
-      common_vendor.index.__f__("log", "at pages/home/home.vue:353", "首页 onUnmounted: 移除 postUpdated 事件监听");
+      common_vendor.index.__f__("log", "at pages/home/home.vue:388", "首页 onUnmounted: 移除 postUpdated 事件监听");
       common_vendor.index.$off("postUpdated", handlePostUpdate);
       common_vendor.index.$off("userFollowStatusChanged", handleUserFollowStatusChange);
       common_vendor.index.$off("postInteractionChanged", handlePostInteractionChange);
@@ -108,13 +114,13 @@ const _sfc_main = {
     common_vendor.onShow(async () => {
       let currentUserId = common_vendor.index.getStorageSync("userId");
       if (!currentUserId) {
-        common_vendor.index.__f__("log", "at pages/home/home.vue:370", "检测到未登录，尝试静默登录...");
+        common_vendor.index.__f__("log", "at pages/home/home.vue:405", "检测到未登录，尝试静默登录...");
         await performSilentLogin();
         currentUserId = common_vendor.index.getStorageSync("userId");
       }
       const currentUserIsLogin = !!currentUserId;
       if (isInitialLoad.value || isLogin.value !== currentUserIsLogin || postList.value.length === 0) {
-        common_vendor.index.__f__("log", "at pages/home/home.vue:385", "触发刷新: 首次加载或登录状态变更");
+        common_vendor.index.__f__("log", "at pages/home/home.vue:420", "触发刷新: 首次加载或登录状态变更");
         loggedInUserId.value = currentUserId;
         isLogin.value = currentUserIsLogin;
         if (isLogin.value) {
@@ -125,12 +131,15 @@ const _sfc_main = {
         getBusinessOpportunitiesList(true);
         isInitialLoad.value = false;
       } else {
-        common_vendor.index.__f__("log", "at pages/home/home.vue:403", "从详情页返回，不刷新列表，保持滚动位置。");
+        common_vendor.index.__f__("log", "at pages/home/home.vue:438", "从详情页返回，不刷新列表，保持滚动位置。");
       }
       common_vendor.index.showShareMenu({
         withShareTicket: true,
         menus: ["shareAppMessage", "shareTimeline"]
       });
+      if (common_vendor.index.getStorageSync("token")) {
+        fetchScrollBarData();
+      }
     });
     common_vendor.onReachBottom(() => {
       if (loadingStatus.value === "more") {
@@ -171,7 +180,43 @@ const _sfc_main = {
       };
     });
     const handlePostUpdate = () => {
-      common_vendor.index.__f__("log", "at pages/home/home.vue:467", "postUpdated 触发，但已通过精准事件同步数据，跳过全量刷新");
+      common_vendor.index.__f__("log", "at pages/home/home.vue:506", "postUpdated 触发，但已通过精准事件同步数据，跳过全量刷新");
+    };
+    const fetchScrollBarData = async () => {
+      try {
+        const {
+          data,
+          error
+        } = await utils_request.request("/app-api/member/experience-record/get-scroll-bar", {
+          method: "GET"
+        });
+        if (!error && data) {
+          pointsDetailData.value = data;
+          const list = [];
+          if (data.totalFriendNum > 0) {
+            list.push({
+              type: "friend",
+              label: "新的圈友",
+              count: data.totalFriendNum
+            });
+          }
+          list.push({
+            type: "points",
+            label: "昨日贡分",
+            count: data.totalExperience || 0
+          });
+          if (data.pendingConfirmUserTotal > 0) {
+            list.push({
+              type: "confirm",
+              label: "用户确认",
+              count: data.pendingConfirmUserTotal
+            });
+          }
+          scrollBarData.value = list;
+        }
+      } catch (e) {
+        common_vendor.index.__f__("error", "at pages/home/home.vue:558", "获取滚动条数据失败", e);
+      }
     };
     const performSilentLogin = async () => {
       try {
@@ -195,7 +240,7 @@ const _sfc_main = {
           data: payload
         });
         if (!error && data && data.accessToken) {
-          common_vendor.index.__f__("log", "at pages/home/home.vue:509", "✅ 静默登录成功!", data);
+          common_vendor.index.__f__("log", "at pages/home/home.vue:597", "✅ 静默登录成功!", data);
           common_vendor.index.setStorageSync("token", data.accessToken);
           common_vendor.index.setStorageSync("userId", data.userId);
           isLogin.value = true;
@@ -206,10 +251,10 @@ const _sfc_main = {
             common_vendor.index.removeStorageSync("pendingInviteCode");
           }
         } else {
-          common_vendor.index.__f__("log", "at pages/home/home.vue:528", "静默登录未成功 (可能是非新用户需手机号或接口异常):", error);
+          common_vendor.index.__f__("log", "at pages/home/home.vue:616", "静默登录未成功 (可能是非新用户需手机号或接口异常):", error);
         }
       } catch (e) {
-        common_vendor.index.__f__("error", "at pages/home/home.vue:531", "静默登录流程异常:", e);
+        common_vendor.index.__f__("error", "at pages/home/home.vue:619", "静默登录流程异常:", e);
       }
     };
     const fetchCurrentUserInfo = async () => {
@@ -220,11 +265,11 @@ const _sfc_main = {
         method: "GET"
       });
       if (error) {
-        common_vendor.index.__f__("error", "at pages/home/home.vue:543", "首页实时获取用户信息失败:", error);
+        common_vendor.index.__f__("error", "at pages/home/home.vue:631", "首页实时获取用户信息失败:", error);
         currentUserInfo.value = utils_user.getCachedUserInfo();
       } else {
         currentUserInfo.value = data;
-        common_vendor.index.__f__("log", "at pages/home/home.vue:548", "首页实时获取用户信息成功:", currentUserInfo.value);
+        common_vendor.index.__f__("log", "at pages/home/home.vue:636", "首页实时获取用户信息成功:", currentUserInfo.value);
         common_vendor.index.setStorageSync("userInfo", JSON.stringify(data));
       }
     };
@@ -317,7 +362,7 @@ const _sfc_main = {
           pageNo.value++;
         }
       } catch (err) {
-        common_vendor.index.__f__("error", "at pages/home/home.vue:647", "getBusinessOpportunitiesList 逻辑异常:", err);
+        common_vendor.index.__f__("error", "at pages/home/home.vue:735", "getBusinessOpportunitiesList 逻辑异常:", err);
         loadingStatus.value = "more";
         common_vendor.index.showToast({
           title: "页面逻辑异常，请稍后重试",
@@ -389,13 +434,16 @@ const _sfc_main = {
       type,
       user
     }) => {
-      common_vendor.index.__f__("log", "at pages/home/home.vue:725", "菜单操作:", type, user);
+      common_vendor.index.__f__("log", "at pages/home/home.vue:813", "菜单操作:", type, user);
       switch (type) {
         case "viewCard":
           navigateToBusinessCard(user);
           break;
         case "addCircle":
           addCirclePopup.value.open(user);
+          break;
+        case "inviteCircle":
+          invitePopupRef.value.open(user);
           break;
         case "removeCircle":
           common_vendor.index.showModal({
@@ -425,8 +473,23 @@ const _sfc_main = {
           break;
       }
     };
+    const handleNoticeClick = (item) => {
+      if (item.type === "friend") {
+        common_vendor.index.navigateTo({
+          url: "/packages/my-friendInvitation/my-friendInvitation?currentTab=1"
+        });
+      } else if (item.type === "points") {
+        if (scrollPointsPopup.value) {
+          scrollPointsPopup.value.open(pointsDetailData.value);
+        }
+      } else if (item.type === "confirm") {
+        common_vendor.index.navigateTo({
+          url: "/packages/my-active/my-active?currentTab=1"
+        });
+      }
+    };
     const handleUserFollowStatusChange = (data) => {
-      common_vendor.index.__f__("log", "at pages/home/home.vue:835", "接收到关注状态变更:", data);
+      common_vendor.index.__f__("log", "at pages/home/home.vue:945", "接收到关注状态变更:", data);
       if (!data || !data.userId)
         return;
       postList.value.forEach((post) => {
@@ -436,7 +499,7 @@ const _sfc_main = {
       });
     };
     const handlePostInteractionChange = (data) => {
-      common_vendor.index.__f__("log", "at pages/home/home.vue:850", "接收到帖子互动变更:", data);
+      common_vendor.index.__f__("log", "at pages/home/home.vue:960", "接收到帖子互动变更:", data);
       if (!data || !data.postId)
         return;
       const targetPost = postList.value.find((p) => String(p.id) === String(data.postId));
@@ -456,11 +519,11 @@ const _sfc_main = {
           }
         }
       } else {
-        common_vendor.index.__f__("warn", "at pages/home/home.vue:878", `未在当前列表中找到 ID 为 ${data.postId} 的帖子，跳过更新`);
+        common_vendor.index.__f__("warn", "at pages/home/home.vue:988", `未在当前列表中找到 ID 为 ${data.postId} 的帖子，跳过更新`);
       }
     };
     const handleUserInfoChange = async () => {
-      common_vendor.index.__f__("log", "at pages/home/home.vue:886", "收到用户信息变更通知，刷新首页配置");
+      common_vendor.index.__f__("log", "at pages/home/home.vue:996", "收到用户信息变更通知，刷新首页配置");
       await fetchCurrentUserInfo();
     };
     const toggleAction = async (post, clickedAction) => {
@@ -790,7 +853,7 @@ const _sfc_main = {
           });
         },
         fail: (err) => {
-          common_vendor.index.__f__("error", "at pages/home/home.vue:1271", "setClipboardData failed:", err);
+          common_vendor.index.__f__("error", "at pages/home/home.vue:1381", "setClipboardData failed:", err);
           common_vendor.index.showToast({
             title: "复制失败",
             icon: "none"
@@ -825,21 +888,37 @@ const _sfc_main = {
         f: searchQuery.value,
         g: common_vendor.o(($event) => searchQuery.value = $event.detail.value),
         h: common_vendor.o(handleSearch),
-        i: activeTab.value === 1 ? 1 : "",
-        j: common_vendor.o(($event) => handleTabClick(1)),
-        k: activeTab.value === 2 ? 1 : "",
-        l: common_vendor.o(($event) => handleTabClick(2)),
-        m: activeTab.value === 3 ? 1 : "",
-        n: common_vendor.o(($event) => handleTabClick(3)),
-        o: activeTab.value === 4 ? 1 : "",
-        p: common_vendor.o(($event) => handleTabClick(4)),
-        q: common_vendor.p({
+        i: scrollBarData.value.length > 0
+      }, scrollBarData.value.length > 0 ? {
+        j: common_vendor.p({
+          type: "sound",
+          size: "14",
+          color: "#FF6A00"
+        }),
+        k: common_vendor.f(scrollBarData.value, (item, index, i0) => {
+          return {
+            a: common_vendor.t(item.label),
+            b: common_vendor.t(item.count),
+            c: common_vendor.o(($event) => handleNoticeClick(item), index),
+            d: index
+          };
+        })
+      } : {}, {
+        l: activeTab.value === 1 ? 1 : "",
+        m: common_vendor.o(($event) => handleTabClick(1)),
+        n: activeTab.value === 2 ? 1 : "",
+        o: common_vendor.o(($event) => handleTabClick(2)),
+        p: activeTab.value === 3 ? 1 : "",
+        q: common_vendor.o(($event) => handleTabClick(3)),
+        r: activeTab.value === 4 ? 1 : "",
+        s: common_vendor.o(($event) => handleTabClick(4)),
+        t: common_vendor.p({
           type: "compose",
           size: "18",
           color: "#FFFFFF"
         }),
-        r: common_vendor.o(postNew),
-        s: common_vendor.f(postList.value, (post, k0, i0) => {
+        v: common_vendor.o(postNew),
+        w: common_vendor.f(postList.value, (post, k0, i0) => {
           return common_vendor.e({
             a: post.user.avatar,
             b: common_vendor.o(($event) => handleAvatarClick(post.user), post.id),
@@ -897,7 +976,7 @@ const _sfc_main = {
           } : {}, {
             C: common_vendor.t(post.time)
           }, isLogin.value ? common_vendor.e({
-            D: "07e72d3c-2-" + i0,
+            D: "07e72d3c-3-" + i0,
             E: common_vendor.p({
               type: post.userAction === "like" ? "hand-up-filled" : "hand-up",
               size: "20",
@@ -906,7 +985,7 @@ const _sfc_main = {
             F: common_vendor.t(post.likes),
             G: post.userAction === "like" ? 1 : "",
             H: common_vendor.o(($event) => toggleAction(post, "like"), post.id),
-            I: "07e72d3c-3-" + i0,
+            I: "07e72d3c-4-" + i0,
             J: common_vendor.p({
               type: post.userAction === "dislike" ? "hand-down-filled" : "hand-down",
               size: "20",
@@ -915,7 +994,7 @@ const _sfc_main = {
             K: common_vendor.t(post.dislikes),
             L: post.userAction === "dislike" ? 1 : "",
             M: common_vendor.o(($event) => toggleAction(post, "dislike"), post.id),
-            N: "07e72d3c-4-" + i0,
+            N: "07e72d3c-5-" + i0,
             O: common_vendor.p({
               type: "chatbubble",
               size: "20",
@@ -923,7 +1002,7 @@ const _sfc_main = {
             }),
             P: common_vendor.t(post.commonCount),
             Q: common_vendor.o(($event) => navigateToComments(post), post.id),
-            R: "07e72d3c-5-" + i0,
+            R: "07e72d3c-6-" + i0,
             S: common_vendor.p({
               type: post.isSaved ? "star-filled" : "star",
               size: "20",
@@ -934,7 +1013,7 @@ const _sfc_main = {
             V: common_vendor.o(($event) => toggleSave(post), post.id),
             W: isLogin.value && loggedInUserId.value === post.user.id
           }, isLogin.value && loggedInUserId.value === post.user.id ? {
-            X: "07e72d3c-6-" + i0,
+            X: "07e72d3c-7-" + i0,
             Y: common_vendor.p({
               type: "trash",
               size: "20",
@@ -946,40 +1025,46 @@ const _sfc_main = {
             ab: common_vendor.o(($event) => handlePostClick(post), post.id)
           });
         }),
-        t: isLogin.value,
-        v: !isLogin.value && postList.value.length === 0
+        x: isLogin.value,
+        y: !isLogin.value && postList.value.length === 0
       }, !isLogin.value && postList.value.length === 0 ? {
-        w: common_vendor.o(goToLogin)
+        z: common_vendor.o(goToLogin)
       } : isLogin.value && postList.value.length === 0 && loadingStatus.value === "noMore" ? {} : loadingStatus.value === "loading" ? {
-        z: common_vendor.p({
+        C: common_vendor.p({
           status: "loading",
           ["contentText.loading"]: "正在加载..."
         })
       } : loadingStatus.value === "noMore" ? {
-        B: common_vendor.p({
+        E: common_vendor.p({
           status: "noMore",
           ["contentText.noMore"]: "暂无更多内容"
         })
       } : {}, {
-        x: isLogin.value && postList.value.length === 0 && loadingStatus.value === "noMore",
-        y: loadingStatus.value === "loading",
-        A: loadingStatus.value === "noMore",
-        C: copyMenu.show
+        A: isLogin.value && postList.value.length === 0 && loadingStatus.value === "noMore",
+        B: loadingStatus.value === "loading",
+        D: loadingStatus.value === "noMore",
+        F: copyMenu.show
       }, copyMenu.show ? {
-        D: common_vendor.o(executeCopy),
-        E: common_vendor.o(() => {
+        G: common_vendor.o(executeCopy),
+        H: common_vendor.o(() => {
         }),
-        F: common_vendor.o(hideCopyMenu)
+        I: common_vendor.o(hideCopyMenu)
       } : {}, {
-        G: common_vendor.sr(guidePopupRef, "07e72d3c-9", {
+        J: common_vendor.sr(guidePopupRef, "07e72d3c-10", {
           "k": "guidePopupRef"
         }),
-        H: common_vendor.sr(avatarMenuRef, "07e72d3c-10", {
+        K: common_vendor.sr(avatarMenuRef, "07e72d3c-11", {
           "k": "avatarMenuRef"
         }),
-        I: common_vendor.o(handleMenuAction),
-        J: common_vendor.sr(addCirclePopup, "07e72d3c-11", {
+        L: common_vendor.o(handleMenuAction),
+        M: common_vendor.sr(addCirclePopup, "07e72d3c-12", {
           "k": "addCirclePopup"
+        }),
+        N: common_vendor.sr(invitePopupRef, "07e72d3c-13", {
+          "k": "invitePopupRef"
+        }),
+        O: common_vendor.sr(scrollPointsPopup, "07e72d3c-14", {
+          "k": "scrollPointsPopup"
         })
       });
     };

@@ -59,7 +59,8 @@
         "applicationBusinessCard/applicationBusinessCard",
         "myStore-edit/myStore-edit",
         "my-active/my-active",
-        "my-collection/my-collection"
+        "my-collection/my-collection",
+        "participant-detail/participant-detail"
       ]
     }
   ],

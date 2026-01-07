@@ -7,13 +7,15 @@ if (!Array) {
 }
 const _easycom_uni_icons = () => "../../uni_modules/uni-icons/components/uni-icons/uni-icons.js";
 if (!Math) {
-  _easycom_uni_icons();
+  (_easycom_uni_icons + PointsFeedbackPopup)();
 }
+const PointsFeedbackPopup = () => "../../components/PointsFeedbackPopup.js";
 const _sfc_main = {
   __name: "shop-detail",
   setup(__props) {
     const storeDetail = common_vendor.ref(null);
     const isLoading = common_vendor.ref(true);
+    const pointsPopup = common_vendor.ref(null);
     const coverImages = common_vendor.computed(() => {
       if (storeDetail.value && Array.isArray(storeDetail.value.storeCoverImageUrls)) {
         return storeDetail.value.storeCoverImageUrls;
@@ -65,7 +67,7 @@ const _sfc_main = {
           special
         };
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/shop-detail/shop-detail.vue:225", "解析营业时间失败:", error);
+        common_vendor.index.__f__("error", "at pages/shop-detail/shop-detail.vue:230", "解析营业时间失败:", error);
         return {
           regular: [{
             day: "营业时间",
@@ -96,7 +98,7 @@ const _sfc_main = {
       });
       isLoading.value = false;
       if (error) {
-        common_vendor.index.__f__("error", "at pages/shop-detail/shop-detail.vue:263", "获取聚店详情失败:", error);
+        common_vendor.index.__f__("error", "at pages/shop-detail/shop-detail.vue:268", "获取聚店详情失败:", error);
         common_vendor.index.showToast({
           title: error,
           icon: "none"
@@ -104,7 +106,14 @@ const _sfc_main = {
         return;
       }
       storeDetail.value = data;
-      common_vendor.index.__f__("log", "at pages/shop-detail/shop-detail.vue:272", "聚店详情数据:", storeDetail.value);
+      common_vendor.index.__f__("log", "at pages/shop-detail/shop-detail.vue:277", "聚店详情数据:", storeDetail.value);
+      if (data.checkContribution === 1) {
+        setTimeout(() => {
+          if (pointsPopup.value) {
+            pointsPopup.value.show("查看聚店详情", 10);
+          }
+        }, 500);
+      }
     });
     const openMap = () => {
       if (!storeDetail.value)
@@ -260,9 +269,12 @@ const _sfc_main = {
           color: "#fff",
           size: "20"
         }),
-        D: common_vendor.o(callPhone)
+        D: common_vendor.o(callPhone),
+        E: common_vendor.sr(pointsPopup, "b8678dae-4", {
+          "k": "pointsPopup"
+        })
       }) : {
-        E: common_vendor.p({
+        F: common_vendor.p({
           type: "spinner-cycle",
           size: "30",
           color: "#999"

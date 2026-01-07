@@ -1,6 +1,7 @@
 {
   "navigationBarTitleText": "聚店详情",
   "usingComponents": {
-    "uni-icons": "../../uni_modules/uni-icons/components/uni-icons/uni-icons"
+    "uni-icons": "../../uni_modules/uni-icons/components/uni-icons/uni-icons",
+    "points-feedback-popup": "../../components/PointsFeedbackPopup"
   }
 }

@@ -147,7 +147,7 @@
 							</uni-forms-item>
 							<view class="divider"></view>
 							<uni-forms-item :label="`公司名称`" :name="`company_${index}`" label-width="70px">
-								<uni-easyinput v-model="company.name" placeholder="请输入公司或机构名称" />
+								<uni-easyinput v-model="company.name" placeholder="请输入公司名称" />
 							</uni-forms-item>
 							<view class="divider"></view>
 							<uni-forms-item :label="`担任职务`" :name="`position_${index}`" label-width="70px">
@@ -1137,7 +1137,7 @@
 				setTimeout(() => {
 					uni.showModal({
 						title: '发布到商友圈',
-						content: '您的资料已更新，是否发布名片到商友圈，让更多商友看见您？',
+						content: '您的资料已更新，发布名片问候语到商友圈的“商友连接”模块，让商友们更快看见您！',
 						confirmText: '立即发布',
 						cancelText: '暂不发布',
 						success: (res) => {

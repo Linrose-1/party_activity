@@ -1,0 +1,95 @@
+/* 水平间距 */
+/* 水平间距 */
+.points-popup.data-v-fe1ae207 {
+  width: 560rpx;
+  background-color: #fff;
+  border-radius: 30rpx;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* 稍微加一点阴影 */
+  box-shadow: 0 10rpx 40rpx rgba(255, 110, 0, 0.2);
+}
+.popup-header.data-v-fe1ae207 {
+  width: 100%;
+  height: 160rpx;
+  background: linear-gradient(135deg, #FF8C37, #FF6E00);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom-left-radius: 50% 20rpx;
+  border-bottom-right-radius: 50% 20rpx;
+  margin-bottom: 20rpx;
+}
+.popup-header .header-img.data-v-fe1ae207 {
+  width: 120rpx;
+  height: 120rpx;
+}
+.popup-body.data-v-fe1ae207 {
+  padding: 20rpx 40rpx;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.congrats-text.data-v-fe1ae207 {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #FF6E00;
+  margin-bottom: 20rpx;
+}
+.detail-text.data-v-fe1ae207 {
+  font-size: 28rpx;
+  color: #333;
+  line-height: 1.5;
+  margin-bottom: 10rpx;
+}
+.detail-text .highlight.data-v-fe1ae207 {
+  font-weight: bold;
+  color: #FF6E00;
+  margin: 0 4rpx;
+}
+.points-value.data-v-fe1ae207 {
+  font-size: 60rpx;
+  font-weight: 800;
+  color: #FF4D4F;
+  /* 用红色更醒目，或者继续用主题橙 #FF6E00 */
+  margin: 20rpx 0;
+  font-family: "Helvetica Neue", Helvetica, sans-serif;
+}
+.points-value .unit.data-v-fe1ae207 {
+  font-size: 28rpx;
+  font-weight: normal;
+  color: #666;
+  margin-left: 6rpx;
+}
+.sub-tip.data-v-fe1ae207 {
+  font-size: 24rpx;
+  color: #999;
+  margin-top: 10rpx;
+}
+.popup-footer.data-v-fe1ae207 {
+  width: 100%;
+  padding: 30rpx 40rpx 40rpx;
+  box-sizing: border-box;
+}
+.confirm-btn.data-v-fe1ae207 {
+  width: 100%;
+  height: 80rpx;
+  line-height: 80rpx;
+  border-radius: 40rpx;
+  background: linear-gradient(to right, #FF8C37, #FF6E00);
+  color: #fff;
+  font-size: 30rpx;
+  font-weight: bold;
+  box-shadow: 0 6rpx 16rpx rgba(255, 110, 0, 0.3);
+}
+.confirm-btn.data-v-fe1ae207::after {
+  border: none;
+}
+.confirm-btn.data-v-fe1ae207:active {
+  opacity: 0.9;
+  transform: translateY(2rpx);
+}

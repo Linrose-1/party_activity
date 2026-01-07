@@ -4,14 +4,12 @@ const utils_request = require("../../utils/request.js");
 if (!Array) {
   const _easycom_uni_segmented_control2 = common_vendor.resolveComponent("uni-segmented-control");
   const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
-  const _easycom_uni_badge2 = common_vendor.resolveComponent("uni-badge");
-  (_easycom_uni_segmented_control2 + _easycom_uni_icons2 + _easycom_uni_badge2)();
+  (_easycom_uni_segmented_control2 + _easycom_uni_icons2)();
 }
 const _easycom_uni_segmented_control = () => "../../uni_modules/uni-segmented-control/components/uni-segmented-control/uni-segmented-control.js";
 const _easycom_uni_icons = () => "../../uni_modules/uni-icons/components/uni-icons/uni-icons.js";
-const _easycom_uni_badge = () => "../../uni_modules/uni-badge/components/uni-badge/uni-badge.js";
 if (!Math) {
-  (_easycom_uni_segmented_control + _easycom_uni_icons + _easycom_uni_badge)();
+  (_easycom_uni_segmented_control + _easycom_uni_icons)();
 }
 const _sfc_main = {
   __name: "my-active",
@@ -27,7 +25,7 @@ const _sfc_main = {
     const publishedPageNo = common_vendor.ref(1);
     const publishedHasMore = common_vendor.ref(true);
     common_vendor.onShow(() => {
-      common_vendor.index.__f__("log", "at packages/my-active/my-active.vue:218", "页面显示，刷新当前 Tab 数据");
+      common_vendor.index.__f__("log", "at packages/my-active/my-active.vue:222", "页面显示，刷新当前 Tab 数据");
       handleRefresh();
     });
     const getMyActivitiesList = async (isLoadMore = false) => {
@@ -49,7 +47,7 @@ const _sfc_main = {
           method: "GET",
           data: params
         });
-        common_vendor.index.__f__("log", "at packages/my-active/my-active.vue:249", `获取Tab ${currentTab.value} 的聚会`, result);
+        common_vendor.index.__f__("log", "at packages/my-active/my-active.vue:253", `获取Tab ${currentTab.value} 的聚会`, result);
         if (result && !result.error && result.data) {
           const list = result.data.list || [];
           const total = result.data.total || 0;
@@ -64,7 +62,7 @@ const _sfc_main = {
           }
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at packages/my-active/my-active.vue:268", "请求我的聚会列表失败:", error);
+        common_vendor.index.__f__("error", "at packages/my-active/my-active.vue:272", "请求我的聚会列表失败:", error);
       } finally {
         loading.value = false;
         refreshing.value = false;
@@ -183,7 +181,7 @@ const _sfc_main = {
       });
     };
     const cancelActivity = (activityId) => {
-      common_vendor.index.__f__("log", "at packages/my-active/my-active.vue:416", "一进来就调用");
+      common_vendor.index.__f__("log", "at packages/my-active/my-active.vue:420", "一进来就调用");
       common_vendor.index.showModal({
         title: "警告",
         content: "确定要取消您发布的此聚会吗？此操作不可逆。",
@@ -252,6 +250,11 @@ const _sfc_main = {
         url: `/packages/active-publish/active-publish?mode=edit&id=${activityId}`
       });
     };
+    const navigateToParticipantList = (activityId) => {
+      common_vendor.index.navigateTo({
+        url: `/packages/participant-detail/participant-detail?id=${activityId}`
+      });
+    };
     return (_ctx, _cache) => {
       return common_vendor.e({
         a: common_vendor.o(switchTab),
@@ -266,12 +269,12 @@ const _sfc_main = {
         d: common_vendor.f(enrolledActivities.value, (item, index, i0) => {
           return common_vendor.e({
             a: item.coverImageUrl,
-            b: common_vendor.t(item.activityTitle),
-            c: item.memberActivityJoinResp.rejectMsg
+            b: item.memberActivityJoinResp.rejectMsg
           }, item.memberActivityJoinResp.rejectMsg ? {} : {
-            d: common_vendor.t(item.memberActivityJoinResp.paymentStatusStr),
-            e: common_vendor.n(getStatusClass(item.memberActivityJoinResp.paymentStatusStr))
+            c: common_vendor.t(item.memberActivityJoinResp.paymentStatusStr),
+            d: common_vendor.n(getStatusClass(item.memberActivityJoinResp.paymentStatusStr))
           }, {
+            e: common_vendor.t(item.activityTitle),
             f: "530922ba-1-" + i0,
             g: common_vendor.t(formatDateTime(item.startDatetime)),
             h: "530922ba-2-" + i0,
@@ -289,8 +292,8 @@ const _sfc_main = {
             }),
             p: common_vendor.t(item.memberActivityJoinResp.rejectMsg)
           } : {}, {
-            q: ["待支付", "已支付", "替补"].includes(item.memberActivityJoinResp.paymentStatusStr) && !item.memberActivityJoinResp.rejectMsg
-          }, ["待支付", "已支付", "替补"].includes(item.memberActivityJoinResp.paymentStatusStr) && !item.memberActivityJoinResp.rejectMsg ? {
+            q: ["待支付", "已支付", "替补", "待确定"].includes(item.memberActivityJoinResp.paymentStatusStr) && !item.memberActivityJoinResp.rejectMsg
+          }, ["待支付", "已支付", "替补", "待确定"].includes(item.memberActivityJoinResp.paymentStatusStr) && !item.memberActivityJoinResp.rejectMsg ? {
             r: common_vendor.o(($event) => cancelEnroll(item.id), item.id)
           } : {}, {
             s: item.memberActivityJoinResp.paymentStatusStr === "待退款"
@@ -308,17 +311,17 @@ const _sfc_main = {
         }),
         e: common_vendor.p({
           type: "calendar",
-          size: "16",
+          size: "14",
           color: "#999"
         }),
         f: common_vendor.p({
           type: "map-pin",
-          size: "16",
+          size: "14",
           color: "#999"
         }),
         g: common_vendor.p({
-          type: "person-filled",
-          size: "16",
+          type: "person",
+          size: "14",
           color: "#999"
         })
       } : !loading.value ? {
@@ -334,9 +337,9 @@ const _sfc_main = {
         o: common_vendor.f(publishedActivities.value, (item, index, i0) => {
           return common_vendor.e({
             a: item.coverImageUrl,
-            b: common_vendor.t(item.activityTitle),
-            c: common_vendor.t(item.statusStr),
-            d: common_vendor.n(getStatusClass(item.statusStr)),
+            b: common_vendor.t(item.statusStr),
+            c: common_vendor.n(getStatusClass(item.statusStr)),
+            d: common_vendor.t(item.activityTitle),
             e: "530922ba-5-" + i0,
             f: common_vendor.t(formatDateTime(item.startDatetime)),
             g: "530922ba-6-" + i0,
@@ -346,23 +349,20 @@ const _sfc_main = {
             k: common_vendor.t(item.totalSlots || "不限"),
             l: item.paddingReturnCount > 0
           }, item.paddingReturnCount > 0 ? {
-            m: "530922ba-8-" + i0,
-            n: common_vendor.p({
-              text: item.paddingReturnCount,
-              type: "error"
-            }),
-            o: common_vendor.o(($event) => manageRefunds(item, "individual"), item.id)
+            m: common_vendor.t(item.paddingReturnCount),
+            n: common_vendor.o(($event) => manageRefunds(item, "individual"), item.id)
           } : {}, {
+            o: common_vendor.o(($event) => navigateToParticipantList(item.id), item.id),
             p: ["未开始", "报名中", "活动即将开始", "进行中"].includes(item.statusStr)
           }, ["未开始", "报名中", "活动即将开始", "进行中"].includes(item.statusStr) ? {
             q: common_vendor.o(($event) => cancelActivity(item.id), item.id)
           } : {}, {
-            r: item.statusStr === "活动取消"
-          }, item.statusStr === "活动取消" ? {
+            r: item.statusStr === "活动取消" || item.statusStr === "聚会取消"
+          }, item.statusStr === "活动取消" || item.statusStr === "聚会取消" ? {
             s: common_vendor.o(($event) => manageRefunds(item, "all"), item.id)
           } : {}, {
-            t: item.statusStr !== "活动取消"
-          }, item.statusStr !== "活动取消" ? {
+            t: item.statusStr !== "活动取消" && item.statusStr !== "聚会取消"
+          }, item.statusStr !== "活动取消" && item.statusStr !== "聚会取消" ? {
             v: common_vendor.o(($event) => navigateToRegisteredUsers(item), item.id)
           } : {}, {
             w: common_vendor.o(($event) => navigateToEdit(item.id), item.id),
@@ -372,17 +372,17 @@ const _sfc_main = {
         }),
         p: common_vendor.p({
           type: "calendar",
-          size: "16",
+          size: "14",
           color: "#999"
         }),
         q: common_vendor.p({
           type: "map-pin",
-          size: "16",
+          size: "14",
           color: "#999"
         }),
         r: common_vendor.p({
-          type: "person-filled",
-          size: "16",
+          type: "person",
+          size: "14",
           color: "#999"
         })
       } : !loading.value ? {

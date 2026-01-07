@@ -219,6 +219,8 @@
 				<view class="copy-menu-item" @click="executeCopy">复制</view>
 			</view>
 		</view>
+
+		<PointsFeedbackPopup ref="pointsPopup" />
 	</view>
 </template>
 
@@ -242,6 +244,8 @@
 	import {
 		getInviteCode
 	} from '../../utils/user.js';
+	import feedback from '@/utils/feedback.js';
+	import PointsFeedbackPopup from '@/components/PointsFeedbackPopup.vue';
 
 	const hasDataChanged = ref(false);
 
@@ -280,6 +284,8 @@
 	const replyToNickname = ref('');
 
 	const isAnonymous = ref(false);
+
+	const pointsPopup = ref(null); // 定义 ref
 
 	const sharePopup = ref(null); // 用于获取 uni-popup 组件实例
 	const customShareTitle = ref(''); // 用于存储用户自定义的分享标题
@@ -600,6 +606,15 @@
 
 				if (loggedInUserId.value && item.userId && loggedInUserId.value != item.userId) {
 					showFollowButton.value = true;
+				}
+
+				if (item.checkContribution === 1) {
+					setTimeout(() => {
+						// 使用组件的 show 方法，传入名称和分数
+						if (pointsPopup.value) {
+							pointsPopup.value.show('阅读商机详情', 10);
+						}
+					}, 500);
 				}
 
 				getCommentList();
@@ -1496,7 +1511,7 @@
 	.comments-section {
 		background: white;
 		border-radius: 36rpx;
-		margin: 0 30rpx 40rpx;
+		margin: 0 30rpx 60rpx;
 		padding: 44rpx;
 		box-shadow: 0 10rpx 40rpx rgba(0, 0, 0, 0.05);
 		border: 2rpx solid #eee;

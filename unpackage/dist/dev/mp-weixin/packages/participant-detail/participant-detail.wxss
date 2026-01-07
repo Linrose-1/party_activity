@@ -1,0 +1,182 @@
+/* 水平间距 */
+/* 水平间距 */
+.page-container.data-v-c2f43f13 {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background-color: #fff;
+}
+
+/* 统计栏 */
+.stats-bar.data-v-c2f43f13 {
+  padding: 20rpx 30rpx;
+  background-color: #fff8e1;
+  /* 浅黄色背景提示 */
+  color: #ff8f00;
+  font-size: 28rpx;
+  font-weight: 500;
+  border-bottom: 1rpx solid #ffe0b2;
+}
+.stats-bar .highlight.data-v-c2f43f13 {
+  font-weight: bold;
+  margin: 0 4rpx;
+  font-size: 32rpx;
+}
+
+/* 温馨提示条 */
+.tips-bar.data-v-c2f43f13 {
+  background-color: #f4f4f5;
+  color: #909399;
+  font-size: 24rpx;
+  padding: 12rpx 30rpx;
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+}
+
+/* 表格滚动区 */
+.table-scroll.data-v-c2f43f13 {
+  flex: 1;
+  height: 0;
+  /* 配合 flex 布局 */
+  width: 100%;
+  /* 允许横向滚动（虽然这里主要做纵向，但为了不换行） */
+}
+.table-wrapper.data-v-c2f43f13 {
+  display: inline-block;
+  /* 关键：让容器宽度随内容撑开 */
+  min-width: 100%;
+  padding-bottom: 40rpx;
+  vertical-align: top;
+  /* 防止底部出现不明空隙 */
+}
+
+/* 表格行通用样式 */
+.table-header.data-v-c2f43f13,
+.table-row.data-v-c2f43f13 {
+  display: flex;
+  align-items: center;
+  padding: 0 20rpx;
+  border-bottom: 1rpx solid #ebeef5;
+  /* 关键：让行宽根据子元素自动撑开，不换行 */
+  width: -webkit-max-content;
+  width: max-content;
+  min-width: 100%;
+  /* 至少占满屏幕宽 */
+  box-sizing: border-box;
+}
+
+/* 表头样式 */
+.table-header.data-v-c2f43f13 {
+  background-color: #f5f7fa;
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  height: 80rpx;
+}
+.table-header .th.data-v-c2f43f13 {
+  font-size: 26rpx;
+  font-weight: bold;
+  color: #333;
+  padding: 0 10rpx;
+  flex-shrink: 0;
+  /* 防止压缩 */
+  text-align: center;
+}
+
+/* 数据行样式 */
+.table-row.data-v-c2f43f13 {
+  height: 90rpx;
+  background-color: #fff;
+}
+.table-row.stripe.data-v-c2f43f13 {
+  background-color: #fafafa;
+  /* 斑马纹 */
+}
+.table-row .td.data-v-c2f43f13 {
+  font-size: 26rpx;
+  color: #666;
+  padding: 0 10rpx;
+  flex-shrink: 0;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 列宽定义 (总宽度超过 100% 时会出现横向滚动条，这是符合预期的表格体验) */
+.cell-name.data-v-c2f43f13 {
+  width: 140rpx;
+}
+.cell-nickname.data-v-c2f43f13 {
+  width: 160rpx;
+}
+.cell-gender.data-v-c2f43f13 {
+  width: 80rpx;
+}
+.cell-era.data-v-c2f43f13 {
+  width: 120rpx;
+}
+.cell-mobile.data-v-c2f43f13 {
+  width: 200rpx;
+}
+.cell-company.data-v-c2f43f13 {
+  width: 220rpx;
+}
+.cell-job.data-v-c2f43f13 {
+  width: 160rpx;
+}
+.cell-level.data-v-c2f43f13 {
+  width: 140rpx;
+}
+.cell-vip.data-v-c2f43f13 {
+  width: 140rpx;
+}
+
+/* 空状态 */
+.empty-state.data-v-c2f43f13 {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 100rpx 0;
+  color: #ccc;
+}
+.empty-state text.data-v-c2f43f13 {
+  font-size: 28rpx;
+  margin-top: 20rpx;
+}
+
+/* 底部操作栏 */
+.footer-bar.data-v-c2f43f13 {
+  padding: 20rpx 30rpx;
+  background-color: #fff;
+  border-top: 1rpx solid #ebeef5;
+  box-shadow: 0 -4rpx 16rpx rgba(0, 0, 0, 0.05);
+}
+.safe-area-bottom.data-v-c2f43f13 {
+  padding-bottom: calc(20rpx + env(safe-area-inset-bottom));
+}
+.export-btn.data-v-c2f43f13 {
+  background: linear-gradient(135deg, #FF6B00, #ff8c00);
+  color: #fff;
+  border-radius: 44rpx;
+  height: 88rpx;
+  line-height: 88rpx;
+  font-size: 30rpx;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.export-btn.data-v-c2f43f13::after {
+  border: none;
+}
+.export-btn.data-v-c2f43f13:active {
+  opacity: 0.9;
+}
+.export-btn[disabled].data-v-c2f43f13 {
+  background: #e0e0e0;
+  color: #999;
+}

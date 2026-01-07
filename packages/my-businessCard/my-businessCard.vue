@@ -121,6 +121,7 @@
 		computed
 	} from 'vue';
 	import {
+		onHide,
 		onLoad,
 		onShareAppMessage,
 		onShareTimeline
@@ -138,6 +139,8 @@
 	const fromShare = ref(false);
 	const promotionQrCodeUrl = ref('');
 	const promotionQrCodeBase64 = ref('');
+	const remainingShareQuota = ref(0); // 剩余分享次数
+	const isQuotaLoaded = ref(false);
 
 	// 分享UI相关的状态
 	const sharePopup = ref(null);
@@ -274,6 +277,8 @@
 
 		// 7. 处理分享奖励 (内部有判断 loggedInUserId，游客调用安全)
 		handleShareReward(finalOptions);
+
+		uni.hideShareMenu();
 	});
 
 	/**
@@ -494,6 +499,44 @@
 		throw new Error(typeof error === 'string' ? error : (error.msg || '获取失败'));
 	};
 
+	// 获取名片分享剩余次数 (rightsType = 4)
+	const checkShareQuota = async () => {
+		try {
+			const {
+				data
+			} = await request('/app-api/member/top-up-level-rights/get-remaining', {
+				method: 'GET',
+				data: {
+					rightsType: 4
+				}
+			});
+			// 注意：名片这里 -1 代表无限次，所以逻辑稍微不同
+			// 如果返回 -1，保留 -1；如果返回数字，保留数字；如果返回 null，视为 0
+			if (typeof data === 'number') {
+				remainingShareQuota.value = data;
+			} else {
+				remainingShareQuota.value = 0;
+			}
+
+			isQuotaLoaded.value = true;
+			console.log('剩余分享次数:', remainingShareQuota.value);
+		} catch (e) {
+			console.error('获取权益失败', e);
+		}
+	};
+
+	const deductShareQuota = async () => {
+		try {
+			await request('/app-api/member/top-up-level-rights/update-share-rights', {
+				method: 'PUT'
+			});
+			// 扣减成功后，重新获取一次最新额度
+			checkShareQuota();
+		} catch (e) {
+			console.log('扣减权益失败', e);
+		}
+	};
+
 	/**
 	 * @description 适配不同接口返回的用户数据，统一为组件所需格式
 	 */
@@ -623,6 +666,9 @@
 	// 监听“分享给好友”
 	onShareAppMessage(() => {
 		closeSharePopup();
+
+		deductShareQuota();
+
 		if (!userInfo.value) return {
 			title: '一张很棒的电子名片'
 		};
@@ -761,7 +807,7 @@
 	const goToEdit = () => uni.navigateTo({
 		url: '/packages/my-edit/my-edit'
 	});
-	const openSharePopup = () => {
+	const openSharePopup = async () => {
 		const token = uni.getStorageSync('token');
 		if (!token) {
 			uni.showModal({
@@ -777,9 +823,32 @@
 			return;
 		}
 
+		// 1. 先检查额度
+		await checkShareQuota();
+
+		// 2. 判断额度
+		// -1 表示无限次
+		if (remainingShareQuota.value !== -1 && remainingShareQuota.value <= 0) {
+			uni.showModal({
+				title: '分享次数不足',
+				content: '您本月的名片分享次数已耗尽。升级会员可获取更多次数。',
+				confirmText: '升级会员',
+				cancelText: '取消',
+				success: (res) => {
+					if (res.confirm) {
+						uni.navigateTo({
+							url: '/pages/recharge/recharge?type=membership'
+						});
+					}
+				}
+			});
+			return;
+		}
+
+		// 3. 额度充足，打开弹窗
 		customShareTitle.value = `这是 ${userInfo.value.realName || userInfo.value.nickname} 的名片`;
 		sharePopup.value.open();
-		isPopupOpen.value = true; // 标记弹窗打开
+		isPopupOpen.value = true;
 	};
 	const closeSharePopup = () => {
 		sharePopup.value.close();
@@ -787,6 +856,9 @@
 	};
 	const guideShareTimeline = () => {
 		closeSharePopup(); // 这会自动把 isPopupOpen 设为 false
+
+		deductShareQuota();
+
 		showTimelineGuide.value = true; // 引导层 z-index 很高，通常没问题
 	};
 

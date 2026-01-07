@@ -16,16 +16,10 @@
 				</view>
 			</view>
 
-			<!-- 2. 操作按钮区 -->
+			<!-- 2. 操作按钮区 (2x2 布局) -->
 			<view class="action-grid">
-				<!-- 主要操作 -->
-				<view class="grid-item" :class="isSelf ? 'disabled' : 'primary'" @click="handleAction('addCircle')">
-					<view class="icon-box">
-						<uni-icons type="plusempty" size="28" color="#fff"></uni-icons>
-					</view>
-					<text class="item-text">{{ isSelf ? '本人' : '申请入圈' }}</text>
-				</view>
 
+				<!-- 1. 查看名片 -->
 				<view class="grid-item" @click="handleAction('viewCard')">
 					<view class="icon-box secondary">
 						<uni-icons type="person" size="28" color="#FF7009"></uni-icons>
@@ -33,7 +27,7 @@
 					<text class="item-text">查看名片</text>
 				</view>
 
-				<!-- 次要操作 -->
+				<!-- 2. 商友点评 -->
 				<view class="grid-item" @click="handleAction('comment')">
 					<view class="icon-box normal">
 						<uni-icons type="star" size="24" color="#666"></uni-icons>
@@ -41,19 +35,38 @@
 					<text class="item-text">商友点评</text>
 				</view>
 
-				<!-- <view class="grid-item" @click="handleAction('removeCircle')">
-					<view class="icon-box danger">
-						<uni-icons type="minus" size="24" color="#ff4d4f"></uni-icons>
+				<!-- 3. 邀请入圈 (新增) -->
+				<!-- 逻辑：如果是自己，禁用 -->
+				<view class="grid-item" :class="isSelf ? 'disabled' : 'primary-outline'"
+					@click="handleAction('inviteCircle')">
+					<view class="icon-box invite-style">
+						<uni-icons type="paperplane-filled" size="26" color="#FF7009"></uni-icons>
 					</view>
-					<text class="item-text">一键脱圈</text>
-				</view> -->
+					<text class="item-text">{{ isSelf ? '本人' : '邀请入圈' }}</text>
+				</view>
+
+				<!-- 4. 申请入圈 -->
+				<view class="grid-item" :class="isSelf ? 'disabled' : 'primary'" @click="handleAction('addCircle')">
+					<view class="icon-box">
+						<uni-icons type="plusempty" size="28" color="#fff"></uni-icons>
+					</view>
+					<text class="item-text">{{ isSelf ? '本人' : '申请入圈' }}</text>
+				</view>
+
+				<!-- <view class="grid-item" @click="handleAction('removeCircle')">
+									<view class="icon-box danger">
+										<uni-icons type="minus" size="24" color="#ff4d4f"></uni-icons>
+									</view>
+									<text class="item-text">一键脱圈</text>
+								</view> -->
 
 				<!-- <view class="grid-item" @click="handleAction('disconnect')">
-					<view class="icon-box danger">
-						<uni-icons type="closeempty" size="24" color="#ff4d4f"></uni-icons>
-					</view>
-					<text class="item-text">一键脱连</text>
-				</view> -->
+									<view class="icon-box danger">
+										<uni-icons type="closeempty" size="24" color="#ff4d4f"></uni-icons>
+									</view>
+									<text class="item-text">一键脱连</text>
+								</view> -->
+
 			</view>
 		</view>
 	</uni-popup>
@@ -70,16 +83,13 @@
 	const emit = defineEmits(['action']);
 	const currentUserId = ref(null);
 
-	// 计算属性：是否是本人
 	const isSelf = computed(() => {
-		// 确保 ID 存在且类型安全转换后相等
 		return currentUserId.value && targetUser.value.id && String(currentUserId.value) === String(targetUser
 			.value.id);
 	});
 
 	const open = (user) => {
 		targetUser.value = user || {};
-		// 每次打开时重新获取当前用户ID，确保状态最新
 		currentUserId.value = uni.getStorageSync('userId');
 		popup.value.open();
 	};
@@ -89,18 +99,16 @@
 	};
 
 	const handleAction = (type) => {
-		// 如果是申请入圈操作，且是本人，直接拦截
-		if (type === 'addCircle' && isSelf.value) {
+		// 拦截自己操作
+		if ((type === 'addCircle' || type === 'inviteCircle') && isSelf.value) {
 			return;
 		}
-
 		close();
 		emit('action', {
 			type,
 			user: targetUser.value
 		});
 	};
-
 
 	defineExpose({
 		open,
@@ -117,7 +125,6 @@
 		position: relative;
 	}
 
-	/* 头部样式 */
 	.card-header {
 		background: linear-gradient(135deg, #FF7009, #FF9A44);
 		padding: 40rpx 30rpx;
@@ -166,13 +173,14 @@
 		opacity: 0.8;
 	}
 
-	/* 操作网格样式 */
+	/* --- 2x2 网格布局修改 --- */
 	.action-grid {
 		display: grid;
-		grid-template-columns: repeat(3, 1fr);
-		/* 3列布局 */
-		gap: 30rpx;
-		padding: 40rpx 30rpx 50rpx;
+		grid-template-columns: repeat(2, 1fr);
+		/* 改为2列 */
+		gap: 40rpx;
+		/* 增加间距 */
+		padding: 50rpx 40rpx;
 	}
 
 	.grid-item {
@@ -188,8 +196,9 @@
 	}
 
 	.icon-box {
-		width: 100rpx;
-		height: 100rpx;
+		width: 110rpx;
+		/* 稍微加大图标区域 */
+		height: 110rpx;
 		border-radius: 50%;
 		display: flex;
 		align-items: center;
@@ -198,43 +207,45 @@
 		box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
 	}
 
-	/* 按钮风格 */
+	/* 申请入圈 (实心橙色) */
 	.grid-item.primary .icon-box {
 		background: linear-gradient(135deg, #FF7009, #FF8C00);
 		box-shadow: 0 6rpx 16rpx rgba(255, 112, 9, 0.3);
 	}
 
-	.grid-item.disabled {
-		pointer-events: none;
-		/* 禁止点击 */
-
-		.icon-box {
-			background-color: #dcdcdc;
-			/* 灰色背景 */
-			box-shadow: none;
-		}
-
-		.item-text {
-			color: #999;
-			/* 灰色文字 */
-		}
+	/* 邀请入圈 (空心/浅橙色描边风格) */
+	.grid-item.primary-outline .icon-box.invite-style {
+		background-color: #fff;
+		border: 2rpx solid #FF7009;
+		color: #FF7009;
 	}
 
+	/* 查看名片 */
 	.icon-box.secondary {
 		background-color: #FFF3E0;
-		/* 浅橙色 */
 	}
 
+	/* 点评 */
 	.icon-box.normal {
 		background-color: #f5f5f5;
 	}
 
-	.icon-box.danger {
-		background-color: #FFF0F0;
+	.grid-item.disabled {
+		pointer-events: none;
+
+		.icon-box {
+			background-color: #dcdcdc;
+			box-shadow: none;
+			border: none;
+		}
+
+		.item-text {
+			color: #999;
+		}
 	}
 
 	.item-text {
-		font-size: 26rpx;
+		font-size: 28rpx;
 		color: #333;
 		font-weight: 500;
 	}

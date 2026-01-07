@@ -621,7 +621,7 @@ const _sfc_main = {
           setTimeout(() => {
             common_vendor.index.showModal({
               title: "发布到商友圈",
-              content: "您的资料已更新，是否发布名片到商友圈，让更多商友看见您？",
+              content: "您的资料已更新，发布名片问候语到商友圈的“商友连接”模块，让商友们更快看见您！",
               confirmText: "立即发布",
               cancelText: "暂不发布",
               success: (res) => {
@@ -899,7 +899,7 @@ const _sfc_main = {
             h: "2d637515-33-" + i0 + "," + ("2d637515-32-" + i0),
             i: common_vendor.o(($event) => company.name = $event, index),
             j: common_vendor.p({
-              placeholder: "请输入公司或机构名称",
+              placeholder: "请输入公司名称",
               modelValue: company.name
             }),
             k: "2d637515-32-" + i0 + ",2d637515-1",

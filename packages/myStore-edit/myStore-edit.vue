@@ -37,12 +37,13 @@
 						<text class="sub-header">最多9张，长按拖拽排序</text>
 					</view>
 
-					<!-- 替换为组件 -->
-					<DragImageUploader v-model="coverImages" :max-count="9" @add-image="handleCoverImageUpload" />
+					<view class="uploader-wrapper">
+						<DragImageUploader v-model="coverImages" :max-count="9" @add-image="handleCoverImageUpload" />
+					</view>
 
 					<view class="form-tip">
 						<uni-icons type="info" size="14" color="#FF9800"></uni-icons>
-						建议首图使用 5:4 或 4:3 比例，将作为分享封面展示。
+						建议首图使用4:3 比例，将作为分享封面展示。
 					</view>
 				</view>
 
@@ -829,6 +830,19 @@
 			color: $text-placeholder;
 			font-weight: normal;
 		}
+	}
+
+	.uploader-wrapper {
+		width: 100%;
+		min-height: 200rpx;
+		/* 最小高度，防止未加载时完全塌陷 */
+		overflow: hidden;
+		/* 触发 BFC，清除浮动，防止子元素外溢 */
+		display: block;
+		position: relative;
+		z-index: 1;
+		margin-bottom: 20rpx;
+		/* 与下方的提示语拉开间距 */
 	}
 
 	/* 表单项样式 */

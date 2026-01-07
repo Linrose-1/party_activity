@@ -33,7 +33,7 @@
 							:clear="false"></uni-data-select>
 					</uni-forms-item>
 
-					<!-- 聚会封面 (5:4 比例) -->
+					<!-- 聚会封面 (4:3 比例) -->
 					<uni-forms-item label="聚会封面">
 						<view class="cover-upload-box" @click="uploadCover">
 							<image v-if="form.coverImageUrl" :src="form.coverImageUrl" mode="aspectFill"
@@ -43,7 +43,7 @@
 									<uni-icons type="camera-filled" size="32" color="#FF6F00"></uni-icons>
 								</view>
 								<text class="tip-text">点击上传封面</text>
-								<text class="sub-tip">(建议比例 5:4 或 4:3)</text>
+								<text class="sub-tip">(建议比例4:3)</text>
 							</view>
 						</view>
 					</uni-forms-item>
@@ -56,20 +56,18 @@
 						</view>
 					</uni-forms-item>
 
-					<!-- 时间选择 (各占一行) -->
 					<uni-forms-item label="聚会时间" required>
-						<view @click="isPickerOpen = true" class="picker-trigger-box">
+						<!-- 点击外层打开 -->
+						<view class="picker-trigger-box" @click="openPicker">
 							<uni-datetime-picker type="datetimerange" v-model="timeRange" rangeSeparator=" 至 "
-								@change="isPickerOpen = false" @maskClick="isPickerOpen = false" />
-							<!-- <uni-icons type="calendar" size="18" color="#999" class="picker-icon"></uni-icons> -->
+								@maskClick="closePicker" @change="closePicker" />
 						</view>
 					</uni-forms-item>
 
 					<uni-forms-item label="报名时间" required>
-						<view @click="isPickerOpen = true" class="picker-trigger-box">
+						<view class="picker-trigger-box" @click="openPicker">
 							<uni-datetime-picker type="datetimerange" v-model="enrollTimeRange" rangeSeparator=" 至 "
-								@change="isPickerOpen = false" @maskClick="isPickerOpen = false" />
-							<!-- <uni-icons type="calendar" size="18" color="#999" class="picker-icon"></uni-icons> -->
+								@maskClick="closePicker" @change="closePicker" />
 						</view>
 					</uni-forms-item>
 
@@ -242,13 +240,25 @@
 		</scroll-view>
 
 		<!-- ============ 底部操作栏 ============ -->
-		<view class="action-bar" :class="{ 'z-index-low': isPickerOpen }">
+		<view class="action-bar" :class="{ 'hidden': isPickerOpen }">
 			<view v-if="mode === 'create'" class="action-btn save-btn" @click="saveDraft">
 				<uni-icons type="download" size="16" color="#666"></uni-icons>
 				<text>存草稿</text>
 			</view>
-			<view class="action-btn publish-btn" :class="{ 'disabled': isPublishing }" @click="publish">
-				{{ isPublishing ? '处理中...' : (mode === 'edit' ? '保存修改' : '发起聚会') }}
+			<view class="action-btn publish-btn" :class="{ 
+			        'disabled': isPublishing || (mode === 'create' && isQuotaLoaded && remainingQuota <= 0) 
+			    }" @click="handlePublishClick">
+				<!-- 按钮文案逻辑：
+			         1. 处理中 -> 处理中...
+			         2. 编辑模式 -> 保存修改
+			         3. 创建模式且次数不足 -> 发起聚会 (灰色)
+			         4. 创建模式且次数充足 -> 发起聚会 (余X次)
+			    -->
+				<text v-if="isPublishing">处理中...</text>
+				<text v-else-if="mode === 'edit'">保存修改</text>
+				<text v-else>
+					发起聚会
+				</text>
 			</view>
 		</view>
 
@@ -270,6 +280,7 @@
 		nextTick
 	} from 'vue';
 	import {
+		onShow,
 		onLoad,
 		onUnload,
 		onShareAppMessage,
@@ -290,9 +301,10 @@
 	const DRAFT_STORAGE_KEY = 'activity_draft'; // 草稿箱Key
 	const isUserVerified = ref(true); // 实名认证状态
 	const isPublishing = ref(false); // 发布按钮防抖/加载状态
-	const isPickerOpen = ref(false); // 时间选择器打开状态(用于控制底部栏层级)
 	const mode = ref('create'); // 页面模式: 'create' | 'edit'
 	const editActivityId = ref(null); // 编辑模式下的ID
+	const remainingQuota = ref(0); // 剩余聚会发布次数
+	const isQuotaLoaded = ref(false); // 标记是否已检查额度
 
 	// --- 表单数据模型 ---
 	const timeRange = ref([]); // 聚会时间范围 [开始, 结束]
@@ -341,6 +353,25 @@
 	const currentSponsorIndex = ref(-1); // 当前正在编辑的索引
 	const currentSponsorData = ref(null); // 传递给弹窗的编辑数据
 
+	const isPickerOpen = ref(false);
+	const inputStyles = ref({
+		color: '#333',
+		borderColor: '#dcdfe6'
+	});
+
+	// 处理打开
+	const openPicker = () => {
+		isPickerOpen.value = true;
+	};
+
+	// 处理关闭 (无论是选完还是取消)
+	const closePicker = () => {
+		// 加个微小的延时，防止闪烁
+		setTimeout(() => {
+			isPickerOpen.value = false;
+		}, 100);
+	};
+
 	// ==============================================================================
 	// 3. 生命周期 (Lifecycle Hooks)
 	// ==============================================================================
@@ -348,6 +379,12 @@
 		checkUserVerificationStatus();
 		getActiveType();
 		// initDragLayout();
+	});
+
+	onShow(() => {
+		if (uni.getStorageSync('token')) {
+			checkPublishQuota();
+		}
 	});
 
 	onLoad(async (options) => {
@@ -384,6 +421,11 @@
 
 	onUnload(() => {
 		uni.$off('shopSelected');
+	});
+
+	// 监听时间变化，选完了就恢复层级
+	watch([timeRange, enrollTimeRange], () => {
+		isPickerOpen.value = false;
 	});
 
 	// ==============================================================================
@@ -458,7 +500,7 @@
 				// 微信小程序端：调用原生裁剪接口
 				wx.cropImage({
 					src: tempFilePath, // 图片路径
-					cropScale: '5:4', // 【关键】设置裁剪比例为 5:4
+					cropScale: '4:3', // 【关键】设置裁剪比例为 4:3
 					success: (cropRes) => {
 						console.log('裁剪成功:', cropRes.tempFilePath);
 						// 将裁剪后的图片上传到服务器
@@ -851,6 +893,67 @@
 		}
 	};
 
+	// 获取聚会发布剩余次数 (rightsType = 3)
+	const checkPublishQuota = async () => {
+		try {
+			const {
+				data
+			} = await request('/app-api/member/top-up-level-rights/get-remaining', {
+				method: 'GET',
+				data: {
+					rightsType: 3
+				}
+			});
+
+			// 【核心修改】只看 data，不管 error
+			// 1. 如果 data 是数字 (比如 15，或者 0)，直接赋值
+			if (typeof data === 'number') {
+				remainingQuota.value = data;
+			}
+			// 2. 如果 data 是 null (接口500报错)，或者 undefined，强制设为 0
+			else {
+				console.log('接口返回 null，视为次数已用完');
+				remainingQuota.value = 0;
+			}
+
+			// 【关键】标记为已加载，这样 template 里的 :class 判断才会生效 (按钮变灰)
+			isQuotaLoaded.value = true;
+
+		} catch (e) {
+			console.error('获取权益网络异常', e);
+			// 网络异常时不标记 loaded，保持按钮原样，或者提示网络错误
+		}
+	};
+
+	const showQuotaExceededModal = () => {
+		uni.showModal({
+			title: '额度已用完',
+			content: '您本月的聚会发布次数已耗尽。升级会员可获取更多额度。',
+			confirmText: '升级会员',
+			cancelText: '取消',
+			confirmColor: '#FF6B00',
+			success: (res) => {
+				if (res.confirm) {
+					uni.navigateTo({
+						url: '/pages/recharge/recharge?type=membership'
+					});
+				}
+			}
+		});
+	};
+
+	const handlePublishClick = () => {
+		// 1. 额度检查拦截
+		// 如果是编辑模式(mode='edit')，通常不扣次数（视业务而定），如果是创建模式才检查
+		if (mode.value === 'create' && isQuotaLoaded.value && remainingQuota.value == 0) {
+			showQuotaExceededModal();
+			return;
+		}
+
+		// 2. 额度充足或编辑模式，走原有逻辑
+		publish();
+	};
+
 	// --- 7.3 发布/保存流程 ---
 	const publish = async () => {
 		if (isPublishing.value) return;
@@ -1058,7 +1161,7 @@
 		color: $theme-color !important;
 	}
 
-	/* 封面上传框 (5:4 比例) */
+	/* 封面上传框 (4:3 比例) */
 	.cover-upload-box {
 		width: 100%;
 		aspect-ratio: 5 / 4;
@@ -1399,7 +1502,7 @@
 
 	.form-bottom {
 		text-align: center;
-		padding: 40rpx 0;
+		padding: 50rpx 0;
 		color: #ccc;
 		font-size: 24rpx;
 	}
@@ -1416,13 +1519,12 @@
 		display: flex;
 		gap: 24rpx;
 		z-index: 99;
+		transition: opacity 0.2s;
 		box-sizing: border-box;
 
-		&.z-index-low {
-			z-index: -1 !important;
-			/* 关键：变成负数 */
-			opacity: 0;
-			/* 关键：选择时间时隐藏底部栏，体验更佳 */
+		&.hidden {
+			transform: translateY(100%);
+			/* 移出屏幕 */
 		}
 
 		.action-btn {
@@ -1458,18 +1560,33 @@
 			}
 
 			&.disabled {
-				background: #ccc;
+				background: #e0e0e0;
+				/* 灰色背景 */
+				color: #999;
 				box-shadow: none;
-				pointer-events: none;
+				/* pointer-events: none; <--- 同样建议去掉这行，允许点击出弹窗提示 */
 			}
 		}
 	}
 
-	/* 2. 暴力提升时间选择器层级 (防止被其他元素遮挡) */
-	:deep(.uni-date-mask),
-	:deep(.uni-date-range-popup),
-	:deep(.uni-datetime-picker--mask),
-	:deep(.uni-datetime-picker--popup) {
-		z-index: 9999 !important;
+	/* 强制提升 Picker 弹窗层级，无视父级限制 */
+	:deep(.uni-datetime-picker--popup),
+	:deep(.uni-date-range-popup) {
+		z-index: 99999 !important;
+		position: fixed !important;
+		top: 50% !important;
+		left: 50% !important;
+		transform: translate(-50%, -50%) !important;
+	}
+
+	/* 强制提升遮罩层级 */
+	:deep(.uni-mask),
+	:deep(.uni-date-mask) {
+		z-index: 99998 !important;
+	}
+
+	/* 确保底部栏层级正常，不要太高 */
+	.action-bar {
+		z-index: 99;
 	}
 </style>

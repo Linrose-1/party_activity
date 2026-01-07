@@ -43,20 +43,34 @@ const _sfc_main = {
         const sortedData = data.sort((a, b) => a.level - b.level);
         membershipLevels.value = sortedData.map((item) => {
           let parsedContent = [];
+          parsedContent.push("可使用智米消耗平台服务与产品");
           try {
             if (item.content) {
-              parsedContent = JSON.parse(item.content);
+              const rights = JSON.parse(item.content);
+              if (rights.business !== void 0) {
+                parsedContent.push(`可进行商机发布 ${rights.business}次/月`);
+              }
+              if (rights.partnerBusiness !== void 0) {
+                parsedContent.push(`可进行猎伙发布 ${rights.partnerBusiness}次/月`);
+              }
+              if (rights.activity !== void 0) {
+                parsedContent.push(`可进行聚会发布 ${rights.activity}次/月`);
+              }
+              if (rights.shareUserCard !== void 0) {
+                const shareCount = rights.shareUserCard >= 999999 ? "无限制" : `${rights.shareUserCard}次`;
+                parsedContent.push(`可名片分享 ${shareCount}/月`);
+              }
             }
           } catch (e) {
-            common_vendor.index.__f__("error", "at pages/my-memberDetails/my-memberDetails.vue:145", "解析权益内容失败", e);
-            parsedContent = [item.content];
+            common_vendor.index.__f__("error", "at pages/my-memberDetails/my-memberDetails.vue:169", "解析权益 JSON 失败", e);
           }
+          parsedContent.push("可使用贡分参与平台权益的二次分配，获得智米");
           const themeColor = getThemeColor(item.level);
           return {
             ...item,
             parsedContent,
+            // 这里已经是生成的文案数组了，模板直接循环即可
             themeColor,
-            // 简化 Tab 显示名称
             shortName: item.name.replace("会员", "")
           };
         });

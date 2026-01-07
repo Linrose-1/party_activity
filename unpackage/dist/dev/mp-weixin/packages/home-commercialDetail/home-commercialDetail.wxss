@@ -334,7 +334,7 @@
 .comments-section.data-v-8303b14f {
 		background: white;
 		border-radius: 36rpx;
-		margin: 0 30rpx 40rpx;
+		margin: 0 30rpx 60rpx;
 		padding: 44rpx;
 		box-shadow: 0 10rpx 40rpx rgba(0, 0, 0, 0.05);
 		border: 2rpx solid #eee;

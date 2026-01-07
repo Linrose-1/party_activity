@@ -130,35 +130,58 @@
 		}
 
 		if (data && data.length > 0) {
-			// 1. 排序
 			const sortedData = data.sort((a, b) => a.level - b.level);
 
-			// 2. 数据清洗与增强
 			membershipLevels.value = sortedData.map(item => {
-				// 解析 content JSON 字符串
 				let parsedContent = [];
+
+				// 1. 固定权益
+				parsedContent.push('可使用智米消耗平台服务与产品');
+
+				// 2. 解析动态权益
 				try {
 					if (item.content) {
-						parsedContent = JSON.parse(item.content);
+						const rights = JSON.parse(item.content);
+
+						// 商机发布
+						if (rights.business !== undefined) {
+							parsedContent.push(`可进行商机发布 ${rights.business}次/月`);
+						}
+
+						// 猎伙发布
+						if (rights.partnerBusiness !== undefined) {
+							parsedContent.push(`可进行猎伙发布 ${rights.partnerBusiness}次/月`);
+						}
+
+						// 聚会发布
+						if (rights.activity !== undefined) {
+							parsedContent.push(`可进行聚会发布 ${rights.activity}次/月`);
+						}
+
+						// 名片分享
+						if (rights.shareUserCard !== undefined) {
+							const shareCount = rights.shareUserCard >= 999999 ? '无限制' :
+								`${rights.shareUserCard}次`;
+							parsedContent.push(`可名片分享 ${shareCount}/月`);
+						}
 					}
 				} catch (e) {
-					console.error('解析权益内容失败', e);
-					parsedContent = [item.content]; // 降级处理
+					console.error('解析权益 JSON 失败', e);
 				}
 
-				// 获取主题色 (用于图标颜色)
+				// 3. 固定权益
+				parsedContent.push('可使用贡分参与平台权益的二次分配，获得智米');
+
 				const themeColor = getThemeColor(item.level);
 
 				return {
 					...item,
-					parsedContent,
+					parsedContent, // 这里已经是生成的文案数组了，模板直接循环即可
 					themeColor,
-					// 简化 Tab 显示名称
 					shortName: item.name.replace('会员', '')
 				};
 			});
 
-			// 3. 处理初始跳转定位
 			if (initialTargetLevel.value !== null) {
 				const targetIndex = membershipLevels.value.findIndex(item => item.level === initialTargetLevel
 					.value);

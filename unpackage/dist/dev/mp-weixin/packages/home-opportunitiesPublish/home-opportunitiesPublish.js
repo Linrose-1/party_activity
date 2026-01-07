@@ -31,11 +31,20 @@ const _sfc_main = {
     });
     const tagSuggestions = common_vendor.ref([]);
     let tagSearchTimer = null;
+    const quotaBusiness = common_vendor.ref(0);
+    const quotaPartner = common_vendor.ref(0);
+    const isQuotaLoaded = common_vendor.ref(false);
     const contentPlaceholder = common_vendor.computed(() => {
       if (form.topic === "创业猎伙") {
         return "发布寻找创业项目合伙人需求。";
       }
       return "描述您的项目/商机、需求/经验分享。";
+    });
+    const currentRemainingQuota = common_vendor.computed(() => {
+      if (form.topic === "创业猎伙") {
+        return quotaPartner.value;
+      }
+      return quotaBusiness.value;
     });
     common_vendor.onLoad(() => {
       const token = common_vendor.index.getStorageSync("token");
@@ -57,6 +66,9 @@ const _sfc_main = {
         });
         return;
       }
+      if (common_vendor.index.getStorageSync("token")) {
+        checkPublishQuota();
+      }
       checkDraft();
       common_vendor.index.showShareMenu({
         withShareTicket: true,
@@ -75,7 +87,7 @@ const _sfc_main = {
     const saveDraft = (data) => {
       if (data.title || data.content || data.tags.length > 0 || data.images.length > 0) {
         common_vendor.index.setStorageSync(DRAFT_KEY, JSON.stringify(data));
-        common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:209", "📝 草稿已自动保存");
+        common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:228", "📝 草稿已自动保存");
       }
     };
     const checkDraft = () => {
@@ -99,7 +111,31 @@ const _sfc_main = {
     };
     const clearDraft = () => {
       common_vendor.index.removeStorageSync(DRAFT_KEY);
-      common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:235", "🧹 草稿已清除");
+      common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:254", "🧹 草稿已清除");
+    };
+    const checkPublishQuota = async () => {
+      try {
+        const [res1, res2] = await Promise.all([
+          utils_request.request("/app-api/member/top-up-level-rights/get-remaining", {
+            method: "GET",
+            data: {
+              rightsType: 1
+            }
+          }),
+          utils_request.request("/app-api/member/top-up-level-rights/get-remaining", {
+            method: "GET",
+            data: {
+              rightsType: 2
+            }
+          })
+        ]);
+        quotaBusiness.value = typeof res1.data === "number" ? res1.data : 0;
+        quotaPartner.value = typeof res2.data === "number" ? res2.data : 0;
+        isQuotaLoaded.value = true;
+        common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:281", `权益加载完成: 商机=${quotaBusiness.value}, 猎伙=${quotaPartner.value}`);
+      } catch (e) {
+        common_vendor.index.__f__("error", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:284", "获取权益失败", e);
+      }
     };
     function topicChange(e) {
       form.topic = e.detail.value;
@@ -159,9 +195,9 @@ const _sfc_main = {
             type
           }
         });
-        common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:323", `标签历史 "${tagName}" 已记录`);
+        common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:373", `标签历史 "${tagName}" 已记录`);
       } catch (error) {
-        common_vendor.index.__f__("error", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:325", "记录标签历史失败:", error);
+        common_vendor.index.__f__("error", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:375", "记录标签历史失败:", error);
       }
     }
     common_vendor.watch(() => form.tagInput, (newValue) => {
@@ -196,7 +232,7 @@ const _sfc_main = {
         const suggestions = data.list.map((item) => item.name);
         tagSuggestions.value = [...new Set(suggestions)];
       } catch (e) {
-        common_vendor.index.__f__("error", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:374", "获取标签建议失败:", e);
+        common_vendor.index.__f__("error", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:424", "获取标签建议失败:", e);
         tagSuggestions.value = [];
       }
     }
@@ -233,7 +269,7 @@ const _sfc_main = {
             if (result.data)
               successfulUrls.push(result.data);
             else
-              common_vendor.index.__f__("error", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:445", "上传失败:", result.error);
+              common_vendor.index.__f__("error", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:495", "上传失败:", result.error);
           });
           form.images.push(...successfulUrls);
           if (successfulUrls.length < validFiles.length) {
@@ -289,7 +325,7 @@ const _sfc_main = {
           }
         },
         fail: (err) => {
-          common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:568", "取消选择视频");
+          common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:618", "取消选择视频");
         }
       });
     }
@@ -317,14 +353,14 @@ const _sfc_main = {
           const tempFilePath = res.tempFiles[0].tempFilePath;
           common_vendor.wx$1.cropImage({
             src: tempFilePath,
-            cropScale: "5:4",
-            // 【关键】强制 5:4 比例
+            cropScale: "4:3",
+            // 【关键】强制 4:3 比例
             success: (cropRes) => {
-              common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:605", "裁剪成功:", cropRes.tempFilePath);
+              common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:655", "裁剪成功:", cropRes.tempFilePath);
               uploadCoverToCloud(cropRes.tempFilePath);
             },
             fail: (err) => {
-              common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:609", "用户取消裁剪或失败:", err);
+              common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:659", "用户取消裁剪或失败:", err);
             }
           });
         }
@@ -353,7 +389,35 @@ const _sfc_main = {
         });
       }
     };
+    const showQuotaExceededModal = () => {
+      const typeName = form.topic === "创业猎伙" ? "创业猎伙" : "商机发布";
+      common_vendor.index.showModal({
+        title: "发布额度不足",
+        content: `您本月的【${typeName}】发布次数已耗尽，升级会员可获取更多额度。`,
+        cancelText: "取消",
+        confirmText: "升级会员",
+        confirmColor: "#FF6A00",
+        success: (res) => {
+          if (res.confirm) {
+            common_vendor.index.navigateTo({
+              url: "/pages/recharge/recharge?type=membership"
+            });
+          }
+        }
+      });
+    };
+    const handleSubmitClick = () => {
+      if (isQuotaLoaded.value && currentRemainingQuota.value == 0) {
+        showQuotaExceededModal();
+        return;
+      }
+      submitPost();
+    };
     function submitPost() {
+      if (isQuotaLoaded.value && remainingQuota.value == 0) {
+        showQuotaExceededModal();
+        return;
+      }
       if (!form.title.trim() || form.title.length > 100)
         return common_vendor.index.showToast({
           title: "标题不能为空且不能超过100字",
@@ -426,7 +490,7 @@ const _sfc_main = {
     };
     common_vendor.onShareAppMessage(() => {
       const inviteCode = utils_user.getInviteCode();
-      common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:733", `[商机发布页] 分享给好友，获取到邀请码: ${inviteCode}`);
+      common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:816", `[商机发布页] 分享给好友，获取到邀请码: ${inviteCode}`);
       let sharePath = "/packages/home-opportunitiesPublish/home-opportunitiesPublish";
       if (inviteCode) {
         sharePath += `?inviteCode=${inviteCode}`;
@@ -437,12 +501,12 @@ const _sfc_main = {
         // 建议使用一个固定的、吸引人的分享图片
         imageUrl: "https://img.gofor.club/logo_share.jpg"
       };
-      common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:749", "[商机发布页] 分享给好友的内容:", JSON.stringify(shareContent));
+      common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:832", "[商机发布页] 分享给好友的内容:", JSON.stringify(shareContent));
       return shareContent;
     });
     common_vendor.onShareTimeline(() => {
       const inviteCode = utils_user.getInviteCode();
-      common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:759", `[商机发布页] 分享到朋友圈，获取到邀请码: ${inviteCode}`);
+      common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:842", `[商机发布页] 分享到朋友圈，获取到邀请码: ${inviteCode}`);
       let queryString = "";
       if (inviteCode) {
         queryString = `inviteCode=${inviteCode}`;
@@ -452,7 +516,7 @@ const _sfc_main = {
         query: queryString,
         imageUrl: "https://img.gofor.club/logo_share.jpg"
       };
-      common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:774", "[商机发布页] 分享到朋友圈的内容:", JSON.stringify(shareContent));
+      common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:857", "[商机发布页] 分享到朋友圈的内容:", JSON.stringify(shareContent));
       return shareContent;
     });
     return (_ctx, _cache) => {
@@ -528,7 +592,8 @@ const _sfc_main = {
         F: common_vendor.t(form.mediaType === "image" ? "最多可上传9张图片" : "仅支持上传一个视频"),
         G: form.showProfile,
         H: common_vendor.o((e) => form.showProfile = e.detail.value),
-        I: common_vendor.o(submitPost)
+        I: isQuotaLoaded.value && currentRemainingQuota.value <= 0 ? 1 : "",
+        J: common_vendor.o(handleSubmitClick)
       });
     };
   }

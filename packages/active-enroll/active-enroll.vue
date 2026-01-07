@@ -70,7 +70,7 @@
 					:styles="{ borderColor: '#eee', borderRadius: '12rpx' }"></uni-easyinput>
 			</view>
 
-			<!-- 【新增】当需要排队时，显示申请理由输入框 -->
+			<!-- 当需要排队时，显示申请理由输入框 -->
 			<view class="input-item" v-if="isQueuing">
 				<label for="remark">申请理由（排队中）</label>
 				<uni-easyinput type="textarea" autoHeight v-model="formData.remark"

@@ -117,7 +117,7 @@ const _sfc_main = {
       }
       if (data && Array.isArray(data)) {
         categoryList.value = data;
-        common_vendor.index.__f__("log", "at packages/myStore-edit/myStore-edit.vue:330", "成功获取聚店类别:", categoryList.value);
+        common_vendor.index.__f__("log", "at packages/myStore-edit/myStore-edit.vue:331", "成功获取聚店类别:", categoryList.value);
       }
     };
     const getStoreDetails = async (storeId) => {
@@ -171,7 +171,7 @@ const _sfc_main = {
           description: d.description || ""
         }));
       } catch (e) {
-        common_vendor.index.__f__("warn", "at packages/myStore-edit/myStore-edit.vue:397", "解析营业时间失败或为新建状态，将使用默认值:", e.message);
+        common_vendor.index.__f__("warn", "at packages/myStore-edit/myStore-edit.vue:398", "解析营业时间失败或为新建状态，将使用默认值:", e.message);
         editableHours.regular = weekdays.map((dayInfo) => ({
           key: dayInfo.key,
           label: dayInfo.label,

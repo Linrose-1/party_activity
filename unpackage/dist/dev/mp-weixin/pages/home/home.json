@@ -6,6 +6,8 @@
     "uni-load-more": "../../uni_modules/uni-load-more/components/uni-load-more/uni-load-more",
     "guide-popup": "../../components/GuidePopup",
     "avatar-long-press-menu": "../../components/AvatarLongPressMenu",
-    "add-circle-confirm-popup": "../../components/AddCircleConfirmPopup"
+    "add-circle-confirm-popup": "../../components/AddCircleConfirmPopup",
+    "invite-circle-confirm-popup": "../../components/InviteCircleConfirmPopup",
+    "scroll-points-popup": "../../components/ScrollPointsPopup"
   }
 }

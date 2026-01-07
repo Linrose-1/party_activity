@@ -129,6 +129,8 @@
 			</button>
 		</view>
 
+		<PointsFeedbackPopup ref="pointsPopup" />
+
 	</view>
 
 	<!-- 加载状态 -->
@@ -152,9 +154,12 @@
 		onLoad
 	} from '@dcloudio/uni-app';
 	import request from '../../utils/request.js';
+	import PointsFeedbackPopup from '@/components/PointsFeedbackPopup.vue';
 
 	const storeDetail = ref(null);
 	const isLoading = ref(true);
+
+	const pointsPopup = ref(null);
 
 	const coverImages = computed(() => {
 		// 直接返回后端提供的数组，如果不存在则返回空数组
@@ -270,6 +275,14 @@
 
 		storeDetail.value = data;
 		console.log('聚店详情数据:', storeDetail.value);
+
+		if (data.checkContribution === 1) {
+			setTimeout(() => {
+				if (pointsPopup.value) {
+					pointsPopup.value.show('查看聚店详情', 10);
+				}
+			}, 500); // 延迟 500ms 显示
+		}
 	});
 
 	const openMap = () => {

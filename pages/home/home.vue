@@ -33,7 +33,26 @@
 		</view>
 
 		<!-- ==================== 2. 导航与操作区 ==================== -->
-		<view class="section-title">商友圈</view>
+		<view class="nav-header-row">
+			<!-- 左侧标题 -->
+			<view class="section-title">商友圈</view>
+
+			<!-- 右侧滚动条 (跑马灯) -->
+			<view class="notice-bar" v-if="scrollBarData.length > 0">
+				<view class="notice-icon">
+					<uni-icons type="sound" size="14" color="#FF6A00"></uni-icons>
+				</view>
+				<swiper class="notice-swiper" vertical autoplay circular :interval="3000" :duration="500">
+					<swiper-item v-for="(item, index) in scrollBarData" :key="index">
+						<!-- 必须要有个容器包住，并且宽高100% -->
+						<view class="swiper-item-box" @click="handleNoticeClick(item)">
+							<text class="notice-text">{{ item.label }}</text>
+							<text class="notice-num">（{{ item.count }}）</text>
+						</view>
+					</swiper-item>
+				</swiper>
+			</view>
+		</view>
 		<view class="tabs">
 			<view class="tab" :class="{ active: activeTab === 1 }" @click="handleTabClick(1)">推荐</view>
 			<view class="tab" :class="{ active: activeTab === 2 }" @click="handleTabClick(2)">附近</view>
@@ -183,6 +202,10 @@
 
 	<AddCircleConfirmPopup ref="addCirclePopup" />
 
+	<InviteCircleConfirmPopup ref="invitePopupRef" />
+
+	<ScrollPointsPopup ref="scrollPointsPopup" />
+
 </template>
 
 <script setup>
@@ -209,6 +232,8 @@
 	import GuidePopup from '@/components/GuidePopup.vue';
 	import AvatarLongPressMenu from '@/components/AvatarLongPressMenu.vue';
 	import AddCircleConfirmPopup from '@/components/AddCircleConfirmPopup.vue';
+	import InviteCircleConfirmPopup from '@/components/InviteCircleConfirmPopup.vue';
+	import ScrollPointsPopup from '@/components/ScrollPointsPopup.vue'
 
 
 
@@ -244,6 +269,11 @@
 
 	const defaultAvatarUrl = '/static/icon/default-avatar.png';
 
+	// 滚动条数据源
+	const scrollBarData = ref([]);
+	const pointsDetailData = ref(null); // 存储接口返回的 experienceStatisticsList，传给弹窗用
+
+
 	// 标志位，用于控制 onShow 是否需要强制刷新
 	const isInitialLoad = ref(true);
 
@@ -252,6 +282,10 @@
 	const avatarMenuRef = ref(null);
 
 	const addCirclePopup = ref(null);
+
+	const invitePopupRef = ref(null);
+
+	const scrollPointsPopup = ref(null);
 
 
 
@@ -325,6 +359,7 @@
 		const paidLevels = ['青铜', '白银', '黄金', '黑钻'];
 		return paidLevels.includes(member.value);
 	});
+
 
 	// ============================
 	// 3. 生命周期钩子 (Lifecycle Hooks)
@@ -408,6 +443,10 @@
 			withShareTicket: true,
 			menus: ["shareAppMessage", "shareTimeline"]
 		});
+
+		if (uni.getStorageSync('token')) {
+			fetchScrollBarData();
+		}
 	});
 
 	onReachBottom(() => {
@@ -470,6 +509,55 @@
 	// ============================
 	// 5. 主要业务方法 (Business Methods)
 	// ============================
+
+	// 获取滚动条数据
+	const fetchScrollBarData = async () => {
+		try {
+			const {
+				data,
+				error
+			} = await request('/app-api/member/experience-record/get-scroll-bar', {
+				method: 'GET'
+			});
+
+			if (!error && data) {
+				pointsDetailData.value = data;
+
+				// 构造滚动条列表
+				const list = [];
+
+				// 1. 新的圈友
+				if (data.totalFriendNum > 0) {
+					list.push({
+						type: 'friend',
+						label: '新的圈友',
+						count: data.totalFriendNum
+					});
+				}
+
+				// 2. 昨日贡分 (总是显示，或者大于0显示)
+				list.push({
+					type: 'points',
+					label: '昨日贡分',
+					count: data.totalExperience || 0
+				});
+
+				// 3. 【新增】用户确认 (待审核报名)
+				// 假设接口字段名为 pendingConfirmUserTotal
+				if (data.pendingConfirmUserTotal > 0) {
+					list.push({
+						type: 'confirm',
+						label: '用户确认',
+						count: data.pendingConfirmUserTotal
+					});
+				}
+
+				scrollBarData.value = list;
+			}
+		} catch (e) {
+			console.error('获取滚动条数据失败', e);
+		}
+	};
 
 	/**
 	 * 静默登录方法
@@ -732,6 +820,9 @@
 			case 'addCircle':
 				addCirclePopup.value.open(user);
 				break;
+			case 'inviteCircle':
+				invitePopupRef.value.open(user);
+				break;
 			case 'removeCircle':
 				uni.showModal({
 					title: '确认脱圈',
@@ -820,6 +911,25 @@
 			console.error(e);
 		} finally {
 			uni.hideLoading();
+		}
+	};
+
+	// 点击处理
+	const handleNoticeClick = (item) => {
+		if (item.type === 'friend') {
+			uni.navigateTo({
+				url: '/packages/my-friendInvitation/my-friendInvitation?currentTab=1'
+			});
+		} else if (item.type === 'points') {
+			if (scrollPointsPopup.value) {
+				scrollPointsPopup.value.open(pointsDetailData.value);
+			}
+		} else if (item.type === 'confirm') {
+			// 【新增】点击“用户确认”
+			// 跳转到“我的聚会 - 我的发布”页面，那里有处理申请的入口
+			uni.navigateTo({
+				url: '/packages/my-active/my-active?currentTab=1'
+			});
 		}
 	};
 
@@ -1451,13 +1561,29 @@
 	/* =========================
 	 * 2. 导航栏 (Tabs) 样式
 	 * ========================= */
+	.nav-header-row {
+		display: flex;
+		align-items: center;
+		/* 垂直居中 */
+		padding: 30rpx 40rpx 20rpx;
+		background-color: #f5f7fa;
+	}
+
 	.section-title {
 		font-size: 40rpx;
 		font-weight: 700;
-		padding: 40rpx 40rpx 30rpx;
 		color: #FF6A00;
 		display: flex;
 		align-items: center;
+		margin-right: 24rpx;
+		/* 给右侧留出间距 */
+		flex-shrink: 0;
+		/* 防止标题被压缩 */
+		/* 移除原来的 padding: 40rpx 40rpx 30rpx; */
+		padding: 0;
+		height: 50rpx;
+		/* 明确高度 */
+		line-height: 50rpx;
 	}
 
 	.section-title::before {
@@ -1468,6 +1594,73 @@
 		background: #FF6A00;
 		border-radius: 4rpx;
 		margin-right: 20rpx;
+	}
+
+	/* --- 滚动条样式 --- */
+	.notice-bar {
+		width: 260rpx;
+		/* 给一个固定宽度，或者 min-width */
+		height: 50rpx;
+		/* 与标题高度一致 */
+		background-color: #fff;
+		border-radius: 25rpx;
+		/* 圆角高度一半 */
+		display: flex;
+		align-items: center;
+		padding: 0 20rpx;
+		box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.05);
+		margin-left: auto;
+		/* margin-left: 20rpx; */
+		/* 与标题的间距 */
+	}
+
+	.notice-icon {
+		margin-right: 12rpx;
+		display: flex;
+		align-items: center;
+	}
+
+	.notice-swiper {
+		width: 100%;
+		height: 100%;
+	}
+
+
+	.notice-item {
+		height: 100%;
+		line-height: 60rpx;
+		/* 垂直居中 */
+		font-size: 26rpx;
+		color: #666;
+	}
+
+	.swiper-item-box {
+		width: 100%;
+		height: 100%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		/* 居中显示 */
+	}
+
+	.notice-text {
+		font-size: 24rpx;
+		color: #666;
+	}
+
+	.notice-num {
+		font-size: 24rpx;
+		color: #ff4d4f;
+		/* 红色 */
+		font-weight: bold;
+		margin-left: 4rpx;
+	}
+
+	/* 单行省略通用样式 (如果全局已有可省略) */
+	.text-ellipsis {
+		overflow: hidden;
+		white-space: nowrap;
+		text-overflow: ellipsis;
 	}
 
 	.tabs {

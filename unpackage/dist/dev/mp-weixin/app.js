@@ -58,6 +58,7 @@ if (!Math) {
   "./packages/myStore-edit/myStore-edit.js";
   "./packages/my-active/my-active.js";
   "./packages/my-collection/my-collection.js";
+  "./packages/participant-detail/participant-detail.js";
 }
 const _sfc_main = {
   data() {

@@ -1,7 +1,7 @@
 <template>
 	<view class="page-container">
 
-		<!-- 分段器 -->
+		<!-- 分段器 (保持原样) -->
 		<view class="segmented-container">
 			<uni-segmented-control :current="currentTab" :values="tabs" @clickItem="switchTab" style-type="button"
 				active-color="#FF6B00" />
@@ -16,66 +16,68 @@
 
 			<!-- 聚会列表 -->
 			<view v-if="enrolledActivities.length > 0" class="activity-list">
-				<view v-for="(item, index) in enrolledActivities" :key="item.id" class="activity-item"
+				<view v-for="(item, index) in enrolledActivities" :key="item.id" class="activity-card"
 					@click="handleActivityClick(item.id)">
-					<image class="activity-image" :src="item.coverImageUrl" mode="aspectFill" />
 
-					<view class="activity-content">
-						<view class="activity-header">
+					<!-- 顶部封面与状态 -->
+					<view class="card-cover-wrapper">
+						<image class="activity-image" :src="item.coverImageUrl" mode="aspectFill" />
+						<!-- 状态标签悬浮显示 -->
+						<view v-if="item.memberActivityJoinResp.rejectMsg" class="status-badge status-rejected">
+							已驳回
+						</view>
+						<view v-else class="status-badge"
+							:class="getStatusClass(item.memberActivityJoinResp.paymentStatusStr)">
+							{{ item.memberActivityJoinResp.paymentStatusStr }}
+						</view>
+					</view>
+
+					<view class="card-body">
+						<view class="card-header-row">
 							<text class="activity-title">{{ item.activityTitle }}</text>
-							<view v-if="item.memberActivityJoinResp.rejectMsg" class="status-tag status-rejected">
-								已驳回
+						</view>
+
+						<view class="info-list">
+							<view class="info-item">
+								<uni-icons type="calendar" size="14" color="#999" />
+								<text class="info-text">{{ formatDateTime(item.startDatetime) }}</text>
 							</view>
-							<view v-else
-								:class="['status-tag', getStatusClass(item.memberActivityJoinResp.paymentStatusStr)]">
-								{{ item.memberActivityJoinResp.paymentStatusStr }}
+							<view class="info-item">
+								<uni-icons type="map-pin" size="14" color="#999" />
+								<text class="info-text">{{ item.locationAddress || '线上聚会' }}</text>
+							</view>
+							<view class="info-item">
+								<uni-icons type="person" size="14" color="#999" />
+								<text class="info-text">报名情况:
+									{{ item.joinCount || 0 }}/{{ item.totalSlots || '不限' }}人</text>
 							</view>
 						</view>
 
-						<view class="activity-info">
-							<uni-icons type="calendar" size="16" color="#999" />
-							<text class="info-text">{{ formatDateTime(item.startDatetime) }}</text>
-						</view>
-
-						<view class="activity-info">
-							<uni-icons type="map-pin" size="16" color="#999" />
-							<text class="info-text">{{ item.locationAddress || '线上聚会' }}</text>
-						</view>
-
-						<view class="activity-info">
-							<uni-icons type="person-filled" size="16" color="#999" />
-							<text class="info-text">{{ item.joinCount || 0 }}/{{ item.totalSlots || '不限' }}人</text>
-						</view>
-
-						<view v-if="item.memberActivityJoinResp.rejectMsg" class="rejection-reason-box">
+						<!-- 驳回原因提示 -->
+						<view v-if="item.memberActivityJoinResp.rejectMsg" class="reject-box">
 							<uni-icons type="info-filled" color="#f56c6c" size="16"></uni-icons>
-							<text>原因: {{ item.memberActivityJoinResp.rejectMsg }}</text>
+							<text class="reject-text">原因: {{ item.memberActivityJoinResp.rejectMsg }}</text>
 						</view>
 
-						<view class="activity-footer">
-							<!-- <view class="participants">
-								<uni-icons type="people" size="16" color="#999" />
-								<text>{{ item.joinCount || 0 }}/{{ item.totalSlots || '不限' }}人</text>
-							</view> -->
-
+						<view class="card-footer">
 							<view class="action-buttons">
-								<!-- 【核心修改】v-if 条件使用字符串判断 -->
 								<button
-									v-if="['待支付', '已支付', '替补'].includes(item.memberActivityJoinResp.paymentStatusStr) && !item.memberActivityJoinResp.rejectMsg"
-									class="btn btn-cancel" @click.stop="cancelEnroll(item.id)">
+									v-if="['待支付', '已支付', '替补', '待确定'].includes(item.memberActivityJoinResp.paymentStatusStr) && !item.memberActivityJoinResp.rejectMsg"
+									class="btn btn-outline-danger" @click.stop="cancelEnroll(item.id)">
 									取消报名
 								</button>
+
 								<button v-if="item.memberActivityJoinResp.paymentStatusStr === '待退款'"
-									class="btn btn-refund-apply" @click.stop="applyForRefund(item)">
+									class="btn btn-outline-primary" @click.stop="applyForRefund(item)">
 									申请退款
 								</button>
 
-								<button v-if="item.memberActivityJoinResp.rejectMsg" class="btn btn-re-upload"
+								<button v-if="item.memberActivityJoinResp.rejectMsg" class="btn btn-gradient-warning"
 									@click.stop="navigateToReUpload(item)">
 									重新上传
 								</button>
 
-								<button class="btn btn-detail" @click.stop="viewDetail(item.id)">
+								<button class="btn btn-light" @click.stop="viewDetail(item.id)">
 									查看详情
 								</button>
 							</view>
@@ -102,66 +104,68 @@
 
 			<!-- 聚会列表 -->
 			<view v-if="publishedActivities.length > 0" class="activity-list">
-				<view v-for="(item, index) in publishedActivities" :key="item.id" class="activity-item"
+				<view v-for="(item, index) in publishedActivities" :key="item.id" class="activity-card"
 					@click="handleActivityClick(item.id)">
-					<image class="activity-image" :src="item.coverImageUrl" mode="aspectFill" />
 
-					<view class="activity-content">
-						<view class="activity-header">
+					<view class="card-cover-wrapper">
+						<image class="activity-image" :src="item.coverImageUrl" mode="aspectFill" />
+						<view class="status-badge" :class="getStatusClass(item.statusStr)">
+							{{ item.statusStr }}
+						</view>
+					</view>
+
+					<view class="card-body">
+						<view class="card-header-row">
 							<text class="activity-title">{{ item.activityTitle }}</text>
-							<view :class="['status-tag', getStatusClass(item.statusStr)]">
-								{{ item.statusStr }}
+						</view>
+
+						<view class="info-list">
+							<view class="info-item">
+								<uni-icons type="calendar" size="14" color="#999" />
+								<text class="info-text">{{ formatDateTime(item.startDatetime) }}</text>
+							</view>
+							<view class="info-item">
+								<uni-icons type="map-pin" size="14" color="#999" />
+								<text class="info-text">{{ item.locationAddress || '线上聚会' }}</text>
+							</view>
+							<view class="info-item">
+								<uni-icons type="person" size="14" color="#999" />
+								<text class="info-text">报名情况:
+									{{ item.joinCount || 0 }}/{{ item.totalSlots || '不限' }}人</text>
 							</view>
 						</view>
 
-						<view class="activity-info">
-							<uni-icons type="calendar" size="16" color="#999" />
-							<text class="info-text">{{ formatDateTime(item.startDatetime) }}</text>
-						</view>
-
-						<view class="activity-info">
-							<uni-icons type="map-pin" size="16" color="#999" />
-							<text class="info-text">{{ item.locationAddress || '线上聚会' }}</text>
-						</view>
-
-						<view class="activity-info">
-							<uni-icons type="person-filled" size="16" color="#999" />
-							<text class="info-text">{{ item.joinCount || 0 }}/{{ item.totalSlots || '不限' }}人</text>
-						</view>
-
-						<view class="activity-footer">
-							<!-- <view class="participants">
-								<uni-icons type="people" size="16" color="#999" />
-								<text>{{ item.joinCount || 0 }}/{{ item.totalSlots || '不限' }}人</text>
-							</view> -->
-
+						<view class="card-footer">
 							<view class="action-buttons">
-								<button v-if="item.paddingReturnCount > 0" class="btn btn-approval"
+								<!-- 处理申请 (带红色徽标) -->
+								<button v-if="item.paddingReturnCount > 0" class="btn btn-gradient-primary icon-btn"
 									@click.stop="manageRefunds(item, 'individual')">
-									处理申请 <uni-badge class="badge" :text="item.paddingReturnCount"
-										type="error"></uni-badge>
+									处理申请 <view class="badge-dot">{{ item.paddingReturnCount }}</view>
+								</button>
+
+								<!-- 参会名单 -->
+								<button class="btn btn-outline-primary"
+									@click.stop="navigateToParticipantList(item.id)">
+									参会名单
 								</button>
 
 								<button v-if="['未开始', '报名中', '活动即将开始', '进行中'].includes(item.statusStr)"
-									class="btn btn-cancel" @click.stop="cancelActivity(item.id)">
+									class="btn btn-outline-danger" @click.stop="cancelActivity(item.id)">
 									取消聚会
 								</button>
 
-								<button v-if="item.statusStr === '活动取消'" class="btn btn-refund-manage"
-									@click.stop="manageRefunds(item, 'all')">
+								<button v-if="item.statusStr === '活动取消' || item.statusStr === '聚会取消'"
+									class="btn btn-gradient-danger" @click.stop="manageRefunds(item, 'all')">
 									处理退款
 								</button>
 
-								<button v-if="item.statusStr !== '活动取消'" class="btn btn-view-users"
-									@click.stop="navigateToRegisteredUsers(item)">
+								<button v-if="item.statusStr !== '活动取消' && item.statusStr !== '聚会取消'"
+									class="btn btn-light" @click.stop="navigateToRegisteredUsers(item)">
 									报名用户
 								</button>
 
-								<!-- <button class="btn btn-detail" @click.stop="viewDetail(item.id)">
-									查看详情
-								</button> -->
-								<button class="btn btn-edit-style" @click.stop="navigateToEdit(item.id)">
-									编辑
+								<button class="btn btn-light" @click.stop="navigateToEdit(item.id)">
+									修改编辑
 								</button>
 							</view>
 						</view>
@@ -328,7 +332,7 @@
 			// 我的报名状态
 			'待支付': 'pending_payment', // 假设用 pending 样式
 			'已支付': 'enrolled', // 假设用 enrolled 样式
-			'待确定': 'pending', 
+			'待确定': 'pending',
 			'待退款': 'refund_pending',
 			'已退款': 'ended', // 假设用 ended 样式
 			'替补': 'upcoming', // 假设用 upcoming 样式
@@ -499,26 +503,48 @@
 			url: `/packages/active-publish/active-publish?mode=edit&id=${activityId}`
 		});
 	};
+
+	/**
+	 * 跳转到参会者清单页面
+	 * @param {string|number} activityId - 聚会ID
+	 */
+	const navigateToParticipantList = (activityId) => {
+		uni.navigateTo({
+			url: `/packages/participant-detail/participant-detail?id=${activityId}`
+		});
+	};
 </script>
 
 
 <style lang="scss" scoped>
+	/* --- 全局变量 --- */
+	$primary-color: #FF6B00;
+	$danger-color: #f56c6c;
+	$success-color: #4caf50;
+	$bg-color: #f5f7fa;
+	$card-bg: #ffffff;
+	$text-main: #1c1e21;
+	$text-sub: #666;
+
 	.page-container {
 		display: flex;
 		flex-direction: column;
 		height: 100vh;
-		background-color: #f5f7fa;
+		background-color: $bg-color;
 	}
 
 	.segmented-container {
 		padding: 20rpx 24rpx;
 		background-color: #fff;
 		border-bottom: 1rpx solid #f0f2f5;
+		position: sticky;
+		top: 0;
+		z-index: 10;
 	}
 
 	.content-scroll {
 		flex: 1;
-		height: 1px; // 修复scroll-view高度问题
+		height: 1px;
 		padding: 0 24rpx;
 	}
 
@@ -530,7 +556,7 @@
 		.section-title {
 			font-size: 32rpx;
 			font-weight: 600;
-			color: #1c1e21;
+			color: $text-main;
 		}
 	}
 
@@ -538,249 +564,240 @@
 		padding-bottom: 40rpx;
 	}
 
-	.activity-item {
-		background-color: #fff;
-		border-radius: 16rpx;
+	/* --- 全新卡片样式 --- */
+	.activity-card {
+		background-color: $card-bg;
+		border-radius: 20rpx;
 		overflow: hidden;
 		margin-bottom: 24rpx;
-		box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.05);
+		box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.04);
 		transition: transform 0.2s;
 
 		&:active {
-			transform: scale(0.98);
-			opacity: 0.9;
+			transform: scale(0.99);
 		}
+	}
+
+	/* 图片封面区 */
+	.card-cover-wrapper {
+		position: relative;
+		width: 100%;
+		height: 280rpx;
+		/* 增加图片高度展示 */
 	}
 
 	.activity-image {
 		width: 100%;
-		height: 300rpx;
+		height: 100%;
 	}
 
-	.activity-content {
+	/* 悬浮状态标签 */
+	.status-badge {
+		position: absolute;
+		top: 20rpx;
+		right: 20rpx;
+		padding: 6rpx 20rpx;
+		border-radius: 30rpx;
+		font-size: 24rpx;
+		font-weight: 600;
+		color: #fff;
+		background-color: rgba(0, 0, 0, 0.5);
+		/* 默认半透明黑 */
+		backdrop-filter: blur(4px);
+		/* 毛玻璃效果 */
+
+		&.enrolled,
+		&.ongoing {
+			background-color: $success-color;
+		}
+
+		&.pending,
+		&.upcoming,
+		&.pending_payment {
+			background-color: #ff9800;
+		}
+
+		&.refund_pending {
+			background-color: #2196f3;
+		}
+
+		&.canceled,
+		&.status-rejected {
+			background-color: $danger-color;
+		}
+
+		&.ended {
+			background-color: #909399;
+		}
+	}
+
+	.card-body {
 		padding: 24rpx;
 	}
 
-	.activity-header {
-		display: flex;
-		justify-content: space-between;
-		align-items: flex-start;
-		margin-bottom: 20rpx;
+	.card-header-row {
+		margin-bottom: 16rpx;
 	}
 
 	.activity-title {
 		font-size: 32rpx;
-		font-weight: 600;
-		color: #1c1e21;
-		flex: 1;
-		margin-right: 20rpx;
-		overflow: hidden;
-		text-overflow: ellipsis;
+		font-weight: 700;
+		color: $text-main;
+		line-height: 1.4;
 		display: -webkit-box;
 		-webkit-line-clamp: 2;
 		-webkit-box-orient: vertical;
-		word-break: break-all;
+		overflow: hidden;
 	}
 
-	.status-tag {
-		font-size: 24rpx;
-		padding: 6rpx 16rpx;
-		border-radius: 8rpx;
-		white-space: nowrap;
-
-		&.enrolled,
-		&.ongoing {
-			background-color: #e8f5e9;
-			color: #4caf50;
-		}
-
-		&.pending,
-		&.upcoming {
-			background-color: #fff3e0;
-			color: #ff9800;
-		}
-
-		&.ended {
-			background-color: #f5f5f5;
-			color: #9e9e9e;
-		}
-
-		// 新增状态样式
-		&.refund_pending {
-			background-color: #e3f2fd;
-			color: #2196f3;
-		}
-
-		&.canceled {
-			background-color: #ffebee;
-			color: #f44336;
-		}
+	/* 信息列表 */
+	.info-list {
+		display: flex;
+		flex-direction: column;
+		gap: 10rpx;
+		margin-bottom: 20rpx;
 	}
 
-	.activity-info {
+	.info-item {
 		display: flex;
 		align-items: center;
-		margin-bottom: 16rpx;
 		font-size: 26rpx;
-		color: #666;
+		color: $text-sub;
 
 		.info-text {
-			margin-left: 8rpx;
+			margin-left: 10rpx;
 		}
 	}
 
-	.activity-footer {
+	/* 驳回提示框 */
+	.reject-box {
+		background-color: #fef0f0;
+		padding: 16rpx 20rpx;
+		border-radius: 12rpx;
+		margin-bottom: 20rpx;
 		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		margin-top: 24rpx;
-		padding-top: 24rpx;
+		align-items: flex-start;
+		border: 1rpx solid #fde2e2;
+
+		.reject-text {
+			font-size: 24rpx;
+			color: $danger-color;
+			line-height: 1.4;
+			margin-left: 10rpx;
+			flex: 1;
+		}
+	}
+
+	/* 底部操作区 */
+	.card-footer {
 		border-top: 1rpx solid #f0f2f5;
-		justify-content: flex-end;
-		/* 让内容（按钮组）靠右对齐 */
-	}
-
-	.participants {
-		display: flex;
-		align-items: center;
-		font-size: 24rpx;
-		color: #999;
-
-		text {
-			margin-left: 8rpx;
-		}
+		padding-top: 24rpx;
 	}
 
 	.action-buttons {
 		display: flex;
+		justify-content: flex-end;
+		flex-wrap: wrap;
 		gap: 16rpx;
 	}
 
-	.status-tag {
-
-		// ...
-		&.status-rejected {
-			// 【新增】驳回状态的样式
-			background-color: #fef0f0;
-			color: #f56c6c;
-		}
-	}
-
-	.btn-edit-style {
-		background-color: #e3fdfd;
-		color: #2196f3;
-	}
-
-	.rejection-reason-box {
-		// 【新增】驳回原因容器的样式
-		background-color: #fef0f0;
-		color: #f56c6c;
-		font-size: 24rpx;
-		padding: 12rpx 20rpx;
-		border-radius: 8rpx;
-		margin-top: 20rpx;
-		display: flex;
-		align-items: center;
-
-		text {
-			margin-left: 8rpx;
-		}
-	}
-
+	/* --- 按钮样式重构 --- */
 	.btn {
 		margin: 0;
-		padding: 0 24rpx;
+		padding: 0 28rpx;
 		height: 60rpx;
-		line-height: 60rpx;
+		line-height: 58rpx;
+		/* 扣除边框 */
 		border-radius: 30rpx;
 		font-size: 24rpx;
 		font-weight: 500;
-		border: none;
-		background-color: transparent;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		box-sizing: border-box;
 
-		// 消除button默认边框
 		&::after {
 			border: none;
 		}
-
-		&-detail {
-			background-color: #f0f2f5;
-			color: #606770;
-		}
-
-		&-view-users {
-			background-color: #e8f5e9;
-			color: #4caf50;
-		}
-
-		&-cancel {
-			background-color: #ffebee;
-			color: #f44336;
-		}
-
-		&-manage {
-			background-color: #e3f2fd;
-			color: #2196f3;
-		}
-
-		&-cancel {
-			background-color: #ffebee;
-			color: #f44336;
-		}
-
-		// 新增按钮样式
-		&-refund-apply {
-			background-color: #e8f5e9;
-			color: #4caf50;
-		}
-
-		&-refund-manage {
-			background: linear-gradient(135deg, #FF6B00 0%, #FF8C00 100%);
-			color: white;
-		}
-
-		&-re-upload {
-			// 【新增】重新上传按钮样式
-			background: linear-gradient(135deg, #FF9500, #FF7900);
-			color: #fff;
-		}
 	}
 
-	.btn-approval {
-		background-color: #e3f2fd;
-		color: #2196f3;
-		display: flex; // 为了让徽标对齐
-		align-items: center;
-
-		.badge {
-			margin-left: 8rpx;
-		}
+	/* 浅色按钮 (次要操作) */
+	.btn-light {
+		background-color: #f5f7fa;
+		color: #606266;
+		border: 1rpx solid #dcdfe6;
 	}
 
-	.primary-btn {
-		background: linear-gradient(135deg, #FF6B00 0%, #FF8C00 100%);
-		color: white;
+	/* 描边主色按钮 */
+	.btn-outline-primary {
+		background-color: #fff;
+		color: $primary-color;
+		border: 1rpx solid $primary-color;
+	}
+
+	/* 描边红色按钮 (危险操作) */
+	.btn-outline-danger {
+		background-color: #fff;
+		color: $danger-color;
+		border: 1rpx solid $danger-color;
+	}
+
+	/* 渐变主色按钮 (核心操作) */
+	.btn-gradient-primary {
+		background: linear-gradient(135deg, #FF6B00, #FF8C00);
+		color: #fff;
 		border: none;
-		padding: 0 48rpx;
-		height: 72rpx;
-		line-height: 72rpx;
-		border-radius: 36rpx;
-		font-size: 28rpx;
-		font-weight: 500;
-		margin-top: 24rpx;
+		box-shadow: 0 4rpx 10rpx rgba(255, 107, 0, 0.2);
 	}
 
-	// 修改为空状态的占位符样式
+	/* 渐变警告按钮 */
+	.btn-gradient-warning {
+		background: linear-gradient(135deg, #f56c6c, #ff9090);
+		color: #fff;
+		border: none;
+	}
+
+	.btn-gradient-danger {
+		background: linear-gradient(135deg, #f56c6c, #f78989);
+		color: #fff;
+		border: none;
+	}
+
+	/* 带徽标按钮容器 */
+	.icon-btn {
+		position: relative;
+		overflow: visible;
+		/* 允许徽标溢出 */
+	}
+
+	/* 红色数字徽标 */
+	.badge-dot {
+		position: absolute;
+		top: -16rpx;
+		right: -10rpx;
+		background-color: $danger-color;
+		color: #fff;
+		font-size: 20rpx;
+		height: 32rpx;
+		min-width: 32rpx;
+		line-height: 32rpx;
+		text-align: center;
+		border-radius: 16rpx;
+		padding: 0 8rpx;
+		border: 2rpx solid #fff;
+		box-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.15);
+		z-index: 10;
+	}
+
+	/* --- 空状态 --- */
 	.empty-state-placeholder {
 		display: flex;
 		flex-direction: column;
 		align-items: center;
 		justify-content: center;
-		text-align: center;
-		padding: 80rpx 0;
-		background-color: #fff;
-		border-radius: 16rpx;
-		margin-top: 40rpx;
+		padding: 120rpx 0;
+		background-color: transparent;
+		/* 移除白色背景块 */
 	}
 
 	.empty-title {
@@ -796,26 +813,23 @@
 		margin-bottom: 40rpx;
 	}
 
+	.primary-btn {
+		background: linear-gradient(135deg, #FF6B00 0%, #FF8C00 100%);
+		color: white;
+		border: none;
+		padding: 0 60rpx;
+		height: 80rpx;
+		line-height: 80rpx;
+		border-radius: 40rpx;
+		font-size: 30rpx;
+		font-weight: 500;
+		box-shadow: 0 6rpx 20rpx rgba(255, 107, 0, 0.2);
+	}
+
 	.loading-more {
 		text-align: center;
 		color: #999;
 		padding: 20rpx 0;
-	}
-
-	.btn-approval {
-		background-color: #e3f2fd; // 使用淡蓝色以示区分
-		color: #2196f3;
-		display: flex; // 必须设置为 flex 才能让徽标垂直居中
-		align-items: center;
-
-		.badge {
-			margin-left: 8rpx; // 给徽标和文字之间一点间距
-		}
-	}
-
-	// 确保你的 .btn-refund-manage 样式是这样的
-	.btn-refund-manage {
-		background: linear-gradient(135deg, #ff9a44 0%, #ff5e3a 100%);
-		color: white;
+		font-size: 24rpx;
 	}
 </style>

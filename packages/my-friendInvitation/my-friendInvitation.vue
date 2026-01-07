@@ -165,7 +165,7 @@
 						<view class="icon-box">
 							<uni-icons type="personadd-filled" size="24" color="#fff"></uni-icons>
 						</view>
-						<text class="entry-title">新的圈友申请</text>
+						<text class="entry-title">新的圈友</text>
 					</view>
 					<view class="entry-right">
 						<!-- 如果有申请，显示红点数字 -->

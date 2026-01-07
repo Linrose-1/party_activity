@@ -98,7 +98,7 @@
 
 					<!-- 提示文案 -->
 					<text class="hint">{{ form.mediaType === 'image' ? '最多可上传9张图片' : '仅支持上传一个视频' }}</text>
-					<view class="hint">为了适应分享封面，首张图片建议使用5:4或4:3画幅比例上传，可使用相册自带的画幅剪切工具调整图片尺寸</view>
+					<view class="hint">为了适应分享封面，首张图片建议使用4:3画幅比例上传，可使用相册自带的画幅剪切工具调整图片尺寸</view>
 				</view>
 			</view>
 
@@ -112,7 +112,10 @@
 				</view>
 			</view>
 
-			<button class="submit-btn" @click="submitPost">发布帖子</button>
+			<button class="submit-btn" :class="{ 'disabled-btn': isQuotaLoaded && currentRemainingQuota <= 0 }"
+				@click="handleSubmitClick">
+				发布帖子
+			</button>
 		</view>
 	</view>
 </template>
@@ -154,12 +157,24 @@
 	const tagSuggestions = ref([]); // 用于存储从API获取的标签建议
 	let tagSearchTimer = null; // 用于输入防抖
 
+	const quotaBusiness = ref(0); // 商机剩余
+	const quotaPartner = ref(0); // 猎伙剩余
+	const isQuotaLoaded = ref(false);
+
 	// --- 计算属性 ---
 	const contentPlaceholder = computed(() => {
 		if (form.topic === '创业猎伙') {
 			return '发布寻找创业项目合伙人需求。';
 		}
 		return '描述您的项目/商机、需求/经验分享。';
+	});
+
+	const currentRemainingQuota = computed(() => {
+		// 根据当前选中的 topic 返回对应的余额
+		if (form.topic === '创业猎伙') {
+			return quotaPartner.value;
+		}
+		return quotaBusiness.value; // 默认为商机分享
 	});
 
 	// --- 生命周期钩子 ---
@@ -182,6 +197,10 @@
 				}
 			});
 			return;
+		}
+
+		if (uni.getStorageSync('token')) {
+			checkPublishQuota();
 		}
 		checkDraft();
 		uni.showShareMenu({
@@ -233,6 +252,37 @@
 	const clearDraft = () => {
 		uni.removeStorageSync(DRAFT_KEY);
 		console.log('🧹 草稿已清除');
+	};
+
+	// 获取商机发布剩余次数
+	// 获取商机/猎伙发布剩余次数
+	const checkPublishQuota = async () => {
+		try {
+			const [res1, res2] = await Promise.all([
+				request('/app-api/member/top-up-level-rights/get-remaining', {
+					method: 'GET',
+					data: {
+						rightsType: 1
+					}
+				}),
+				request('/app-api/member/top-up-level-rights/get-remaining', {
+					method: 'GET',
+					data: {
+						rightsType: 2
+					}
+				})
+			]);
+
+			// 只看 data，null 转为 0
+			quotaBusiness.value = (typeof res1.data === 'number') ? res1.data : 0;
+			quotaPartner.value = (typeof res2.data === 'number') ? res2.data : 0;
+
+			isQuotaLoaded.value = true;
+			console.log(`权益加载完成: 商机=${quotaBusiness.value}, 猎伙=${quotaPartner.value}`);
+
+		} catch (e) {
+			console.error('获取权益失败', e);
+		}
 	};
 
 	// --- 表单交互函数 (现在都操作 form 对象) ---
@@ -600,7 +650,7 @@
 				// 微信小程序端：调用原生裁剪
 				wx.cropImage({
 					src: tempFilePath,
-					cropScale: '5:4', // 【关键】强制 5:4 比例
+					cropScale: '4:3', // 【关键】强制 4:3 比例
 					success: (cropRes) => {
 						console.log('裁剪成功:', cropRes.tempFilePath);
 						uploadCoverToCloud(cropRes.tempFilePath);
@@ -608,7 +658,7 @@
 					fail: (err) => {
 						console.log('用户取消裁剪或失败:', err);
 						// 即使取消裁剪，是否允许直接使用原图？
-						// 如果强制要求 5:4，这里就 return; 
+						// 如果强制要求 4:3，这里就 return; 
 						// 如果允许降级，则调用 uploadCoverToCloud(tempFilePath);
 					}
 				});
@@ -651,8 +701,41 @@
 		}
 	};
 
+	const showQuotaExceededModal = () => {
+		const typeName = form.topic === '创业猎伙' ? '创业猎伙' : '商机发布';
+		uni.showModal({
+			title: '发布额度不足',
+			content: `您本月的【${typeName}】发布次数已耗尽，升级会员可获取更多额度。`,
+			cancelText: '取消',
+			confirmText: '升级会员',
+			confirmColor: '#FF6A00',
+			success: (res) => {
+				if (res.confirm) {
+					// 跳转到会员充值页
+					uni.navigateTo({
+						url: '/pages/recharge/recharge?type=membership'
+					});
+				}
+			}
+		});
+	};
+
+	const handleSubmitClick = () => {
+		// 使用计算属性判断当前类别的额度
+		if (isQuotaLoaded.value && currentRemainingQuota.value == 0) {
+			showQuotaExceededModal();
+			return;
+		}
+		submitPost();
+	};
+
 	// --- 提交表单 ---
 	function submitPost() {
+		// 额度检查拦截
+		if (isQuotaLoaded.value && remainingQuota.value == 0) {
+			showQuotaExceededModal();
+			return;
+		}
 		if (!form.title.trim() || form.title.length > 100) return uni.showToast({
 			title: '标题不能为空且不能超过100字',
 			icon: 'none'
@@ -1224,6 +1307,14 @@
 		font-weight: 600;
 		margin-top: 20rpx;
 		box-shadow: 0 6rpx 16rpx rgba(255, 106, 0, 0.3);
+	}
+
+	.submit-btn.disabled-btn {
+		background: #ccc;
+		/* 灰色背景 */
+		color: #fff;
+		box-shadow: none;
+		/* pointer-events: none;  <--如果不希望用户点击出弹窗，就加上这行；如果希望点击后弹窗提示升级，就不要加这行 */
 	}
 
 	/* ==================== 媒体选择器和视频预览样式 ==================== */

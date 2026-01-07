@@ -30,7 +30,7 @@ const _sfc_main = {
       popup.value.close();
     };
     const handleAction = (type) => {
-      if (type === "addCircle" && isSelf.value) {
+      if ((type === "addCircle" || type === "inviteCircle") && isSelf.value) {
         return;
       }
       close();
@@ -54,29 +54,37 @@ const _sfc_main = {
         }),
         d: common_vendor.o(close),
         e: common_vendor.p({
-          type: "plusempty",
-          size: "28",
-          color: "#fff"
-        }),
-        f: common_vendor.t(isSelf.value ? "本人" : "申请入圈"),
-        g: common_vendor.n(isSelf.value ? "disabled" : "primary"),
-        h: common_vendor.o(($event) => handleAction("addCircle")),
-        i: common_vendor.p({
           type: "person",
           size: "28",
           color: "#FF7009"
         }),
-        j: common_vendor.o(($event) => handleAction("viewCard")),
-        k: common_vendor.p({
+        f: common_vendor.o(($event) => handleAction("viewCard")),
+        g: common_vendor.p({
           type: "star",
           size: "24",
           color: "#666"
         }),
-        l: common_vendor.o(($event) => handleAction("comment")),
-        m: common_vendor.sr(popup, "5571075f-0", {
+        h: common_vendor.o(($event) => handleAction("comment")),
+        i: common_vendor.p({
+          type: "paperplane-filled",
+          size: "26",
+          color: "#FF7009"
+        }),
+        j: common_vendor.t(isSelf.value ? "本人" : "邀请入圈"),
+        k: common_vendor.n(isSelf.value ? "disabled" : "primary-outline"),
+        l: common_vendor.o(($event) => handleAction("inviteCircle")),
+        m: common_vendor.p({
+          type: "plusempty",
+          size: "28",
+          color: "#fff"
+        }),
+        n: common_vendor.t(isSelf.value ? "本人" : "申请入圈"),
+        o: common_vendor.n(isSelf.value ? "disabled" : "primary"),
+        p: common_vendor.o(($event) => handleAction("addCircle")),
+        q: common_vendor.sr(popup, "5571075f-0", {
           "k": "popup"
         }),
-        n: common_vendor.p({
+        r: common_vendor.p({
           type: "center",
           ["mask-click"]: true
         })

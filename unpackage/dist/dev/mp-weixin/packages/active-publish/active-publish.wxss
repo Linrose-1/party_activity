@@ -80,7 +80,7 @@
   color: #FF6F00 !important;
 }
 
-/* 封面上传框 (5:4 比例) */
+/* 封面上传框 (4:3 比例) */
 .cover-upload-box.data-v-5d3444db {
   width: 100%;
   aspect-ratio: 5/4;
@@ -383,7 +383,7 @@
 }
 .form-bottom.data-v-5d3444db {
   text-align: center;
-  padding: 40rpx 0;
+  padding: 50rpx 0;
   color: #ccc;
   font-size: 24rpx;
 }
@@ -400,13 +400,12 @@
   display: flex;
   gap: 24rpx;
   z-index: 99;
+  transition: opacity 0.2s;
   box-sizing: border-box;
 }
-.action-bar.z-index-low.data-v-5d3444db {
-  z-index: -1 !important;
-  /* 关键：变成负数 */
-  opacity: 0;
-  /* 关键：选择时间时隐藏底部栏，体验更佳 */
+.action-bar.hidden.data-v-5d3444db {
+  transform: translateY(100%);
+  /* 移出屏幕 */
 }
 .action-bar .action-btn.data-v-5d3444db {
   height: 88rpx;
@@ -437,12 +436,28 @@
   opacity: 0.9;
 }
 .action-bar .publish-btn.disabled.data-v-5d3444db {
-  background: #ccc;
+  background: #e0e0e0;
+  /* 灰色背景 */
+  color: #999;
   box-shadow: none;
-  pointer-events: none;
+  /* pointer-events: none; <--- 同样建议去掉这行，允许点击出弹窗提示 */
 }
 
-/* 2. 暴力提升时间选择器层级 (防止被其他元素遮挡) */
-.data-v-5d3444db .uni-date-mask,.data-v-5d3444db .uni-date-range-popup,.data-v-5d3444db .uni-datetime-picker--mask,.data-v-5d3444db .uni-datetime-picker--popup {
-  z-index: 9999 !important;
+/* 强制提升 Picker 弹窗层级，无视父级限制 */
+.data-v-5d3444db .uni-datetime-picker--popup,.data-v-5d3444db .uni-date-range-popup {
+  z-index: 99999 !important;
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+}
+
+/* 强制提升遮罩层级 */
+.data-v-5d3444db .uni-mask,.data-v-5d3444db .uni-date-mask {
+  z-index: 99998 !important;
+}
+
+/* 确保底部栏层级正常，不要太高 */
+.action-bar.data-v-5d3444db {
+  z-index: 99;
 }

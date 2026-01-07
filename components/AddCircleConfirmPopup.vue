@@ -9,16 +9,16 @@
 				</view>
 				<view class="divider"></view>
 				<view class="desc-item">
-					<text>同时将您展示在对方的圈友网络中</text>
+					<text>将您加入到TA的圈友网络中</text>
 				</view>
-				<view class="desc-item sub-text">
+				<!-- <view class="desc-item sub-text">
 					<text>（这将建立双向的圈友关系）</text>
-				</view>
+				</view> -->
 			</view>
 
 			<view class="card-actions">
 				<button class="btn cancel" @click="close">取消</button>
-				<button class="btn confirm" @click="confirm" :loading="loading">确认互圈</button>
+				<button class="btn confirm" @click="confirm" :loading="loading">确认加入</button>
 			</view>
 		</view>
 	</uni-popup>
