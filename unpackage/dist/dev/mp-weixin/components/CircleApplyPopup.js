@@ -96,9 +96,9 @@ const _sfc_main = {
       try {
         const url = `/app-api/member/user/friend/review`;
         const payload = {
-          id: item.fid
+          id: item.fid,
           // 关系记录ID
-          // status: isAgree
+          status: isAgree
         };
         const {
           error

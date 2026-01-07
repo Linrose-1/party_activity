@@ -180,7 +180,7 @@
 			const url = `/app-api/member/user/friend/review`;
 			const payload = {
 				id: item.fid, // 关系记录ID
-				// status: isAgree
+				status: isAgree
 			};
 
 			const {
