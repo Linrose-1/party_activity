@@ -136,14 +136,46 @@
 						</view>
 
 						<view class="card-footer">
-							<view class="action-buttons">
-								<!-- 处理申请 (带红色徽标) -->
+							<scroll-view scroll-x="true" class="action-scroll" show-scrollbar="false">
+								<view class="action-buttons-inner">
+
+									<button v-if="item.paddingReturnCount > 0" class="btn btn-gradient-primary icon-btn"
+										@click.stop="manageRefunds(item, 'individual')">
+										处理申请 <view class="badge-dot">{{ item.paddingReturnCount }}</view>
+									</button>
+
+									<button class="btn btn-outline-primary"
+										@click.stop="navigateToParticipantList(item.id)">
+										参会名单
+									</button>
+
+									<button v-if="['未开始', '报名中', '活动即将开始', '进行中'].includes(item.statusStr)"
+										class="btn btn-outline-danger" @click.stop="cancelActivity(item.id)">
+										取消聚会
+									</button>
+
+									<button v-if="item.statusStr === '活动取消' || item.statusStr === '聚会取消'"
+										class="btn btn-gradient-danger" @click.stop="manageRefunds(item, 'all')">
+										处理退款
+									</button>
+
+									<button v-if="item.statusStr !== '活动取消' && item.statusStr !== '聚会取消'"
+										class="btn btn-light" @click.stop="navigateToRegisteredUsers(item)">
+										报名商友
+									</button>
+
+									<button class="btn btn-light" @click.stop="navigateToEdit(item.id)">
+										修改编辑
+									</button>
+
+								</view>
+							</scroll-view>
+							<!-- <view class="action-buttons">
 								<button v-if="item.paddingReturnCount > 0" class="btn btn-gradient-primary icon-btn"
 									@click.stop="manageRefunds(item, 'individual')">
 									处理申请 <view class="badge-dot">{{ item.paddingReturnCount }}</view>
 								</button>
 
-								<!-- 参会名单 -->
 								<button class="btn btn-outline-primary"
 									@click.stop="navigateToParticipantList(item.id)">
 									参会名单
@@ -161,13 +193,13 @@
 
 								<button v-if="item.statusStr !== '活动取消' && item.statusStr !== '聚会取消'"
 									class="btn btn-light" @click.stop="navigateToRegisteredUsers(item)">
-									报名用户
+									报名商友
 								</button>
 
 								<button class="btn btn-light" @click.stop="navigateToEdit(item.id)">
 									修改编辑
 								</button>
-							</view>
+							</view> -->
 						</view>
 					</view>
 				</view>
@@ -193,7 +225,8 @@
 	} from 'vue';
 	// 【修改 3】引入 onShow 生命周期钩子
 	import {
-		onShow
+		onShow,
+		onLoad
 	} from '@dcloudio/uni-app';
 	import request from '@/utils/request.js';
 
@@ -213,6 +246,11 @@
 
 
 	// --- 生命周期 ---
+	onLoad((options) => {
+		if (options && options.currentTab) {
+			currentTab.value = parseInt(options.currentTab);
+		}
+	});
 	/**
 	 * 【核心修改 3】使用 onShow 刷新数据
 	 * 每次进入页面都会触发，确保数据是当前 Tab 最新的。
@@ -691,7 +729,44 @@
 	/* 底部操作区 */
 	.card-footer {
 		border-top: 1rpx solid #f0f2f5;
-		padding-top: 24rpx;
+		/* 这里的 padding 可以保留，作为分割线和滚动区之间的间距 */
+		padding-top: 10rpx;
+	}
+
+	.action-scroll {
+		width: 100%;
+		white-space: nowrap;
+		/* 移除 scroll-view 上的 padding，避免影响滚动条位置 */
+	}
+
+	.action-buttons-inner {
+		display: flex;
+		flex-direction: row;
+		justify-content: flex-end;
+		align-items: center;
+		gap: 16rpx;
+		width: max-content;
+		min-width: 100%;
+
+		/* 【关键修复】让内部容器的顶部有 padding，从而把按钮“压”下去 */
+		/* 20rpx 足够容纳 top: -16rpx 的徽标 */
+		padding-top: 20rpx;
+
+		padding-right: 4rpx;
+		padding-bottom: 4rpx;
+	}
+
+	/* 3. 关键：针对所有按钮禁止压缩 */
+	.btn {
+		flex-shrink: 0 !important;
+		/* 强制不压缩 */
+		white-space: nowrap;
+		/* 按钮文字不换行 */
+	}
+
+	/* 针对带徽标的按钮容器也要禁止压缩 */
+	.icon-btn {
+		flex-shrink: 0 !important;
 	}
 
 	.action-buttons {

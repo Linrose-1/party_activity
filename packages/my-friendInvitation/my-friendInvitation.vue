@@ -238,7 +238,8 @@
 	} from 'vue';
 	import {
 		onPullDownRefresh,
-		onReachBottom
+		onReachBottom,
+		onLoad
 	} from '@dcloudio/uni-app';
 	import request from '@/utils/request.js'; // 确保路径正确
 	import CircleApplyPopup from '@/components/CircleApplyPopup.vue';
@@ -359,6 +360,24 @@
 		initializePage();
 		getShareUserList(true);
 		fetchUserInfo();
+	});
+
+	onLoad((options) => {
+		// 1. 处理 Tab 跳转参数
+		if (options.currentTab) {
+			currentTab.value = Number(options.currentTab);
+		}
+
+		// ... (原有的 inviteCode 处理逻辑) ...
+		// ... (原有的 loggedInUserId 处理逻辑) ...
+
+		// 确保根据新的 Tab 加载数据
+		if (currentTab.value === 1) {
+			// 如果默认进圈友页，可能需要预加载圈友数据
+			// 但 initializePage 已经全量加载了，所以这里通常不需要额外操作，
+			// 除非你想做一些针对性的优化。
+			// 目前 initializePage 会并行加载所有数据，所以界面会自动显示出来。
+		}
 	});
 
 	onPullDownRefresh(async () => {

@@ -34,6 +34,7 @@
 				<view style="font-weight: 700;font-size: 36rpx;"
 					@longpress.stop="handleLongPress(postDetail.postTitle)">
 					<text v-if="postDetail.postType == 1" class="detail-type-tag hunter">创业猎伙</text>
+					<text v-else-if="postDetail.postType == 3" class="detail-type-tag connection">商友连接</text>
 					<text v-else class="detail-type-tag business">商机分享</text>
 					{{postDetail.postTitle}}
 				</view>
@@ -1372,6 +1373,12 @@
 	.detail-type-tag.hunter {
 		color: #1890FF;
 		background-color: #E6F7FF;
+	}
+
+	.detail-type-tag.connection {
+		color: #722ed1;
+		background-color: #f9f0ff;
+		border: 1rpx solid rgba(114, 46, 209, 0.3);
 	}
 
 	/* --- 商机内容、图片、标签 --- */

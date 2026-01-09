@@ -208,6 +208,11 @@
 		color: #1890FF;
 		background-color: #E6F7FF;
 }
+.detail-type-tag.connection.data-v-8303b14f {
+		color: #722ed1;
+		background-color: #f9f0ff;
+		border: 1rpx solid rgba(114, 46, 209, 0.3);
+}
 
 	/* --- 商机内容、图片、标签 --- */
 .opportunity-content.data-v-8303b14f {

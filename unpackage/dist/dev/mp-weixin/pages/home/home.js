@@ -22,6 +22,7 @@ const defaultAvatarUrl = "/static/icon/default-avatar.png";
 const _sfc_main = {
   __name: "home",
   setup(__props) {
+    const isPageReady = common_vendor.ref(false);
     const loggedInUserId = common_vendor.ref(null);
     const isLogin = common_vendor.ref(false);
     const member = common_vendor.ref("白银");
@@ -93,7 +94,7 @@ const _sfc_main = {
       return paidLevels.includes(member.value);
     });
     common_vendor.onMounted(() => {
-      common_vendor.index.__f__("log", "at pages/home/home.vue:369", "首页 onMounted: 开始监听 postUpdated 事件");
+      common_vendor.index.__f__("log", "at pages/home/home.vue:374", "首页 onMounted: 开始监听 postUpdated 事件");
       common_vendor.index.$on("postUpdated", handlePostUpdate);
       common_vendor.index.$on("userFollowStatusChanged", handleUserFollowStatusChange);
       common_vendor.index.$on("postInteractionChanged", handlePostInteractionChange);
@@ -105,7 +106,7 @@ const _sfc_main = {
       }, 2e3);
     });
     common_vendor.onUnmounted(() => {
-      common_vendor.index.__f__("log", "at pages/home/home.vue:388", "首页 onUnmounted: 移除 postUpdated 事件监听");
+      common_vendor.index.__f__("log", "at pages/home/home.vue:393", "首页 onUnmounted: 移除 postUpdated 事件监听");
       common_vendor.index.$off("postUpdated", handlePostUpdate);
       common_vendor.index.$off("userFollowStatusChanged", handleUserFollowStatusChange);
       common_vendor.index.$off("postInteractionChanged", handlePostInteractionChange);
@@ -113,14 +114,18 @@ const _sfc_main = {
     });
     common_vendor.onShow(async () => {
       let currentUserId = common_vendor.index.getStorageSync("userId");
-      if (!currentUserId) {
-        common_vendor.index.__f__("log", "at pages/home/home.vue:405", "检测到未登录，尝试静默登录...");
-        await performSilentLogin();
-        currentUserId = common_vendor.index.getStorageSync("userId");
+      if (isInitialLoad.value) {
+        if (!currentUserId) {
+          common_vendor.index.__f__("log", "at pages/home/home.vue:411", "检测到未登录，开始静默登录流程...");
+          await performSilentLogin();
+        }
+        isPageReady.value = true;
+      } else {
+        isPageReady.value = true;
       }
       const currentUserIsLogin = !!currentUserId;
       if (isInitialLoad.value || isLogin.value !== currentUserIsLogin || postList.value.length === 0) {
-        common_vendor.index.__f__("log", "at pages/home/home.vue:420", "触发刷新: 首次加载或登录状态变更");
+        common_vendor.index.__f__("log", "at pages/home/home.vue:440", "触发刷新: 首次加载或登录状态变更");
         loggedInUserId.value = currentUserId;
         isLogin.value = currentUserIsLogin;
         if (isLogin.value) {
@@ -131,7 +136,7 @@ const _sfc_main = {
         getBusinessOpportunitiesList(true);
         isInitialLoad.value = false;
       } else {
-        common_vendor.index.__f__("log", "at pages/home/home.vue:438", "从详情页返回，不刷新列表，保持滚动位置。");
+        common_vendor.index.__f__("log", "at pages/home/home.vue:458", "从详情页返回，不刷新列表，保持滚动位置。");
       }
       common_vendor.index.showShareMenu({
         withShareTicket: true,
@@ -180,7 +185,7 @@ const _sfc_main = {
       };
     });
     const handlePostUpdate = () => {
-      common_vendor.index.__f__("log", "at pages/home/home.vue:506", "postUpdated 触发，但已通过精准事件同步数据，跳过全量刷新");
+      common_vendor.index.__f__("log", "at pages/home/home.vue:526", "postUpdated 触发，但已通过精准事件同步数据，跳过全量刷新");
     };
     const fetchScrollBarData = async () => {
       try {
@@ -208,14 +213,14 @@ const _sfc_main = {
           if (data.pendingConfirmUserTotal > 0) {
             list.push({
               type: "confirm",
-              label: "用户确认",
+              label: "聚会确认",
               count: data.pendingConfirmUserTotal
             });
           }
           scrollBarData.value = list;
         }
       } catch (e) {
-        common_vendor.index.__f__("error", "at pages/home/home.vue:558", "获取滚动条数据失败", e);
+        common_vendor.index.__f__("error", "at pages/home/home.vue:578", "获取滚动条数据失败", e);
       }
     };
     const performSilentLogin = async () => {
@@ -240,7 +245,7 @@ const _sfc_main = {
           data: payload
         });
         if (!error && data && data.accessToken) {
-          common_vendor.index.__f__("log", "at pages/home/home.vue:597", "✅ 静默登录成功!", data);
+          common_vendor.index.__f__("log", "at pages/home/home.vue:617", "✅ 静默登录成功!", data);
           common_vendor.index.setStorageSync("token", data.accessToken);
           common_vendor.index.setStorageSync("userId", data.userId);
           isLogin.value = true;
@@ -251,10 +256,10 @@ const _sfc_main = {
             common_vendor.index.removeStorageSync("pendingInviteCode");
           }
         } else {
-          common_vendor.index.__f__("log", "at pages/home/home.vue:616", "静默登录未成功 (可能是非新用户需手机号或接口异常):", error);
+          common_vendor.index.__f__("log", "at pages/home/home.vue:636", "静默登录未成功 (可能是非新用户需手机号或接口异常):", error);
         }
       } catch (e) {
-        common_vendor.index.__f__("error", "at pages/home/home.vue:619", "静默登录流程异常:", e);
+        common_vendor.index.__f__("error", "at pages/home/home.vue:639", "静默登录流程异常:", e);
       }
     };
     const fetchCurrentUserInfo = async () => {
@@ -265,11 +270,11 @@ const _sfc_main = {
         method: "GET"
       });
       if (error) {
-        common_vendor.index.__f__("error", "at pages/home/home.vue:631", "首页实时获取用户信息失败:", error);
+        common_vendor.index.__f__("error", "at pages/home/home.vue:651", "首页实时获取用户信息失败:", error);
         currentUserInfo.value = utils_user.getCachedUserInfo();
       } else {
         currentUserInfo.value = data;
-        common_vendor.index.__f__("log", "at pages/home/home.vue:636", "首页实时获取用户信息成功:", currentUserInfo.value);
+        common_vendor.index.__f__("log", "at pages/home/home.vue:656", "首页实时获取用户信息成功:", currentUserInfo.value);
         common_vendor.index.setStorageSync("userInfo", JSON.stringify(data));
       }
     };
@@ -277,13 +282,12 @@ const _sfc_main = {
       if (loadingStatus.value === "loading" && !isRefresh)
         return;
       loadingStatus.value = "loading";
+      let currentPage = pageNo.value;
       if (isRefresh) {
-        pageNo.value = 1;
-        postList.value = [];
-        loadingStatus.value = "more";
+        currentPage = 1;
       }
       const params = {
-        pageNo: pageNo.value,
+        pageNo: currentPage,
         pageSize: pageSize.value,
         tabIndex: activeTab.value
       };
@@ -354,7 +358,13 @@ const _sfc_main = {
             }
           };
         });
-        postList.value = isRefresh ? mappedData : [...postList.value, ...mappedData];
+        if (isRefresh) {
+          postList.value = mappedData;
+          pageNo.value = 2;
+        } else {
+          postList.value = [...postList.value, ...mappedData];
+          pageNo.value++;
+        }
         if (postList.value.length >= apiData.total) {
           loadingStatus.value = "noMore";
         } else {
@@ -362,7 +372,7 @@ const _sfc_main = {
           pageNo.value++;
         }
       } catch (err) {
-        common_vendor.index.__f__("error", "at pages/home/home.vue:735", "getBusinessOpportunitiesList 逻辑异常:", err);
+        common_vendor.index.__f__("error", "at pages/home/home.vue:767", "getBusinessOpportunitiesList 逻辑异常:", err);
         loadingStatus.value = "more";
         common_vendor.index.showToast({
           title: "页面逻辑异常，请稍后重试",
@@ -434,7 +444,7 @@ const _sfc_main = {
       type,
       user
     }) => {
-      common_vendor.index.__f__("log", "at pages/home/home.vue:813", "菜单操作:", type, user);
+      common_vendor.index.__f__("log", "at pages/home/home.vue:845", "菜单操作:", type, user);
       switch (type) {
         case "viewCard":
           navigateToBusinessCard(user);
@@ -489,7 +499,7 @@ const _sfc_main = {
       }
     };
     const handleUserFollowStatusChange = (data) => {
-      common_vendor.index.__f__("log", "at pages/home/home.vue:945", "接收到关注状态变更:", data);
+      common_vendor.index.__f__("log", "at pages/home/home.vue:977", "接收到关注状态变更:", data);
       if (!data || !data.userId)
         return;
       postList.value.forEach((post) => {
@@ -499,7 +509,7 @@ const _sfc_main = {
       });
     };
     const handlePostInteractionChange = (data) => {
-      common_vendor.index.__f__("log", "at pages/home/home.vue:960", "接收到帖子互动变更:", data);
+      common_vendor.index.__f__("log", "at pages/home/home.vue:992", "接收到帖子互动变更:", data);
       if (!data || !data.postId)
         return;
       const targetPost = postList.value.find((p) => String(p.id) === String(data.postId));
@@ -519,11 +529,11 @@ const _sfc_main = {
           }
         }
       } else {
-        common_vendor.index.__f__("warn", "at pages/home/home.vue:988", `未在当前列表中找到 ID 为 ${data.postId} 的帖子，跳过更新`);
+        common_vendor.index.__f__("warn", "at pages/home/home.vue:1020", `未在当前列表中找到 ID 为 ${data.postId} 的帖子，跳过更新`);
       }
     };
     const handleUserInfoChange = async () => {
-      common_vendor.index.__f__("log", "at pages/home/home.vue:996", "收到用户信息变更通知，刷新首页配置");
+      common_vendor.index.__f__("log", "at pages/home/home.vue:1028", "收到用户信息变更通知，刷新首页配置");
       await fetchCurrentUserInfo();
     };
     const toggleAction = async (post, clickedAction) => {
@@ -853,7 +863,7 @@ const _sfc_main = {
           });
         },
         fail: (err) => {
-          common_vendor.index.__f__("error", "at pages/home/home.vue:1381", "setClipboardData failed:", err);
+          common_vendor.index.__f__("error", "at pages/home/home.vue:1413", "setClipboardData failed:", err);
           common_vendor.index.showToast({
             title: "复制失败",
             icon: "none"
@@ -870,32 +880,40 @@ const _sfc_main = {
     };
     return (_ctx, _cache) => {
       return common_vendor.e({
-        a: common_vendor.f(headerSlides.value, (slide, index, i0) => {
+        a: !isPageReady.value
+      }, !isPageReady.value ? {
+        b: common_vendor.p({
+          type: "spinner-cycle",
+          size: "40",
+          color: "#FF6A00"
+        })
+      } : {}, {
+        c: common_vendor.f(headerSlides.value, (slide, index, i0) => {
           return {
             a: common_vendor.t(slide.title),
             b: common_vendor.t(slide.slogan),
             c: index
           };
         }),
-        b: common_vendor.t(pageDescription.value),
-        c: common_vendor.o(goToCustomizationPage),
-        d: common_vendor.p({
+        d: common_vendor.t(pageDescription.value),
+        e: common_vendor.o(goToCustomizationPage),
+        f: common_vendor.p({
           type: "search",
           size: "20",
           color: "#FF6A00"
         }),
-        e: common_vendor.o(handleSearch),
-        f: searchQuery.value,
-        g: common_vendor.o(($event) => searchQuery.value = $event.detail.value),
-        h: common_vendor.o(handleSearch),
-        i: scrollBarData.value.length > 0
+        g: common_vendor.o(handleSearch),
+        h: searchQuery.value,
+        i: common_vendor.o(($event) => searchQuery.value = $event.detail.value),
+        j: common_vendor.o(handleSearch),
+        k: scrollBarData.value.length > 0
       }, scrollBarData.value.length > 0 ? {
-        j: common_vendor.p({
+        l: common_vendor.p({
           type: "sound",
           size: "14",
           color: "#FF6A00"
         }),
-        k: common_vendor.f(scrollBarData.value, (item, index, i0) => {
+        m: common_vendor.f(scrollBarData.value, (item, index, i0) => {
           return {
             a: common_vendor.t(item.label),
             b: common_vendor.t(item.count),
@@ -904,21 +922,21 @@ const _sfc_main = {
           };
         })
       } : {}, {
-        l: activeTab.value === 1 ? 1 : "",
-        m: common_vendor.o(($event) => handleTabClick(1)),
-        n: activeTab.value === 2 ? 1 : "",
-        o: common_vendor.o(($event) => handleTabClick(2)),
-        p: activeTab.value === 3 ? 1 : "",
-        q: common_vendor.o(($event) => handleTabClick(3)),
-        r: activeTab.value === 4 ? 1 : "",
-        s: common_vendor.o(($event) => handleTabClick(4)),
-        t: common_vendor.p({
+        n: activeTab.value === 1 ? 1 : "",
+        o: common_vendor.o(($event) => handleTabClick(1)),
+        p: activeTab.value === 2 ? 1 : "",
+        q: common_vendor.o(($event) => handleTabClick(2)),
+        r: activeTab.value === 3 ? 1 : "",
+        s: common_vendor.o(($event) => handleTabClick(3)),
+        t: activeTab.value === 4 ? 1 : "",
+        v: common_vendor.o(($event) => handleTabClick(4)),
+        w: common_vendor.p({
           type: "compose",
           size: "18",
           color: "#FFFFFF"
         }),
-        v: common_vendor.o(postNew),
-        w: common_vendor.f(postList.value, (post, k0, i0) => {
+        x: common_vendor.o(postNew),
+        y: common_vendor.f(postList.value, (post, k0, i0) => {
           return common_vendor.e({
             a: post.user.avatar,
             b: common_vendor.o(($event) => handleAvatarClick(post.user), post.id),
@@ -938,98 +956,97 @@ const _sfc_main = {
             k: common_vendor.o(($event) => toggleFollow(post), post.id)
           } : {}, {
             l: post.postType == 1
-          }, post.postType == 1 ? {} : {}, {
-            m: common_vendor.t(post.title),
-            n: common_vendor.o(($event) => handleLongPress(post.title), post.id),
-            o: post.displayContent
+          }, post.postType == 1 ? {} : post.postType == 3 ? {} : {}, {
+            m: post.postType == 3,
+            n: common_vendor.t(post.title),
+            o: common_vendor.o(($event) => handleLongPress(post.title), post.id),
+            p: post.displayContent
           }, post.displayContent ? common_vendor.e({
-            p: common_vendor.t(post.displayContent),
-            q: post.isTruncated
+            q: common_vendor.t(post.displayContent),
+            r: post.isTruncated
           }, post.isTruncated ? {
-            r: common_vendor.o(($event) => handlePostClick(post), post.id)
+            s: common_vendor.o(($event) => handlePostClick(post), post.id)
           } : {}, {
-            s: common_vendor.o(($event) => handleLongPress(post.fullContent), post.id)
+            t: common_vendor.o(($event) => handleLongPress(post.fullContent), post.id)
           }) : {}, {
-            t: post.video
+            v: post.video
           }, post.video ? {
-            v: "video-" + post.id,
-            w: post.video,
-            x: common_vendor.o(() => {
+            w: "video-" + post.id,
+            x: post.video,
+            y: common_vendor.o(() => {
             }, post.id)
           } : post.images && post.images.length > 0 ? {
-            z: common_vendor.f(post.images, (image, imgIndex, i1) => {
+            A: common_vendor.f(post.images, (image, imgIndex, i1) => {
               return {
                 a: image,
                 b: imgIndex
               };
             })
           } : {}, {
-            y: post.images && post.images.length > 0,
-            A: post.tags && post.tags.length
+            z: post.images && post.images.length > 0,
+            B: post.tags && post.tags.length
           }, post.tags && post.tags.length ? {
-            B: common_vendor.f(post.tags, (tag, tagIndex, i1) => {
+            C: common_vendor.f(post.tags, (tag, tagIndex, i1) => {
               return {
                 a: common_vendor.t(tag),
                 b: tagIndex
               };
             })
           } : {}, {
-            C: common_vendor.t(post.time)
+            D: common_vendor.t(post.time)
           }, isLogin.value ? common_vendor.e({
-            D: "07e72d3c-3-" + i0,
-            E: common_vendor.p({
+            E: "07e72d3c-4-" + i0,
+            F: common_vendor.p({
               type: post.userAction === "like" ? "hand-up-filled" : "hand-up",
               size: "20",
               color: post.userAction === "like" ? "#e74c3c" : "#666"
             }),
-            F: common_vendor.t(post.likes),
-            G: post.userAction === "like" ? 1 : "",
-            H: common_vendor.o(($event) => toggleAction(post, "like"), post.id),
-            I: "07e72d3c-4-" + i0,
-            J: common_vendor.p({
+            G: common_vendor.t(post.likes),
+            H: post.userAction === "like" ? 1 : "",
+            I: common_vendor.o(($event) => toggleAction(post, "like"), post.id),
+            J: "07e72d3c-5-" + i0,
+            K: common_vendor.p({
               type: post.userAction === "dislike" ? "hand-down-filled" : "hand-down",
               size: "20",
               color: post.userAction === "dislike" ? "#3498db" : "#666"
             }),
-            K: common_vendor.t(post.dislikes),
-            L: post.userAction === "dislike" ? 1 : "",
-            M: common_vendor.o(($event) => toggleAction(post, "dislike"), post.id),
-            N: "07e72d3c-5-" + i0,
-            O: common_vendor.p({
+            L: common_vendor.t(post.dislikes),
+            M: post.userAction === "dislike" ? 1 : "",
+            N: common_vendor.o(($event) => toggleAction(post, "dislike"), post.id),
+            O: "07e72d3c-6-" + i0,
+            P: common_vendor.p({
               type: "chatbubble",
               size: "20",
               color: "#666"
             }),
-            P: common_vendor.t(post.commonCount),
-            Q: common_vendor.o(($event) => navigateToComments(post), post.id),
-            R: "07e72d3c-6-" + i0,
-            S: common_vendor.p({
+            Q: common_vendor.t(post.commonCount),
+            R: common_vendor.o(($event) => navigateToComments(post), post.id),
+            S: "07e72d3c-7-" + i0,
+            T: common_vendor.p({
               type: post.isSaved ? "star-filled" : "star",
               size: "20",
               color: post.isSaved ? "#FF6A00" : "#666"
             }),
-            T: common_vendor.t(post.isSaved ? "已收藏" : "收藏"),
-            U: post.isSaved ? 1 : "",
-            V: common_vendor.o(($event) => toggleSave(post), post.id),
-            W: isLogin.value && loggedInUserId.value === post.user.id
+            U: common_vendor.t(post.isSaved ? "已收藏" : "收藏"),
+            V: post.isSaved ? 1 : "",
+            W: common_vendor.o(($event) => toggleSave(post), post.id),
+            X: isLogin.value && loggedInUserId.value === post.user.id
           }, isLogin.value && loggedInUserId.value === post.user.id ? {
-            X: "07e72d3c-7-" + i0,
-            Y: common_vendor.p({
+            Y: "07e72d3c-8-" + i0,
+            Z: common_vendor.p({
               type: "trash",
               size: "20",
               color: "#e74c3c"
             }),
-            Z: common_vendor.o(($event) => deletePost(post), post.id)
+            aa: common_vendor.o(($event) => deletePost(post), post.id)
           } : {}) : {}, {
-            aa: post.id,
-            ab: common_vendor.o(($event) => handlePostClick(post), post.id)
+            ab: post.id,
+            ac: common_vendor.o(($event) => handlePostClick(post), post.id)
           });
         }),
-        x: isLogin.value,
-        y: !isLogin.value && postList.value.length === 0
-      }, !isLogin.value && postList.value.length === 0 ? {
-        z: common_vendor.o(goToLogin)
-      } : isLogin.value && postList.value.length === 0 && loadingStatus.value === "noMore" ? {} : loadingStatus.value === "loading" ? {
+        z: isLogin.value,
+        A: isLogin.value && postList.value.length === 0 && loadingStatus.value === "noMore"
+      }, isLogin.value && postList.value.length === 0 && loadingStatus.value === "noMore" ? {} : loadingStatus.value === "loading" ? {
         C: common_vendor.p({
           status: "loading",
           ["contentText.loading"]: "正在加载..."
@@ -1040,7 +1057,6 @@ const _sfc_main = {
           ["contentText.noMore"]: "暂无更多内容"
         })
       } : {}, {
-        A: isLogin.value && postList.value.length === 0 && loadingStatus.value === "noMore",
         B: loadingStatus.value === "loading",
         D: loadingStatus.value === "noMore",
         F: copyMenu.show
@@ -1050,20 +1066,20 @@ const _sfc_main = {
         }),
         I: common_vendor.o(hideCopyMenu)
       } : {}, {
-        J: common_vendor.sr(guidePopupRef, "07e72d3c-10", {
+        J: common_vendor.sr(guidePopupRef, "07e72d3c-11", {
           "k": "guidePopupRef"
         }),
-        K: common_vendor.sr(avatarMenuRef, "07e72d3c-11", {
+        K: common_vendor.sr(avatarMenuRef, "07e72d3c-12", {
           "k": "avatarMenuRef"
         }),
         L: common_vendor.o(handleMenuAction),
-        M: common_vendor.sr(addCirclePopup, "07e72d3c-12", {
+        M: common_vendor.sr(addCirclePopup, "07e72d3c-13", {
           "k": "addCirclePopup"
         }),
-        N: common_vendor.sr(invitePopupRef, "07e72d3c-13", {
+        N: common_vendor.sr(invitePopupRef, "07e72d3c-14", {
           "k": "invitePopupRef"
         }),
-        O: common_vendor.sr(scrollPointsPopup, "07e72d3c-14", {
+        O: common_vendor.sr(scrollPointsPopup, "07e72d3c-15", {
           "k": "scrollPointsPopup"
         })
       });

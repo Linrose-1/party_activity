@@ -18,7 +18,7 @@
 				</view>
 				<!-- Tab 1: 邀请入TA圈 (addInitiator=1) -->
 				<view class="tab-item" :class="{ active: currentTab === 1 }" @click="switchTab(1)">
-					邀请入TA圈
+					受邀入TA圈
 				</view>
 			</view>
 

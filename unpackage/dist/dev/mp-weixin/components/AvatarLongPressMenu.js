@@ -70,7 +70,7 @@ const _sfc_main = {
           size: "26",
           color: "#FF7009"
         }),
-        j: common_vendor.t(isSelf.value ? "本人" : "邀请入圈"),
+        j: common_vendor.t(isSelf.value ? "本人" : "邀入我圈"),
         k: common_vendor.n(isSelf.value ? "disabled" : "primary-outline"),
         l: common_vendor.o(($event) => handleAction("inviteCircle")),
         m: common_vendor.p({
@@ -78,7 +78,7 @@ const _sfc_main = {
           size: "28",
           color: "#fff"
         }),
-        n: common_vendor.t(isSelf.value ? "本人" : "申请入圈"),
+        n: common_vendor.t(isSelf.value ? "本人" : "加入TA圈"),
         o: common_vendor.n(isSelf.value ? "disabled" : "primary"),
         p: common_vendor.o(($event) => handleAction("addCircle")),
         q: common_vendor.sr(popup, "5571075f-0", {

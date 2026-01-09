@@ -434,7 +434,7 @@
 				"path" : "participant-detail/participant-detail",
 				"style" : 
 				{
-					"navigationBarTitleText" : "参会者清单"
+					"navigationBarTitleText" : "参会名单"
 				}
 			}
 			// 如果还有其他页面要放进这个分包，继续在这里加

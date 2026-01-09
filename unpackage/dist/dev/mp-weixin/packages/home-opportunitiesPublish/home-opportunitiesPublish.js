@@ -414,7 +414,7 @@ const _sfc_main = {
       submitPost();
     };
     function submitPost() {
-      if (isQuotaLoaded.value && remainingQuota.value == 0) {
+      if (isQuotaLoaded.value && currentRemainingQuota.value == 0) {
         showQuotaExceededModal();
         return;
       }

@@ -40,6 +40,39 @@
 		margin-bottom: 4rpx;
 }
 
+	/* 全屏 Loading 样式 */
+.full-screen-loading.data-v-07e72d3c {
+		position: fixed;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100vh;
+		background-color: #fff;
+		/* 白底遮盖 */
+		z-index: 9999;
+		/* 最高层级 */
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+}
+.loading-icon.data-v-07e72d3c {
+		animation: spin-07e72d3c 1s linear infinite;
+}
+.loading-text.data-v-07e72d3c {
+		margin-top: 20rpx;
+		font-size: 28rpx;
+		color: #666;
+}
+@keyframes spin-07e72d3c {
+0% {
+			transform: rotate(0deg);
+}
+100% {
+			transform: rotate(360deg);
+}
+}
+
 	/* =========================
 	 * 1. 页面通用与头部样式
 	 * ========================= */
@@ -185,7 +218,7 @@
 
 	/* --- 滚动条样式 --- */
 .notice-bar.data-v-07e72d3c {
-		width: 260rpx;
+		width: 360rpx;
 		/* 给一个固定宽度，或者 min-width */
 		height: 50rpx;
 		/* 与标题高度一致 */
@@ -444,6 +477,11 @@
 		color: #FF6A00;
 		background-color: #FFF0E6;
 		border: 1rpx solid rgba(255, 106, 0, 0.3);
+}
+.type-tag.connection.data-v-07e72d3c {
+		color: #722ed1;
+		background-color: #f9f0ff;
+		border: 1rpx solid rgba(114, 46, 209, 0.3);
 }
 
 	/* 猎伙样式 (蓝色系，突出显示) */

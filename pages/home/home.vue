@@ -1,5 +1,9 @@
 <template>
 	<view class="business-opportunity-app">
+		<view v-if="!isPageReady" class="full-screen-loading">
+			<uni-icons type="spinner-cycle" size="40" color="#FF6A00" class="loading-icon"></uni-icons>
+			<text class="loading-text">正在加载商友圈...</text>
+		</view>
 		<!-- <view class="custom-fab" @click="goToCustomizationPage">
 			<uni-icons type="gear-filled" size="20" color="#FFFFFF"></uni-icons>
 			<text>定制</text>
@@ -100,6 +104,7 @@
 				<!-- 为标题添加新的 longpress 事件 -->
 				<view class="post-content-title" @longpress.stop="handleLongPress(post.title)">
 					<text v-if="post.postType == 1" class="type-tag hunter">创业猎伙</text>
+					<text v-else-if="post.postType == 3" class="type-tag connection">商友连接</text>
 					<text v-else class="type-tag business">商机分享</text>
 					{{ post.title }}
 				</view>
@@ -170,13 +175,12 @@
 
 			<!-- 3.4 列表加载状态 -->
 			<view class="loading-status">
-				<view v-if="!isLogin && postList.length === 0" class="content-placeholder"
+				<!-- <view v-if="!isLogin && postList.length === 0" class="content-placeholder"
 					style="margin-top: 40rpx; border: none; background: transparent;">
 					<view class="placeholder-text">登录后查看更多精彩内容</view>
 					<button class="placeholder-button" @click.stop="goToLogin">立即登录</button>
-				</view>
-				<view v-else-if="isLogin && postList.length === 0 && loadingStatus === 'noMore'"
-					class="no-posts-message">
+				</view> -->
+				<view v-if="isLogin && postList.length === 0 && loadingStatus === 'noMore'" class="no-posts-message">
 					暂无相关商机！
 				</view>
 				<view v-else-if="loadingStatus === 'loading'">
@@ -242,6 +246,7 @@
 	// ============================
 
 	// 用户与权限状态
+	const isPageReady = ref(false);
 	const loggedInUserId = ref(null);
 	const isLogin = ref(false);
 	const member = ref('白银'); // 示例会员等级
@@ -400,13 +405,28 @@
 		// 1. 获取当前缓存中的 userId
 		let currentUserId = uni.getStorageSync('userId');
 
-		// 2. 如果本地没有 userId，说明未登录，尝试进行静默登录
-		if (!currentUserId) {
-			console.log('检测到未登录，尝试静默登录...');
-			await performSilentLogin();
-			// 静默登录尝试完成后，再次获取 userId (如果成功，现在应该有了)
-			currentUserId = uni.getStorageSync('userId');
+		if (isInitialLoad.value) {
+			if (!currentUserId) {
+				// 未登录：保持 Loading，去执行静默登录
+				console.log('检测到未登录，开始静默登录流程...');
+				await performSilentLogin();
+				// 登录完（无论成功失败），都要放行
+			}
+
+			// 首次加载逻辑结束，准备渲染数据
+			isPageReady.value = true;
+		} else {
+			// 非首次加载（从详情页返回），直接显示
+			isPageReady.value = true;
 		}
+
+		// 2. 如果本地没有 userId，说明未登录，尝试进行静默登录
+		// if (!currentUserId) {
+		// 	console.log('检测到未登录，尝试静默登录...');
+		// 	await performSilentLogin();
+		// 	// 静默登录尝试完成后，再次获取 userId (如果成功，现在应该有了)
+		// 	currentUserId = uni.getStorageSync('userId');
+		// }
 
 		// 每次进入页面时检查登录状态并刷新数据
 		// const currentUserId = uni.getStorageSync('userId');
@@ -547,7 +567,7 @@
 				if (data.pendingConfirmUserTotal > 0) {
 					list.push({
 						type: 'confirm',
-						label: '用户确认',
+						label: '聚会确认',
 						count: data.pendingConfirmUserTotal
 					});
 				}
@@ -643,14 +663,18 @@
 		if (loadingStatus.value === 'loading' && !isRefresh) return;
 		loadingStatus.value = 'loading';
 
+		// if (isRefresh) {
+		// 	pageNo.value = 1;
+		// 	postList.value = [];
+		// 	loadingStatus.value = 'more';
+		// }
+		let currentPage = pageNo.value;
 		if (isRefresh) {
-			pageNo.value = 1;
-			postList.value = [];
-			loadingStatus.value = 'more';
+			currentPage = 1;
 		}
 
 		const params = {
-			pageNo: pageNo.value,
+			pageNo: currentPage,
 			pageSize: pageSize.value,
 			tabIndex: activeTab.value,
 		};
@@ -723,7 +747,15 @@
 				}
 			});
 
-			postList.value = isRefresh ? mappedData : [...postList.value, ...mappedData];
+			// postList.value = isRefresh ? mappedData : [...postList.value, ...mappedData];
+
+			if (isRefresh) {
+				postList.value = mappedData; // 直接覆盖
+				pageNo.value = 2; // 下次加载第2页
+			} else {
+				postList.value = [...postList.value, ...mappedData]; // 追加
+				pageNo.value++; // 页码+1
+			}
 
 			if (postList.value.length >= apiData.total) {
 				loadingStatus.value = 'noMore';
@@ -1441,6 +1473,43 @@
 		margin-bottom: 4rpx;
 	}
 
+	/* 全屏 Loading 样式 */
+	.full-screen-loading {
+		position: fixed;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100vh;
+		background-color: #fff;
+		/* 白底遮盖 */
+		z-index: 9999;
+		/* 最高层级 */
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.loading-icon {
+		animation: spin 1s linear infinite;
+	}
+
+	.loading-text {
+		margin-top: 20rpx;
+		font-size: 28rpx;
+		color: #666;
+	}
+
+	@keyframes spin {
+		0% {
+			transform: rotate(0deg);
+		}
+
+		100% {
+			transform: rotate(360deg);
+		}
+	}
+
 	/* =========================
 	 * 1. 页面通用与头部样式
 	 * ========================= */
@@ -1598,7 +1667,7 @@
 
 	/* --- 滚动条样式 --- */
 	.notice-bar {
-		width: 260rpx;
+		width: 360rpx;
 		/* 给一个固定宽度，或者 min-width */
 		height: 50rpx;
 		/* 与标题高度一致 */
@@ -1884,6 +1953,12 @@
 		color: #FF6A00;
 		background-color: #FFF0E6;
 		border: 1rpx solid rgba(255, 106, 0, 0.3);
+	}
+
+	.type-tag.connection {
+		color: #722ed1;
+		background-color: #f9f0ff;
+		border: 1rpx solid rgba(114, 46, 209, 0.3);
 	}
 
 	/* 猎伙样式 (蓝色系，突出显示) */

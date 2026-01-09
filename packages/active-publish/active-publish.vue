@@ -12,7 +12,7 @@
 			</view>
 		</view>
 
-		<scroll-view scroll-y class="main-scroll">
+		<view class="main-scroll">
 			<!-- ================== 1. 基本信息表单 ================== -->
 			<view class="form-card">
 				<view class="card-header">
@@ -184,7 +184,7 @@
 				<!-- 聚会环节 Label -->
 				<view class="subsection-title">聚会环节</view>
 
-				<view v-for="(item, index) in form.activitySessions" :key="index" class="session-card">
+				<view v-for="(item, index) in form.activitySessions" :key="item._id || index" class="session-card">
 					<view class="session-header">
 						<text class="session-index">环节 {{ index + 1 }}</text>
 						<view class="session-del" @click="removeAgenda(index)">
@@ -192,10 +192,17 @@
 						</view>
 					</view>
 					<view class="session-inputs">
-						<uni-easyinput v-model="item.sessionTitle" placeholder="请输入环节标题" :inputBorder="true"
-							class="mb-20" :styles="inputStyles" />
-						<uni-easyinput v-model="item.sessionDescription" placeholder="请输入环节描述" :inputBorder="true"
-							:styles="inputStyles" />
+						<!-- 【修改】改用原生 input，手动加样式 -->
+						<view class="native-input-wrapper mb-20">
+							<input v-model="item.sessionTitle" placeholder="请输入环节标题" class="native-input"
+								placeholder-class="input-placeholder" />
+						</view>
+
+						<!-- 【修改】改用原生 textarea -->
+						<view class="native-input-wrapper">
+							<textarea v-model="item.sessionDescription" placeholder="请输入环节描述" class="native-textarea"
+								placeholder-class="input-placeholder" auto-height />
+						</view>
 					</view>
 				</view>
 
@@ -237,7 +244,7 @@
 				<text>— 到底啦，请发起聚会吧 —</text>
 			</view>
 			<view style="height: 140rpx;"></view>
-		</scroll-view>
+		</view>
 
 		<!-- ============ 底部操作栏 ============ -->
 		<view class="action-bar" :class="{ 'hidden': isPickerOpen }">
@@ -340,6 +347,7 @@
 		associatedStoreId: null,
 		tag: '',
 		activitySessions: [{
+			_id: Date.now(),
 			sessionTitle: '环节标题',
 			sessionDescription: '环节描述'
 		}]
@@ -632,10 +640,13 @@
 	};
 
 	// --- 5.3 环节管理 ---
-	const addAgenda = () => form.value.activitySessions.push({
-		sessionTitle: '',
-		sessionDescription: ''
-	});
+	const addAgenda = () => {
+		form.value.activitySessions.push({
+			_id: Date.now() + Math.random(), // 生成唯一标识
+			sessionTitle: '',
+			sessionDescription: ''
+		});
+	};
 	const removeAgenda = (i) => form.value.activitySessions.splice(i, 1);
 
 	// ==============================================================================
@@ -862,7 +873,7 @@
 		// 回显环节
 		if (data.memberActivitySessionList && data.memberActivitySessionList.length > 0) {
 			form.value.activitySessions = data.memberActivitySessionList.map(item => ({
-				id: item.id,
+				_id: item.id,
 				sessionTitle: item.sessionTitle,
 				sessionDescription: item.sessionDescription
 			}));
@@ -1075,16 +1086,24 @@
 	$input-border: #dcdfe6;
 
 	.page {
+		/* 【修改】允许页面滚动 */
+		min-height: 100vh;
 		background-color: $bg-color;
-		height: 100vh;
-		display: flex;
-		flex-direction: column;
+		/* display: flex;  <-- 删除 flex 布局，回归文档流 */
+		/* flex-direction: column; */
+		padding-bottom: constant(safe-area-inset-bottom);
+		padding-bottom: env(safe-area-inset-bottom);
 	}
 
-	.main-scroll {
-		flex: 1;
-		height: 0;
+	.main-content {
+		padding-bottom: 120rpx;
+		/* 给底部栏留位置 */
 	}
+
+	// .main-scroll {
+	// 	flex: 1;
+	// 	height: 0;
+	// }
 
 	/* 卡片通用样式 */
 	.form-card {
@@ -1439,6 +1458,37 @@
 		margin: 20rpx 0;
 		padding-left: 10rpx;
 		border-left: 6rpx solid $theme-color;
+	}
+
+	/* 原生输入框样式适配 */
+	.native-input-wrapper {
+		border: 1px solid #dcdfe6;
+		border-radius: 4px;
+		padding: 0 10px;
+		background-color: #fff;
+	}
+
+	.native-input {
+		height: 36px;
+		/* 对应 uni-easyinput 的默认高度 */
+		font-size: 14px;
+		color: #333;
+		width: 100%;
+	}
+
+	.native-textarea {
+		width: 100%;
+		font-size: 14px;
+		color: #333;
+		padding: 10px 0;
+		min-height: 40px;
+		line-height: 1.5;
+	}
+
+	/* 占位符样式 */
+	::v-deep .input-placeholder {
+		color: #999;
+		font-size: 14px;
 	}
 
 	.session-card {

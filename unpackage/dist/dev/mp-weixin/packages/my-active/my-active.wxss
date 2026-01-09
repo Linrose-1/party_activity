@@ -146,7 +146,41 @@
 /* 底部操作区 */
 .card-footer.data-v-530922ba {
   border-top: 1rpx solid #f0f2f5;
-  padding-top: 24rpx;
+  /* 这里的 padding 可以保留，作为分割线和滚动区之间的间距 */
+  padding-top: 10rpx;
+}
+.action-scroll.data-v-530922ba {
+  width: 100%;
+  white-space: nowrap;
+  /* 移除 scroll-view 上的 padding，避免影响滚动条位置 */
+}
+.action-buttons-inner.data-v-530922ba {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 16rpx;
+  width: -webkit-max-content;
+  width: max-content;
+  min-width: 100%;
+  /* 【关键修复】让内部容器的顶部有 padding，从而把按钮“压”下去 */
+  /* 20rpx 足够容纳 top: -16rpx 的徽标 */
+  padding-top: 20rpx;
+  padding-right: 4rpx;
+  padding-bottom: 4rpx;
+}
+
+/* 3. 关键：针对所有按钮禁止压缩 */
+.btn.data-v-530922ba {
+  flex-shrink: 0 !important;
+  /* 强制不压缩 */
+  white-space: nowrap;
+  /* 按钮文字不换行 */
+}
+
+/* 针对带徽标的按钮容器也要禁止压缩 */
+.icon-btn.data-v-530922ba {
+  flex-shrink: 0 !important;
 }
 .action-buttons.data-v-530922ba {
   display: flex;

@@ -11,7 +11,7 @@ const _easycom_uni_load_more = () => "../../uni_modules/uni-load-more/components
 if (!Math) {
   (_easycom_uni_icons + _easycom_uni_load_more)();
 }
-const pageSize = 20;
+const pageSize = 10;
 const _sfc_main = {
   __name: "participant-detail",
   setup(__props) {
@@ -66,6 +66,12 @@ const _sfc_main = {
           } else {
             loadingStatus.value = "more";
             pageNo.value++;
+            if (list.value.length < 12) {
+              common_vendor.index.__f__("log", "at packages/participant-detail/participant-detail.vue:140", "数据量较少，自动加载下一页...");
+              setTimeout(() => {
+                loadMore();
+              }, 200);
+            }
           }
         } else {
           loadingStatus.value = "more";
@@ -76,8 +82,9 @@ const _sfc_main = {
         }
       } catch (e) {
         loadingStatus.value = "more";
-        common_vendor.index.__f__("error", "at packages/participant-detail/participant-detail.vue:147", e);
+        common_vendor.index.__f__("error", "at packages/participant-detail/participant-detail.vue:156", e);
       }
+      common_vendor.index.__f__("log", "at packages/participant-detail/participant-detail.vue:159", `加载完成: 当前数量=${list.value.length}, 总数=${total.value}, 状态=${loadingStatus.value}`);
     };
     const loadMore = () => {
       loadData(false);
@@ -158,49 +165,43 @@ const _sfc_main = {
     };
     return (_ctx, _cache) => {
       return common_vendor.e({
-        a: common_vendor.t(total.value),
-        b: common_vendor.p({
+        a: common_vendor.p({
           type: "info",
           size: "14",
           color: "#909399"
         }),
-        c: common_vendor.f(list.value, (item, index, i0) => {
+        b: common_vendor.f(list.value, (item, index, i0) => {
           return {
             a: common_vendor.t(item.realName || "-"),
             b: common_vendor.t(item.nickname || "-"),
             c: common_vendor.t(getGenderText(item.sex)),
-            d: common_vendor.t(item.era || "-"),
-            e: common_vendor.t(item.mobile || "-"),
-            f: common_vendor.t(item.companyName || "-"),
-            g: common_vendor.t(item.professionalTitle || "-"),
-            h: common_vendor.t(item.level || "-"),
-            i: common_vendor.t(item.topUpLevel || "-"),
-            j: index,
-            k: index % 2 === 1 ? 1 : ""
+            d: common_vendor.t(item.mobile || "-"),
+            e: index,
+            f: index % 2 === 1 ? 1 : ""
           };
         }),
-        d: list.value.length > 0 || loadingStatus.value === "loading"
+        c: list.value.length > 0 || loadingStatus.value === "loading"
       }, list.value.length > 0 || loadingStatus.value === "loading" ? {
-        e: common_vendor.p({
+        d: common_vendor.p({
           status: loadingStatus.value
         })
       } : {}, {
-        f: list.value.length === 0 && loadingStatus.value === "noMore"
+        e: list.value.length === 0 && loadingStatus.value === "noMore"
       }, list.value.length === 0 && loadingStatus.value === "noMore" ? {
-        g: common_vendor.p({
+        f: common_vendor.p({
           type: "staff",
           size: "50",
           color: "#ccc"
         })
       } : {}, {
-        h: common_vendor.o(loadMore),
-        i: common_vendor.p({
+        g: common_vendor.o(loadMore),
+        h: common_vendor.p({
           type: "email-filled",
           size: "18",
           color: "#fff"
         }),
-        j: common_vendor.o(handleExport),
-        k: list.value.length === 0
+        i: common_vendor.o(handleExport),
+        j: list.value.length === 0
       });
     };
   }

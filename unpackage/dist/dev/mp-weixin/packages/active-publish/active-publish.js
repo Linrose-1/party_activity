@@ -69,6 +69,7 @@ const _sfc_main = {
       associatedStoreId: null,
       tag: "",
       activitySessions: [{
+        _id: Date.now(),
         sessionTitle: "环节标题",
         sessionDescription: "环节描述"
       }]
@@ -186,11 +187,11 @@ const _sfc_main = {
             cropScale: "4:3",
             // 【关键】设置裁剪比例为 4:3
             success: (cropRes) => {
-              common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:505", "裁剪成功:", cropRes.tempFilePath);
+              common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:513", "裁剪成功:", cropRes.tempFilePath);
               processUpload(cropRes.tempFilePath);
             },
             fail: (err) => {
-              common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:510", "用户取消裁剪或失败:", err);
+              common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:518", "用户取消裁剪或失败:", err);
             }
           });
         }
@@ -251,7 +252,7 @@ const _sfc_main = {
               });
             }
           } catch (error) {
-            common_vendor.index.__f__("error", "at packages/active-publish/active-publish.vue:599", "上传异常:", error);
+            common_vendor.index.__f__("error", "at packages/active-publish/active-publish.vue:607", "上传异常:", error);
             common_vendor.index.showToast({
               title: "上传出错",
               icon: "none"
@@ -283,10 +284,14 @@ const _sfc_main = {
         }
       });
     };
-    const addAgenda = () => form.value.activitySessions.push({
-      sessionTitle: "",
-      sessionDescription: ""
-    });
+    const addAgenda = () => {
+      form.value.activitySessions.push({
+        _id: Date.now() + Math.random(),
+        // 生成唯一标识
+        sessionTitle: "",
+        sessionDescription: ""
+      });
+    };
     const removeAgenda = (i) => form.value.activitySessions.splice(i, 1);
     const handleAddSponsor = () => {
       currentSponsorIndex.value = -1;
@@ -322,7 +327,7 @@ const _sfc_main = {
       showSponsorPopup.value = false;
     };
     const syncSponsorsInline = async (activityId) => {
-      common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:689", "开始同步赞助商:", activityId);
+      common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:700", "开始同步赞助商:", activityId);
       const userId = common_vendor.index.getStorageSync("userId");
       for (const id of deletedSponsorIds.value) {
         await utils_request.request(`/app-api/member/sponsor/delete?id=${id}`, {
@@ -421,7 +426,7 @@ const _sfc_main = {
         return;
       }
       const data = detailRes.data;
-      common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:811", "获取详情用于编辑:", data);
+      common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:822", "获取详情用于编辑:", data);
       form.value.activityTitle = data.activityTitle;
       form.value.activityDescription = data.activityDescription;
       form.value.totalSlots = data.totalSlots;
@@ -462,7 +467,7 @@ const _sfc_main = {
       }
       if (data.memberActivitySessionList && data.memberActivitySessionList.length > 0) {
         form.value.activitySessions = data.memberActivitySessionList.map((item) => ({
-          id: item.id,
+          _id: item.id,
           sessionTitle: item.sessionTitle,
           sessionDescription: item.sessionDescription
         }));
@@ -477,7 +482,7 @@ const _sfc_main = {
               gallery = item.galleryImageUrls;
             }
           } catch (e) {
-            common_vendor.index.__f__("error", "at packages/active-publish/active-publish.vue:882", "解析赞助商图集失败:", e);
+            common_vendor.index.__f__("error", "at packages/active-publish/active-publish.vue:893", "解析赞助商图集失败:", e);
             gallery = [];
           }
           return {
@@ -485,7 +490,7 @@ const _sfc_main = {
             galleryImageUrls: gallery
           };
         });
-        common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:890", "赞助商回显完成:", sponsorsList.value);
+        common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:901", "赞助商回显完成:", sponsorsList.value);
       } else {
         sponsorsList.value = [];
       }
@@ -503,12 +508,12 @@ const _sfc_main = {
         if (typeof data === "number") {
           remainingQuota.value = data;
         } else {
-          common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:915", "接口返回 null，视为次数已用完");
+          common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:926", "接口返回 null，视为次数已用完");
           remainingQuota.value = 0;
         }
         isQuotaLoaded.value = true;
       } catch (e) {
-        common_vendor.index.__f__("error", "at packages/active-publish/active-publish.vue:923", "获取权益网络异常", e);
+        common_vendor.index.__f__("error", "at packages/active-publish/active-publish.vue:934", "获取权益网络异常", e);
       }
     };
     const showQuotaExceededModal = () => {
@@ -623,7 +628,7 @@ const _sfc_main = {
           })
         });
       } catch (e) {
-        common_vendor.index.__f__("error", "at packages/active-publish/active-publish.vue:1055", e);
+        common_vendor.index.__f__("error", "at packages/active-publish/active-publish.vue:1066", e);
         common_vendor.index.showToast({
           title: e.message || "系统异常",
           icon: "none"
@@ -863,24 +868,12 @@ const _sfc_main = {
           return {
             a: common_vendor.t(index + 1),
             b: "5d3444db-34-" + i0,
-            c: common_vendor.o(($event) => removeAgenda(index), index),
-            d: "5d3444db-35-" + i0,
-            e: common_vendor.o(($event) => item.sessionTitle = $event, index),
-            f: common_vendor.p({
-              placeholder: "请输入环节标题",
-              inputBorder: true,
-              styles: inputStyles.value,
-              modelValue: item.sessionTitle
-            }),
-            g: "5d3444db-36-" + i0,
-            h: common_vendor.o(($event) => item.sessionDescription = $event, index),
-            i: common_vendor.p({
-              placeholder: "请输入环节描述",
-              inputBorder: true,
-              styles: inputStyles.value,
-              modelValue: item.sessionDescription
-            }),
-            j: index
+            c: common_vendor.o(($event) => removeAgenda(index), item._id || index),
+            d: item.sessionTitle,
+            e: common_vendor.o(($event) => item.sessionTitle = $event.detail.value, item._id || index),
+            f: item.sessionDescription,
+            g: common_vendor.o(($event) => item.sessionDescription = $event.detail.value, item._id || index),
+            h: item._id || index
           };
         }),
         at: common_vendor.p({

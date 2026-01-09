@@ -42,7 +42,7 @@
 					<view class="icon-box invite-style">
 						<uni-icons type="paperplane-filled" size="26" color="#FF7009"></uni-icons>
 					</view>
-					<text class="item-text">{{ isSelf ? '本人' : '邀请入圈' }}</text>
+					<text class="item-text">{{ isSelf ? '本人' : '邀入我圈' }}</text>
 				</view>
 
 				<!-- 4. 申请入圈 -->
@@ -50,7 +50,7 @@
 					<view class="icon-box">
 						<uni-icons type="plusempty" size="28" color="#fff"></uni-icons>
 					</view>
-					<text class="item-text">{{ isSelf ? '本人' : '申请入圈' }}</text>
+					<text class="item-text">{{ isSelf ? '本人' : '加入TA圈' }}</text>
 				</view>
 
 				<!-- <view class="grid-item" @click="handleAction('removeCircle')">

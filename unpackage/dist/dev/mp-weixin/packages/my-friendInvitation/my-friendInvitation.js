@@ -109,8 +109,15 @@ const _sfc_main = {
       getShareUserList(true);
       fetchUserInfo();
     });
+    common_vendor.onLoad((options) => {
+      if (options.currentTab) {
+        currentTab.value = Number(options.currentTab);
+      }
+      if (currentTab.value === 1)
+        ;
+    });
     common_vendor.onPullDownRefresh(async () => {
-      common_vendor.index.__f__("log", "at packages/my-friendInvitation/my-friendInvitation.vue:365", "触发下拉刷新...");
+      common_vendor.index.__f__("log", "at packages/my-friendInvitation/my-friendInvitation.vue:384", "触发下拉刷新...");
       try {
         if (currentTab.value === 0) {
           await Promise.all([getShareUserList(true), fetchUserInfo()]);
@@ -123,9 +130,9 @@ const _sfc_main = {
           ]);
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at packages/my-friendInvitation/my-friendInvitation.vue:379", "下拉刷新时发生错误:", error);
+        common_vendor.index.__f__("error", "at packages/my-friendInvitation/my-friendInvitation.vue:398", "下拉刷新时发生错误:", error);
       } finally {
-        common_vendor.index.__f__("log", "at packages/my-friendInvitation/my-friendInvitation.vue:382", "刷新操作完成，停止动画。");
+        common_vendor.index.__f__("log", "at packages/my-friendInvitation/my-friendInvitation.vue:401", "刷新操作完成，停止动画。");
         common_vendor.index.stopPullDownRefresh();
       }
     });
@@ -238,7 +245,7 @@ const _sfc_main = {
           loadStatus.value = "noMore";
         }
       } catch (err) {
-        common_vendor.index.__f__("error", "at packages/my-friendInvitation/my-friendInvitation.vue:571", "获取邀请列表失败:", err);
+        common_vendor.index.__f__("error", "at packages/my-friendInvitation/my-friendInvitation.vue:590", "获取邀请列表失败:", err);
         loadStatus.value = "more";
       }
     };
@@ -285,7 +292,7 @@ const _sfc_main = {
           circleLoadStatus.value = "noMore";
         }
       } catch (e) {
-        common_vendor.index.__f__("error", "at packages/my-friendInvitation/my-friendInvitation.vue:624", "获取圈友列表失败:", e);
+        common_vendor.index.__f__("error", "at packages/my-friendInvitation/my-friendInvitation.vue:643", "获取圈友列表失败:", e);
         circleLoadStatus.value = "more";
       } finally {
         if (isRefresh)
@@ -312,7 +319,7 @@ const _sfc_main = {
           newApplyCount.value = data.total;
         }
       } catch (e) {
-        common_vendor.index.__f__("error", "at packages/my-friendInvitation/my-friendInvitation.vue:651", "获取新申请失败", e);
+        common_vendor.index.__f__("error", "at packages/my-friendInvitation/my-friendInvitation.vue:670", "获取新申请失败", e);
       }
     };
     common_vendor.watch(searchKey, (newValue, oldValue) => {
@@ -328,7 +335,7 @@ const _sfc_main = {
         common_vendor.index.navigateTo({
           url: item.path,
           fail: (err) => {
-            common_vendor.index.__f__("error", "at packages/my-friendInvitation/my-friendInvitation.vue:671", "跳转失败", err);
+            common_vendor.index.__f__("error", "at packages/my-friendInvitation/my-friendInvitation.vue:690", "跳转失败", err);
             common_vendor.index.showToast({
               title: "页面路径未配置",
               icon: "none"
@@ -468,7 +475,7 @@ const _sfc_main = {
       const name = user.nickname || user.realName || "匿名用户";
       const avatarUrl = user.avatar || defaultAvatar;
       const url = `/packages/applicationBusinessCard/applicationBusinessCard?id=${user.id}&name=${encodeURIComponent(name)}&avatar=${encodeURIComponent(avatarUrl)}&fromShare=1`;
-      common_vendor.index.__f__("log", "at packages/my-friendInvitation/my-friendInvitation.vue:880", "从推荐商友页跳转到名片申请页, URL:", url);
+      common_vendor.index.__f__("log", "at packages/my-friendInvitation/my-friendInvitation.vue:899", "从推荐商友页跳转到名片申请页, URL:", url);
       common_vendor.index.navigateTo({
         url
       });

@@ -1,9 +1,9 @@
 <template>
 	<view class="page-container">
 		<!-- 1. 统计信息栏 -->
-		<view class="stats-bar">
+		<!-- <view class="stats-bar">
 			<text>共 <text class="highlight">{{ total }}</text> 人报名</text>
-		</view>
+		</view> -->
 
 		<view class="tips-bar">
 			<uni-icons type="info" size="14" color="#909399"></uni-icons>
@@ -12,19 +12,20 @@
 
 		<!-- 2. 表格容器 (使用 scroll-view 实现滚动) -->
 		<!-- scroll-y 必须要有确定的高度，这里通过 calc 计算剩余高度 -->
-		<scroll-view scroll-y scroll-x class="table-scroll" @scrolltolower="loadMore">
+		<scroll-view scroll-y scroll-x class="table-scroll" enable-flex="true" @scrolltolower="loadMore"
+			:lower-threshold="50">
 			<view class="table-wrapper">
 				<!-- 表头 (Sticky 吸顶) -->
 				<view class="table-header">
 					<view class="th cell-name">姓名</view>
 					<view class="th cell-nickname">昵称</view>
 					<view class="th cell-gender">性别</view>
-					<view class="th cell-era">年代</view>
+					<!-- <view class="th cell-era">年代</view> -->
 					<view class="th cell-mobile">手机</view>
-					<view class="th cell-company">公司</view>
-					<view class="th cell-job">职务</view>
-					<view class="th cell-level">社交级别</view>
-					<view class="th cell-vip">会员级别</view>
+					<!-- <view class="th cell-company">公司</view> -->
+					<!-- <view class="th cell-level">社交级别</view> -->
+					<!-- <view class="th cell-job">职务</view> -->
+					<!-- <view class="th cell-vip">会员级别</view> -->
 				</view>
 
 				<!-- 数据行 -->
@@ -33,12 +34,12 @@
 					<view class="td cell-name">{{ item.realName || '-' }}</view>
 					<view class="td cell-nickname">{{ item.nickname || '-' }}</view>
 					<view class="td cell-gender">{{ getGenderText(item.sex) }}</view>
-					<view class="td cell-era">{{ item.era || '-' }}</view>
+					<!-- <view class="td cell-era">{{ item.era || '-' }}</view> -->
 					<view class="td cell-mobile">{{ item.mobile || '-' }}</view>
-					<view class="td cell-company">{{ item.companyName || '-' }}</view>
-					<view class="td cell-job">{{ item.professionalTitle || '-' }}</view>
-					<view class="td cell-level">{{ item.level || '-' }}</view>
-					<view class="td cell-vip">{{ item.topUpLevel || '-' }}</view>
+					<!-- <view class="td cell-company">{{ item.companyName || '-' }}</view> -->
+					<!-- <view class="td cell-job">{{ item.professionalTitle || '-' }}</view> -->
+					<!-- <view class="td cell-level">{{ item.level || '-' }}</view> -->
+					<!-- <view class="td cell-vip">{{ item.topUpLevel || '-' }}</view> -->
 				</view>
 
 				<!-- 加载状态 -->
@@ -78,7 +79,7 @@
 	const list = ref([]);
 	const total = ref(0);
 	const pageNo = ref(1);
-	const pageSize = 20;
+	const pageSize = 10;
 	const loadingStatus = ref('more'); // more, loading, noMore
 
 	// --- 生命周期 ---
@@ -134,6 +135,14 @@
 				} else {
 					loadingStatus.value = 'more';
 					pageNo.value++;
+
+					if (list.value.length < 12) {
+						console.log('数据量较少，自动加载下一页...');
+						// 使用 nextTick 或 setTimeout 避免递归过快
+						setTimeout(() => {
+							loadMore();
+						}, 200);
+					}
 				}
 			} else {
 				loadingStatus.value = 'more'; // 失败允许重试
@@ -146,6 +155,8 @@
 			loadingStatus.value = 'more';
 			console.error(e);
 		}
+
+		console.log(`加载完成: 当前数量=${list.value.length}, 总数=${total.value}, 状态=${loadingStatus.value}`);
 	};
 
 	const loadMore = () => {
@@ -246,6 +257,7 @@
 		flex-direction: column;
 		height: 100vh;
 		background-color: #fff;
+		position: relative;
 	}
 
 	/* 统计栏 */
@@ -282,6 +294,7 @@
 		height: 0;
 		/* 配合 flex 布局 */
 		width: 100%;
+		overflow: hidden;
 		// white-space: nowrap;
 		/* 允许横向滚动（虽然这里主要做纵向，但为了不换行） */
 	}

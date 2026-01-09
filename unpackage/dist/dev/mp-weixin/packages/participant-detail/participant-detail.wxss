@@ -5,6 +5,7 @@
   flex-direction: column;
   height: 100vh;
   background-color: #fff;
+  position: relative;
 }
 
 /* 统计栏 */
@@ -40,6 +41,7 @@
   height: 0;
   /* 配合 flex 布局 */
   width: 100%;
+  overflow: hidden;
   /* 允许横向滚动（虽然这里主要做纵向，但为了不换行） */
 }
 .table-wrapper.data-v-c2f43f13 {

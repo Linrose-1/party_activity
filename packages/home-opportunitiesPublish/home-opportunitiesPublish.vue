@@ -732,7 +732,7 @@
 	// --- 提交表单 ---
 	function submitPost() {
 		// 额度检查拦截
-		if (isQuotaLoaded.value && remainingQuota.value == 0) {
+		if (isQuotaLoaded.value && currentRemainingQuota.value == 0) {
 			showQuotaExceededModal();
 			return;
 		}
