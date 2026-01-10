@@ -134,19 +134,37 @@
 }
 .uni-list .uni-list-cell.data-v-12e513cf {
   display: flex;
+  align-items: center;
 }
 .uni-list .uni-list-cell-left.data-v-12e513cf {
   padding: 10rpx;
   border-radius: 10rpx;
+  flex-shrink: 0;
 }
 .uni-list .uni-list-cell-db.data-v-12e513cf {
   margin-left: 10rpx;
   padding: 10rpx;
   background-color: #FFF0E5;
-  min-width: 500rpx;
+  flex: 1;
+  min-width: 0;
 }
 .uni-list .uni-list-cell-db .uni-input.data-v-12e513cf {
   margin-left: 10rpx;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+.uni-list .uni-list-cell-db .uni-input text.data-v-12e513cf,
+.uni-list .uni-list-cell-db .uni-input .placeholder.data-v-12e513cf {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.uni-list .uni-list-cell-db .uni-input .arrow.data-v-12e513cf {
+  color: #999;
+  font-size: 32rpx;
+  margin-left: auto;
+  padding: 0 10rpx;
 }
 
 /* 聚会列表 */

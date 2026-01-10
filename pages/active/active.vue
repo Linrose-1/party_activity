@@ -154,6 +154,7 @@
 	const statusIndex = ref(0); // Picker 使用的索引
 	// 位置信息
 	const selectedLocationInfo = ref(null);
+	let filterDebounceTimer = null;
 
 	// --- 计算属性 (用于 Picker 的显示) ---
 	const typePickerRange = computed(() => {
@@ -418,6 +419,18 @@
 			},
 			fail: (err) => {
 				console.log('选择位置失败:', err);
+
+				if (err.errMsg.includes('auth deny') || err.errMsg.includes('auth denied')) {
+					uni.showModal({
+						title: '定位权限未开启',
+						content: '需要您的位置权限来筛选附近的聚会，是否前往设置开启？',
+						success: (res) => {
+							if (res.confirm) {
+								uni.openSetting(); // 打开系统设置界面
+							}
+						}
+					});
+				}
 			}
 		});
 	};
@@ -464,14 +477,38 @@
 	// --- 监听器 ---
 
 	// 监听所有筛选条件的变化，自动重新搜索
+	// watch(
+	// 	[searchKeyword, selectedCategory, statusIndex, selectedLocationInfo],
+	// 	(newValue, oldValue) => {
+	// 		console.log('筛选条件变化，重新搜索...');
+	// 		uni.showLoading({
+	// 			title: '正在筛选...'
+	// 		});
+	// 		// 调用 getActiveList(false) 来刷新列表，而不是追加
+	// 		getActiveList(false).finally(() => {
+	// 			//无论成功失败，都在请求结束后隐藏加载
+	// 			uni.hideLoading();
+	// 		});
+	// 	}, {
+	// 		deep: true // deep: true 对监听 selectedLocationInfo 对象变化是必需的
+	// 	}
+	// );
+
 	watch(
 		[searchKeyword, selectedCategory, statusIndex, selectedLocationInfo],
-		(newValue, oldValue) => {
-			console.log('筛选条件变化，重新搜索...');
-			// 调用 getActiveList(false) 来刷新列表，而不是追加
-			getActiveList(false);
+		() => { // 不再需要 newValue, oldValue
+			clearTimeout(filterDebounceTimer);
+			filterDebounceTimer = setTimeout(() => {
+				console.log('筛选条件变化（已防抖），重新搜索...');
+				uni.showLoading({
+					title: '正在筛选...'
+				});
+				getActiveList(false).finally(() => {
+					uni.hideLoading();
+				});
+			}, 300); // 延迟300毫秒执行，可以有效合并快速的连续操作
 		}, {
-			deep: true // deep: true 对监听 selectedLocationInfo 对象变化是必需的
+			deep: true
 		}
 	);
 
@@ -690,21 +727,44 @@
 
 		.uni-list-cell {
 			display: flex;
+			align-items: center;
 		}
 
 		.uni-list-cell-left {
 			padding: 10rpx;
 			border-radius: 10rpx;
+			flex-shrink: 0;
 		}
 
 		.uni-list-cell-db {
 			margin-left: 10rpx;
 			padding: 10rpx;
 			background-color: #FFF0E5;
-			min-width: 500rpx;
+			flex: 1; // (1) 让这个容器占据所有剩余空间
+			min-width: 0; // (2) 允许它被压缩，这是防止溢出的关键！
 
 			.uni-input {
 				margin-left: 10rpx;
+				display: flex;
+				align-items: center;
+				width: 100%;
+
+				// 文本或占位符的样式
+				text,
+				.placeholder {
+					// (1) 不再需要 flex 相关的属性，只做文本截断
+					white-space: nowrap;
+					overflow: hidden;
+					text-overflow: ellipsis;
+				}
+
+				.arrow {
+					color: #999;
+					font-size: 32rpx;
+					// (2) 关键：使用 margin-left: auto 将箭头推到最右边
+					margin-left: auto;
+					padding: 0 10rpx; // (3) 给箭头左侧一点空间，避免紧贴文字
+				}
 			}
 		}
 	}
