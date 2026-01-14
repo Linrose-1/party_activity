@@ -688,18 +688,18 @@
 				uni.setStorageSync('token', data.accessToken);
 				uni.setStorageSync('userId', data.userId);
 
-				// 【关键】登录成功后，立即更新状态并刷新数据
-				isLogin.value = true;
-				loggedInUserId.value = data.userId;
+				// // 【关键】登录成功后，立即更新状态并刷新数据
+				// isLogin.value = true;
+				// loggedInUserId.value = data.userId;
 
 				// 刷新用户信息和列表
 				fetchCurrentUserInfo();
-				getBusinessOpportunitiesList(true);
+				// getBusinessOpportunitiesList(true);
 
 				// 如果之前使用了邀请码，现在可以清除了
-				if (pendingInviteCode) {
-					uni.removeStorageSync('pendingInviteCode');
-				}
+				// if (pendingInviteCode) {
+				// 	uni.removeStorageSync('pendingInviteCode');
+				// }
 			} else {
 				// 失败不弹窗，保持静默
 				console.log('静默登录未成功 (可能是非新用户需手机号或接口异常):', error);
@@ -708,6 +708,26 @@
 			console.error('静默登录流程异常:', e);
 		}
 	};
+	
+	//微信登录完还需要获取用户信息
+	const fetchCurrentUserInfo = async () => {
+			const {
+				data,
+				error
+			} = await request('/app-api/member/user/get', {
+				method: 'GET'
+			});
+			if (error) {
+				console.error("首页实时获取用户信息失败:", error);
+				// 失败时可以考虑使用缓存数据作为兜底
+				currentUserInfo.value = getCachedUserInfo();
+			} else {
+				// currentUserInfo.value = data;
+				// console.log("首页实时获取用户信息成功:", currentUserInfo.value);
+				// // 【重要】获取成功后，用新数据更新本地缓存
+				uni.setStorageSync('userInfo', JSON.stringify(data));
+			}
+		};
 </script>
 
 <style lang="scss" scoped>
