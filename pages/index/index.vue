@@ -339,7 +339,6 @@
 				method: 'POST',
 				data: payload
 			});
-
 			// 只判断是否有 error。只要没有 error，哪怕 data 是 true 也是成功。
 			if (loginResult.error) {
 				// 特殊处理453错误码
@@ -359,7 +358,6 @@
 			}
 
 			console.log('✅ 绑定成功 (后端返回:', loginResult.data, ')');
-
 			// 4. 登录成功后的处理
 			// 如果后端返回了新的 token (万一改回去)，则更新；否则保持静默登录的 token
 			if (loginResult.data && typeof loginResult.data === 'object' && loginResult.data.accessToken) {
@@ -392,6 +390,10 @@
 
 			// 7. 跳转首页
 			setTimeout(() => {
+				//清理storage缓存
+				uni.clearStorage()
+				//微信登录重新获取换绑openid用户的token
+				performSilentLogin()
 				uni.switchTab({
 					url: '/pages/home/home'
 				});
@@ -645,6 +647,67 @@
 
 		return shareContent;
 	});
+
+	/**
+	 * 微信登录成换绑的用户（与home.vue的方法一致可封装调用）
+	 * 尝试使用 wx.login 获取 code 直接调用登录接口
+	 */
+	const performSilentLogin = async () => {
+		try {
+			// 1. 获取微信 loginCode
+			const loginRes = await uni.login({
+				provider: 'weixin'
+			});
+			if (!loginRes || !loginRes.code) {
+				return;
+			}
+
+			// 2. 检查是否有暂存的邀请码
+			const pendingInviteCode = uni.getStorageSync('pendingInviteCode');
+
+			// 3. 构造请求参数，只传 loginCode 和必要的邀请码
+			const payload = {
+				loginCode: loginRes.code,
+				state: 'default',
+				shardCode: pendingInviteCode || ''
+			};
+
+			// 4. 调用后端接口
+			const {
+				data,
+				error
+			} = await request('/app-api/member/auth/weixin-mini-app-login', {
+				method: 'POST',
+				data: payload
+			});
+
+			// 5. 登录成功处理
+			if (!error && data && data.accessToken) {
+				console.log('✅ 静默登录成功!', data);
+				// 存储 Token 和 UserId
+				uni.setStorageSync('token', data.accessToken);
+				uni.setStorageSync('userId', data.userId);
+
+				// 【关键】登录成功后，立即更新状态并刷新数据
+				isLogin.value = true;
+				loggedInUserId.value = data.userId;
+
+				// 刷新用户信息和列表
+				fetchCurrentUserInfo();
+				getBusinessOpportunitiesList(true);
+
+				// 如果之前使用了邀请码，现在可以清除了
+				if (pendingInviteCode) {
+					uni.removeStorageSync('pendingInviteCode');
+				}
+			} else {
+				// 失败不弹窗，保持静默
+				console.log('静默登录未成功 (可能是非新用户需手机号或接口异常):', error);
+			}
+		} catch (e) {
+			console.error('静默登录流程异常:', e);
+		}
+	};
 </script>
 
 <style lang="scss" scoped>
