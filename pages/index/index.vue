@@ -254,10 +254,6 @@
 	};
 
 	// --- 5. 核心登录逻辑 ---
-
-	/**
-	 * @description 处理一键登录
-	 */
 	/**
 	 * @description 处理一键登录
 	 */
@@ -344,11 +340,7 @@
 				data: payload
 			});
 
-			// ==================== 【核心修复点】开始 ====================
-			// 旧代码：if (loginResult.error || !loginResult.data?.accessToken) { ... }
-			// 错误原因：后端返回 data: true，true 没有 accessToken 属性，导致报错。
-
-			// 新代码：只判断是否有 error。只要没有 error，哪怕 data 是 true 也是成功。
+			// 只判断是否有 error。只要没有 error，哪怕 data 是 true 也是成功。
 			if (loginResult.error) {
 				// 特殊处理453错误码
 				if (loginResult.error.code === 453) {
@@ -365,7 +357,6 @@
 				getLoginCode();
 				return;
 			}
-			// ==================== 【核心修复点】结束 ====================
 
 			console.log('✅ 绑定成功 (后端返回:', loginResult.data, ')');
 
@@ -388,6 +379,10 @@
 			if (currentUserId) {
 				await handlePendingShareReward(currentUserId);
 			}
+
+			console.log('🧹 [登录页] 绑定完成，清除本地 Token/UserId 以触发首页静默登录刷新');
+			uni.removeStorageSync('token');
+			uni.removeStorageSync('userId');
 
 			uni.hideLoading();
 			uni.showToast({
