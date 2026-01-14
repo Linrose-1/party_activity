@@ -16,7 +16,7 @@
 							<uni-easyinput v-model="form.sponsorName" placeholder="请输入赞助商名称" class="standard-input" />
 						</uni-forms-item>
 
-						<uni-forms-item label="品牌Logo" >
+						<uni-forms-item label="品牌Logo">
 							<view class="upload-box logo-upload" @click="uploadLogo">
 								<image v-if="form.logoUrl" :src="form.logoUrl" mode="aspectFit" class="uploaded-img">
 								</image>
@@ -27,7 +27,7 @@
 							</view>
 						</uni-forms-item>
 
-						<uni-forms-item label="品牌简介" >
+						<uni-forms-item label="品牌简介">
 							<uni-easyinput type="textarea" v-model="form.introduction" placeholder="请输入200字以内的简介"
 								maxlength="200" class="standard-textarea" />
 						</uni-forms-item>
@@ -88,8 +88,10 @@
 						</template>
 
 						<uni-forms-item label="品牌图集">
-							<DragImageUploader v-model="form.galleryImageUrls" :max-count="9"
-								@add-image="uploadGallery" />
+							<view class="uploader-wrap">
+								<DragImageUploader v-model="form.galleryImageUrls" :max-count="9"
+									@add-image="uploadGallery" />
+							</view>
 						</uni-forms-item>
 
 						<view class="section-divider"></view>
@@ -688,6 +690,19 @@
 
 	.name-wrapper {
 		flex: 1;
+	}
+
+	.uploader-wrap {
+		width: 100%;
+		/* 关键：触发 BFC，清除子元素浮动造成的塌陷 */
+		overflow: hidden;
+		/* 关键：给一个最小高度，防止没图片时完全缩在一起 */
+		min-height: 200rpx;
+		/* 确保它是块级元素 */
+		display: block;
+		position: relative;
+		/* 稍微给点下边距，防止贴得太紧 */
+		margin-bottom: 20rpx;
 	}
 
 	.section-divider {

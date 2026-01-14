@@ -46,6 +46,7 @@
 							</view>
 							<view class="relation-tags"
 								v-if="business.fellowTownspeopleCityFlag === 1 || business.peerFlag === 1 || business.classmateFlag === 1">
+								<text v-if="business.friendParentFlag === 1" class="tag fellow-circle">同圈</text>
 								<text v-if="business.fellowTownspeopleCityFlag === 1"
 									class="tag fellow-townsman">同乡</text>
 								<text v-if="business.peerFlag === 1" class="tag peer">同行</text>
@@ -638,7 +639,7 @@
 				/* 与上方的公司信息拉开距离 */
 			}
 
-			// 【新增】通用标签样式
+			// 通用标签样式
 			.tag {
 				font-size: 16rpx;
 				padding: 3rpx 12rpx;
@@ -647,11 +648,19 @@
 				white-space: nowrap;
 			}
 
-			// 【新增】不同类型标签的颜色
+			// 不同类型标签的颜色
 			.fellow-townsman {
 				background-color: #e8f5e9; // 淡绿色背景
 				color: #388e3c; // 深绿色文字
 				border: 1rpx solid #a5d6a7;
+			}
+
+			.fellow-circle {
+				background-color: #f3e5f5;
+				/* 浅紫色背景 */
+				color: #9c27b0;
+				/* 紫色文字 */
+				border: 1rpx solid #e1bee7;
 			}
 
 			.peer {

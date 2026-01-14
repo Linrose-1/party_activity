@@ -79,7 +79,7 @@
 							<view class="price-wrapper">
 								<text class="currency">¥</text>
 								<!-- 显示差价 -->
-								<text class="price">{{ level.experience }}</text>
+								<text class="price">{{ level.priceDifference }}</text>
 							</view>
 
 							<!-- 选中状态指示器 -->
@@ -167,7 +167,7 @@
 			// 【修复】会员模式：使用 level 字段查找选中项
 			const level = memberLevels.value.find(item => item.level === selectedLevelNum.value);
 			// 返回 experience 差价
-			return level ? Number(level.experience).toFixed(2) : '0.00';
+			return level ? Number(level.priceDifference).toFixed(2) : '0.00';
 		}
 	});
 

@@ -33,7 +33,7 @@ const _sfc_main = {
         return "0.00";
       } else {
         const level = memberLevels.value.find((item) => item.level === selectedLevelNum.value);
-        return level ? Number(level.experience).toFixed(2) : "0.00";
+        return level ? Number(level.priceDifference).toFixed(2) : "0.00";
       }
     });
     common_vendor.onLoad((options) => {
@@ -251,7 +251,7 @@ const _sfc_main = {
             b: common_vendor.t(level.name),
             c: common_vendor.t(level.duration || "永久"),
             d: common_vendor.t(level.price),
-            e: common_vendor.t(level.experience),
+            e: common_vendor.t(level.priceDifference),
             f: selectedLevelNum.value === level.level
           }, selectedLevelNum.value === level.level ? {} : {}, {
             g: level.level,

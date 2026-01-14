@@ -149,25 +149,14 @@
   /* 这里的 padding 可以保留，作为分割线和滚动区之间的间距 */
   padding-top: 10rpx;
 }
-.action-scroll.data-v-530922ba {
-  width: 100%;
-  white-space: nowrap;
-  /* 移除 scroll-view 上的 padding，避免影响滚动条位置 */
-}
-.action-buttons-inner.data-v-530922ba {
+.action-buttons.data-v-530922ba {
   display: flex;
-  flex-direction: row;
   justify-content: flex-end;
+  /* 按钮靠右对齐 */
   align-items: center;
   gap: 16rpx;
-  width: -webkit-max-content;
-  width: max-content;
-  min-width: 100%;
-  /* 【关键修复】让内部容器的顶部有 padding，从而把按钮“压”下去 */
-  /* 20rpx 足够容纳 top: -16rpx 的徽标 */
-  padding-top: 20rpx;
-  padding-right: 4rpx;
-  padding-bottom: 4rpx;
+  /* 【关键】允许换行，以防万一按钮过多 */
+  flex-wrap: wrap;
 }
 
 /* 3. 关键：针对所有按钮禁止压缩 */
@@ -180,13 +169,32 @@
 
 /* 针对带徽标的按钮容器也要禁止压缩 */
 .icon-btn.data-v-530922ba {
-  flex-shrink: 0 !important;
+  position: relative;
+  overflow: visible;
+  /* 允许徽标溢出 */
 }
 .action-buttons.data-v-530922ba {
   display: flex;
   justify-content: flex-end;
   flex-wrap: wrap;
   gap: 16rpx;
+}
+.badge-dot.data-v-530922ba {
+  position: absolute;
+  top: -16rpx;
+  right: -10rpx;
+  background-color: #f56c6c;
+  color: #fff;
+  font-size: 20rpx;
+  height: 32rpx;
+  min-width: 32rpx;
+  line-height: 32rpx;
+  text-align: center;
+  border-radius: 16rpx;
+  padding: 0 8rpx;
+  border: 2rpx solid #fff;
+  box-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.15);
+  z-index: 10;
 }
 
 /* --- 按钮样式重构 --- */

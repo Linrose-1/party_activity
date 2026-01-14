@@ -136,40 +136,32 @@
 						</view>
 
 						<view class="card-footer">
-							<scroll-view scroll-x="true" class="action-scroll" show-scrollbar="false">
-								<view class="action-buttons-inner">
+							<view class="action-buttons">
+								<!-- 核心操作按钮 (始终显示) -->
+								<button v-if="item.paddingReturnCount > 0" class="btn btn-gradient-primary icon-btn"
+									@click.stop="manageRefunds(item, 'individual')">
+									处理申请 <view class="badge-dot">{{ item.paddingReturnCount }}</view>
+								</button>
 
-									<button v-if="item.paddingReturnCount > 0" class="btn btn-gradient-primary icon-btn"
-										@click.stop="manageRefunds(item, 'individual')">
-										处理申请 <view class="badge-dot">{{ item.paddingReturnCount }}</view>
-									</button>
+								<!-- 【优化1】为“报名商友”按钮增加待确认提醒 -->
+								<button class="btn btn-outline-primary icon-btn"
+									@click.stop="navigateToRegisteredUsers(item)">
+									报名商友
+									<view v-if="item.pendingConfirmCount > 0" class="badge-dot">
+										{{ item.pendingConfirmCount }}
+									</view>
+								</button>
 
-									<button class="btn btn-outline-primary"
-										@click.stop="navigateToParticipantList(item.id)">
-										参会名单
-									</button>
+								<button v-if="item.statusStr === '活动取消' || item.statusStr === '聚会取消'"
+									class="btn btn-gradient-danger" @click.stop="manageRefunds(item, 'all')">
+									处理退款
+								</button>
 
-									<button v-if="['未开始', '报名中', '活动即将开始', '进行中'].includes(item.statusStr)"
-										class="btn btn-outline-danger" @click.stop="cancelActivity(item.id)">
-										取消聚会
-									</button>
-
-									<button v-if="item.statusStr === '活动取消' || item.statusStr === '聚会取消'"
-										class="btn btn-gradient-danger" @click.stop="manageRefunds(item, 'all')">
-										处理退款
-									</button>
-
-									<button v-if="item.statusStr !== '活动取消' && item.statusStr !== '聚会取消'"
-										class="btn btn-light" @click.stop="navigateToRegisteredUsers(item)">
-										报名商友
-									</button>
-
-									<button class="btn btn-light" @click.stop="navigateToEdit(item.id)">
-										修改编辑
-									</button>
-
-								</view>
-							</scroll-view>
+								<!-- 【优化2】新增“更多”按钮 -->
+								<button class="btn btn-light" @click.stop="showMoreActions(item)">
+									更多
+								</button>
+							</view>
 							<!-- <view class="action-buttons">
 								<button v-if="item.paddingReturnCount > 0" class="btn btn-gradient-primary icon-btn"
 									@click.stop="manageRefunds(item, 'individual')">
@@ -356,6 +348,46 @@
 
 
 	// --- 辅助方法 ---
+
+	/**
+	 * @description 【优化2】点击“更多”按钮，弹出操作菜单
+	 * @param {object} activityItem - 当前操作的聚会对象
+	 */
+	const showMoreActions = (activityItem) => {
+		// 1. 动态构建操作列表
+		const itemList = [];
+		const availableActions = {};
+
+		// 根据聚会状态动态添加可执行的操作
+		// 参会名单
+		itemList.push('参会名单');
+		availableActions['参会名单'] = () => navigateToParticipantList(activityItem.id);
+
+		// 取消聚会
+		if (['未开始', '报名中', '活动即将开始', '进行中'].includes(activityItem.statusStr)) {
+			itemList.push('取消聚会');
+			availableActions['取消聚会'] = () => cancelActivity(activityItem.id);
+		}
+
+		// 修改编辑
+		itemList.push('修改编辑');
+		availableActions['修改编辑'] = () => navigateToEdit(activityItem.id);
+
+		// 2. 调用 uni.showActionSheet
+		uni.showActionSheet({
+			itemList: itemList,
+			success: (res) => {
+				const tappedItem = itemList[res.tapIndex];
+				// 3. 根据用户点击的文本，执行对应的函数
+				if (availableActions[tappedItem]) {
+					availableActions[tappedItem]();
+				}
+			},
+			fail: (res) => {
+				console.log(res.errMsg);
+			}
+		});
+	};
 
 	/**
 	 * 【核心修改 1 & 2】根据状态字符串返回对应的 CSS 类名
@@ -733,28 +765,38 @@
 		padding-top: 10rpx;
 	}
 
-	.action-scroll {
-		width: 100%;
-		white-space: nowrap;
-		/* 移除 scroll-view 上的 padding，避免影响滚动条位置 */
-	}
-
-	.action-buttons-inner {
+	.action-buttons {
 		display: flex;
-		flex-direction: row;
 		justify-content: flex-end;
+		/* 按钮靠右对齐 */
 		align-items: center;
 		gap: 16rpx;
-		width: max-content;
-		min-width: 100%;
-
-		/* 【关键修复】让内部容器的顶部有 padding，从而把按钮“压”下去 */
-		/* 20rpx 足够容纳 top: -16rpx 的徽标 */
-		padding-top: 20rpx;
-
-		padding-right: 4rpx;
-		padding-bottom: 4rpx;
+		/* 【关键】允许换行，以防万一按钮过多 */
+		flex-wrap: wrap;
 	}
+
+	// .action-scroll {
+	// 	width: 100%;
+	// 	white-space: nowrap;
+	// 	/* 移除 scroll-view 上的 padding，避免影响滚动条位置 */
+	// }
+
+	// .action-buttons-inner {
+	// 	display: flex;
+	// 	flex-direction: row;
+	// 	justify-content: flex-end;
+	// 	align-items: center;
+	// 	gap: 16rpx;
+	// 	width: max-content;
+	// 	min-width: 100%;
+
+	// 	/* 【关键修复】让内部容器的顶部有 padding，从而把按钮“压”下去 */
+	// 	/* 20rpx 足够容纳 top: -16rpx 的徽标 */
+	// 	padding-top: 20rpx;
+
+	// 	padding-right: 4rpx;
+	// 	padding-bottom: 4rpx;
+	// }
 
 	/* 3. 关键：针对所有按钮禁止压缩 */
 	.btn {
@@ -766,7 +808,9 @@
 
 	/* 针对带徽标的按钮容器也要禁止压缩 */
 	.icon-btn {
-		flex-shrink: 0 !important;
+		position: relative;
+		overflow: visible;
+		/* 允许徽标溢出 */
 	}
 
 	.action-buttons {
@@ -774,6 +818,24 @@
 		justify-content: flex-end;
 		flex-wrap: wrap;
 		gap: 16rpx;
+	}
+
+	.badge-dot {
+		position: absolute;
+		top: -16rpx;
+		right: -10rpx;
+		background-color: $danger-color;
+		color: #fff;
+		font-size: 20rpx;
+		height: 32rpx;
+		min-width: 32rpx;
+		line-height: 32rpx;
+		text-align: center;
+		border-radius: 16rpx;
+		padding: 0 8rpx;
+		border: 2rpx solid #fff;
+		box-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.15);
+		z-index: 10;
 	}
 
 	/* --- 按钮样式重构 --- */

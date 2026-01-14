@@ -76,6 +76,7 @@ const _sfc_main = {
             id: item.id,
             title: item.title,
             content: item.content,
+            // images: item.img ? item.img.split(',').filter(Boolean) : [],
             images: item.img ? item.img.split(",").filter(Boolean) : [],
             time: formatTimestamp(item.createTime),
             user: {
@@ -93,7 +94,7 @@ const _sfc_main = {
           pageNo.value++;
         }
       } catch (err) {
-        common_vendor.index.__f__("error", "at packages/my-systemConstruction/my-systemConstruction.vue:177", "getSuggestionList 逻辑异常:", err);
+        common_vendor.index.__f__("error", "at packages/my-systemConstruction/my-systemConstruction.vue:179", "getSuggestionList 逻辑异常:", err);
         loadingStatus.value = "more";
         common_vendor.index.showToast({
           title: "页面加载异常",
@@ -171,9 +172,10 @@ const _sfc_main = {
                 c: imgIndex
               };
             }),
-            i: common_vendor.n("images-count-" + suggestion.images.length)
+            i: suggestion.images.length === 1 ? "widthFix" : "aspectFill",
+            j: common_vendor.n("images-count-" + suggestion.images.length)
           } : {}, {
-            j: suggestion.id
+            k: suggestion.id
           });
         }),
         k: suggestionList.value.length === 0 && loadingStatus.value === "noMore"

@@ -99,7 +99,10 @@
 
 /* 弹窗打开时降低层级 */
 .footer-action-bar.z-index-low.data-v-34d71473 {
-  z-index: 1;
+  z-index: -1 !important;
+  opacity: 0;
+  pointer-events: none;
+  /* 禁止点击 */
 }
 .action-group.data-v-34d71473 {
   display: flex;

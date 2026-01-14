@@ -1,9 +1,9 @@
 <template>
 	<view class="user-opportunities-app">
 		<!-- 1. 页面头部，显示用户名 -->
-		<view class="page-header">
+		<!-- <view class="page-header">
 			<text class="user-name-title">{{ pageTitle }}</text>
-		</view>
+		</view> -->
 
 		<!-- 2. 商机列表 -->
 		<view class="post-list">

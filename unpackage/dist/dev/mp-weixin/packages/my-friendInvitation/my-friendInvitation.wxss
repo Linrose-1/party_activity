@@ -108,6 +108,13 @@
   border-radius: 6rpx;
   font-weight: 500;
 }
+.fellow-circle.data-v-a29497fd {
+  background-color: #f3e5f5;
+  /* 浅紫色背景 */
+  color: #9c27b0;
+  /* 紫色文字 */
+  border: 1rpx solid #e1bee7;
+}
 .fellow-townsman.data-v-a29497fd {
   background-color: #e8f5e9;
   color: #388e3c;

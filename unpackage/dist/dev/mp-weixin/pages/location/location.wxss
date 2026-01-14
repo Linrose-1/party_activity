@@ -161,6 +161,13 @@
   color: #388e3c;
   border: 1rpx solid #a5d6a7;
 }
+.business-card .business-info .fellow-circle.data-v-4d9b4fcb {
+  background-color: #f3e5f5;
+  /* 浅紫色背景 */
+  color: #9c27b0;
+  /* 紫色文字 */
+  border: 1rpx solid #e1bee7;
+}
 .business-card .business-info .peer.data-v-4d9b4fcb {
   background-color: #e3f2fd;
   color: #1976d2;

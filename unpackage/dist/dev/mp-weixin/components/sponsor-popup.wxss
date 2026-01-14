@@ -220,6 +220,18 @@
 .name-wrapper.data-v-4df7dc31 {
   flex: 1;
 }
+.uploader-wrap.data-v-4df7dc31 {
+  width: 100%;
+  /* 关键：触发 BFC，清除子元素浮动造成的塌陷 */
+  overflow: hidden;
+  /* 关键：给一个最小高度，防止没图片时完全缩在一起 */
+  min-height: 200rpx;
+  /* 确保它是块级元素 */
+  display: block;
+  position: relative;
+  /* 稍微给点下边距，防止贴得太紧 */
+  margin-bottom: 20rpx;
+}
 .section-divider.data-v-4df7dc31 {
   height: 1px;
   background-color: #F0F0F0;

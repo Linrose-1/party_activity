@@ -47,7 +47,7 @@
 		</template>
 
 		<!-- ==================== 底部动态操作栏 ==================== -->
-		<view class="footer-action-bar" v-if="userInfo" :class="{ 'z-index-low': isPopupOpen }">
+		<view class="footer-action-bar" v-if="userInfo" :class="{ 'z-index-low': isAnyPopupOpen }">
 
 			<!-- 场景 A: 未登录用户 -->
 			<view v-if="userStatus === 'GUEST'" class="action-group">
@@ -55,17 +55,22 @@
 				<button class="btn btn-primary" @click="goToHome">首页预览</button>
 			</view>
 
-			<!-- 场景 B: 已登录，陌生人 -->
+			<!-- 场景 B: 已登录，陌生人-->
 			<view v-else-if="userStatus === 'STRANGER'" class="action-group">
-				<!-- 这里预留加圈逻辑，目前先做按钮 -->
-				<button class="btn btn-primary btn-block" @click="handleAddCircle">
+				<button class="btn btn-secondary" @click="openShareTypePopup">
+					<uni-icons type="paperplane" size="18" color="#fff"></uni-icons> 分享
+				</button>
+				<button class="btn btn-primary" @click="handleAddCircle">
 					<uni-icons type="plusempty" size="18" color="#fff"></uni-icons> 加圈
 				</button>
 			</view>
 
 			<!-- 场景 C: 已登录，已是圈友 -->
 			<view v-else-if="userStatus === 'FRIEND'" class="action-group">
-				<button class="btn btn-success btn-block" disabled>
+				<button class="btn btn-secondary" @click="openShareTypePopup">
+					<uni-icons type="paperplane" size="18" color="#fff"></uni-icons> 分享
+				</button>
+				<button class="btn btn-success" disabled>
 					<uni-icons type="star-filled" size="18" color="#fff"></uni-icons> 已互圈
 				</button>
 			</view>
@@ -113,6 +118,9 @@
 	</view>
 
 	<AddCircleConfirmPopup ref="addCirclePopup" />
+
+	<ShareTypePopup ref="shareTypePopupRef" @selectMode="handleShareTypeSelect" @change="onShareTypePopupChange" />
+
 </template>
 
 <script setup>
@@ -129,6 +137,10 @@
 	import MyCard from '../../components/MyCard.vue';
 	import request from '../../utils/request.js';
 	import AddCircleConfirmPopup from '@/components/AddCircleConfirmPopup.vue';
+	import {
+		getInviteCode
+	} from '../../utils/user.js'; // 引入工具函数获取登录用户邀请码
+	import ShareTypePopup from '@/components/ShareTypePopup.vue'; // 引入新组件
 
 	// --- 1. 状态管理 ---
 	const userInfo = ref(null);
@@ -149,6 +161,9 @@
 	const isPopupOpen = ref(false);
 
 	const addCirclePopup = ref(null);
+	const shareTypePopupRef = ref(null);
+	const currentShareMode = ref('PROXY'); // 默认模式， 'SELF' | 'PROXY'
+	const isShareTypePopupOpen = ref(false);
 
 	// 假设后端返回的名片信息里有一个字段表示是否互圈，比如 isFriend
 	// 目前先模拟一下，或者根据需求说明先预留
@@ -599,7 +614,35 @@
 		];
 	});
 
+	const isAnyPopupOpen = computed(() => {
+		return isPopupOpen.value || isShareTypePopupOpen.value;
+	});
+
+	// 处理新弹窗的状态变化
+	const onShareTypePopupChange = (e) => {
+		isShareTypePopupOpen.value = e.show;
+	};
+
 	// --- 5. 分享相关逻辑 ---
+
+	/**
+	 * 打开转发选择弹窗
+	 */
+	const openShareTypePopup = () => {
+		isShareTypePopupOpen.value = true; // 标记打开
+		shareTypePopupRef.value.open();
+	};
+
+	/**
+	 * 处理分享模式选择
+	 * @param {string} mode 'SELF' 或 'PROXY'
+	 */
+	const handleShareTypeSelect = (mode) => {
+		console.log('用户选择了分享模式:', mode);
+		currentShareMode.value = mode;
+		// 注意：这里不需要做任何跳转，因为点击弹窗按钮的同时，
+		// 已经触发了 onShareAppMessage，逻辑会在那里执行
+	};
 
 	/**
 	 * @description 处理分享链接被点击后的奖励逻辑
@@ -664,8 +707,10 @@
 	};
 
 	// 监听“分享给好友”
-	onShareAppMessage(() => {
+	onShareAppMessage((res) => {
+		// 关闭相关的弹窗
 		closeSharePopup();
+		if (shareTypePopupRef.value) shareTypePopupRef.value.close();
 
 		deductShareQuota();
 
@@ -674,22 +719,55 @@
 		};
 
 		const loggedInUserId = uni.getStorageSync('userId');
-		const cardOwnerId = userInfo.value.id; // 分享路径中的ID应始终是名片所有者的ID
+		const cardOwnerId = userInfo.value.id;
 
-		const inviteCode = userInfo.value.shardCode;
+		// 1. 确定使用哪个邀请码
+		let finalInviteCode = '';
+
+		if (res.from === 'button' && currentShareMode.value) {
+			// 如果是通过按钮触发（通常是我们的自发/代发按钮）
+			if (currentShareMode.value === 'SELF') {
+				// 自发：使用登录用户的邀请码
+				finalInviteCode = getInviteCode();
+				console.log('分享模式：自发，使用我的码:', finalInviteCode);
+			} else {
+				// 代发：使用名片主人的邀请码 (userInfo 是当前查看的名片信息)
+				finalInviteCode = userInfo.value.shardCode;
+				console.log('分享模式：代发，使用TA的码:', finalInviteCode);
+			}
+
+			// 重置模式为默认（防止下次系统原生分享时状态混乱），但这里其实无所谓，因为原生分享一般看做自发
+			// currentShareMode.value = 'PROXY'; 
+		} else {
+			// 如果是点击右上角原生菜单分享他人名片，默认策略是什么？
+			// 策略 A：默认为“代发”（帮TA推广）
+			// 策略 B：默认为“自发”（算我的业绩）
+			// 这里建议默认为“自发”（用登录者的码），或者跟代发保持一致。
+			// 既然是分享他人，通常携带他人码比较符合“原样转发”的直觉；
+			// 但如果为了推广奖励，通常希望带自己的码。
+			// 此处代码演示默认为【自发】(即使用登录者的码)，如果登录者没码，才用TA的。
+			finalInviteCode = getInviteCode() || userInfo.value.shardCode;
+			console.log('分享模式：原生菜单，默认使用:', finalInviteCode);
+		}
 
 		let sharePath = `/packages/my-businessCard/my-businessCard?id=${cardOwnerId}&fromShare=1`;
-		// 分享者ID是当前登录用户的ID
+
 		if (loggedInUserId) {
 			sharePath += `&sharerId=${loggedInUserId}`;
 		}
 
-		if (inviteCode) {
-			sharePath += `&inviteCode=${inviteCode}`;
+		if (finalInviteCode) {
+			sharePath += `&inviteCode=${finalInviteCode}`;
+		}
+
+		// 标题逻辑
+		let titlePrefix = '';
+		if (currentShareMode.value === 'SELF') {
+			titlePrefix = '【推荐】';
 		}
 
 		const finalTitle = customShareTitle.value ||
-			`这是 ${userInfo.value.realName || userInfo.value.nickname} 的名片`;
+			`${titlePrefix}这是 ${userInfo.value.realName || userInfo.value.nickname} 的名片`;
 
 		const shareContent = {
 			title: finalTitle,
@@ -697,12 +775,49 @@
 			imageUrl: userInfo.value.avatar,
 		};
 
-		// ===================== LOG START: 分享数据 =====================
-		console.log('[my-businessCard] 分享好友内容:', JSON.stringify(shareContent));
-		// ===================== LOG END ===============================
+		console.log('[my-businessCard] 最终分享内容:', JSON.stringify(shareContent));
 
 		return shareContent;
 	});
+	// onShareAppMessage(() => {
+	// 	closeSharePopup();
+
+	// 	deductShareQuota();
+
+	// 	if (!userInfo.value) return {
+	// 		title: '一张很棒的电子名片'
+	// 	};
+
+	// 	const loggedInUserId = uni.getStorageSync('userId');
+	// 	const cardOwnerId = userInfo.value.id; // 分享路径中的ID应始终是名片所有者的ID
+
+	// 	const inviteCode = userInfo.value.shardCode;
+
+	// 	let sharePath = `/packages/my-businessCard/my-businessCard?id=${cardOwnerId}&fromShare=1`;
+	// 	// 分享者ID是当前登录用户的ID
+	// 	if (loggedInUserId) {
+	// 		sharePath += `&sharerId=${loggedInUserId}`;
+	// 	}
+
+	// 	if (inviteCode) {
+	// 		sharePath += `&inviteCode=${inviteCode}`;
+	// 	}
+
+	// 	const finalTitle = customShareTitle.value ||
+	// 		`这是 ${userInfo.value.realName || userInfo.value.nickname} 的名片`;
+
+	// 	const shareContent = {
+	// 		title: finalTitle,
+	// 		path: sharePath,
+	// 		imageUrl: userInfo.value.avatar,
+	// 	};
+
+	// 	// ===================== LOG START: 分享数据 =====================
+	// 	console.log('[my-businessCard] 分享好友内容:', JSON.stringify(shareContent));
+	// 	// ===================== LOG END ===============================
+
+	// 	return shareContent;
+	// });
 
 	// 监听“分享到朋友圈”
 	onShareTimeline(() => {
@@ -1057,7 +1172,10 @@
 
 	/* 弹窗打开时降低层级 */
 	.footer-action-bar.z-index-low {
-		z-index: 1;
+		z-index: -1 !important;
+		opacity: 0;
+		pointer-events: none;
+		/* 禁止点击 */
 	}
 
 	.action-group {

@@ -39,7 +39,7 @@ const _sfc_main = {
     const activities = common_vendor.ref([]);
     const businesses = common_vendor.ref([]);
     const resetState = () => {
-      common_vendor.index.__f__("log", "at pages/location/location.vue:137", "页面状态已重置");
+      common_vendor.index.__f__("log", "at pages/location/location.vue:138", "页面状态已重置");
       shaken.value = false;
       loading.value = false;
       activities.value = [];
@@ -57,11 +57,11 @@ const _sfc_main = {
       if (loading.value)
         return;
       currentTab.value = e.currentIndex;
-      common_vendor.index.__f__("log", "at pages/location/location.vue:160", "🔥点击切换tab！当前 Tab 索引为:", currentTab.value);
+      common_vendor.index.__f__("log", "at pages/location/location.vue:161", "🔥点击切换tab！当前 Tab 索引为:", currentTab.value);
     };
     const triggerShakeSequence = () => {
       const savedTabIndex = currentTab.value;
-      common_vendor.index.__f__("log", "at pages/location/location.vue:167", "🔥 摇一摇触发！当前 Tab 索引为:", savedTabIndex);
+      common_vendor.index.__f__("log", "at pages/location/location.vue:168", "🔥 摇一摇触发！当前 Tab 索引为:", savedTabIndex);
       lockShake();
       if (shakeAudioContext) {
         shakeAudioContext.stop();
@@ -92,7 +92,7 @@ const _sfc_main = {
               getNearbyBusinesses(true)
             ]);
           } catch (error) {
-            common_vendor.index.__f__("error", "at pages/location/location.vue:209", "加载错误:", error);
+            common_vendor.index.__f__("error", "at pages/location/location.vue:210", "加载错误:", error);
           } finally {
             loading.value = false;
             if (currentTab.value !== savedTabIndex) {
@@ -238,7 +238,7 @@ const _sfc_main = {
       const name = user.nickname || "匿名用户";
       const avatarUrl = user.avatar || defaultAvatar;
       const url = `/packages/applicationBusinessCard/applicationBusinessCard?id=${user.id}&name=${encodeURIComponent(name)}&avatar=${encodeURIComponent(avatarUrl)}`;
-      common_vendor.index.__f__("log", "at pages/location/location.vue:387", "从摇一摇页跳转，URL:", url);
+      common_vendor.index.__f__("log", "at pages/location/location.vue:388", "从摇一摇页跳转，URL:", url);
       common_vendor.index.navigateTo({
         url
       });
@@ -246,7 +246,7 @@ const _sfc_main = {
     common_vendor.onLoad((options) => {
       resetState();
       if (options.autoShake === "true") {
-        common_vendor.index.__f__("log", "at pages/location/location.vue:400", "onLoad: 接收到自动摇一摇指令");
+        common_vendor.index.__f__("log", "at pages/location/location.vue:401", "onLoad: 接收到自动摇一摇指令");
         autoShakeOnLoad.value = true;
       }
     });
@@ -257,7 +257,7 @@ const _sfc_main = {
         shakeAudioContext.src = "https://img.gofor.club/wechat_shake.mp3";
       }
       if (autoShakeOnLoad.value) {
-        common_vendor.index.__f__("log", "at pages/location/location.vue:417", "onShow: 执行自动摇一摇流程");
+        common_vendor.index.__f__("log", "at pages/location/location.vue:418", "onShow: 执行自动摇一摇流程");
         resetState();
         triggerShakeSequence();
         autoShakeOnLoad.value = false;
@@ -281,13 +281,13 @@ const _sfc_main = {
       switch (currentTab.value) {
         case 0:
           if (businessLoadingStatus.value === "more") {
-            common_vendor.index.__f__("log", "at pages/location/location.vue:453", "触底加载更多商友...");
+            common_vendor.index.__f__("log", "at pages/location/location.vue:454", "触底加载更多商友...");
             getNearbyBusinesses();
           }
           break;
         case 1:
           if (activityLoadingStatus.value === "more") {
-            common_vendor.index.__f__("log", "at pages/location/location.vue:460", "触底加载更多聚会...");
+            common_vendor.index.__f__("log", "at pages/location/location.vue:461", "触底加载更多聚会...");
             getNearbyActivities();
           }
           break;
@@ -331,16 +331,18 @@ const _sfc_main = {
           } : {}, {
             h: business.fellowTownspeopleCityFlag === 1 || business.peerFlag === 1 || business.classmateFlag === 1
           }, business.fellowTownspeopleCityFlag === 1 || business.peerFlag === 1 || business.classmateFlag === 1 ? common_vendor.e({
-            i: business.fellowTownspeopleCityFlag === 1
+            i: business.friendParentFlag === 1
+          }, business.friendParentFlag === 1 ? {} : {}, {
+            j: business.fellowTownspeopleCityFlag === 1
           }, business.fellowTownspeopleCityFlag === 1 ? {} : {}, {
-            j: business.peerFlag === 1
+            k: business.peerFlag === 1
           }, business.peerFlag === 1 ? {} : {}, {
-            k: business.classmateFlag === 1
+            l: business.classmateFlag === 1
           }, business.classmateFlag === 1 ? {} : {}) : {}, {
-            l: common_vendor.t(business.followFlag === 1 ? "取关" : "关注"),
-            m: business.followFlag === 1 ? 1 : "",
-            n: common_vendor.o(($event) => handleFollowAction(business), business.id),
-            o: business.id
+            m: common_vendor.t(business.followFlag === 1 ? "取关" : "关注"),
+            n: business.followFlag === 1 ? 1 : "",
+            o: common_vendor.o(($event) => handleFollowAction(business), business.id),
+            p: business.id
           });
         }),
         i: common_vendor.p({

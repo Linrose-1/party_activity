@@ -39,7 +39,8 @@
 
 						<!-- 使用 v-for 循环渲染图片 -->
 						<view v-for="(image, imgIndex) in suggestion.images" :key="imgIndex" class="image-wrapper">
-							<image :src="image" class="suggestion-image" mode="aspectFill"
+							<image :src="image" class="suggestion-image"
+								:mode="suggestion.images.length === 1 ? 'widthFix' : 'aspectFill'"
 								@click.stop="previewImage(suggestion.images, imgIndex)" />
 						</view>
 					</view>
@@ -154,6 +155,7 @@
 				id: item.id,
 				title: item.title,
 				content: item.content,
+				// images: item.img ? item.img.split(',').filter(Boolean) : [],
 				images: item.img ? item.img.split(',').filter(Boolean) : [],
 				time: formatTimestamp(item.createTime),
 				user: {
@@ -408,18 +410,25 @@
 		display: block;
 	}
 
-	/* 为1张图片时做特殊处理，让它横向撑满，高度自适应 */
 	.images-count-1 .image-wrapper {
 		grid-column: 1 / -1;
 		/* 占据所有列 */
 		aspect-ratio: unset;
 		/* 取消正方形比例限制 */
+		width: 100%;
+		/* 确保容器宽度 100% */
 	}
 
 	.images-count-1 .suggestion-image {
-		/* 1张图时，使用 widthFix 模式效果更好 */
-		/* 我们可以在 template 中动态绑定 mode，这里先用 css 模拟 */
+		width: 100%;
+		/* 宽度撑满 */
 		height: auto;
+		/* 高度自适应 */
+		max-height: 500rpx;
+		/* (可选) 防止长图占满整个屏幕，稍微限制一下最大高度 */
+		border-radius: 12rpx;
+		display: block;
+		/* 消除图片底部空隙 */
 	}
 
 	/* 为2张或4张图片时使用2列布局，更美观 */

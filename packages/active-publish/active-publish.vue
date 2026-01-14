@@ -270,8 +270,9 @@
 		</view>
 
 		<!-- ============ 弹窗组件：赞助商编辑 ============ -->
-		<sponsor-popup :visible="showSponsorPopup" :data="currentSponsorData" @close="showSponsorPopup = false"
-			@confirm="handleSponsorSave"></sponsor-popup>
+		<sponsor-popup v-if="showSponsorPopup" :visible="showSponsorPopup" :data="currentSponsorData"
+			@close="showSponsorPopup = false" @confirm="handleSponsorSave">
+		</sponsor-popup>
 
 	</view>
 </template>

@@ -100,7 +100,9 @@
 							<view class="info-header">
 								<text class="friend-name">{{ friend.nickname || friend.realName || '匿名用户' }}</text>
 								<view class="relation-tags"
-									v-if="friend.fellowTownspeopleCityFlag === 1 || friend.peerFlag === 1 || friend.classmateFlag === 1">
+									v-if="friend.fellowTownspeopleCityFlag === 1 || friend.peerFlag === 1 || friend.classmateFlag === 1 || friend.friendParentFlag === 1">
+									<text v-if="friend.friendParentFlag === 1" class="tag fellow-circle">同圈</text>
+
 									<text v-if="friend.fellowTownspeopleCityFlag === 1"
 										class="tag fellow-townsman">同乡</text>
 									<text v-if="friend.peerFlag === 1" class="tag peer">同行</text>
@@ -1052,6 +1054,14 @@
 		padding: 4rpx 12rpx;
 		border-radius: 6rpx;
 		font-weight: 500;
+	}
+
+	.fellow-circle {
+		background-color: #f3e5f5;
+		/* 浅紫色背景 */
+		color: #9c27b0;
+		/* 紫色文字 */
+		border: 1rpx solid #e1bee7;
 	}
 
 	.fellow-townsman {

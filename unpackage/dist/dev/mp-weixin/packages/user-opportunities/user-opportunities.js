@@ -116,8 +116,7 @@ const _sfc_main = {
     };
     return (_ctx, _cache) => {
       return common_vendor.e({
-        a: common_vendor.t(pageTitle.value),
-        b: common_vendor.f(postList.value, (post, k0, i0) => {
+        a: common_vendor.f(postList.value, (post, k0, i0) => {
           return common_vendor.e({
             a: "f3dcc489-0-" + i0,
             b: common_vendor.t(post.time),
@@ -148,20 +147,20 @@ const _sfc_main = {
             o: common_vendor.o(($event) => goToDetail(post.id), post.id)
           });
         }),
-        c: common_vendor.p({
+        b: common_vendor.p({
           type: "calendar-filled",
           size: "14",
           color: "#888"
         }),
-        d: postList.value.length > 0
+        c: postList.value.length > 0
       }, postList.value.length > 0 ? {
-        e: common_vendor.p({
+        d: common_vendor.p({
           status: loadStatus.value
         })
       } : {}, {
-        f: postList.value.length === 0 && loadStatus.value === "noMore"
+        e: postList.value.length === 0 && loadStatus.value === "noMore"
       }, postList.value.length === 0 && loadStatus.value === "noMore" ? {
-        g: common_vendor.p({
+        f: common_vendor.p({
           type: "list",
           size: "50",
           color: "#e0e0e0"

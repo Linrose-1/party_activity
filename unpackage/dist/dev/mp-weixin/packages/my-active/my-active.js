@@ -30,7 +30,7 @@ const _sfc_main = {
       }
     });
     common_vendor.onShow(() => {
-      common_vendor.index.__f__("log", "at packages/my-active/my-active.vue:260", "页面显示，刷新当前 Tab 数据");
+      common_vendor.index.__f__("log", "at packages/my-active/my-active.vue:252", "页面显示，刷新当前 Tab 数据");
       handleRefresh();
     });
     const getMyActivitiesList = async (isLoadMore = false) => {
@@ -52,7 +52,7 @@ const _sfc_main = {
           method: "GET",
           data: params
         });
-        common_vendor.index.__f__("log", "at packages/my-active/my-active.vue:291", `获取Tab ${currentTab.value} 的聚会`, result);
+        common_vendor.index.__f__("log", "at packages/my-active/my-active.vue:283", `获取Tab ${currentTab.value} 的聚会`, result);
         if (result && !result.error && result.data) {
           const list = result.data.list || [];
           const total = result.data.total || 0;
@@ -67,7 +67,7 @@ const _sfc_main = {
           }
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at packages/my-active/my-active.vue:310", "请求我的聚会列表失败:", error);
+        common_vendor.index.__f__("error", "at packages/my-active/my-active.vue:302", "请求我的聚会列表失败:", error);
       } finally {
         loading.value = false;
         refreshing.value = false;
@@ -100,6 +100,30 @@ const _sfc_main = {
         publishedHasMore.value = true;
       }
       await getMyActivitiesList(false);
+    };
+    const showMoreActions = (activityItem) => {
+      const itemList = [];
+      const availableActions = {};
+      itemList.push("参会名单");
+      availableActions["参会名单"] = () => navigateToParticipantList(activityItem.id);
+      if (["未开始", "报名中", "活动即将开始", "进行中"].includes(activityItem.statusStr)) {
+        itemList.push("取消聚会");
+        availableActions["取消聚会"] = () => cancelActivity(activityItem.id);
+      }
+      itemList.push("修改编辑");
+      availableActions["修改编辑"] = () => navigateToEdit(activityItem.id);
+      common_vendor.index.showActionSheet({
+        itemList,
+        success: (res) => {
+          const tappedItem = itemList[res.tapIndex];
+          if (availableActions[tappedItem]) {
+            availableActions[tappedItem]();
+          }
+        },
+        fail: (res) => {
+          common_vendor.index.__f__("log", "at packages/my-active/my-active.vue:387", res.errMsg);
+        }
+      });
     };
     const getStatusClass = (statusStr) => {
       const classMap = {
@@ -186,7 +210,7 @@ const _sfc_main = {
       });
     };
     const cancelActivity = (activityId) => {
-      common_vendor.index.__f__("log", "at packages/my-active/my-active.vue:458", "一进来就调用");
+      common_vendor.index.__f__("log", "at packages/my-active/my-active.vue:490", "一进来就调用");
       common_vendor.index.showModal({
         title: "警告",
         content: "确定要取消您发布的此聚会吗？此操作不可逆。",
@@ -357,22 +381,18 @@ const _sfc_main = {
             m: common_vendor.t(item.paddingReturnCount),
             n: common_vendor.o(($event) => manageRefunds(item, "individual"), item.id)
           } : {}, {
-            o: common_vendor.o(($event) => navigateToParticipantList(item.id), item.id),
-            p: ["未开始", "报名中", "活动即将开始", "进行中"].includes(item.statusStr)
-          }, ["未开始", "报名中", "活动即将开始", "进行中"].includes(item.statusStr) ? {
-            q: common_vendor.o(($event) => cancelActivity(item.id), item.id)
+            o: item.pendingConfirmCount > 0
+          }, item.pendingConfirmCount > 0 ? {
+            p: common_vendor.t(item.pendingConfirmCount)
           } : {}, {
+            q: common_vendor.o(($event) => navigateToRegisteredUsers(item), item.id),
             r: item.statusStr === "活动取消" || item.statusStr === "聚会取消"
           }, item.statusStr === "活动取消" || item.statusStr === "聚会取消" ? {
             s: common_vendor.o(($event) => manageRefunds(item, "all"), item.id)
           } : {}, {
-            t: item.statusStr !== "活动取消" && item.statusStr !== "聚会取消"
-          }, item.statusStr !== "活动取消" && item.statusStr !== "聚会取消" ? {
-            v: common_vendor.o(($event) => navigateToRegisteredUsers(item), item.id)
-          } : {}, {
-            w: common_vendor.o(($event) => navigateToEdit(item.id), item.id),
-            x: item.id,
-            y: common_vendor.o(($event) => handleActivityClick(item.id), item.id)
+            t: common_vendor.o(($event) => showMoreActions(item), item.id),
+            v: item.id,
+            w: common_vendor.o(($event) => handleActivityClick(item.id), item.id)
           });
         }),
         p: common_vendor.p({
