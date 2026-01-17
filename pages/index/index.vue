@@ -113,6 +113,15 @@
 	onLoad(async (options) => {
 		getLoginCode();
 
+		console.log('🔄 [登录页] 页面加载，正在预加载最新 Token...');
+		performSilentLoginForBind().then(success => {
+			if (success) {
+				console.log('✅ [登录页] Token 预加载成功');
+			} else {
+				console.warn('⚠️ [登录页] Token 预加载失败，将在点击登录时重试');
+			}
+		});
+
 		// 检查并处理传入的邀请码
 		// 优先级：URL参数 > 本地缓存的pendingInviteCode
 		const codeFromUrl = options?.inviteCode;
@@ -396,14 +405,14 @@
 				await handlePendingShareReward(currentUserId);
 			}
 
-			console.log('🧹 [登录页] 绑定完成，清除本地 Token/UserId 以触发首页静默登录刷新');
-			uni.removeStorageSync('token');
-			uni.removeStorageSync('userId');
+			// console.log('🧹 [登录页] 绑定完成，清除本地 Token/UserId 以触发首页静默登录刷新');
+			// uni.removeStorageSync('token');
+			// uni.removeStorageSync('userId');
 
 			//清理storage缓存
-			uni.clearStorage()
+			// uni.clearStorage()
 			//微信登录重新获取换绑openid用户的token
-			performSilentLogin()
+			// performSilentLogin()
 
 			uni.hideLoading();
 			uni.showToast({
