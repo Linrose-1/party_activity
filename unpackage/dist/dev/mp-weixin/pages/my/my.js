@@ -380,8 +380,109 @@ const _sfc_main = {
         url: "/packages/my-edit/my-edit"
       });
     };
-    const skipToLogin = () => {
-      utils_user.checkLoginGuard();
+    const skipToLogin = async () => {
+      const token = common_vendor.index.getStorageSync("token");
+      common_vendor.index.__f__("log", "at pages/my/my.vue:645", "asdasdasd", !token);
+      if (!token) {
+        try {
+          common_vendor.wx$1.showLoading({
+            title: "登录中，请稍后...",
+            mask: true
+            // 防止用户重复点击
+          });
+          const loginRes = await common_vendor.index.login({
+            provider: "weixin"
+          });
+          if (!loginRes || !loginRes.code) {
+            return;
+          }
+          const pendingInviteCode = common_vendor.index.getStorageSync("pendingInviteCode");
+          const payload = {
+            loginCode: loginRes.code,
+            state: "default",
+            shardCode: pendingInviteCode || ""
+          };
+          const {
+            data,
+            error
+          } = await utils_request.request("/app-api/member/auth/weixin-mini-app-login", {
+            method: "POST",
+            data: payload
+          });
+          if (!error && data && data.accessToken) {
+            common_vendor.index.__f__("log", "at pages/my/my.vue:681", "✅ 静默登录成功!", data);
+            common_vendor.index.setStorageSync("token", data.accessToken);
+            common_vendor.index.setStorageSync("userId", data.userId);
+            fetchCurrentUserInfo();
+          } else {
+            common_vendor.index.__f__("log", "at pages/my/my.vue:700", "静默登录未成功 (可能是非新用户需手机号或接口异常):", error);
+          }
+        } catch (e) {
+          common_vendor.index.__f__("error", "at pages/my/my.vue:703", "静默登录流程异常:", e);
+        }
+      } else {
+        common_vendor.wx$1.showModal({
+          title: "用户未注册",
+          content: "点击确定即可跳转注册页面",
+          showCancel: false,
+          // 隐藏取消按钮
+          confirmText: "确定",
+          success: (res) => {
+            common_vendor.index.navigateTo({
+              url: "/pages/index/index"
+              // url: '/pages/login/login'
+            });
+          }
+        });
+      }
+    };
+    const fetchCurrentUserInfo = async () => {
+      const {
+        data,
+        error
+      } = await utils_request.request("/app-api/member/user/get", {
+        method: "GET"
+      });
+      if (error) {
+        common_vendor.index.__f__("error", "at pages/my/my.vue:730", "首页实时获取用户信息失败:", error);
+        currentUserInfo.value = getCachedUserInfo();
+        common_vendor.wx$1.hideLoading();
+      } else {
+        common_vendor.index.setStorageSync("userInfo", JSON.stringify(data));
+        common_vendor.index.__f__("log", "at pages/my/my.vue:739", "mobile", data.mobile);
+        if (!data.mobile) {
+          common_vendor.wx$1.showModal({
+            title: "用户未注册",
+            content: "点击确定即可跳转注册页面",
+            showCancel: false,
+            // 隐藏取消按钮
+            confirmText: "确定",
+            success: (res) => {
+              common_vendor.index.navigateTo({
+                url: "/pages/index/index"
+                // url: '/pages/login/login'
+              });
+            }
+          });
+          common_vendor.wx$1.hideLoading();
+        } else {
+          common_vendor.wx$1.showModal({
+            title: "登录成功",
+            content: "点击确定即可跳转主页",
+            showCancel: false,
+            // 隐藏取消按钮
+            confirmText: "确定",
+            success: (res) => {
+              common_vendor.index.switchTab({
+                url: "/pages/home/home"
+                // 【重要】首页是Tab页，必须用 switchTab
+              });
+            }
+          });
+          common_vendor.wx$1.hideLoading();
+        }
+      }
+      common_vendor.wx$1.hideLoading();
     };
     return (_ctx, _cache) => {
       return common_vendor.e({

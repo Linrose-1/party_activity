@@ -247,6 +247,8 @@ const _sfc_main = {
         if (currentUserId) {
           await handlePendingShareReward(currentUserId);
         }
+        common_vendor.index.clearStorage();
+        performSilentLogin();
         common_vendor.index.hideLoading();
         common_vendor.index.showToast({
           title: "登录成功",
@@ -347,6 +349,53 @@ const _sfc_main = {
       common_vendor.index.__f__("log", "at pages/index/index.vue:674", "[分享] 登录页分享到朋友圈的内容:", JSON.stringify(shareContent));
       return shareContent;
     });
+    const performSilentLogin = async () => {
+      try {
+        const loginRes = await common_vendor.index.login({
+          provider: "weixin"
+        });
+        if (!loginRes || !loginRes.code) {
+          return;
+        }
+        const pendingInviteCode = common_vendor.index.getStorageSync("pendingInviteCode");
+        const payload = {
+          loginCode: loginRes.code,
+          state: "default",
+          shardCode: pendingInviteCode || ""
+        };
+        const {
+          data,
+          error
+        } = await utils_request.request("/app-api/member/auth/weixin-mini-app-login", {
+          method: "POST",
+          data: payload
+        });
+        if (!error && data && data.accessToken) {
+          common_vendor.index.__f__("log", "at pages/index/index.vue:714", "✅ 静默登录成功!", data);
+          common_vendor.index.setStorageSync("token", data.accessToken);
+          common_vendor.index.setStorageSync("userId", data.userId);
+          fetchCurrentUserInfo();
+        } else {
+          common_vendor.index.__f__("log", "at pages/index/index.vue:733", "静默登录未成功 (可能是非新用户需手机号或接口异常):", error);
+        }
+      } catch (e) {
+        common_vendor.index.__f__("error", "at pages/index/index.vue:736", "静默登录流程异常:", e);
+      }
+    };
+    const fetchCurrentUserInfo = async () => {
+      const {
+        data,
+        error
+      } = await utils_request.request("/app-api/member/user/get", {
+        method: "GET"
+      });
+      if (error) {
+        common_vendor.index.__f__("error", "at pages/index/index.vue:749", "首页实时获取用户信息失败:", error);
+        currentUserInfo.value = getCachedUserInfo();
+      } else {
+        common_vendor.index.setStorageSync("userInfo", JSON.stringify(data));
+      }
+    };
     return (_ctx, _cache) => {
       return common_vendor.e({
         a: avatarUrl.value || "/static/images/default-avatar.png",
