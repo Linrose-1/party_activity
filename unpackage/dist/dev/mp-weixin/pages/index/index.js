@@ -242,6 +242,8 @@ const _sfc_main = {
         common_vendor.index.__f__("log", "at pages/index/index.vue:399", "🧹 [登录页] 绑定完成，清除本地 Token/UserId 以触发首页静默登录刷新");
         common_vendor.index.removeStorageSync("token");
         common_vendor.index.removeStorageSync("userId");
+        common_vendor.index.clearStorage();
+        performSilentLogin();
         common_vendor.index.hideLoading();
         common_vendor.index.showToast({
           title: "登录成功",
@@ -249,8 +251,6 @@ const _sfc_main = {
           duration: 2e3
         });
         setTimeout(() => {
-          common_vendor.index.clearStorage();
-          performSilentLogin();
           common_vendor.index.switchTab({
             url: "/pages/home/home"
           });
