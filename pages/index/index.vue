@@ -254,6 +254,37 @@
 	};
 
 	// --- 5. 核心登录逻辑 ---
+
+	/**
+	 * 专门用于绑定前的静默登录补救函数
+	 * 返回 true 表示成功拿到 Token，false 表示失败
+	 */
+	const performSilentLoginForBind = async () => {
+		try {
+			const loginRes = await uni.login({
+				provider: 'weixin'
+			});
+			if (loginRes.code) {
+				const silentResult = await request('/app-api/member/auth/weixin-mini-app-login', {
+					method: 'POST',
+					data: {
+						loginCode: loginRes.code,
+						state: 'default',
+						shardCode: inviteCode.value // 尝试带上邀请码，虽然主要是为了拿 Token
+					}
+				});
+				if (silentResult.data && silentResult.data.accessToken) {
+					uni.setStorageSync('token', silentResult.data.accessToken);
+					uni.setStorageSync('userId', silentResult.data.userId);
+					console.log('✅ 登录前置补救成功，Token 已更新');
+					return true;
+				}
+			}
+		} catch (e) {
+			console.error('前置补救异常:', e);
+		}
+		return false;
+	};
 	/**
 	 * @description 处理一键登录
 	 */
@@ -292,34 +323,21 @@
 			title: '正在登录...'
 		});
 
-		// 1. 检查是否有 Token，没有则先进行静默登录获取 Token
 		let token = uni.getStorageSync('token');
+
+		// 如果没有 Token，或者我们想确保万无一失，直接执行一次静默登录流程
 		if (!token) {
-			console.log('无 Token，先执行静默登录...');
-			const loginRes = await uni.login({
-				provider: 'weixin'
-			});
-			if (loginRes.code) {
-				const silentResult = await request('/app-api/member/auth/weixin-mini-app-login', {
-					method: 'POST',
-					data: {
-						loginCode: loginRes.code,
-						state: 'default',
-						shardCode: inviteCode.value
-					}
+			console.log('检测到无 Token，正在执行登录前置补救...');
+			const loginSuccess = await performSilentLoginForBind();
+			if (!loginSuccess) {
+				uni.hideLoading();
+				return uni.showToast({
+					title: '登录初始化失败，请重试',
+					icon: 'none'
 				});
-				if (silentResult.data && silentResult.data.accessToken) {
-					uni.setStorageSync('token', silentResult.data.accessToken);
-					uni.setStorageSync('userId', silentResult.data.userId);
-					console.log('静默登录补救成功');
-				} else {
-					uni.hideLoading();
-					return uni.showToast({
-						title: '登录初始化失败，请重试',
-						icon: 'none'
-					});
-				}
 			}
+			// 补救成功后，更新 token 变量
+			token = uni.getStorageSync('token');
 		}
 
 		try {
@@ -353,7 +371,7 @@
 					throw new Error(loginResult.error.msg || '登录失败，请重试');
 				}
 				// 重新获取 code 防止下次失败
-				getLoginCode();
+				// getLoginCode();
 				return;
 			}
 
@@ -393,7 +411,7 @@
 				//清理storage缓存
 				uni.clearStorage()
 				//微信登录重新获取换绑openid用户的token
-				performSilentLogin()
+				// performSilentLogin()
 				uni.switchTab({
 					url: '/pages/home/home'
 				});
@@ -406,7 +424,7 @@
 				title: error.message || '系统异常',
 				icon: 'none'
 			});
-			getLoginCode();
+			// getLoginCode();
 		}
 	};
 	// const handleLogin = async () => {
@@ -708,26 +726,26 @@
 			console.error('静默登录流程异常:', e);
 		}
 	};
-	
+
 	//微信登录完还需要获取用户信息
 	const fetchCurrentUserInfo = async () => {
-			const {
-				data,
-				error
-			} = await request('/app-api/member/user/get', {
-				method: 'GET'
-			});
-			if (error) {
-				console.error("首页实时获取用户信息失败:", error);
-				// 失败时可以考虑使用缓存数据作为兜底
-				currentUserInfo.value = getCachedUserInfo();
-			} else {
-				// currentUserInfo.value = data;
-				// console.log("首页实时获取用户信息成功:", currentUserInfo.value);
-				// // 【重要】获取成功后，用新数据更新本地缓存
-				uni.setStorageSync('userInfo', JSON.stringify(data));
-			}
-		};
+		const {
+			data,
+			error
+		} = await request('/app-api/member/user/get', {
+			method: 'GET'
+		});
+		if (error) {
+			console.error("首页实时获取用户信息失败:", error);
+			// 失败时可以考虑使用缓存数据作为兜底
+			currentUserInfo.value = getCachedUserInfo();
+		} else {
+			// currentUserInfo.value = data;
+			// console.log("首页实时获取用户信息成功:", currentUserInfo.value);
+			// // 【重要】获取成功后，用新数据更新本地缓存
+			uni.setStorageSync('userInfo', JSON.stringify(data));
+		}
+	};
 </script>
 
 <style lang="scss" scoped>

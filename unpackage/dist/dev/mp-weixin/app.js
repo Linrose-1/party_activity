@@ -59,6 +59,7 @@ if (!Math) {
   "./packages/my-active/my-active.js";
   "./packages/my-collection/my-collection.js";
   "./packages/participant-detail/participant-detail.js";
+  "./packages/user-reviews/user-reviews.js";
 }
 const _sfc_main = {
   data() {
@@ -96,12 +97,36 @@ const _sfc_main = {
   onShow: function() {
     common_vendor.index.__f__("log", "at App.vue:46", "App Show");
     this.startLocationUpdates();
+    this.checkUpdate();
   },
   onHide: function() {
-    common_vendor.index.__f__("log", "at App.vue:51", "App Hide");
+    common_vendor.index.__f__("log", "at App.vue:53", "App Hide");
     this.stopLocationUpdates();
   },
   methods: {
+    /**
+     * 检查小程序更新
+     */
+    checkUpdate() {
+      const updateManager = common_vendor.index.getUpdateManager();
+      updateManager.onCheckForUpdate(function(res) {
+        common_vendor.index.__f__("log", "at App.vue:68", "是否有新版本发布:", res.hasUpdate);
+      });
+      updateManager.onUpdateReady(function() {
+        common_vendor.index.showModal({
+          title: "更新提示",
+          content: "新版本已经准备好，是否重启应用？",
+          success: function(res) {
+            if (res.confirm) {
+              updateManager.applyUpdate();
+            }
+          }
+        });
+      });
+      updateManager.onUpdateFailed(function() {
+        common_vendor.index.__f__("error", "at App.vue:88", "新版本下载失败");
+      });
+    },
     /**
      * 检查用户是否已登录
      */
@@ -115,15 +140,15 @@ const _sfc_main = {
     startLocationUpdates() {
       this.stopLocationUpdates();
       if (!this.isLoggedIn()) {
-        common_vendor.index.__f__("log", "at App.vue:76", "用户未登录，不启动位置上传定时器");
+        common_vendor.index.__f__("log", "at App.vue:113", "用户未登录，不启动位置上传定时器");
         return;
       }
       const updateTask = () => {
-        common_vendor.index.__f__("log", "at App.vue:81", "正在获取并上传用户当前位置...");
+        common_vendor.index.__f__("log", "at App.vue:118", "正在获取并上传用户当前位置...");
         common_vendor.index.getLocation({
           type: "gcj02",
           success: async (res) => {
-            common_vendor.index.__f__("log", "at App.vue:85", `获取位置成功: ${res.longitude}, ${res.latitude}`);
+            common_vendor.index.__f__("log", "at App.vue:122", `获取位置成功: ${res.longitude}, ${res.latitude}`);
             const {
               error
             } = await utils_request.request("/app-api/member/user/upload-location", {
@@ -134,19 +159,19 @@ const _sfc_main = {
               }
             });
             if (error) {
-              common_vendor.index.__f__("error", "at App.vue:99", "自动上传位置信息失败:", error);
+              common_vendor.index.__f__("error", "at App.vue:136", "自动上传位置信息失败:", error);
             } else {
-              common_vendor.index.__f__("log", "at App.vue:101", "用户当前位置上传成功！");
+              common_vendor.index.__f__("log", "at App.vue:138", "用户当前位置上传成功！");
             }
           },
           fail: (err) => {
-            common_vendor.index.__f__("error", "at App.vue:105", "获取位置信息失败:", err);
+            common_vendor.index.__f__("error", "at App.vue:142", "获取位置信息失败:", err);
           }
         });
       };
       updateTask();
       this.locationTimer = setInterval(updateTask, 6e5);
-      common_vendor.index.__f__("log", "at App.vue:115", "位置上传定时器已启动");
+      common_vendor.index.__f__("log", "at App.vue:152", "位置上传定时器已启动");
     },
     /**
      * 停止位置上传
@@ -155,7 +180,7 @@ const _sfc_main = {
       if (this.locationTimer) {
         clearInterval(this.locationTimer);
         this.locationTimer = null;
-        common_vendor.index.__f__("log", "at App.vue:125", "位置上传定时器已停止");
+        common_vendor.index.__f__("log", "at App.vue:162", "位置上传定时器已停止");
       }
     }
   }

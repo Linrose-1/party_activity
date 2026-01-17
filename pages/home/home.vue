@@ -210,6 +210,9 @@
 
 	<ScrollPointsPopup ref="scrollPointsPopup" />
 
+	<ZhimiPayPopup ref="payPopup" :price="10" content="定制功能需要支付10智米，请问是否同意支付开启该功能？"
+		api-path="/app-api/member/user/pay-business-friend-auth" @success="handlePaySuccess" />
+
 </template>
 
 <script setup>
@@ -238,6 +241,7 @@
 	import AddCircleConfirmPopup from '@/components/AddCircleConfirmPopup.vue';
 	import InviteCircleConfirmPopup from '@/components/InviteCircleConfirmPopup.vue';
 	import ScrollPointsPopup from '@/components/ScrollPointsPopup.vue'
+	import ZhimiPayPopup from '@/components/ZhimiPayPopup.vue';
 
 
 
@@ -291,6 +295,8 @@
 	const invitePopupRef = ref(null);
 
 	const scrollPointsPopup = ref(null);
+
+	const payPopup = ref(null);
 
 
 
@@ -877,9 +883,8 @@
 				});
 				break;
 			case 'comment':
-				uni.showToast({
-					title: '点评功能待开发',
-					icon: 'none'
+				uni.navigateTo({
+					url: `/packages/user-reviews/user-reviews?userId=${user.id}`
 				});
 				break;
 		}
@@ -1268,49 +1273,62 @@
 			});
 		} else {
 			// 如果未支付，弹出确认支付弹窗
-			uni.showModal({
-				title: '开启定制功能',
-				content: '定制功能需要支付10智米，请问是否同意支付开启该功能？',
-				confirmText: '立即支付',
-				cancelText: '再想想',
-				success: async (res) => {
-					if (res.confirm) {
-						// 用户确认支付，调用支付接口
-						uni.showLoading({
-							title: '正在开通...'
-						});
-						const {
-							data,
-							error
-						} = await request('/app-api/member/user/pay-business-friend-auth', {
-							method: 'POST'
-						});
-						uni.hideLoading();
+			payPopup.value.open();
+			// uni.showModal({
+			// 	title: '开启定制功能',
+			// 	content: '定制功能需要支付10智米，请问是否同意支付开启该功能？',
+			// 	confirmText: '立即支付',
+			// 	cancelText: '再想想',
+			// 	success: async (res) => {
+			// 		if (res.confirm) {
+			// 			// 用户确认支付，调用支付接口
+			// 			uni.showLoading({
+			// 				title: '正在开通...'
+			// 			});
+			// 			const {
+			// 				data,
+			// 				error
+			// 			} = await request('/app-api/member/user/pay-business-friend-auth', {
+			// 				method: 'POST'
+			// 			});
+			// 			uni.hideLoading();
 
-						if (error) {
-							uni.showToast({
-								title: error,
-								icon: 'none',
-								duration: 3000
-							});
-						} else {
-							uni.showToast({
-								title: '开通成功！',
-								icon: 'success'
-							});
-							// 支付成功后，重新获取用户信息以更新状态
-							await fetchCurrentUserInfo();
-							// 然后再跳转到定制页
-							setTimeout(() => {
-								uni.navigateTo({
-									url: `/packages/home-customization/home-customization`
-								});
-							}, 800);
-						}
-					}
-				}
-			});
+			// 			if (error) {
+			// 				uni.showToast({
+			// 					title: error,
+			// 					icon: 'none',
+			// 					duration: 3000
+			// 				});
+			// 			} else {
+			// 				uni.showToast({
+			// 					title: '开通成功！',
+			// 					icon: 'success'
+			// 				});
+			// 				// 支付成功后，重新获取用户信息以更新状态
+			// 				await fetchCurrentUserInfo();
+			// 				// 然后再跳转到定制页
+			// 				setTimeout(() => {
+			// 					uni.navigateTo({
+			// 						url: `/packages/home-customization/home-customization`
+			// 					});
+			// 				}, 800);
+			// 			}
+			// 		}
+			// 	}
+			// });
 		}
+	};
+
+	// 支付成功回调
+	const handlePaySuccess = async () => {
+		// 支付成功后，重新获取用户信息以更新状态
+		await fetchCurrentUserInfo();
+		// 然后再跳转到定制页
+		setTimeout(() => {
+			uni.navigateTo({
+				url: `/packages/home-customization/home-customization`
+			});
+		}, 800);
 	};
 
 	const handlePostClick = (post) => {

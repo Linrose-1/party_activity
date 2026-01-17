@@ -1,0 +1,158 @@
+/* 水平间距 */
+/* 水平间距 */
+.container.data-v-91a56258 {
+  min-height: 100vh;
+  background-color: #f5f7fa;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Tabs 样式 */
+.tabs.data-v-91a56258 {
+  display: flex;
+  background-color: #fff;
+  height: 88rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.tabs .tab-item.data-v-91a56258 {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30rpx;
+  color: #666;
+  position: relative;
+  font-weight: 500;
+  transition: all 0.3s;
+}
+.tabs .tab-item.active.data-v-91a56258 {
+  color: #FF8C00;
+  font-weight: bold;
+  font-size: 32rpx;
+}
+.tabs .tab-item .active-line.data-v-91a56258 {
+  position: absolute;
+  bottom: 0;
+  width: 40rpx;
+  height: 6rpx;
+  background-color: #FF8C00;
+  border-radius: 6rpx;
+}
+.content-body.data-v-91a56258 {
+  padding: 30rpx;
+  flex: 1;
+}
+.placeholder-box.data-v-91a56258 {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 400rpx;
+  color: #999;
+  font-size: 32rpx;
+}
+
+/* 评分标准卡片 (复用样式) */
+.standard-card.data-v-91a56258 {
+  background: #fff;
+  border-radius: 20rpx;
+  padding: 24rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.03);
+  margin-bottom: 30rpx;
+}
+.standard-title.data-v-91a56258 {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  margin-bottom: 20rpx;
+}
+.standard-title text.data-v-91a56258 {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #333;
+}
+.standard-grid.data-v-91a56258 {
+  display: flex;
+  justify-content: space-between;
+  gap: 10rpx;
+}
+.standard-item.data-v-91a56258 {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 16rpx 0;
+  border-radius: 12rpx;
+  background-color: #f5f5f5;
+}
+.standard-item .score-range.data-v-91a56258 {
+  font-size: 24rpx;
+  font-weight: bold;
+  margin-bottom: 4rpx;
+}
+.standard-item .score-desc.data-v-91a56258 {
+  font-size: 22rpx;
+  opacity: 0.9;
+}
+.standard-item.level-6.data-v-91a56258 {
+  background-color: #FFF0E6;
+  color: #FF6A00;
+}
+.standard-item.level-5.data-v-91a56258 {
+  background-color: #FFF7E6;
+  color: #FF9C38;
+}
+.standard-item.level-4.data-v-91a56258 {
+  background-color: #E8F5E9;
+  color: #4CAF50;
+}
+.standard-item.level-3.data-v-91a56258 {
+  background-color: #E3F2FD;
+  color: #2196F3;
+}
+.standard-item.level-2.data-v-91a56258 {
+  background-color: #FFF3E0;
+  color: #FF9800;
+}
+.standard-item.level-1.data-v-91a56258 {
+  background-color: #FBE9E7;
+  color: #FF5722;
+}
+.score-form-wrapper.data-v-91a56258 {
+  padding-bottom: 20rpx;
+}
+.footer-spacer.data-v-91a56258 {
+  height: 120rpx;
+}
+.footer-bar.data-v-91a56258 {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: #fff;
+  padding: 20rpx 30rpx;
+  padding-bottom: calc(20rpx + env(safe-area-inset-bottom));
+  box-shadow: 0 -4rpx 16rpx rgba(0, 0, 0, 0.05);
+  z-index: 99;
+  box-sizing: border-box;
+}
+.submit-btn.data-v-91a56258 {
+  background: linear-gradient(to right, #FF8C00, #FF6B00);
+  color: #fff;
+  height: 88rpx;
+  line-height: 88rpx;
+  border-radius: 44rpx;
+  font-size: 32rpx;
+  font-weight: bold;
+  border: none;
+}
+.submit-btn[disabled].data-v-91a56258 {
+  opacity: 0.7;
+}
+.submit-btn.data-v-91a56258::after {
+  border: none;
+}

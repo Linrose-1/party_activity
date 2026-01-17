@@ -60,7 +60,8 @@
         "myStore-edit/myStore-edit",
         "my-active/my-active",
         "my-collection/my-collection",
-        "participant-detail/participant-detail"
+        "participant-detail/participant-detail",
+        "user-reviews/user-reviews"
       ]
     }
   ],

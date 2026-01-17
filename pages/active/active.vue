@@ -16,7 +16,7 @@
 					<view class="swiper-item">
 						<!-- 轮播图图片 -->
 						<image :src="banner.imageUrl" mode="aspectFill" class="swiper-image"></image>
-						<!-- 轮播图标题 (如果存在) -->
+						<!-- 轮播图标题 -->
 						<view v-if="banner.title" class="swiper-title">{{ banner.title }}</view>
 					</view>
 				</swiper-item>

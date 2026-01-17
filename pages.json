@@ -436,6 +436,13 @@
 				{
 					"navigationBarTitleText" : "参会名单"
 				}
+			},
+			{
+				"path" : "user-reviews/user-reviews",
+				"style" : 
+				{
+					"navigationBarTitleText" : "商友点评"
+				}
 			}
 			// 如果还有其他页面要放进这个分包，继续在这里加
 		]

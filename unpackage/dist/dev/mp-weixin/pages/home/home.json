@@ -8,6 +8,7 @@
     "avatar-long-press-menu": "../../components/AvatarLongPressMenu",
     "add-circle-confirm-popup": "../../components/AddCircleConfirmPopup",
     "invite-circle-confirm-popup": "../../components/InviteCircleConfirmPopup",
-    "scroll-points-popup": "../../components/ScrollPointsPopup"
+    "scroll-points-popup": "../../components/ScrollPointsPopup",
+    "zhimi-pay-popup": "../../components/ZhimiPayPopup"
   }
 }

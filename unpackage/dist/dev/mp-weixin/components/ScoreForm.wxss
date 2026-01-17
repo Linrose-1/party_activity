@@ -1,0 +1,38 @@
+/* 水平间距 */
+/* 水平间距 */
+.section-card.data-v-8704d7b3 {
+  background-color: #fff;
+  border-radius: 20rpx;
+  padding: 30rpx;
+  margin-bottom: 30rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.05);
+}
+.section-header.data-v-8704d7b3 {
+  padding-bottom: 20rpx;
+  border-bottom: 1px solid #f0f0f0;
+  margin-bottom: 20rpx;
+}
+.section-header .section-title.data-v-8704d7b3 {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #333;
+}
+.score-item.data-v-8704d7b3 {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16rpx 0;
+}
+.item-label.data-v-8704d7b3 {
+  font-size: 28rpx;
+  color: #555;
+  width: 100rpx;
+  /* 固定宽度对齐 */
+}
+.score-text.data-v-8704d7b3 {
+  font-size: 24rpx;
+  color: #FF8C00;
+  width: 60rpx;
+  text-align: right;
+  margin-left: 10rpx;
+}

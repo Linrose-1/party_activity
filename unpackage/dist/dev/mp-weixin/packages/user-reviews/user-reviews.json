@@ -1,5 +1,5 @@
 {
-  "navigationBarTitleText": "数字标签",
+  "navigationBarTitleText": "商友点评",
   "usingComponents": {
     "uni-icons": "../../uni_modules/uni-icons/components/uni-icons/uni-icons",
     "score-form": "../../components/ScoreForm"

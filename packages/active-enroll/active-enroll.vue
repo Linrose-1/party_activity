@@ -150,15 +150,22 @@
 
 		<!-- 第三步：完成报名 -->
 		<view v-if="currentStep === 3">
-			<view class="success-message">
-				<view class="success-icon">🎉</view>
-				<view>您的申请已递交，请等候组织者确认</view>
-				<!-- <view style="font-size: 28rpx; color: #666; margin-top: 30rpx">
-					我们已发送确认短信至您的手机
+			<!-- 情况 A: 待确认 (joinStatus === 1) -->
+			<view v-if="activityDetail && activityDetail.joinStatus === 1" class="success-message">
+				<view class="success-icon" style="font-size: 60rpx;">⏳</view> <!-- 换个沙漏图标 -->
+				<view class="status-title">报名已提交，等待确认</view>
+				<view class="status-desc" style="font-size: 28rpx; color: #666; margin-top: 20rpx; padding: 0 40rpx;">
+					您的报名申请已提交给组织者，请耐心等待审核。审核结果将通过系统消息通知您。
 				</view>
-				<view style="font-size: 28rpx; color: #FF6E00; margin-top: 10rpx">
-					{{ formData.userPhone }}
-				</view> -->
+			</view>
+
+			<!-- 情况 B: 已报名成功 (joinStatus === 2 或 刚刚提交成功) -->
+			<view v-else class="success-message">
+				<view class="success-icon">🎉</view>
+				<view class="status-title">报名成功</view>
+				<view class="status-desc" style="font-size: 28rpx; color: #666; margin-top: 20rpx;">
+					您的报名已通过确认，期待您的到来！
+				</view>
 			</view>
 
 			<view class="section" v-if="activityDetail">
@@ -249,7 +256,7 @@
 
 		if (options.id) {
 			activityId.value = options.id;
-			// 【修改】现在 getActiveDetail 会处理所有逻辑
+			// 现在 getActiveDetail 会处理所有逻辑
 			getActiveDetail();
 		} else {
 			console.error('未接收到聚会ID！');
@@ -454,28 +461,53 @@
 				const data = result.data;
 				console.log('getActiveDetail result:', data);
 
-				// 1. 检查用户是否已有效报名 (增加了对 paymentStatusStr 的判断)
-				if (data && data.memberActivityJoinResp && data.memberActivityJoinResp.paymentStatusStr) {
-					console.log('用户已有效报名 (paymentStatusStr 存在)，直接跳转到成功页。');
-					activityDetail.value = data; // 仍然需要赋值，以便成功页显示信息
+				activityDetail.value = data; // 先赋值，后续逻辑依赖它
 
-					// 【新增】如果已报名，从返回数据中获取信息，而不是重新生成
-					// 注意：后端目前没有返回报名编号，我们暂时还用前端生成逻辑
-					// 如果后端返回了，可以用：ticketNumber.value = data.memberActivityJoin-Resp.ticketId || generateTicketNumber();
-					ticketNumber.value = generateTicketNumber();
+				// 获取 joinStatus，如果没有则默认为 0 (未报名)
+				// 注意：有些后端可能放在 data.joinStatus，也可能放在 data.memberActivityJoinResp.joinStatus
+				// 根据你的描述是 activity/get 接口直接返回，假设在 data 根层级，或者你需要确认一下层级
+				// 这里假设字段在 data.joinStatus (如果是在 memberActivityJoinResp 里，请改为 data.memberActivityJoinResp?.joinStatus)
+				// 补充：根据之前的代码结构，已报名信息在 memberActivityJoinResp 里，建议优先检查那里，或者根目录
 
-					currentStep.value = 3; // 直接设置为步骤3
+				// 假设 joinStatus 在 data 根目录下 (根据你提供的接口描述)
+				// 同时也兼容旧逻辑 (检查 memberActivityJoinResp)
+				let status = 0;
+				if (data.joinStatus !== undefined) {
+					status = data.joinStatus;
+				} else if (data.memberActivityJoinResp) {
+					// 兼容旧数据的推断逻辑
+					status = 2; // 有 resp 视为已报名/待确认，具体细分可能看后端旧字段
+				}
 
-					// 并且预填一些信息，虽然用不上，但保持数据一致性
-					formData.userName = data.memberActivityJoinResp.userName || '';
-					formData.userPhone = data.memberActivityJoinResp.userPhone || '';
-					formData.paymentScreenshotUrl = data.memberActivityJoinResp.paymentScreenshotUrl || '';
+				console.log('当前报名状态 joinStatus:', status);
+
+				if (status === 2) {
+					// === 2 已报名 (报名成功) ===
+					console.log('状态：已报名，跳转成功页');
+					ticketNumber.value = generateTicketNumber(); // 或从后端取
+
+					// 预填信息
+					if (data.memberActivityJoinResp) {
+						formData.userName = data.memberActivityJoinResp.userName || '';
+						formData.userPhone = data.memberActivityJoinResp.userPhone || '';
+						formData.paymentScreenshotUrl = data.memberActivityJoinResp.paymentScreenshotUrl || '';
+					}
+					currentStep.value = 3;
+
+				} else if (status === 1) {
+					// === 1 待确认 (新增逻辑) ===
+					console.log('状态：待确认，跳转等待页');
+					// 也可以复用步骤3的界面，只是文案不同
+					// 预填信息
+					if (data.memberActivityJoinResp) {
+						formData.userName = data.memberActivityJoinResp.userName || '';
+						formData.userPhone = data.memberActivityJoinResp.userPhone || '';
+					}
+					currentStep.value = 3; // 复用结果页
 
 				} else {
-					// 【修改】这里的日志也更新一下，更清晰
-					console.log('用户未报名或报名状态无效，进入正常报名流程。');
-					// 用户未报名，正常赋值并停留在步骤1
-					activityDetail.value = data;
+					// === 0 未报名 ===
+					console.log('状态：未报名，进入填写页');
 					currentStep.value = 1;
 				}
 			} else {
@@ -559,7 +591,7 @@
 			// 提交成功，清除缓存
 			uni.removeStorageSync(FORM_CACHE_KEY);
 
-			currentStep.value = 3;
+			await getActiveDetail();
 		} else {
 			// 报名失败，处理错误
 			const error = result.error;

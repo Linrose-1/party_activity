@@ -75,16 +75,23 @@
 						</view>
 
 						<view class="card-right">
-							<view class="price-label">需付差价</view>
-							<view class="price-wrapper">
-								<text class="currency">¥</text>
-								<!-- 显示差价 -->
-								<text class="price">{{ level.priceDifference }}</text>
+							<!-- 情况 A: 可置换 (isExchange === 1) -->
+							<view v-if="level.isExchange === 1" class="exchange-wrapper">
+								<text class="exchange-tag">免费置换</text>
+							</view>
+
+							<!-- 情况 B: 需付费 (isExchange === 0) -->
+							<view v-else>
+								<view class="price-label">需付差价</view>
+								<view class="price-wrapper">
+									<text class="currency">¥</text>
+									<text class="price">{{ level.priceDifference }}</text>
+								</view>
 							</view>
 
 							<!-- 选中状态指示器 -->
 							<view class="radio-circle">
-								<!-- 【修复】判断条件改为 level.level -->
+								<!-- 判断条件改为 level.level -->
 								<view v-if="selectedLevelNum === level.level" class="radio-inner"></view>
 							</view>
 						</view>
@@ -111,9 +118,9 @@
 					<!-- 显示计算后的金额 -->
 					<view class="amount">¥ {{ payAmount }}</view>
 				</view>
-				<button class="pay-btn" @click="handleRecharge" :disabled="isPaying || parseFloat(payAmount) < 0"
-					:loading="isPaying">
-					{{ isPaying ? '支付中...' : '立即支付' }}
+				<button class="pay-btn" @click="handleButtonClick"
+					:disabled="isPaying || (currentTab === 1 && parseFloat(payAmount) <= 0)" :loading="isPaying">
+					{{ getButtonText() }}
 				</button>
 			</view>
 		</view>
@@ -212,7 +219,7 @@
 			});
 			return;
 		}
-		// 【修复】使用 level 字段进行选中标记
+		// 使用 level 字段进行选中标记
 		selectedLevelNum.value = level.level;
 	};
 
@@ -319,6 +326,101 @@
 				}
 			});
 		});
+	};
+
+
+	// --- 计算按钮文案 ---
+	const getButtonText = () => {
+		if (isPaying.value) return '处理中...';
+
+		// 如果是会员Tab，且选中了置换项
+		if (currentTab.value === 2) {
+			const selectedLevel = memberLevels.value.find(l => l.level === selectedLevelNum.value);
+			if (selectedLevel && selectedLevel.isExchange === 1) {
+				return '确认置换';
+			}
+		}
+		return '立即支付';
+	};
+
+	// --- 置换接口调用 ---
+	const handleExchange = async () => {
+		// 1. 找到选中项
+		const selectedLevelObj = memberLevels.value.find(l => l.level === selectedLevelNum.value);
+		if (!selectedLevelObj) return;
+
+		uni.showModal({
+			title: '确认置换',
+			content: `您当前的剩余价值足以覆盖目标等级，确认免费置换为【${selectedLevelObj.name}】吗？`,
+			success: async (res) => {
+				if (res.confirm) {
+					isPaying.value = true;
+					uni.showLoading({
+						title: '置换中...'
+					});
+
+					try {
+						// 2. 调用置换接口
+						// 注意：参数名 topUpLevelId，传的是 ID 还是 Level？根据您的描述是“等级编号”，通常指ID。
+						// 既然上面的 createOrder 用的是 levelId = id || level，这里保持一致
+						const {
+							error
+						} = await request('/app-api/member/top-up-level/exchange-top-up-level', {
+							method: 'POST', // 假设是 POST，或者是 PUT？通常操作类用 POST
+							data: {
+								topUpLevelId: selectedLevelObj.id // 传 id
+							}
+						});
+
+						uni.hideLoading();
+
+						if (error) {
+							uni.showToast({
+								title: error,
+								icon: 'none'
+							});
+						} else {
+							uni.showToast({
+								title: '置换成功',
+								icon: 'success'
+							});
+							// 刷新用户信息
+							await fetchUserInfo();
+							// 刷新列表（可能状态会变）
+							await fetchMemberLevels();
+
+							setTimeout(() => uni.navigateBack(), 1500);
+						}
+					} catch (e) {
+						uni.hideLoading();
+						uni.showToast({
+							title: '网络异常',
+							icon: 'none'
+						});
+					} finally {
+						isPaying.value = false;
+					}
+				}
+			}
+		});
+	};
+
+	// --- 总控点击事件 ---
+	const handleButtonClick = () => {
+		if (!checkLoginGuard()) return;
+
+		// 判断当前模式
+		if (currentTab.value === 2) {
+			const selectedLevel = memberLevels.value.find(l => l.level === selectedLevelNum.value);
+			if (selectedLevel && selectedLevel.isExchange === 1) {
+				// 走置换流程
+				handleExchange();
+				return;
+			}
+		}
+
+		// 否则走原有支付流程
+		handleRecharge();
 	};
 
 	const handleRecharge = async () => {
@@ -694,6 +796,21 @@
 					background-color: $theme-color;
 				}
 			}
+		}
+
+		.exchange-wrapper {
+			margin-right: 20rpx;
+		}
+
+		.exchange-tag {
+			font-size: 24rpx;
+			color: #52c41a;
+			/* 绿色 */
+			background-color: #f6ffed;
+			border: 1rpx solid #b7eb8f;
+			padding: 4rpx 12rpx;
+			border-radius: 8rpx;
+			font-weight: bold;
 		}
 
 		&.active .radio-circle {

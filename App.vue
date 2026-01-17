@@ -46,6 +46,8 @@
 			console.log('App Show');
 			// 在应用显示时，尝试启动定时器
 			this.startLocationUpdates();
+			// 检查并应用新版本
+			this.checkUpdate();
 		},
 		onHide: function() {
 			console.log('App Hide');
@@ -53,6 +55,41 @@
 			this.stopLocationUpdates();
 		},
 		methods: {
+			/**
+			 * 检查小程序更新
+			 */
+			checkUpdate() {
+				// 获取全局唯一的版本更新管理器
+				const updateManager = uni.getUpdateManager();
+
+				// 1. 检查是否有新版本
+				updateManager.onCheckForUpdate(function(res) {
+					// 请求完新版本信息的回调
+					console.log('是否有新版本发布:', res.hasUpdate);
+				});
+
+				// 2. 新版本下载完成
+				updateManager.onUpdateReady(function() {
+					uni.showModal({
+						title: '更新提示',
+						content: '新版本已经准备好，是否重启应用？',
+						success: function(res) {
+							if (res.confirm) {
+								// 新的版本已经下载好，调用 applyUpdate 应用新版本并重启
+								updateManager.applyUpdate();
+							}
+						}
+					});
+				});
+
+				// 3. 新版本下载失败
+				updateManager.onUpdateFailed(function() {
+					// 新的版本下载失败
+					console.error('新版本下载失败');
+					// 可以选择提示用户删除小程序重新搜索，或者静默忽略
+					// uni.showToast({ title: '新版本下载失败，请稍后重试', icon: 'none' });
+				});
+			},
 			/**
 			 * 检查用户是否已登录
 			 */

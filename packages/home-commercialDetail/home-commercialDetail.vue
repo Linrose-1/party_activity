@@ -243,7 +243,8 @@
 	} from '@dcloudio/uni-app';
 	import request from '../../utils/request.js';
 	import {
-		getInviteCode
+		getInviteCode,
+		checkLoginGuard
 	} from '../../utils/user.js';
 	import feedback from '@/utils/feedback.js';
 	import PointsFeedbackPopup from '@/components/PointsFeedbackPopup.vue';
@@ -696,6 +697,8 @@
 	};
 
 	const replyComment = (comment) => {
+		if (!checkLoginGuard()) return;
+
 		replyToCommentId.value = comment.id;
 		replyToNickname.value = comment.user;
 		uni.showToast({
@@ -705,6 +708,8 @@
 	};
 
 	const addComment = async () => {
+		if (!checkLoginGuard()) return;
+
 		const content = newCommentText.value.trim();
 		if (!content) {
 			uni.showToast({
@@ -816,6 +821,8 @@
 
 	// ==================== 完善 toggleAction (点赞/点踩) 方法 ====================
 	const toggleAction = async (post, clickedAction) => {
+		if (!checkLoginGuard()) return;
+
 		if (isActionInProgress.value) return;
 		isActionInProgress.value = true;
 
@@ -893,6 +900,8 @@
 
 	// ==================== 关注/取消关注用户 ====================
 	const toggleFollow = async (post) => {
+		if (!checkLoginGuard()) return;
+
 		// 1. 防抖/节流
 		if (isActionInProgress.value) return;
 		if (!loggedInUserId.value) {
@@ -962,6 +971,8 @@
 
 	// ==================== 收藏/取消收藏商机 ====================
 	const toggleBookmark = async (post) => {
+		if (!checkLoginGuard()) return;
+
 		if (isActionInProgress.value) return;
 		if (!loggedInUserId.value) {
 			uni.showToast({

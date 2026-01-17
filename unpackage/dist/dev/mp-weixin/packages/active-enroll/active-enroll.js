@@ -35,7 +35,7 @@ const _sfc_main = {
         activityId.value = options.id;
         getActiveDetail();
       } else {
-        common_vendor.index.__f__("error", "at packages/active-enroll/active-enroll.vue:255", "未接收到聚会ID！");
+        common_vendor.index.__f__("error", "at packages/active-enroll/active-enroll.vue:262", "未接收到聚会ID！");
         common_vendor.index.showToast({
           title: "加载聚会详情失败，缺少ID",
           icon: "none"
@@ -51,17 +51,17 @@ const _sfc_main = {
           formData.contactAddress = parsedData.contactAddress || "";
           formData.remark = parsedData.remark || "";
           formData.paymentScreenshotUrl = parsedData.paymentScreenshotUrl || "";
-          common_vendor.index.__f__("log", "at packages/active-enroll/active-enroll.vue:276", "已恢复上次未提交的报名信息");
+          common_vendor.index.__f__("log", "at packages/active-enroll/active-enroll.vue:283", "已恢复上次未提交的报名信息");
         }
       } catch (e) {
-        common_vendor.index.__f__("error", "at packages/active-enroll/active-enroll.vue:279", "读取缓存失败", e);
+        common_vendor.index.__f__("error", "at packages/active-enroll/active-enroll.vue:286", "读取缓存失败", e);
       }
     });
     common_vendor.watch(formData, (newVal) => {
       try {
         common_vendor.index.setStorageSync(FORM_CACHE_KEY, JSON.stringify(newVal));
       } catch (e) {
-        common_vendor.index.__f__("error", "at packages/active-enroll/active-enroll.vue:291", "保存缓存失败", e);
+        common_vendor.index.__f__("error", "at packages/active-enroll/active-enroll.vue:298", "保存缓存失败", e);
       }
     }, {
       deep: true
@@ -134,10 +134,10 @@ const _sfc_main = {
         return;
       }
       if (activityDetail.value && activityDetail.value.registrationFee === 0) {
-        common_vendor.index.__f__("log", "at packages/active-enroll/active-enroll.vue:376", "免费活动，直接提交报名");
+        common_vendor.index.__f__("log", "at packages/active-enroll/active-enroll.vue:383", "免费活动，直接提交报名");
         joinActivity();
       } else {
-        common_vendor.index.__f__("log", "at packages/active-enroll/active-enroll.vue:380", "收费活动，进入支付步骤");
+        common_vendor.index.__f__("log", "at packages/active-enroll/active-enroll.vue:387", "收费活动，进入支付步骤");
         currentStep.value = 2;
       }
     };
@@ -170,7 +170,7 @@ const _sfc_main = {
               icon: "success"
             });
           } else {
-            common_vendor.index.__f__("error", "at packages/active-enroll/active-enroll.vue:424", "上传失败:", result.error);
+            common_vendor.index.__f__("error", "at packages/active-enroll/active-enroll.vue:431", "上传失败:", result.error);
             common_vendor.index.showToast({
               title: result.error || "上传失败",
               icon: "none"
@@ -196,22 +196,37 @@ const _sfc_main = {
         common_vendor.index.hideLoading();
         if (result && !result.error) {
           const data = result.data;
-          common_vendor.index.__f__("log", "at packages/active-enroll/active-enroll.vue:455", "getActiveDetail result:", data);
-          if (data && data.memberActivityJoinResp && data.memberActivityJoinResp.paymentStatusStr) {
-            common_vendor.index.__f__("log", "at packages/active-enroll/active-enroll.vue:459", "用户已有效报名 (paymentStatusStr 存在)，直接跳转到成功页。");
-            activityDetail.value = data;
+          common_vendor.index.__f__("log", "at packages/active-enroll/active-enroll.vue:462", "getActiveDetail result:", data);
+          activityDetail.value = data;
+          let status = 0;
+          if (data.joinStatus !== void 0) {
+            status = data.joinStatus;
+          } else if (data.memberActivityJoinResp) {
+            status = 2;
+          }
+          common_vendor.index.__f__("log", "at packages/active-enroll/active-enroll.vue:482", "当前报名状态 joinStatus:", status);
+          if (status === 2) {
+            common_vendor.index.__f__("log", "at packages/active-enroll/active-enroll.vue:486", "状态：已报名，跳转成功页");
             ticketNumber.value = generateTicketNumber();
+            if (data.memberActivityJoinResp) {
+              formData.userName = data.memberActivityJoinResp.userName || "";
+              formData.userPhone = data.memberActivityJoinResp.userPhone || "";
+              formData.paymentScreenshotUrl = data.memberActivityJoinResp.paymentScreenshotUrl || "";
+            }
             currentStep.value = 3;
-            formData.userName = data.memberActivityJoinResp.userName || "";
-            formData.userPhone = data.memberActivityJoinResp.userPhone || "";
-            formData.paymentScreenshotUrl = data.memberActivityJoinResp.paymentScreenshotUrl || "";
+          } else if (status === 1) {
+            common_vendor.index.__f__("log", "at packages/active-enroll/active-enroll.vue:499", "状态：待确认，跳转等待页");
+            if (data.memberActivityJoinResp) {
+              formData.userName = data.memberActivityJoinResp.userName || "";
+              formData.userPhone = data.memberActivityJoinResp.userPhone || "";
+            }
+            currentStep.value = 3;
           } else {
-            common_vendor.index.__f__("log", "at packages/active-enroll/active-enroll.vue:476", "用户未报名或报名状态无效，进入正常报名流程。");
-            activityDetail.value = data;
+            common_vendor.index.__f__("log", "at packages/active-enroll/active-enroll.vue:510", "状态：未报名，进入填写页");
             currentStep.value = 1;
           }
         } else {
-          common_vendor.index.__f__("log", "at packages/active-enroll/active-enroll.vue:482", "请求失败:", result ? result.error : "无返回结果");
+          common_vendor.index.__f__("log", "at packages/active-enroll/active-enroll.vue:514", "请求失败:", result ? result.error : "无返回结果");
           common_vendor.index.showToast({
             title: result.error || "获取聚会信息失败",
             icon: "none"
@@ -219,7 +234,7 @@ const _sfc_main = {
         }
       } catch (e) {
         common_vendor.index.hideLoading();
-        common_vendor.index.__f__("error", "at packages/active-enroll/active-enroll.vue:490", "获取聚会详情时发生异常:", e);
+        common_vendor.index.__f__("error", "at packages/active-enroll/active-enroll.vue:522", "获取聚会详情时发生异常:", e);
         common_vendor.index.showToast({
           title: "网络异常，请稍后重试",
           icon: "none"
@@ -278,7 +293,7 @@ const _sfc_main = {
           icon: "success"
         });
         common_vendor.index.removeStorageSync(FORM_CACHE_KEY);
-        currentStep.value = 3;
+        await getActiveDetail();
       } else {
         const error = result.error;
         common_vendor.index.showToast({
@@ -405,12 +420,14 @@ const _sfc_main = {
       }) : {}, {
         M: currentStep.value === 3
       }, currentStep.value === 3 ? common_vendor.e({
-        N: activityDetail.value
+        N: activityDetail.value && activityDetail.value.joinStatus === 1
+      }, activityDetail.value && activityDetail.value.joinStatus === 1 ? {} : {}, {
+        O: activityDetail.value
       }, activityDetail.value ? {
-        O: common_vendor.t(activityDetail.value.activityTitle),
-        P: common_vendor.t(common_vendor.unref(currentDate))
+        P: common_vendor.t(activityDetail.value.activityTitle),
+        Q: common_vendor.t(common_vendor.unref(currentDate))
       } : {}, {
-        Q: common_vendor.o(backToHome)
+        R: common_vendor.o(backToHome)
       }) : {});
     };
   }

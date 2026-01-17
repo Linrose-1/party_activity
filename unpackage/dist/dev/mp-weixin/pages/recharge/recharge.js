@@ -112,7 +112,7 @@ const _sfc_main = {
       } else {
         payload.amount = parseFloat(payAmount.value);
       }
-      common_vendor.index.__f__("log", "at pages/recharge/recharge.vue:278", "1. 开始创建订单, 参数:", payload);
+      common_vendor.index.__f__("log", "at pages/recharge/recharge.vue:285", "1. 开始创建订单, 参数:", payload);
       const {
         data,
         error
@@ -125,7 +125,7 @@ const _sfc_main = {
       return data;
     };
     const getPayParams = async (orderNo) => {
-      common_vendor.index.__f__("log", "at pages/recharge/recharge.vue:293", "正在获取支付签名，订单号:", orderNo);
+      common_vendor.index.__f__("log", "at pages/recharge/recharge.vue:300", "正在获取支付签名，订单号:", orderNo);
       const {
         data,
         error
@@ -154,6 +154,81 @@ const _sfc_main = {
           }
         });
       });
+    };
+    const getButtonText = () => {
+      if (isPaying.value)
+        return "处理中...";
+      if (currentTab.value === 2) {
+        const selectedLevel = memberLevels.value.find((l) => l.level === selectedLevelNum.value);
+        if (selectedLevel && selectedLevel.isExchange === 1) {
+          return "确认置换";
+        }
+      }
+      return "立即支付";
+    };
+    const handleExchange = async () => {
+      const selectedLevelObj = memberLevels.value.find((l) => l.level === selectedLevelNum.value);
+      if (!selectedLevelObj)
+        return;
+      common_vendor.index.showModal({
+        title: "确认置换",
+        content: `您当前的剩余价值足以覆盖目标等级，确认免费置换为【${selectedLevelObj.name}】吗？`,
+        success: async (res) => {
+          if (res.confirm) {
+            isPaying.value = true;
+            common_vendor.index.showLoading({
+              title: "置换中..."
+            });
+            try {
+              const {
+                error
+              } = await utils_request.request("/app-api/member/top-up-level/exchange-top-up-level", {
+                method: "POST",
+                // 假设是 POST，或者是 PUT？通常操作类用 POST
+                data: {
+                  topUpLevelId: selectedLevelObj.id
+                  // 传 id
+                }
+              });
+              common_vendor.index.hideLoading();
+              if (error) {
+                common_vendor.index.showToast({
+                  title: error,
+                  icon: "none"
+                });
+              } else {
+                common_vendor.index.showToast({
+                  title: "置换成功",
+                  icon: "success"
+                });
+                await fetchUserInfo();
+                await fetchMemberLevels();
+                setTimeout(() => common_vendor.index.navigateBack(), 1500);
+              }
+            } catch (e) {
+              common_vendor.index.hideLoading();
+              common_vendor.index.showToast({
+                title: "网络异常",
+                icon: "none"
+              });
+            } finally {
+              isPaying.value = false;
+            }
+          }
+        }
+      });
+    };
+    const handleButtonClick = () => {
+      if (!utils_user.checkLoginGuard())
+        return;
+      if (currentTab.value === 2) {
+        const selectedLevel = memberLevels.value.find((l) => l.level === selectedLevelNum.value);
+        if (selectedLevel && selectedLevel.isExchange === 1) {
+          handleExchange();
+          return;
+        }
+      }
+      handleRecharge();
     };
     const handleRecharge = async () => {
       if (!utils_user.checkLoginGuard())
@@ -251,13 +326,16 @@ const _sfc_main = {
             b: common_vendor.t(level.name),
             c: common_vendor.t(level.duration || "永久"),
             d: common_vendor.t(level.price),
-            e: common_vendor.t(level.priceDifference),
-            f: selectedLevelNum.value === level.level
+            e: level.isExchange === 1
+          }, level.isExchange === 1 ? {} : {
+            f: common_vendor.t(level.priceDifference)
+          }, {
+            g: selectedLevelNum.value === level.level
           }, selectedLevelNum.value === level.level ? {} : {}, {
-            g: level.level,
-            h: selectedLevelNum.value === level.level ? 1 : "",
-            i: level.isChoice === 0 ? 1 : "",
-            j: common_vendor.o(($event) => selectMemberLevel(level), level.level)
+            h: level.level,
+            i: selectedLevelNum.value === level.level ? 1 : "",
+            j: level.isChoice === 0 ? 1 : "",
+            k: common_vendor.o(($event) => selectMemberLevel(level), level.level)
           });
         }),
         p: common_vendor.p({
@@ -267,9 +345,9 @@ const _sfc_main = {
         })
       } : {}, {
         q: common_vendor.t(payAmount.value),
-        r: common_vendor.t(isPaying.value ? "支付中..." : "立即支付"),
-        s: common_vendor.o(handleRecharge),
-        t: isPaying.value || parseFloat(payAmount.value) < 0,
+        r: common_vendor.t(getButtonText()),
+        s: common_vendor.o(handleButtonClick),
+        t: isPaying.value || currentTab.value === 1 && parseFloat(payAmount.value) <= 0,
         v: isPaying.value
       });
     };

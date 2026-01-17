@@ -262,6 +262,19 @@
   border-radius: 50%;
   background-color: #FF6E00;
 }
+.member-card .exchange-wrapper.data-v-2984a38c {
+  margin-right: 20rpx;
+}
+.member-card .exchange-tag.data-v-2984a38c {
+  font-size: 24rpx;
+  color: #52c41a;
+  /* 绿色 */
+  background-color: #f6ffed;
+  border: 1rpx solid #b7eb8f;
+  padding: 4rpx 12rpx;
+  border-radius: 8rpx;
+  font-weight: bold;
+}
 .member-card.active .radio-circle.data-v-2984a38c {
   border-color: #FF6E00;
 }
