@@ -410,9 +410,9 @@
 			// uni.removeStorageSync('userId');
 
 			//清理storage缓存
-			// uni.clearStorage()
+			uni.clearStorage()
 			//微信登录重新获取换绑openid用户的token
-			// performSilentLogin()
+			performSilentLogin()
 
 			uni.hideLoading();
 			uni.showToast({

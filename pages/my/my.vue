@@ -65,7 +65,7 @@
 						<uni-icons type="person-filled" size="30" color="#FF8C00"></uni-icons>
 					</view>
 
-					<!-- 登录提示文字 -->
+					<!-- 【新增】登录提示文字 -->
 					<view class="login-prompt-text">点击去登录</view>
 
 					<!-- 右侧箭头 -->
@@ -633,9 +633,141 @@
 	// 	})
 	// }
 
-	const skipToLogin = () => {
-		checkLoginGuard();
-	}
+	// const skipToLogin = () => {
+	// 	uni.navigateTo({
+	// 		url: '/pages/index/index'
+	// 		// url: '/pages/login/login'
+	// 	})
+	// }
+
+	const skipToLogin = async () => {
+		const token = uni.getStorageSync("token")
+		console.log("asdasdasd", !token)
+		if (!token) {
+			try {
+				wx.showLoading({
+					title: '登录中，请稍后...',
+					mask: true // 防止用户重复点击
+				});
+				// 1. 获取微信 loginCode
+				const loginRes = await uni.login({
+					provider: 'weixin'
+				});
+				if (!loginRes || !loginRes.code) {
+					return;
+				}
+
+				// 2. 检查是否有暂存的邀请码
+				const pendingInviteCode = uni.getStorageSync('pendingInviteCode');
+
+				// 3. 构造请求参数，只传 loginCode 和必要的邀请码
+				const payload = {
+					loginCode: loginRes.code,
+					state: 'default',
+					shardCode: pendingInviteCode || ''
+				};
+
+				// 4. 调用后端接口
+				const {
+					data,
+					error
+				} = await request('/app-api/member/auth/weixin-mini-app-login', {
+					method: 'POST',
+					data: payload
+				});
+
+				// 5. 登录成功处理
+				if (!error && data && data.accessToken) {
+					console.log('✅ 静默登录成功!', data);
+					// 存储 Token 和 UserId
+					uni.setStorageSync('token', data.accessToken);
+					uni.setStorageSync('userId', data.userId);
+
+					// // 【关键】登录成功后，立即更新状态并刷新数据
+					// isLogin.value = true;
+					// loggedInUserId.value = data.userId;
+
+					// 刷新用户信息和列表
+					fetchCurrentUserInfo();
+					// getBusinessOpportunitiesList(true);
+
+					// 如果之前使用了邀请码，现在可以清除了
+					// if (pendingInviteCode) {
+					// 	uni.removeStorageSync('pendingInviteCode');
+					// }
+				} else {
+					// 失败不弹窗，保持静默
+					console.log('静默登录未成功 (可能是非新用户需手机号或接口异常):', error);
+				}
+			} catch (e) {
+				console.error('静默登录流程异常:', e);
+			}
+		} else {
+			wx.showModal({
+				title: '用户未注册',
+				content: '点击确定即可跳转注册页面',
+				showCancel: false, // 隐藏取消按钮
+				confirmText: '确定',
+				success: (res) => {
+					uni.navigateTo({
+						url: '/pages/index/index'
+						// url: '/pages/login/login'
+					})
+				}
+			});
+		}
+	};
+
+	//微信登录完还需要获取用户信息
+	const fetchCurrentUserInfo = async () => {
+		const {
+			data,
+			error
+		} = await request('/app-api/member/user/get', {
+			method: 'GET'
+		});
+		if (error) {
+			console.error("首页实时获取用户信息失败:", error);
+			// 失败时可以考虑使用缓存数据作为兜底
+			currentUserInfo.value = getCachedUserInfo();
+			wx.hideLoading();
+		} else {
+			// currentUserInfo.value = data;
+			// console.log("首页实时获取用户信息成功:", currentUserInfo.value);
+			// // 【重要】获取成功后，用新数据更新本地缓存
+			uni.setStorageSync('userInfo', JSON.stringify(data));
+			console.log("mobile", data.mobile)
+			if (!data.mobile) {
+				wx.showModal({
+					title: '用户未注册',
+					content: '点击确定即可跳转注册页面',
+					showCancel: false, // 隐藏取消按钮
+					confirmText: '确定',
+					success: (res) => {
+						uni.navigateTo({
+							url: '/pages/index/index'
+							// url: '/pages/login/login'
+						})
+					}
+				});
+				wx.hideLoading();
+			} else {
+				wx.showModal({
+					title: '登录成功',
+					content: '点击确定即可跳转主页',
+					showCancel: false, // 隐藏取消按钮
+					confirmText: '确定',
+					success: (res) => {
+						uni.switchTab({
+							url: '/pages/home/home' // 【重要】首页是Tab页，必须用 switchTab
+						});
+					}
+				});
+				wx.hideLoading();
+			}
+		}
+		wx.hideLoading();
+	};
 </script>
 
 <style scoped>
