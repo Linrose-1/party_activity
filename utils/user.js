@@ -39,7 +39,7 @@ export function isUserFullyLoggedIn() {
 	}
 
 	// 2. 检查用户信息中是否有手机号
-	const userInfo = getCachedUserInfo(); // 复用文件里已有的 getCachedUserInfo 方法
+	const userInfo = getCachedUserInfo(); 
 	if (!userInfo || !userInfo.mobile) {
 		return false;
 	}
@@ -75,4 +75,71 @@ export function checkLoginGuard(content = '该功能需要您完善登录信息�
 	});
 
 	return false;
+}
+
+
+
+// utils/user.js
+
+let loginPromise = null;
+
+/**
+ * 全局静默登录方法
+ * 任何页面调用它，都会复用同一个请求，避免并发重复登录
+ */
+export async function globalSilentLogin() {
+	// 1. 如果已有 Token，直接返回成功
+	if (uni.getStorageSync('token')) {
+		return true;
+	}
+
+	// 2. 如果正在登录中，返回同一个 Promise
+	if (loginPromise) {
+		return loginPromise;
+	}
+
+	// 3. 开始新的登录流程
+	loginPromise = new Promise(async (resolve) => {
+		console.log('🚀 [Global] 开始全局静默登录...');
+		try {
+			const loginRes = await uni.login({
+				provider: 'weixin'
+			});
+			if (loginRes.code) {
+				// 引入 request (注意循环依赖，如果 request 也引了 user.js，要小心)
+				// 这里建议把 request 逻辑内联或者确保解耦
+				// 简单起见，假设 request 可用
+				const {
+					request
+				} = require('./request.js'); // 动态引入防循环
+
+				const pendingInviteCode = uni.getStorageSync('pendingInviteCode');
+				const {
+					data
+				} = await request('/app-api/member/auth/weixin-mini-app-login', {
+					method: 'POST',
+					data: {
+						loginCode: loginRes.code,
+						state: 'default',
+						shardCode: pendingInviteCode || ''
+					}
+				});
+
+				if (data && data.accessToken) {
+					uni.setStorageSync('token', data.accessToken);
+					uni.setStorageSync('userId', data.userId);
+					console.log('✅ [Global] 静默登录成功');
+					resolve(true);
+					return;
+				}
+			}
+		} catch (e) {
+			console.error('❌ [Global] 静默登录失败', e);
+		} finally {
+			loginPromise = null; // 结束后清空锁
+		}
+		resolve(false);
+	});
+
+	return loginPromise;
 }

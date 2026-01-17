@@ -403,7 +403,8 @@
 			uni.hideLoading();
 			uni.showToast({
 				title: '登录成功',
-				icon: 'success'
+				icon: 'success',
+				duration: 2000
 			});
 
 			// 7. 跳转首页
@@ -411,11 +412,11 @@
 				//清理storage缓存
 				uni.clearStorage()
 				//微信登录重新获取换绑openid用户的token
-				// performSilentLogin()
+				performSilentLogin()
 				uni.switchTab({
 					url: '/pages/home/home'
 				});
-			}, 500);
+			}, 2000);
 
 		} catch (error) {
 			uni.hideLoading();
@@ -606,7 +607,7 @@
 
 
 	// ==========================================================
-	// --- 【新增】分享功能逻辑 ---
+	// --- 分享功能逻辑 ---
 	// ==========================================================
 
 	/**

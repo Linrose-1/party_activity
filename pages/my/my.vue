@@ -65,7 +65,7 @@
 						<uni-icons type="person-filled" size="30" color="#FF8C00"></uni-icons>
 					</view>
 
-					<!-- 【新增】登录提示文字 -->
+					<!-- 登录提示文字 -->
 					<view class="login-prompt-text">点击去登录</view>
 
 					<!-- 右侧箭头 -->
@@ -155,7 +155,7 @@
 	} from '@dcloudio/uni-app'; // 引入 onLoad
 	import request from '../../utils/request.js';
 	import {
-	    checkLoginGuard
+		checkLoginGuard
 	} from '../../utils/user.js';
 
 	onMounted(() => {
@@ -367,7 +367,7 @@
 			iconBg: 'linear-gradient(135deg, #30CFD0, #330867)',
 			key: 'membershipCenter'
 			// path: '/pages/index/index'
-		}, 
+		},
 		// {
 		// 	name: '精准投放',
 		// 	desc: '广告精准触达',
@@ -634,10 +634,7 @@
 	// }
 
 	const skipToLogin = () => {
-		uni.navigateTo({
-			url: '/pages/index/index'
-			// url: '/pages/login/login'
-		})
+		checkLoginGuard();
 	}
 </script>
 

@@ -381,10 +381,7 @@ const _sfc_main = {
       });
     };
     const skipToLogin = () => {
-      common_vendor.index.navigateTo({
-        url: "/pages/index/index"
-        // url: '/pages/login/login'
-      });
+      utils_user.checkLoginGuard();
     };
     return (_ctx, _cache) => {
       return common_vendor.e({

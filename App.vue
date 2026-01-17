@@ -1,5 +1,8 @@
 <script>
 	import request from '@/utils/request.js';
+	import {
+		globalSilentLogin
+	} from '@/utils/user.js';
 
 	export default {
 		data() {
@@ -43,6 +46,8 @@
 			}
 		},
 		onShow: function() {
+			// 尝试预加载登录态，不 await，让它在后台跑
+			globalSilentLogin();
 			console.log('App Show');
 			// 在应用显示时，尝试启动定时器
 			this.startLocationUpdates();

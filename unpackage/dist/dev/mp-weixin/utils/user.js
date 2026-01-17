@@ -48,7 +48,54 @@ function checkLoginGuard(content = "该功能需要您完善登录信息（绑�
   });
   return false;
 }
+let loginPromise = null;
+async function globalSilentLogin() {
+  if (common_vendor.index.getStorageSync("token")) {
+    return true;
+  }
+  if (loginPromise) {
+    return loginPromise;
+  }
+  loginPromise = new Promise(async (resolve) => {
+    common_vendor.index.__f__("log", "at utils/user.js:103", "🚀 [Global] 开始全局静默登录...");
+    try {
+      const loginRes = await common_vendor.index.login({
+        provider: "weixin"
+      });
+      if (loginRes.code) {
+        const {
+          request
+        } = require("./request.js");
+        const pendingInviteCode = common_vendor.index.getStorageSync("pendingInviteCode");
+        const {
+          data
+        } = await request("/app-api/member/auth/weixin-mini-app-login", {
+          method: "POST",
+          data: {
+            loginCode: loginRes.code,
+            state: "default",
+            shardCode: pendingInviteCode || ""
+          }
+        });
+        if (data && data.accessToken) {
+          common_vendor.index.setStorageSync("token", data.accessToken);
+          common_vendor.index.setStorageSync("userId", data.userId);
+          common_vendor.index.__f__("log", "at utils/user.js:131", "✅ [Global] 静默登录成功");
+          resolve(true);
+          return;
+        }
+      }
+    } catch (e) {
+      common_vendor.index.__f__("error", "at utils/user.js:137", "❌ [Global] 静默登录失败", e);
+    } finally {
+      loginPromise = null;
+    }
+    resolve(false);
+  });
+  return loginPromise;
+}
 exports.checkLoginGuard = checkLoginGuard;
 exports.getCachedUserInfo = getCachedUserInfo;
 exports.getInviteCode = getInviteCode;
+exports.globalSilentLogin = globalSilentLogin;
 //# sourceMappingURL=../../.sourcemap/mp-weixin/utils/user.js.map
