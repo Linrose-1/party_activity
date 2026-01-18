@@ -285,8 +285,8 @@ const _sfc_main = {
         return ["营业时间格式有误"];
       }
     });
-    const openSharePopup = () => {
-      if (!utils_user.checkLoginGuard())
+    const openSharePopup = async () => {
+      if (!await utils_user.checkLoginGuard())
         return;
       customShareTitle.value = activityDetail.value.activityTitle || "发现一个很棒的聚会，快来看看吧！";
       sharePopup.value.open();
@@ -378,8 +378,8 @@ const _sfc_main = {
         imageUrl: activityDetail.value.coverImageUrl || "/static/default-share-image.png"
       };
     });
-    function register() {
-      if (!utils_user.checkLoginGuard())
+    const register = async () => {
+      if (!await utils_user.checkLoginGuard())
         return;
       if (!isRegistrationActive.value) {
         common_vendor.index.showToast({
@@ -391,7 +391,7 @@ const _sfc_main = {
       common_vendor.index.navigateTo({
         url: `/packages/active-enroll/active-enroll?id=${activityId.value}`
       });
-    }
+    };
     function viewAllUsers() {
       if (participantTotal.value === 0) {
         common_vendor.index.showToast({

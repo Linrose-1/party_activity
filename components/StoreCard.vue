@@ -88,8 +88,8 @@
 		emit('click-card', props.store);
 	};
 
-	const handleInitiateParty = () => {
-		if (!checkLoginGuard()) return;
+	const handleInitiateParty = async () => {
+		if (!await checkLoginGuard()) return;
 		if (!props.store || !props.store.id) return;
 		const url =
 			`/packages/active-publish/active-publish?storeId=${props.store.id}&storeName=${encodeURIComponent(props.store.storeName)}`;

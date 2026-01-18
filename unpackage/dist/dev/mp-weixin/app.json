@@ -61,7 +61,10 @@
         "my-active/my-active",
         "my-collection/my-collection",
         "participant-detail/participant-detail",
-        "user-reviews/user-reviews"
+        "user-reviews/user-reviews",
+        "user-review-list/user-review-list",
+        "social-interaction/social-interaction",
+        "my-reviews/my-reviews"
       ]
     }
   ],

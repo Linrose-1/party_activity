@@ -58,15 +58,15 @@ const _sfc_main = {
       };
       return classMap[statusStr] || "";
     };
-    const handleCardClick = () => {
-      if (!utils_user.checkLoginGuard("登录并绑定手机号后才能查看聚会详情，是否立即登录？"))
+    const handleCardClick = async () => {
+      if (!await utils_user.checkLoginGuard("登录并绑定手机号后才能查看聚会详情，是否立即登录？"))
         return;
       common_vendor.index.navigateTo({
         url: `/packages/active-detail/active-detail?id=${props.activity.id}`
       });
     };
-    const handleRegisterClick = () => {
-      if (!utils_user.checkLoginGuard("登录并绑定手机号后才能报名聚会，是否立即登录？"))
+    const handleRegisterClick = async () => {
+      if (!await utils_user.checkLoginGuard("登录并绑定手机号后才能报名聚会，是否立即登录？"))
         return;
       common_vendor.index.navigateTo({
         url: `/packages/active-enroll/active-enroll?id=${props.activity.id}`
@@ -76,7 +76,7 @@ const _sfc_main = {
       if (loading.value) {
         return;
       }
-      if (!utils_user.checkLoginGuard("登录并绑定手机号后才能收藏聚会，是否立即登录？"))
+      if (!await utils_user.checkLoginGuard("登录并绑定手机号后才能收藏聚会，是否立即登录？"))
         return;
       loading.value = true;
       const userId = common_vendor.index.getStorageSync("userId");

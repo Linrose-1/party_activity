@@ -351,8 +351,8 @@ const _sfc_main = {
         common_vendor.index.__f__("error", "at packages/home-commercialDetail/home-commercialDetail.vue:695", "请求评论列表异常:", error);
       }
     };
-    const replyComment = (comment) => {
-      if (!utils_user.checkLoginGuard())
+    const replyComment = async (comment) => {
+      if (!await utils_user.checkLoginGuard())
         return;
       replyToCommentId.value = comment.id;
       replyToNickname.value = comment.user;
@@ -363,7 +363,7 @@ const _sfc_main = {
     };
     const addComment = async () => {
       var _a;
-      if (!utils_user.checkLoginGuard())
+      if (!await utils_user.checkLoginGuard())
         return;
       const content = newCommentText.value.trim();
       if (!content) {
@@ -462,7 +462,7 @@ const _sfc_main = {
       });
     };
     const toggleAction = async (post, clickedAction) => {
-      if (!utils_user.checkLoginGuard())
+      if (!await utils_user.checkLoginGuard())
         return;
       if (isActionInProgress.value)
         return;
@@ -531,7 +531,7 @@ const _sfc_main = {
       }
     };
     const toggleFollow = async (post) => {
-      if (!utils_user.checkLoginGuard())
+      if (!await utils_user.checkLoginGuard())
         return;
       if (isActionInProgress.value)
         return;
@@ -587,7 +587,7 @@ const _sfc_main = {
       }
     };
     const toggleBookmark = async (post) => {
-      if (!utils_user.checkLoginGuard())
+      if (!await utils_user.checkLoginGuard())
         return;
       if (isActionInProgress.value)
         return;

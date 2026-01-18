@@ -406,8 +406,8 @@
 	};
 
 	// --- 总控点击事件 ---
-	const handleButtonClick = () => {
-		if (!checkLoginGuard()) return;
+	const handleButtonClick = async () => {
+		if (!await checkLoginGuard()) return;
 
 		// 判断当前模式
 		if (currentTab.value === 2) {
@@ -424,7 +424,7 @@
 	};
 
 	const handleRecharge = async () => {
-		if (!checkLoginGuard()) return;
+		if (!await checkLoginGuard()) return;
 
 		const amount = parseFloat(payAmount.value);
 

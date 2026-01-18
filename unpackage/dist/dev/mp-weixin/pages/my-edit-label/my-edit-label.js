@@ -57,40 +57,53 @@ const _sfc_main = {
     });
     const scoreRecordId = common_vendor.ref(null);
     const isSubmitting = common_vendor.ref(false);
-    common_vendor.onMounted(async () => {
-      common_vendor.index.getStorageSync("userInfo");
-      const userId = common_vendor.index.getStorageSync("userId");
-      if (!userId) {
-        common_vendor.index.showToast({
-          title: "无法获取用户信息，请重新登录",
-          icon: "none"
-        });
-        return;
+    const targetUserId = common_vendor.ref(null);
+    const currentUserId = common_vendor.ref(null);
+    const isSelf = common_vendor.ref(false);
+    common_vendor.onLoad((options) => {
+      currentUserId.value = common_vendor.index.getStorageSync("userId");
+      if (options.id) {
+        targetUserId.value = options.id;
+      } else {
+        targetUserId.value = currentUserId.value;
       }
-      common_vendor.index.showLoading({
-        title: "正在加载评分..."
+      isSelf.value = String(targetUserId.value) === String(currentUserId.value);
+      common_vendor.index.setNavigationBarTitle({
+        title: isSelf.value ? "数字标签(自我评价)" : "商友评分"
       });
-      const {
-        data: userScores,
-        error
-      } = await ScoreApi.getMyScores(userId);
-      common_vendor.index.hideLoading();
-      if (error) {
-        common_vendor.index.__f__("warn", "at pages/my-edit-label/my-edit-label.vue:247", "获取已有评分失败:", error);
-        return;
-      }
-      if (userScores) {
-        common_vendor.index.__f__("log", "at pages/my-edit-label/my-edit-label.vue:253", "成功获取到已有评分:", userScores);
-        scoreRecordId.value = userScores.id;
-        Object.keys(scores.value).forEach((key) => {
-          if (userScores[key] !== void 0 && userScores[key] !== null) {
-            scores.value[key] = userScores[key];
+    });
+    common_vendor.onMounted(() => {
+      fetchScores();
+    });
+    const fetchScores = async () => {
+      common_vendor.index.showLoading({
+        title: "加载中..."
+      });
+      try {
+        const {
+          data,
+          error
+        } = await utils_request.request("/app-api/member/user-scores/getInfo", {
+          method: "GET",
+          data: {
+            // 根据文档：userId 为被评分人
+            userId: targetUserId.value
           }
         });
-      } else {
-        common_vendor.index.__f__("log", "at pages/my-edit-label/my-edit-label.vue:263", "用户尚未评分，将使用默认值。");
+        if (!error && data) {
+          scoreRecordId.value = data.id;
+          Object.keys(scores.value).forEach((key) => {
+            if (data[key] !== void 0 && data[key] !== null) {
+              scores.value[key] = data[key];
+            }
+          });
+        }
+      } catch (e) {
+        common_vendor.index.__f__("error", "at pages/my-edit-label/my-edit-label.vue:282", e);
+      } finally {
+        common_vendor.index.hideLoading();
       }
-    });
+    };
     const submitScores = async () => {
       if (isSubmitting.value)
         return;
@@ -111,8 +124,10 @@ const _sfc_main = {
         ...scores.value,
         id: scoreRecordId.value,
         // 如果是首次评分，id为null
-        userId,
-        scorerId: userId
+        scorerId: targetUserId.value,
+        // 被评分人
+        userId: currentUserId.value
+        // 评分人 (自己)
       };
       const {
         data: newRecord,
@@ -121,7 +136,7 @@ const _sfc_main = {
       common_vendor.index.hideLoading();
       isSubmitting.value = false;
       if (error) {
-        common_vendor.index.__f__("error", "at pages/my-edit-label/my-edit-label.vue:306", "评分保存失败:", error);
+        common_vendor.index.__f__("error", "at pages/my-edit-label/my-edit-label.vue:327", "评分保存失败:", error);
         common_vendor.index.showToast({
           title: `保存失败: ${error}`,
           icon: "none"
@@ -141,18 +156,20 @@ const _sfc_main = {
     };
     return (_ctx, _cache) => {
       return {
-        a: common_vendor.p({
+        a: common_vendor.t(isSelf.value ? "数字标签（自我评价）" : "给商友评分"),
+        b: common_vendor.t(isSelf.value ? "请对自己以下维度的表现进行1-10分评估" : "请对TA以下维度的表现进行1-10分评估"),
+        c: common_vendor.p({
           type: "info-filled",
           size: "16",
           color: "#FF8C00"
         }),
-        b: common_vendor.o(($event) => scores.value = $event),
-        c: common_vendor.p({
+        d: common_vendor.o(($event) => scores.value = $event),
+        e: common_vendor.p({
           modelValue: scores.value
         }),
-        d: common_vendor.t(isSubmitting.value ? "保存中..." : "保存评分"),
-        e: isSubmitting.value,
-        f: common_vendor.o(submitScores)
+        f: common_vendor.t(isSubmitting.value ? "保存中..." : "保存评分"),
+        g: isSubmitting.value,
+        h: common_vendor.o(submitScores)
       };
     };
   }

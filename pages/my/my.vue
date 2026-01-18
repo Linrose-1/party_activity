@@ -59,13 +59,13 @@
 			<!-- 如果未登录，显示登录提示 (此部分无变化) -->
 			<template v-else>
 				<!-- 将点击事件移动到最外层容器上 -->
-				<view class="login-prompt" @click="skipToLogin">
+				<view class="login-prompt" @click="handleLoginClick">
 					<!-- 头像图标 -->
 					<view class="login-prompt-avatar">
 						<uni-icons type="person-filled" size="30" color="#FF8C00"></uni-icons>
 					</view>
 
-					<!-- 【新增】登录提示文字 -->
+					<!-- 登录提示文字 -->
 					<view class="login-prompt-text">点击去登录</view>
 
 					<!-- 右侧箭头 -->
@@ -282,8 +282,8 @@
 	});
 
 	// 【优化 3】修改跳转逻辑，处理 "互动信息" 的点击事件
-	const navigateToAccountDetail = (item) => {
-		if (!checkLoginGuard()) return;
+	const navigateToAccountDetail = async (item) => {
+		if (!await checkLoginGuard()) return;
 		if (item && item.path) {
 			uni.navigateTo({
 				url: item.path
@@ -342,7 +342,8 @@
 			desc: '您的互动信息',
 			icon: '../../static/icon/社交互动.png',
 			iconBg: 'linear-gradient(135deg, #4158D0, #C850C0)',
-			key: 'membershipCenter'
+			// key: 'membershipCenter'
+			path: '/packages/social-interaction/social-interaction'
 		},
 		{
 			name: '用户中心',
@@ -379,8 +380,8 @@
 
 
 	//  "人脉金库" 模块的跳转逻辑处理
-	const navigateToCoreFeature = (item) => {
-		if (!checkLoginGuard()) return;
+	const navigateToCoreFeature = async (item) => {
+		if (!await checkLoginGuard()) return;
 		// 优先处理有特殊 key 的项
 		if (item.key) {
 			switch (item.key) {
@@ -532,8 +533,8 @@
 		} // 新增，带特殊标记
 	]);
 
-	const navigateToFeature = (item) => {
-		if (!checkLoginGuard()) return;
+	const navigateToFeature = async (item) => {
+		if (!await checkLoginGuard()) return;
 		// 1. 优先处理有特殊 key 的项
 		if (item && item.key === 'customerService') {
 			// 检查电话号码是否存在
@@ -575,8 +576,8 @@
 	};
 
 
-	const onEdit = () => {
-		if (!checkLoginGuard()) return;
+	const onEdit = async () => {
+		if (!await checkLoginGuard()) return;
 
 		uni.navigateTo({
 			// url: '/packages/my-edit/my-edit'
@@ -584,8 +585,8 @@
 		})
 	}
 
-	const onViewAccountDetail = () => {
-		if (!checkLoginGuard()) return;
+	const onViewAccountDetail = async () => {
+		if (!await checkLoginGuard()) return;
 
 		uni.navigateTo({
 			url: '/packages/my-edit/my-edit'
@@ -593,8 +594,8 @@
 	}
 
 
-	const copyToClipboard = (text) => {
-		if (!checkLoginGuard()) return;
+	const copyToClipboard = async (text) => {
+		if (!await checkLoginGuard()) return;
 		if (!text) {
 			uni.showToast({
 				title: '没有可复制的内容',
@@ -627,18 +628,26 @@
 		})
 	}
 
-	// const onViewDetail = () => {
-	// 	uni.navigateTo({
-	// 		url: '/packages/my-businessCard/my-businessCard'
-	// 	})
-	// }
+	// 处理点击登录区域的逻辑
+	const handleLoginClick = async () => {
+		// 调用智能守卫
+		// 1. 如果是老用户：守卫内部会静默登录 -> 存Token -> 返回 true
+		// 2. 如果是新用户：守卫内部会弹窗 -> 用户点去登录 -> 跳转 -> 返回 false
+		const isLoggedIn = await checkLoginGuard();
 
-	// const skipToLogin = () => {
-	// 	uni.navigateTo({
-	// 		url: '/pages/index/index'
-	// 		// url: '/pages/login/login'
-	// 	})
-	// }
+		if (isLoggedIn) {
+			// 守卫返回 true，说明找回了老用户身份，且本地 Token 已更新
+			// 此时我们需要刷新一下当前页面的 UI（头像、昵称等）
+			uni.showToast({
+				title: '欢迎回来',
+				icon: 'success'
+			});
+
+			// 刷新数据
+			isLogin.value = true;
+			getUserInfo(); // 重新获取并渲染用户信息
+		}
+	};
 
 	const skipToLogin = async () => {
 		const token = uni.getStorageSync("token")
@@ -979,14 +988,14 @@
 		/* 防止被压缩 */
 	}
 
-	/* 【修改】登录提示文字样式 */
+	/* 登录提示文字样式 */
 	.login-prompt-text {
 		font-size: 36rpx;
 		font-weight: bold;
 		color: white;
 	}
 
-	/* 【修改】右箭头样式，使用 margin-left: auto 自动推到最右侧 */
+	/* 右箭头样式，使用 margin-left: auto 自动推到最右侧 */
 	.login-prompt-arrow {
 		margin-left: auto;
 		font-size: 40rpx;

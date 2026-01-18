@@ -781,8 +781,8 @@
 		}
 	};
 
-	const handleSearch = () => {
-		if (!checkLoginGuard()) return;
+	const handleSearch = async () => {
+		if (!await checkLoginGuard()) return;
 		getBusinessOpportunitiesList(true);
 	};
 
@@ -835,8 +835,8 @@
 		});
 	};
 
-	const handleAvatarClick = (user) => {
-		if (!checkLoginGuard()) return;
+	const handleAvatarClick = async (user) => {
+		if (!await checkLoginGuard()) return;
 
 		if (avatarMenuRef.value) {
 			avatarMenuRef.value.open(user);
@@ -1039,7 +1039,7 @@
 
 	const toggleAction = async (post, clickedAction) => {
 		if (isActionInProgress.value || !isLogin.value) return;
-		if (!checkLoginGuard()) return;
+		if (!await checkLoginGuard()) return;
 		isActionInProgress.value = true;
 
 		const originalAction = post.userAction;
@@ -1113,7 +1113,7 @@
 	const toggleGenericFollow = async (post, type, targetId, statusKey, successMsg, failureMsg) => {
 		// 1. 防抖/节流检查
 		if (isActionInProgress.value || !isLogin.value) return;
-		if (!checkLoginGuard()) return;
+		if (!await checkLoginGuard()) return;
 		isActionInProgress.value = true;
 
 		// 2. 记录原始状态 (用于失败回滚)
@@ -1250,7 +1250,7 @@
 
 	// 跳转到定制页的函数
 	const goToCustomizationPage = async () => {
-		if (!checkLoginGuard()) return;
+		if (!await checkLoginGuard()) return;
 		// 1. 检查是否登录
 		if (!isLogin.value) {
 			goToLogin();
@@ -1331,8 +1331,8 @@
 		}, 800);
 	};
 
-	const handlePostClick = (post) => {
-		if (!checkLoginGuard()) return;
+	const handlePostClick = async (post) => {
+		if (!await checkLoginGuard()) return;
 		if (!hasPaidMembership.value) {
 			goToMembership();
 		} else {
@@ -1340,9 +1340,9 @@
 		}
 	};
 
-	const navigateToComments = (post) => {
+	const navigateToComments = async (post) => {
 		// 复用卡片点击的权限检查逻辑
-		if (!checkLoginGuard()) return;
+		if (!await checkLoginGuard()) return;
 		if (!hasPaidMembership.value) {
 			goToMembership();
 		} else {
@@ -1369,8 +1369,8 @@
 		});
 	};
 
-	const postNew = () => {
-		if (!checkLoginGuard()) return;
+	const postNew = async  () => {
+		if (!await checkLoginGuard()) return;
 		uni.navigateTo({
 			url: '/packages/home-opportunitiesPublish/home-opportunitiesPublish'
 		});

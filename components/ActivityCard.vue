@@ -150,9 +150,9 @@
 	};
 
 	// 卡片主体点击事件
-	const handleCardClick = () => {
+	const handleCardClick = async () => {
 		// 使用统一卫士，如果校验未通过，自动弹窗并拦截
-		if (!checkLoginGuard('登录并绑定手机号后才能查看聚会详情，是否立即登录？')) return;
+		if (!await checkLoginGuard('登录并绑定手机号后才能查看聚会详情，是否立即登录？')) return;
 
 		// 校验通过，执行跳转
 		uni.navigateTo({
@@ -161,8 +161,8 @@
 	};
 
 	// 报名按钮点击事件
-	const handleRegisterClick = () => {
-		if (!checkLoginGuard('登录并绑定手机号后才能报名聚会，是否立即登录？')) return;
+	const handleRegisterClick = async () => {
+		if (!await checkLoginGuard('登录并绑定手机号后才能报名聚会，是否立即登录？')) return;
 
 		uni.navigateTo({
 			url: `/packages/active-enroll/active-enroll?id=${props.activity.id}`
@@ -173,7 +173,7 @@
 		if (loading.value) {
 			return;
 		}
-		if (!checkLoginGuard('登录并绑定手机号后才能收藏聚会，是否立即登录？')) return;
+		if (!await checkLoginGuard('登录并绑定手机号后才能收藏聚会，是否立即登录？')) return;
 
 		loading.value = true;
 		const userId = uni.getStorageSync('userId');

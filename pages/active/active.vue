@@ -444,8 +444,8 @@
 	};
 
 	// 发布聚会
-	const publishActivity = () => {
-		if (!checkLoginGuard()) return;
+	const publishActivity = async () => {
+		if (!await checkLoginGuard()) return;
 		uni.navigateTo({
 			url: '/packages/active-publish/active-publish'
 		});
@@ -455,8 +455,8 @@
 	 * 处理轮播图点击事件的函数
 	 * @param {object} banner - 被点击的轮播图数据对象
 	 */
-	const handleBannerClick = (banner) => {
-		if (!checkLoginGuard()) return;
+	const handleBannerClick = async (banner) => {
+		if (!await checkLoginGuard()) return;
 		// 1. 检查 banner 对象和 targetUrl 是否存在
 		if (!banner || !banner.targetUrl) {
 			console.log('该轮播图没有配置跳转链接，不执行任何操作。');

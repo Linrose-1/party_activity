@@ -241,15 +241,15 @@ const _sfc_main = {
         activityToUpdate.followFlag = event.newFollowFlag;
       }
     };
-    const publishActivity = () => {
-      if (!utils_user.checkLoginGuard())
+    const publishActivity = async () => {
+      if (!await utils_user.checkLoginGuard())
         return;
       common_vendor.index.navigateTo({
         url: "/packages/active-publish/active-publish"
       });
     };
-    const handleBannerClick = (banner) => {
-      if (!utils_user.checkLoginGuard())
+    const handleBannerClick = async (banner) => {
+      if (!await utils_user.checkLoginGuard())
         return;
       if (!banner || !banner.targetUrl) {
         common_vendor.index.__f__("log", "at pages/active/active.vue:462", "该轮播图没有配置跳转链接，不执行任何操作。");

@@ -7299,7 +7299,7 @@ function initOnError() {
 function initRuntimeSocketService() {
   const hosts = "172.20.10.4,127.0.0.1";
   const port = "8090";
-  const id = "mp-weixin_f-dvJv";
+  const id = "mp-weixin_-NfGGv";
   const lazy = typeof swan !== "undefined";
   let restoreError = lazy ? () => {
   } : initOnError();
@@ -8599,6 +8599,24 @@ const subPackages = [
         path: "user-reviews/user-reviews",
         style: {
           navigationBarTitleText: "商友点评"
+        }
+      },
+      {
+        path: "user-review-list/user-review-list",
+        style: {
+          navigationBarTitleText: "商友评论列表"
+        }
+      },
+      {
+        path: "social-interaction/social-interaction",
+        style: {
+          navigationBarTitleText: "社交互动"
+        }
+      },
+      {
+        path: "my-reviews/my-reviews",
+        style: {
+          navigationBarTitleText: "我的点评"
         }
       }
     ]

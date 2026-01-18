@@ -384,8 +384,8 @@ const _sfc_main = {
         common_vendor.index.stopPullDownRefresh();
       }
     };
-    const handleSearch = () => {
-      if (!utils_user.checkLoginGuard())
+    const handleSearch = async () => {
+      if (!await utils_user.checkLoginGuard())
         return;
       getBusinessOpportunitiesList(true);
     };
@@ -435,8 +435,8 @@ const _sfc_main = {
         }
       });
     };
-    const handleAvatarClick = (user) => {
-      if (!utils_user.checkLoginGuard())
+    const handleAvatarClick = async (user) => {
+      if (!await utils_user.checkLoginGuard())
         return;
       if (avatarMenuRef.value) {
         avatarMenuRef.value.open(user);
@@ -540,7 +540,7 @@ const _sfc_main = {
     const toggleAction = async (post, clickedAction) => {
       if (isActionInProgress.value || !isLogin.value)
         return;
-      if (!utils_user.checkLoginGuard())
+      if (!await utils_user.checkLoginGuard())
         return;
       isActionInProgress.value = true;
       const originalAction = post.userAction;
@@ -606,7 +606,7 @@ const _sfc_main = {
     const toggleGenericFollow = async (post, type, targetId, statusKey, successMsg, failureMsg) => {
       if (isActionInProgress.value || !isLogin.value)
         return;
-      if (!utils_user.checkLoginGuard())
+      if (!await utils_user.checkLoginGuard())
         return;
       isActionInProgress.value = true;
       const originalStatus = post[statusKey];
@@ -724,7 +724,7 @@ const _sfc_main = {
     };
     const goToCustomizationPage = async () => {
       var _a;
-      if (!utils_user.checkLoginGuard())
+      if (!await utils_user.checkLoginGuard())
         return;
       if (!isLogin.value) {
         goToLogin();
@@ -750,8 +750,8 @@ const _sfc_main = {
         });
       }, 800);
     };
-    const handlePostClick = (post) => {
-      if (!utils_user.checkLoginGuard())
+    const handlePostClick = async (post) => {
+      if (!await utils_user.checkLoginGuard())
         return;
       if (!hasPaidMembership.value) {
         goToMembership();
@@ -759,8 +759,8 @@ const _sfc_main = {
         skipCommercialDetail(post.id);
       }
     };
-    const navigateToComments = (post) => {
-      if (!utils_user.checkLoginGuard())
+    const navigateToComments = async (post) => {
+      if (!await utils_user.checkLoginGuard())
         return;
       if (!hasPaidMembership.value) {
         goToMembership();
@@ -784,8 +784,8 @@ const _sfc_main = {
         url
       });
     };
-    const postNew = () => {
-      if (!utils_user.checkLoginGuard())
+    const postNew = async () => {
+      if (!await utils_user.checkLoginGuard())
         return;
       common_vendor.index.navigateTo({
         url: "/packages/home-opportunitiesPublish/home-opportunitiesPublish"

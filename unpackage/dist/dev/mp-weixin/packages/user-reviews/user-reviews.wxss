@@ -46,16 +46,147 @@
   padding: 30rpx;
   flex: 1;
 }
-.placeholder-box.data-v-91a56258 {
+
+/* Tab 1: 反馈卡片 */
+.feedback-card.data-v-91a56258 {
+  background: #fff;
+  padding: 30rpx;
+  border-radius: 20rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.03);
+  margin-bottom: 30rpx;
+}
+.card-header.data-v-91a56258 {
+  text-align: center;
+  margin-bottom: 30rpx;
+}
+.card-header .title.data-v-91a56258 {
+  font-size: 34rpx;
+  font-weight: bold;
+  color: #333;
+  display: block;
+  margin-bottom: 8rpx;
+}
+.card-header .subtitle.data-v-91a56258 {
+  font-size: 24rpx;
+  color: #999;
+}
+.action-buttons.data-v-91a56258 {
   display: flex;
+  gap: 30rpx;
+  margin-bottom: 30rpx;
+}
+.action-buttons .action-btn.data-v-91a56258 {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 400rpx;
-  color: #999;
-  font-size: 32rpx;
+  padding: 20rpx;
+  border-radius: 16rpx;
+  background: #f9f9f9;
+  border: 2rpx solid transparent;
+  transition: all 0.2s;
+}
+.action-buttons .action-btn uni-icons.data-v-91a56258 {
+  margin-bottom: 10rpx;
+}
+.action-buttons .action-btn text.data-v-91a56258 {
+  font-size: 28rpx;
+  font-weight: 500;
+}
+.action-buttons .action-btn.like-btn.active.data-v-91a56258 {
+  background-color: #FF6A00;
+  border-color: #FF6A00;
+}
+.action-buttons .action-btn.dislike-btn.active.data-v-91a56258 {
+  background-color: #666;
+  border-color: #666;
+}
+.input-area.data-v-91a56258 {
+  margin-bottom: 30rpx;
+}
+.input-area .input-label.data-v-91a56258 {
+  font-size: 28rpx;
+  color: #333;
+  font-weight: bold;
+  margin-bottom: 16rpx;
+  display: block;
+}
+.input-area .review-textarea.data-v-91a56258 {
+  width: 100%;
+  height: 160rpx;
+  background: #f5f5f5;
+  border-radius: 12rpx;
+  padding: 20rpx;
+  box-sizing: border-box;
+  font-size: 28rpx;
+}
+.submit-review-btn.data-v-91a56258 {
+  background: linear-gradient(to right, #FF8C00, #FF6B00);
+  color: #fff;
+  height: 80rpx;
+  line-height: 80rpx;
+  border-radius: 40rpx;
+  font-size: 30rpx;
+  font-weight: bold;
+  border: none;
+}
+.submit-review-btn.data-v-91a56258::after {
+  border: none;
+}
+.submit-review-btn[disabled].data-v-91a56258 {
+  opacity: 0.7;
 }
 
-/* 评分标准卡片 (复用样式) */
+/* Tab 1: 最近反馈列表 */
+.recent-list-section.data-v-91a56258 {
+  background: #fff;
+  padding: 30rpx;
+  border-radius: 20rpx;
+  margin-bottom: 30rpx;
+}
+.section-title.data-v-91a56258 {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 20rpx;
+  padding-left: 10rpx;
+  border-left: 8rpx solid #FF8C00;
+}
+.review-item.data-v-91a56258 {
+  display: flex;
+  align-items: flex-start;
+  padding: 20rpx 0;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+.review-item.data-v-91a56258:last-child {
+  border-bottom: none;
+}
+.review-item .review-icon.data-v-91a56258 {
+  margin-right: 16rpx;
+  margin-top: 4rpx;
+}
+.review-item .review-content-text.data-v-91a56258 {
+  flex: 1;
+  font-size: 28rpx;
+  color: #333;
+  line-height: 1.5;
+}
+.review-item .review-time.data-v-91a56258 {
+  font-size: 24rpx;
+  color: #999;
+  margin-left: 20rpx;
+  white-space: nowrap;
+}
+.view-all-btn.data-v-91a56258 {
+  text-align: center;
+  color: #FF8C00;
+  font-size: 28rpx;
+  padding-top: 30rpx;
+  font-weight: 500;
+}
+
+/* Tab 2: 评分相关样式 */
 .standard-card.data-v-91a56258 {
   background: #fff;
   border-radius: 20rpx;
@@ -155,4 +286,82 @@
 }
 .submit-btn.data-v-91a56258::after {
   border: none;
+}
+
+/* 雷达图区域 */
+.chart-section.data-v-91a56258 {
+  background: #fff;
+  border-radius: 20rpx;
+  padding: 30rpx;
+  margin-bottom: 30rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.03);
+}
+.chart-wrapper.data-v-91a56258 {
+  width: 100%;
+  height: 500rpx;
+  /* 高度自定 */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.score-compare-table.data-v-91a56258 {
+  margin-top: 30rpx;
+  border: 1rpx solid #eee;
+  border-radius: 12rpx;
+  overflow: hidden;
+}
+.table-row.data-v-91a56258 {
+  display: flex;
+  border-bottom: 1rpx solid #eee;
+}
+.table-row.data-v-91a56258:last-child {
+  border-bottom: none;
+}
+.table-row.header-row.data-v-91a56258 {
+  background-color: #f9f9f9;
+  font-weight: bold;
+  color: #333;
+}
+.table-row .col.data-v-91a56258 {
+  flex: 1;
+  padding: 16rpx 0;
+  text-align: center;
+  font-size: 24rpx;
+  /* 橙色对应自我 */
+  /* 蓝色对应综合 */
+}
+.table-row .col.dim.data-v-91a56258 {
+  flex: 1.5;
+  color: #333;
+  text-align: left;
+  padding-left: 30rpx;
+}
+.table-row .col.self.data-v-91a56258 {
+  color: #FF7D00;
+}
+.table-row .col.total.data-v-91a56258 {
+  color: #1890FF;
+}
+.rate-entry-card.data-v-91a56258 {
+  background: #FF720E;
+  padding: 40rpx 30rpx;
+  border-radius: 20rpx;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.03);
+  margin-top: 30rpx;
+}
+.rate-entry-card.data-v-91a56258:active {
+  background-color: #fafafa;
+}
+.rate-entry-card .entry-title.data-v-91a56258 {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #fff;
+  margin-bottom: 8rpx;
+}
+.rate-entry-card .entry-desc.data-v-91a56258 {
+  font-size: 24rpx;
+  color: #d9d9d9;
 }

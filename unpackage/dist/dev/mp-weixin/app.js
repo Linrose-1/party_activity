@@ -61,6 +61,9 @@ if (!Math) {
   "./packages/my-collection/my-collection.js";
   "./packages/participant-detail/participant-detail.js";
   "./packages/user-reviews/user-reviews.js";
+  "./packages/user-review-list/user-review-list.js";
+  "./packages/social-interaction/social-interaction.js";
+  "./packages/my-reviews/my-reviews.js";
 }
 const _sfc_main = {
   data() {

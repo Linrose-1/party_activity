@@ -221,22 +221,22 @@ const _sfc_main = {
     const selectFilter = (filterValue) => {
       activeFilter.value = filterValue;
     };
-    const goToStoreDetail = (store) => {
-      if (!utils_user.checkLoginGuard())
+    const goToStoreDetail = async (store) => {
+      if (!await utils_user.checkLoginGuard())
         return;
       common_vendor.index.navigateTo({
         url: `/pages/shop-detail/shop-detail?id=${store.id}`
       });
     };
-    const shareStore = () => {
-      if (!utils_user.checkLoginGuard())
+    const shareStore = async () => {
+      if (!await utils_user.checkLoginGuard())
         return;
       common_vendor.index.navigateTo({
         url: "/pages/shop-recommend/shop-recommend"
       });
     };
-    const skipToNewShop = () => {
-      if (!utils_user.checkLoginGuard())
+    const skipToNewShop = async () => {
+      if (!await utils_user.checkLoginGuard())
         return;
       common_vendor.index.navigateTo({
         url: "/packages/myStore-edit/myStore-edit"

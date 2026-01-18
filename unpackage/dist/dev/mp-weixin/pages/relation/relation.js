@@ -211,23 +211,23 @@ const _sfc_main = {
         }
       });
     };
-    const handleChooseLocation = () => {
-      if (!utils_user.checkLoginGuard())
+    const handleChooseLocation = async () => {
+      if (!await utils_user.checkLoginGuard())
         return;
       common_vendor.index.chooseLocation({
         success: (res) => destination.value = res
       });
     };
-    const handleTimeChange = (e) => {
-      if (!utils_user.checkLoginGuard()) {
+    const handleTimeChange = async (e) => {
+      if (!await utils_user.checkLoginGuard()) {
         timeRange.value = [];
         return;
       }
       timeRange.value = e;
     };
     const switchTab = (tabIndex) => activeTab.value = tabIndex;
-    const goToShakePage = () => {
-      if (!utils_user.checkLoginGuard())
+    const goToShakePage = async () => {
+      if (!await utils_user.checkLoginGuard())
         return;
       common_vendor.index.navigateTo({
         url: "/pages/location/location?autoShake=true"

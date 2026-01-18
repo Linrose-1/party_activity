@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "社交互动",
+  "usingComponents": {
+    "uni-icons": "../../uni_modules/uni-icons/components/uni-icons/uni-icons"
+  }
+}

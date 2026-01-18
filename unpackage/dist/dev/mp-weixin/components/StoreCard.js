@@ -33,8 +33,8 @@ const _sfc_main = {
     const handleCardClick = () => {
       emit("click-card", props.store);
     };
-    const handleInitiateParty = () => {
-      if (!utils_user.checkLoginGuard())
+    const handleInitiateParty = async () => {
+      if (!await utils_user.checkLoginGuard())
         return;
       if (!props.store || !props.store.id)
         return;

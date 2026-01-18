@@ -2,8 +2,8 @@
 	<view class="container">
 		<view class="page-header">
 			<view class="header-title-box">
-				<text class="page-title">数字标签（自我评价）</text>
-				<text class="page-subtitle">请对自己以下维度的表现进行1-10分评估</text>
+				<text class="page-title">{{ isSelf ? '数字标签（自我评价）' : '给商友评分' }}</text>
+				<text class="page-subtitle">{{ isSelf ? '请对自己以下维度的表现进行1-10分评估' : '请对TA以下维度的表现进行1-10分评估' }}</text>
 			</view>
 
 			<!-- 评分标准卡片 -->
@@ -82,6 +82,9 @@
 		ref,
 		onMounted
 	} from 'vue';
+	import {
+		onLoad
+	} from '@dcloudio/uni-app';
 	import request from '../../utils/request.js';
 	import ScoreForm from '@/components/ScoreForm.vue';
 
@@ -218,54 +221,72 @@
 	const scoreRecordId = ref(null); // 存储已有评分记录的ID
 	const isSubmitting = ref(false); // 防止重复提交
 
+	const targetUserId = ref(null); // 被评分人 (Target)
+	const currentUserId = ref(null); // 评分人 (Me)
+	const isSelf = ref(false);
+
 	/**
 	 * 页面加载时，获取用户ID并拉取已有评分
 	 */
-	onMounted(async () => {
-		const userInfo = uni.getStorageSync('userInfo');
-		const userId = uni.getStorageSync('userId');
+	onLoad((options) => {
+		currentUserId.value = uni.getStorageSync('userId');
 
-		if (!userId) {
-			uni.showToast({
-				title: '无法获取用户信息，请重新登录',
-				icon: 'none'
-			});
-			return;
-		}
-
-		uni.showLoading({
-			title: '正在加载评分...'
-		});
-		const {
-			data: userScores,
-			error
-		} = await ScoreApi.getMyScores(userId);
-		uni.hideLoading();
-
-		if (error) {
-			// 接口报错，不影响用户进行首次评分
-			console.warn('获取已有评分失败:', error);
-			return;
-		}
-
-		if (userScores) {
-			// 如果成功获取到数据，则填充表单
-			console.log('成功获取到已有评分:', userScores);
-			scoreRecordId.value = userScores.id; // 保存记录ID，用于更新
-			// 遍历 scores.value 的所有 key，并用返回的数据填充
-			Object.keys(scores.value).forEach(key => {
-				if (userScores[key] !== undefined && userScores[key] !== null) {
-					scores.value[key] = userScores[key];
-				}
-			});
+		// id 传的是被评分人的 ID
+		if (options.id) {
+			targetUserId.value = options.id;
 		} else {
-			// 接口成功，但data为null，说明是新用户，第一次评分
-			console.log('用户尚未评分，将使用默认值。');
+			// 没传默认给自己打分
+			targetUserId.value = currentUserId.value;
 		}
+
+		// 判断是否是自己给自己打分
+		isSelf.value = String(targetUserId.value) === String(currentUserId.value);
+
+		uni.setNavigationBarTitle({
+			title: isSelf.value ? '数字标签(自我评价)' : '商友评分'
+		});
 	});
 
+	onMounted(() => {
+		// 调用获取方法
+		fetchScores();
+	});
+
+	// 定义 fetchScores 方法
+	const fetchScores = async () => {
+		uni.showLoading({
+			title: '加载中...'
+		});
+		try {
+			const {
+				data,
+				error
+			} = await request('/app-api/member/user-scores/getInfo', {
+				method: 'GET',
+				data: {
+					// 根据文档：userId 为被评分人
+					userId: targetUserId.value
+				}
+			});
+
+			if (!error && data) {
+				scoreRecordId.value = data.id;
+				// 回显分数
+				Object.keys(scores.value).forEach(key => {
+					if (data[key] !== undefined && data[key] !== null) {
+						scores.value[key] = data[key];
+					}
+				});
+			}
+		} catch (e) {
+			console.error(e);
+		} finally {
+			uni.hideLoading();
+		}
+	};
+
 	/**
-	 * 【修改】提交评分的方法
+	 * 提交评分的方法
 	 */
 	const submitScores = async () => {
 		if (isSubmitting.value) return;
@@ -289,8 +310,8 @@
 		const payload = {
 			...scores.value,
 			id: scoreRecordId.value, // 如果是首次评分，id为null
-			userId: userId,
-			scorerId: userId
+			scorerId: targetUserId.value, // 被评分人
+			userId: currentUserId.value // 评分人 (自己)
 		};
 
 		// 【注意】请确保保存接口的地址是正确的
@@ -506,5 +527,9 @@
 		&::after {
 			border: none;
 		}
+	}
+	
+	.score-sections{
+		margin-bottom: 80rpx;
 	}
 </style>

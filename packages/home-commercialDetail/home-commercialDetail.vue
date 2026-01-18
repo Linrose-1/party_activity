@@ -696,8 +696,8 @@
 		}
 	};
 
-	const replyComment = (comment) => {
-		if (!checkLoginGuard()) return;
+	const replyComment = async (comment) => {
+		if (!await checkLoginGuard()) return;
 
 		replyToCommentId.value = comment.id;
 		replyToNickname.value = comment.user;
@@ -708,7 +708,7 @@
 	};
 
 	const addComment = async () => {
-		if (!checkLoginGuard()) return;
+		if (!await checkLoginGuard()) return;
 
 		const content = newCommentText.value.trim();
 		if (!content) {
@@ -821,7 +821,7 @@
 
 	// ==================== 完善 toggleAction (点赞/点踩) 方法 ====================
 	const toggleAction = async (post, clickedAction) => {
-		if (!checkLoginGuard()) return;
+		if (!await checkLoginGuard()) return;
 
 		if (isActionInProgress.value) return;
 		isActionInProgress.value = true;
@@ -900,7 +900,7 @@
 
 	// ==================== 关注/取消关注用户 ====================
 	const toggleFollow = async (post) => {
-		if (!checkLoginGuard()) return;
+		if (!await checkLoginGuard()) return;
 
 		// 1. 防抖/节流
 		if (isActionInProgress.value) return;
@@ -971,7 +971,7 @@
 
 	// ==================== 收藏/取消收藏商机 ====================
 	const toggleBookmark = async (post) => {
-		if (!checkLoginGuard()) return;
+		if (!await checkLoginGuard()) return;
 
 		if (isActionInProgress.value) return;
 		if (!loggedInUserId.value) {

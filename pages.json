@@ -443,6 +443,27 @@
 				{
 					"navigationBarTitleText" : "商友点评"
 				}
+			},
+			{
+				"path" : "user-review-list/user-review-list",
+				"style" : 
+				{
+					"navigationBarTitleText" : "商友评论列表"
+				}
+			},
+			{
+				"path" : "social-interaction/social-interaction",
+				"style" : 
+				{
+					"navigationBarTitleText" : "社交互动"
+				}
+			},
+			{
+				"path" : "my-reviews/my-reviews",
+				"style" : 
+				{
+					"navigationBarTitleText" : "我的点评"
+				}
 			}
 			// 如果还有其他页面要放进这个分包，继续在这里加
 		]

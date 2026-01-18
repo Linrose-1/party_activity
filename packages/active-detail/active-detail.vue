@@ -656,8 +656,8 @@
 
 
 	// 打开分享弹窗的方法
-	const openSharePopup = () => {
-		if (!checkLoginGuard()) return;
+	const openSharePopup = async () => {
+		if (!await checkLoginGuard()) return;
 		// 设置输入框的默认值为聚会标题
 		customShareTitle.value = activityDetail.value.activityTitle || '发现一个很棒的聚会，快来看看吧！';
 		sharePopup.value.open();
@@ -792,8 +792,8 @@
 		})
 	}
 
-	function register() {
-		if (!checkLoginGuard()) return;
+	const register = async () => {
+		if (!await checkLoginGuard()) return;
 
 		if (!isRegistrationActive.value) {
 			uni.showToast({

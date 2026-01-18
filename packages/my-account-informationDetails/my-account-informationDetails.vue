@@ -603,18 +603,26 @@
 	}
 
 	.chart-legend {
-		display: flex;
-		flex-wrap: wrap;
-		justify-content: center;
+		display: grid;
+		/* 核心：两列等宽，中间间距 20rpx */
+		grid-template-columns: 1fr 1fr;
 		gap: 20rpx;
+
 		margin-top: 20rpx;
 		padding-top: 20rpx;
 		border-top: 1rpx solid #f0f2f5;
+
+		/* 让整体内容在容器内居中（如果容器有 padding） */
+		padding-left: 20rpx;
+		padding-right: 20rpx;
 	}
 
 	.legend-item {
 		display: flex;
 		align-items: center;
+		/* 让内容在各自的格子内居中显示，或者 justify-self: center */
+		justify-content: left;
+
 		font-size: 24rpx;
 		color: #666;
 	}
@@ -623,6 +631,7 @@
 		width: 16rpx;
 		height: 16rpx;
 		border-radius: 50%;
-		margin-right: 10rpx;
+		margin-right: 12rpx;
+		flex-shrink: 0;
 	}
 </style>

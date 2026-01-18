@@ -1,0 +1,64 @@
+/* 水平间距 */
+/* 水平间距 */
+.container.data-v-bcbcdbe7 {
+  min-height: 100vh;
+  background-color: #f5f7fa;
+  padding: 30rpx;
+}
+.menu-list.data-v-bcbcdbe7 {
+  background-color: #fff;
+  border-radius: 20rpx;
+  overflow: hidden;
+}
+.menu-item.data-v-bcbcdbe7 {
+  display: flex;
+  align-items: center;
+  padding: 30rpx;
+  border-bottom: 1rpx solid #f9f9f9;
+  position: relative;
+}
+.menu-item.data-v-bcbcdbe7:active {
+  background-color: #fafafa;
+}
+.menu-item.data-v-bcbcdbe7:last-child {
+  border-bottom: none;
+}
+.icon-box.data-v-bcbcdbe7 {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 16rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 24rpx;
+}
+.icon-box.review.data-v-bcbcdbe7 {
+  background: linear-gradient(135deg, #FF9A9E, #FECFEF);
+}
+.icon-box.hunter.data-v-bcbcdbe7 {
+  background: linear-gradient(135deg, #a18cd1, #fbc2eb);
+}
+.icon-box.business.data-v-bcbcdbe7 {
+  background: linear-gradient(135deg, #84fab0, #8fd3f4);
+}
+.content.data-v-bcbcdbe7 {
+  flex: 1;
+}
+.content .title.data-v-bcbcdbe7 {
+  font-size: 30rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 6rpx;
+}
+.content .desc.data-v-bcbcdbe7 {
+  font-size: 24rpx;
+  color: #999;
+}
+.badge.data-v-bcbcdbe7 {
+  background-color: #ff4d4f;
+  color: #fff;
+  font-size: 20rpx;
+  padding: 2rpx 10rpx;
+  border-radius: 20rpx;
+  margin-right: 10rpx;
+}

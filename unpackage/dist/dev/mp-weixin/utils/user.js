@@ -1,12 +1,13 @@
 "use strict";
 const common_vendor = require("../common/vendor.js");
+const utils_request = require("./request.js");
 function getCachedUserInfo() {
   const userInfoStr = common_vendor.index.getStorageSync("userInfo");
   if (userInfoStr) {
     try {
       return JSON.parse(userInfoStr);
     } catch (e) {
-      common_vendor.index.__f__("error", "at utils/user.js:13", "解析缓存的用户信息失败:", e);
+      common_vendor.index.__f__("error", "at utils/user.js:14", "解析缓存的用户信息失败:", e);
       return null;
     }
   }
@@ -28,9 +29,53 @@ function isUserFullyLoggedIn() {
   }
   return true;
 }
-function checkLoginGuard(content = "该功能需要您完善登录信息（绑定手机号）后才能使用，是否立即前往登录？") {
+async function checkLoginGuard(content = "该功能需要您完善登录信息（绑定手机号）后才能使用，是否立即前往登录？") {
   if (isUserFullyLoggedIn()) {
     return true;
+  }
+  common_vendor.index.showLoading({
+    title: "检查身份...",
+    mask: true
+  });
+  try {
+    const loginRes = await common_vendor.index.login({
+      provider: "weixin"
+    });
+    if (loginRes.code) {
+      const pendingInviteCode = common_vendor.index.getStorageSync("pendingInviteCode");
+      const {
+        data: loginData,
+        error: loginError
+      } = await utils_request.request("/app-api/member/auth/weixin-mini-app-login", {
+        method: "POST",
+        data: {
+          loginCode: loginRes.code,
+          state: "default",
+          shardCode: pendingInviteCode || ""
+        }
+      });
+      if (!loginError && loginData && loginData.accessToken) {
+        common_vendor.index.setStorageSync("token", loginData.accessToken);
+        common_vendor.index.setStorageSync("userId", loginData.userId);
+        const {
+          data: userData,
+          error: userError
+        } = await utils_request.request("/app-api/member/user/get", {
+          method: "GET"
+        });
+        if (!userError && userData) {
+          common_vendor.index.setStorageSync("userInfo", JSON.stringify(userData));
+          if (userData.mobile) {
+            common_vendor.index.hideLoading();
+            return true;
+          }
+        }
+      }
+    }
+  } catch (e) {
+    common_vendor.index.__f__("error", "at utils/user.js:153", "守卫检测异常:", e);
+  } finally {
+    common_vendor.index.hideLoading();
   }
   common_vendor.index.showModal({
     title: "温馨提示",
@@ -57,7 +102,7 @@ async function globalSilentLogin() {
     return loginPromise;
   }
   loginPromise = new Promise(async (resolve) => {
-    common_vendor.index.__f__("log", "at utils/user.js:103", "🚀 [Global] 开始全局静默登录...");
+    common_vendor.index.__f__("log", "at utils/user.js:197", "🚀 [Global] 开始全局静默登录...");
     try {
       const loginRes = await common_vendor.index.login({
         provider: "weixin"
@@ -80,13 +125,13 @@ async function globalSilentLogin() {
         if (data && data.accessToken) {
           common_vendor.index.setStorageSync("token", data.accessToken);
           common_vendor.index.setStorageSync("userId", data.userId);
-          common_vendor.index.__f__("log", "at utils/user.js:131", "✅ [Global] 静默登录成功");
+          common_vendor.index.__f__("log", "at utils/user.js:225", "✅ [Global] 静默登录成功");
           resolve(true);
           return;
         }
       }
     } catch (e) {
-      common_vendor.index.__f__("error", "at utils/user.js:137", "❌ [Global] 静默登录失败", e);
+      common_vendor.index.__f__("error", "at utils/user.js:231", "❌ [Global] 静默登录失败", e);
     } finally {
       loginPromise = null;
     }

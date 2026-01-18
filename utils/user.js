@@ -1,4 +1,5 @@
 // src/utils/user.js
+import request from '@/utils/request.js';
 
 /**
  * @description 从本地缓存中获取解析后的用户信息对象
@@ -39,7 +40,7 @@ export function isUserFullyLoggedIn() {
 	}
 
 	// 2. 检查用户信息中是否有手机号
-	const userInfo = getCachedUserInfo(); 
+	const userInfo = getCachedUserInfo();
 	if (!userInfo || !userInfo.mobile) {
 		return false;
 	}
@@ -47,18 +48,115 @@ export function isUserFullyLoggedIn() {
 	return true;
 }
 
+// /**
+//  * @description 统一的登录权限校验卫士
+//  * 如果未完整登录，自动弹出提示框并引导去登录页。
+//  * @param {string} content - 弹窗提示文案，默认为标准话术
+//  * @returns {boolean} true=校验通过, false=校验不通过(已弹窗)
+//  */
+// export function checkLoginGuard(content = '该功能需要您完善登录信息（绑定手机号）后才能使用，是否立即前往登录？') {
+// 	if (isUserFullyLoggedIn()) {
+// 		return true;
+// 	}
+
+// 	// 校验未通过，弹出引导窗
+// 	uni.showModal({
+// 		title: '温馨提示',
+// 		content: content,
+// 		confirmText: '去登录',
+// 		cancelText: '再逛逛',
+// 		confirmColor: '#FF6A00',
+// 		success: (res) => {
+// 			if (res.confirm) {
+// 				uni.navigateTo({
+// 					url: '/pages/index/index'
+// 				});
+// 			}
+// 		}
+// 	});
+
+// 	return false;
+// }
+
 /**
- * @description 统一的登录权限校验卫士
- * 如果未完整登录，自动弹出提示框并引导去登录页。
- * @param {string} content - 弹窗提示文案，默认为标准话术
- * @returns {boolean} true=校验通过, false=校验不通过(已弹窗)
+ * @description 智能登录权限校验卫士 (Async)
+ * 1. 检查本地是否已完整登录 -> 是：放行 (true)
+ * 2. 尝试静默登录获取 Token
+ * 3. 获取用户信息检查是否绑定 -> 是：存缓存，放行 (true)
+ * 4. 否：弹窗引导去绑定页 -> 拦截 (false)
+ * 
+ * @param {string} content - 弹窗提示文案
+ * @returns {Promise<boolean>} true=校验通过/已自动登录, false=校验不通过(已弹窗)
  */
-export function checkLoginGuard(content = '该功能需要您完善登录信息（绑定手机号）后才能使用，是否立即前往登录？') {
+export async function checkLoginGuard(content = '该功能需要您完善登录信息（绑定手机号）后才能使用，是否立即前往登录？') {
+	// 1. 第一道防线：本地缓存检查
+	// 如果本地已经有 Token 且有手机号，直接放行，速度最快
 	if (isUserFullyLoggedIn()) {
 		return true;
 	}
 
-	// 校验未通过，弹出引导窗
+	// 2. 第二道防线：尝试静默登录补救
+	// (即使用户本地没 Token，或者有 Token 但没手机号，我们都试着去后端问问“我是不是老用户？”)
+
+	uni.showLoading({
+		title: '检查身份...',
+		mask: true
+	});
+
+	try {
+		// 2.1 执行静默登录拿 Token
+		// 这里复用 globalSilentLogin 或者直接写逻辑，为了独立性，这里写个精简版
+		const loginRes = await uni.login({
+			provider: 'weixin'
+		});
+		if (loginRes.code) {
+			const pendingInviteCode = uni.getStorageSync('pendingInviteCode');
+			const {
+				data: loginData,
+				error: loginError
+			} = await request('/app-api/member/auth/weixin-mini-app-login', {
+				method: 'POST',
+				data: {
+					loginCode: loginRes.code,
+					state: 'default',
+					shardCode: pendingInviteCode || ''
+				}
+			});
+
+			if (!loginError && loginData && loginData.accessToken) {
+				// 存 Token
+				uni.setStorageSync('token', loginData.accessToken);
+				uni.setStorageSync('userId', loginData.userId);
+
+				// 2.2 拿到 Token 后，立即获取用户信息，检查是否绑定了手机号
+				const {
+					data: userData,
+					error: userError
+				} = await request('/app-api/member/user/get', {
+					method: 'GET'
+				});
+
+				if (!userError && userData) {
+					// 存用户信息
+					uni.setStorageSync('userInfo', JSON.stringify(userData));
+
+					// 【关键判断】：是老用户吗？(有手机号)
+					if (userData.mobile) {
+						uni.hideLoading();
+						// 是老用户，直接放行！
+						return true;
+					}
+				}
+			}
+		}
+	} catch (e) {
+		console.error('守卫检测异常:', e);
+	} finally {
+		uni.hideLoading();
+	}
+
+	// 3. 第三道防线：确实是新用户（或者接口挂了），弹窗引导
+	// 只有到了这一步，才认为“真的需要去绑定了”
 	uni.showModal({
 		title: '温馨提示',
 		content: content,
@@ -76,10 +174,6 @@ export function checkLoginGuard(content = '该功能需要您完善登录信息�
 
 	return false;
 }
-
-
-
-// utils/user.js
 
 let loginPromise = null;
 

@@ -189,14 +189,14 @@
 		/* 防止被压缩 */
 }
 
-	/* 【修改】登录提示文字样式 */
+	/* 登录提示文字样式 */
 .login-prompt-text.data-v-2f1ef635 {
 		font-size: 36rpx;
 		font-weight: bold;
 		color: white;
 }
 
-	/* 【修改】右箭头样式，使用 margin-left: auto 自动推到最右侧 */
+	/* 右箭头样式，使用 margin-left: auto 自动推到最右侧 */
 .login-prompt-arrow.data-v-2f1ef635 {
 		margin-left: auto;
 		font-size: 40rpx;

@@ -152,3 +152,6 @@
 .submit-btn.data-v-03f92355::after {
   border: none;
 }
+.score-sections.data-v-03f92355 {
+  margin-bottom: 80rpx;
+}

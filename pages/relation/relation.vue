@@ -406,15 +406,15 @@
 
 
 	// --- 事件处理器 ---
-	const handleChooseLocation = () => {
-		if (!checkLoginGuard()) return;
+	const handleChooseLocation = async () => {
+		if (!await checkLoginGuard()) return;
 
 		uni.chooseLocation({
 			success: (res) => destination.value = res
 		});
 	};
-	const handleTimeChange = (e) => {
-		if (!checkLoginGuard()) {
+	const handleTimeChange = async (e) => {
+		if (!await checkLoginGuard()) {
 			// 如果未登录，重置时间选择，防止触发 watch
 			timeRange.value = [];
 			return;
@@ -423,8 +423,8 @@
 		timeRange.value = e;
 	};
 	const switchTab = (tabIndex) => activeTab.value = tabIndex;
-	const goToShakePage = () => {
-		if (!checkLoginGuard()) return;
+	const goToShakePage = async () => {
+		if (!await checkLoginGuard()) return;
 
 		uni.navigateTo({
 			url: '/pages/location/location?autoShake=true'

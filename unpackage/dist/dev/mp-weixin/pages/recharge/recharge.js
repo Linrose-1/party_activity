@@ -218,8 +218,8 @@ const _sfc_main = {
         }
       });
     };
-    const handleButtonClick = () => {
-      if (!utils_user.checkLoginGuard())
+    const handleButtonClick = async () => {
+      if (!await utils_user.checkLoginGuard())
         return;
       if (currentTab.value === 2) {
         const selectedLevel = memberLevels.value.find((l) => l.level === selectedLevelNum.value);
@@ -231,7 +231,7 @@ const _sfc_main = {
       handleRecharge();
     };
     const handleRecharge = async () => {
-      if (!utils_user.checkLoginGuard())
+      if (!await utils_user.checkLoginGuard())
         return;
       const amount = parseFloat(payAmount.value);
       if (amount < 0) {

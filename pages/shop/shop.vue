@@ -513,21 +513,21 @@
 
 	// --- 页面跳转 ---
 
-	const goToStoreDetail = (store) => {
-		if (!checkLoginGuard()) return;
+	const goToStoreDetail = async (store) => {
+		if (!await checkLoginGuard()) return;
 		uni.navigateTo({
 			url: `/pages/shop-detail/shop-detail?id=${store.id}`
 		});
 	};
 
-	const shareStore = () => {
-		if (!checkLoginGuard()) return;
+	const shareStore = async () => {
+		if (!await checkLoginGuard()) return;
 		uni.navigateTo({
 			url: '/pages/shop-recommend/shop-recommend'
 		});
 	};
-	const skipToNewShop = () => {
-		if (!checkLoginGuard()) return;
+	const skipToNewShop = async () => {
+		if (!await checkLoginGuard()) return;
 		uni.navigateTo({
 			url: '/packages/myStore-edit/myStore-edit'
 		});
