@@ -382,7 +382,7 @@
 
 		// 允许从右上角菜单发起分享
 		uni.showShareMenu({
-			withShareTicket: true,
+			// withShareTicket: true,
 			menus: ["shareAppMessage", "shareTimeline"]
 		});
 	});

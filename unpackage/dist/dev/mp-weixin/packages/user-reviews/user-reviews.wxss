@@ -1,5 +1,6 @@
 /* 水平间距 */
 /* 水平间距 */
+/* 保持原有样式，仅优化格式 */
 .container.data-v-91a56258 {
   min-height: 100vh;
   background-color: #f5f7fa;
@@ -7,7 +8,7 @@
   flex-direction: column;
 }
 
-/* Tabs 样式 */
+/* Tabs */
 .tabs.data-v-91a56258 {
   display: flex;
   background-color: #fff;
@@ -47,7 +48,7 @@
   flex: 1;
 }
 
-/* Tab 1: 反馈卡片 */
+/* Feedback Card */
 .feedback-card.data-v-91a56258 {
   background: #fff;
   padding: 30rpx;
@@ -138,7 +139,7 @@
   opacity: 0.7;
 }
 
-/* Tab 1: 最近反馈列表 */
+/* Recent List */
 .recent-list-section.data-v-91a56258 {
   background: #fff;
   padding: 30rpx;
@@ -186,7 +187,7 @@
   font-weight: 500;
 }
 
-/* Tab 2: 评分相关样式 */
+/* Tab 2 Styles */
 .standard-card.data-v-91a56258 {
   background: #fff;
   border-radius: 20rpx;
@@ -253,42 +254,8 @@
   background-color: #FBE9E7;
   color: #FF5722;
 }
-.score-form-wrapper.data-v-91a56258 {
-  padding-bottom: 20rpx;
-}
-.footer-spacer.data-v-91a56258 {
-  height: 120rpx;
-}
-.footer-bar.data-v-91a56258 {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  background-color: #fff;
-  padding: 20rpx 30rpx;
-  padding-bottom: calc(20rpx + env(safe-area-inset-bottom));
-  box-shadow: 0 -4rpx 16rpx rgba(0, 0, 0, 0.05);
-  z-index: 99;
-  box-sizing: border-box;
-}
-.submit-btn.data-v-91a56258 {
-  background: linear-gradient(to right, #FF8C00, #FF6B00);
-  color: #fff;
-  height: 88rpx;
-  line-height: 88rpx;
-  border-radius: 44rpx;
-  font-size: 32rpx;
-  font-weight: bold;
-  border: none;
-}
-.submit-btn[disabled].data-v-91a56258 {
-  opacity: 0.7;
-}
-.submit-btn.data-v-91a56258::after {
-  border: none;
-}
 
-/* 雷达图区域 */
+/* Radar Chart */
 .chart-section.data-v-91a56258 {
   background: #fff;
   border-radius: 20rpx;
@@ -299,7 +266,6 @@
 .chart-wrapper.data-v-91a56258 {
   width: 100%;
   height: 500rpx;
-  /* 高度自定 */
   display: flex;
   justify-content: center;
   align-items: center;
@@ -327,8 +293,6 @@
   padding: 16rpx 0;
   text-align: center;
   font-size: 24rpx;
-  /* 橙色对应自我 */
-  /* 蓝色对应综合 */
 }
 .table-row .col.dim.data-v-91a56258 {
   flex: 1.5;

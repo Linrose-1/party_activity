@@ -1,6 +1,6 @@
 /* 水平间距 */
 /* 水平间距 */
-/* 样式无变化，保持原样 */
+/* 保持原有样式，仅优化缩进 */
 .container.data-v-03f92355 {
   background-color: #f9f9f9;
   min-height: 100vh;
@@ -56,13 +56,12 @@
   padding: 16rpx 0;
   border-radius: 12rpx;
   background-color: #f5f5f5;
-  /* 颜色分级样式 */
-  /* 杰出 - 深橙 */
-  /* 优秀 - 浅橙 */
-  /* 较好 - 绿 */
-  /* 一般 - 蓝 */
-  /* 较差 - 黄 */
-  /* 极差 - 红 */
+  /* 杰出 */
+  /* 优秀 */
+  /* 较好 */
+  /* 一般 */
+  /* 较差 */
+  /* 极差 */
 }
 .standard-item .score-range.data-v-03f92355 {
   font-size: 24rpx;
@@ -96,33 +95,6 @@
 .standard-item.level-1.data-v-03f92355 {
   background-color: #FBE9E7;
   color: #FF5722;
-}
-.section-card.data-v-03f92355 {
-  background-color: #fff;
-  border-radius: 20rpx;
-  padding: 30rpx;
-  margin-bottom: 30rpx;
-  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.05);
-}
-.section-header.data-v-03f92355 {
-  padding-bottom: 20rpx;
-  border-bottom: 1px solid #f0f0f0;
-  margin-bottom: 20rpx;
-}
-.section-header .section-title.data-v-03f92355 {
-  font-size: 34rpx;
-  font-weight: 600;
-  color: #333;
-}
-.score-item.data-v-03f92355 {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20rpx 0;
-}
-.item-label.data-v-03f92355 {
-  font-size: 30rpx;
-  color: #555;
 }
 .footer.data-v-03f92355 {
   position: fixed;

@@ -141,7 +141,7 @@ const _sfc_main = {
         common_vendor.index.__f__("log", "at pages/home/home.vue:464", "从详情页返回，不刷新列表，保持滚动位置。");
       }
       common_vendor.index.showShareMenu({
-        withShareTicket: true,
+        // withShareTicket: true,
         menus: ["shareAppMessage", "shareTimeline"]
       });
       if (common_vendor.index.getStorageSync("token")) {

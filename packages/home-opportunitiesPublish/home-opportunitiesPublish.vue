@@ -204,7 +204,7 @@
 		}
 		checkDraft();
 		uni.showShareMenu({
-			withShareTicket: true,
+			// withShareTicket: true,
 			menus: ["shareAppMessage", "shareTimeline"]
 		});
 	});

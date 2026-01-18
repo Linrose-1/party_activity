@@ -10,7 +10,7 @@
 					给 <text class="highlight">{{ reviewData.targetName || '商友' }}</text> 的评价
 				</view>
 
-				<!-- 【新增】评价类型选择 -->
+				<!-- 评价类型选择 -->
 				<view class="action-buttons">
 					<view class="action-btn like-btn" :class="{ active: currentIsLike === 1 }" @click="selectLike(1)">
 						<uni-icons type="hand-up-filled" size="20"

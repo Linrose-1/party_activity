@@ -15,16 +15,29 @@ const EditReviewPopup = () => "../../components/EditReviewPopup.js";
 const _sfc_main = {
   __name: "my-reviews",
   setup(__props) {
+    const ReviewApi = {
+      /** 获取我的点评列表 (发出的/收到的) */
+      getMyList: (params) => utils_request.request("/app-api/member/user-review/my-list", {
+        method: "GET",
+        data: params
+      }),
+      /** 更新点评内容 */
+      update: (data) => utils_request.request("/app-api/member/user-review/update", {
+        method: "PUT",
+        data
+      }),
+      /** 删除点评 (注意：ID拼接在URL上) */
+      delete: (id) => utils_request.request(`/app-api/member/user-review/delete?id=${id}`, {
+        method: "DELETE"
+      })
+    };
     const currentTab = common_vendor.ref(1);
+    const loadingStatus = common_vendor.ref("more");
+    const filterLike = common_vendor.ref(null);
     const reviewList = common_vendor.ref([]);
     const pageNo = common_vendor.ref(1);
     const pageSize = common_vendor.ref(10);
     const total = common_vendor.ref(0);
-    const loadingStatus = common_vendor.ref("more");
-    const stats = common_vendor.ref({
-      likes: 0,
-      dislikes: 0
-    });
     const editPopup = common_vendor.ref(null);
     const currentEditItem = common_vendor.ref({});
     common_vendor.onMounted(() => {
@@ -42,6 +55,15 @@ const _sfc_main = {
       if (currentTab.value === tab)
         return;
       currentTab.value = tab;
+      filterLike.value = null;
+      fetchList(true);
+    };
+    const toggleFilter = (val) => {
+      if (filterLike.value === val) {
+        filterLike.value = null;
+      } else {
+        filterLike.value = val;
+      }
       fetchList(true);
     };
     const fetchList = async (isRefresh = false) => {
@@ -53,20 +75,18 @@ const _sfc_main = {
       }
       loadingStatus.value = "loading";
       try {
+        const params = {
+          isOwn: currentTab.value,
+          pageNo: pageNo.value,
+          pageSize: pageSize.value
+        };
+        if (filterLike.value) {
+          params.isLike = filterLike.value;
+        }
         const {
           data,
           error
-        } = await utils_request.request("/app-api/member/user-review/my-list", {
-          method: "GET",
-          data: {
-            isOwn: currentTab.value,
-            // 1我发出的, 0我收到的
-            pageNo: pageNo.value,
-            pageSize: pageSize.value
-          }
-        });
-        if (isRefresh)
-          common_vendor.index.stopPullDownRefresh();
+        } = await ReviewApi.getMyList(params);
         if (!error && data) {
           const list = data.list || [];
           reviewList.value = isRefresh ? list : [...reviewList.value, ...list];
@@ -76,10 +96,6 @@ const _sfc_main = {
           } else {
             loadingStatus.value = "more";
             pageNo.value++;
-          }
-          if (isRefresh && currentTab.value === 0) {
-            stats.value.likes = reviewList.value.filter((i) => i.isLike === 1).length;
-            stats.value.dislikes = reviewList.value.filter((i) => i.isLike === 2).length;
           }
         } else {
           loadingStatus.value = "noMore";
@@ -92,23 +108,29 @@ const _sfc_main = {
     };
     const getAvatar = (item) => {
       var _a;
-      if (currentTab.value === 0 && item.isAnonymous === 1) {
+      if (currentTab.value === 0) {
         return "/static/icon/default-avatar.png";
       }
-      return ((_a = item.memberUserBaseVO) == null ? void 0 : _a.avatar) || "/static/icon/default-avatar.png";
+      return ((_a = item.memberUser) == null ? void 0 : _a.avatar) || "/static/icon/default-avatar.png";
     };
     const getName = (item) => {
       var _a;
-      if (currentTab.value === 0 && item.isAnonymous === 1) {
+      if (currentTab.value === 0) {
         return "匿名用户";
       }
-      return ((_a = item.memberUserBaseVO) == null ? void 0 : _a.nickname) || "未知用户";
+      return ((_a = item.memberUser) == null ? void 0 : _a.nickname) || "未知用户";
     };
     const getRole = (item) => {
       var _a;
-      if (currentTab.value === 0 && item.isAnonymous === 1)
+      if (currentTab.value === 0)
         return "";
-      return ((_a = item.memberUserBaseVO) == null ? void 0 : _a.levelName) || "";
+      return ((_a = item.memberUser) == null ? void 0 : _a.levelName) || "";
+    };
+    const formatTime = (str) => {
+      if (!str)
+        return "";
+      const d = new Date(str);
+      return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`;
     };
     const openEdit = (item) => {
       currentEditItem.value = {
@@ -121,10 +143,7 @@ const _sfc_main = {
       try {
         const {
           error
-        } = await utils_request.request("/app-api/member/user-review/update", {
-          method: "PUT",
-          data: formData
-        });
+        } = await ReviewApi.update(formData);
         if (!error) {
           common_vendor.index.showToast({
             title: "修改成功",
@@ -160,10 +179,7 @@ const _sfc_main = {
           if (res.confirm) {
             const {
               error
-            } = await utils_request.request(`/app-api/member/user-review/delete?id=${item.id}`, {
-              method: "DELETE"
-              // data: { id: item.id } // 移除这个
-            });
+            } = await ReviewApi.delete(item.id);
             if (!error) {
               common_vendor.index.showToast({
                 title: "已删除",
@@ -181,12 +197,6 @@ const _sfc_main = {
         }
       });
     };
-    const formatTime = (str) => {
-      if (!str)
-        return "";
-      const d = new Date(str);
-      return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`;
-    };
     return (_ctx, _cache) => {
       return common_vendor.e({
         a: currentTab.value === 1
@@ -197,13 +207,15 @@ const _sfc_main = {
       }, currentTab.value === 0 ? {} : {}, {
         e: currentTab.value === 0 ? 1 : "",
         f: common_vendor.o(($event) => switchTab(0)),
-        g: currentTab.value === 0 && reviewList.value.length > 0
-      }, currentTab.value === 0 && reviewList.value.length > 0 ? {
+        g: currentTab.value === 0
+      }, currentTab.value === 0 ? {
         h: common_vendor.t(total.value),
-        i: common_vendor.t(stats.value.likes),
-        j: common_vendor.t(stats.value.dislikes)
+        i: filterLike.value === 1 ? 1 : "",
+        j: common_vendor.o(($event) => toggleFilter(1)),
+        k: filterLike.value === 2 ? 1 : "",
+        l: common_vendor.o(($event) => toggleFilter(2))
       } : {}, {
-        k: common_vendor.f(reviewList.value, (item, k0, i0) => {
+        m: common_vendor.f(reviewList.value, (item, k0, i0) => {
           return common_vendor.e({
             a: getAvatar(item),
             b: common_vendor.t(getName(item)),
@@ -236,26 +248,26 @@ const _sfc_main = {
             p: item.id
           });
         }),
-        l: currentTab.value === 1,
-        m: reviewList.value.length > 0 || loadingStatus.value === "loading"
+        n: currentTab.value === 1,
+        o: reviewList.value.length > 0 || loadingStatus.value === "loading"
       }, reviewList.value.length > 0 || loadingStatus.value === "loading" ? {
-        n: common_vendor.p({
+        p: common_vendor.p({
           status: loadingStatus.value
         })
       } : {}, {
-        o: reviewList.value.length === 0 && loadingStatus.value === "noMore"
+        q: reviewList.value.length === 0 && loadingStatus.value === "noMore"
       }, reviewList.value.length === 0 && loadingStatus.value === "noMore" ? {
-        p: common_vendor.p({
+        r: common_vendor.p({
           type: "chatboxes",
           size: "60",
           color: "#e0e0e0"
         })
       } : {}, {
-        q: common_vendor.sr(editPopup, "4d2c7548-4", {
+        s: common_vendor.sr(editPopup, "4d2c7548-4", {
           "k": "editPopup"
         }),
-        r: common_vendor.o(onSaveReview),
-        s: common_vendor.p({
+        t: common_vendor.o(onSaveReview),
+        v: common_vendor.p({
           ["review-data"]: currentEditItem.value
         })
       });

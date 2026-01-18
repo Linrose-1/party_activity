@@ -71,7 +71,7 @@ const _sfc_main = {
       }
       checkDraft();
       common_vendor.index.showShareMenu({
-        withShareTicket: true,
+        // withShareTicket: true,
         menus: ["shareAppMessage", "shareTimeline"]
       });
     });

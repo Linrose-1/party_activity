@@ -16,6 +16,22 @@ if (!Math) {
 const _sfc_main = {
   __name: "user-review-list",
   setup(__props) {
+    const ReviewApi = {
+      /** 获取评论分页列表 */
+      getPage: (params) => utils_request.request("/app-api/member/user-review/page", {
+        method: "GET",
+        data: params
+      }),
+      /** 创建互动 (点赞/点踩) */
+      createInteraction: (data) => utils_request.request("/app-api/member/user-review-interaction/create", {
+        method: "POST",
+        data
+      }),
+      /** 取消互动 */
+      cancelInteraction: (data) => utils_request.request(`/app-api/member/user-review-interaction/cancel?id=${data.id}`, {
+        method: "DELETE"
+      })
+    };
     const targetUserId = common_vendor.ref(null);
     const currentFilter = common_vendor.ref(0);
     const searchKey = common_vendor.ref("");
@@ -67,10 +83,7 @@ const _sfc_main = {
         const {
           data,
           error
-        } = await utils_request.request("/app-api/member/user-review/page", {
-          method: "GET",
-          data: params
-        });
+        } = await ReviewApi.getPage(params);
         if (isRefresh)
           common_vendor.index.stopPullDownRefresh();
         if (!error && data) {
@@ -107,13 +120,6 @@ const _sfc_main = {
       if (currentStatus === targetIsLike) {
         isCancel = true;
       }
-      if (isCancel && !item.interactionId) {
-        common_vendor.index.showToast({
-          title: "暂无法取消历史评价",
-          icon: "none"
-        });
-        return;
-      }
       const originalStatus = item.isReview;
       const originalLikes = item.likesCount;
       const originalDislikes = item.dislikesCount;
@@ -139,32 +145,22 @@ const _sfc_main = {
         if (isCancel) {
           const {
             error
-          } = await utils_request.request("/app-api/member/user-review-interaction/cancel", {
-            method: "DELETE",
-            data: {
-              id: item.interactionId
-            }
-            // 这里必须要有值
+          } = await ReviewApi.cancelInteraction({
+            id: item.id
           });
           if (error)
             throw new Error(error.msg);
-          item.interactionId = null;
         } else {
           const {
             data,
             error
-          } = await utils_request.request("/app-api/member/user-review-interaction/create", {
-            method: "POST",
-            data: {
-              userId: currentUserId,
-              reviewId: item.id,
-              isLike: targetIsLike
-            }
+          } = await ReviewApi.createInteraction({
+            userId: currentUserId,
+            reviewId: item.id,
+            isLike: targetIsLike
           });
           if (error)
             throw new Error(error.msg);
-          if (data)
-            item.interactionId = data;
         }
       } catch (e) {
         item.isReview = originalStatus;

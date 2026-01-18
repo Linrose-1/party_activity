@@ -47,26 +47,6 @@
 			<!-- 双向绑定 scores 对象 -->
 			<ScoreForm v-model="scores" />
 		</view>
-		<!-- <view class="score-sections">
-			<view class="section-card" v-for="category in scoreCategories" :key="category.title">
-				<view class="section-header">
-					<text class="section-title">{{ category.title }}</text>
-				</view>
-				<view class="section-content">
-					<view class="score-item" v-for="item in category.items" :key="item.key">
-						<text class="item-label">{{ item.label }}</text>
-						<uni-rate 
-							v-model="scores[item.key]" 
-							:max="10" 
-							:size="22"
-							color="#c0c0c0"
-							active-color="#FF8C00"
-							:allow-half="false" 
-						/>
-					</view>
-				</view>
-			</view>
-		</view> -->
 
 		<!-- 提交按钮 -->
 		<view class="footer">
@@ -85,17 +65,17 @@
 	import {
 		onLoad
 	} from '@dcloudio/uni-app';
-	import request from '../../utils/request.js';
+	import request from '@/utils/request.js'; // 统一引用路径
 	import ScoreForm from '@/components/ScoreForm.vue';
 
-	// 完善评分API的封装
+	// ==========================================
+	// 1. API 定义区域
+	// ==========================================
 	const ScoreApi = {
 		/**
 		 * 保存或更新用户评分
-		 * @param {object} scoreData
 		 */
 		saveOrUpdate: (scoreData) => {
-			// 假设接口是 /saveOrUpdate，请根据实际情况修改
 			return request('/app-api/member/user-scores/saveOrUpdate', {
 				method: 'POST',
 				data: scoreData
@@ -103,102 +83,31 @@
 		},
 		/**
 		 * 获取用户评分
-		 * @param {string|number} userId
 		 */
-		getMyScores: (userId) => {
+		getInfo: (userId) => {
 			return request('/app-api/member/user-scores/getInfo', {
 				method: 'GET',
 				data: {
-					userId: userId
+					userId
 				}
 			});
 		}
 	};
 
-	// 评分项结构定义 (无变化)
-	// const scoreCategories = ref([{
-	// 		title: '基础信用',
-	// 		items: [{
-	// 				label: '守时',
-	// 				key: 'punctuality'
-	// 			},
-	// 			{
-	// 				label: '守诺',
-	// 				key: 'promiseKeep'
-	// 			},
-	// 			{
-	// 				label: '守法',
-	// 				key: 'lawAbiding'
-	// 			},
-	// 			{
-	// 				label: '尽责',
-	// 				key: 'responsible'
-	// 			},
-	// 		]
-	// 	},
-	// 	{
-	// 		title: '协作态度',
-	// 		items: [{
-	// 				label: '真诚',
-	// 				key: 'sincere'
-	// 			},
-	// 			{
-	// 				label: '包容',
-	// 				key: 'tolerance'
-	// 			},
-	// 			{
-	// 				label: '利他',
-	// 				key: 'altruism'
-	// 			},
-	// 			{
-	// 				label: '共情',
-	// 				key: 'empathy'
-	// 			}
-	// 		]
-	// 	},
-	// 	{
-	// 		title: '专业能力',
-	// 		items: [{
-	// 				label: '专注',
-	// 				key: 'focus'
-	// 			},
-	// 			{
-	// 				label: '高效',
-	// 				key: 'efficient'
-	// 			},
-	// 			{
-	// 				label: '细致',
-	// 				key: 'detailOriented'
-	// 			},
-	// 			{
-	// 				label: '拓局',
-	// 				key: 'expandVision'
-	// 			}
-	// 		]
-	// 	},
-	// 	{
-	// 		title: '精神格局',
-	// 		items: [{
-	// 				label: '贡献',
-	// 				key: 'contribution'
-	// 			},
-	// 			{
-	// 				label: '谦逊',
-	// 				key: 'humility'
-	// 			},
-	// 			{
-	// 				label: '远见',
-	// 				key: 'foresight'
-	// 			},
-	// 			{
-	// 				label: '使命',
-	// 				key: 'mission'
-	// 			}
-	// 		]
-	// 	}
-	// ]);
+	// ==========================================
+	// 2. 状态变量区域
+	// ==========================================
 
-	// 存储所有评分项的分数 (无变化)
+	// 用户身份相关
+	const currentUserId = ref(null); // 当前登录用户 (Me)
+	const targetUserId = ref(null); // 目标用户 (Target)
+	const isSelf = ref(false); // 是否是自己给自己评分
+
+	// 业务数据相关
+	const scoreRecordId = ref(null); // 现有评分记录ID
+	const isSubmitting = ref(false); // 提交锁
+
+	// 评分数据模型
 	const scores = ref({
 		punctuality: 0,
 		promiseKeep: 0,
@@ -218,60 +127,54 @@
 		mission: 0
 	});
 
-	const scoreRecordId = ref(null); // 存储已有评分记录的ID
-	const isSubmitting = ref(false); // 防止重复提交
+	// ==========================================
+	// 3. 生命周期区域
+	// ==========================================
 
-	const targetUserId = ref(null); // 被评分人 (Target)
-	const currentUserId = ref(null); // 评分人 (Me)
-	const isSelf = ref(false);
-
-	/**
-	 * 页面加载时，获取用户ID并拉取已有评分
-	 */
 	onLoad((options) => {
 		currentUserId.value = uni.getStorageSync('userId');
 
-		// id 传的是被评分人的 ID
+		// 确定目标用户：有id则为他人，无id则为自己
 		if (options.id) {
 			targetUserId.value = options.id;
 		} else {
-			// 没传默认给自己打分
 			targetUserId.value = currentUserId.value;
 		}
 
-		// 判断是否是自己给自己打分
+		// 判断身份关系
 		isSelf.value = String(targetUserId.value) === String(currentUserId.value);
 
+		// 设置导航栏标题
 		uni.setNavigationBarTitle({
 			title: isSelf.value ? '数字标签(自我评价)' : '商友评分'
 		});
 	});
 
 	onMounted(() => {
-		// 调用获取方法
 		fetchScores();
 	});
 
-	// 定义 fetchScores 方法
+	// ==========================================
+	// 4. 方法逻辑区域
+	// ==========================================
+
+	/**
+	 * 获取已有评分数据
+	 */
 	const fetchScores = async () => {
 		uni.showLoading({
 			title: '加载中...'
 		});
 		try {
+			// 根据提供的逻辑，这里传入的是 targetUserId
 			const {
 				data,
 				error
-			} = await request('/app-api/member/user-scores/getInfo', {
-				method: 'GET',
-				data: {
-					// 根据文档：userId 为被评分人
-					userId: targetUserId.value
-				}
-			});
+			} = await ScoreApi.getInfo(targetUserId.value);
 
 			if (!error && data) {
 				scoreRecordId.value = data.id;
-				// 回显分数
+				// 遍历回显分数，确保只合并有效值
 				Object.keys(scores.value).forEach(key => {
 					if (data[key] !== undefined && data[key] !== null) {
 						scores.value[key] = data[key];
@@ -279,21 +182,21 @@
 				});
 			}
 		} catch (e) {
-			console.error(e);
+			console.error('[Fetch Error]', e);
 		} finally {
 			uni.hideLoading();
 		}
 	};
 
 	/**
-	 * 提交评分的方法
+	 * 提交评分
 	 */
 	const submitScores = async () => {
+		// 1. 防重复提交检查
 		if (isSubmitting.value) return;
 
-		const userInfo = uni.getStorageSync('userInfo');
+		// 2. 登录态检查
 		const userId = uni.getStorageSync('userId');
-
 		if (!userId) {
 			uni.showToast({
 				title: '无法获取用户信息，请重新登录',
@@ -302,19 +205,21 @@
 			return;
 		}
 
+		// 3. 准备提交
 		isSubmitting.value = true;
 		uni.showLoading({
 			title: '正在保存...'
 		});
 
+		// 4. 组装参数 (保持原代码逻辑)
 		const payload = {
 			...scores.value,
-			id: scoreRecordId.value, // 如果是首次评分，id为null
+			id: scoreRecordId.value, // 记录ID (新增为null)
 			scorerId: targetUserId.value, // 被评分人
-			userId: currentUserId.value // 评分人 (自己)
+			userId: currentUserId.value // 评分人 (操作者)
 		};
 
-		// 【注意】请确保保存接口的地址是正确的
+		// 5. 调用接口
 		const {
 			data: newRecord,
 			error
@@ -323,6 +228,7 @@
 		uni.hideLoading();
 		isSubmitting.value = false;
 
+		// 6. 结果处理
 		if (error) {
 			console.error('评分保存失败:', error);
 			uni.showToast({
@@ -337,11 +243,12 @@
 			icon: 'success'
 		});
 
-		// 接口文档未明确指出保存接口是否返回新的ID，如果返回，可以更新
+		// 更新ID，防止再次提交变成新增
 		if (newRecord && newRecord.id) {
 			scoreRecordId.value = newRecord.id;
 		}
 
+		// 延迟返回上一页
 		setTimeout(() => {
 			uni.navigateBack();
 		}, 1500);
@@ -349,7 +256,7 @@
 </script>
 
 <style scoped lang="scss">
-	/* 样式无变化，保持原样 */
+	/* 保持原有样式，仅优化缩进 */
 	.container {
 		background-color: #f9f9f9;
 		min-height: 100vh;
@@ -426,75 +333,42 @@
 			opacity: 0.9;
 		}
 
-		/* 颜色分级样式 */
 		&.level-6 {
 			background-color: #FFF0E6;
 			color: #FF6A00;
 		}
 
-		/* 杰出 - 深橙 */
+		/* 杰出 */
 		&.level-5 {
 			background-color: #FFF7E6;
 			color: #FF9C38;
 		}
 
-		/* 优秀 - 浅橙 */
+		/* 优秀 */
 		&.level-4 {
 			background-color: #E8F5E9;
 			color: #4CAF50;
 		}
 
-		/* 较好 - 绿 */
+		/* 较好 */
 		&.level-3 {
 			background-color: #E3F2FD;
 			color: #2196F3;
 		}
 
-		/* 一般 - 蓝 */
+		/* 一般 */
 		&.level-2 {
 			background-color: #FFF3E0;
 			color: #FF9800;
 		}
 
-		/* 较差 - 黄 */
+		/* 较差 */
 		&.level-1 {
 			background-color: #FBE9E7;
 			color: #FF5722;
 		}
 
-		/* 极差 - 红 */
-	}
-
-	.section-card {
-		background-color: #fff;
-		border-radius: 20rpx;
-		padding: 30rpx;
-		margin-bottom: 30rpx;
-		box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.05);
-	}
-
-	.section-header {
-		padding-bottom: 20rpx;
-		border-bottom: 1px solid #f0f0f0;
-		margin-bottom: 20rpx;
-
-		.section-title {
-			font-size: 34rpx;
-			font-weight: 600;
-			color: #333;
-		}
-	}
-
-	.score-item {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		padding: 20rpx 0;
-	}
-
-	.item-label {
-		font-size: 30rpx;
-		color: #555;
+		/* 极差 */
 	}
 
 	.footer {
@@ -528,8 +402,8 @@
 			border: none;
 		}
 	}
-	
-	.score-sections{
+
+	.score-sections {
 		margin-bottom: 80rpx;
 	}
 </style>

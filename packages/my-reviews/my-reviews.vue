@@ -15,12 +15,16 @@
 		<!-- 2. 内容列表 -->
 		<view class="list-container">
 
-			<!-- 仅在“我收到的”Tab 显示统计 (Mock数据) -->
-			<view v-if="currentTab === 0 && reviewList.length > 0" class="stats-header">
+			<view v-if="currentTab === 0" class="stats-header">
 				<text class="stats-title">共收到 {{ total }} 条评价</text>
 				<view class="stats-tags">
-					<view class="tag like">👍 {{ stats.likes }} 条正面</view>
-					<view class="tag dislike">👎 {{ stats.dislikes }} 条改进</view>
+					<!-- 改为筛选按钮，点击切换 active 状态 -->
+					<view class="tag like" :class="{ active: filterLike === 1 }" @click="toggleFilter(1)">
+						👍 好评
+					</view>
+					<view class="tag dislike" :class="{ active: filterLike === 2 }" @click="toggleFilter(2)">
+						👎 改进
+					</view>
 				</view>
 			</view>
 
@@ -28,7 +32,7 @@
 			<view class="review-card" v-for="item in reviewList" :key="item.id">
 				<!-- 卡片头部：用户信息 -->
 				<view class="card-header">
-					<!-- 头像：如果是“我收到的”且匿名，显示匿名头像；否则显示真实头像 -->
+					<!-- 头像逻辑：收到且匿名显示默认，否则显示真实头像 -->
 					<image :src="getAvatar(item)" class="avatar" mode="aspectFill" />
 					<view class="user-info">
 						<view class="name-row">
@@ -62,9 +66,10 @@
 			</view>
 
 			<!-- 加载状态 -->
-			<uni-load-more :status="loadingStatus"
-				v-if="reviewList.length > 0 || loadingStatus === 'loading'"></uni-load-more>
+			<uni-load-more :status="loadingStatus" v-if="reviewList.length > 0 || loadingStatus === 'loading'">
+			</uni-load-more>
 
+			<!-- 空状态 -->
 			<view v-if="reviewList.length === 0 && loadingStatus === 'noMore'" class="empty-state">
 				<uni-icons type="chatboxes" size="60" color="#e0e0e0"></uni-icons>
 				<text>暂无相关点评</text>
@@ -88,23 +93,55 @@
 	import request from '@/utils/request.js';
 	import EditReviewPopup from '@/components/EditReviewPopup.vue';
 
-	// --- 状态 ---
+	// ==========================================
+	// 1. API 定义区域
+	// ==========================================
+	const ReviewApi = {
+		/** 获取我的点评列表 (发出的/收到的) */
+		getMyList: (params) => request('/app-api/member/user-review/my-list', {
+			method: 'GET',
+			data: params
+		}),
+		/** 更新点评内容 */
+		update: (data) => request('/app-api/member/user-review/update', {
+			method: 'PUT',
+			data: data
+		}),
+		/** 删除点评 (注意：ID拼接在URL上) */
+		delete: (id) => request(`/app-api/member/user-review/delete?id=${id}`, {
+			method: 'DELETE'
+		})
+	};
+
+	// ==========================================
+	// 2. 状态变量区域
+	// ==========================================
+
+	// 视图状态
 	const currentTab = ref(1); // 1=我发出的, 0=我收到的
+	const loadingStatus = ref('more'); // more, loading, noMore
+	const filterLike = ref(null); // 筛选状态 (null=全部, 1=好评, 2=差评)
+
+	// 数据状态
 	const reviewList = ref([]);
 	const pageNo = ref(1);
 	const pageSize = ref(10);
 	const total = ref(0);
-	const loadingStatus = ref('more');
-	const stats = ref({
-		likes: 0,
-		dislikes: 0
-	}); // 统计数据(Mock)
+
+	// 统计数据 (Mock)
+	// const stats = ref({
+	// 	likes: 0,
+	// 	dislikes: 0
+	// });
 
 	// 编辑相关
 	const editPopup = ref(null);
 	const currentEditItem = ref({});
 
-	// --- 生命周期 ---
+	// ==========================================
+	// 3. 生命周期区域
+	// ==========================================
+
 	onMounted(() => {
 		fetchList(true);
 	});
@@ -119,14 +156,29 @@
 		}
 	});
 
-	// --- 方法 ---
+	// ==========================================
+	// 4. 方法逻辑区域
+	// ==========================================
 
+	// --- 页面交互 ---
 	const switchTab = (tab) => {
 		if (currentTab.value === tab) return;
 		currentTab.value = tab;
+		filterLike.value = null;
 		fetchList(true);
 	};
 
+	// 点击筛选
+	const toggleFilter = (val) => {
+		if (filterLike.value === val) {
+			filterLike.value = null; // 取消筛选，查全部
+		} else {
+			filterLike.value = val;
+		}
+		fetchList(true); // 刷新列表
+	};
+
+	// --- 数据获取 ---
 	const fetchList = async (isRefresh = false) => {
 		if (loadingStatus.value === 'loading' && !isRefresh) return;
 
@@ -137,19 +189,21 @@
 		loadingStatus.value = 'loading';
 
 		try {
+			const params = {
+				isOwn: currentTab.value,
+				pageNo: pageNo.value,
+				pageSize: pageSize.value
+			};
+
+			// 如果有筛选，带上参数
+			if (filterLike.value) {
+				params.isLike = filterLike.value;
+			}
+
 			const {
 				data,
 				error
-			} = await request('/app-api/member/user-review/my-list', {
-				method: 'GET',
-				data: {
-					isOwn: currentTab.value, // 1我发出的, 0我收到的
-					pageNo: pageNo.value,
-					pageSize: pageSize.value
-				}
-			});
-
-			if (isRefresh) uni.stopPullDownRefresh();
+			} = await ReviewApi.getMyList(params);
 
 			if (!error && data) {
 				const list = data.list || [];
@@ -163,13 +217,11 @@
 					pageNo.value++;
 				}
 
-				// 简单统计 (真实场景应由后端返回)
-				if (isRefresh && currentTab.value === 0) {
-					// 注意：这里只能统计已加载的，或者让后端加接口
-					// 暂时 Mock 演示效果
-					stats.value.likes = reviewList.value.filter(i => i.isLike === 1).length;
-					stats.value.dislikes = reviewList.value.filter(i => i.isLike === 2).length;
-				}
+				// Mock 统计逻辑 (仅演示)
+				// if (isRefresh && currentTab.value === 0) {
+				// 	stats.value.likes = reviewList.value.filter(i => i.isLike === 1).length;
+				// 	stats.value.dislikes = reviewList.value.filter(i => i.isLike === 2).length;
+				// }
 			} else {
 				loadingStatus.value = 'noMore';
 			}
@@ -179,38 +231,40 @@
 		}
 	};
 
-	// 辅助：获取头像
+	// --- 辅助显示函数 (头像/名称/角色/时间) ---
+
 	const getAvatar = (item) => {
-		// 假设 UserReviewRespVO 包含 memberUserBaseVO
-		// 如果是我收到的(Tab=0)且匿名(isAnonymous=1)，显示默认图
-		if (currentTab.value === 0 && item.isAnonymous === 1) {
-			return '/static/icon/default-avatar.png'; // 匿名头像
+		// Tab 0 (我收到的): 强制匿名
+		if (currentTab.value === 0) {
+			return '/static/icon/default-avatar.png';
 		}
-		// 否则显示真实头像
-		// 注意：my-list 接口对于"我发出的"，需要显示 reviewedUser 的头像
-		// 对于 "我收到的"，显示 user 的头像
-		// 需确认后端返回结构，这里假设 memberUserBaseVO 是对方的信息
-		return item.memberUserBaseVO?.avatar || '/static/icon/default-avatar.png';
+		// Tab 1 (我发出的): 显示真实头像
+		return item.memberUser?.avatar || '/static/icon/default-avatar.png';
 	};
 
-	// 辅助：获取名字
 	const getName = (item) => {
-		if (currentTab.value === 0 && item.isAnonymous === 1) {
+		// Tab 0 (我收到的): 强制显示匿名
+		if (currentTab.value === 0) {
 			return '匿名用户';
 		}
-		return item.memberUserBaseVO?.nickname || '未知用户';
+		// Tab 1 (我发出的): 显示真实昵称
+		return item.memberUser?.nickname || '未知用户';
 	};
 
-	// 辅助：获取职位/角色
 	const getRole = (item) => {
-		if (currentTab.value === 0 && item.isAnonymous === 1) return '';
-		// 假设有 levelName 或 positionTitle
-		return item.memberUserBaseVO?.levelName || '';
+		if (currentTab.value === 0) return '';
+		return item.memberUser?.levelName || '';
 	};
 
-	// 操作：打开编辑
+	const formatTime = (str) => {
+		if (!str) return '';
+		const d = new Date(str);
+		return `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日`;
+	};
+
+	// --- 编辑操作 ---
+
 	const openEdit = (item) => {
-		// 构造传给弹窗的数据，确保包含对方名字用于展示
 		currentEditItem.value = {
 			...item,
 			targetName: getName(item)
@@ -218,22 +272,18 @@
 		editPopup.value.open();
 	};
 
-	// 操作：保存编辑
 	const onSaveReview = async (formData, done) => {
 		try {
 			const {
 				error
-			} = await request('/app-api/member/user-review/update', {
-				method: 'PUT',
-				data: formData
-			});
+			} = await ReviewApi.update(formData);
 
 			if (!error) {
 				uni.showToast({
 					title: '修改成功',
 					icon: 'success'
 				});
-				// 更新本地列表
+				// 更新本地列表数据，避免重新刷新
 				const index = reviewList.value.findIndex(i => i.id === formData.id);
 				if (index !== -1) {
 					reviewList.value[index].reviewContent = formData.reviewContent;
@@ -256,7 +306,8 @@
 		}
 	};
 
-	// 操作：删除
+	// --- 删除操作 ---
+
 	const handleDelete = (item) => {
 		uni.showModal({
 			title: '确认删除',
@@ -264,17 +315,10 @@
 			confirmColor: '#FF8500',
 			success: async (res) => {
 				if (res.confirm) {
-					// 【核心修改】将 id 拼接到 URL 上，或者 data 设为 null/undefined
-					// 如果 request.js 封装支持 data 为 query 参数（对于 DELETE/GET），则不用动。
-					// 但通常 DELETE 请求在 uni.request 中 data 会被放到 body 里（这就变成了 JSON）。
-					// 最稳妥的方式：直接拼接到 URL。
-
+					// 核心处理：ID 拼接到 URL
 					const {
 						error
-					} = await request(`/app-api/member/user-review/delete?id=${item.id}`, {
-						method: 'DELETE',
-						// data: { id: item.id } // 移除这个
-					});
+					} = await ReviewApi.delete(item.id);
 
 					if (!error) {
 						uni.showToast({
@@ -293,13 +337,6 @@
 				}
 			}
 		});
-	};
-
-	const formatTime = (str) => {
-		if (!str) return '';
-		const d = new Date(str);
-		// 简单格式化：2024年1月15日 或 3天前 (这里用简单日期)
-		return `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日`;
 	};
 </script>
 
@@ -377,17 +414,31 @@
 
 			.tag {
 				font-size: 24rpx;
-				padding: 6rpx 16rpx;
+				padding: 8rpx 20rpx;
+				/* 稍微加大点击区域 */
 				border-radius: 8rpx;
+				transition: all 0.2s;
+				border: 2rpx solid transparent; // 预留边框位置
 
 				&.like {
 					background-color: #FFF0E6;
 					color: $theme-color;
+
+					&.active {
+						border-color: $theme-color; // 选中加边框
+						font-weight: bold;
+					}
 				}
 
 				&.dislike {
 					background-color: #f5f5f5;
 					color: #666;
+
+					&.active {
+						border-color: #999;
+						background-color: #e0e0e0;
+						font-weight: bold;
+					}
 				}
 			}
 		}

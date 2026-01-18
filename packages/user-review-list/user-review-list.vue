@@ -5,7 +5,8 @@
 			<!-- 搜索框 -->
 			<view class="search-bar">
 				<uni-easyinput prefixIcon="search" v-model="searchKey" placeholder="搜索反馈内容" @confirm="handleSearch"
-					@clear="handleSearch"></uni-easyinput>
+					@clear="handleSearch">
+				</uni-easyinput>
 			</view>
 
 			<!-- 筛选 Tab -->
@@ -21,45 +22,55 @@
 			<view class="review-card" v-for="item in reviewList" :key="item.id">
 				<!-- 头部：类型 + 匿名标识 + 时间 -->
 				<view class="card-header">
-					<!-- 这里使用 isLike 判断点评是好评还是差评 -->
+					<!-- 类型标签 -->
 					<view class="type-tag" :class="item.isLike === 1 ? 'like' : 'dislike'">
 						<uni-icons :type="item.isLike === 1 ? 'hand-up-filled' : 'hand-down-filled'" size="16"
-							:color="item.isLike === 1 ? '#FF6A00' : '#666'"></uni-icons>
+							:color="item.isLike === 1 ? '#FF6A00' : '#666'">
+						</uni-icons>
 						<text>{{ item.isLike === 1 ? '正面反馈' : '改进建议' }}</text>
 					</view>
+
+					<!-- 匿名标签 -->
 					<view class="anon-tag">
 						<uni-icons type="locked-filled" size="14" color="#999"></uni-icons> 匿名
 					</view>
+
+					<!-- 时间 -->
 					<view class="time-tag">{{ formatTime(item.createTime) }}</view>
 				</view>
 
-				<!-- 内容 -->
+				<!-- 内容区域 -->
 				<view class="card-body">
-					<text
-						class="review-text">{{ item.reviewContent || (item.isLike === 1 ? '（未填写具体原因，默认为好评）' : '（未填写具体原因，默认为改进建议）') }}</text>
+					<text class="review-text">
+						{{ item.reviewContent || (item.isLike === 1 ? '（未填写具体原因，默认为好评）' : '（未填写具体原因，默认为改进建议）') }}
+					</text>
 				</view>
 
-				<!-- 底部互动 -->
+				<!-- 底部互动区域 -->
 				<view class="card-footer">
-					<!-- 这里使用 isReview 判断当前用户是否对该点评点赞/踩 -->
+					<!-- 点赞按钮 -->
 					<view class="action-item" :class="{ active: item.isReview === 1 }"
 						@click="toggleAction(item, 'like')">
 						<uni-icons :type="item.isReview === 1 ? 'hand-up-filled' : 'hand-up'" size="18"
-							:color="item.isReview === 1 ? '#FF6A00' : '#999'"></uni-icons>
+							:color="item.isReview === 1 ? '#FF6A00' : '#999'">
+						</uni-icons>
 						<text>{{ item.likesCount || 0 }}</text>
 					</view>
+
+					<!-- 点踩按钮 -->
 					<view class="action-item" :class="{ active: item.isReview === 2 }"
 						@click="toggleAction(item, 'dislike')">
 						<uni-icons :type="item.isReview === 2 ? 'hand-down-filled' : 'hand-down'" size="18"
-							:color="item.isReview === 2 ? '#333' : '#999'"></uni-icons>
+							:color="item.isReview === 2 ? '#333' : '#999'">
+						</uni-icons>
 						<text>{{ item.dislikesCount || 0 }}</text>
 					</view>
 				</view>
 			</view>
 
 			<!-- 加载状态 -->
-			<uni-load-more :status="loadingStatus"
-				v-if="reviewList.length > 0 || loadingStatus === 'loading'"></uni-load-more>
+			<uni-load-more :status="loadingStatus" v-if="reviewList.length > 0 || loadingStatus === 'loading'">
+			</uni-load-more>
 
 			<!-- 空状态 -->
 			<view v-if="reviewList.length === 0 && loadingStatus === 'noMore'" class="empty-state">
@@ -83,18 +94,46 @@
 	} from '@dcloudio/uni-app';
 	import request from '@/utils/request.js';
 
-	// --- 状态管理 ---
+	// ==========================================
+	// 1. API 定义区域
+	// ==========================================
+	const ReviewApi = {
+		/** 获取评论分页列表 */
+		getPage: (params) => request('/app-api/member/user-review/page', {
+			method: 'GET',
+			data: params
+		}),
+		/** 创建互动 (点赞/点踩) */
+		createInteraction: (data) => request('/app-api/member/user-review-interaction/create', {
+			method: 'POST',
+			data: data
+		}),
+		/** 取消互动 */
+		cancelInteraction: (data) => request(`/app-api/member/user-review-interaction/cancel?id=${data.id}`, {
+			method: 'DELETE',
+		})
+	}
+
+	// ==========================================
+	// 2. 状态变量区域
+	// ==========================================
+
+	// 页面参数与筛选
 	const targetUserId = ref(null); // 被点评人ID
 	const currentFilter = ref(0); // 0全部, 1好评, 2差评
-	const searchKey = ref('');
+	const searchKey = ref(''); // 搜索关键词
 
+	// 列表数据与分页
 	const reviewList = ref([]);
 	const pageNo = ref(1);
 	const pageSize = ref(10);
 	const total = ref(0);
 	const loadingStatus = ref('more'); // more, loading, noMore
 
-	// --- 生命周期 ---
+	// ==========================================
+	// 3. 生命周期区域
+	// ==========================================
+
 	onLoad((options) => {
 		if (options.userId) {
 			targetUserId.value = options.userId;
@@ -112,7 +151,11 @@
 		}
 	});
 
-	// --- 方法 ---
+	// ==========================================
+	// 4. 方法逻辑区域
+	// ==========================================
+
+	// --- 筛选与搜索 ---
 
 	const switchFilter = (val) => {
 		if (currentFilter.value === val) return;
@@ -124,13 +167,19 @@
 		fetchList(true);
 	};
 
+	// --- 数据获取 ---
+
+	/**
+	 * 获取列表数据
+	 * @param {boolean} isRefresh 是否为下拉刷新/重置
+	 */
 	const fetchList = async (isRefresh = false) => {
 		if (loadingStatus.value === 'loading' && !isRefresh) return;
 
 		if (isRefresh) {
 			pageNo.value = 1;
 			loadingStatus.value = 'more';
-			// reviewList.value = []; // 可选：清空列表防止闪烁，或者保留旧数据平滑过渡
+			// reviewList.value = []; // 保持旧数据平滑过渡
 		}
 
 		loadingStatus.value = 'loading';
@@ -146,15 +195,12 @@
 			if (currentFilter.value !== 0) {
 				params.isLike = currentFilter.value;
 			}
-			// 搜索暂未实现，如果后端支持，可加 params.keyword = searchKey.value
+			// 如果有后端搜索字段，可在此添加 params.keyword = searchKey.value
 
 			const {
 				data,
 				error
-			} = await request('/app-api/member/user-review/page', {
-				method: 'GET',
-				data: params
-			});
+			} = await ReviewApi.getPage(params);
 
 			if (isRefresh) uni.stopPullDownRefresh();
 
@@ -178,7 +224,13 @@
 		}
 	};
 
-	// 对反馈进行点赞/点踩
+	// --- 用户互动 (点赞/点踩) ---
+
+	/**
+	 * 切换互动状态
+	 * @param {object} item 评论对象
+	 * @param {string} actionType 'like' | 'dislike'
+	 */
 	const toggleAction = async (item, actionType) => {
 		// 1. 登录检查
 		const currentUserId = uni.getStorageSync('userId');
@@ -194,41 +246,42 @@
 		const targetIsLike = actionType === 'like' ? 1 : 2;
 		const currentStatus = item.isReview; // 0=无, 1=已赞, 2=已踩
 
-		// 3. 判断操作类型
+		// 3. 判断是否为取消操作
 		let isCancel = false;
 		if (currentStatus === targetIsLike) {
 			isCancel = true; // 点击已选中的 -> 取消
 		}
 
-		// 4. 【重要】暂不支持取消历史互动
-		// 原因：后端取消接口需要 interactionId，但列表接口没返回。
-		// 策略：如果 isCancel 为真，且没有本地缓存的 interactionId，则拦截提示。
-		if (isCancel && !item.interactionId) {
-			uni.showToast({
-				title: '暂无法取消历史评价',
-				icon: 'none'
-			});
-			return;
-		}
+		// 4. 【历史数据保护】
+		// 如果是取消操作，但本地没有 interactionId，说明是历史数据，无法取消
+		// if (isCancel && !item.interactionId) {
+		// 	uni.showToast({
+		// 		title: '暂无法取消历史评价',
+		// 		icon: 'none'
+		// 	});
+		// 	return;
+		// }
 
-		// 5. 乐观更新 UI
+		// 5. 乐观更新 UI (先变界面，再请求)
 		const originalStatus = item.isReview;
 		const originalLikes = item.likesCount;
 		const originalDislikes = item.dislikesCount;
 
 		if (isCancel) {
+			// 取消状态
 			item.isReview = 0;
 			if (originalStatus === 1) item.likesCount--;
 			if (originalStatus === 2) item.dislikesCount--;
 		} else {
+			// 设置新状态
 			item.isReview = targetIsLike;
-			// 如果是从赞变踩，或从踩变赞
+			// 处理计数变化
 			if (targetIsLike === 1) { // 目标是赞
 				item.likesCount++;
-				if (originalStatus === 2) item.dislikesCount--;
+				if (originalStatus === 2) item.dislikesCount--; // 如果原来是踩，踩数减1
 			} else { // 目标是踩
 				item.dislikesCount++;
-				if (originalStatus === 1) item.likesCount--;
+				if (originalStatus === 1) item.likesCount--; // 如果原来是赞，赞数减1
 			}
 		}
 
@@ -237,35 +290,28 @@
 				// === 取消互动 ===
 				const {
 					error
-				} = await request('/app-api/member/user-review-interaction/cancel', {
-					method: 'DELETE',
-					data: {
-						id: item.interactionId
-					} // 这里必须要有值
+				} = await ReviewApi.cancelInteraction({
+					id: item.id
 				});
 				if (error) throw new Error(error.msg);
-				item.interactionId = null; // 清除
 			} else {
 				// === 新增/切换互动 ===
 				const {
 					data,
 					error
-				} = await request('/app-api/member/user-review-interaction/create', {
-					method: 'POST',
-					data: {
-						userId: currentUserId,
-						reviewId: item.id,
-						isLike: targetIsLike
-					}
+				} = await ReviewApi.createInteraction({
+					userId: currentUserId,
+					reviewId: item.id,
+					isLike: targetIsLike
 				});
 
 				if (error) throw new Error(error.msg);
 
 				// 保存返回的 ID，以便稍后取消
-				if (data) item.interactionId = data;
+				// if (data) item.interactionId = data;
 			}
 		} catch (e) {
-			// 回滚
+			// 6. 请求失败，回滚 UI
 			item.isReview = originalStatus;
 			item.likesCount = originalLikes;
 			item.dislikesCount = originalDislikes;
@@ -276,6 +322,8 @@
 		}
 	};
 
+	// --- 工具方法 ---
+
 	const formatTime = (timeStr) => {
 		if (!timeStr) return '';
 		const date = new Date(timeStr);
@@ -284,6 +332,7 @@
 </script>
 
 <style lang="scss" scoped>
+	/* 保持原有样式结构 */
 	.container {
 		min-height: 100vh;
 		background-color: #f5f7fa;
@@ -408,7 +457,6 @@
 
 			&.active {
 				font-weight: bold;
-				// 颜色在 style 绑定里控制
 			}
 		}
 	}

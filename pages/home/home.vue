@@ -466,7 +466,7 @@
 
 		// 确保分享菜单总是可用
 		uni.showShareMenu({
-			withShareTicket: true,
+			// withShareTicket: true,
 			menus: ["shareAppMessage", "shareTimeline"]
 		});
 

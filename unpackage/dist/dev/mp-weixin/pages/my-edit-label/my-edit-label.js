@@ -16,7 +16,6 @@ const _sfc_main = {
     const ScoreApi = {
       /**
        * 保存或更新用户评分
-       * @param {object} scoreData
        */
       saveOrUpdate: (scoreData) => {
         return utils_request.request("/app-api/member/user-scores/saveOrUpdate", {
@@ -26,9 +25,8 @@ const _sfc_main = {
       },
       /**
        * 获取用户评分
-       * @param {string|number} userId
        */
-      getMyScores: (userId) => {
+      getInfo: (userId) => {
         return utils_request.request("/app-api/member/user-scores/getInfo", {
           method: "GET",
           data: {
@@ -37,6 +35,11 @@ const _sfc_main = {
         });
       }
     };
+    const currentUserId = common_vendor.ref(null);
+    const targetUserId = common_vendor.ref(null);
+    const isSelf = common_vendor.ref(false);
+    const scoreRecordId = common_vendor.ref(null);
+    const isSubmitting = common_vendor.ref(false);
     const scores = common_vendor.ref({
       punctuality: 0,
       promiseKeep: 0,
@@ -55,11 +58,6 @@ const _sfc_main = {
       foresight: 0,
       mission: 0
     });
-    const scoreRecordId = common_vendor.ref(null);
-    const isSubmitting = common_vendor.ref(false);
-    const targetUserId = common_vendor.ref(null);
-    const currentUserId = common_vendor.ref(null);
-    const isSelf = common_vendor.ref(false);
     common_vendor.onLoad((options) => {
       currentUserId.value = common_vendor.index.getStorageSync("userId");
       if (options.id) {
@@ -83,13 +81,7 @@ const _sfc_main = {
         const {
           data,
           error
-        } = await utils_request.request("/app-api/member/user-scores/getInfo", {
-          method: "GET",
-          data: {
-            // 根据文档：userId 为被评分人
-            userId: targetUserId.value
-          }
-        });
+        } = await ScoreApi.getInfo(targetUserId.value);
         if (!error && data) {
           scoreRecordId.value = data.id;
           Object.keys(scores.value).forEach((key) => {
@@ -99,7 +91,7 @@ const _sfc_main = {
           });
         }
       } catch (e) {
-        common_vendor.index.__f__("error", "at pages/my-edit-label/my-edit-label.vue:282", e);
+        common_vendor.index.__f__("error", "at pages/my-edit-label/my-edit-label.vue:185", "[Fetch Error]", e);
       } finally {
         common_vendor.index.hideLoading();
       }
@@ -107,7 +99,6 @@ const _sfc_main = {
     const submitScores = async () => {
       if (isSubmitting.value)
         return;
-      common_vendor.index.getStorageSync("userInfo");
       const userId = common_vendor.index.getStorageSync("userId");
       if (!userId) {
         common_vendor.index.showToast({
@@ -123,11 +114,11 @@ const _sfc_main = {
       const payload = {
         ...scores.value,
         id: scoreRecordId.value,
-        // 如果是首次评分，id为null
+        // 记录ID (新增为null)
         scorerId: targetUserId.value,
         // 被评分人
         userId: currentUserId.value
-        // 评分人 (自己)
+        // 评分人 (操作者)
       };
       const {
         data: newRecord,
@@ -136,7 +127,7 @@ const _sfc_main = {
       common_vendor.index.hideLoading();
       isSubmitting.value = false;
       if (error) {
-        common_vendor.index.__f__("error", "at pages/my-edit-label/my-edit-label.vue:327", "评分保存失败:", error);
+        common_vendor.index.__f__("error", "at pages/my-edit-label/my-edit-label.vue:233", "评分保存失败:", error);
         common_vendor.index.showToast({
           title: `保存失败: ${error}`,
           icon: "none"

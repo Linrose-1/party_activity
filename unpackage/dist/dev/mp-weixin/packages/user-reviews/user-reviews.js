@@ -13,6 +13,50 @@ const MyRadarChart = () => "../../components/MyRadarChart.js";
 const _sfc_main = {
   __name: "user-reviews",
   setup(__props) {
+    const ReviewApi = {
+      // 创建评论（赞/踩）
+      create: (data) => utils_request.request("/app-api/member/user-review/create", {
+        method: "POST",
+        data
+      }),
+      // 获取评论分页
+      getPage: (params) => utils_request.request("/app-api/member/user-review/page", {
+        method: "GET",
+        data: params
+      }),
+      // 更新评论
+      update: (data) => utils_request.request("/app-api/member/user-review/update", {
+        method: "PUT",
+        data
+      }),
+      // 获取我的点评列表 (这里用于查"我发给某人"的)
+      getMyList: (params) => utils_request.request("/app-api/member/user-review/my-list", {
+        method: "GET",
+        data: params
+      })
+    };
+    const ScoreApi = {
+      // 获取综合统计或自我评价统计 (type: 0自评, 3综合)
+      getStatistics: (userId, type) => utils_request.request("/app-api/member/user-scores/complexStatistics", {
+        method: "GET",
+        data: {
+          userId,
+          type
+        }
+      }),
+      // 获取详细评分信息
+      getInfo: (userId) => utils_request.request("/app-api/member/user-scores/getInfo", {
+        method: "GET",
+        data: {
+          userId
+        }
+      }),
+      // 保存评分
+      save: (data) => utils_request.request("/app-api/member/user-scores/saveOrUpdate", {
+        method: "POST",
+        data
+      })
+    };
     const currentTab = common_vendor.ref(0);
     const targetUserId = common_vendor.ref(null);
     const currentUserId = common_vendor.ref(null);
@@ -24,8 +68,11 @@ const _sfc_main = {
     });
     const recentReviews = common_vendor.ref([]);
     const totalReviews = common_vendor.ref(0);
+    const reviewRecordId = common_vendor.ref(null);
+    const isReviewEditMode = common_vendor.ref(false);
     common_vendor.ref(false);
     const scoreRecordId = common_vendor.ref(null);
+    const radarDatasets = common_vendor.ref([]);
     const scores = common_vendor.ref({
       punctuality: 0,
       promiseKeep: 0,
@@ -44,7 +91,6 @@ const _sfc_main = {
       foresight: 0,
       mission: 0
     });
-    const radarDatasets = common_vendor.ref([]);
     common_vendor.onLoad((options) => {
       if (options.userId) {
         targetUserId.value = options.userId;
@@ -60,14 +106,54 @@ const _sfc_main = {
     common_vendor.onMounted(() => {
       if (targetUserId.value) {
         fetchRecentReviews();
+        fetchMyReviewToTarget();
         fetchMyHistoryScore();
         fetchRadarStatistics();
       }
     });
+    const switchTab = (index) => {
+      currentTab.value = index;
+    };
+    const formatTime = (timeStr) => {
+      if (!timeStr)
+        return "";
+      const date = new Date(timeStr);
+      return `${date.getMonth() + 1}-${date.getDate()}`;
+    };
+    const fetchMyReviewToTarget = async () => {
+      try {
+        const {
+          data,
+          error
+        } = await ReviewApi.getMyList({
+          reviewedId: targetUserId.value,
+          // 关键：后端 my-list 接口文档说支持 userId 筛选，
+          // 且 isOwn=1 表示我发出的。为了精准，最好加上 userId=currentUserId
+          // 或者 isOwn=1 (取决于后端实现，通常 my-list 默认就是查自己的)
+          // 根据文档：isOwn: 0点评我的，1我点评的
+          isOwn: 1,
+          pageNo: 1,
+          pageSize: 1
+        });
+        if (!error && data && data.list && data.list.length > 0) {
+          const myReview = data.list[0];
+          reviewForm.isLike = myReview.isLike;
+          reviewForm.reviewContent = myReview.reviewContent;
+          reviewRecordId.value = myReview.id;
+          isReviewEditMode.value = true;
+          common_vendor.index.__f__("log", "at packages/user-reviews/user-reviews.vue:337", "✅ 回显我的历史评价:", myReview);
+        } else {
+          isReviewEditMode.value = false;
+          reviewRecordId.value = null;
+        }
+      } catch (e) {
+        common_vendor.index.__f__("error", "at packages/user-reviews/user-reviews.vue:344", "获取我的评价失败", e);
+      }
+    };
     const selectLike = (val) => {
       reviewForm.isLike = val;
     };
-    const submitReview = async () => {
+    const handleReviewSubmit = async () => {
       if (!reviewForm.isLike) {
         common_vendor.index.showToast({
           title: "请选择评价类型",
@@ -75,36 +161,48 @@ const _sfc_main = {
         });
         return;
       }
+      if (isReviewSubmitting.value)
+        return;
       isReviewSubmitting.value = true;
       try {
-        const payload = {
-          userId: currentUserId.value,
-          // 点评人
-          reviewedId: targetUserId.value,
-          // 被点评人
-          isLike: reviewForm.isLike,
-          reviewContent: reviewForm.reviewContent,
-          isAnonymous: 1,
-          // 强制匿名
-          starRating: 0
-        };
-        const {
-          error
-        } = await utils_request.request("/app-api/member/user-review/create", {
-          method: "POST",
-          data: payload
-        });
+        let error;
+        if (isReviewEditMode.value && reviewRecordId.value) {
+          const payload = {
+            id: reviewRecordId.value,
+            // 必填
+            userId: currentUserId.value,
+            reviewedId: targetUserId.value,
+            isLike: reviewForm.isLike,
+            reviewContent: reviewForm.reviewContent,
+            isAnonymous: 1,
+            // 保持匿名
+            starRating: 0
+          };
+          const res = await ReviewApi.update(payload);
+          error = res.error;
+        } else {
+          const payload = {
+            userId: currentUserId.value,
+            reviewedId: targetUserId.value,
+            isLike: reviewForm.isLike,
+            reviewContent: reviewForm.reviewContent,
+            isAnonymous: 1,
+            starRating: 0
+          };
+          const res = await ReviewApi.create(payload);
+          error = res.error;
+        }
         if (!error) {
           common_vendor.index.showToast({
-            title: "提交成功",
+            title: isReviewEditMode.value ? "修改成功" : "提交成功",
             icon: "success"
           });
-          reviewForm.reviewContent = "";
+          await fetchMyReviewToTarget();
           fetchRecentReviews();
         } else {
-          const errorMsg = typeof error === "string" ? error : error.msg || "提交失败";
+          const msg = typeof error === "string" ? error : error.msg || "操作失败";
           common_vendor.index.showToast({
-            title: errorMsg,
+            title: msg,
             icon: "none"
           });
         }
@@ -122,32 +220,23 @@ const _sfc_main = {
         const {
           data,
           error
-        } = await utils_request.request("/app-api/member/user-review/page", {
-          method: "GET",
-          data: {
-            reviewedId: targetUserId.value,
-            pageNo: 1,
-            pageSize: 5
-          }
+        } = await ReviewApi.getPage({
+          reviewedId: targetUserId.value,
+          pageNo: 1,
+          pageSize: 5
         });
         if (!error && data) {
           recentReviews.value = data.list || [];
           totalReviews.value = data.total || 0;
         }
       } catch (e) {
-        common_vendor.index.__f__("error", "at packages/user-reviews/user-reviews.vue:313", "获取最近反馈失败", e);
+        common_vendor.index.__f__("error", "at packages/user-reviews/user-reviews.vue:438", "获取最近反馈失败", e);
       }
     };
     const goToAllReviews = () => {
       common_vendor.index.navigateTo({
         url: `/packages/user-review-list/user-review-list?userId=${targetUserId.value}`
       });
-    };
-    const formatTime = (timeStr) => {
-      if (!timeStr)
-        return "";
-      const date = new Date(timeStr);
-      return `${date.getMonth() + 1}-${date.getDate()}`;
     };
     const goToRatePage = () => {
       common_vendor.index.navigateTo({
@@ -157,20 +246,8 @@ const _sfc_main = {
     const fetchRadarStatistics = async () => {
       try {
         const [selfRes, complexRes] = await Promise.all([
-          utils_request.request("/app-api/member/user-scores/complexStatistics", {
-            method: "GET",
-            data: {
-              userId: targetUserId.value,
-              type: 0
-            }
-          }),
-          utils_request.request("/app-api/member/user-scores/complexStatistics", {
-            method: "GET",
-            data: {
-              userId: targetUserId.value,
-              type: 3
-            }
-          })
+          ScoreApi.getStatistics(targetUserId.value, 0),
+          ScoreApi.getStatistics(targetUserId.value, 3)
         ]);
         const newDatasets = [];
         if (!selfRes.error && selfRes.data) {
@@ -183,7 +260,6 @@ const _sfc_main = {
               selfRes.data.avg4 || 0
             ],
             color: "#FF7D00"
-            // 橙色
           });
         }
         if (!complexRes.error && complexRes.data) {
@@ -196,38 +272,23 @@ const _sfc_main = {
               complexRes.data.avg4 || 0
             ],
             color: "#1890FF"
-            // 蓝色
           });
         }
         radarDatasets.value = newDatasets;
       } catch (e) {
-        common_vendor.index.__f__("error", "at packages/user-reviews/user-reviews.vue:393", "获取统计数据失败", e);
+        common_vendor.index.__f__("error", "at packages/user-reviews/user-reviews.vue:497", "获取统计数据失败", e);
       }
-    };
-    const getScoreValue = (datasetIndex, dimIndex) => {
-      if (radarDatasets.value[datasetIndex] && radarDatasets.value[datasetIndex].data) {
-        const val = radarDatasets.value[datasetIndex].data[dimIndex];
-        return val !== void 0 ? val : "-";
-      }
-      return "-";
     };
     const fetchMyHistoryScore = async () => {
       try {
         const {
           data,
           error
-        } = await utils_request.request("/app-api/member/user-scores/getInfo", {
-          method: "GET",
-          data: {
-            userId: targetUserId.value
-            // 只需传被评分人的 ID
-          }
-        });
+        } = await ScoreApi.getInfo(targetUserId.value);
         if (!error && data) {
-          common_vendor.index.__f__("log", "at packages/user-reviews/user-reviews.vue:421", "✅ 获取到历史评分:", data);
-          if (data.id) {
+          common_vendor.index.__f__("log", "at packages/user-reviews/user-reviews.vue:510", "✅ 获取到历史评分:", data);
+          if (data.id)
             scoreRecordId.value = data.id;
-          }
           Object.keys(scores.value).forEach((key) => {
             if (data[key] !== void 0 && data[key] !== null) {
               scores.value[key] = data[key];
@@ -235,19 +296,27 @@ const _sfc_main = {
           });
         }
       } catch (e) {
-        common_vendor.index.__f__("error", "at packages/user-reviews/user-reviews.vue:438", "获取历史评分异常:", e);
+        common_vendor.index.__f__("error", "at packages/user-reviews/user-reviews.vue:520", "获取历史评分异常:", e);
       }
+    };
+    const getScoreValue = (datasetIndex, dimIndex) => {
+      const ds = radarDatasets.value[datasetIndex];
+      if (ds && ds.data) {
+        const val = ds.data[dimIndex];
+        return val !== void 0 ? val : "-";
+      }
+      return "-";
     };
     return (_ctx, _cache) => {
       return common_vendor.e({
         a: currentTab.value === 0
       }, currentTab.value === 0 ? {} : {}, {
         b: currentTab.value === 0 ? 1 : "",
-        c: common_vendor.o(($event) => currentTab.value = 0),
+        c: common_vendor.o(($event) => switchTab(0)),
         d: currentTab.value === 1
       }, currentTab.value === 1 ? {} : {}, {
         e: currentTab.value === 1 ? 1 : "",
-        f: common_vendor.o(($event) => currentTab.value = 1),
+        f: common_vendor.o(($event) => switchTab(1)),
         g: currentTab.value === 0
       }, currentTab.value === 0 ? common_vendor.e({
         h: common_vendor.p({
@@ -268,9 +337,9 @@ const _sfc_main = {
         o: common_vendor.o(($event) => selectLike(2)),
         p: reviewForm.reviewContent,
         q: common_vendor.o(($event) => reviewForm.reviewContent = $event.detail.value),
-        r: common_vendor.t(isReviewSubmitting.value ? "提交中..." : "提交反馈"),
+        r: common_vendor.t(isReviewSubmitting.value ? "处理中..." : isReviewEditMode.value ? "修改反馈" : "提交反馈"),
         s: isReviewSubmitting.value,
-        t: common_vendor.o(submitReview),
+        t: common_vendor.o(handleReviewSubmit),
         v: recentReviews.value.length > 0
       }, recentReviews.value.length > 0 ? {
         w: common_vendor.f(recentReviews.value, (item, k0, i0) => {

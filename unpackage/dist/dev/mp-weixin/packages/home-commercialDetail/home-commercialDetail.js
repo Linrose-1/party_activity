@@ -109,7 +109,7 @@ const _sfc_main = {
         }
       }
       common_vendor.index.showShareMenu({
-        withShareTicket: true,
+        // withShareTicket: true,
         menus: ["shareAppMessage", "shareTimeline"]
       });
     });

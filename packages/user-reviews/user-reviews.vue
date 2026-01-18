@@ -2,11 +2,11 @@
 	<view class="container">
 		<!-- 1. 顶部 Tabs -->
 		<view class="tabs">
-			<view class="tab-item" :class="{ active: currentTab === 0 }" @click="currentTab = 0">
+			<view class="tab-item" :class="{ active: currentTab === 0 }" @click="switchTab(0)">
 				赞踩
 				<view class="active-line" v-if="currentTab === 0"></view>
 			</view>
-			<view class="tab-item" :class="{ active: currentTab === 1 }" @click="currentTab = 1">
+			<view class="tab-item" :class="{ active: currentTab === 1 }" @click="switchTab(1)">
 				评分
 				<view class="active-line" v-if="currentTab === 1"></view>
 			</view>
@@ -15,10 +15,10 @@
 		<!-- 2. Tab 内容区 -->
 		<view class="content-body">
 
-			<!-- Tab 1: 赞踩 -->
+			<!-- ================== Tab 1: 赞踩模块 ================== -->
 			<view v-if="currentTab === 0">
 
-				<!-- 2.1 提交反馈区 -->
+				<!-- 2.1 提交反馈卡片 -->
 				<view class="feedback-card">
 					<view class="card-header">
 						<text class="title">为商友提供反馈</text>
@@ -48,8 +48,8 @@
 							class="review-textarea" maxlength="200" />
 					</view>
 
-					<button class="submit-review-btn" :disabled="isReviewSubmitting" @click="submitReview">
-						{{ isReviewSubmitting ? '提交中...' : '提交反馈' }}
+					<button class="submit-review-btn" :disabled="isReviewSubmitting" @click="handleReviewSubmit">
+						{{ isReviewSubmitting ? '处理中...' : (isReviewEditMode ? '修改反馈' : '提交反馈') }}
 					</button>
 				</view>
 
@@ -64,7 +64,7 @@
 									color="#FF6A00"></uni-icons>
 								<uni-icons v-else type="hand-down-filled" size="18" color="#999"></uni-icons>
 							</view>
-							<!-- 如果内容为空，给一个默认文案 -->
+							<!-- 内容回显逻辑 -->
 							<view class="review-content-text">
 								{{ item.reviewContent || (item.isLike === 1 ? '点了个赞' : '踩了一下') }}
 							</view>
@@ -79,7 +79,7 @@
 
 			</view>
 
-			<!-- Tab 2: 评分 -->
+			<!-- ================== Tab 2: 评分模块 ================== -->
 			<view v-if="currentTab === 1">
 
 				<!-- 2.0 雷达图统计 -->
@@ -92,7 +92,8 @@
 					<view class="chart-wrapper">
 						<MyRadarChart :categories="['基础信用', '协作态度', '专业能力', '精神格局']" :datasets="radarDatasets" />
 					</view>
-					<!-- 图例说明 -->
+
+					<!-- 图例说明表格 -->
 					<view class="score-compare-table">
 						<!-- 表头 -->
 						<view class="table-row header-row">
@@ -132,6 +133,7 @@
 					</view>
 				</view>
 
+				<!-- 2.2 去评分入口 -->
 				<view class="section-header-title">
 					<view class="standard-title">
 						<uni-icons type="compose" size="16" color="#FF8C00"></uni-icons>
@@ -166,12 +168,66 @@
 	import ScoreForm from '@/components/ScoreForm.vue';
 	import MyRadarChart from '@/components/MyRadarChart.vue';
 
-	// --- 全局状态 ---
-	const currentTab = ref(0); // 默认显示赞踩 Tab
-	const targetUserId = ref(null); // 被评分/被点评人 ID
-	const currentUserId = ref(null); // 当前登录用户 ID
+	// ==========================================
+	// 1. API 定义区域
+	// ==========================================
 
-	// --- Tab 1 (赞踩) 相关状态 ---
+	const ReviewApi = {
+		// 创建评论（赞/踩）
+		create: (data) => request('/app-api/member/user-review/create', {
+			method: 'POST',
+			data
+		}),
+		// 获取评论分页
+		getPage: (params) => request('/app-api/member/user-review/page', {
+			method: 'GET',
+			data: params
+		}),
+		// 更新评论
+		update: (data) => request('/app-api/member/user-review/update', {
+			method: 'PUT',
+			data
+		}),
+		// 获取我的点评列表 (这里用于查"我发给某人"的)
+		getMyList: (params) => request('/app-api/member/user-review/my-list', {
+			method: 'GET',
+			data: params
+		})
+	};
+
+	const ScoreApi = {
+		// 获取综合统计或自我评价统计 (type: 0自评, 3综合)
+		getStatistics: (userId, type) => request('/app-api/member/user-scores/complexStatistics', {
+			method: 'GET',
+			data: {
+				userId,
+				type
+			}
+		}),
+		// 获取详细评分信息
+		getInfo: (userId) => request('/app-api/member/user-scores/getInfo', {
+			method: 'GET',
+			data: {
+				userId
+			}
+		}),
+		// 保存评分
+		save: (data) => request('/app-api/member/user-scores/saveOrUpdate', {
+			method: 'POST',
+			data
+		})
+	};
+
+	// ==========================================
+	// 2. 状态变量区域
+	// ==========================================
+
+	// --- 全局状态 ---
+	const currentTab = ref(0);
+	const targetUserId = ref(null); // 被操作人 ID
+	const currentUserId = ref(null); // 当前登录人 ID
+
+	// --- Tab 1 (赞踩) 状态 ---
 	const isReviewSubmitting = ref(false);
 	const reviewForm = reactive({
 		isLike: 1, // 1:点赞, 2:点踩
@@ -179,10 +235,14 @@
 	});
 	const recentReviews = ref([]);
 	const totalReviews = ref(0);
+	const reviewRecordId = ref(null); // 存储我给该用户的评价ID
+	const isReviewEditMode = ref(false); // 标记是否处于编辑模式
 
-	// --- Tab 2 (评分) 相关状态 ---
+	// --- Tab 2 (评分) 状态 ---
 	const isSubmitting = ref(false);
 	const scoreRecordId = ref(null);
+	const radarDatasets = ref([]);
+	// 评分数据模型 (用于历史数据回显或提交)
 	const scores = ref({
 		punctuality: 0,
 		promiseKeep: 0,
@@ -201,9 +261,11 @@
 		foresight: 0,
 		mission: 0
 	});
-	const radarDatasets = ref([]);
 
-	// --- 生命周期 ---
+	// ==========================================
+	// 3. 生命周期区域
+	// ==========================================
+
 	onLoad((options) => {
 		if (options.userId) {
 			targetUserId.value = options.userId;
@@ -218,25 +280,76 @@
 	});
 
 	onMounted(() => {
-		// 1. 加载最近反馈 (Tab 1)
 		if (targetUserId.value) {
-			fetchRecentReviews();
+			// 初始化 Tab 1 数据
+			fetchRecentReviews(); // 别人的评价
+			fetchMyReviewToTarget(); // 我给他的评价
+			// 初始化 Tab 2 数据
 			fetchMyHistoryScore();
 			fetchRadarStatistics();
 		}
-
-
 	});
 
-	// --- Tab 1 方法 ---
+	// ==========================================
+	// 4. 方法逻辑区域
+	// ==========================================
 
-	// 选择赞/踩
+	// --- 通用方法 ---
+	const switchTab = (index) => {
+		currentTab.value = index;
+	};
+
+	const formatTime = (timeStr) => {
+		if (!timeStr) return '';
+		const date = new Date(timeStr);
+		return `${date.getMonth() + 1}-${date.getDate()}`;
+	};
+
+	// --- Tab 1: 赞踩业务 ---
+
+	// 获取我给目标用户的历史评价
+	const fetchMyReviewToTarget = async () => {
+		try {
+			const {
+				data,
+				error
+			} = await ReviewApi.getMyList({
+				reviewedId: targetUserId.value,
+				// 关键：后端 my-list 接口文档说支持 userId 筛选，
+				// 且 isOwn=1 表示我发出的。为了精准，最好加上 userId=currentUserId
+				// 或者 isOwn=1 (取决于后端实现，通常 my-list 默认就是查自己的)
+				// 根据文档：isOwn: 0点评我的，1我点评的
+				isOwn: 1,
+				pageNo: 1,
+				pageSize: 1
+			});
+
+			if (!error && data && data.list && data.list.length > 0) {
+				// 找到了历史评价
+				const myReview = data.list[0];
+
+				// 回显数据
+				reviewForm.isLike = myReview.isLike;
+				reviewForm.reviewContent = myReview.reviewContent;
+				reviewRecordId.value = myReview.id;
+
+				isReviewEditMode.value = true; // 标记为编辑模式
+				console.log('✅ 回显我的历史评价:', myReview);
+			} else {
+				// 没评过
+				isReviewEditMode.value = false;
+				reviewRecordId.value = null;
+			}
+		} catch (e) {
+			console.error('获取我的评价失败', e);
+		}
+	};
+
 	const selectLike = (val) => {
 		reviewForm.isLike = val;
 	};
 
-	// 提交点评 (赞踩)
-	const submitReview = async () => {
+	const handleReviewSubmit = async () => {
 		if (!reviewForm.isLike) {
 			uni.showToast({
 				title: '请选择评价类型',
@@ -245,38 +358,54 @@
 			return;
 		}
 
+		if (isReviewSubmitting.value) return; // 防抖
 		isReviewSubmitting.value = true;
 
 		try {
-			const payload = {
-				userId: currentUserId.value, // 点评人
-				reviewedId: targetUserId.value, // 被点评人
-				isLike: reviewForm.isLike,
-				reviewContent: reviewForm.reviewContent,
-				isAnonymous: 1, // 强制匿名
-				starRating: 0
-			};
+			let error;
 
-			const {
-				error
-			} = await request('/app-api/member/user-review/create', {
-				method: 'POST',
-				data: payload
-			});
+			if (isReviewEditMode.value && reviewRecordId.value) {
+				// === 更新逻辑 ===
+				const payload = {
+					id: reviewRecordId.value, // 必填
+					userId: currentUserId.value,
+					reviewedId: targetUserId.value,
+					isLike: reviewForm.isLike,
+					reviewContent: reviewForm.reviewContent,
+					isAnonymous: 1, // 保持匿名
+					starRating: 0
+				};
+				const res = await ReviewApi.update(payload);
+				error = res.error;
+			} else {
+				// === 新增逻辑 ===
+				const payload = {
+					userId: currentUserId.value,
+					reviewedId: targetUserId.value,
+					isLike: reviewForm.isLike,
+					reviewContent: reviewForm.reviewContent,
+					isAnonymous: 1,
+					starRating: 0
+				};
+				const res = await ReviewApi.create(payload);
+				error = res.error;
+			}
 
 			if (!error) {
 				uni.showToast({
-					title: '提交成功',
+					title: isReviewEditMode.value ? '修改成功' : '提交成功',
 					icon: 'success'
 				});
-				// 重置表单
-				reviewForm.reviewContent = '';
-				// 刷新列表
+
+				// 提交成功后，重新拉取一下，确保 ID 和状态同步（特别是新增转修改的情况）
+				await fetchMyReviewToTarget();
+
+				// 刷新下方的最近列表（如果我的评价正好在前5条里）
 				fetchRecentReviews();
 			} else {
-				const errorMsg = typeof error === 'string' ? error : (error.msg || '提交失败');
+				const msg = typeof error === 'string' ? error : (error.msg || '操作失败');
 				uni.showToast({
-					title: errorMsg,
+					title: msg,
 					icon: 'none'
 				});
 			}
@@ -290,19 +419,15 @@
 		}
 	};
 
-	// 获取最近反馈 (分页取前5条)
 	const fetchRecentReviews = async () => {
 		try {
 			const {
 				data,
 				error
-			} = await request('/app-api/member/user-review/page', {
-				method: 'GET',
-				data: {
-					reviewedId: targetUserId.value,
-					pageNo: 1,
-					pageSize: 5
-				}
+			} = await ReviewApi.getPage({
+				reviewedId: targetUserId.value,
+				pageNo: 1,
+				pageSize: 5
 			});
 
 			if (!error && data) {
@@ -314,52 +439,32 @@
 		}
 	};
 
-	// 跳转全部列表
 	const goToAllReviews = () => {
 		uni.navigateTo({
 			url: `/packages/user-review-list/user-review-list?userId=${targetUserId.value}`
 		});
 	};
 
-	// 工具: 时间格式化
-	const formatTime = (timeStr) => {
-		if (!timeStr) return '';
-		const date = new Date(timeStr);
-		// 简单的月-日格式，如 1-15
-		return `${date.getMonth() + 1}-${date.getDate()}`;
-	};
+	// --- Tab 2: 评分业务 ---
 
-	// --- Tab 2 方法 ---
 	const goToRatePage = () => {
 		uni.navigateTo({
 			url: `/pages/my-edit-label/my-edit-label?id=${targetUserId.value}`
 		});
 	};
 
-	// 获取雷达图统计数据
+	// 获取并计算雷达图数据
 	const fetchRadarStatistics = async () => {
 		try {
-			// 并发请求 type=0 (自评) 和 type=3 (综合)
+			// 并发请求：0=自评，3=综合
 			const [selfRes, complexRes] = await Promise.all([
-				request('/app-api/member/user-scores/complexStatistics', {
-					method: 'GET',
-					data: {
-						userId: targetUserId.value,
-						type: 0
-					}
-				}),
-				request('/app-api/member/user-scores/complexStatistics', {
-					method: 'GET',
-					data: {
-						userId: targetUserId.value,
-						type: 3
-					}
-				})
+				ScoreApi.getStatistics(targetUserId.value, 0),
+				ScoreApi.getStatistics(targetUserId.value, 3)
 			]);
 
 			const newDatasets = [];
 
-			// 处理自我评价
+			// 组装自我评价数据
 			if (!selfRes.error && selfRes.data) {
 				newDatasets.push({
 					name: '自我评价',
@@ -369,11 +474,11 @@
 						selfRes.data.avg3 || 0,
 						selfRes.data.avg4 || 0
 					],
-					color: '#FF7D00' // 橙色
+					color: '#FF7D00'
 				});
 			}
 
-			// 处理综合评价
+			// 组装综合评价数据
 			if (!complexRes.error && complexRes.data) {
 				newDatasets.push({
 					name: '综合评价',
@@ -383,52 +488,29 @@
 						complexRes.data.avg3 || 0,
 						complexRes.data.avg4 || 0
 					],
-					color: '#1890FF' // 蓝色
+					color: '#1890FF'
 				});
 			}
 
 			radarDatasets.value = newDatasets;
-
 		} catch (e) {
 			console.error('获取统计数据失败', e);
 		}
 	};
 
-	// 获取指定数据集(datasetIndex)的指定维度(dimIndex)分数
-	const getScoreValue = (datasetIndex, dimIndex) => {
-		if (radarDatasets.value[datasetIndex] &&
-			radarDatasets.value[datasetIndex].data) {
-			const val = radarDatasets.value[datasetIndex].data[dimIndex];
-			return val !== undefined ? val : '-';
-		}
-		return '-';
-	};
-
-	// 获取我给对方的历史评分
+	// 获取历史评分 (用于回显逻辑)
 	const fetchMyHistoryScore = async () => {
 		try {
 			const {
 				data,
 				error
-			} = await request('/app-api/member/user-scores/getInfo', {
-				method: 'GET',
-				data: {
-					userId: targetUserId.value // 只需传被评分人的 ID
-				}
-			});
+			} = await ScoreApi.getInfo(targetUserId.value);
 
 			if (!error && data) {
 				console.log('✅ 获取到历史评分:', data);
+				if (data.id) scoreRecordId.value = data.id;
 
-				// 1. 保存记录 ID (用于提交时 update)
-				if (data.id) {
-					scoreRecordId.value = data.id;
-				}
-
-				// 2. 回显分数到 scores 对象
-				// 遍历 scores 的 key，如果 data 中有对应值且不为 null，则赋值
 				Object.keys(scores.value).forEach(key => {
-					// 注意：后端可能返回 0 或者 null，我们要显示出来
 					if (data[key] !== undefined && data[key] !== null) {
 						scores.value[key] = data[key];
 					}
@@ -439,7 +521,21 @@
 		}
 	};
 
-	// 提交评分 (多维度打分)
+	// 辅助: 获取雷达图表格数值
+	const getScoreValue = (datasetIndex, dimIndex) => {
+		const ds = radarDatasets.value[datasetIndex];
+		if (ds && ds.data) {
+			const val = ds.data[dimIndex];
+			return val !== undefined ? val : '-';
+		}
+		return '-';
+	};
+
+	/**
+	 * 提交评分
+	 * 注意：当前页面模板主要用于展示，通过 goToRatePage 跳转评分。
+	 * 保留此方法以兼容潜在的逻辑调用。
+	 */
 	const submitScores = async () => {
 		if (isSubmitting.value) return;
 
@@ -451,23 +547,17 @@
 		const payload = {
 			...scores.value,
 			id: scoreRecordId.value,
-			// 注意参数名: scorerId 是被评分人(target), userId 是评分人(me)
-			// (根据之前沟通的接口定义修正)
-			scorerId: targetUserId.value,
-			userId: currentUserId.value
+			scorerId: targetUserId.value, // 被评分人
+			userId: currentUserId.value // 评分人
 		};
 
 		try {
 			const {
 				data,
 				error
-			} = await request('/app-api/member/user-scores/saveOrUpdate', {
-				method: 'POST',
-				data: payload
-			});
+			} = await ScoreApi.save(payload);
 
 			uni.hideLoading();
-
 			if (error) {
 				uni.showToast({
 					title: error.msg || '提交失败',
@@ -478,8 +568,6 @@
 					title: '评价成功',
 					icon: 'success'
 				});
-				// 评分成功后可能不需要刷新页面，直接返回或停留在当前页
-				// setTimeout(() => { uni.navigateBack(); }, 1500);
 			}
 		} catch (e) {
 			uni.hideLoading();
@@ -494,6 +582,7 @@
 </script>
 
 <style lang="scss" scoped>
+	/* 保持原有样式，仅优化格式 */
 	.container {
 		min-height: 100vh;
 		background-color: #f5f7fa;
@@ -501,7 +590,7 @@
 		flex-direction: column;
 	}
 
-	/* Tabs 样式 */
+	/* Tabs */
 	.tabs {
 		display: flex;
 		background-color: #fff;
@@ -544,7 +633,7 @@
 		flex: 1;
 	}
 
-	/* Tab 1: 反馈卡片 */
+	/* Feedback Card */
 	.feedback-card {
 		background: #fff;
 		padding: 30rpx;
@@ -650,7 +739,7 @@
 		}
 	}
 
-	/* Tab 1: 最近反馈列表 */
+	/* Recent List */
 	.recent-list-section {
 		background: #fff;
 		padding: 30rpx;
@@ -705,7 +794,7 @@
 		font-weight: 500;
 	}
 
-	/* Tab 2: 评分相关样式 */
+	/* Tab 2 Styles */
 	.standard-card {
 		background: #fff;
 		border-radius: 20rpx;
@@ -785,47 +874,7 @@
 		}
 	}
 
-	.score-form-wrapper {
-		padding-bottom: 20rpx;
-	}
-
-	.footer-spacer {
-		height: 120rpx;
-	}
-
-	.footer-bar {
-		position: fixed;
-		bottom: 0;
-		left: 0;
-		width: 100%;
-		background-color: #fff;
-		padding: 20rpx 30rpx;
-		padding-bottom: calc(20rpx + env(safe-area-inset-bottom));
-		box-shadow: 0 -4rpx 16rpx rgba(0, 0, 0, 0.05);
-		z-index: 99;
-		box-sizing: border-box;
-	}
-
-	.submit-btn {
-		background: linear-gradient(to right, #FF8C00, #FF6B00);
-		color: #fff;
-		height: 88rpx;
-		line-height: 88rpx;
-		border-radius: 44rpx;
-		font-size: 32rpx;
-		font-weight: bold;
-		border: none;
-
-		&[disabled] {
-			opacity: 0.7;
-		}
-
-		&::after {
-			border: none;
-		}
-	}
-
-	/* 雷达图区域 */
+	/* Radar Chart */
 	.chart-section {
 		background: #fff;
 		border-radius: 20rpx;
@@ -837,7 +886,6 @@
 	.chart-wrapper {
 		width: 100%;
 		height: 500rpx;
-		/* 高度自定 */
 		display: flex;
 		justify-content: center;
 		align-items: center;
@@ -881,12 +929,9 @@
 				color: #FF7D00;
 			}
 
-			/* 橙色对应自我 */
 			&.total {
 				color: #1890FF;
 			}
-
-			/* 蓝色对应综合 */
 		}
 	}
 
