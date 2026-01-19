@@ -25,12 +25,15 @@ const _sfc_main = {
       },
       /**
        * 获取用户评分
+       * @param {Number|String} userId - 当前登录用户ID
+       * @param {Number|String} scorerId - 被评分/查看的用户ID
        */
-      getInfo: (userId) => {
+      getInfo: (userId, scorerId) => {
         return utils_request.request("/app-api/member/user-scores/getInfo", {
           method: "GET",
           data: {
-            userId
+            userId,
+            scorerId
           }
         });
       }
@@ -65,6 +68,7 @@ const _sfc_main = {
       } else {
         targetUserId.value = currentUserId.value;
       }
+      common_vendor.index.__f__("log", "at pages/my-edit-label/my-edit-label.vue:147", "查看用户id:", targetUserId);
       isSelf.value = String(targetUserId.value) === String(currentUserId.value);
       common_vendor.index.setNavigationBarTitle({
         title: isSelf.value ? "数字标签(自我评价)" : "商友评分"
@@ -74,24 +78,45 @@ const _sfc_main = {
       fetchScores();
     });
     const fetchScores = async () => {
+      scoreRecordId.value = null;
+      Object.keys(scores.value).forEach((key) => {
+        scores.value[key] = 0;
+      });
+      if (!currentUserId.value || !targetUserId.value) {
+        common_vendor.index.__f__("error", "at pages/my-edit-label/my-edit-label.vue:178", "缺少 ID 信息:", {
+          me: currentUserId.value,
+          target: targetUserId.value
+        });
+        return;
+      }
       common_vendor.index.showLoading({
         title: "加载中..."
       });
       try {
+        const me = String(currentUserId.value);
+        const target = String(targetUserId.value);
+        common_vendor.index.__f__("log", "at pages/my-edit-label/my-edit-label.vue:194", `🚀 发起请求 -> userId(我): ${me}, scorerId(目标): ${target}`);
         const {
           data,
           error
-        } = await ScoreApi.getInfo(targetUserId.value);
+        } = await ScoreApi.getInfo(me, target);
         if (!error && data) {
+          common_vendor.index.__f__("log", "at pages/my-edit-label/my-edit-label.vue:202", "✅ 接口返回数据:", data);
+          if (String(data.scorerId) !== target) {
+            common_vendor.index.__f__("warn", "at pages/my-edit-label/my-edit-label.vue:207", "⚠️ 后端返回的被评分人 ID 与请求不符，可能不存在历史评分");
+            return;
+          }
           scoreRecordId.value = data.id;
           Object.keys(scores.value).forEach((key) => {
             if (data[key] !== void 0 && data[key] !== null) {
               scores.value[key] = data[key];
             }
           });
+        } else {
+          common_vendor.index.__f__("log", "at pages/my-edit-label/my-edit-label.vue:219", "💡 未找到该评价记录，显示默认分");
         }
       } catch (e) {
-        common_vendor.index.__f__("error", "at pages/my-edit-label/my-edit-label.vue:185", "[Fetch Error]", e);
+        common_vendor.index.__f__("error", "at pages/my-edit-label/my-edit-label.vue:222", "[Fetch Error]", e);
       } finally {
         common_vendor.index.hideLoading();
       }
@@ -127,7 +152,7 @@ const _sfc_main = {
       common_vendor.index.hideLoading();
       isSubmitting.value = false;
       if (error) {
-        common_vendor.index.__f__("error", "at pages/my-edit-label/my-edit-label.vue:233", "评分保存失败:", error);
+        common_vendor.index.__f__("error", "at pages/my-edit-label/my-edit-label.vue:270", "评分保存失败:", error);
         common_vendor.index.showToast({
           title: `保存失败: ${error}`,
           icon: "none"

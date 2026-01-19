@@ -61,8 +61,10 @@
 	const loading = ref(false);
 
 	const open = () => {
+		console.log('弹窗打开，接收数据:', props.reviewData); // debug
 		content.value = props.reviewData.reviewContent || '';
-		currentIsLike.value = props.reviewData.isLike || 1; // 回显赞踩状态
+		// 别忘了回显赞踩状态！
+		currentIsLike.value = props.reviewData.isLike || 1;
 		popupRef.value.open();
 	};
 

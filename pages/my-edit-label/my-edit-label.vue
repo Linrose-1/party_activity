@@ -83,12 +83,15 @@
 		},
 		/**
 		 * 获取用户评分
+		 * @param {Number|String} userId - 当前登录用户ID
+		 * @param {Number|String} scorerId - 被评分/查看的用户ID
 		 */
-		getInfo: (userId) => {
+		getInfo: (userId, scorerId) => {
 			return request('/app-api/member/user-scores/getInfo', {
 				method: 'GET',
 				data: {
-					userId
+					userId,
+					scorerId
 				}
 			});
 		}
@@ -141,6 +144,8 @@
 			targetUserId.value = currentUserId.value;
 		}
 
+		console.log("查看用户id:", targetUserId)
+
 		// 判断身份关系
 		isSelf.value = String(targetUserId.value) === String(currentUserId.value);
 
@@ -162,24 +167,56 @@
 	 * 获取已有评分数据
 	 */
 	const fetchScores = async () => {
+		// 【优化 1】每次请求前，先重置分数为 0，防止看到上一个人的数据
+		scoreRecordId.value = null;
+		Object.keys(scores.value).forEach(key => {
+			scores.value[key] = 0;
+		});
+
+		// 安全检查
+		if (!currentUserId.value || !targetUserId.value) {
+			console.error("缺少 ID 信息:", {
+				me: currentUserId.value,
+				target: targetUserId.value
+			});
+			return;
+		}
+
 		uni.showLoading({
 			title: '加载中...'
 		});
+
 		try {
-			// 根据提供的逻辑，这里传入的是 targetUserId
+			// 【优化 2】显式使用 .value，确保传给接口的是字符串/数字而不是 Ref 对象
+			const me = String(currentUserId.value);
+			const target = String(targetUserId.value);
+
+			console.log(`🚀 发起请求 -> userId(我): ${me}, scorerId(目标): ${target}`);
+
 			const {
 				data,
 				error
-			} = await ScoreApi.getInfo(targetUserId.value);
+			} = await ScoreApi.getInfo(me, target);
 
 			if (!error && data) {
+				console.log('✅ 接口返回数据:', data);
+
+				// 【优化 3】校验返回的数据是否真的是我们要的那条记录
+				// 如果后端返回的 scorerId 和我们请求的 target 不一致，说明后端逻辑可能有误或返回了默认自评
+				if (String(data.scorerId) !== target) {
+					console.warn('⚠️ 后端返回的被评分人 ID 与请求不符，可能不存在历史评分');
+					return;
+				}
+
 				scoreRecordId.value = data.id;
-				// 遍历回显分数，确保只合并有效值
+				// 回显分数
 				Object.keys(scores.value).forEach(key => {
 					if (data[key] !== undefined && data[key] !== null) {
 						scores.value[key] = data[key];
 					}
 				});
+			} else {
+				console.log('💡 未找到该评价记录，显示默认分');
 			}
 		} catch (e) {
 			console.error('[Fetch Error]', e);

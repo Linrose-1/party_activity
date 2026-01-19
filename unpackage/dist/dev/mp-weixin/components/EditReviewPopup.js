@@ -27,6 +27,7 @@ const _sfc_main = {
     const currentIsLike = common_vendor.ref(1);
     const loading = common_vendor.ref(false);
     const open = () => {
+      common_vendor.index.__f__("log", "at components/EditReviewPopup.vue:64", "弹窗打开，接收数据:", props.reviewData);
       content.value = props.reviewData.reviewContent || "";
       currentIsLike.value = props.reviewData.isLike || 1;
       popupRef.value.open();
