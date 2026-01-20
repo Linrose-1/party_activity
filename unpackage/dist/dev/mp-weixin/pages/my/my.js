@@ -158,14 +158,14 @@ const _sfc_main = {
       {
         name: "名片分享",
         desc: "连接精英商友",
-        icon: "../../static/icon/我的名片.png",
+        icon: "../../static/icon/名片.png",
         iconBg: "linear-gradient(135deg, #30CFD0, #330867)",
         path: "/packages/my-businessCard/my-businessCard"
       },
       {
         name: "猩球榜单",
         desc: "猩球贡献榜单",
-        icon: "../../static/icon/注册.png",
+        icon: "../../static/icon/榜单.png",
         iconBg: "linear-gradient(135deg, #30CFD0, #330867)",
         key: "membershipCenter"
         // path: '/pages/index/index'
@@ -315,12 +315,9 @@ const _sfc_main = {
         desc: "联系我们，获取帮助",
         icon: "../../static/icon/customer-service.png",
         // 假设您有一个客服图标
-        path: null,
-        // path 为 null, 我们将通过 key 来特殊处理
-        key: "customerService",
-        // 定义一个唯一的 key
-        phone: "18024545855",
-        // 【请在这里替换成您的真实客服电话】
+        path: "/packages/ContactService/ContactService",
+        // key: 'customerService', // 定义一个唯一的 key
+        // phone: '18024545855', // 【请在这里替换成您的真实客服电话】
         fullWidth: true
       },
       // 单独成行

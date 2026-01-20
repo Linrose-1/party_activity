@@ -218,7 +218,7 @@
 			</view>
 
 			<!-- Tab 1: 数字标签 (保持原有逻辑，优化UI) -->
-			<view v-show="currentTab === 1">
+			<view v-if="currentTab === 1">
 				<view class="form-card info-card">
 					<view class="info-header">
 						<text class="info-title">什么是数字标签？</text>
@@ -246,9 +246,11 @@
 					</view>
 					<button class="label-btn" @click="goToLabelEditPage">
 						<uni-icons type="compose" color="#fff" size="18" style="margin-right: 12rpx;"></uni-icons>
-						前往编辑数字标签
+						前往编辑数字标签（自我评分）
 					</button>
 				</view>
+
+				<UserScoreBoard :datasets="radarDatasets" :showTitle="true" />
 			</view>
 		</view>
 	</view>
@@ -267,10 +269,13 @@
 	import request from '../../utils/request.js';
 	import uploadFile from '../../utils/upload.js';
 
+	import UserScoreBoard from '@/components/UserScoreBoard.vue';
+
 	// --- 1. 响应式状态定义 ---
 	const currentTab = ref(0);
 	const tabItems = ['基本信息', '数字标签'];
 	const initialDataState = ref('');
+	const userId = ref(uni.getStorageSync('userId'));
 	// --- 草稿缓存相关变量 ---
 	const DRAFT_KEY = 'user_profile_draft_v3'; // 换个新 Key，防止旧缓存干扰
 	const isDataLoaded = ref(false); // 【关键】标记后端数据是否已填充完毕
@@ -308,6 +313,7 @@
 	const industryTree = ref([]);
 	const professionOptions = ref([]);
 	const hobbyOptions = ref([]);
+	const radarDatasets = ref([]);
 
 	const eraOptions = [{
 			value: '50/60',
@@ -480,7 +486,14 @@
 		}),
 		autoPostToCircle: () => request('/app-api/member/business-opportunities/autoOpportunities', {
 			method: 'POST'
-		})
+		}),
+		getStatistics: (userId, type) => request('/app-api/member/user-scores/complexStatistics', {
+			method: 'GET',
+			data: {
+				userId,
+				type
+			}
+		}),
 	};
 
 
@@ -490,12 +503,16 @@
 		uni.showLoading({
 			title: '加载基础数据...'
 		});
+		if (!userId.value) {
+			userId.value = uni.getStorageSync('userId');
+		}
 		// 确保数据源先加载
 		await Promise.all([
 			getAreaTreeData(),
 			getIndustryTreeData(),
 			getProfessionData(),
-			getHobbyData()
+			getHobbyData(),
+			fetchRadarStatistics()
 		]);
 		// 再获取用户信息并填充
 		await fetchUserInfoAndPopulateForm();
@@ -548,6 +565,64 @@
 
 
 	// --- 4. 数据获取与处理方法 ---
+	// 获取并计算雷达图数据
+	const fetchRadarStatistics = async () => {
+		try {
+			// 并发请求：0=自评，3=综合
+			const [selfRes, friendRes,complexRes] = await Promise.all([
+				Api.getStatistics(userId.value, 0), // 自评
+				Api.getStatistics(userId.value, 1), // 商友
+				Api.getStatistics(userId.value, 3) // 综合
+			]);
+
+			const newDatasets = [];
+
+			// 组装自我评价数据
+			if (!selfRes.error && selfRes.data) {
+				newDatasets.push({
+					name: '自我评价',
+					data: [
+						selfRes.data.avg1 || 0,
+						selfRes.data.avg2 || 0,
+						selfRes.data.avg3 || 0,
+						selfRes.data.avg4 || 0
+					],
+					color: '#FF7D00'
+				});
+			}
+			
+			if (!friendRes.error && friendRes.data) {
+				newDatasets.push({
+					name: '商友评价',
+					data: [
+						friendRes.data.avg1 || 0,
+						friendRes.data.avg2 || 0,
+						friendRes.data.avg3 || 0,
+						friendRes.data.avg4 || 0
+					],
+					color: '#4CAF50'
+				});
+			}
+
+			// 组装综合评价数据
+			if (!complexRes.error && complexRes.data) {
+				newDatasets.push({
+					name: '综合评价',
+					data: [
+						complexRes.data.avg1 || 0,
+						complexRes.data.avg2 || 0,
+						complexRes.data.avg3 || 0,
+						complexRes.data.avg4 || 0
+					],
+					color: '#1890FF'
+				});
+			}
+
+			radarDatasets.value = newDatasets;
+		} catch (e) {
+			console.error('获取统计数据失败', e);
+		}
+	};
 
 	const getAreaTreeData = async () => {
 		const {

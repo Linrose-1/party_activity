@@ -1,0 +1,149 @@
+/* 水平间距 */
+/* 水平间距 */
+view.data-v-ff62e0ca,
+text.data-v-ff62e0ca {
+  box-sizing: border-box;
+}
+.score-board-container.data-v-ff62e0ca {
+  width: 100%;
+  overflow: hidden;
+}
+
+/* 雷达图区域 */
+.chart-section.data-v-ff62e0ca {
+  background: #fff;
+  border-radius: 20rpx;
+  padding: 30rpx;
+  margin-bottom: 30rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.03);
+  width: 100%;
+}
+.chart-wrapper.data-v-ff62e0ca {
+  width: 100%;
+  height: 500rpx;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+.score-compare-table.data-v-ff62e0ca {
+  width: 100%;
+  margin-top: 30rpx;
+  border: 1rpx solid #eee;
+  border-radius: 12rpx;
+  overflow: hidden;
+}
+.standard-title.data-v-ff62e0ca {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+.standard-title text.data-v-ff62e0ca {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+/* 评分标准卡片 */
+.standard-card.data-v-ff62e0ca {
+  background: #fdfdfd;
+  border-radius: 16rpx;
+  padding: 20rpx;
+  margin: 20rpx 0;
+  border: 1rpx solid #f0f0f0;
+}
+.standard-grid.data-v-ff62e0ca {
+  display: flex;
+  justify-content: space-between;
+  gap: 8rpx;
+  margin-top: 16rpx;
+}
+.standard-item.data-v-ff62e0ca {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 12rpx 0;
+  border-radius: 8rpx;
+  background-color: #f5f5f5;
+}
+.standard-item .score-range.data-v-ff62e0ca {
+  font-size: 20rpx;
+  font-weight: bold;
+  margin-bottom: 2rpx;
+}
+.standard-item .score-desc.data-v-ff62e0ca {
+  font-size: 18rpx;
+  opacity: 0.9;
+}
+.standard-item.level-6.data-v-ff62e0ca {
+  background-color: #FFF0E6;
+  color: #FF6A00;
+}
+.standard-item.level-5.data-v-ff62e0ca {
+  background-color: #FFF7E6;
+  color: #FF9C38;
+}
+.standard-item.level-4.data-v-ff62e0ca {
+  background-color: #E8F5E9;
+  color: #4CAF50;
+}
+.standard-item.level-3.data-v-ff62e0ca {
+  background-color: #E3F2FD;
+  color: #2196F3;
+}
+.standard-item.level-2.data-v-ff62e0ca {
+  background-color: #FFF3E0;
+  color: #FF9800;
+}
+.standard-item.level-1.data-v-ff62e0ca {
+  background-color: #FBE9E7;
+  color: #FF5722;
+}
+
+/* 表格样式 */
+.score-compare-table.data-v-ff62e0ca {
+  margin-top: 30rpx;
+  border: 1rpx solid #eee;
+  border-radius: 12rpx;
+  overflow: hidden;
+}
+.table-row.data-v-ff62e0ca {
+  display: flex;
+  border-bottom: 1rpx solid #eee;
+}
+.table-row.data-v-ff62e0ca:last-child {
+  border-bottom: none;
+}
+.table-row.header-row.data-v-ff62e0ca {
+  background-color: #f9f9f9;
+  font-weight: bold;
+  color: #333;
+}
+.table-row.footer-row.data-v-ff62e0ca {
+  background-color: #fffef9;
+  font-weight: bold;
+  border-top: 2rpx solid #eee;
+}
+.table-row .col.data-v-ff62e0ca {
+  flex: 1;
+  padding: 20rpx 0;
+  text-align: center;
+  font-size: 22rpx;
+}
+.table-row .col.dim.data-v-ff62e0ca {
+  flex: 1.5;
+  color: #333;
+  text-align: left;
+  padding-left: 30rpx;
+}
+.table-row .col.self.data-v-ff62e0ca {
+  color: #FF7D00;
+}
+.table-row .col.friend.data-v-ff62e0ca {
+  color: #4CAF50;
+}
+.table-row .col.total.data-v-ff62e0ca {
+  color: #1890FF;
+}

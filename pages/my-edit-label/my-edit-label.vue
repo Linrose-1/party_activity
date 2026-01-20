@@ -2,7 +2,7 @@
 	<view class="container">
 		<view class="page-header">
 			<view class="header-title-box">
-				<text class="page-title">{{ isSelf ? '数字标签（自我评价）' : '给商友评分' }}</text>
+				<text class="page-title">{{ isSelf ? '数字标签（自我评分）' : '给商友评分' }}</text>
 				<text class="page-subtitle">{{ isSelf ? '请对自己以下维度的表现进行1-10分评估' : '请对TA以下维度的表现进行1-10分评估' }}</text>
 			</view>
 
@@ -10,7 +10,7 @@
 			<view class="standard-card">
 				<view class="standard-title">
 					<uni-icons type="info-filled" size="16" color="#FF8C00"></uni-icons>
-					<text>评分参考标准</text>
+					<text>评分参考</text>
 				</view>
 
 				<view class="standard-grid">
@@ -44,7 +44,6 @@
 
 		<!-- 评分区域 -->
 		<view class="score-sections">
-			<!-- 双向绑定 scores 对象 -->
 			<ScoreForm v-model="scores" />
 		</view>
 
@@ -60,12 +59,13 @@
 <script setup>
 	import {
 		ref,
-		onMounted
+		onMounted,
+		reactive
 	} from 'vue';
 	import {
 		onLoad
 	} from '@dcloudio/uni-app';
-	import request from '@/utils/request.js'; // 统一引用路径
+	import request from '@/utils/request.js';
 	import ScoreForm from '@/components/ScoreForm.vue';
 
 	// ==========================================
@@ -74,6 +74,7 @@
 	const ScoreApi = {
 		/**
 		 * 保存或更新用户评分
+		 * userId: 被评分人ID
 		 */
 		saveOrUpdate: (scoreData) => {
 			return request('/app-api/member/user-scores/saveOrUpdate', {
@@ -83,15 +84,13 @@
 		},
 		/**
 		 * 获取用户评分
-		 * @param {Number|String} userId - 当前登录用户ID
-		 * @param {Number|String} scorerId - 被评分/查看的用户ID
+		 * userId: 被评分人ID
 		 */
-		getInfo: (userId, scorerId) => {
+		getInfo: (userId) => {
 			return request('/app-api/member/user-scores/getInfo', {
 				method: 'GET',
 				data: {
-					userId,
-					scorerId
+					userId
 				}
 			});
 		}
@@ -101,17 +100,13 @@
 	// 2. 状态变量区域
 	// ==========================================
 
-	// 用户身份相关
-	const currentUserId = ref(null); // 当前登录用户 (Me)
-	const targetUserId = ref(null); // 目标用户 (Target)
+	const targetUserId = ref(null); // 目标用户 (Target)，即接口需要的 userId
 	const isSelf = ref(false); // 是否是自己给自己评分
-
-	// 业务数据相关
 	const scoreRecordId = ref(null); // 现有评分记录ID
 	const isSubmitting = ref(false); // 提交锁
 
-	// 评分数据模型
-	const scores = ref({
+	// 初始化分数的函数
+	const getInitialScores = () => ({
 		punctuality: 0,
 		promiseKeep: 0,
 		lawAbiding: 0,
@@ -130,28 +125,28 @@
 		mission: 0
 	});
 
+	const scores = ref(getInitialScores());
+
 	// ==========================================
 	// 3. 生命周期区域
 	// ==========================================
 
 	onLoad((options) => {
-		currentUserId.value = uni.getStorageSync('userId');
+		const myId = uni.getStorageSync('userId');
 
-		// 确定目标用户：有id则为他人，无id则为自己
+		// 确定目标用户：URL传了id则为他人，没传则为自己
 		if (options.id) {
 			targetUserId.value = options.id;
 		} else {
-			targetUserId.value = currentUserId.value;
+			targetUserId.value = myId;
 		}
 
-		console.log("查看用户id:", targetUserId)
-
-		// 判断身份关系
-		isSelf.value = String(targetUserId.value) === String(currentUserId.value);
+		// 判断身份关系用于 UI 显示
+		isSelf.value = String(targetUserId.value) === String(myId);
 
 		// 设置导航栏标题
 		uni.setNavigationBarTitle({
-			title: isSelf.value ? '数字标签(自我评价)' : '商友评分'
+			title: isSelf.value ? '数字标签(自我评分)' : '商友评分'
 		});
 	});
 
@@ -167,47 +162,25 @@
 	 * 获取已有评分数据
 	 */
 	const fetchScores = async () => {
-		// 【优化 1】每次请求前，先重置分数为 0，防止看到上一个人的数据
-		scoreRecordId.value = null;
-		Object.keys(scores.value).forEach(key => {
-			scores.value[key] = 0;
-		});
+		if (!targetUserId.value) return;
 
-		// 安全检查
-		if (!currentUserId.value || !targetUserId.value) {
-			console.error("缺少 ID 信息:", {
-				me: currentUserId.value,
-				target: targetUserId.value
-			});
-			return;
-		}
+		// 每次请求前重置数据，防止残留
+		scoreRecordId.value = null;
+		scores.value = getInitialScores();
 
 		uni.showLoading({
 			title: '加载中...'
 		});
 
 		try {
-			// 【优化 2】显式使用 .value，确保传给接口的是字符串/数字而不是 Ref 对象
-			const me = String(currentUserId.value);
-			const target = String(targetUserId.value);
-
-			console.log(`🚀 发起请求 -> userId(我): ${me}, scorerId(目标): ${target}`);
-
+			// 【修正】直接传 targetUserId 给接口的 userId 参数
 			const {
 				data,
 				error
-			} = await ScoreApi.getInfo(me, target);
+			} = await ScoreApi.getInfo(targetUserId.value);
 
 			if (!error && data) {
-				console.log('✅ 接口返回数据:', data);
-
-				// 【优化 3】校验返回的数据是否真的是我们要的那条记录
-				// 如果后端返回的 scorerId 和我们请求的 target 不一致，说明后端逻辑可能有误或返回了默认自评
-				if (String(data.scorerId) !== target) {
-					console.warn('⚠️ 后端返回的被评分人 ID 与请求不符，可能不存在历史评分');
-					return;
-				}
-
+				console.log('✅ 获取评分成功:', data);
 				scoreRecordId.value = data.id;
 				// 回显分数
 				Object.keys(scores.value).forEach(key => {
@@ -215,8 +188,6 @@
 						scores.value[key] = data[key];
 					}
 				});
-			} else {
-				console.log('💡 未找到该评价记录，显示默认分');
 			}
 		} catch (e) {
 			console.error('[Fetch Error]', e);
@@ -229,71 +200,58 @@
 	 * 提交评分
 	 */
 	const submitScores = async () => {
-		// 1. 防重复提交检查
 		if (isSubmitting.value) return;
 
-		// 2. 登录态检查
-		const userId = uni.getStorageSync('userId');
-		if (!userId) {
-			uni.showToast({
-				title: '无法获取用户信息，请重新登录',
-				icon: 'none'
-			});
-			return;
-		}
-
-		// 3. 准备提交
 		isSubmitting.value = true;
 		uni.showLoading({
 			title: '正在保存...'
 		});
 
-		// 4. 组装参数 (保持原代码逻辑)
+		// 【修正】payload 里的 userId 传目标 ID，不再传 scorerId
 		const payload = {
 			...scores.value,
-			id: scoreRecordId.value, // 记录ID (新增为null)
-			scorerId: targetUserId.value, // 被评分人
-			userId: currentUserId.value // 评分人 (操作者)
+			id: scoreRecordId.value,
+			userId: targetUserId.value
 		};
 
-		// 5. 调用接口
-		const {
-			data: newRecord,
-			error
-		} = await ScoreApi.saveOrUpdate(payload);
+		try {
+			const {
+				data: newRecord,
+				error
+			} = await ScoreApi.saveOrUpdate(payload);
 
-		uni.hideLoading();
-		isSubmitting.value = false;
-
-		// 6. 结果处理
-		if (error) {
-			console.error('评分保存失败:', error);
+			if (error) {
+				const msg = typeof error === 'string' ? error : (error.msg || '保存失败');
+				uni.showToast({
+					title: msg,
+					icon: 'none'
+				});
+			} else {
+				uni.showToast({
+					title: '保存成功！',
+					icon: 'success'
+				});
+				if (newRecord && newRecord.id) {
+					scoreRecordId.value = newRecord.id;
+				}
+				setTimeout(() => {
+					uni.navigateBack();
+				}, 1500);
+			}
+		} catch (e) {
 			uni.showToast({
-				title: `保存失败: ${error}`,
+				title: '网络异常',
 				icon: 'none'
 			});
-			return;
+		} finally {
+			isSubmitting.value = false;
+			uni.hideLoading();
 		}
-
-		uni.showToast({
-			title: '保存成功！',
-			icon: 'success'
-		});
-
-		// 更新ID，防止再次提交变成新增
-		if (newRecord && newRecord.id) {
-			scoreRecordId.value = newRecord.id;
-		}
-
-		// 延迟返回上一页
-		setTimeout(() => {
-			uni.navigateBack();
-		}, 1500);
 	};
 </script>
 
 <style scoped lang="scss">
-	/* 保持原有样式，仅优化缩进 */
+	/* 样式部分保持不变 */
 	.container {
 		background-color: #f9f9f9;
 		min-height: 100vh;
@@ -375,37 +333,30 @@
 			color: #FF6A00;
 		}
 
-		/* 杰出 */
 		&.level-5 {
 			background-color: #FFF7E6;
 			color: #FF9C38;
 		}
 
-		/* 优秀 */
 		&.level-4 {
 			background-color: #E8F5E9;
 			color: #4CAF50;
 		}
 
-		/* 较好 */
 		&.level-3 {
 			background-color: #E3F2FD;
 			color: #2196F3;
 		}
 
-		/* 一般 */
 		&.level-2 {
 			background-color: #FFF3E0;
 			color: #FF9800;
 		}
 
-		/* 较差 */
 		&.level-1 {
 			background-color: #FBE9E7;
 			color: #FF5722;
 		}
-
-		/* 极差 */
 	}
 
 	.footer {
@@ -415,7 +366,6 @@
 		right: 0;
 		background-color: #fff;
 		padding: 20rpx 30rpx;
-		padding-bottom: calc(20rpx + constant(safe-area-inset-bottom));
 		padding-bottom: calc(20rpx + env(safe-area-inset-bottom));
 		border-top: 1px solid #f0f0f0;
 		z-index: 100;

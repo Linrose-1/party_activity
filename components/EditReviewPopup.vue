@@ -7,7 +7,7 @@
 
 			<view class="popup-content">
 				<view class="target-info">
-					给 <text class="highlight">{{ reviewData.targetName || '商友' }}</text> 的评价
+					给 <text class="highlight">{{ reviewData.targetName || '商友' }}</text> 的点评
 				</view>
 
 				<!-- 评价类型选择 -->
@@ -26,7 +26,7 @@
 				</view>
 
 				<view class="input-area">
-					<textarea v-model="content" class="review-textarea" placeholder="请输入评价内容..." maxlength="500" />
+					<textarea v-model="content" class="review-textarea" placeholder="请输入评语内容..." maxlength="500" />
 					<view class="word-count">{{ content.length }}/500</view>
 				</view>
 			</view>

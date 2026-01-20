@@ -20,22 +20,22 @@
 			<view class="action-grid">
 
 				<!-- 1. 查看名片 -->
-				<view class="grid-item" @click="handleAction('viewCard')">
-					<view class="icon-box secondary">
-						<uni-icons type="person" size="28" color="#FF7009"></uni-icons>
+				<view class="grid-item primary-outline" @click="handleAction('viewCard')">
+					<view class="icon-box invite-style">
+						<uni-icons type="person" size="26" color="#FF7009"></uni-icons>
 					</view>
 					<text class="item-text">查看名片</text>
 				</view>
 
 				<!-- 2. 商友点评 -->
-				<view class="grid-item" @click="handleAction('comment')">
-					<view class="icon-box normal">
-						<uni-icons type="star" size="24" color="#666"></uni-icons>
+				<view class="grid-item primary-outline" @click="handleAction('comment')">
+					<view class="icon-box invite-style">
+						<uni-icons type="star" size="26" color="#FF7009"></uni-icons>
 					</view>
 					<text class="item-text">商友点评</text>
 				</view>
 
-				<!-- 3. 邀请入圈 (新增) -->
+				<!-- 3. 邀请入圈 -->
 				<!-- 逻辑：如果是自己，禁用 -->
 				<view class="grid-item" :class="isSelf ? 'disabled' : 'primary-outline'"
 					@click="handleAction('inviteCircle')">
@@ -46,9 +46,9 @@
 				</view>
 
 				<!-- 4. 申请入圈 -->
-				<view class="grid-item" :class="isSelf ? 'disabled' : 'primary'" @click="handleAction('addCircle')">
-					<view class="icon-box">
-						<uni-icons type="plusempty" size="28" color="#fff"></uni-icons>
+				<view class="grid-item" :class="isSelf ? 'disabled' : 'primary-outline'" @click="handleAction('addCircle')">
+					<view class="icon-box invite-style">
+						<uni-icons type="plusempty" size="26" color="#FF7009"></uni-icons>
 					</view>
 					<text class="item-text">{{ isSelf ? '本人' : '加入TA圈' }}</text>
 				</view>

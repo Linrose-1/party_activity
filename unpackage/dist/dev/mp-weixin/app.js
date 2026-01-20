@@ -64,6 +64,7 @@ if (!Math) {
   "./packages/user-review-list/user-review-list.js";
   "./packages/social-interaction/social-interaction.js";
   "./packages/my-reviews/my-reviews.js";
+  "./packages/ContactService/ContactService.js";
 }
 const _sfc_main = {
   data() {

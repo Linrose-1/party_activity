@@ -39,7 +39,7 @@
 				:signature="userInfo.signature" :personal-bio="userInfo.personalBio"
 				:contact-info="formattedContactInfo" :show-user-qr-code="!!userInfo.wechatQrCodeUrl"
 				:user-we-chat-qr-code-url="userInfo.wechatQrCodeUrl" :shard-code="userInfo.shardCode"
-				:dynamic-qr-code-url="promotionQrCodeBase64"
+				:dynamic-qr-code-url="promotionQrCodeBase64" :radar-datasets="radarDatasets"
 				platform-qr-code-url="https://img.gofor.club/mmexport1759211962539.jpg"
 				@goToOpportunities="handleGoToOpportunities" />
 
@@ -153,6 +153,8 @@
 	const promotionQrCodeBase64 = ref('');
 	const remainingShareQuota = ref(0); // 剩余分享次数
 	const isQuotaLoaded = ref(false);
+
+	const radarDatasets = ref([]);
 
 	// 分享UI相关的状态
 	const sharePopup = ref(null);
@@ -293,7 +295,10 @@
 		// 7. 处理分享奖励 (内部有判断 loggedInUserId，游客调用安全)
 		handleShareReward(finalOptions);
 
-		uni.hideShareMenu();
+		// uni.hideShareMenu();
+		uni.showShareMenu({
+			menus: ['shareAppMessage', 'shareTimeline'] // 关键：必须包含 shareTimeline
+		});
 	});
 
 	/**
@@ -315,6 +320,10 @@
 
 			userInfo.value = adaptUserInfo(rawData);
 
+			if (userInfo.value.id) {
+				await fetchRadarStatistics(userInfo.value.id);
+			}
+
 			await fetchPromotionQrCode();
 
 		} catch (err) {
@@ -330,6 +339,68 @@
 			}
 		} finally {
 			isLoading.value = false;
+		}
+	};
+
+	// 获取雷达图数据
+	const fetchRadarStatistics = async (userId) => {
+		try {
+			// 并发请求 type 0 (自评) 和 type 3 (综合)
+			const [selfRes, friendRes, complexRes] = await Promise.all([
+				request('/app-api/member/user-scores/complexStatistics', {
+					method: 'GET',
+					data: {
+						userId,
+						type: 0
+					}
+				}),
+				request('/app-api/member/user-scores/complexStatistics', {
+					method: 'GET',
+					data: {
+						userId,
+						type: 1
+					}
+				}),
+				request('/app-api/member/user-scores/complexStatistics', {
+					method: 'GET',
+					data: {
+						userId,
+						type: 3
+					}
+				})
+			]);
+
+			const newDatasets = [];
+			if (!selfRes.error && selfRes.data) {
+				newDatasets.push({
+					name: '自我评价',
+					data: [selfRes.data.avg1 || 0, selfRes.data.avg2 || 0, selfRes.data.avg3 || 0, selfRes
+						.data.avg4 || 0
+					],
+					color: '#FF7D00'
+				});
+			}
+			if (!friendRes.error && friendRes.data) {
+				newDatasets.push({
+					name: '商友评价',
+					data: [friendRes.data.avg1 || 0, friendRes.data.avg2 || 0, friendRes.data.avg3 || 0,
+						friendRes.data.avg4 || 0
+					],
+					color: '#4CAF50'
+				});
+			}
+			if (!complexRes.error && complexRes.data) {
+				newDatasets.push({
+					name: '综合评价',
+					data: [complexRes.data.avg1 || 0, complexRes.data.avg2 || 0, complexRes.data.avg3 || 0,
+						complexRes.data.avg4 || 0
+					],
+					color: '#1890FF'
+				});
+			}
+			radarDatasets.value = newDatasets;
+		} catch (e) {
+			console.error('获取评分统计失败', e);
 		}
 	};
 
@@ -634,14 +705,31 @@
 	};
 
 	/**
-	 * 处理分享模式选择
-	 * @param {string} mode 'SELF' 或 'PROXY'
+	 * 处理分享模式选择 (他人名片)
 	 */
 	const handleShareTypeSelect = (mode) => {
 		console.log('用户选择了分享模式:', mode);
 		currentShareMode.value = mode;
-		// 注意：这里不需要做任何跳转，因为点击弹窗按钮的同时，
-		// 已经触发了 onShareAppMessage，逻辑会在那里执行
+
+		// 1. 关闭模式选择弹窗
+		if (shareTypePopupRef.value) {
+			shareTypePopupRef.value.close();
+		}
+		isShareTypePopupOpen.value = false; // 立即手动重置标记位
+
+		// 2. 【关键】延迟 300-400ms 执行，避开 uni-popup 关闭动画
+		setTimeout(() => {
+			// 自动生成初始的自定义标题
+			let titlePrefix = mode === 'SELF' ? '【推荐】' : '';
+			customShareTitle.value =
+				`${titlePrefix}这是 ${userInfo.value.realName || userInfo.value.nickname} 的名片`;
+
+			// 3. 打开自定义内容弹窗
+			if (sharePopup.value) {
+				sharePopup.value.open();
+				isPopupOpen.value = true; // 设置第二个弹窗的标记位
+			}
+		}, 350);
 	};
 
 	/**
@@ -706,50 +794,51 @@
 		}
 	};
 
-	// 监听“分享给好友”
+	/**
+	 * 监听“分享给好友”
+	 * 逻辑：自动识别是按钮触发还是原生菜单触发，并根据 currentShareMode 组装路径
+	 */
 	onShareAppMessage((res) => {
-		// 关闭相关的弹窗
-		closeSharePopup();
+		// 1. UI 清理：立即关闭所有相关的弹窗
+		isPopupOpen.value = false;
+		isShareTypePopupOpen.value = false;
+		if (sharePopup.value) sharePopup.value.close();
 		if (shareTypePopupRef.value) shareTypePopupRef.value.close();
 
+		// 2. 扣减名片分享次数权益（按产品要求，发起分享即视为扣减）
 		deductShareQuota();
 
+		// 3. 安全检查：如果用户信息还没加载出来，返回默认标题
 		if (!userInfo.value) return {
-			title: '一张很棒的电子名片'
+			title: '名片分享'
 		};
 
-		const loggedInUserId = uni.getStorageSync('userId');
-		const cardOwnerId = userInfo.value.id;
 
-		// 1. 确定使用哪个邀请码
+		const cardOwnerId = userInfo.value.id; // 当前名片的主人 ID
+		const loggedInUserId = uni.getStorageSync('userId'); // 当前执行分享操作的人 ID
+
+		// 4. 确定最终使用的邀请码 (核心逻辑)
 		let finalInviteCode = '';
 
-		if (res.from === 'button' && currentShareMode.value) {
-			// 如果是通过按钮触发（通常是我们的自发/代发按钮）
+		// 如果是通过页面按钮触发（自发/代发按钮）
+		if (res.from === 'button') {
 			if (currentShareMode.value === 'SELF') {
-				// 自发：使用登录用户的邀请码
+				// 【自发模式】：使用当前登录人（分享者）的邀请码
 				finalInviteCode = getInviteCode();
-				console.log('分享模式：自发，使用我的码:', finalInviteCode);
+				console.log('分享模式：自发(推荐)，使用我的邀请码:', finalInviteCode);
 			} else {
-				// 代发：使用名片主人的邀请码 (userInfo 是当前查看的名片信息)
+				// 【代发模式】：使用名片主人（userInfo）的邀请码
 				finalInviteCode = userInfo.value.shardCode;
-				console.log('分享模式：代发，使用TA的码:', finalInviteCode);
+				console.log('分享模式：代发(原样)，使用TA的邀请码:', finalInviteCode);
 			}
-
-			// 重置模式为默认（防止下次系统原生分享时状态混乱），但这里其实无所谓，因为原生分享一般看做自发
-			// currentShareMode.value = 'PROXY'; 
 		} else {
-			// 如果是点击右上角原生菜单分享他人名片，默认策略是什么？
-			// 策略 A：默认为“代发”（帮TA推广）
-			// 策略 B：默认为“自发”（算我的业绩）
-			// 这里建议默认为“自发”（用登录者的码），或者跟代发保持一致。
-			// 既然是分享他人，通常携带他人码比较符合“原样转发”的直觉；
-			// 但如果为了推广奖励，通常希望带自己的码。
-			// 此处代码演示默认为【自发】(即使用登录者的码)，如果登录者没码，才用TA的。
+			// 如果是通过右上角原生菜单触发（默认视为自发推荐）
 			finalInviteCode = getInviteCode() || userInfo.value.shardCode;
-			console.log('分享模式：原生菜单，默认使用:', finalInviteCode);
+			console.log('分享模式：原生菜单触发，默认优先使用我的码:', finalInviteCode);
 		}
 
+		// 5. 组装分享路径
+		// 携带参数：id(名片主), fromShare(来源标记), sharerId(分享人), inviteCode(最终码)
 		let sharePath = `/packages/my-businessCard/my-businessCard?id=${cardOwnerId}&fromShare=1`;
 
 		if (loggedInUserId) {
@@ -760,22 +849,18 @@
 			sharePath += `&inviteCode=${finalInviteCode}`;
 		}
 
-		// 标题逻辑
-		let titlePrefix = '';
-		if (currentShareMode.value === 'SELF') {
-			titlePrefix = '【推荐】';
-		}
-
-		const finalTitle = customShareTitle.value ||
-			`${titlePrefix}这是 ${userInfo.value.realName || userInfo.value.nickname} 的名片`;
+		// 6. 确定最终标题
+		// 如果用户在弹窗里修改了，使用 customShareTitle，否则使用默认文案
+		const defaultTitle = `${userInfo.value.realName || userInfo.value.nickname} 的数字名片`;
+		const finalTitle = customShareTitle.value || defaultTitle;
 
 		const shareContent = {
 			title: finalTitle,
 			path: sharePath,
-			imageUrl: userInfo.value.avatar,
+			imageUrl: userInfo.value.avatar, // 使用名片主人的头像作为分享卡片封面
 		};
 
-		console.log('[my-businessCard] 最终分享内容:', JSON.stringify(shareContent));
+		console.log('🚀 [onShareAppMessage] 最终分享配置:', JSON.stringify(shareContent));
 
 		return shareContent;
 	});
@@ -820,40 +905,73 @@
 	// });
 
 	// 监听“分享到朋友圈”
+	// onShareTimeline(() => {
+	// 	hideTimelineGuide();
+	// 	if (!userInfo.value) return {
+	// 		title: '一张很棒的电子名片'
+	// 	};
+
+	// 	const loggedInUserId = uni.getStorageSync('userId');
+	// 	const cardOwnerId = userInfo.value.id;
+
+	// 	// 【确认】此逻辑已存在且正确：从名片信息中获取邀请码
+	// 	const inviteCode = userInfo.value.shardCode;
+
+	// 	let queryString = `id=${cardOwnerId}&fromShare=1`;
+	// 	if (loggedInUserId) {
+	// 		queryString += `&sharerId=${loggedInUserId}`;
+	// 	}
+
+	// 	// 【确认】此逻辑已存在且正确：将邀请码拼接到 query 字符串中
+	// 	if (inviteCode) {
+	// 		queryString += `&inviteCode=${inviteCode}`;
+	// 	}
+
+	// 	const finalTitle = customShareTitle.value ||
+	// 		`这是 ${userInfo.value.realName || userInfo.value.nickname} 的名片`;
+
+	// 	const shareContent = {
+	// 		title: finalTitle,
+	// 		query: queryString,
+	// 		imageUrl: userInfo.value.avatar,
+	// 	};
+
+	// 	console.log('[my-businessCard] 生成时间轴共享内容:', JSON.stringify(shareContent));
+
+	// 	return shareContent;
+	// });
+	// 监听“分享到朋友圈”
 	onShareTimeline(() => {
+		// 1. 只有点击了我们的引导或原生触发时才会执行
 		hideTimelineGuide();
-		if (!userInfo.value) return {
-			title: '一张很棒的电子名片'
-		};
+
+		isPopupOpen.value = false;
+		isShareTypePopupOpen.value = false;
+
+		// 2. 核心优化：分享到朋友圈也扣减次数
+		deductShareQuota();
+
+		if (!userInfo.value) return {};
 
 		const loggedInUserId = uni.getStorageSync('userId');
 		const cardOwnerId = userInfo.value.id;
-
-		// 【确认】此逻辑已存在且正确：从名片信息中获取邀请码
-		const inviteCode = userInfo.value.shardCode;
+		const inviteCode = (currentShareMode.value === 'SELF') ? getInviteCode() : userInfo.value.shardCode;
 
 		let queryString = `id=${cardOwnerId}&fromShare=1`;
-		if (loggedInUserId) {
-			queryString += `&sharerId=${loggedInUserId}`;
-		}
+		if (loggedInUserId) queryString += `&sharerId=${loggedInUserId}`;
+		if (inviteCode) queryString += `&inviteCode=${inviteCode}`;
 
-		// 【确认】此逻辑已存在且正确：将邀请码拼接到 query 字符串中
-		if (inviteCode) {
-			queryString += `&inviteCode=${inviteCode}`;
-		}
+		// 标记当前模式（用于后端统计，如果需要的话）
+		queryString += `&m=${currentShareMode.value}`;
 
 		const finalTitle = customShareTitle.value ||
 			`这是 ${userInfo.value.realName || userInfo.value.nickname} 的名片`;
 
-		const shareContent = {
+		return {
 			title: finalTitle,
 			query: queryString,
 			imageUrl: userInfo.value.avatar,
 		};
-
-		console.log('[my-businessCard] 生成时间轴共享内容:', JSON.stringify(shareContent));
-
-		return shareContent;
 	});
 
 	// --- 6. 事件处理器 ---
@@ -961,6 +1079,7 @@
 		}
 
 		// 3. 额度充足，打开弹窗
+		currentShareMode.value = 'SELF'; // 自己分享自己一定是 SELF 模式
 		customShareTitle.value = `这是 ${userInfo.value.realName || userInfo.value.nickname} 的名片`;
 		sharePopup.value.open();
 		isPopupOpen.value = true;
@@ -972,7 +1091,8 @@
 	const guideShareTimeline = () => {
 		closeSharePopup(); // 这会自动把 isPopupOpen 设为 false
 
-		deductShareQuota();
+		// deductShareQuota();
+		isPopupOpen.value = false;
 
 		showTimelineGuide.value = true; // 引导层 z-index 很高，通常没问题
 	};

@@ -18,44 +18,61 @@
 			<!-- ================== Tab 1: 赞踩模块 ================== -->
 			<view v-if="currentTab === 0">
 
-				<!-- 2.1 提交反馈卡片 -->
+				<!-- 提交反馈卡片 -->
 				<view class="feedback-card">
-					<view class="card-header">
-						<text class="title">为商友提供反馈</text>
-						<text class="subtitle">（您的评价将完全匿名，帮助TA变得更好）</text>
+					<view v-if="isSelf" class="self-placeholder"
+						style="padding: 40rpx; text-align: center; color: #999;">
+						<uni-icons type="info" size="30" color="#ccc"></uni-icons>
+						<view style="margin-top: 20rpx; font-size: 28rpx;">不能对自己进行评价</view>
 					</view>
 
-					<!-- 赞踩按钮组 -->
-					<view class="action-buttons">
-						<view class="action-btn like-btn" :class="{ active: reviewForm.isLike === 1 }"
-							@click="selectLike(1)">
-							<uni-icons type="hand-up-filled" size="24"
-								:color="reviewForm.isLike === 1 ? '#fff' : '#FF6A00'"></uni-icons>
-							<text :style="{ color: reviewForm.isLike === 1 ? '#fff' : '#FF6A00' }">好评/点赞</text>
+					<block v-else>
+						<view class="card-header">
+							<text class="title">为商友提供反馈</text>
+							<text class="subtitle">（您的评价将完全匿名，帮助TA变得更好）</text>
 						</view>
-						<view class="action-btn dislike-btn" :class="{ active: reviewForm.isLike === 2 }"
-							@click="selectLike(2)">
-							<uni-icons type="hand-down-filled" size="24"
-								:color="reviewForm.isLike === 2 ? '#fff' : '#666'"></uni-icons>
-							<text :style="{ color: reviewForm.isLike === 2 ? '#fff' : '#666' }">改进/点踩</text>
+
+						<!-- 赞踩按钮组 -->
+						<view class="action-buttons">
+							<view class="action-btn like-btn" :class="{ active: reviewForm.isLike === 1 }"
+								@click="selectLike(1)">
+								<uni-icons type="hand-up-filled" size="24"
+									:color="reviewForm.isLike === 1 ? '#fff' : '#FF6A00'"></uni-icons>
+								<text :style="{ color: reviewForm.isLike === 1 ? '#fff' : '#FF6A00' }">点赞</text>
+							</view>
+							<view class="action-btn dislike-btn" :class="{ active: reviewForm.isLike === 2 }"
+								@click="selectLike(2)">
+								<uni-icons type="hand-down-filled" size="24"
+									:color="reviewForm.isLike === 2 ? '#fff' : '#666'"></uni-icons>
+								<text :style="{ color: reviewForm.isLike === 2 ? '#fff' : '#666' }">点踩</text>
+							</view>
 						</view>
-					</view>
 
-					<!-- 评价内容输入 -->
-					<view class="input-area">
-						<text class="input-label">反馈原因（选填）：</text>
-						<textarea v-model="reviewForm.reviewContent" placeholder="例如：专业、靠谱、合作愉快... 或：经验不足、沟通不畅..."
-							class="review-textarea" maxlength="200" />
-					</view>
+						<!-- 评价内容输入 -->
+						<view class="input-area">
+							<text class="input-label">评语（好评/改进）：</text>
+							<textarea v-model="reviewForm.reviewContent" placeholder="例如：专业、靠谱、合作愉快... 或：经验不足、沟通不畅..."
+								class="review-textarea" maxlength="200" />
+						</view>
 
-					<button class="submit-review-btn" :disabled="isReviewSubmitting" @click="handleReviewSubmit">
-						{{ isReviewSubmitting ? '处理中...' : (isReviewEditMode ? '修改反馈' : '提交反馈') }}
-					</button>
+						<view class="submit-action-bar" style="display: flex; align-items: center; gap: 20rpx;">
+							<button class="submit-review-btn" :disabled="isReviewSubmitting" @click="handleReviewSubmit"
+								style="flex: 1;">
+								{{ isReviewSubmitting ? '处理中...' : (isReviewEditMode ? '修改评价' : '提交评价') }}
+							</button>
+
+							<!-- 仅在编辑模式（已有评价）下显示垃圾桶 -->
+							<view v-if="isReviewEditMode" class="delete-icon-box" @click="handleReviewDelete"
+								style="padding: 10rpx; display: flex; align-items: center;">
+								<uni-icons type="trash-filled" size="26" color="#dd524d"></uni-icons>
+							</view>
+						</view>
+					</block>
 				</view>
 
 				<!-- 2.2 最近反馈列表 -->
 				<view v-if="recentReviews.length > 0" class="recent-list-section">
-					<view class="section-title">📝 最近反馈</view>
+					<view class="section-title">📝 最近评价</view>
 
 					<view class="review-list">
 						<view v-for="item in recentReviews" :key="item.id" class="review-item">
@@ -73,7 +90,7 @@
 					</view>
 
 					<view class="view-all-btn" @click="goToAllReviews">
-						查看全部 {{ totalReviews }} 条反馈 →
+						查看全部 {{ totalReviews }} 条评价 →
 					</view>
 				</view>
 
@@ -82,62 +99,11 @@
 			<!-- ================== Tab 2: 评分模块 ================== -->
 			<view v-if="currentTab === 1">
 
-				<!-- 2.0 雷达图统计 -->
-				<view class="chart-section" v-if="radarDatasets.length > 0">
-					<view class="standard-title" style="margin-bottom: 30rpx;">
-						<uni-icons type="data-filled" size="16" color="#1890FF"></uni-icons>
-						<text>用户评分统计</text>
-					</view>
-
-					<view class="chart-wrapper">
-						<MyRadarChart :categories="['基础信用', '协作态度', '专业能力', '精神格局']" :datasets="radarDatasets" />
-					</view>
-
-					<!-- 图例说明表格 -->
-					<view class="score-compare-table">
-						<!-- 表头 -->
-						<view class="table-row header-row">
-							<view class="col dim">维度</view>
-							<view class="col val self">自我</view>
-							<view class="col val total">综合</view>
-						</view>
-
-						<!-- 数据行 -->
-						<view class="table-row" v-for="(dim, index) in ['基础信用', '协作态度', '专业能力', '精神格局']" :key="index">
-							<view class="col dim">{{ dim }}</view>
-							<view class="col val self">{{ getScoreValue(0, index) }}</view>
-							<view class="col val total">{{ getScoreValue(1, index) }}</view>
-						</view>
-					</view>
-				</view>
-
-				<!-- 2.1 评分标准 -->
-				<view class="standard-card">
-					<view class="standard-title">
-						<uni-icons type="info-filled" size="16" color="#FF8C00"></uni-icons>
-						<text>评分参考标准</text>
-					</view>
-					<view class="standard-grid">
-						<view class="standard-item level-6"><text class="score-range">10分</text><text
-								class="score-desc">杰出</text></view>
-						<view class="standard-item level-5"><text class="score-range">8-9分</text><text
-								class="score-desc">优秀</text></view>
-						<view class="standard-item level-4"><text class="score-range">6-7分</text><text
-								class="score-desc">较好</text></view>
-						<view class="standard-item level-3"><text class="score-range">4-5分</text><text
-								class="score-desc">一般</text></view>
-						<view class="standard-item level-2"><text class="score-range">2-3分</text><text
-								class="score-desc">较差</text></view>
-						<view class="standard-item level-1"><text class="score-range">0-1分</text><text
-								class="score-desc">极差</text></view>
-					</view>
-				</view>
-
-				<!-- 2.2 去评分入口 -->
+				<!--去评分入口 -->
 				<view class="section-header-title">
 					<view class="standard-title">
 						<uni-icons type="compose" size="16" color="#FF8C00"></uni-icons>
-						<text>用户评分</text>
+						<text>商友评分</text>
 					</view>
 				</view>
 				<view class="rate-entry-card" @click="goToRatePage">
@@ -149,6 +115,8 @@
 						<uni-icons type="right" size="20" color="#ccc"></uni-icons>
 					</view>
 				</view>
+
+				<UserScoreBoard :datasets="radarDatasets" />
 			</view>
 
 		</view>
@@ -166,7 +134,8 @@
 	} from '@dcloudio/uni-app';
 	import request from '@/utils/request.js';
 	import ScoreForm from '@/components/ScoreForm.vue';
-	import MyRadarChart from '@/components/MyRadarChart.vue';
+	// import MyRadarChart from '@/components/MyRadarChart.vue';
+	import UserScoreBoard from '@/components/UserScoreBoard.vue';
 
 	// ==========================================
 	// 1. API 定义区域
@@ -192,6 +161,10 @@
 		getMyList: (params) => request('/app-api/member/user-review/my-list', {
 			method: 'GET',
 			data: params
+		}),
+		// 删除接口
+		delete: (id) => request(`/app-api/member/user-review/delete?id=${id}`, {
+			method: 'DELETE'
 		})
 	};
 
@@ -226,6 +199,7 @@
 	const currentTab = ref(0);
 	const targetUserId = ref(null); // 被操作人 ID
 	const currentUserId = ref(null); // 当前登录人 ID
+	const isSelf = ref(false);
 
 	// --- Tab 1 (赞踩) 状态 ---
 	const isReviewSubmitting = ref(false);
@@ -277,6 +251,8 @@
 			setTimeout(() => uni.navigateBack(), 1500);
 		}
 		currentUserId.value = uni.getStorageSync('userId');
+
+		isSelf.value = String(targetUserId.value) === String(currentUserId.value);
 	});
 
 	onMounted(() => {
@@ -439,6 +415,58 @@
 		}
 	};
 
+	/**
+	 * 删除我的评价
+	 */
+	const handleReviewDelete = () => {
+		if (!reviewRecordId.value) return;
+
+		uni.showModal({
+			title: '确认删除',
+			content: '确定要删除您对该商友的评价吗？',
+			confirmColor: '#FF8C00',
+			success: async (res) => {
+				if (res.confirm) {
+					uni.showLoading({
+						title: '删除中...'
+					});
+					try {
+						const {
+							error
+						} = await ReviewApi.delete(reviewRecordId.value);
+						if (!error) {
+							uni.showToast({
+								title: '已删除',
+								icon: 'success'
+							});
+
+							// 重置表单状态
+							reviewForm.isLike = 1;
+							reviewForm.reviewContent = '';
+							reviewRecordId.value = null;
+							isReviewEditMode.value = false;
+
+							// 刷新下方列表
+							fetchRecentReviews();
+						} else {
+							uni.showToast({
+								title: error.msg || '删除失败',
+								icon: 'none'
+							});
+						}
+					} catch (e) {
+						uni.showToast({
+							title: '网络异常',
+							icon: 'none'
+						});
+					} finally {
+						uni.hideLoading();
+					}
+				}
+			}
+		});
+	};
+
 	const goToAllReviews = () => {
 		uni.navigateTo({
 			url: `/packages/user-review-list/user-review-list?userId=${targetUserId.value}`
@@ -457,8 +485,9 @@
 	const fetchRadarStatistics = async () => {
 		try {
 			// 并发请求：0=自评，3=综合
-			const [selfRes, complexRes] = await Promise.all([
+			const [selfRes, friendRes, complexRes] = await Promise.all([
 				ScoreApi.getStatistics(targetUserId.value, 0),
+				ScoreApi.getStatistics(targetUserId.value, 1),
 				ScoreApi.getStatistics(targetUserId.value, 3)
 			]);
 
@@ -475,6 +504,19 @@
 						selfRes.data.avg4 || 0
 					],
 					color: '#FF7D00'
+				});
+			}
+
+			if (!friendRes.error && friendRes.data) {
+				newDatasets.push({
+					name: '商友评价',
+					data: [
+						friendRes.data.avg1 || 0,
+						friendRes.data.avg2 || 0,
+						friendRes.data.avg3 || 0,
+						friendRes.data.avg4 || 0
+					],
+					color: '#4CAF50'
 				});
 			}
 
@@ -943,7 +985,7 @@
 		justify-content: space-between;
 		align-items: center;
 		box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.03);
-		margin-top: 30rpx;
+		margin: 30rpx auto;
 
 		&:active {
 			background-color: #fafafa;

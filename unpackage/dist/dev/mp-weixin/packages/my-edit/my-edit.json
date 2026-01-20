@@ -8,6 +8,7 @@
     "uni-data-select": "../../uni_modules/uni-data-select/components/uni-data-select/uni-data-select",
     "uni-data-picker": "../../uni_modules/uni-data-picker/components/uni-data-picker/uni-data-picker",
     "uni-data-checkbox": "../../uni_modules/uni-data-checkbox/components/uni-data-checkbox/uni-data-checkbox",
-    "uni-forms": "../../uni_modules/uni-forms/components/uni-forms/uni-forms"
+    "uni-forms": "../../uni_modules/uni-forms/components/uni-forms/uni-forms",
+    "user-score-board": "../../components/UserScoreBoard"
   }
 }

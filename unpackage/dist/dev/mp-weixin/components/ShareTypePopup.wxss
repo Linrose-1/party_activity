@@ -36,6 +36,7 @@
   text-align: left;
   line-height: 1.5;
   transition: all 0.2s;
+  width: 600rpx;
 }
 .option-btn.data-v-a159665f::after {
   border: none;

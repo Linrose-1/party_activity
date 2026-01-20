@@ -464,6 +464,13 @@
 				{
 					"navigationBarTitleText" : "我的点评"
 				}
+			},
+			{
+				"path" : "ContactService/ContactService",
+				"style" : 
+				{
+					"navigationBarTitleText" : "平台客服"
+				}
 			}
 			// 如果还有其他页面要放进这个分包，继续在这里加
 		]

@@ -129,6 +129,7 @@
 	const pageSize = ref(10);
 	const total = ref(0);
 	const loadingStatus = ref('more'); // more, loading, noMore
+	const isActionInProgress = ref(false); // 操作防抖锁
 
 	// ==========================================
 	// 3. 生命周期区域
@@ -232,7 +233,16 @@
 	 * @param {string} actionType 'like' | 'dislike'
 	 */
 	const toggleAction = async (item, actionType) => {
-		// 1. 登录检查
+		// 1. 防抖检查：如果正在处理中，直接拦截
+		if (isActionInProgress.value) {
+			uni.showToast({
+				title: '操作太快了，请稍候',
+				icon: 'none'
+			});
+			return;
+		}
+
+		// 2. 登录检查
 		const currentUserId = uni.getStorageSync('userId');
 		if (!currentUserId) {
 			uni.showToast({
@@ -242,52 +252,42 @@
 			return;
 		}
 
-		// 2. 确定目标状态 (1=点赞, 2=点踩)
+		// 开启锁
+		isActionInProgress.value = true;
+
+		// 3. 确定目标状态 (1=点赞, 2=点踩)
 		const targetIsLike = actionType === 'like' ? 1 : 2;
 		const currentStatus = item.isReview; // 0=无, 1=已赞, 2=已踩
 
-		// 3. 判断是否为取消操作
+		// 4. 判断是否为取消操作
 		let isCancel = false;
 		if (currentStatus === targetIsLike) {
-			isCancel = true; // 点击已选中的 -> 取消
+			isCancel = true;
 		}
 
-		// 4. 【历史数据保护】
-		// 如果是取消操作，但本地没有 interactionId，说明是历史数据，无法取消
-		// if (isCancel && !item.interactionId) {
-		// 	uni.showToast({
-		// 		title: '暂无法取消历史评价',
-		// 		icon: 'none'
-		// 	});
-		// 	return;
-		// }
-
-		// 5. 乐观更新 UI (先变界面，再请求)
+		// 5. 乐观更新 UI (先改变界面显示，提升响应速度)
 		const originalStatus = item.isReview;
 		const originalLikes = item.likesCount;
 		const originalDislikes = item.dislikesCount;
 
 		if (isCancel) {
-			// 取消状态
 			item.isReview = 0;
 			if (originalStatus === 1) item.likesCount--;
 			if (originalStatus === 2) item.dislikesCount--;
 		} else {
-			// 设置新状态
 			item.isReview = targetIsLike;
-			// 处理计数变化
-			if (targetIsLike === 1) { // 目标是赞
+			if (targetIsLike === 1) {
 				item.likesCount++;
-				if (originalStatus === 2) item.dislikesCount--; // 如果原来是踩，踩数减1
-			} else { // 目标是踩
+				if (originalStatus === 2) item.dislikesCount--;
+			} else {
 				item.dislikesCount++;
-				if (originalStatus === 1) item.likesCount--; // 如果原来是赞，赞数减1
+				if (originalStatus === 1) item.likesCount--;
 			}
 		}
 
 		try {
 			if (isCancel) {
-				// === 取消互动 ===
+				// === 调用取消互动接口 ===
 				const {
 					error
 				} = await ReviewApi.cancelInteraction({
@@ -295,7 +295,7 @@
 				});
 				if (error) throw new Error(error.msg);
 			} else {
-				// === 新增/切换互动 ===
+				// === 调用创建互动接口 ===
 				const {
 					data,
 					error
@@ -304,14 +304,10 @@
 					reviewId: item.id,
 					isLike: targetIsLike
 				});
-
 				if (error) throw new Error(error.msg);
-
-				// 保存返回的 ID，以便稍后取消
-				// if (data) item.interactionId = data;
 			}
 		} catch (e) {
-			// 6. 请求失败，回滚 UI
+			// 6. 请求失败，回滚 UI 状态
 			item.isReview = originalStatus;
 			item.likesCount = originalLikes;
 			item.dislikesCount = originalDislikes;
@@ -319,6 +315,11 @@
 				title: e.message || '操作失败',
 				icon: 'none'
 			});
+		} finally {
+			// 7. 【核心】2秒后释放锁，允许下次操作
+			setTimeout(() => {
+				isActionInProgress.value = false;
+			}, 2000);
 		}
 	};
 

@@ -6,8 +6,9 @@ if (!Array) {
 }
 const _easycom_uni_icons = () => "../uni_modules/uni-icons/components/uni-icons/uni-icons.js";
 if (!Math) {
-  _easycom_uni_icons();
+  (_easycom_uni_icons + UserScoreBoard)();
 }
+const UserScoreBoard = () => "./UserScoreBoard.js";
 const _sfc_main = {
   __name: "MyCard",
   props: {
@@ -141,6 +142,10 @@ const _sfc_main = {
     fullCompanyName: {
       type: String,
       default: ""
+    },
+    radarDatasets: {
+      type: Array,
+      default: () => []
     }
   },
   emits: ["goToOpportunities"],
@@ -308,23 +313,37 @@ const _sfc_main = {
           color: "#bbb"
         }),
         L: common_vendor.o(($event) => _ctx.$emit("goToOpportunities")),
-        M: __props.showUserQrCode
-      }, __props.showUserQrCode ? {
-        N: __props.userWeChatQrCodeUrl,
-        O: common_vendor.o(($event) => previewImage(__props.userWeChatQrCodeUrl))
+        M: __props.radarDatasets && __props.radarDatasets.length > 0
+      }, __props.radarDatasets && __props.radarDatasets.length > 0 ? {
+        N: common_vendor.p({
+          type: "star-filled",
+          size: "18",
+          color: "#FF8500"
+        }),
+        O: common_vendor.t(__props.isViewingOwnCard ? "我的猩友评价" : "TA的猩友评价"),
+        P: common_vendor.p({
+          datasets: __props.radarDatasets,
+          showCard: false,
+          showTitle: false
+        })
       } : {}, {
-        P: __props.shardCode
+        Q: __props.showUserQrCode
+      }, __props.showUserQrCode ? {
+        R: __props.userWeChatQrCodeUrl,
+        S: common_vendor.o(($event) => previewImage(__props.userWeChatQrCodeUrl))
+      } : {}, {
+        T: __props.shardCode
       }, __props.shardCode ? {
-        Q: common_vendor.t(__props.shardCode),
-        R: common_vendor.p({
+        U: common_vendor.t(__props.shardCode),
+        V: common_vendor.p({
           type: "paperclip",
           size: "16",
           color: "#F78C2F"
         }),
-        S: common_vendor.o(copyShardCode)
+        W: common_vendor.o(copyShardCode)
       } : {}, {
-        T: __props.dynamicQrCodeUrl || __props.platformQrCodeUrl,
-        U: common_vendor.o(($event) => previewImage(__props.dynamicQrCodeUrl || __props.platformQrCodeUrl))
+        X: __props.dynamicQrCodeUrl || __props.platformQrCodeUrl,
+        Y: common_vendor.o(($event) => previewImage(__props.dynamicQrCodeUrl || __props.platformQrCodeUrl))
       });
     };
   }

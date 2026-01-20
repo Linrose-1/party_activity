@@ -314,7 +314,7 @@
   justify-content: space-between;
   align-items: center;
   box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.03);
-  margin-top: 30rpx;
+  margin: 30rpx auto;
 }
 .rate-entry-card.data-v-91a56258:active {
   background-color: #fafafa;

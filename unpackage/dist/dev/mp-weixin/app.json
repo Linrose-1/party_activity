@@ -64,7 +64,8 @@
         "user-reviews/user-reviews",
         "user-review-list/user-review-list",
         "social-interaction/social-interaction",
-        "my-reviews/my-reviews"
+        "my-reviews/my-reviews",
+        "ContactService/ContactService"
       ]
     }
   ],

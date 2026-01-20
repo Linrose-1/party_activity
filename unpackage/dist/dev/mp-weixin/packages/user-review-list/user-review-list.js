@@ -40,6 +40,7 @@ const _sfc_main = {
     const pageSize = common_vendor.ref(10);
     const total = common_vendor.ref(0);
     const loadingStatus = common_vendor.ref("more");
+    const isActionInProgress = common_vendor.ref(false);
     common_vendor.onLoad((options) => {
       if (options.userId) {
         targetUserId.value = options.userId;
@@ -106,6 +107,13 @@ const _sfc_main = {
       }
     };
     const toggleAction = async (item, actionType) => {
+      if (isActionInProgress.value) {
+        common_vendor.index.showToast({
+          title: "操作太快了，请稍候",
+          icon: "none"
+        });
+        return;
+      }
       const currentUserId = common_vendor.index.getStorageSync("userId");
       if (!currentUserId) {
         common_vendor.index.showToast({
@@ -114,6 +122,7 @@ const _sfc_main = {
         });
         return;
       }
+      isActionInProgress.value = true;
       const targetIsLike = actionType === "like" ? 1 : 2;
       const currentStatus = item.isReview;
       let isCancel = false;
@@ -170,6 +179,10 @@ const _sfc_main = {
           title: e.message || "操作失败",
           icon: "none"
         });
+      } finally {
+        setTimeout(() => {
+          isActionInProgress.value = false;
+        }, 2e3);
       }
     };
     const formatTime = (timeStr) => {

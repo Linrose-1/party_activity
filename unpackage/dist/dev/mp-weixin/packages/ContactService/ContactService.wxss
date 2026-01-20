@@ -1,0 +1,131 @@
+/* 水平间距 */
+/* 水平间距 */
+.contact-container.data-v-828940d1 {
+  min-height: 100vh;
+  background-color: #f8f9fb;
+  position: relative;
+  padding: 40rpx 30rpx;
+}
+
+/* 顶部氛围背景 */
+.header-bg.data-v-828940d1 {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 360rpx;
+  background: linear-gradient(180deg, #FF8400 0%, rgba(255, 132, 0, 0.1) 100%);
+  z-index: 1;
+}
+
+/* 客服卡片主体 */
+.service-card.data-v-828940d1 {
+  position: relative;
+  z-index: 2;
+  background: #ffffff;
+  border-radius: 30rpx;
+  padding: 50rpx 40rpx;
+  margin-top: 80rpx;
+  box-shadow: 0 10rpx 40rpx rgba(0, 0, 0, 0.05);
+}
+.card-header.data-v-828940d1 {
+  text-align: center;
+  margin-bottom: 50rpx;
+}
+.card-header .title.data-v-828940d1 {
+  font-size: 40rpx;
+  font-weight: bold;
+  color: #333;
+  display: block;
+  margin-bottom: 16rpx;
+}
+.card-header .subtitle.data-v-828940d1 {
+  font-size: 26rpx;
+  color: #999;
+  line-height: 1.5;
+}
+
+/* 二维码区域 */
+.qr-section.data-v-828940d1 {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 60rpx;
+}
+.qr-section .qr-box.data-v-828940d1 {
+  width: 320rpx;
+  height: 320rpx;
+  padding: 20rpx;
+  background: #fff;
+  border: 2rpx solid #f0f0f0;
+  border-radius: 20rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.02);
+}
+.qr-section .qr-box .qr-image.data-v-828940d1 {
+  width: 100%;
+  height: 100%;
+}
+.qr-section .qr-hint.data-v-828940d1 {
+  font-size: 24rpx;
+  color: #FF8400;
+  margin-top: 24rpx;
+  font-weight: 500;
+}
+
+/* 联系信息列表 */
+.info-list.data-v-828940d1 {
+  background-color: #f9fafc;
+  border-radius: 20rpx;
+  padding: 10rpx 0;
+}
+.info-list .info-item.data-v-828940d1 {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 30rpx 30rpx;
+}
+.info-list .info-item.data-v-828940d1:not(:last-child) {
+  border-bottom: 1rpx solid #f0f0f0;
+}
+.info-list .info-item.data-v-828940d1:active {
+  background-color: #f1f2f5;
+}
+.info-list .item-left.data-v-828940d1 {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+.info-list .item-left .label.data-v-828940d1 {
+  font-size: 28rpx;
+  color: #666;
+}
+.info-list .item-right.data-v-828940d1 {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+.info-list .item-right .value.data-v-828940d1 {
+  font-size: 30rpx;
+  color: #333;
+  font-weight: bold;
+}
+.info-list .item-right .phone-value.data-v-828940d1 {
+  color: #FF8400;
+  /* 电话突出显示 */
+}
+.info-list .item-right .copy-btn.data-v-828940d1 {
+  font-size: 22rpx;
+  color: #FF8400;
+  background: rgba(255, 132, 0, 0.1);
+  padding: 4rpx 16rpx;
+  border-radius: 8rpx;
+  border: 1rpx solid rgba(255, 132, 0, 0.2);
+}
+
+/* 底部说明 */
+.service-time.data-v-828940d1 {
+  text-align: center;
+  margin-top: 60rpx;
+  color: #bbb;
+  font-size: 24rpx;
+}

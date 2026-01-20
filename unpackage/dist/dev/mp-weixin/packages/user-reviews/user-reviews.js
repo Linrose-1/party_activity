@@ -7,9 +7,9 @@ if (!Array) {
 }
 const _easycom_uni_icons = () => "../../uni_modules/uni-icons/components/uni-icons/uni-icons.js";
 if (!Math) {
-  (_easycom_uni_icons + MyRadarChart)();
+  (_easycom_uni_icons + UserScoreBoard)();
 }
-const MyRadarChart = () => "../../components/MyRadarChart.js";
+const UserScoreBoard = () => "../../components/UserScoreBoard.js";
 const _sfc_main = {
   __name: "user-reviews",
   setup(__props) {
@@ -33,6 +33,10 @@ const _sfc_main = {
       getMyList: (params) => utils_request.request("/app-api/member/user-review/my-list", {
         method: "GET",
         data: params
+      }),
+      // 删除接口
+      delete: (id) => utils_request.request(`/app-api/member/user-review/delete?id=${id}`, {
+        method: "DELETE"
       })
     };
     const ScoreApi = {
@@ -60,6 +64,7 @@ const _sfc_main = {
     const currentTab = common_vendor.ref(0);
     const targetUserId = common_vendor.ref(null);
     const currentUserId = common_vendor.ref(null);
+    const isSelf = common_vendor.ref(false);
     const isReviewSubmitting = common_vendor.ref(false);
     const reviewForm = common_vendor.reactive({
       isLike: 1,
@@ -102,6 +107,7 @@ const _sfc_main = {
         setTimeout(() => common_vendor.index.navigateBack(), 1500);
       }
       currentUserId.value = common_vendor.index.getStorageSync("userId");
+      isSelf.value = String(targetUserId.value) === String(currentUserId.value);
     });
     common_vendor.onMounted(() => {
       if (targetUserId.value) {
@@ -141,13 +147,13 @@ const _sfc_main = {
           reviewForm.reviewContent = myReview.reviewContent;
           reviewRecordId.value = myReview.id;
           isReviewEditMode.value = true;
-          common_vendor.index.__f__("log", "at packages/user-reviews/user-reviews.vue:337", "✅ 回显我的历史评价:", myReview);
+          common_vendor.index.__f__("log", "at packages/user-reviews/user-reviews.vue:313", "✅ 回显我的历史评价:", myReview);
         } else {
           isReviewEditMode.value = false;
           reviewRecordId.value = null;
         }
       } catch (e) {
-        common_vendor.index.__f__("error", "at packages/user-reviews/user-reviews.vue:344", "获取我的评价失败", e);
+        common_vendor.index.__f__("error", "at packages/user-reviews/user-reviews.vue:320", "获取我的评价失败", e);
       }
     };
     const selectLike = (val) => {
@@ -230,8 +236,52 @@ const _sfc_main = {
           totalReviews.value = data.total || 0;
         }
       } catch (e) {
-        common_vendor.index.__f__("error", "at packages/user-reviews/user-reviews.vue:438", "获取最近反馈失败", e);
+        common_vendor.index.__f__("error", "at packages/user-reviews/user-reviews.vue:414", "获取最近反馈失败", e);
       }
+    };
+    const handleReviewDelete = () => {
+      if (!reviewRecordId.value)
+        return;
+      common_vendor.index.showModal({
+        title: "确认删除",
+        content: "确定要删除您对该商友的评价吗？",
+        confirmColor: "#FF8C00",
+        success: async (res) => {
+          if (res.confirm) {
+            common_vendor.index.showLoading({
+              title: "删除中..."
+            });
+            try {
+              const {
+                error
+              } = await ReviewApi.delete(reviewRecordId.value);
+              if (!error) {
+                common_vendor.index.showToast({
+                  title: "已删除",
+                  icon: "success"
+                });
+                reviewForm.isLike = 1;
+                reviewForm.reviewContent = "";
+                reviewRecordId.value = null;
+                isReviewEditMode.value = false;
+                fetchRecentReviews();
+              } else {
+                common_vendor.index.showToast({
+                  title: error.msg || "删除失败",
+                  icon: "none"
+                });
+              }
+            } catch (e) {
+              common_vendor.index.showToast({
+                title: "网络异常",
+                icon: "none"
+              });
+            } finally {
+              common_vendor.index.hideLoading();
+            }
+          }
+        }
+      });
     };
     const goToAllReviews = () => {
       common_vendor.index.navigateTo({
@@ -245,8 +295,9 @@ const _sfc_main = {
     };
     const fetchRadarStatistics = async () => {
       try {
-        const [selfRes, complexRes] = await Promise.all([
+        const [selfRes, friendRes, complexRes] = await Promise.all([
           ScoreApi.getStatistics(targetUserId.value, 0),
+          ScoreApi.getStatistics(targetUserId.value, 1),
           ScoreApi.getStatistics(targetUserId.value, 3)
         ]);
         const newDatasets = [];
@@ -260,6 +311,18 @@ const _sfc_main = {
               selfRes.data.avg4 || 0
             ],
             color: "#FF7D00"
+          });
+        }
+        if (!friendRes.error && friendRes.data) {
+          newDatasets.push({
+            name: "商友评价",
+            data: [
+              friendRes.data.avg1 || 0,
+              friendRes.data.avg2 || 0,
+              friendRes.data.avg3 || 0,
+              friendRes.data.avg4 || 0
+            ],
+            color: "#4CAF50"
           });
         }
         if (!complexRes.error && complexRes.data) {
@@ -276,7 +339,7 @@ const _sfc_main = {
         }
         radarDatasets.value = newDatasets;
       } catch (e) {
-        common_vendor.index.__f__("error", "at packages/user-reviews/user-reviews.vue:497", "获取统计数据失败", e);
+        common_vendor.index.__f__("error", "at packages/user-reviews/user-reviews.vue:539", "获取统计数据失败", e);
       }
     };
     const fetchMyHistoryScore = async () => {
@@ -286,7 +349,7 @@ const _sfc_main = {
           error
         } = await ScoreApi.getInfo(targetUserId.value);
         if (!error && data) {
-          common_vendor.index.__f__("log", "at packages/user-reviews/user-reviews.vue:510", "✅ 获取到历史评分:", data);
+          common_vendor.index.__f__("log", "at packages/user-reviews/user-reviews.vue:552", "✅ 获取到历史评分:", data);
           if (data.id)
             scoreRecordId.value = data.id;
           Object.keys(scores.value).forEach((key) => {
@@ -296,16 +359,8 @@ const _sfc_main = {
           });
         }
       } catch (e) {
-        common_vendor.index.__f__("error", "at packages/user-reviews/user-reviews.vue:520", "获取历史评分异常:", e);
+        common_vendor.index.__f__("error", "at packages/user-reviews/user-reviews.vue:562", "获取历史评分异常:", e);
       }
-    };
-    const getScoreValue = (datasetIndex, dimIndex) => {
-      const ds = radarDatasets.value[datasetIndex];
-      if (ds && ds.data) {
-        const val = ds.data[dimIndex];
-        return val !== void 0 ? val : "-";
-      }
-      return "-";
     };
     return (_ctx, _cache) => {
       return common_vendor.e({
@@ -319,41 +374,58 @@ const _sfc_main = {
         f: common_vendor.o(($event) => switchTab(1)),
         g: currentTab.value === 0
       }, currentTab.value === 0 ? common_vendor.e({
-        h: common_vendor.p({
+        h: isSelf.value
+      }, isSelf.value ? {
+        i: common_vendor.p({
+          type: "info",
+          size: "30",
+          color: "#ccc"
+        })
+      } : common_vendor.e({
+        j: common_vendor.p({
           type: "hand-up-filled",
           size: "24",
           color: reviewForm.isLike === 1 ? "#fff" : "#FF6A00"
         }),
-        i: reviewForm.isLike === 1 ? "#fff" : "#FF6A00",
-        j: reviewForm.isLike === 1 ? 1 : "",
-        k: common_vendor.o(($event) => selectLike(1)),
-        l: common_vendor.p({
+        k: reviewForm.isLike === 1 ? "#fff" : "#FF6A00",
+        l: reviewForm.isLike === 1 ? 1 : "",
+        m: common_vendor.o(($event) => selectLike(1)),
+        n: common_vendor.p({
           type: "hand-down-filled",
           size: "24",
           color: reviewForm.isLike === 2 ? "#fff" : "#666"
         }),
-        m: reviewForm.isLike === 2 ? "#fff" : "#666",
-        n: reviewForm.isLike === 2 ? 1 : "",
-        o: common_vendor.o(($event) => selectLike(2)),
-        p: reviewForm.reviewContent,
-        q: common_vendor.o(($event) => reviewForm.reviewContent = $event.detail.value),
-        r: common_vendor.t(isReviewSubmitting.value ? "处理中..." : isReviewEditMode.value ? "修改反馈" : "提交反馈"),
-        s: isReviewSubmitting.value,
-        t: common_vendor.o(handleReviewSubmit),
-        v: recentReviews.value.length > 0
+        o: reviewForm.isLike === 2 ? "#fff" : "#666",
+        p: reviewForm.isLike === 2 ? 1 : "",
+        q: common_vendor.o(($event) => selectLike(2)),
+        r: reviewForm.reviewContent,
+        s: common_vendor.o(($event) => reviewForm.reviewContent = $event.detail.value),
+        t: common_vendor.t(isReviewSubmitting.value ? "处理中..." : isReviewEditMode.value ? "修改评价" : "提交评价"),
+        v: isReviewSubmitting.value,
+        w: common_vendor.o(handleReviewSubmit),
+        x: isReviewEditMode.value
+      }, isReviewEditMode.value ? {
+        y: common_vendor.p({
+          type: "trash-filled",
+          size: "26",
+          color: "#dd524d"
+        }),
+        z: common_vendor.o(handleReviewDelete)
+      } : {}), {
+        A: recentReviews.value.length > 0
       }, recentReviews.value.length > 0 ? {
-        w: common_vendor.f(recentReviews.value, (item, k0, i0) => {
+        B: common_vendor.f(recentReviews.value, (item, k0, i0) => {
           return common_vendor.e({
             a: item.isLike === 1
           }, item.isLike === 1 ? {
-            b: "91a56258-2-" + i0,
+            b: "91a56258-4-" + i0,
             c: common_vendor.p({
               type: "hand-up-filled",
               size: "18",
               color: "#FF6A00"
             })
           } : {
-            d: "91a56258-3-" + i0,
+            d: "91a56258-5-" + i0,
             e: common_vendor.p({
               type: "hand-down-filled",
               size: "18",
@@ -365,36 +437,11 @@ const _sfc_main = {
             h: item.id
           });
         }),
-        x: common_vendor.t(totalReviews.value),
-        y: common_vendor.o(goToAllReviews)
+        C: common_vendor.t(totalReviews.value),
+        D: common_vendor.o(goToAllReviews)
       } : {}) : {}, {
-        z: currentTab.value === 1
-      }, currentTab.value === 1 ? common_vendor.e({
-        A: radarDatasets.value.length > 0
-      }, radarDatasets.value.length > 0 ? {
-        B: common_vendor.p({
-          type: "data-filled",
-          size: "16",
-          color: "#1890FF"
-        }),
-        C: common_vendor.p({
-          categories: ["基础信用", "协作态度", "专业能力", "精神格局"],
-          datasets: radarDatasets.value
-        }),
-        D: common_vendor.f(["基础信用", "协作态度", "专业能力", "精神格局"], (dim, index, i0) => {
-          return {
-            a: common_vendor.t(dim),
-            b: common_vendor.t(getScoreValue(0, index)),
-            c: common_vendor.t(getScoreValue(1, index)),
-            d: index
-          };
-        })
-      } : {}, {
-        E: common_vendor.p({
-          type: "info-filled",
-          size: "16",
-          color: "#FF8C00"
-        }),
+        E: currentTab.value === 1
+      }, currentTab.value === 1 ? {
         F: common_vendor.p({
           type: "compose",
           size: "16",
@@ -405,8 +452,11 @@ const _sfc_main = {
           size: "20",
           color: "#ccc"
         }),
-        H: common_vendor.o(goToRatePage)
-      }) : {});
+        H: common_vendor.o(goToRatePage),
+        I: common_vendor.p({
+          datasets: radarDatasets.value
+        })
+      } : {});
     };
   }
 };

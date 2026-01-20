@@ -8,24 +8,24 @@
 			<view class="share-options">
 				<!-- 选项1：自发 (绑定我自己) -->
 				<!-- open-type="share" 是关键，点击后直接触发父页面的 onShareAppMessage -->
-				<button class="option-btn self-share" open-type="share" @click="handleShare('SELF')">
+				<button class="option-btn self-share" @click="handleShare('SELF')">
 					<view class="icon-wrap">
 						<uni-icons type="person-filled" size="32" color="#FF6A00"></uni-icons>
 					</view>
 					<view class="text-wrap">
-						<text class="main-text">自发推荐</text>
+						<text class="main-text">直发</text>
 						<text class="sub-text">新用户将绑定<text class="highlight">您</text>的邀请码</text>
 					</view>
 					<uni-icons type="right" size="16" color="#ccc"></uni-icons>
 				</button>
 
 				<!-- 选项2：代发 (绑定名片主) -->
-				<button class="option-btn proxy-share" open-type="share" @click="handleShare('PROXY')">
+				<button class="option-btn proxy-share" @click="handleShare('PROXY')">
 					<view class="icon-wrap">
 						<uni-icons type="staff-filled" size="32" color="#1890FF"></uni-icons>
 					</view>
 					<view class="text-wrap">
-						<text class="main-text">帮TA转发</text>
+						<text class="main-text">代发</text>
 						<text class="sub-text">新用户将绑定<text class="highlight">名片主人</text>的邀请码</text>
 					</view>
 					<uni-icons type="right" size="16" color="#ccc"></uni-icons>
@@ -117,6 +117,7 @@
 		text-align: left;
 		line-height: 1.5;
 		transition: all 0.2s;
+		width: 600rpx;
 
 		&::after {
 			border: none;

@@ -55,14 +55,14 @@ const _sfc_main = {
         d: common_vendor.o(close),
         e: common_vendor.p({
           type: "person",
-          size: "28",
+          size: "26",
           color: "#FF7009"
         }),
         f: common_vendor.o(($event) => handleAction("viewCard")),
         g: common_vendor.p({
           type: "star",
-          size: "24",
-          color: "#666"
+          size: "26",
+          color: "#FF7009"
         }),
         h: common_vendor.o(($event) => handleAction("comment")),
         i: common_vendor.p({
@@ -75,11 +75,11 @@ const _sfc_main = {
         l: common_vendor.o(($event) => handleAction("inviteCircle")),
         m: common_vendor.p({
           type: "plusempty",
-          size: "28",
-          color: "#fff"
+          size: "26",
+          color: "#FF7009"
         }),
         n: common_vendor.t(isSelf.value ? "本人" : "加入TA圈"),
-        o: common_vendor.n(isSelf.value ? "disabled" : "primary"),
+        o: common_vendor.n(isSelf.value ? "disabled" : "primary-outline"),
         p: common_vendor.o(($event) => handleAction("addCircle")),
         q: common_vendor.sr(popup, "5571075f-0", {
           "k": "popup"

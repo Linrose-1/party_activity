@@ -126,6 +126,35 @@
 				</view>
 			</view>
 
+			<!-- ==================== 猩友评价模块 ==================== -->
+			<view class="section-block score-statistics-section" v-if="radarDatasets && radarDatasets.length > 0">
+				<view class="section-title">
+					<uni-icons type="star-filled" size="18" color="#FF8500"></uni-icons>
+					<text>{{ isViewingOwnCard ? '我的猩友评价' : 'TA的猩友评价' }}</text>
+				</view>
+
+				<UserScoreBoard :datasets="radarDatasets" :showCard="false" :showTitle="false" />
+
+				<!-- 雷达图容器 -->
+				<!-- <view class="chart-wrapper">
+					<MyRadarChart :categories="['基础信用', '协作态度', '专业能力', '精神格局']" :datasets="radarDatasets" />
+				</view> -->
+
+				<!-- 维度得分对比表 -->
+				<!-- <view class="score-compare-table">
+					<view class="table-row header-row">
+						<view class="col dim">维度</view>
+						<view class="col val self">自我</view>
+						<view class="col val total">综合</view>
+					</view>
+					<view class="table-row" v-for="(dim, index) in ['基础信用', '协作态度', '专业能力', '精神格局']" :key="index">
+						<view class="col dim">{{ dim }}</view>
+						<view class="col val self">{{ getScoreValue(0, index) }}</view>
+						<view class="col val total">{{ getScoreValue(1, index) }}</view>
+					</view>
+				</view> -->
+			</view>
+
 			<!-- 7. 用户个人微信二维码 -->
 			<view class="user-qr-section" v-if="showUserQrCode">
 				<view class="qr-title">我的微信二维码</view>
@@ -163,7 +192,7 @@
 				<!-- <image :src="platformQrCodeUrl" mode="aspectFit" show-menu-by-longpress /> -->
 				<image :src="dynamicQrCodeUrl || platformQrCodeUrl" mode="aspectFit" show-menu-by-longpress />
 			</view>
-			<!-- 新增：平台二维码下方的提示文字 -->
+			<!-- 平台二维码下方的提示文字 -->
 			<view class="qr-hint-back">扫码或长按识别加入平台</view>
 			<!-- <view class="logo">
 				<image :src="logoUrl" mode="aspectFit" />
@@ -177,10 +206,10 @@
 	import {
 		computed
 	} from 'vue';
+	// import MyRadarChart from '@/components/MyRadarChart.vue';
+	import UserScoreBoard from '@/components/UserScoreBoard.vue';
 
 	const emit = defineEmits(['goToOpportunities']);
-
-
 	const props = defineProps({
 		// --- 身份核心信息 ---
 		avatar: {
@@ -309,6 +338,10 @@
 			type: String,
 			default: ''
 		},
+		radarDatasets: {
+			type: Array,
+			default: () => []
+		}
 	});
 
 	// 计算属性，处理多项社会职务
@@ -316,7 +349,17 @@
 		return props.professionalTitle ? props.professionalTitle.split(',').filter(item => item.trim()) : [];
 	});
 
-	// 【新增】计算属性，处理职业信息分组
+	// 辅助函数：从 datasets 中提取分值
+	const getScoreValue = (datasetIndex, dimIndex) => {
+		const ds = props.radarDatasets[datasetIndex];
+		if (ds && ds.data) {
+			const val = ds.data[dimIndex];
+			return val !== undefined ? val : '-';
+		}
+		return '-';
+	};
+
+	// 计算属性，处理职业信息分组
 	const careerGroups = computed(() => {
 		const companies = props.companyName ? props.companyName.split(',') : [];
 		const positions = props.positionTitle ? props.positionTitle.split(',') : [];
@@ -847,6 +890,58 @@
 			font-size: 30rpx;
 			font-weight: 500;
 			color: #F78C2F;
+		}
+	}
+
+	.chart-wrapper {
+		width: 100%;
+		height: 450rpx; // 稍微调小一点，适合名片布局
+		display: flex;
+		justify-content: center;
+		align-items: center;
+	}
+
+	.score-compare-table {
+		margin-top: 20rpx;
+		border: 1rpx solid #f0f0f0;
+		border-radius: 12rpx;
+		overflow: hidden;
+	}
+
+	.table-row {
+		display: flex;
+		border-bottom: 1rpx solid #f5f5f5;
+
+		&:last-child {
+			border-bottom: none;
+		}
+
+		&.header-row {
+			background-color: #fafafa;
+			font-weight: bold;
+		}
+
+		.col {
+			flex: 1;
+			padding: 12rpx 0;
+			text-align: center;
+			font-size: 22rpx;
+			color: #666;
+
+			&.dim {
+				flex: 1.5;
+				text-align: left;
+				padding-left: 20rpx;
+				color: #333;
+			}
+
+			&.self {
+				color: #FF7D00;
+			}
+
+			&.total {
+				color: #1890FF;
+			}
 		}
 	}
 
