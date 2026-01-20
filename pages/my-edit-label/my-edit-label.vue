@@ -211,7 +211,8 @@
 		const payload = {
 			...scores.value,
 			id: scoreRecordId.value,
-			userId: targetUserId.value
+			scorerId: targetUserId.value,//被评分人
+			userId: targetUserId.value // 评分人（这个加不加都没事，后端重新赋值了)
 		};
 
 		try {
