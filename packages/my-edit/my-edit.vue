@@ -568,61 +568,107 @@
 	// 获取并计算雷达图数据
 	const fetchRadarStatistics = async () => {
 		try {
-			// 并发请求：0=自评，3=综合
-			const [selfRes, friendRes,complexRes] = await Promise.all([
-				Api.getStatistics(userId.value, 0), // 自评
-				Api.getStatistics(userId.value, 1), // 商友
-				Api.getStatistics(userId.value, 3) // 综合
+			// 1. 并发请求：0=自评，1=商友，3=综合
+			const [selfRes, friendRes, complexRes] = await Promise.all([
+				Api.getStatistics(userId.value, 0),
+				Api.getStatistics(userId.value, 1),
+				Api.getStatistics(userId.value, 3)
 			]);
 
 			const newDatasets = [];
 
-			// 组装自我评价数据
-			if (!selfRes.error && selfRes.data) {
-				newDatasets.push({
-					name: '自我评价',
-					data: [
-						selfRes.data.avg1 || 0,
-						selfRes.data.avg2 || 0,
-						selfRes.data.avg3 || 0,
-						selfRes.data.avg4 || 0
-					],
-					color: '#FF7D00'
-				});
-			}
-			
-			if (!friendRes.error && friendRes.data) {
-				newDatasets.push({
-					name: '商友评价',
-					data: [
-						friendRes.data.avg1 || 0,
-						friendRes.data.avg2 || 0,
-						friendRes.data.avg3 || 0,
-						friendRes.data.avg4 || 0
-					],
-					color: '#4CAF50'
-				});
-			}
+			// 2. 索引 0：固定为 自我评价
+			newDatasets.push({
+				name: '自我评价',
+				data: (!selfRes.error && selfRes.data) ? [selfRes.data.avg1 || 0, selfRes.data.avg2 || 0,
+					selfRes.data.avg3 || 0, selfRes.data.avg4 || 0
+				] : [0, 0, 0, 0],
+				color: '#FF7D00'
+			});
 
-			// 组装综合评价数据
-			if (!complexRes.error && complexRes.data) {
-				newDatasets.push({
-					name: '综合评价',
-					data: [
-						complexRes.data.avg1 || 0,
-						complexRes.data.avg2 || 0,
-						complexRes.data.avg3 || 0,
-						complexRes.data.avg4 || 0
-					],
-					color: '#1890FF'
-				});
-			}
+			// 3. 索引 1：固定为 商友评价 (必须占住第2位)
+			newDatasets.push({
+				name: '商友评价',
+				data: (!friendRes.error && friendRes.data) ? [friendRes.data.avg1 || 0, friendRes.data
+					.avg2 || 0, friendRes.data.avg3 || 0, friendRes.data.avg4 || 0
+				] : [0, 0, 0, 0],
+				color: '#4CAF50'
+			});
 
+			// 4. 索引 2：固定为 综合评价 (必须占住第3位)
+			newDatasets.push({
+				name: '综合评价',
+				data: (!complexRes.error && complexRes.data) ? [complexRes.data.avg1 || 0, complexRes.data
+					.avg2 || 0, complexRes.data.avg3 || 0, complexRes.data.avg4 || 0
+				] : [0, 0, 0, 0],
+				color: '#1890FF'
+			});
+
+			// 5. 赋值
 			radarDatasets.value = newDatasets;
+			console.log('✅ 统计数据加载完毕，索引已固定：[0]自我, [1]商友, [2]综合');
+
 		} catch (e) {
-			console.error('获取统计数据失败', e);
+			console.error('获取统计数据异常', e);
 		}
 	};
+	// const fetchRadarStatistics = async () => {
+	// 	try {
+	// 		// 并发请求：0=自评，3=综合
+	// 		const [selfRes, friendRes,complexRes] = await Promise.all([
+	// 			Api.getStatistics(userId.value, 0), // 自评
+	// 			Api.getStatistics(userId.value, 1), // 商友
+	// 			Api.getStatistics(userId.value, 3) // 综合
+	// 		]);
+
+	// 		const newDatasets = [];
+
+	// 		// 组装自我评价数据
+	// 		if (!selfRes.error && selfRes.data) {
+	// 			newDatasets.push({
+	// 				name: '自我评价',
+	// 				data: [
+	// 					selfRes.data.avg1 || 0,
+	// 					selfRes.data.avg2 || 0,
+	// 					selfRes.data.avg3 || 0,
+	// 					selfRes.data.avg4 || 0
+	// 				],
+	// 				color: '#FF7D00'
+	// 			});
+	// 		}
+
+	// 		if (!friendRes.error && friendRes.data) {
+	// 			newDatasets.push({
+	// 				name: '商友评价',
+	// 				data: [
+	// 					friendRes.data.avg1 || 0,
+	// 					friendRes.data.avg2 || 0,
+	// 					friendRes.data.avg3 || 0,
+	// 					friendRes.data.avg4 || 0
+	// 				],
+	// 				color: '#4CAF50'
+	// 			});
+	// 		}
+
+	// 		// 组装综合评价数据
+	// 		if (!complexRes.error && complexRes.data) {
+	// 			newDatasets.push({
+	// 				name: '综合评价',
+	// 				data: [
+	// 					complexRes.data.avg1 || 0,
+	// 					complexRes.data.avg2 || 0,
+	// 					complexRes.data.avg3 || 0,
+	// 					complexRes.data.avg4 || 0
+	// 				],
+	// 				color: '#1890FF'
+	// 			});
+	// 		}
+
+	// 		radarDatasets.value = newDatasets;
+	// 	} catch (e) {
+	// 		console.error('获取统计数据失败', e);
+	// 	}
+	// };
 
 	const getAreaTreeData = async () => {
 		const {

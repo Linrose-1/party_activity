@@ -1,52 +1,67 @@
 <template>
 	<view class="container">
-		<!-- 只有在用户信息加载后才显示内容 -->
 		<template v-if="userInfo">
-			<!-- 我的智米模块 -->
+			<!-- 我的智米核心模块 -->
 			<view class="smart-rice-section">
-				<view class="smart-rice-header">
-					<view class="smart-rice-title">
-						<uni-icons type="wallet" size="24" color="#FF6B00"></uni-icons> 我的智米
+				<!-- 1. 标题与说明 -->
+				<view class="section-title-box">
+					<view class="main-title">
+						<uni-icons type="wallet-filled" size="22" color="#FF6F00"></uni-icons>
+						<text>我的智米</text>
 					</view>
-					<view class="smart-rice-value">{{ userInfo.point }} 智米</view>
+					<text class="sub-desc">智米是平台内的通用积分，可用于兑换平台内指定的服务或商品。</text>
 				</view>
-				<view class="smart-rice-info">
-					<p>智米是平台内的通用积分，可用于兑换平台内指定的服务或商品。</p>
+
+				<!-- 2. 数值展示区 -->
+				<view class="balance-display-card">
+					<view class="display-item">
+						<text class="num">{{ userInfo.point || 0 }}</text>
+						<text class="label">可用智米</text>
+						<text class="hint">当前剩余可用</text>
+					</view>
+					<view class="display-divider"></view>
+					<view class="display-item">
+						<text class="num total">{{ userInfo.totalPoint || 0 }}</text>
+						<text class="label">累计智米</text>
+						<text class="hint">历史获得总额</text>
+					</view>
 				</view>
+
+				<!-- 3. 操作按钮 -->
 				<view class="smart-rice-actions">
-					<button class="action-button exchange-button" @click="handleExchangeSmartRice">
-						<uni-icons type="forward" size="20" color="#fff"></uni-icons> 申请兑换
-					</button>
-					<button class="action-button recharge-button" @click="handleRechargeSmartRice">
-						<uni-icons type="wallet" size="20" color="#fff"></uni-icons> 立即充值
-					</button>
+					<button class="action-button exchange-btn" @click="handleExchangeSmartRice">申请兑换</button>
+					<button class="action-button recharge-btn" @click="handleRechargeSmartRice">立即充值</button>
 				</view>
-				<!-- 您可以根据需要添加更多说明或智米历史记录入口 -->
-				<!-- <p class="smart-rice-note">
-					<uni-icons type="info-filled" size="18" color="#FF6B00"></uni-icons> 智米充值请联系平台客服。
-				</p> -->
 			</view>
 
-			<!-- 可以在此位置添加 "智米明细"、"如何获取" 等其他相关模块 -->
-			<!-- <view class="related-section">
-				<view class="related-item" @click="showComingSoon">
-					<uni-icons type="list" size="22" color="#666"></uni-icons>
-					<text>智米明细</text>
-					<uni-icons type="right" size="16" color="#ccc"></uni-icons>
+			<!-- 最近智米明细预览 -->
+			<view class="record-preview-section">
+				<view class="section-header">
+					<text class="title">最近明细</text>
+					<view class="view-all" @click="goToAllRecords">
+						查看全部 <uni-icons type="right" size="14" color="#999"></uni-icons>
+					</view>
 				</view>
-				<view class="related-item" @click="showComingSoon">
-					<uni-icons type="help" size="22" color="#666"></uni-icons>
-					<text>如何获取智米</text>
-					<uni-icons type="right" size="16" color="#ccc"></uni-icons>
+
+				<view class="record-list" v-if="recentRecords.length > 0">
+					<view class="record-item" v-for="item in recentRecords" :key="item.id">
+						<view class="record-left">
+							<text class="record-title">{{ item.title }}</text>
+							<text class="record-date">{{ formatDate(item.createTime) }}</text>
+						</view>
+						<view class="record-right" :class="{ 'plus': item.point > 0 }">
+							{{ item.point > 0 ? '+' : '' }}{{ item.point }}
+						</view>
+					</view>
 				</view>
-			</view> -->
+				<view v-else class="empty-tip">暂无智米记录</view>
+			</view>
 		</template>
 
-		<!-- 加载中的占位符 -->
+		<!-- 加载中 -->
 		<view v-else class="loading-placeholder">
-			<uni-load-more status="loading" contentText="正在加载您的智米信息..."></uni-load-more>
+			<uni-load-more status="loading" contentText="加载中..."></uni-load-more>
 		</view>
-
 	</view>
 </template>
 
@@ -55,194 +70,253 @@
 		ref,
 		onMounted
 	} from 'vue';
-	// ‼️ 请确保此路径相对于您新文件的位置是正确的
-	import request from '../../utils/request.js';
+	import request from '@/utils/request.js';
 
-	// 1. 数据状态
 	const userInfo = ref(null);
+	const recentRecords = ref([]);
 
-	// 2. 生命周期函数
 	onMounted(() => {
-		// 页面加载时，获取最新的用户信息
 		fetchUserInfo();
+		fetchRecentRecords();
 	});
 
-	// 3. 数据获取方法
+	// 获取用户信息（包含可用智米 point 和 累计智米 totalPoint）
 	const fetchUserInfo = async () => {
 		const {
 			data,
 			error
-		} = await request('/app-api/member/user/get', {
-			method: 'GET'
-		});
-
-		if (error) {
-			uni.showToast({
-				title: `加载失败: ${error}`,
-				icon: 'none'
-			});
-			return;
-		}
-		userInfo.value = data;
+		} = await request('/app-api/member/user/get');
+		if (!error) userInfo.value = data;
 	};
 
-	// 4. 事件处理方法
-	/**
-	 * @description 处理点击 "申请兑换"
-	 */
+	// 获取最近 5 条记录
+	const fetchRecentRecords = async () => {
+		const {
+			data,
+			error
+		} = await request('/app-api/member/point/record/my-point-list', {
+			data: {
+				pageNo: 1,
+				pageSize: 5
+			}
+		});
+		if (!error && data) {
+			recentRecords.value = data.list;
+		}
+	};
+
+	const formatDate = (timestamp) => {
+		if (!timestamp) return '';
+		const date = new Date(timestamp);
+		return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+	};
+
+	const goToAllRecords = () => {
+		uni.navigateTo({
+			url: '/packages/smart-rice-records/smart-rice-records'
+		});
+	};
+
 	const handleExchangeSmartRice = () => {
 		uni.showToast({
-			title: '兑换功能正在开发中...',
+			title: '兑换功能正在开发中',
 			icon: 'none'
 		});
-		// 示例跳转: uni.navigateTo({ url: '/pages/exchange/exchange' });
 	};
 
-	/**
-	 * @description 处理点击 "立即充值"
-	 */
 	const handleRechargeSmartRice = () => {
 		uni.navigateTo({
-			url: '/pages/recharge/recharge' // 跳转到统一的充值页面
-		});
-	};
-
-	/**
-	 * @description 敬请期待提示
-	 */
-	const showComingSoon = () => {
-		uni.showToast({
-			title: '功能即将上线，敬请期待',
-			icon: 'none'
+			url: '/pages/recharge/recharge'
 		});
 	};
 </script>
 
 <style scoped>
-	/* 页面整体容器 */
 	.container {
-		background-color: #f7f8fa;
 		min-height: 100vh;
+		background-color: #F8F9FB;
 		padding: 30rpx;
 	}
 
-	/* 加载占位符样式 */
-	.loading-placeholder {
-		padding-top: 200rpx;
-	}
-
-	/* --- 我的智米模块核心样式 (从原页面抽取) --- */
+	/* 顶部模块 */
 	.smart-rice-section {
-		background: linear-gradient(to right, #fefefe, #f9f9f9);
-		border-radius: 40rpx;
-		padding: 50rpx;
-		margin-bottom: 40rpx;
-		box-shadow: 0 10rpx 30rpx rgba(0, 0, 0, 0.05);
-		border: 2rpx solid #eee;
+		background-color: #ffffff;
+		border-radius: 32rpx;
+		padding: 40rpx;
+		margin-bottom: 30rpx;
+		box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.02);
 	}
 
-	.smart-rice-header {
+	.section-title-box {
+		margin-bottom: 40rpx;
+	}
+
+	.main-title {
 		display: flex;
-		justify-content: space-between;
 		align-items: center;
-		margin-bottom: 40rpx;
-	}
-
-	.smart-rice-title {
-		font-size: 36rpx;
+		gap: 12rpx;
+		font-size: 34rpx;
 		font-weight: bold;
 		color: #333;
+		margin-bottom: 12rpx;
+	}
+
+	.sub-desc {
+		font-size: 24rpx;
+		color: #999;
+		line-height: 1.5;
+		display: block;
+	}
+
+	/* 数值展示卡片 */
+	.balance-display-card {
+		background: linear-gradient(135deg, #FFFBF8 0%, #FFF5EE 100%);
+		border: 1rpx solid #FFEDDF;
+		border-radius: 24rpx;
 		display: flex;
+		padding: 40rpx 0;
+		margin-bottom: 40rpx;
+	}
+
+	.display-item {
+		flex: 1;
+		display: flex;
+		flex-direction: column;
 		align-items: center;
 	}
 
-	.smart-rice-title uni-icons {
-		margin-right: 12rpx;
+	.display-divider {
+		width: 1rpx;
+		height: 80rpx;
+		background-color: #FFEDDF;
+		align-self: center;
 	}
 
-	.smart-rice-value {
+	.num {
 		font-size: 48rpx;
 		font-weight: bold;
-		color: #FF6B00;
+		color: #FF6F00;
+		margin-bottom: 8rpx;
 	}
 
-	.smart-rice-info {
+	.num.total {
+		color: #333;
+	}
+
+	.label {
 		font-size: 28rpx;
-		color: #666;
-		line-height: 1.6;
-		margin-bottom: 60rpx;
+		color: #333;
+		font-weight: 500;
+		margin-bottom: 4rpx;
 	}
 
+	.hint {
+		font-size: 20rpx;
+		color: #999;
+	}
+
+	/* 按钮操作 */
 	.smart-rice-actions {
 		display: flex;
-		justify-content: space-around;
-		gap: 30rpx;
-		margin-bottom: 20rpx;
-		/* 调整与底部的距离 */
+		gap: 24rpx;
 	}
 
 	.action-button {
 		flex: 1;
-		height: 90rpx;
-		border-radius: 50rpx;
-		border: none;
-		color: white;
-		font-size: 32rpx;
+		height: 88rpx;
+		line-height: 88rpx;
+		border-radius: 44rpx;
+		font-size: 28rpx;
 		font-weight: bold;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		cursor: pointer;
-		transition: all 0.3s;
-		box-shadow: 0 8rpx 20rpx rgba(0, 0, 0, 0.1);
 	}
 
-	/* 移除 button 默认边框，uni-app 中需要这样写 */
 	.action-button::after {
 		border: none;
 	}
 
-	.exchange-button {
-		background: linear-gradient(to right, #FF8C00, #FF6B00);
-	}
-
-	.recharge-button {
-		background: linear-gradient(to right, #007bff, #0056b3);
-	}
-
-	.action-button uni-icons {
-		margin-right: 15rpx;
-	}
-
-	.action-button:hover {
-		transform: translateY(-5rpx);
-		box-shadow: 0 12rpx 25rpx rgba(0, 0, 0, 0.2);
-	}
-
-	/* --- 新增的相关功能模块样式 --- */
-	.related-section {
+	.exchange-btn {
 		background-color: #fff;
-		border-radius: 20rpx;
-		overflow: hidden;
+		color: #FF6F00;
+		border: 2rpx solid #FF6F00;
 	}
 
-	.related-item {
+	.recharge-btn {
+		background-color: #FF6F00;
+		color: #fff;
+	}
+
+	/* 最近明细预览 */
+	.record-preview-section {
+		background-color: #ffffff;
+		border-radius: 32rpx;
+		padding: 30rpx 40rpx;
+	}
+
+	.section-header {
 		display: flex;
+		justify-content: space-between;
 		align-items: center;
-		padding: 30rpx;
+		padding-bottom: 20rpx;
+		border-bottom: 1rpx solid #F5F5F5;
+	}
+
+	.section-header .title {
 		font-size: 30rpx;
+		font-weight: bold;
 		color: #333;
 	}
 
-	.related-item:not(:last-child) {
-		border-bottom: 1rpx solid #f0f0f0;
+	.view-all {
+		font-size: 24rpx;
+		color: #999;
 	}
 
-	.related-item uni-icons:first-child {
-		margin-right: 20rpx;
+	.record-item {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: 30rpx 0;
+		border-bottom: 1rpx solid #F5F5F5;
 	}
 
-	.related-item text {
-		flex: 1;
+	.record-item:last-child {
+		border-bottom: none;
+	}
+
+	.record-left {
+		display: flex;
+		flex-direction: column;
+		gap: 6rpx;
+	}
+
+	.record-title {
+		font-size: 28rpx;
+		color: #333;
+	}
+
+	.record-date {
+		font-size: 22rpx;
+		color: #bbb;
+	}
+
+	.record-right {
+		font-size: 32rpx;
+		font-weight: bold;
+		color: #333;
+	}
+
+	.record-right.plus {
+		color: #FF6F00;
+	}
+
+	.empty-tip {
+		text-align: center;
+		padding: 60rpx 0;
+		color: #ccc;
+		font-size: 26rpx;
+	}
+
+	.loading-placeholder {
+		padding-top: 30vh;
 	}
 </style>

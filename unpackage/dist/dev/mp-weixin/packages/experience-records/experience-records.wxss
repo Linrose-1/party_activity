@@ -1,0 +1,113 @@
+
+.records-container.data-v-32cf1b5c {
+		min-height: 100vh;
+		background: #F8F9FB;
+}
+.filter-sticky.data-v-32cf1b5c {
+		position: -webkit-sticky;
+		position: sticky;
+		top: 0;
+		z-index: 10;
+		background: #fff;
+		box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+.tabs-box.data-v-32cf1b5c {
+		display: flex;
+		height: 88rpx;
+		border-bottom: 1rpx solid #eee;
+}
+.tab-item.data-v-32cf1b5c {
+		flex: 1;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 28rpx;
+		color: #666;
+		position: relative;
+}
+.tab-item.active.data-v-32cf1b5c {
+		color: #FF6B00;
+		font-weight: bold;
+}
+.tab-item.active .line.data-v-32cf1b5c {
+		position: absolute;
+		bottom: 0;
+		width: 40rpx;
+		height: 4rpx;
+		background: #FF6B00;
+}
+.date-filter-bar.data-v-32cf1b5c {
+		padding: 20rpx 30rpx;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+}
+.date-picker-trigger.data-v-32cf1b5c {
+		background: #F5F5F5;
+		padding: 12rpx 24rpx;
+		border-radius: 30rpx;
+		font-size: 24rpx;
+		color: #666;
+		display: flex;
+		align-items: center;
+		gap: 8rpx;
+}
+.reset-link.data-v-32cf1b5c {
+		font-size: 24rpx;
+		color: #FF6B00;
+}
+.list-content.data-v-32cf1b5c {
+		padding: 20rpx;
+}
+.record-card.data-v-32cf1b5c {
+		background: #fff;
+		border-radius: 20rpx;
+		padding: 24rpx;
+		margin-bottom: 20rpx;
+}
+.card-top.data-v-32cf1b5c {
+		display: flex;
+		justify-content: space-between;
+		align-items: flex-start;
+		margin-bottom: 12rpx;
+}
+.title.data-v-32cf1b5c {
+		font-size: 30rpx;
+		font-weight: bold;
+		color: #333;
+		flex: 1;
+}
+.amount.data-v-32cf1b5c {
+		font-size: 34rpx;
+		font-weight: bold;
+}
+.amount.is-plus.data-v-32cf1b5c {
+		color: #FF6B00;
+}
+.desc.data-v-32cf1b5c {
+		font-size: 26rpx;
+		color: #888;
+		margin-bottom: 16rpx;
+		display: block;
+}
+.card-bottom.data-v-32cf1b5c {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+}
+.time.data-v-32cf1b5c {
+		font-size: 22rpx;
+		color: #bbb;
+}
+.biz-tag.data-v-32cf1b5c {
+		font-size: 20rpx;
+		background: #FFF5EE;
+		color: #FF6B00;
+		padding: 4rpx 12rpx;
+		border-radius: 4rpx;
+}
+.empty-box.data-v-32cf1b5c {
+		text-align: center;
+		padding-top: 100rpx;
+		color: #999;
+}

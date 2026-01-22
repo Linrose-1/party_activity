@@ -1699,6 +1699,7 @@
 		margin-left: auto;
 		/* margin-left: 20rpx; */
 		/* 与标题的间距 */
+		border: 1rpx #FF7C1D solid;
 	}
 
 	.notice-icon {

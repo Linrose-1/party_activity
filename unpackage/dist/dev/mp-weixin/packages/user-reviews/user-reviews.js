@@ -312,6 +312,17 @@ const _sfc_main = {
             ],
             color: "#FF7D00"
           });
+        } else {
+          newDatasets.push({
+            name: "自我评价",
+            data: [
+              0,
+              0,
+              0,
+              0
+            ],
+            color: "#FF7D00"
+          });
         }
         if (!friendRes.error && friendRes.data) {
           newDatasets.push({
@@ -321,6 +332,17 @@ const _sfc_main = {
               friendRes.data.avg2 || 0,
               friendRes.data.avg3 || 0,
               friendRes.data.avg4 || 0
+            ],
+            color: "#4CAF50"
+          });
+        } else {
+          newDatasets.push({
+            name: "商友评价",
+            data: [
+              0,
+              0,
+              0,
+              0
             ],
             color: "#4CAF50"
           });
@@ -336,10 +358,21 @@ const _sfc_main = {
             ],
             color: "#1890FF"
           });
+        } else {
+          newDatasets.push({
+            name: "综合评价",
+            data: [
+              0,
+              0,
+              0,
+              0
+            ],
+            color: "#1890FF"
+          });
         }
         radarDatasets.value = newDatasets;
       } catch (e) {
-        common_vendor.index.__f__("error", "at packages/user-reviews/user-reviews.vue:539", "获取统计数据失败", e);
+        common_vendor.index.__f__("error", "at packages/user-reviews/user-reviews.vue:572", "获取统计数据失败", e);
       }
     };
     const fetchMyHistoryScore = async () => {
@@ -349,7 +382,7 @@ const _sfc_main = {
           error
         } = await ScoreApi.getInfo(targetUserId.value);
         if (!error && data) {
-          common_vendor.index.__f__("log", "at packages/user-reviews/user-reviews.vue:552", "✅ 获取到历史评分:", data);
+          common_vendor.index.__f__("log", "at packages/user-reviews/user-reviews.vue:585", "✅ 获取到历史评分:", data);
           if (data.id)
             scoreRecordId.value = data.id;
           Object.keys(scores.value).forEach((key) => {
@@ -359,7 +392,7 @@ const _sfc_main = {
           });
         }
       } catch (e) {
-        common_vendor.index.__f__("error", "at packages/user-reviews/user-reviews.vue:562", "获取历史评分异常:", e);
+        common_vendor.index.__f__("error", "at packages/user-reviews/user-reviews.vue:595", "获取历史评分异常:", e);
       }
     };
     return (_ctx, _cache) => {

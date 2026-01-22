@@ -1,87 +1,92 @@
 <template>
 	<view class="container">
-		<!-- 只有在用户信息加载后才显示内容 -->
 		<template v-if="userInfo">
-			<!-- 贡分获取区域 -->
-			<view class="points-section">
-				<view class="points-header">
-					<view class="points-title">
-						<uni-icons type="compose" size="24" color="#FF6B00"></uni-icons> 当前贡分
+			<!-- 1. 贡分数值展示区 (可用 + 累计) -->
+			<view class="section-card">
+				<view class="section-title-box">
+					<view class="main-title">
+						<uni-icons type="medal-filled" size="22" color="#FF6B00"></uni-icons>
+						<text>我的贡分</text>
 					</view>
-					<view class="points-value">{{ userInfo.currExperience }}</view>
+					<text class="sub-desc">贡分是衡量平台社交贡献度的核心指标，可用于提升等级及参与智米分配。</text>
 				</view>
-				<p class="section-desc">
-					通过完成以下任务获取贡分，提升您的社交等级：
-				</p>
-				<view class="task-grid">
-					<view class="task-card" v-for="(task, index) in tasks" :key="index" @click="handleTaskClick(task)">
-						<view class="task-header">
-							<view class="task-icon">
-								<uni-icons :type="task.icon" size="24" color="#FF6B00"></uni-icons>
-							</view>
-							<view class="task-name">{{ task.name }}</view>
-						</view>
-						<view class="task-desc">{{ task.desc }}</view>
-						<view class="task-footer">
-							<span class="task-points">{{ task.points }}</span>
-							<view class="task-action-icon">
-								<uni-icons type="forward" size="20" color="#FF6B00"></uni-icons>
-							</view>
-						</view>
+
+				<view class="balance-display-card">
+					<view class="display-item">
+						<text class="num">{{ userInfo.currExperience || 0 }}</text>
+						<text class="label">可用贡分</text>
+					</view>
+					<view class="display-divider"></view>
+					<view class="display-item">
+						<text class="num total">{{ userInfo.totalExperience || 0 }}</text>
+						<text class="label">累计贡分</text>
+					</view>
+				</view>
+
+				<!-- 业务说明 -->
+				<view class="explanation-box">
+					<view class="exp-item">
+						<uni-icons type="info" size="14" color="#FF6B00"></uni-icons>
+						<text>可用贡分：是指累计贡分减除已参与平台智米分配计算之后的贡分余额。</text>
+					</view>
+					<view class="exp-item">
+						<uni-icons type="info" size="14" color="#FF6B00"></uni-icons>
+						<text>累计贡分：是累计获得的历史贡分。</text>
 					</view>
 				</view>
 			</view>
 
-			<!-- 贡分历史记录 -->
-			<view class="history-section">
-				<view class="history-title">
-					<uni-icons type="bars" size="24" color="#FF6B00"></uni-icons> 贡分历史记录
+			<!-- 2. 获得方式 (完整还原 8 个原始任务) -->
+			<view class="section-card">
+				<view class="section-header">
+					<text class="title">获得方式</text>
+					<text class="title-tip">完成任务，提升等级</text>
 				</view>
-
-				<view v-if="historyList.length === 0 && historyLoadStatus === 'noMore'" class="history-empty">
-					<uni-icons type="info-filled" size="40" color="#ccc"></uni-icons>
-					<text>暂无贡分记录</text>
+				<view class="task-grid">
+					<view class="task-card" v-for="(task, index) in tasks" :key="index" @click="handleTaskClick(task)">
+						<view class="task-icon-wrap">
+							<uni-icons :type="task.icon" size="24" color="#FF6B00"></uni-icons>
+						</view>
+						<view class="task-content">
+							<view class="task-name-row">
+								<text class="task-name">{{ task.name }}</text>
+								<text class="task-points">{{ task.points }}</text>
+							</view>
+							<text class="task-desc">{{ task.desc }}</text>
+						</view>
+						<uni-icons type="right" size="14" color="#DDD"></uni-icons>
+					</view>
 				</view>
+			</view>
 
-				<view v-else class="history-list">
-					<view class="history-item" v-for="(record, index) in historyList"
-						:key="record.createTime + '-' + index">
-						<!-- ... 历史记录项内容无变化 ... -->
-						<view class="history-icon"
-							:class="{ 'positive-bg': record.experience >= 0, 'negative-bg': record.experience < 0 }">
-							<uni-icons :type="record.experience >= 0 ? 'arrow-up' : 'arrow-down'" size="20"
-								:color="record.experience >= 0 ? '#28a745' : '#dc3545'">
-							</uni-icons>
-						</view>
-						<view class="history-details">
-							<view class="history-task">{{ record.title }}</view>
-							<view class="history-date">{{ formatTimestamp(record.createTime) }}</view>
-						</view>
-						<view class="history-points"
-							:class="{ 'positive': record.experience >= 0, 'negative': record.experience < 0 }">
-							{{ record.experience > 0 ? '+' : '' }}{{ record.experience }}
-						</view>
+			<!-- 3. 最近获得的记录 (预览 5 条) -->
+			<view class="section-card">
+				<view class="section-header">
+					<text class="title">最近记录</text>
+					<view class="view-all" @click="goToAllRecords">
+						查看全部 <uni-icons type="right" size="14" color="#999"></uni-icons>
 					</view>
 				</view>
 
-				<uni-load-more v-if="historyList.length > 0 || historyLoadStatus === 'loading'"
-					:status="historyLoadStatus" :contentText="{
-						contentdown: '上拉显示更多',
-						contentrefresh: '正在加载...',
-						contentnomore: '—— 我是有底线的 ——'
-					}"></uni-load-more>
+				<view class="record-list" v-if="recentRecords.length > 0">
+					<view class="record-item" v-for="(item, index) in recentRecords" :key="index">
+						<view class="record-left">
+							<text class="record-title">{{ item.title }}</text>
+							<text class="record-date">{{ formatDate(item.createTime) }}</text>
+						</view>
+						<view class="record-right" :class="{ 'plus': item.experience > 0 }">
+							{{ item.experience > 0 ? '+' : '' }}{{ item.experience }}
+						</view>
+					</view>
+				</view>
+				<view v-else class="empty-tip">暂无贡分记录</view>
 			</view>
 		</template>
 
-		<!-- 【【【核心修复】】】 页面加载中占位 -->
 		<view v-else class="loading-placeholder">
-			<!-- 不再使用错误的 contentText 属性 -->
 			<uni-load-more status="loading"></uni-load-more>
-			<!-- 将自定义文本放在组件外部 -->
-			<text class="loading-text">正在加载您的贡分信息...</text>
 		</view>
 	</view>
-
 </template>
 
 <script setup>
@@ -89,18 +94,12 @@
 		ref,
 		onMounted
 	} from 'vue';
-	import {
-		onReachBottom
-	} from '@dcloudio/uni-app';
-	import request from '../../utils/request.js';
+	import request from '@/utils/request.js';
 
 	const userInfo = ref(null);
-	const historyList = ref([]);
-	const historyPageNo = ref(1);
-	const historyPageSize = ref(10);
-	const historyTotal = ref(0);
-	const historyLoadStatus = ref('more');
+	const recentRecords = ref([]);
 
+	// --- 完整还原 8 个原始任务数据 ---
 	const tasks = ref([{
 			icon: 'flag',
 			name: '发起聚会',
@@ -158,363 +157,283 @@
 			desc: '用户在平台的其他贡献',
 			points: '+n分',
 			path: '/packages/getPoints/getPoints'
-		},
+		}
 	]);
 
 	const tabBarPaths = ['/pages/active/active', '/pages/home/home'];
 
 	onMounted(() => {
 		fetchUserInfo();
-		getHistoryList(true);
-	});
-
-	onReachBottom(() => {
-		getHistoryList();
+		fetchRecentRecords();
 	});
 
 	const fetchUserInfo = async () => {
 		const {
 			data,
 			error
-		} = await request('/app-api/member/user/get', {
-			method: 'GET'
-		});
-		if (!error) {
-			userInfo.value = data;
-		} else {
-			console.error("获取用户信息失败:", error);
-		}
+		} = await request('/app-api/member/user/get');
+		if (!error) userInfo.value = data;
 	};
 
-	const getHistoryList = async (isRefresh = false) => {
-		if (historyLoadStatus.value === 'loading' || (historyLoadStatus.value === 'noMore' && !isRefresh)) {
-			return;
-		}
-		if (isRefresh) {
-			historyPageNo.value = 1;
-			historyList.value = [];
-			historyLoadStatus.value = 'more';
-		}
-		historyLoadStatus.value = 'loading';
-
+	const fetchRecentRecords = async () => {
+		// 接入新接口，获取前 5 条
 		const {
 			data,
 			error
-		} = await request('/app-api/member/experience-record/page', {
-			method: 'GET',
+		} = await request('/app-api/member/experience-record/my-experience-list', {
 			data: {
-				pageNo: historyPageNo.value,
-				pageSize: historyPageSize.value,
-			},
-		});
-
-		if (error) {
-			historyLoadStatus.value = 'more';
-			uni.showToast({
-				title: `历史记录加载失败: ${error}`,
-				icon: 'none'
-			});
-			return;
-		}
-
-		if (data && data.list && data.list.length > 0) {
-			historyList.value.push(...data.list);
-			historyTotal.value = data.total;
-			if (historyList.value.length >= historyTotal.value) {
-				historyLoadStatus.value = 'noMore';
-			} else {
-				historyLoadStatus.value = 'more';
-				historyPageNo.value++;
+				pageNo: 1,
+				pageSize: 5
 			}
-		} else {
-			// 如果 data.list 为空或不存在，说明没有更多数据了
-			historyLoadStatus.value = 'noMore';
+		});
+		if (!error && data) {
+			recentRecords.value = data.list;
 		}
+	};
+
+	const formatDate = (ts) => {
+		const d = new Date(ts);
+		return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+	};
+
+	const goToAllRecords = () => {
+		uni.navigateTo({
+			url: '/packages/experience-records/experience-records'
+		});
 	};
 
 	const handleTaskClick = (task) => {
-		if (!task.path) {
-			uni.showToast({
-				title: '敬请期待该任务上线',
-				icon: 'none'
-			});
-			return;
-		}
-
+		if (!task.path) return;
 		if (task.isTabBar || tabBarPaths.includes(task.path)) {
 			uni.switchTab({
-				url: task.path,
-				fail: (err) => {
-					console.error('switchTab 失败:', err);
-					uni.showToast({
-						title: '页面跳转失败',
-						icon: 'none'
-					});
-				}
+				url: task.path
 			});
 		} else {
 			uni.navigateTo({
-				url: task.path,
-				fail: (err) => {
-					console.error('navigateTo 失败:', err);
-					uni.showToast({
-						title: '页面跳转失败',
-						icon: 'none'
-					});
-				}
+				url: task.path
 			});
 		}
-	};
-
-	const formatTimestamp = (timestamp) => {
-		if (!timestamp) return '';
-		const date = new Date(timestamp);
-		const Y = date.getFullYear();
-		const M = (date.getMonth() + 1).toString().padStart(2, '0');
-		const D = date.getDate().toString().padStart(2, '0');
-		const h = date.getHours().toString().padStart(2, '0');
-		const m = date.getMinutes().toString().padStart(2, '0');
-		return `${Y}-${M}-${D} ${h}:${m}`;
 	};
 </script>
 
 <style scoped>
-	/* ... 其他样式无变化 ... */
 	.container {
-		background-color: #f7f8fa;
+		background-color: #F8F9FB;
 		min-height: 100vh;
-		padding: 30rpx;
+		padding: 24rpx;
 	}
 
-	/* --- 【【【核心修复】】】 --- */
-	.loading-placeholder {
-		padding-top: 200rpx;
+	.section-card {
+		background-color: #ffffff;
+		border-radius: 32rpx;
+		padding: 32rpx;
+		margin-bottom: 24rpx;
+		box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.02);
+	}
+
+	.section-title-box {
+		margin-bottom: 32rpx;
+	}
+
+	.main-title {
 		display: flex;
-		flex-direction: column;
 		align-items: center;
-		justify-content: center;
-	}
-
-	.loading-text {
-		color: #999;
-		font-size: 28rpx;
-		margin-top: 10rpx;
-	}
-
-	.points-section {
-		background: white;
-		border-radius: 40rpx;
-		padding: 40rpx;
-		margin-bottom: 40rpx;
-		box-shadow: 0 10rpx 30rpx rgba(0, 0, 0, 0.05);
-	}
-
-	.points-header {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		margin-bottom: 20rpx;
-	}
-
-	.points-title {
-		font-size: 36rpx;
+		gap: 12rpx;
+		font-size: 34rpx;
 		font-weight: bold;
 		color: #333;
+	}
+
+	.sub-desc {
+		font-size: 24rpx;
+		color: #999;
+		margin-top: 8rpx;
+		display: block;
+		line-height: 1.4;
+	}
+
+	.balance-display-card {
+		background: linear-gradient(135deg, #FFFBF8 0%, #FFF5EE 100%);
+		border-radius: 24rpx;
 		display: flex;
-		align-items: center;
+		padding: 40rpx 0;
+		border: 1rpx solid #FFEDDF;
 	}
 
-	.points-title uni-icons {
-		margin-right: 12rpx;
+	.display-item {
+		flex: 1;
+		text-align: center;
 	}
 
-	.points-value {
-		font-size: 48rpx;
+	.num {
+		font-size: 44rpx;
 		font-weight: bold;
 		color: #FF6B00;
+		display: block;
 	}
 
-	.section-desc {
-		font-size: 28rpx;
+	.num.total {
+		color: #333;
+	}
+
+	.label {
+		font-size: 26rpx;
 		color: #666;
-		margin-bottom: 40rpx;
+		margin-top: 10rpx;
+		display: block;
 	}
 
+	.display-divider {
+		width: 1rpx;
+		height: 60rpx;
+		background: #FFEDDF;
+		align-self: center;
+	}
+
+	.explanation-box {
+		margin-top: 24rpx;
+		background: #FDFCFB;
+		padding: 20rpx;
+		border-radius: 16rpx;
+		border: 1rpx dashed #FFEDDF;
+	}
+
+	.exp-item {
+		display: flex;
+		gap: 10rpx;
+		font-size: 22rpx;
+		color: #888;
+		margin-bottom: 10rpx;
+		line-height: 1.5;
+	}
+
+	.exp-item:last-child {
+		margin-bottom: 0;
+	}
+
+	/* 获得方式列表 - 调整为单列更清晰地展示描述 */
 	.task-grid {
-		display: grid;
-		grid-template-columns: repeat(2, 1fr);
-		gap: 30rpx;
+		margin-top: 20rpx;
 	}
 
 	.task-card {
-		background: #f9f9f9;
-		border-radius: 30rpx;
-		padding: 30rpx;
-		transition: all 0.2s ease-in-out;
-		border: 2rpx solid #eee;
-		display: flex;
-		flex-direction: column;
-	}
-
-	.task-card:active {
-		transform: scale(0.98);
-		background-color: #f0f0f0;
-	}
-
-	.task-header {
 		display: flex;
 		align-items: center;
+		padding: 24rpx;
+		background: #F9F9F9;
+		border-radius: 20rpx;
 		margin-bottom: 20rpx;
+		border: 1rpx solid #F0F0F0;
 	}
 
-	.task-icon {
-		width: 60rpx;
-		height: 60rpx;
+	.task-icon-wrap {
+		width: 80rpx;
+		height: 80rpx;
+		background: #fff;
 		border-radius: 20rpx;
-		background: #fff5e6;
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		margin-right: 20rpx;
-		flex-shrink: 0;
 	}
 
-	.task-name {
-		font-size: 30rpx;
-		font-weight: 600;
-		color: #333;
+	.task-content {
+		flex: 1;
 	}
 
-	.task-desc {
-		font-size: 26rpx;
-		color: #666;
-		margin-bottom: 30rpx;
-		line-height: 1.4;
-		flex-grow: 1;
-	}
-
-	.task-footer {
+	.task-name-row {
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		margin-top: auto;
+		margin-bottom: 6rpx;
+	}
+
+	.task-name {
+		font-size: 28rpx;
+		font-weight: bold;
+		color: #333;
 	}
 
 	.task-points {
-		display: inline-block;
-		background: rgba(255, 107, 0, 0.1);
+		font-size: 24rpx;
 		color: #FF6B00;
-		padding: 8rpx 20rpx;
-		border-radius: 40rpx;
-		font-size: 26rpx;
-		font-weight: 600;
-	}
-
-	.task-action-icon {
-		width: 60rpx;
-		height: 60rpx;
-		border-radius: 50%;
-		background-color: #fff;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		margin-left: auto;
-	}
-
-	.history-section {
-		background: white;
-		border-radius: 40rpx;
-		padding: 40rpx;
-		box-shadow: 0 10rpx 30rpx rgba(0, 0, 0, 0.05);
-	}
-
-	.history-title {
-		font-size: 36rpx;
 		font-weight: bold;
-		margin-bottom: 30rpx;
-		color: #333;
+	}
+
+	.task-desc {
+		font-size: 22rpx;
+		color: #999;
+	}
+
+	/* 底部记录列表 */
+	.section-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 24rpx;
+	}
+
+	.section-header .title {
+		font-size: 32rpx;
+		font-weight: bold;
+	}
+
+	.title-tip {
+		font-size: 22rpx;
+		color: #BBB;
+		margin-left: 16rpx;
+		font-weight: normal;
+	}
+
+	.view-all {
+		font-size: 24rpx;
+		color: #999;
 		display: flex;
 		align-items: center;
 	}
 
-	.history-title uni-icons {
-		margin-right: 20rpx;
-	}
-
-	.history-list {}
-
-	.history-item {
+	.record-item {
 		display: flex;
-		padding: 30rpx 0;
-		border-bottom: 2rpx solid #f0f0f0;
+		justify-content: space-between;
 		align-items: center;
+		padding: 24rpx 0;
+		border-bottom: 1rpx solid #F5F5F5;
 	}
 
-	.history-item:last-child {
+	.record-item:last-child {
 		border-bottom: none;
 	}
 
-	.history-icon {
-		width: 80rpx;
-		height: 80rpx;
-		border-radius: 20rpx;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		margin-right: 30rpx;
-	}
-
-	.history-icon.positive-bg {
-		background-color: #e8f5e9;
-	}
-
-	.history-icon.negative-bg {
-		background-color: #fce4e4;
-	}
-
-	.history-details {
-		flex: 1;
-		min-width: 0;
-	}
-
-	.history-task {
-		font-size: 30rpx;
-		font-weight: 500;
-		margin-bottom: 10rpx;
-		white-space: nowrap;
-		overflow: hidden;
-		text-overflow: ellipsis;
-	}
-
-	.history-date {
-		font-size: 26rpx;
-		color: #888;
-	}
-
-	.history-points {
-		font-weight: bold;
-		font-size: 32rpx;
-	}
-
-	.history-points.positive {
-		color: #28a745;
-	}
-
-	.history-points.negative {
-		color: #dc3545;
-	}
-
-	.history-empty {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: center;
-		padding: 80rpx 40rpx;
-		color: #999;
+	.record-title {
 		font-size: 28rpx;
+		color: #333;
+		margin-bottom: 6rpx;
+		display: block;
 	}
 
-	.history-empty text {
-		margin-top: 20rpx;
+	.record-date {
+		font-size: 22rpx;
+		color: #bbb;
+	}
+
+	.record-right {
+		font-size: 32rpx;
+		font-weight: bold;
+		color: #333;
+	}
+
+	.record-right.plus {
+		color: #FF6B00;
+	}
+
+	.empty-tip {
+		text-align: center;
+		color: #ccc;
+		padding: 60rpx;
+		font-size: 24rpx;
+	}
+
+	.loading-placeholder {
+		padding-top: 30vh;
 	}
 </style>

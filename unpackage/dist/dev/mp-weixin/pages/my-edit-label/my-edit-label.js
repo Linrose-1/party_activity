@@ -113,7 +113,10 @@ const _sfc_main = {
       const payload = {
         ...scores.value,
         id: scoreRecordId.value,
+        scorerId: targetUserId.value,
+        //被评分人
         userId: targetUserId.value
+        // 评分人（这个加不加都没事，后端重新赋值了)
       };
       try {
         const {

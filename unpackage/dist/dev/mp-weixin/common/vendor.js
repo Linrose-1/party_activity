@@ -7299,7 +7299,7 @@ function initOnError() {
 function initRuntimeSocketService() {
   const hosts = "172.20.10.4,127.0.0.1";
   const port = "8090";
-  const id = "mp-weixin_eHQ736";
+  const id = "mp-weixin_yeWxU_";
   const lazy = typeof swan !== "undefined";
   let restoreError = lazy ? () => {
   } : initOnError();
@@ -8623,6 +8623,18 @@ const subPackages = [
         path: "ContactService/ContactService",
         style: {
           navigationBarTitleText: "平台客服"
+        }
+      },
+      {
+        path: "smart-rice-records/smart-rice-records",
+        style: {
+          navigationBarTitleText: "智米记录"
+        }
+      },
+      {
+        path: "experience-records/experience-records",
+        style: {
+          navigationBarTitleText: "全部贡分记录"
         }
       }
     ]

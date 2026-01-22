@@ -19,7 +19,19 @@ const _sfc_main = {
     const activityInfo = common_vendor.ref({});
     const qrCodeImage = common_vendor.ref([]);
     const qrCodeUrl = common_vendor.ref("");
+    const staticWords = common_vendor.ref({
+      refundAmountLabel: "退款金额",
+      pageTitle: "申请退款",
+      tipText: "您正在为以下聚会申请退款",
+      currencySymbol: "¥",
+      uploadDesc: "请上传收款码，以便组织者能准确向您退款。",
+      submitBtnText: "提交申请",
+      uploadBtnText: "点击上传收款码",
+      sectionTitle2: "上传收款码",
+      sectionTitle1: "退款聚会"
+    });
     common_vendor.onLoad((options) => {
+      fetchStaticWords();
       if (options.item) {
         try {
           const decodedData = decodeURIComponent(options.item);
@@ -34,14 +46,34 @@ const _sfc_main = {
           };
           fetchExistingRefundInfo();
         } catch (e) {
-          common_vendor.index.__f__("error", "at pages/my-active-apply/my-active-apply.vue:90", "解析聚会数据失败:", e);
-          common_vendor.index.showToast({ title: "加载聚会信息失败", icon: "none" });
+          common_vendor.index.__f__("error", "at pages/my-active-apply/my-active-apply.vue:104", "解析聚会数据失败:", e);
+          common_vendor.index.showToast({
+            title: "加载聚会信息失败",
+            icon: "none"
+          });
         }
       } else {
-        common_vendor.index.__f__("error", "at pages/my-active-apply/my-active-apply.vue:94", "未从上个页面接收到聚会信息");
-        common_vendor.index.showToast({ title: "无法获取聚会信息", icon: "none" });
+        common_vendor.index.__f__("error", "at pages/my-active-apply/my-active-apply.vue:111", "未从上个页面接收到聚会信息");
+        common_vendor.index.showToast({
+          title: "无法获取聚会信息",
+          icon: "none"
+        });
       }
     });
+    const fetchStaticWords = async () => {
+      const {
+        data,
+        error
+      } = await utils_request.request("/app-api/member/config/getStaticWord", {
+        method: "GET"
+      });
+      if (!error && data) {
+        staticWords.value = data;
+        common_vendor.index.setNavigationBarTitle({
+          title: data.pageTitle
+        });
+      }
+    };
     const fetchExistingRefundInfo = async () => {
       if (!fullActivityData.value || !fullActivityData.value.memberActivityJoinResp) {
         return;
@@ -60,7 +92,7 @@ const _sfc_main = {
       if (result.data && result.data.list && result.data.list.length > 0) {
         const existingRecord = result.data.list[0];
         if (existingRecord.refundScreenshotUrl) {
-          common_vendor.index.__f__("log", "at pages/my-active-apply/my-active-apply.vue:123", "发现已存在的收款码:", existingRecord.refundScreenshotUrl);
+          common_vendor.index.__f__("log", "at pages/my-active-apply/my-active-apply.vue:160", "发现已存在的收款码:", existingRecord.refundScreenshotUrl);
           qrCodeUrl.value = existingRecord.refundScreenshotUrl;
           qrCodeImage.value = [{
             name: "existing_qrcode.png",
@@ -85,16 +117,27 @@ const _sfc_main = {
     };
     const handleImageSelect = async (e) => {
       const tempFilePath = e.tempFiles[0];
-      common_vendor.index.showLoading({ title: "上传中...", mask: true });
-      const result = await utils_upload.uploadFile(tempFilePath, { directory: "refund_qrcode" });
+      common_vendor.index.showLoading({
+        title: "上传中...",
+        mask: true
+      });
+      const result = await utils_upload.uploadFile(tempFilePath, {
+        directory: "refund_qrcode"
+      });
       common_vendor.index.hideLoading();
       if (result.data) {
         qrCodeUrl.value = result.data;
-        common_vendor.index.showToast({ title: "上传成功", icon: "success" });
+        common_vendor.index.showToast({
+          title: "上传成功",
+          icon: "success"
+        });
       } else {
         qrCodeImage.value = [];
         qrCodeUrl.value = "";
-        common_vendor.index.showToast({ title: result.error || "上传失败", icon: "none" });
+        common_vendor.index.showToast({
+          title: result.error || "上传失败",
+          icon: "none"
+        });
       }
     };
     const handleImageDelete = () => {
@@ -103,14 +146,22 @@ const _sfc_main = {
     };
     const handleSubmit = async () => {
       if (!qrCodeUrl.value) {
-        common_vendor.index.showToast({ title: "请先上传收款码", icon: "none" });
+        common_vendor.index.showToast({
+          title: "请先上传收款码",
+          icon: "none"
+        });
         return;
       }
       if (!fullActivityData.value || !fullActivityData.value.memberActivityJoinResp) {
-        common_vendor.index.showToast({ title: "报名信息不完整，无法申请", icon: "none" });
+        common_vendor.index.showToast({
+          title: "报名信息不完整，无法申请",
+          icon: "none"
+        });
         return;
       }
-      common_vendor.index.showLoading({ title: "正在提交..." });
+      common_vendor.index.showLoading({
+        title: "正在提交..."
+      });
       const payload = {
         id: fullActivityData.value.memberActivityJoinResp.id,
         activityId: fullActivityData.value.id,
@@ -122,7 +173,10 @@ const _sfc_main = {
       });
       common_vendor.index.hideLoading();
       if (submitResult.error) {
-        common_vendor.index.showToast({ title: `申请失败: ${submitResult.error}`, icon: "none" });
+        common_vendor.index.showToast({
+          title: `申请失败: ${submitResult.error}`,
+          icon: "none"
+        });
       } else {
         common_vendor.index.showModal({
           title: "提交成功",
@@ -141,27 +195,33 @@ const _sfc_main = {
           color: "#FF6B00",
           size: "18"
         }),
-        b: activityInfo.value.image,
-        c: common_vendor.t(activityInfo.value.title),
-        d: common_vendor.p({
+        b: common_vendor.t(staticWords.value.tipText),
+        c: common_vendor.t(staticWords.value.sectionTitle1),
+        d: activityInfo.value.image,
+        e: common_vendor.t(activityInfo.value.title),
+        f: common_vendor.p({
           type: "calendar-filled",
           color: "#999",
           size: "16"
         }),
-        e: common_vendor.t(activityInfo.value.date),
-        f: common_vendor.t(activityInfo.value.fee),
-        g: common_vendor.o(handleImageSelect),
-        h: common_vendor.o(handleImageDelete),
-        i: common_vendor.o(($event) => qrCodeImage.value = $event),
-        j: common_vendor.p({
+        g: common_vendor.t(activityInfo.value.date),
+        h: common_vendor.t(staticWords.value.refundAmountLabel),
+        i: common_vendor.t(activityInfo.value.fee),
+        j: common_vendor.t(staticWords.value.sectionTitle2),
+        k: common_vendor.t(staticWords.value.uploadDesc),
+        l: common_vendor.o(handleImageSelect),
+        m: common_vendor.o(handleImageDelete),
+        n: common_vendor.o(($event) => qrCodeImage.value = $event),
+        o: common_vendor.p({
           ["file-mediatype"]: "image",
           mode: "grid",
           limit: 1,
-          title: "点击上传收款码",
+          title: staticWords.value.uploadBtnText,
           modelValue: qrCodeImage.value
         }),
-        k: common_vendor.o(handleSubmit),
-        l: !qrCodeUrl.value
+        p: common_vendor.t(staticWords.value.submitBtnText),
+        q: common_vendor.o(handleSubmit),
+        r: !qrCodeUrl.value
       };
     };
   }

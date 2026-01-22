@@ -163,23 +163,15 @@
 			</view>
 		</view>
 
-		<!-- 5. 数字标签 (保持不变) -->
+		<!-- 5. 数字标签-->
 		<view class="info-section">
 			<view class="section-header">
 				<uni-icons type="map-filled" size="24" :color="themeColor"></uni-icons>
 				<text class="section-title">数字标签 (自我评价)</text>
 			</view>
-			<view class="chart-wrapper">
-				<MyRadarChart v-if="radarSeriesData.length > 0" :categories="radarCategories"
-					:series-data="radarSeriesData" :theme-color="themeColor" />
-				<view v-else class="chart-loading">正在加载图表...</view>
-			</view>
-			<view class="chart-legend" v-if="radarSeriesData.length > 0">
-				<view class="legend-item" v-for="(item, index) in radarCategories" :key="index">
-					<view class="dot" :style="{ backgroundColor: themeColor }"></view>
-					<text>{{ item }}: {{ radarSeriesData[index] }}分</text>
-				</view>
-			</view>
+			<UserScoreBoard v-if="radarDatasets.length > 0" :datasets="radarDatasets" :showCard="false"
+				:showTitle="false" />
+			<view v-else class="chart-loading">暂无评分统计信息</view>
 		</view>
 	</view>
 </template>
@@ -193,10 +185,12 @@
 		onLoad
 	} from '@dcloudio/uni-app';
 	import request from '@/utils/request.js';
-	import MyRadarChart from '@/components/MyRadarChart.vue';
+	// import MyRadarChart from '@/components/MyRadarChart.vue';
+	import UserScoreBoard from '@/components/UserScoreBoard.vue';
 
 	const themeColor = '#FF7D00';
 	const userInfo = ref(null);
+	const radarDatasets = ref([]);
 	const radarCategories = ref(["基础信用", "协作态度", "专业能力", "精神格局"]);
 	const radarSeriesData = ref([]);
 	// 当前登录用户的ID
@@ -218,6 +212,7 @@
 			});
 			return uni.navigateBack();
 		}
+
 		uni.showLoading({
 			title: '正在加载...'
 		});
@@ -230,9 +225,12 @@
 			});
 			if (userRes.error || !userRes.data) throw new Error('获取用户信息失败');
 			userInfo.value = userRes.data;
+
 			uni.setNavigationBarTitle({
 				title: `${userRes.data.nickname || '用户'}的详情`
 			});
+
+			// 加载三项评分数据
 			await fetchScoreStatistics(userId);
 		} catch (e) {
 			uni.showToast({
@@ -278,28 +276,69 @@
 		return result;
 	});
 
+	/**
+	 * 获取并计算雷达图数据（整合自评、商友、综合）
+	 */
 	const fetchScoreStatistics = async (userId) => {
 		try {
-			const {
-				data,
-				error
-			} = await request('/app-api/member/user-scores/complexStatistics', {
-				method: 'GET',
-				data: {
-					userId,
-					type: 0
-				}
+			// 并发请求：0=自评，1=商友，3=综合
+			const [selfRes, friendRes, complexRes] = await Promise.all([
+				request('/app-api/member/user-scores/complexStatistics', {
+					method: 'GET',
+					data: {
+						userId,
+						type: 0
+					}
+				}),
+				request('/app-api/member/user-scores/complexStatistics', {
+					method: 'GET',
+					data: {
+						userId,
+						type: 1
+					}
+				}),
+				request('/app-api/member/user-scores/complexStatistics', {
+					method: 'GET',
+					data: {
+						userId,
+						type: 3
+					}
+				})
+			]);
+
+			const newDatasets = [];
+
+			// 1. 自我评价
+			newDatasets.push({
+				name: '自我评价',
+				data: (!selfRes.error && selfRes.data) ? [selfRes.data.avg1, selfRes.data.avg2, selfRes
+					.data.avg3, selfRes.data.avg4
+				] : [0, 0, 0, 0],
+				color: '#FF7D00'
 			});
-			if (error) throw new Error('获取评分数据失败');
-			radarSeriesData.value = [
-				data?.avg1 || 0,
-				data?.avg2 || 0,
-				data?.avg3 || 0,
-				data?.avg4 || 0
-			];
+
+			// 2. 商友评价
+			newDatasets.push({
+				name: '商友评价',
+				data: (!friendRes.error && friendRes.data) ? [friendRes.data.avg1, friendRes.data.avg2,
+					friendRes.data.avg3, friendRes.data.avg4
+				] : [0, 0, 0, 0],
+				color: '#4CAF50'
+			});
+
+			// 3. 综合评价
+			newDatasets.push({
+				name: '综合评价',
+				data: (!complexRes.error && complexRes.data) ? [complexRes.data.avg1, complexRes.data.avg2,
+					complexRes.data.avg3, complexRes.data.avg4
+				] : [0, 0, 0, 0],
+				color: '#1890FF'
+			});
+
+			radarDatasets.value = newDatasets;
 		} catch (e) {
-			console.error(e.message);
-			radarSeriesData.value = [0, 0, 0, 0];
+			console.error('获取评分数据失败', e);
+			radarDatasets.value = [];
 		}
 	};
 

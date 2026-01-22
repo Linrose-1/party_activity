@@ -264,52 +264,44 @@ const _sfc_main = {
       try {
         const [selfRes, friendRes, complexRes] = await Promise.all([
           Api.getStatistics(userId.value, 0),
-          // 自评
           Api.getStatistics(userId.value, 1),
-          // 商友
           Api.getStatistics(userId.value, 3)
-          // 综合
         ]);
         const newDatasets = [];
-        if (!selfRes.error && selfRes.data) {
-          newDatasets.push({
-            name: "自我评价",
-            data: [
-              selfRes.data.avg1 || 0,
-              selfRes.data.avg2 || 0,
-              selfRes.data.avg3 || 0,
-              selfRes.data.avg4 || 0
-            ],
-            color: "#FF7D00"
-          });
-        }
-        if (!friendRes.error && friendRes.data) {
-          newDatasets.push({
-            name: "商友评价",
-            data: [
-              friendRes.data.avg1 || 0,
-              friendRes.data.avg2 || 0,
-              friendRes.data.avg3 || 0,
-              friendRes.data.avg4 || 0
-            ],
-            color: "#4CAF50"
-          });
-        }
-        if (!complexRes.error && complexRes.data) {
-          newDatasets.push({
-            name: "综合评价",
-            data: [
-              complexRes.data.avg1 || 0,
-              complexRes.data.avg2 || 0,
-              complexRes.data.avg3 || 0,
-              complexRes.data.avg4 || 0
-            ],
-            color: "#1890FF"
-          });
-        }
+        newDatasets.push({
+          name: "自我评价",
+          data: !selfRes.error && selfRes.data ? [
+            selfRes.data.avg1 || 0,
+            selfRes.data.avg2 || 0,
+            selfRes.data.avg3 || 0,
+            selfRes.data.avg4 || 0
+          ] : [0, 0, 0, 0],
+          color: "#FF7D00"
+        });
+        newDatasets.push({
+          name: "商友评价",
+          data: !friendRes.error && friendRes.data ? [
+            friendRes.data.avg1 || 0,
+            friendRes.data.avg2 || 0,
+            friendRes.data.avg3 || 0,
+            friendRes.data.avg4 || 0
+          ] : [0, 0, 0, 0],
+          color: "#4CAF50"
+        });
+        newDatasets.push({
+          name: "综合评价",
+          data: !complexRes.error && complexRes.data ? [
+            complexRes.data.avg1 || 0,
+            complexRes.data.avg2 || 0,
+            complexRes.data.avg3 || 0,
+            complexRes.data.avg4 || 0
+          ] : [0, 0, 0, 0],
+          color: "#1890FF"
+        });
         radarDatasets.value = newDatasets;
+        common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:609", "✅ 统计数据加载完毕，索引已固定：[0]自我, [1]商友, [2]综合");
       } catch (e) {
-        common_vendor.index.__f__("error", "at packages/my-edit/my-edit.vue:623", "获取统计数据失败", e);
+        common_vendor.index.__f__("error", "at packages/my-edit/my-edit.vue:612", "获取统计数据异常", e);
       }
     };
     const getAreaTreeData = async () => {
@@ -318,7 +310,7 @@ const _sfc_main = {
         error
       } = await Api.getAreaTree();
       if (error) {
-        common_vendor.index.__f__("error", "at packages/my-edit/my-edit.vue:633", "获取地区树失败:", error);
+        common_vendor.index.__f__("error", "at packages/my-edit/my-edit.vue:679", "获取地区树失败:", error);
       } else {
         areaTree.value = data || [];
       }
@@ -347,10 +339,10 @@ const _sfc_main = {
         error
       } = await Api.getIndustryTree();
       if (error) {
-        common_vendor.index.__f__("error", "at packages/my-edit/my-edit.vue:680", "获取行业树失败:", error);
+        common_vendor.index.__f__("error", "at packages/my-edit/my-edit.vue:726", "获取行业树失败:", error);
       } else {
         industryTree.value = processIndustryTree(data || []);
-        common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:684", "处理后的行业树:", industryTree.value);
+        common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:730", "处理后的行业树:", industryTree.value);
       }
     };
     function findPathById(tree, targetId) {
@@ -444,14 +436,14 @@ const _sfc_main = {
       }
       setTimeout(() => {
         isDataLoaded.value = true;
-        common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:844", "✅ [系统状态] 数据初始化完成，开始监听修改...");
+        common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:890", "✅ [系统状态] 数据初始化完成，开始监听修改...");
         checkAndRestoreDraft();
       }, 500);
     };
     const checkAndRestoreDraft = () => {
       const draftStr = common_vendor.index.getStorageSync(DRAFT_KEY);
       if (!draftStr) {
-        common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:855", "📭 [缓存检查] 无本地草稿");
+        common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:901", "📭 [缓存检查] 无本地草稿");
         return;
       }
       common_vendor.index.showModal({
@@ -563,7 +555,7 @@ const _sfc_main = {
             src: tempFilePath,
             cropScale: "1:1",
             success: (cropRes) => uploadAvatar(cropRes.tempFilePath),
-            fail: (err) => common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:986", "用户取消裁剪或裁剪失败:", err)
+            fail: (err) => common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:1032", "用户取消裁剪或裁剪失败:", err)
           });
         }
       });
@@ -602,11 +594,11 @@ const _sfc_main = {
             src: tempFilePath,
             cropScale: "1:1",
             success: (cropRes) => {
-              common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:1038", "二维码裁剪成功");
+              common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:1084", "二维码裁剪成功");
               uploadQrCode(cropRes.tempFilePath);
             },
             fail: (err) => {
-              common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:1042", "取消裁剪或失败:", err);
+              common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:1088", "取消裁剪或失败:", err);
             }
           });
         }
@@ -679,7 +671,7 @@ const _sfc_main = {
           });
         } else {
           common_vendor.index.removeStorageSync(DRAFT_KEY);
-          common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:1204", "🧹 [提交成功] 草稿已清除");
+          common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:1250", "🧹 [提交成功] 草稿已清除");
           common_vendor.index.showToast({
             title: "资料保存成功",
             icon: "success"
@@ -701,7 +693,7 @@ const _sfc_main = {
           }, 800);
         }
       }).catch((err) => {
-        common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:1232", "表单验证失败：", err);
+        common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:1278", "表单验证失败：", err);
       });
     };
     const handleAutoPost = async () => {

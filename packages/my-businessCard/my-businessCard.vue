@@ -345,7 +345,7 @@
 	// 获取雷达图数据
 	const fetchRadarStatistics = async (userId) => {
 		try {
-			// 并发请求 type 0 (自评) 和 type 3 (综合)
+			// 1. 并发请求：0=自评, 1=商友, 3=综合
 			const [selfRes, friendRes, complexRes] = await Promise.all([
 				request('/app-api/member/user-scores/complexStatistics', {
 					method: 'GET',
@@ -371,38 +371,102 @@
 			]);
 
 			const newDatasets = [];
-			if (!selfRes.error && selfRes.data) {
-				newDatasets.push({
-					name: '自我评价',
-					data: [selfRes.data.avg1 || 0, selfRes.data.avg2 || 0, selfRes.data.avg3 || 0, selfRes
-						.data.avg4 || 0
-					],
-					color: '#FF7D00'
-				});
-			}
-			if (!friendRes.error && friendRes.data) {
-				newDatasets.push({
-					name: '商友评价',
-					data: [friendRes.data.avg1 || 0, friendRes.data.avg2 || 0, friendRes.data.avg3 || 0,
-						friendRes.data.avg4 || 0
-					],
-					color: '#4CAF50'
-				});
-			}
-			if (!complexRes.error && complexRes.data) {
-				newDatasets.push({
-					name: '综合评价',
-					data: [complexRes.data.avg1 || 0, complexRes.data.avg2 || 0, complexRes.data.avg3 || 0,
-						complexRes.data.avg4 || 0
-					],
-					color: '#1890FF'
-				});
-			}
+
+			// 2. 固定顺序填充 - 索引 0：自我评价
+			newDatasets.push({
+				name: '自我评价',
+				data: (!selfRes.error && selfRes.data) ? [selfRes.data.avg1 || 0, selfRes.data.avg2 || 0,
+					selfRes.data.avg3 || 0, selfRes.data.avg4 || 0
+				] : [0, 0, 0, 0],
+				color: '#FF7D00'
+			});
+
+			// 3. 固定顺序填充 - 索引 1：商友评价 (确保 type 1 对应这里)
+			newDatasets.push({
+				name: '商友评价',
+				data: (!friendRes.error && friendRes.data) ? [friendRes.data.avg1 || 0, friendRes.data
+					.avg2 || 0, friendRes.data.avg3 || 0, friendRes.data.avg4 || 0
+				] : [0, 0, 0, 0],
+				color: '#4CAF50'
+			});
+
+			// 4. 固定顺序填充 - 索引 2：综合评价 (确保 type 3 对应这里)
+			newDatasets.push({
+				name: '综合评价',
+				data: (!complexRes.error && complexRes.data) ? [complexRes.data.avg1 || 0, complexRes.data
+					.avg2 || 0, complexRes.data.avg3 || 0, complexRes.data.avg4 || 0
+				] : [0, 0, 0, 0],
+				color: '#1890FF'
+			});
+
+			// 5. 最后统一赋值
 			radarDatasets.value = newDatasets;
+
+			console.log('✅ 评分数据加载完成，顺序：自我(0), 商友(1), 综合(2)');
 		} catch (e) {
 			console.error('获取评分统计失败', e);
 		}
 	};
+	// const fetchRadarStatistics = async (userId) => {
+	// 	try {
+	// 		// 并发请求 type 0 (自评) 和 type 3 (综合)
+	// 		const [selfRes, friendRes, complexRes] = await Promise.all([
+	// 			request('/app-api/member/user-scores/complexStatistics', {
+	// 				method: 'GET',
+	// 				data: {
+	// 					userId,
+	// 					type: 0
+	// 				}
+	// 			}),
+	// 			request('/app-api/member/user-scores/complexStatistics', {
+	// 				method: 'GET',
+	// 				data: {
+	// 					userId,
+	// 					type: 1
+	// 				}
+	// 			}),
+	// 			request('/app-api/member/user-scores/complexStatistics', {
+	// 				method: 'GET',
+	// 				data: {
+	// 					userId,
+	// 					type: 3
+	// 				}
+	// 			})
+	// 		]);
+
+	// 		const newDatasets = [];
+	// 		if (!selfRes.error && selfRes.data) {
+	// 			newDatasets.push({
+	// 				name: '自我评价',
+	// 				data: [selfRes.data.avg1 || 0, selfRes.data.avg2 || 0, selfRes.data.avg3 || 0, selfRes
+	// 					.data.avg4 || 0
+	// 				],
+	// 				color: '#FF7D00'
+	// 			});
+	// 		}
+	// 		if (!friendRes.error && friendRes.data) {
+	// 			newDatasets.push({
+	// 				name: '商友评价',
+	// 				data: [friendRes.data.avg1 || 0, friendRes.data.avg2 || 0, friendRes.data.avg3 || 0,
+	// 					friendRes.data.avg4 || 0
+	// 				],
+	// 				color: '#4CAF50'
+	// 			});
+	// 		}
+	// 		if (!complexRes.error && complexRes.data) {
+	// 			newDatasets.push({
+	// 				name: '综合评价',
+	// 				data: [complexRes.data.avg1 || 0, complexRes.data.avg2 || 0, complexRes.data.avg3 || 0,
+	// 					complexRes.data.avg4 || 0
+	// 				],
+	// 				color: '#1890FF'
+	// 			});
+	// 		}
+	// 		radarDatasets.value = newDatasets;
+	// 	} catch (e) {
+	// 		console.error('获取评分统计失败', e);
+	// 	}
+	// };
 
 	// --- 3. 数据获取与适配 ---
 

@@ -1,0 +1,128 @@
+
+.records-container.data-v-7d744250 {
+		min-height: 100vh;
+		background-color: #F8F9FB;
+}
+
+	/* 筛选区域吸顶 */
+.filter-sticky.data-v-7d744250 {
+		position: -webkit-sticky;
+		position: sticky;
+		top: 0;
+		z-index: 100;
+		background-color: #fff;
+		padding-bottom: 10rpx;
+		box-shadow: 0 4rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+
+	/* Tabs 样式 */
+.tabs-box.data-v-7d744250 {
+		display: flex;
+		height: 90rpx;
+		border-bottom: 1rpx solid #eee;
+}
+.tab-item.data-v-7d744250 {
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		font-size: 28rpx;
+		color: #666;
+		position: relative;
+}
+.tab-item.active.data-v-7d744250 {
+		color: #FF6F00;
+		font-weight: bold;
+}
+.tab-item .line.data-v-7d744250 {
+		position: absolute;
+		bottom: 0;
+		width: 40rpx;
+		height: 6rpx;
+		background-color: #FF6F00;
+		border-radius: 3rpx;
+}
+
+	/* 日期筛选条样式 */
+.date-filter-bar.data-v-7d744250 {
+		display: flex;
+		align-items: center;
+		padding: 20rpx 30rpx;
+}
+.date-picker-trigger.data-v-7d744250 {
+		display: flex;
+		align-items: center;
+		background-color: #F5F5F5;
+		padding: 10rpx 24rpx;
+		border-radius: 30rpx;
+		font-size: 24rpx;
+		color: #666;
+}
+.date-text.data-v-7d744250 {
+		margin: 0 10rpx;
+}
+.reset-btn.data-v-7d744250 {
+		margin-left: 20rpx;
+		font-size: 24rpx;
+		color: #FF6F00;
+}
+
+	/* 列表样式 */
+.list-content.data-v-7d744250 {
+		padding: 20rpx;
+}
+.record-card.data-v-7d744250 {
+		background-color: #ffffff;
+		border-radius: 16rpx;
+		padding: 30rpx;
+		margin-bottom: 20rpx;
+}
+.card-main.data-v-7d744250 {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+}
+.info.data-v-7d744250 {
+		display: flex;
+		flex-direction: column;
+		flex: 1;
+}
+.title.data-v-7d744250 {
+		font-size: 30rpx;
+		color: #333;
+		font-weight: 500;
+		margin-bottom: 6rpx;
+}
+.desc.data-v-7d744250 {
+		font-size: 24rpx;
+		color: #888;
+		margin-bottom: 10rpx;
+}
+.time.data-v-7d744250 {
+		font-size: 22rpx;
+		color: #bbb;
+}
+.amount.data-v-7d744250 {
+		font-size: 36rpx;
+		font-weight: bold;
+		color: #333;
+}
+.amount.is-plus.data-v-7d744250 {
+		color: #FF6F00;
+}
+
+	/* 空状态 */
+.empty-box.data-v-7d744250 {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		padding-top: 200rpx;
+		color: #999;
+		font-size: 26rpx;
+}
+.empty-img.data-v-7d744250 {
+		width: 240rpx;
+		height: 240rpx;
+		margin-bottom: 20rpx;
+}

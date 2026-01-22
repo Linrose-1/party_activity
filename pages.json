@@ -471,6 +471,20 @@
 				{
 					"navigationBarTitleText" : "平台客服"
 				}
+			},
+			{
+				"path" : "smart-rice-records/smart-rice-records",
+				"style" : 
+				{
+					"navigationBarTitleText" : "智米记录"
+				}
+			},
+			{
+				"path" : "experience-records/experience-records",
+				"style" : 
+				{
+					"navigationBarTitleText" : "全部贡分记录"
+				}
 			}
 			// 如果还有其他页面要放进这个分包，继续在这里加
 		]

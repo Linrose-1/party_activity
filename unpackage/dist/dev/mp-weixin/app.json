@@ -65,7 +65,9 @@
         "user-review-list/user-review-list",
         "social-interaction/social-interaction",
         "my-reviews/my-reviews",
-        "ContactService/ContactService"
+        "ContactService/ContactService",
+        "smart-rice-records/smart-rice-records",
+        "experience-records/experience-records"
       ]
     }
   ],

@@ -65,6 +65,8 @@ if (!Math) {
   "./packages/social-interaction/social-interaction.js";
   "./packages/my-reviews/my-reviews.js";
   "./packages/ContactService/ContactService.js";
+  "./packages/smart-rice-records/smart-rice-records.js";
+  "./packages/experience-records/experience-records.js";
 }
 const _sfc_main = {
   data() {

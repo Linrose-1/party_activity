@@ -7,16 +7,17 @@ if (!Array) {
 }
 const _easycom_uni_icons = () => "../../uni_modules/uni-icons/components/uni-icons/uni-icons.js";
 if (!Math) {
-  (_easycom_uni_icons + MyRadarChart)();
+  (_easycom_uni_icons + UserScoreBoard)();
 }
-const MyRadarChart = () => "../../components/MyRadarChart.js";
+const UserScoreBoard = () => "../../components/UserScoreBoard.js";
 const themeColor = "#FF7D00";
 const _sfc_main = {
   __name: "my-account-informationDetails",
   setup(__props) {
     const userInfo = common_vendor.ref(null);
-    const radarCategories = common_vendor.ref(["基础信用", "协作态度", "专业能力", "精神格局"]);
-    const radarSeriesData = common_vendor.ref([]);
+    const radarDatasets = common_vendor.ref([]);
+    common_vendor.ref(["基础信用", "协作态度", "专业能力", "精神格局"]);
+    common_vendor.ref([]);
     const currentUserId = common_vendor.index.getStorageSync("userId");
     const isSelf = common_vendor.computed(() => {
       if (!userInfo.value || !currentUserId)
@@ -84,27 +85,64 @@ const _sfc_main = {
     });
     const fetchScoreStatistics = async (userId) => {
       try {
-        const {
-          data,
-          error
-        } = await utils_request.request("/app-api/member/user-scores/complexStatistics", {
-          method: "GET",
-          data: {
-            userId,
-            type: 0
-          }
+        const [selfRes, friendRes, complexRes] = await Promise.all([
+          utils_request.request("/app-api/member/user-scores/complexStatistics", {
+            method: "GET",
+            data: {
+              userId,
+              type: 0
+            }
+          }),
+          utils_request.request("/app-api/member/user-scores/complexStatistics", {
+            method: "GET",
+            data: {
+              userId,
+              type: 1
+            }
+          }),
+          utils_request.request("/app-api/member/user-scores/complexStatistics", {
+            method: "GET",
+            data: {
+              userId,
+              type: 3
+            }
+          })
+        ]);
+        const newDatasets = [];
+        newDatasets.push({
+          name: "自我评价",
+          data: !selfRes.error && selfRes.data ? [
+            selfRes.data.avg1,
+            selfRes.data.avg2,
+            selfRes.data.avg3,
+            selfRes.data.avg4
+          ] : [0, 0, 0, 0],
+          color: "#FF7D00"
         });
-        if (error)
-          throw new Error("获取评分数据失败");
-        radarSeriesData.value = [
-          (data == null ? void 0 : data.avg1) || 0,
-          (data == null ? void 0 : data.avg2) || 0,
-          (data == null ? void 0 : data.avg3) || 0,
-          (data == null ? void 0 : data.avg4) || 0
-        ];
+        newDatasets.push({
+          name: "商友评价",
+          data: !friendRes.error && friendRes.data ? [
+            friendRes.data.avg1,
+            friendRes.data.avg2,
+            friendRes.data.avg3,
+            friendRes.data.avg4
+          ] : [0, 0, 0, 0],
+          color: "#4CAF50"
+        });
+        newDatasets.push({
+          name: "综合评价",
+          data: !complexRes.error && complexRes.data ? [
+            complexRes.data.avg1,
+            complexRes.data.avg2,
+            complexRes.data.avg3,
+            complexRes.data.avg4
+          ] : [0, 0, 0, 0],
+          color: "#1890FF"
+        });
+        radarDatasets.value = newDatasets;
       } catch (e) {
-        common_vendor.index.__f__("error", "at packages/my-account-informationDetails/my-account-informationDetails.vue:301", e.message);
-        radarSeriesData.value = [0, 0, 0, 0];
+        common_vendor.index.__f__("error", "at packages/my-account-informationDetails/my-account-informationDetails.vue:340", "获取评分数据失败", e);
+        radarDatasets.value = [];
       }
     };
     const formatSex = (sex) => {
@@ -115,7 +153,7 @@ const _sfc_main = {
       return "未设置";
     };
     const goToResourceMatch = () => {
-      common_vendor.index.__f__("log", "at packages/my-account-informationDetails/my-account-informationDetails.vue:313", "跳转到资源匹配页面");
+      common_vendor.index.__f__("log", "at packages/my-account-informationDetails/my-account-informationDetails.vue:352", "跳转到资源匹配页面");
       common_vendor.index.showToast({
         title: "资源匹配功能即将上线",
         icon: "none"
@@ -240,24 +278,13 @@ const _sfc_main = {
           size: "24",
           color: themeColor
         }),
-        M: radarSeriesData.value.length > 0
-      }, radarSeriesData.value.length > 0 ? {
+        M: radarDatasets.value.length > 0
+      }, radarDatasets.value.length > 0 ? {
         N: common_vendor.p({
-          categories: radarCategories.value,
-          ["series-data"]: radarSeriesData.value,
-          ["theme-color"]: themeColor
+          datasets: radarDatasets.value,
+          showCard: false,
+          showTitle: false
         })
-      } : {}, {
-        O: radarSeriesData.value.length > 0
-      }, radarSeriesData.value.length > 0 ? {
-        P: common_vendor.f(radarCategories.value, (item, index, i0) => {
-          return {
-            a: common_vendor.t(item),
-            b: common_vendor.t(radarSeriesData.value[index]),
-            c: index
-          };
-        }),
-        Q: themeColor
       } : {}) : {});
     };
   }

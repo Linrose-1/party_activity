@@ -15,11 +15,7 @@ const _sfc_main = {
   __name: "my-points",
   setup(__props) {
     const userInfo = common_vendor.ref(null);
-    const historyList = common_vendor.ref([]);
-    const historyPageNo = common_vendor.ref(1);
-    const historyPageSize = common_vendor.ref(10);
-    const historyTotal = common_vendor.ref(0);
-    const historyLoadStatus = common_vendor.ref("more");
+    const recentRecords = common_vendor.ref([]);
     const tasks = common_vendor.ref([
       {
         icon: "flag",
@@ -83,184 +79,114 @@ const _sfc_main = {
     const tabBarPaths = ["/pages/active/active", "/pages/home/home"];
     common_vendor.onMounted(() => {
       fetchUserInfo();
-      getHistoryList(true);
-    });
-    common_vendor.onReachBottom(() => {
-      getHistoryList();
+      fetchRecentRecords();
     });
     const fetchUserInfo = async () => {
       const {
         data,
         error
-      } = await utils_request.request("/app-api/member/user/get", {
-        method: "GET"
-      });
-      if (!error) {
+      } = await utils_request.request("/app-api/member/user/get");
+      if (!error)
         userInfo.value = data;
-      } else {
-        common_vendor.index.__f__("error", "at packages/my-points/my-points.vue:185", "获取用户信息失败:", error);
-      }
     };
-    const getHistoryList = async (isRefresh = false) => {
-      if (historyLoadStatus.value === "loading" || historyLoadStatus.value === "noMore" && !isRefresh) {
-        return;
-      }
-      if (isRefresh) {
-        historyPageNo.value = 1;
-        historyList.value = [];
-        historyLoadStatus.value = "more";
-      }
-      historyLoadStatus.value = "loading";
+    const fetchRecentRecords = async () => {
       const {
         data,
         error
-      } = await utils_request.request("/app-api/member/experience-record/page", {
-        method: "GET",
+      } = await utils_request.request("/app-api/member/experience-record/my-experience-list", {
         data: {
-          pageNo: historyPageNo.value,
-          pageSize: historyPageSize.value
+          pageNo: 1,
+          pageSize: 5
         }
       });
-      if (error) {
-        historyLoadStatus.value = "more";
-        common_vendor.index.showToast({
-          title: `历史记录加载失败: ${error}`,
-          icon: "none"
-        });
-        return;
-      }
-      if (data && data.list && data.list.length > 0) {
-        historyList.value.push(...data.list);
-        historyTotal.value = data.total;
-        if (historyList.value.length >= historyTotal.value) {
-          historyLoadStatus.value = "noMore";
-        } else {
-          historyLoadStatus.value = "more";
-          historyPageNo.value++;
-        }
-      } else {
-        historyLoadStatus.value = "noMore";
+      if (!error && data) {
+        recentRecords.value = data.list;
       }
     };
+    const formatDate = (ts) => {
+      const d = new Date(ts);
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+    };
+    const goToAllRecords = () => {
+      common_vendor.index.navigateTo({
+        url: "/packages/experience-records/experience-records"
+      });
+    };
     const handleTaskClick = (task) => {
-      if (!task.path) {
-        common_vendor.index.showToast({
-          title: "敬请期待该任务上线",
-          icon: "none"
-        });
+      if (!task.path)
         return;
-      }
       if (task.isTabBar || tabBarPaths.includes(task.path)) {
         common_vendor.index.switchTab({
-          url: task.path,
-          fail: (err) => {
-            common_vendor.index.__f__("error", "at packages/my-points/my-points.vue:248", "switchTab 失败:", err);
-            common_vendor.index.showToast({
-              title: "页面跳转失败",
-              icon: "none"
-            });
-          }
+          url: task.path
         });
       } else {
         common_vendor.index.navigateTo({
-          url: task.path,
-          fail: (err) => {
-            common_vendor.index.__f__("error", "at packages/my-points/my-points.vue:259", "navigateTo 失败:", err);
-            common_vendor.index.showToast({
-              title: "页面跳转失败",
-              icon: "none"
-            });
-          }
+          url: task.path
         });
       }
-    };
-    const formatTimestamp = (timestamp) => {
-      if (!timestamp)
-        return "";
-      const date = new Date(timestamp);
-      const Y = date.getFullYear();
-      const M = (date.getMonth() + 1).toString().padStart(2, "0");
-      const D = date.getDate().toString().padStart(2, "0");
-      const h = date.getHours().toString().padStart(2, "0");
-      const m = date.getMinutes().toString().padStart(2, "0");
-      return `${Y}-${M}-${D} ${h}:${m}`;
     };
     return (_ctx, _cache) => {
       return common_vendor.e({
         a: userInfo.value
       }, userInfo.value ? common_vendor.e({
         b: common_vendor.p({
-          type: "compose",
-          size: "24",
+          type: "medal-filled",
+          size: "22",
           color: "#FF6B00"
         }),
-        c: common_vendor.t(userInfo.value.currExperience),
-        d: common_vendor.f(tasks.value, (task, index, i0) => {
+        c: common_vendor.t(userInfo.value.currExperience || 0),
+        d: common_vendor.t(userInfo.value.totalExperience || 0),
+        e: common_vendor.p({
+          type: "info",
+          size: "14",
+          color: "#FF6B00"
+        }),
+        f: common_vendor.p({
+          type: "info",
+          size: "14",
+          color: "#FF6B00"
+        }),
+        g: common_vendor.f(tasks.value, (task, index, i0) => {
           return {
-            a: "0c26d269-1-" + i0,
+            a: "0c26d269-3-" + i0,
             b: common_vendor.p({
               type: task.icon,
               size: "24",
               color: "#FF6B00"
             }),
             c: common_vendor.t(task.name),
-            d: common_vendor.t(task.desc),
-            e: common_vendor.t(task.points),
-            f: "0c26d269-2-" + i0,
+            d: common_vendor.t(task.points),
+            e: common_vendor.t(task.desc),
+            f: "0c26d269-4-" + i0,
             g: index,
             h: common_vendor.o(($event) => handleTaskClick(task), index)
           };
         }),
-        e: common_vendor.p({
-          type: "forward",
-          size: "20",
-          color: "#FF6B00"
-        }),
-        f: common_vendor.p({
-          type: "bars",
-          size: "24",
-          color: "#FF6B00"
-        }),
-        g: historyList.value.length === 0 && historyLoadStatus.value === "noMore"
-      }, historyList.value.length === 0 && historyLoadStatus.value === "noMore" ? {
         h: common_vendor.p({
-          type: "info-filled",
-          size: "40",
-          color: "#ccc"
-        })
-      } : {
-        i: common_vendor.f(historyList.value, (record, index, i0) => {
+          type: "right",
+          size: "14",
+          color: "#DDD"
+        }),
+        i: common_vendor.p({
+          type: "right",
+          size: "14",
+          color: "#999"
+        }),
+        j: common_vendor.o(goToAllRecords),
+        k: recentRecords.value.length > 0
+      }, recentRecords.value.length > 0 ? {
+        l: common_vendor.f(recentRecords.value, (item, index, i0) => {
           return {
-            a: "0c26d269-5-" + i0,
-            b: common_vendor.p({
-              type: record.experience >= 0 ? "arrow-up" : "arrow-down",
-              size: "20",
-              color: record.experience >= 0 ? "#28a745" : "#dc3545"
-            }),
-            c: record.experience >= 0 ? 1 : "",
-            d: record.experience < 0 ? 1 : "",
-            e: common_vendor.t(record.title),
-            f: common_vendor.t(formatTimestamp(record.createTime)),
-            g: common_vendor.t(record.experience > 0 ? "+" : ""),
-            h: common_vendor.t(record.experience),
-            i: record.experience >= 0 ? 1 : "",
-            j: record.experience < 0 ? 1 : "",
-            k: record.createTime + "-" + index
+            a: common_vendor.t(item.title),
+            b: common_vendor.t(formatDate(item.createTime)),
+            c: common_vendor.t(item.experience > 0 ? "+" : ""),
+            d: common_vendor.t(item.experience),
+            e: item.experience > 0 ? 1 : "",
+            f: index
           };
         })
-      }, {
-        j: historyList.value.length > 0 || historyLoadStatus.value === "loading"
-      }, historyList.value.length > 0 || historyLoadStatus.value === "loading" ? {
-        k: common_vendor.p({
-          status: historyLoadStatus.value,
-          contentText: {
-            contentdown: "上拉显示更多",
-            contentrefresh: "正在加载...",
-            contentnomore: "—— 我是有底线的 ——"
-          }
-        })
       } : {}) : {
-        l: common_vendor.p({
+        m: common_vendor.p({
           status: "loading"
         })
       });
