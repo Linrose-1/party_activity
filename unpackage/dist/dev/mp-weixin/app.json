@@ -67,7 +67,10 @@
         "my-reviews/my-reviews",
         "ContactService/ContactService",
         "smart-rice-records/smart-rice-records",
-        "experience-records/experience-records"
+        "experience-records/experience-records",
+        "enterprise-edit/enterprise-edit",
+        "enterprise-list/enterprise-list",
+        "enterprise-detail/enterprise-detail"
       ]
     }
   ],

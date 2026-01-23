@@ -61,10 +61,8 @@ const _sfc_main = {
         params.addStatus = currentTab.value === "true";
       }
       if (range.value && range.value.length === 2) {
-        params.createTime = [
-          range.value[0] + " 00:00:00",
-          range.value[1] + " 23:59:59"
-        ];
+        params["createTime[0]"] = range.value[0] + " 00:00:00";
+        params["createTime[1]"] = range.value[1] + " 23:59:59";
       }
       const {
         data,

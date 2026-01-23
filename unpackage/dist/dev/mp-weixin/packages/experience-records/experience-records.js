@@ -59,7 +59,9 @@ const _sfc_main = {
         ...queryParams.value
       };
       if (dateRange.value.length === 2) {
-        sendData.createTime = [dateRange.value[0] + " 00:00:00", dateRange.value[1] + " 23:59:59"];
+        sendData["createTime[0]"] = dateRange.value[0] + " 00:00:00";
+        sendData["createTime[1]"] = dateRange.value[1] + " 23:59:59";
+        delete sendData.createTime;
       }
       const {
         data,
@@ -68,9 +70,12 @@ const _sfc_main = {
         data: sendData
       });
       common_vendor.index.stopPullDownRefresh();
-      if (error)
+      if (error) {
+        loadingStatus.value = "more";
         return;
-      recordList.value = isRefresh ? data.list : [...recordList.value, ...data.list];
+      }
+      const list = data.list || [];
+      recordList.value = isRefresh ? list : [...recordList.value, ...list];
       loadingStatus.value = recordList.value.length >= data.total ? "noMore" : "more";
     };
     const handleTabChange = (val) => {

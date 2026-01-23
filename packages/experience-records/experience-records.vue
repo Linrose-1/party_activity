@@ -97,14 +97,22 @@
 			loadingStatus.value = 'loading';
 		}
 
+		// 1. 基础参数（包含 pageNo, pageSize, type）
 		const sendData = {
 			...queryParams.value
 		};
-		// 处理日期参数（参考智米页面的经验，先按数组传，待确认格式）
+
+		// 2. 处理日期参数：改为后端要求的显式下标格式
 		if (dateRange.value.length === 2) {
-			sendData.createTime = [dateRange.value[0] + ' 00:00:00', dateRange.value[1] + ' 23:59:59'];
+			// 强制使用 createTime[0] 和 createTime[1] 作为属性名
+			sendData['createTime[0]'] = dateRange.value[0] + ' 00:00:00';
+			sendData['createTime[1]'] = dateRange.value[1] + ' 23:59:59';
+
+			// 确保不会再发送原始的 createTime 数组（如果 queryParams 里原本有的话）
+			delete sendData.createTime;
 		}
 
+		// 3. 发起请求
 		const {
 			data,
 			error
@@ -113,9 +121,17 @@
 		});
 
 		uni.stopPullDownRefresh();
-		if (error) return;
 
-		recordList.value = isRefresh ? data.list : [...recordList.value, ...data.list];
+		if (error) {
+			loadingStatus.value = 'more';
+			return;
+		}
+
+		// 4. 更新列表数据
+		const list = data.list || [];
+		recordList.value = isRefresh ? list : [...recordList.value, ...list];
+
+		// 5. 更新加载状态
 		loadingStatus.value = recordList.value.length >= data.total ? 'noMore' : 'more';
 	};
 

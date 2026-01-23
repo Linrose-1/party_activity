@@ -67,6 +67,9 @@ if (!Math) {
   "./packages/ContactService/ContactService.js";
   "./packages/smart-rice-records/smart-rice-records.js";
   "./packages/experience-records/experience-records.js";
+  "./packages/enterprise-edit/enterprise-edit.js";
+  "./packages/enterprise-list/enterprise-list.js";
+  "./packages/enterprise-detail/enterprise-detail.js";
 }
 const _sfc_main = {
   data() {

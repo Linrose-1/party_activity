@@ -117,17 +117,11 @@
 			params.addStatus = currentTab.value === 'true';
 		}
 
-		// 筛选2：时间范围 (后端通常接收 [start, end] 或者两个字段，这里根据后端接口文档适配)
+		// 筛选2：时间范围 —— 修改这里以匹配后端要求的 [0] [1] 格式
 		if (range.value && range.value.length === 2) {
-			/**
-			 * 1. 补全时分秒：LocalDateTime 必须要有时间部分
-			 * 2. 传数组：不要用 .join(',')。
-			 *    uni.request 会把数组处理成 createTime=xxx&createTime=yyy
-			 */
-			params.createTime = [
-				range.value[0] + ' 00:00:00',
-				range.value[1] + ' 23:59:59'
-			];
+			// 使用中括号字符串作为键名，强制生成后端需要的 createTime[0] 和 createTime[1]
+			params['createTime[0]'] = range.value[0] + ' 00:00:00';
+			params['createTime[1]'] = range.value[1] + ' 23:59:59';
 		}
 
 		const {

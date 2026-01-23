@@ -7299,7 +7299,7 @@ function initOnError() {
 function initRuntimeSocketService() {
   const hosts = "172.20.10.4,127.0.0.1";
   const port = "8090";
-  const id = "mp-weixin_yeWxU_";
+  const id = "mp-weixin_AGdO7l";
   const lazy = typeof swan !== "undefined";
   let restoreError = lazy ? () => {
   } : initOnError();
@@ -8635,6 +8635,24 @@ const subPackages = [
         path: "experience-records/experience-records",
         style: {
           navigationBarTitleText: "全部贡分记录"
+        }
+      },
+      {
+        path: "enterprise-edit/enterprise-edit",
+        style: {
+          navigationBarTitleText: "创建企业/品牌"
+        }
+      },
+      {
+        path: "enterprise-list/enterprise-list",
+        style: {
+          navigationBarTitleText: "我的企业/品牌"
+        }
+      },
+      {
+        path: "enterprise-detail/enterprise-detail",
+        style: {
+          navigationBarTitleText: "企业/品牌详情"
         }
       }
     ]

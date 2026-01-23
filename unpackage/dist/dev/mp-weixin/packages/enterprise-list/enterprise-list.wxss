@@ -1,0 +1,248 @@
+/* 水平间距 */
+/* 水平间距 */
+.container.data-v-378d963d {
+  min-height: 100vh;
+  background-color: #F8F9FB;
+  padding: 30rpx;
+}
+
+/* 顶部区域 */
+.header-section.data-v-378d963d {
+  margin-bottom: 40rpx;
+}
+.header-section .page-title.data-v-378d963d {
+  font-size: 38rpx;
+  font-weight: 800;
+  color: #333;
+  margin-bottom: 30rpx;
+}
+.header-section .create-btn.data-v-378d963d {
+  background: linear-gradient(135deg, #FF7919, #FF9546);
+  color: #fff;
+  height: 94rpx;
+  border-radius: 16rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  box-shadow: 0 8rpx 20rpx rgba(255, 121, 25, 0.2);
+}
+.header-section .create-btn.data-v-378d963d:active {
+  transform: scale(0.98);
+  opacity: 0.9;
+}
+.header-section .create-btn text.data-v-378d963d {
+  margin-left: 10rpx;
+  font-size: 30rpx;
+}
+.list-count.data-v-378d963d {
+  font-size: 24rpx;
+  color: #bbb;
+  margin-bottom: 20rpx;
+  padding-left: 10rpx;
+}
+
+/* 企业卡片 */
+.enterprise-card.data-v-378d963d {
+  background-color: #fff;
+  border-radius: 30rpx;
+  padding: 40rpx 30rpx 30rpx;
+  margin-bottom: 30rpx;
+  position: relative;
+  box-shadow: 0 4rpx 24rpx rgba(0, 0, 0, 0.03);
+  /* 右上角编辑 */
+}
+.enterprise-card .edit-corner.data-v-378d963d {
+  position: absolute;
+  top: 30rpx;
+  right: 30rpx;
+  display: flex;
+  align-items: center;
+  padding: 10rpx 20rpx;
+  background-color: #f8f8f8;
+  border-radius: 30rpx;
+}
+.enterprise-card .edit-corner text.data-v-378d963d {
+  font-size: 22rpx;
+  color: #999;
+  margin-left: 4rpx;
+}
+.enterprise-card .edit-corner.data-v-378d963d:active {
+  background-color: #eee;
+}
+.enterprise-card .card-body.data-v-378d963d {
+  display: flex;
+  align-items: center;
+  margin-bottom: 30rpx;
+}
+.enterprise-card .logo-box.data-v-378d963d {
+  width: 120rpx;
+  height: 120rpx;
+  margin-right: 30rpx;
+  flex-shrink: 0;
+}
+.enterprise-card .logo-box .logo-img.data-v-378d963d {
+  width: 100%;
+  height: 100%;
+  border-radius: 30rpx;
+  background-color: #f5f5f5;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+.enterprise-card .logo-box .logo-placeholder.data-v-378d963d {
+  width: 100%;
+  height: 100%;
+  border-radius: 30rpx;
+  background-color: #f9f9f9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1rpx solid #eee;
+}
+.enterprise-card .logo-box .logo-placeholder .default-icon.data-v-378d963d {
+  font-size: 50rpx;
+}
+.enterprise-card .info-area.data-v-378d963d {
+  flex: 1;
+  min-width: 0;
+}
+.enterprise-card .info-area .ent-name.data-v-378d963d {
+  font-size: 34rpx;
+  font-weight: bold;
+  color: #333;
+  display: block;
+}
+
+/* 状态标签 */
+.status-tag.data-v-378d963d {
+  display: inline-block;
+  font-size: 20rpx;
+  padding: 4rpx 16rpx;
+  border-radius: 8rpx;
+  margin-top: 12rpx;
+}
+.status-tag.status-0.data-v-378d963d {
+  background: #F5F5F5;
+  color: #999;
+}
+.status-tag.status-1.data-v-378d963d {
+  background: #EFFFF4;
+  color: #4CAF50;
+  border: 1rpx solid #D5F5E3;
+}
+.status-tag.status-2.data-v-378d963d {
+  background: #EBF5FF;
+  color: #2196F3;
+  border: 1rpx solid #D6E9FF;
+}
+.status-tag.status-3.data-v-378d963d {
+  background: #FFF9E6;
+  color: #FFB300;
+  border: 1rpx solid #FFECB3;
+}
+.status-tag.status-4.data-v-378d963d {
+  background: #FFF2F2;
+  color: #F44336;
+  border: 1rpx solid #FFDADA;
+}
+.detail-info.data-v-378d963d {
+  margin-top: 20rpx;
+}
+.detail-info text.data-v-378d963d {
+  font-size: 22rpx;
+  color: #bbb;
+  margin-right: 20rpx;
+}
+
+/* 草稿提示 */
+.draft-notice.data-v-378d963d {
+  background-color: #FFF9F5;
+  padding: 20rpx;
+  border-radius: 12rpx;
+  display: flex;
+  align-items: center;
+  margin-bottom: 30rpx;
+  border: 1rpx dashed rgba(255, 121, 25, 0.3);
+}
+.draft-notice text.data-v-378d963d {
+  font-size: 22rpx;
+  color: #FF7919;
+  margin-left: 10rpx;
+  font-weight: 500;
+}
+
+/* 底部操作 */
+.card-footer.data-v-378d963d {
+  border-top: 2rpx solid #F8F8F8;
+  padding-top: 24rpx;
+  display: flex;
+  justify-content: space-around;
+}
+.card-footer .action-btn.data-v-378d963d {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8rpx;
+  flex: 1;
+  height: 40rpx;
+}
+.card-footer .action-btn text.data-v-378d963d {
+  font-size: 26rpx;
+  color: #666;
+}
+.card-footer .action-btn.data-v-378d963d:not(:last-child) {
+  border-right: 2rpx solid #F5F5F5;
+}
+.card-footer .action-btn.delete text.data-v-378d963d {
+  color: #FF4D4F;
+}
+.card-footer .action-btn.data-v-378d963d:active {
+  opacity: 0.5;
+}
+
+/* 空状态 */
+.empty-state.data-v-378d963d {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 200rpx;
+}
+.empty-state .empty-icon-wrap.data-v-378d963d {
+  width: 160rpx;
+  height: 160rpx;
+  background-color: #fff;
+  border-radius: 80rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10rpx 30rpx rgba(0, 0, 0, 0.05);
+  margin-bottom: 40rpx;
+}
+.empty-state .empty-icon-wrap .emoji.data-v-378d963d {
+  font-size: 80rpx;
+}
+.empty-state .empty-title.data-v-378d963d {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 16rpx;
+}
+.empty-state .empty-desc.data-v-378d963d {
+  font-size: 26rpx;
+  color: #999;
+  text-align: center;
+  padding: 0 100rpx;
+  line-height: 1.6;
+}
+.empty-state .now-create-btn.data-v-378d963d {
+  margin-top: 60rpx;
+  background-color: #333;
+  /* 黑色按钮更显高级感 */
+  color: #fff;
+  width: 340rpx;
+  height: 88rpx;
+  line-height: 88rpx;
+  border-radius: 44rpx;
+  font-size: 28rpx;
+  font-weight: bold;
+  box-shadow: 0 10rpx 20rpx rgba(0, 0, 0, 0.1);
+}

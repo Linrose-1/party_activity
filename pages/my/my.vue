@@ -467,7 +467,7 @@
 			name: '我的券包',
 			desc: '查看您的猩友优惠券',
 			icon: '../../static/icon/我的券包.png',
-			path: null
+			path: '/packages/enterprise-list/enterprise-list'
 		},
 		{
 			name: '时空共享',
