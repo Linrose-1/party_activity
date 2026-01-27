@@ -60,31 +60,37 @@ const _sfc_main = {
         }),
         f: common_vendor.o(($event) => handleAction("viewCard")),
         g: common_vendor.p({
+          type: "staff-filled",
+          size: "26",
+          color: "#FF7009"
+        }),
+        h: common_vendor.o(($event) => handleAction("viewPath")),
+        i: common_vendor.p({
           type: "star",
           size: "26",
           color: "#FF7009"
         }),
-        h: common_vendor.o(($event) => handleAction("comment")),
-        i: common_vendor.p({
+        j: common_vendor.o(($event) => handleAction("comment")),
+        k: common_vendor.p({
           type: "paperplane-filled",
           size: "26",
           color: "#FF7009"
         }),
-        j: common_vendor.t(isSelf.value ? "本人" : "邀入我圈"),
-        k: common_vendor.n(isSelf.value ? "disabled" : "primary-outline"),
-        l: common_vendor.o(($event) => handleAction("inviteCircle")),
-        m: common_vendor.p({
+        l: common_vendor.t(isSelf.value ? "本人" : "邀入我圈"),
+        m: common_vendor.n(isSelf.value ? "disabled" : "primary-outline"),
+        n: common_vendor.o(($event) => handleAction("inviteCircle")),
+        o: common_vendor.p({
           type: "plusempty",
           size: "26",
           color: "#FF7009"
         }),
-        n: common_vendor.t(isSelf.value ? "本人" : "加入TA圈"),
-        o: common_vendor.n(isSelf.value ? "disabled" : "primary-outline"),
-        p: common_vendor.o(($event) => handleAction("addCircle")),
-        q: common_vendor.sr(popup, "5571075f-0", {
+        p: common_vendor.t(isSelf.value ? "本人" : "加入TA圈"),
+        q: common_vendor.n(isSelf.value ? "disabled" : "primary-outline"),
+        r: common_vendor.o(($event) => handleAction("addCircle")),
+        s: common_vendor.sr(popup, "5571075f-0", {
           "k": "popup"
         }),
-        r: common_vendor.p({
+        t: common_vendor.p({
           type: "center",
           ["mask-click"]: true
         })

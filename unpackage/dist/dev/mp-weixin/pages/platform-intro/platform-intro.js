@@ -1,11 +1,15 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
 const utils_request = require("../../utils/request.js");
+if (!Math) {
+  ShareQrCode();
+}
+const ShareQrCode = () => "../../components/ShareQrCode.js";
 const _sfc_main = {
   __name: "platform-intro",
   setup(__props) {
     const content = common_vendor.ref("");
-    common_vendor.onLoad((options) => {
+    common_vendor.onLoad(() => {
       fetchPlatformInfo();
     });
     const fetchPlatformInfo = async () => {
@@ -20,9 +24,15 @@ const _sfc_main = {
       }
     };
     return (_ctx, _cache) => {
-      return {
-        a: content.value
-      };
+      return common_vendor.e({
+        a: content.value,
+        b: content.value
+      }, content.value ? {} : {}, {
+        c: common_vendor.p({
+          path: "pages/home/home",
+          label: "首页专属推广码"
+        })
+      });
     };
   }
 };

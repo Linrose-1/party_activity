@@ -70,7 +70,10 @@
         "experience-records/experience-records",
         "enterprise-edit/enterprise-edit",
         "enterprise-list/enterprise-list",
-        "enterprise-detail/enterprise-detail"
+        "enterprise-detail/enterprise-detail",
+        "enterprise-auth/enterprise-auth",
+        "enterprise-card/enterprise-card",
+        "relationship-path/relationship-path"
       ]
     }
   ],

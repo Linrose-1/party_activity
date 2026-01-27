@@ -506,6 +506,27 @@
 				{
 					"navigationBarTitleText" : "企业/品牌详情"
 				}
+			},
+			{
+				"path" : "enterprise-auth/enterprise-auth",
+				"style" : 
+				{
+					"navigationBarTitleText" : "企业认证"
+				}
+			},
+			{
+				"path" : "enterprise-card/enterprise-card",
+				"style" : 
+				{
+					"navigationBarTitleText" : "企业名片"
+				}
+			},
+			{
+				"path" : "relationship-path/relationship-path",
+				"style" : 
+				{
+					"navigationBarTitleText" : "人脉链路"
+				}
 			}
 			// 如果还有其他页面要放进这个分包，继续在这里加
 		]

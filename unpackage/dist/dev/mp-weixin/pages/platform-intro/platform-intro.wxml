@@ -1,1 +1,1 @@
-<view class="container data-v-08c6f3b5"><rich-text class="data-v-08c6f3b5" nodes="{{a}}"></rich-text></view>
+<view class="container data-v-08c6f3b5"><view class="rich-text-area data-v-08c6f3b5"><rich-text class="data-v-08c6f3b5" nodes="{{a}}"></rich-text></view><view wx:if="{{b}}" class="divider-section data-v-08c6f3b5"><view class="line data-v-08c6f3b5"></view><text class="data-v-08c6f3b5">专属邀请</text><view class="line data-v-08c6f3b5"></view></view><share-qr-code wx:if="{{c}}" class="data-v-08c6f3b5" u-i="08c6f3b5-0" bind:__l="__l" u-p="{{c}}"/></view>

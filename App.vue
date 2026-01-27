@@ -11,40 +11,81 @@
 			}
 		},
 		onLaunch: function(options) {
-			console.warn('当前组件仅支持 uni_modules 目录结构 ，请升级 HBuilderX 到 3.1.0 版本以上！')
-			console.log('App Launch')
-
 			console.log('App Launch, 启动参数 options:', options);
 
 			let finalQuery = options.query || {};
 
-			// 1. 检查是否存在 scene 参数 (扫码进入)
-			if (options.scene) {
+			// --- 【核心兼容性修正】 ---
+			// 1. 优先检查 options.query.scene (这是接口生成的 B类 码数据存放地)
+			if (options.query && options.query.scene) {
+				const sceneStr = decodeURIComponent(options.query.scene);
+				console.log('✅ 解析 query.scene:', sceneStr);
+				parseScene(sceneStr);
+			}
+			// 2. 只有当 query 里没有 scene 时，才去检查 options.scene
+			// 并且要确保 options.scene 是字符串类型 (防止数字 1047 误入)
+			else if (options.scene && typeof options.scene === 'string' && options.scene.includes('=')) {
 				const sceneStr = decodeURIComponent(options.scene);
-				console.log('✅ [App.vue] 检测到 scene 参数:', sceneStr);
-				// 2. 将 scene 字符串解析成键值对对象
+				console.log('✅ 解析 options.scene:', sceneStr);
+				parseScene(sceneStr);
+			}
+
+			function parseScene(str) {
 				const sceneParams = {};
-				sceneStr.split('&').forEach(item => {
+				str.split('&').forEach(item => {
 					const parts = item.split('=');
 					if (parts[0] && parts[1]) {
 						sceneParams[parts[0]] = parts[1];
 					}
 				});
-				console.log('✅ [App.vue] scene 解析结果:', sceneParams);
-				// 3. 将解析后的参数合并到 finalQuery 中，优先使用 scene 里的参数
 				finalQuery = {
 					...finalQuery,
 					...sceneParams
 				};
 			}
+			// -----------------------
 
-			// 4. 从最终的参数对象中提取邀请码
 			const inviteCode = finalQuery.c || finalQuery.inviteCode;
 			if (inviteCode) {
-				console.log('✅ [App.vue] 全局捕获到邀请码:', inviteCode);
+				console.log('✅ 最终捕获到邀请码:', inviteCode);
 				uni.setStorageSync('pendingInviteCode', inviteCode);
 			}
 		},
+		// onLaunch: function(options) {
+		// 	console.warn('当前组件仅支持 uni_modules 目录结构 ，请升级 HBuilderX 到 3.1.0 版本以上！')
+		// 	console.log('App Launch')
+
+		// 	console.log('App Launch, 启动参数 options:', options);
+
+		// 	let finalQuery = options.query || {};
+
+		// 	// 1. 检查是否存在 scene 参数 (扫码进入)
+		// 	if (options.scene) {
+		// 		const sceneStr = decodeURIComponent(options.scene);
+		// 		console.log('✅ [App.vue] 检测到 scene 参数:', sceneStr);
+		// 		// 2. 将 scene 字符串解析成键值对对象
+		// 		const sceneParams = {};
+		// 		sceneStr.split('&').forEach(item => {
+		// 			const parts = item.split('=');
+		// 			if (parts[0] && parts[1]) {
+		// 				sceneParams[parts[0]] = parts[1];
+		// 			}
+		// 		});
+		// 		console.log('✅ [App.vue] scene 解析结果:', sceneParams);
+		// 		// 3. 将解析后的参数合并到 finalQuery 中，优先使用 scene 里的参数
+		// 		finalQuery = {
+		// 			...finalQuery,
+		// 			...sceneParams
+		// 		};
+		// 	}
+
+		// 	// 4. 从最终的参数对象中提取邀请码
+		// 	const inviteCode = finalQuery.c || finalQuery.inviteCode;
+		// 	if (inviteCode) {
+		// 		console.log('✅ [App.vue] 全局捕获到邀请码:', inviteCode);
+		// 		uni.setStorageSync('pendingInviteCode', inviteCode);
+		// 	}
+		// },
 		onShow: function() {
 			// 尝试预加载登录态，不 await，让它在后台跑
 			globalSilentLogin();

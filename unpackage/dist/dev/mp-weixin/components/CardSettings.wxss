@@ -1,0 +1,56 @@
+/* 水平间距 */
+/* 水平间距 */
+.s-container.data-v-af537140 {
+  background: #fff;
+  border-radius: 40rpx 40rpx 0 0;
+  padding: 40rpx;
+}
+.s-header.data-v-af537140 {
+  font-size: 32rpx;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 40rpx;
+}
+.s-body.data-v-af537140 {
+  max-height: 60vh;
+}
+.s-section.data-v-af537140 {
+  margin-bottom: 40rpx;
+}
+.s-label.data-v-af537140 {
+  font-size: 26rpx;
+  color: #999;
+  margin-bottom: 20rpx;
+  display: block;
+}
+.color-list.data-v-af537140 {
+  display: flex;
+  gap: 20rpx;
+}
+.color-list .color-dot.data-v-af537140 {
+  width: 50rpx;
+  height: 50rpx;
+  border-radius: 50%;
+}
+.color-list .color-dot.active.data-v-af537140 {
+  border: 4rpx solid #333;
+  transform: scale(1.1);
+}
+.toggle-item.data-v-af537140 {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20rpx 0;
+  border-bottom: 1rpx solid #f8f8f8;
+  font-size: 28rpx;
+}
+.s-btns.data-v-af537140 {
+  margin-top: 40rpx;
+  padding-bottom: 40rpx;
+}
+.s-btns .s-btn-apply.data-v-af537140 {
+  background: #333;
+  color: #fff;
+  border-radius: 50rpx;
+  font-weight: bold;
+}

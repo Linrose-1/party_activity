@@ -170,6 +170,52 @@
   font-weight: 500;
 }
 
+/* 认证失败提示栏样式 */
+.fail-notice.data-v-378d963d {
+  background-color: #FFF2F2;
+  /* 浅红色背景 */
+  padding: 20rpx 24rpx;
+  border-radius: 12rpx;
+  margin-bottom: 30rpx;
+  border: 1rpx solid rgba(244, 67, 54, 0.2);
+  position: relative;
+}
+.fail-notice .fail-header.data-v-378d963d {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10rpx;
+}
+.fail-notice .fail-header .fail-t.data-v-378d963d {
+  font-size: 24rpx;
+  font-weight: bold;
+  color: #F44336;
+  margin-left: 10rpx;
+}
+.fail-notice .fail-reason.data-v-378d963d {
+  font-size: 24rpx;
+  color: #666;
+  line-height: 1.5;
+  display: block;
+  padding-left: 44rpx;
+  margin-bottom: 16rpx;
+}
+.fail-notice .re-submit.data-v-378d963d {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+.fail-notice .re-submit text.data-v-378d963d {
+  font-size: 22rpx;
+  color: #F44336;
+  font-weight: bold;
+  margin-right: 4rpx;
+}
+
+/* 按钮点击态增强 */
+.fail-notice.data-v-378d963d:active {
+  background-color: #FFE5E5;
+}
+
 /* 底部操作 */
 .card-footer.data-v-378d963d {
   border-top: 2rpx solid #F8F8F8;

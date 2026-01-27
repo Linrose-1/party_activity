@@ -625,7 +625,22 @@
 				uni.setStorageSync('token', data.accessToken);
 				uni.setStorageSync('userId', data.userId);
 
-				// 【关键】登录成功后，立即更新状态并刷新数据
+				// 只有在存在邀请码的情况下，才执行圈友绑定
+				if (pendingInviteCode) {
+					console.log(`🔗 [自动加圈] 检测到邀请码 ${pendingInviteCode}，正在执行圈友绑定...`);
+					// 注意：这里必须在存储 token 之后调用，request 内部会自动从缓存读取 token 放入 Header
+					const bindRes = await request(`/app-api/member/user/friend/bind-friend/${pendingInviteCode}`, {
+						method: 'POST'
+					});
+
+					if (!bindRes.error) {
+						console.log('✅ [自动加圈] 圈友关系绑定成功');
+					} else {
+						console.warn('❌ [自动加圈] 绑定失败:', bindRes.error);
+					}
+				}
+
+				// 登录成功后，立即更新状态并刷新数据
 				isLogin.value = true;
 				loggedInUserId.value = data.userId;
 
@@ -854,6 +869,15 @@
 			case 'viewCard':
 				// 原有的跳转名片逻辑
 				navigateToBusinessCard(user);
+				break;
+			case 'viewPath':
+				const displayName = user.realName || user.nickname || user.name || '商友';
+
+				console.log('🚀 准备跳转，显示的姓名是:', displayName);
+
+				uni.navigateTo({
+					url: `/packages/relationship-path/relationship-path?targetUserId=${user.id}&name=${encodeURIComponent(displayName)}`
+				});
 				break;
 			case 'addCircle':
 				addCirclePopup.value.open(user);
@@ -1369,7 +1393,7 @@
 		});
 	};
 
-	const postNew = async  () => {
+	const postNew = async () => {
 		if (!await checkLoginGuard()) return;
 		uni.navigateTo({
 			url: '/packages/home-opportunitiesPublish/home-opportunitiesPublish'

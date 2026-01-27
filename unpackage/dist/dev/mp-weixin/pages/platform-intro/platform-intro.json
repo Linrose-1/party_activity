@@ -1,4 +1,6 @@
 {
   "navigationBarTitleText": "平台详情",
-  "usingComponents": {}
+  "usingComponents": {
+    "share-qr-code": "../../components/ShareQrCode"
+  }
 }

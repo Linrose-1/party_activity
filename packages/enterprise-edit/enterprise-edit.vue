@@ -113,8 +113,8 @@
 						<view class="sub-label">微信公众号</view>
 						<uni-easyinput v-model="form.wechatMpName" placeholder="名称：ABC科技" class="m-b-10 custom-input-bg"
 							:inputBorder="false" />
-						<uni-easyinput v-model="form.wechatMpId" placeholder="ID：ABC_Tech"
-							class="m-b-10 custom-input-bg" :inputBorder="false" />
+						<!-- <uni-easyinput v-model="form.wechatMpId" placeholder="ID：ABC_Tech"
+							class="m-b-10 custom-input-bg" :inputBorder="false" /> -->
 						<view class="qr-upload-box" @click="handleImageUpload('wechatMpQrcode', 'qrcode')">
 							<image v-if="form.wechatMpQrcode" :src="form.wechatMpQrcode" mode="aspectFill" />
 							<view v-else class="qr-pl">
@@ -315,6 +315,16 @@
 		 */
 		getIndustry: () => request('/app-api/member/national-industry/tree', {
 			method: 'POST'
+		}),
+		/**
+		 * 获取字典数据
+		 * @param {String} type - 字典类型
+		 */
+		getDict: (type) => request('/app-api/system/dict-data/type', {
+			method: 'GET',
+			data: {
+				type
+			}
 		})
 	};
 
@@ -376,29 +386,31 @@
 	});
 
 	// 静态选项配置
-	const typeOptions = [{
-			text: '有限责任公司',
-			value: '有限责任公司'
-		},
-		{
-			text: '个体工商户',
-			value: '个体工商户'
-		}
-	];
+	const typeOptions = ref([]); // 企业类型选项
+	const platformOptions = ref([]); // 线上门店平台选项
+	// const typeOptions = [{
+	// 		text: '有限责任公司',
+	// 		value: '有限责任公司'
+	// 	},
+	// 	{
+	// 		text: '个体工商户',
+	// 		value: '个体工商户'
+	// 	}
+	// ];
 
-	const platformOptions = [{
-			text: '美团',
-			value: '美团'
-		},
-		{
-			text: '大众点评',
-			value: '大众点评'
-		},
-		{
-			text: '饿了么',
-			value: '饿了么'
-		}
-	];
+	// const platformOptions = [{
+	// 		text: '美团',
+	// 		value: '美团'
+	// 	},
+	// 	{
+	// 		text: '大众点评',
+	// 		value: '大众点评'
+	// 	},
+	// 	{
+	// 		text: '饿了么',
+	// 		value: '饿了么'
+	// 	}
+	// ];
 
 	// 表单基本验证规则
 	const rules = {
@@ -431,11 +443,46 @@
 	onMounted(() => {
 		// 加载行业树
 		fetchIndustryTree();
+		// 2. 加载字典数据
+		loadAllDicts();
 	});
 
 	// ==========================================
 	// 4. 业务逻辑方法
 	// ==========================================
+
+	/**
+	 * 加载页面所需的全部字典数据
+	 */
+	const loadAllDicts = async () => {
+		try {
+			// 并发请求两个字典
+			const [typeRes, platformRes] = await Promise.all([
+				Api.getDict('enterprise_type'),
+				Api.getDict('online_stores_online')
+			]);
+
+			// 映射企业类型
+			if (typeRes.data) {
+				typeOptions.value = typeRes.data.map(item => ({
+					text: item.label, // 显示文字
+					value: item.label // 存储值 (保持与之前逻辑一致，存储名称字符串)
+				}));
+			}
+
+			// 映射线上门店平台
+			if (platformRes.data) {
+				platformOptions.value = platformRes.data.map(item => ({
+					text: item.label,
+					value: item.label
+				}));
+			}
+
+			console.log('✅ 字典数据加载成功');
+		} catch (e) {
+			console.error('❌ 加载字典失败', e);
+		}
+	};
 
 	/**
 	 * 获取全量行业数据并进行清洗
@@ -806,7 +853,7 @@
 	// 5. 导航跳转
 	// ==========================================
 	const goCard = () => uni.redirectTo({
-		url: `/pages/enterprise/card?id=${enterpriseId.value || form.id}`
+		url: `/packages/enterprise-card/enterprise-card?id=${enterpriseId.value || form.id}`
 	});
 	const goList = () => uni.navigateBack();
 </script>

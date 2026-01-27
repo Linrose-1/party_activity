@@ -6,6 +6,7 @@
     "uni-popup": "../../uni_modules/uni-popup/components/uni-popup/uni-popup",
     "my-card": "../../components/MyCard",
     "add-circle-confirm-popup": "../../components/AddCircleConfirmPopup",
+    "invite-circle-confirm-popup": "../../components/InviteCircleConfirmPopup",
     "share-type-popup": "../../components/ShareTypePopup"
   }
 }

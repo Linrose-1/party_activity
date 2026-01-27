@@ -21,35 +21,38 @@
 
 				<!-- 1. 查看名片 -->
 				<view class="grid-item primary-outline" @click="handleAction('viewCard')">
-					<view class="icon-box invite-style">
-						<uni-icons type="person" size="26" color="#FF7009"></uni-icons>
+					<view class="icon-box invite-style"><uni-icons type="person" size="26" color="#FF7009"></uni-icons>
 					</view>
 					<text class="item-text">查看名片</text>
 				</view>
 
-				<!-- 2. 商友点评 -->
+				<!-- 2. 人脉链路  -->
+				<view class="grid-item primary-outline" @click="handleAction('viewPath')">
+					<view class="icon-box path-style"><uni-icons type="staff-filled" size="26"
+							color="#FF7009"></uni-icons></view>
+					<text class="item-text">人脉链路</text>
+				</view>
+
+				<!-- 3. 商友点评 -->
 				<view class="grid-item primary-outline" @click="handleAction('comment')">
-					<view class="icon-box invite-style">
-						<uni-icons type="star" size="26" color="#FF7009"></uni-icons>
+					<view class="icon-box invite-style"><uni-icons type="star" size="26" color="#FF7009"></uni-icons>
 					</view>
 					<text class="item-text">商友点评</text>
 				</view>
 
-				<!-- 3. 邀请入圈 -->
-				<!-- 逻辑：如果是自己，禁用 -->
+				<!-- 4. 邀入我圈 -->
 				<view class="grid-item" :class="isSelf ? 'disabled' : 'primary-outline'"
 					@click="handleAction('inviteCircle')">
-					<view class="icon-box invite-style">
-						<uni-icons type="paperplane-filled" size="26" color="#FF7009"></uni-icons>
-					</view>
+					<view class="icon-box invite-style"><uni-icons type="paperplane-filled" size="26"
+							color="#FF7009"></uni-icons></view>
 					<text class="item-text">{{ isSelf ? '本人' : '邀入我圈' }}</text>
 				</view>
 
-				<!-- 4. 申请入圈 -->
-				<view class="grid-item" :class="isSelf ? 'disabled' : 'primary-outline'" @click="handleAction('addCircle')">
-					<view class="icon-box invite-style">
-						<uni-icons type="plusempty" size="26" color="#FF7009"></uni-icons>
-					</view>
+				<!-- 5. 加入TA圈 -->
+				<view class="grid-item" :class="isSelf ? 'disabled' : 'primary-outline'"
+					@click="handleAction('addCircle')">
+					<view class="icon-box invite-style"><uni-icons type="plusempty" size="26"
+							color="#FF7009"></uni-icons></view>
 					<text class="item-text">{{ isSelf ? '本人' : '加入TA圈' }}</text>
 				</view>
 
@@ -176,11 +179,16 @@
 	/* --- 2x2 网格布局修改 --- */
 	.action-grid {
 		display: grid;
-		grid-template-columns: repeat(2, 1fr);
-		/* 改为2列 */
-		gap: 40rpx;
-		/* 增加间距 */
-		padding: 50rpx 40rpx;
+		grid-template-columns: repeat(3, 1fr);
+		/* 改为3列布局 */
+		gap: 30rpx;
+		padding: 40rpx 20rpx;
+	}
+
+	.icon-box.path-style {
+		background-color: #FFF5EE;
+		/* 给链路按钮一个浅橙色底，稍微区别开 */
+		border: 2rpx solid #FF7009;
 	}
 
 	.grid-item {

@@ -324,7 +324,18 @@ const _sfc_main = {
             ...node.children[0],
             children: null
           };
-        } else if (node.children) {
+        }
+        if (node.children && node.children.length > 0) {
+          const hasAllNode = node.children.some((c) => c.name === "全部分类");
+          if (!hasAllNode) {
+            node.children.unshift({
+              id: node.id + "_all",
+              name: "全部分类",
+              text: "全部分类",
+              // 同时显式定义 text 属性
+              children: null
+            });
+          }
           return {
             ...node,
             children: processIndustryTree(node.children)
@@ -333,16 +344,32 @@ const _sfc_main = {
         return node;
       });
     };
+    const onIndustryChangeWithAll = (event, index) => {
+      const nodes = event.detail.value;
+      if (!nodes || nodes.length === 0)
+        return;
+      const lastNode = nodes[nodes.length - 1];
+      const lastNodeText = lastNode.text || lastNode.name;
+      let finalIndustryName = "";
+      if (lastNodeText === "全部分类") {
+        const parentNode = nodes[nodes.length - 2];
+        finalIndustryName = parentNode ? parentNode.text || parentNode.name : "";
+      } else {
+        finalIndustryName = nodes.map((n) => n.text || n.name).join("/");
+      }
+      companyAndIndustryList.value[index].industryName = finalIndustryName;
+      common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:747", `第 ${index + 1} 组行业选择完毕:`, finalIndustryName);
+    };
     const getIndustryTreeData = async () => {
       const {
         data,
         error
       } = await Api.getIndustryTree();
       if (error) {
-        common_vendor.index.__f__("error", "at packages/my-edit/my-edit.vue:726", "获取行业树失败:", error);
+        common_vendor.index.__f__("error", "at packages/my-edit/my-edit.vue:756", "获取行业树失败:", error);
       } else {
         industryTree.value = processIndustryTree(data || []);
-        common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:730", "处理后的行业树:", industryTree.value);
+        common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:760", "处理后的行业树:", industryTree.value);
       }
     };
     function findPathById(tree, targetId) {
@@ -436,14 +463,14 @@ const _sfc_main = {
       }
       setTimeout(() => {
         isDataLoaded.value = true;
-        common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:890", "✅ [系统状态] 数据初始化完成，开始监听修改...");
+        common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:920", "✅ [系统状态] 数据初始化完成，开始监听修改...");
         checkAndRestoreDraft();
       }, 500);
     };
     const checkAndRestoreDraft = () => {
       const draftStr = common_vendor.index.getStorageSync(DRAFT_KEY);
       if (!draftStr) {
-        common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:901", "📭 [缓存检查] 无本地草稿");
+        common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:931", "📭 [缓存检查] 无本地草稿");
         return;
       }
       common_vendor.index.showModal({
@@ -555,7 +582,7 @@ const _sfc_main = {
             src: tempFilePath,
             cropScale: "1:1",
             success: (cropRes) => uploadAvatar(cropRes.tempFilePath),
-            fail: (err) => common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:1032", "用户取消裁剪或裁剪失败:", err)
+            fail: (err) => common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:1062", "用户取消裁剪或裁剪失败:", err)
           });
         }
       });
@@ -594,11 +621,11 @@ const _sfc_main = {
             src: tempFilePath,
             cropScale: "1:1",
             success: (cropRes) => {
-              common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:1084", "二维码裁剪成功");
+              common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:1114", "二维码裁剪成功");
               uploadQrCode(cropRes.tempFilePath);
             },
             fail: (err) => {
-              common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:1088", "取消裁剪或失败:", err);
+              common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:1118", "取消裁剪或失败:", err);
             }
           });
         }
@@ -671,7 +698,7 @@ const _sfc_main = {
           });
         } else {
           common_vendor.index.removeStorageSync(DRAFT_KEY);
-          common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:1250", "🧹 [提交成功] 草稿已清除");
+          common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:1280", "🧹 [提交成功] 草稿已清除");
           common_vendor.index.showToast({
             title: "资料保存成功",
             icon: "success"
@@ -693,7 +720,7 @@ const _sfc_main = {
           }, 800);
         }
       }).catch((err) => {
-        common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:1278", "表单验证失败：", err);
+        common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:1308", "表单验证失败：", err);
       });
     };
     const handleAutoPost = async () => {
@@ -921,9 +948,10 @@ const _sfc_main = {
           }, companyAndIndustryList.value.length > 1 ? {
             b: common_vendor.o(($event) => removeCompany(index), index)
           } : {}, {
-            c: "2d637515-29-" + i0 + "," + ("2d637515-28-" + i0),
-            d: common_vendor.o(($event) => company.industryName = $event, index),
-            e: common_vendor.p({
+            c: common_vendor.o((e) => onIndustryChangeWithAll(e, index), index),
+            d: "2d637515-29-" + i0 + "," + ("2d637515-28-" + i0),
+            e: common_vendor.o(($event) => company.industryName = $event, index),
+            f: common_vendor.p({
               placeholder: "请选择行业",
               ["popup-title"]: "请选择行业",
               localdata: industryTree.value,
@@ -933,37 +961,37 @@ const _sfc_main = {
               },
               modelValue: company.industryName
             }),
-            f: "2d637515-28-" + i0 + ",2d637515-1",
-            g: common_vendor.p({
+            g: "2d637515-28-" + i0 + ",2d637515-1",
+            h: common_vendor.p({
               label: `所在行业`,
               name: `industry_${index}`,
               ["label-width"]: "70px"
             }),
-            h: "2d637515-31-" + i0 + "," + ("2d637515-30-" + i0),
-            i: common_vendor.o(($event) => company.name = $event, index),
-            j: common_vendor.p({
+            i: "2d637515-31-" + i0 + "," + ("2d637515-30-" + i0),
+            j: common_vendor.o(($event) => company.name = $event, index),
+            k: common_vendor.p({
               placeholder: "请输入公司名称",
               modelValue: company.name
             }),
-            k: "2d637515-30-" + i0 + ",2d637515-1",
-            l: common_vendor.p({
+            l: "2d637515-30-" + i0 + ",2d637515-1",
+            m: common_vendor.p({
               label: `公司名称`,
               name: `company_${index}`,
               ["label-width"]: "70px"
             }),
-            m: "2d637515-33-" + i0 + "," + ("2d637515-32-" + i0),
-            n: common_vendor.o(($event) => company.positionTitle = $event, index),
-            o: common_vendor.p({
+            n: "2d637515-33-" + i0 + "," + ("2d637515-32-" + i0),
+            o: common_vendor.o(($event) => company.positionTitle = $event, index),
+            p: common_vendor.p({
               placeholder: "请输入您的职务",
               modelValue: company.positionTitle
             }),
-            p: "2d637515-32-" + i0 + ",2d637515-1",
-            q: common_vendor.p({
+            q: "2d637515-32-" + i0 + ",2d637515-1",
+            r: common_vendor.p({
               label: `担任职务`,
               name: `position_${index}`,
               ["label-width"]: "70px"
             }),
-            r: index
+            s: index
           });
         }),
         ad: companyAndIndustryList.value.length > 1,

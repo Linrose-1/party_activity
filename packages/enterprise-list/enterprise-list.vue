@@ -54,10 +54,23 @@
 						</view>
 					</view>
 
-					<!-- 草稿状态下的橙色温情提示 -->
+					<!-- A. 草稿状态提示 -->
 					<view class="draft-notice" v-if="item.status === 0" @click="goToEdit(item.id)">
 						<uni-icons type="info-filled" size="14" color="#FF7919"></uni-icons>
 						<text>资料未发布，点击“编辑”完善信息后即可展示</text>
+					</view>
+
+					<!-- B. 认证失败状态提示-->
+					<view class="fail-notice" v-if="item.status === 4" @click="handleGoAuth(item)">
+						<view class="fail-header">
+							<uni-icons type="clear" size="14" color="#F44336"></uni-icons>
+							<text class="fail-t">认证失败原因：</text>
+						</view>
+						<text class="fail-reason">{{ item.statusDesc || '资料不符合规范，请重新上传' }}</text>
+						<view class="re-submit">
+							<text>重新提交材料</text>
+							<uni-icons type="right" size="12" color="#F44336"></uni-icons>
+						</view>
 					</view>
 
 					<!-- 底部操作按钮行 -->
@@ -264,24 +277,50 @@
 	 */
 	const goCard = (id) => {
 		uni.navigateTo({
-			url: `/pages/enterprise/card?id=${id}` // 路径请按实际项目调整
+			url: `/packages/enterprise-card/enterprise-card?id=${id}`
 		});
 	};
 
 	/**
-	 * 处理认证逻辑
+	 * [方法] 处理认证跳转逻辑
+	 * 只有已发布的记录才能发起认证申请
+	 * @param {Object} item - 当前点击的企业行数据
 	 */
 	const handleGoAuth = (item) => {
+		// 1. 已认证状态 (3)
 		if (item.status === 3) {
 			return uni.showToast({
 				title: '该企业已通过认证',
 				icon: 'success'
 			});
 		}
-		uni.showToast({
-			title: '认证模块正在对接中...',
-			icon: 'none'
-		});
+
+		// 2. 审核中状态 (2)
+		if (item.status === 2) {
+			return uni.showToast({
+				title: '认证审核中，请耐心等待',
+				icon: 'none'
+			});
+		}
+
+		// 3. 草稿状态 (0)
+		if (item.status === 0) {
+			return uni.showModal({
+				title: '无法认证',
+				content: '请先“编辑”并“保存发布”企业信息后再申请认证。',
+				confirmText: '去完善',
+				success: (res) => {
+					if (res.confirm) goToEdit(item.id);
+				}
+			});
+		}
+
+		// 4. 允许状态 1(已发布) 和 状态 4(认证失败) 跳转认证页
+		if (item.status === 1 || item.status === 4) {
+			uni.navigateTo({
+				url: `/packages/enterprise-auth/enterprise-auth?enterpriseId=${item.id}&enterpriseName=${encodeURIComponent(item.enterpriseName)}`
+			});
+		}
 	};
 
 	/**
@@ -521,6 +560,57 @@
 			margin-left: 10rpx;
 			font-weight: 500;
 		}
+	}
+
+	/* 认证失败提示栏样式 */
+	.fail-notice {
+		background-color: #FFF2F2;
+		/* 浅红色背景 */
+		padding: 20rpx 24rpx;
+		border-radius: 12rpx;
+		margin-bottom: 30rpx;
+		border: 1rpx solid rgba(244, 67, 54, 0.2);
+		position: relative;
+
+		.fail-header {
+			display: flex;
+			align-items: center;
+			margin-bottom: 10rpx;
+
+			.fail-t {
+				font-size: 24rpx;
+				font-weight: bold;
+				color: #F44336;
+				margin-left: 10rpx;
+			}
+		}
+
+		.fail-reason {
+			font-size: 24rpx;
+			color: #666;
+			line-height: 1.5;
+			display: block;
+			padding-left: 44rpx;
+			margin-bottom: 16rpx;
+		}
+
+		.re-submit {
+			display: flex;
+			align-items: center;
+			justify-content: flex-end;
+
+			text {
+				font-size: 22rpx;
+				color: #F44336;
+				font-weight: bold;
+				margin-right: 4rpx;
+			}
+		}
+	}
+
+	/* 按钮点击态增强 */
+	.fail-notice:active {
+		background-color: #FFE5E5;
 	}
 
 	/* 底部操作 */

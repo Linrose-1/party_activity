@@ -43,34 +43,74 @@ const _sfc_main = {
         ent.value = data;
       }
     };
+    const industryText = common_vendor.computed(() => {
+      if (!ent.value)
+        return "";
+      return ent.value.industryFirst + (ent.value.industrySecond ? ` > ${ent.value.industrySecond}` : "");
+    });
     const brandImageList = common_vendor.computed(() => {
       var _a;
-      return ((_a = ent.value) == null ? void 0 : _a.brandImages) ? ent.value.brandImages.split(",") : [];
+      return ((_a = ent.value) == null ? void 0 : _a.brandImages) ? ent.value.brandImages.split(",").filter((i) => i) : [];
     });
     const onlineStores = common_vendor.computed(() => {
       var _a;
-      return ((_a = ent.value) == null ? void 0 : _a.onlineStores) ? JSON.parse(ent.value.onlineStores) : [];
+      if (!((_a = ent.value) == null ? void 0 : _a.onlineStores))
+        return [];
+      try {
+        const data = typeof ent.value.onlineStores === "string" ? JSON.parse(ent.value.onlineStores) : ent.value.onlineStores;
+        return Array.isArray(data) ? data : [];
+      } catch (e) {
+        return [];
+      }
+    });
+    const offlineStores = common_vendor.computed(() => {
+      var _a;
+      if (!((_a = ent.value) == null ? void 0 : _a.offlineStores))
+        return [];
+      try {
+        const data = typeof ent.value.offlineStores === "string" ? JSON.parse(ent.value.offlineStores) : ent.value.offlineStores;
+        return Array.isArray(data) ? data : [];
+      } catch (e) {
+        return [];
+      }
     });
     const parsedTags = common_vendor.computed(() => {
       var _a;
-      return ((_a = ent.value) == null ? void 0 : _a.tags) ? JSON.parse(ent.value.tags) : [];
+      if (!((_a = ent.value) == null ? void 0 : _a.tags))
+        return [];
+      try {
+        const data = typeof ent.value.tags === "string" ? JSON.parse(ent.value.tags) : ent.value.tags;
+        return Array.isArray(data) ? data : [];
+      } catch (e) {
+        return [];
+      }
     });
-    const maskCreditCode = (code, showFull) => {
+    const maskedCreditCode = common_vendor.computed(() => {
+      var _a;
+      const code = (_a = ent.value) == null ? void 0 : _a.creditCode;
       if (!code)
-        return "";
-      if (showFull)
+        return "暂无数据";
+      if (showFullCreditCode.value)
         return code;
       return code.substring(0, 8) + "******" + code.substring(code.length - 4);
-    };
-    const formatDate = (ts) => {
+    });
+    const formatEstablishDate = common_vendor.computed(() => {
+      var _a;
+      const ts = (_a = ent.value) == null ? void 0 : _a.establishDate;
       if (!ts || ts === 0)
         return "待完善";
       const d = new Date(ts);
       return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`;
+    });
+    const toggleCreditCode = () => {
+      showFullCreditCode.value = !showFullCreditCode.value;
     };
     const makePhoneCall = (num) => {
       if (!num)
-        return;
+        return common_vendor.index.showToast({
+          title: "暂无电话信息",
+          icon: "none"
+        });
       common_vendor.index.makePhoneCall({
         phoneNumber: num
       });
@@ -112,10 +152,20 @@ const _sfc_main = {
     };
     const goToCard = () => {
       common_vendor.index.navigateTo({
-        url: `/pages/enterprise/card?id=${ent.value.id}`
+        url: `/packages/enterprise-card/enterprise-card?id=${ent.value.id}`
+      });
+    };
+    const previewQrSingle = () => {
+      if (!currentQrUrl.value)
+        return;
+      common_vendor.index.previewImage({
+        urls: [currentQrUrl.value]
       });
     };
     const saveQrImage = () => {
+      common_vendor.index.showLoading({
+        title: "正在保存"
+      });
       common_vendor.index.downloadFile({
         url: currentQrUrl.value,
         success: (res) => {
@@ -123,44 +173,27 @@ const _sfc_main = {
             filePath: res.tempFilePath,
             success: () => common_vendor.index.showToast({
               title: "已保存至相册"
+            }),
+            fail: () => common_vendor.index.showToast({
+              title: "保存失败",
+              icon: "none"
             })
           });
-        }
+        },
+        complete: () => common_vendor.index.hideLoading()
       });
     };
-    const offlineStores = common_vendor.computed(() => {
-      var _a;
-      if (!((_a = ent.value) == null ? void 0 : _a.offlineStores))
-        return [];
-      try {
-        const data = typeof ent.value.offlineStores === "string" ? JSON.parse(ent.value.offlineStores) : ent.value.offlineStores;
-        return Array.isArray(data) ? data : [];
-      } catch (e) {
-        return [];
-      }
-    });
     const openMap = (store) => {
-      if (!store.lat || !store.lng) {
+      if (!store.lat || !store.lng)
         return common_vendor.index.showToast({
-          title: "暂无位置坐标",
+          title: "坐标缺失",
           icon: "none"
         });
-      }
       common_vendor.index.openLocation({
         latitude: Number(store.lat),
         longitude: Number(store.lng),
         name: store.name,
-        address: store.address,
-        success: () => {
-          common_vendor.index.__f__("log", "at packages/enterprise-detail/enterprise-detail.vue:351", "成功调起地图导航");
-        },
-        fail: (err) => {
-          common_vendor.index.__f__("error", "at packages/enterprise-detail/enterprise-detail.vue:354", "打开地图失败", err);
-          common_vendor.index.showToast({
-            title: "无法打开地图",
-            icon: "none"
-          });
-        }
+        address: store.address
       });
     };
     return (_ctx, _cache) => {
@@ -177,59 +210,57 @@ const _sfc_main = {
       }, ent.value.brandSlogan ? {
         g: common_vendor.t(ent.value.brandSlogan)
       } : {}, {
-        h: common_vendor.o(($event) => _ctx.toggleSection("basic")),
-        i: common_vendor.t(ent.value.enterpriseType || "暂无数据"),
-        j: common_vendor.t(maskCreditCode(ent.value.creditCode, showFullCreditCode.value)),
-        k: common_vendor.p({
+        h: common_vendor.t(ent.value.enterpriseType || "暂无数据"),
+        i: common_vendor.t(maskedCreditCode.value),
+        j: common_vendor.p({
           type: showFullCreditCode.value ? "eye-slash" : "eye",
           size: "16",
           color: "#999"
         }),
-        l: common_vendor.o(($event) => showFullCreditCode.value = !showFullCreditCode.value),
-        m: common_vendor.t(ent.value.legalPerson || "暂无数据"),
-        n: common_vendor.t(formatDate(ent.value.establishDate)),
-        o: common_vendor.t(ent.value.officePhone || "暂无数据"),
-        p: common_vendor.o(($event) => makePhoneCall(ent.value.officePhone)),
-        q: common_vendor.t(ent.value.officialEmail || "暂无数据"),
-        r: common_vendor.t(ent.value.shortIntro || "暂无简短介绍"),
-        s: ent.value.coreValue
+        k: common_vendor.o(toggleCreditCode),
+        l: common_vendor.t(ent.value.legalPerson || "暂无数据"),
+        m: common_vendor.t(formatEstablishDate.value),
+        n: common_vendor.t(ent.value.officePhone || "暂无数据"),
+        o: common_vendor.o(($event) => makePhoneCall(ent.value.officePhone)),
+        p: common_vendor.t(ent.value.officialEmail || "暂无数据"),
+        q: common_vendor.t(ent.value.shortIntro || "暂无详细介绍"),
+        r: ent.value.coreValue
       }, ent.value.coreValue ? {
-        t: common_vendor.t(ent.value.coreValue)
+        s: common_vendor.t(ent.value.coreValue)
       } : {}, {
-        v: common_vendor.t(ent.value.industryFirst),
-        w: common_vendor.t(ent.value.industrySecond ? " > " + ent.value.industrySecond : ""),
-        x: parsedTags.value.length
+        t: common_vendor.t(industryText.value),
+        v: parsedTags.value.length
       }, parsedTags.value.length ? {
-        y: common_vendor.f(parsedTags.value, (tag, index, i0) => {
+        w: common_vendor.f(parsedTags.value, (tag, index, i0) => {
           return {
             a: common_vendor.t(tag),
             b: index
           };
         })
       } : {}, {
-        z: ent.value.officialWebsite
+        x: ent.value.officialWebsite
       }, ent.value.officialWebsite ? {
-        A: common_vendor.t(ent.value.officialWebsite)
+        y: common_vendor.t(ent.value.officialWebsite),
+        z: common_vendor.o(($event) => openStoreLink(ent.value.officialWebsite))
       } : {}, {
-        B: ent.value.wechatMpName
+        A: ent.value.wechatMpName
       }, ent.value.wechatMpName ? {
-        C: common_vendor.t(ent.value.wechatMpName),
-        D: common_vendor.t(ent.value.wechatMpId),
-        E: common_vendor.o(($event) => openQrPopup(ent.value.wechatMpQrcode, ent.value.wechatMpName))
+        B: common_vendor.t(ent.value.wechatMpName),
+        C: common_vendor.o(($event) => openQrPopup(ent.value.wechatMpQrcode, ent.value.wechatMpName))
       } : {}, {
-        F: ent.value.videoAccount
+        D: ent.value.videoAccount
       }, ent.value.videoAccount ? {
-        G: common_vendor.t(ent.value.videoAccount),
-        H: common_vendor.o(($event) => openQrPopup(ent.value.videoAccountQrcode, "视频号"))
+        E: common_vendor.t(ent.value.videoAccount),
+        F: common_vendor.o(($event) => openQrPopup(ent.value.videoAccountQrcode, "官方视频号"))
       } : {}, {
-        I: common_vendor.t(ent.value.customerServicePhone),
-        J: common_vendor.o(($event) => makePhoneCall(ent.value.customerServicePhone)),
-        K: common_vendor.t(ent.value.businessCooperation),
-        L: common_vendor.t(ent.value.afterSaleEmail),
-        M: onlineStores.value.length
+        G: common_vendor.t(ent.value.customerServicePhone || "暂无数据"),
+        H: common_vendor.o(($event) => makePhoneCall(ent.value.customerServicePhone)),
+        I: common_vendor.t(ent.value.businessCooperation || "暂无数据"),
+        J: common_vendor.t(ent.value.afterSaleEmail || "暂无数据"),
+        K: onlineStores.value.length
       }, onlineStores.value.length ? common_vendor.e({
-        N: common_vendor.t(onlineStores.value.length),
-        O: common_vendor.f(onlineStores.value, (store, index, i0) => {
+        L: common_vendor.t(onlineStores.value.length),
+        M: common_vendor.f(onlineStores.value, (store, index, i0) => {
           return {
             a: common_vendor.t(getStoreIcon(store.platform)),
             b: common_vendor.t(store.name),
@@ -239,15 +270,15 @@ const _sfc_main = {
             f: index < 3 || showAllStores.value
           };
         }),
-        P: onlineStores.value.length > 3
+        N: onlineStores.value.length > 3
       }, onlineStores.value.length > 3 ? {
-        Q: common_vendor.t(showAllStores.value ? "收起全部" : "展开全部"),
-        R: common_vendor.o(($event) => showAllStores.value = !showAllStores.value)
+        O: common_vendor.t(showAllStores.value ? "收起全部" : "展开全部"),
+        P: common_vendor.o(($event) => showAllStores.value = !showAllStores.value)
       } : {}) : {}, {
-        S: offlineStores.value.length
+        Q: offlineStores.value.length
       }, offlineStores.value.length ? {
-        T: common_vendor.t(offlineStores.value.length),
-        U: common_vendor.f(offlineStores.value, (store, index, i0) => {
+        R: common_vendor.t(offlineStores.value.length),
+        S: common_vendor.f(offlineStores.value, (store, index, i0) => {
           return {
             a: "9f5eb755-1-" + i0,
             b: common_vendor.t(store.name),
@@ -256,38 +287,39 @@ const _sfc_main = {
             e: "off-" + index
           };
         }),
-        V: common_vendor.p({
+        T: common_vendor.p({
           type: "location-filled",
           size: "24",
           color: "#FF8600"
         })
       } : {}, {
-        W: common_vendor.f(brandImageList.value, (img, index, i0) => {
+        U: common_vendor.f(brandImageList.value, (img, index, i0) => {
           return {
             a: index,
             b: img,
             c: common_vendor.o(($event) => previewImage(index), index)
           };
         }),
-        X: common_vendor.o(($event) => previewImage(0)),
-        Y: ent.value.videoUrl
+        V: common_vendor.o(($event) => previewImage(0)),
+        W: ent.value.videoUrl
       }, ent.value.videoUrl ? {
-        Z: ent.value.videoUrl
+        X: ent.value.videoUrl
       } : {}, {
-        aa: common_vendor.p({
+        Y: common_vendor.p({
           type: "paperplane-filled",
           size: "18",
           color: "#fff"
         }),
-        ab: common_vendor.o(goToCard),
-        ac: common_vendor.t(currentQrTitle.value),
-        ad: currentQrUrl.value,
-        ae: common_vendor.o(saveQrImage),
-        af: common_vendor.o(closeQrPopup),
-        ag: common_vendor.sr(qrPopup, "9f5eb755-3", {
+        Z: common_vendor.o(goToCard),
+        aa: common_vendor.t(currentQrTitle.value),
+        ab: currentQrUrl.value,
+        ac: common_vendor.o(previewQrSingle),
+        ad: common_vendor.o(saveQrImage),
+        ae: common_vendor.o(closeQrPopup),
+        af: common_vendor.sr(qrPopup, "9f5eb755-3", {
           "k": "qrPopup"
         }),
-        ah: common_vendor.p({
+        ag: common_vendor.p({
           type: "center"
         })
       }) : {});

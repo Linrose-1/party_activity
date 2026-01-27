@@ -143,7 +143,7 @@
 							<uni-forms-item :label="`所在行业`" :name="`industry_${index}`" label-width="70px">
 								<uni-data-picker class="simple-picker" placeholder="请选择行业" popup-title="请选择行业"
 									:localdata="industryTree" :map="{text: 'name', value: 'name'}"
-									v-model="company.industryName" />
+									v-model="company.industryName" @change="(e) => onIndustryChangeWithAll(e, index)" />
 							</uni-forms-item>
 							<view class="divider"></view>
 							<uni-forms-item :label="`公司名称`" :name="`company_${index}`" label-width="70px">
@@ -690,31 +690,61 @@
 	const processIndustryTree = (tree) => {
 		if (!Array.isArray(tree)) return [];
 
-		// 使用 map 创建一个新数组，避免直接修改原始数据
 		return tree.map(node => {
-			// 检查当前节点是否满足“父子同名且只有一个子节点”的条件
-			if (
-				node.children &&
-				node.children.length === 1 &&
-				node.children[0].name === node.name
-			) {
-				// 如果满足条件，用子节点替换父节点
-				// 【重要】替换后，需要将这个“新父节点”的 children 设置为 null，因为它就是最终的叶子节点
+			if (node.children && node.children.length === 1 && node.children[0].name === node.name) {
 				return {
 					...node.children[0],
 					children: null
 				};
-			} else if (node.children) {
-				// 如果不满足条件，但有子节点，则递归处理它的子节点
+			}
+
+			if (node.children && node.children.length > 0) {
+				const hasAllNode = node.children.some(c => c.name === '全部分类');
+				if (!hasAllNode) {
+					node.children.unshift({
+						id: node.id + '_all',
+						name: '全部分类',
+						text: '全部分类', // 同时显式定义 text 属性
+						children: null
+					});
+				}
 				return {
 					...node,
 					children: processIndustryTree(node.children)
 				};
 			}
-
-			// 如果没有子节点，直接返回原节点
 			return node;
 		});
+	};
+
+	/**
+	 * @description 处理行业选择，兼容“全部分类”逻辑
+	 */
+	const onIndustryChangeWithAll = (event, index) => {
+		const nodes = event.detail.value; // 获取选中的路径节点数组
+		if (!nodes || nodes.length === 0) return;
+
+		const lastNode = nodes[nodes.length - 1];
+		// 关键：由于配置了 map，组件内部可能会将 name 转换为 text
+		const lastNodeText = lastNode.text || lastNode.name;
+
+		let finalIndustryName = '';
+
+		if (lastNodeText === '全部分类') {
+			// 如果选的是“全部分类”，则取其父级的名称
+			// 逻辑：如果路径是 [制造业, 全部分类]，结果就是 "制造业"
+			const parentNode = nodes[nodes.length - 2];
+			finalIndustryName = parentNode ? (parentNode.text || parentNode.name) : '';
+		} else {
+			// 如果选的是正常的末级分类，拼接完整路径
+			finalIndustryName = nodes.map(n => n.text || n.name).join('/');
+		}
+
+		// 强制更新对应索引的数据，确保响应式
+		companyAndIndustryList.value[index].industryName = finalIndustryName;
+
+		// 调试打印，现在应该能看到正确的值了
+		console.log(`第 ${index + 1} 组行业选择完毕:`, finalIndustryName);
 	};
 
 	const getIndustryTreeData = async () => {

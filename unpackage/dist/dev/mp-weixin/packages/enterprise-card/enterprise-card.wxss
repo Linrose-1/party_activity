@@ -1,0 +1,331 @@
+/* 水平间距 */
+/* 水平间距 */
+/* SCSS 变量声明 */
+.page-container.data-v-0bda02ee {
+  background: #F4F6F8;
+  min-height: 100vh;
+  padding-bottom: 220rpx;
+}
+
+/* 1. 顶部金卡 Card 样式 */
+.hero-section.data-v-0bda02ee {
+  padding: 40rpx 30rpx;
+  background: #fff;
+}
+.premium-card.data-v-0bda02ee {
+  width: 100%;
+  height: 440rpx;
+  border-radius: 40rpx;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 30rpx 60rpx rgba(0, 0, 0, 0.15);
+}
+.premium-card .card-bg.data-v-0bda02ee {
+  width: 100%;
+  height: 100%;
+}
+.premium-card .card-overlay.data-v-0bda02ee {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(210deg, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.85) 100%);
+}
+.premium-card .card-inner.data-v-0bda02ee {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  padding: 40rpx;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.premium-card .card-inner .card-header.data-v-0bda02ee {
+  display: flex;
+  align-items: center;
+  gap: 24rpx;
+}
+.premium-card .card-inner .card-header .ent-logo.data-v-0bda02ee {
+  width: 100rpx;
+  height: 100rpx;
+  background: #fff;
+}
+.premium-card .card-inner .card-header .ent-logo.logo-style-0.data-v-0bda02ee {
+  border-radius: 50%;
+}
+.premium-card .card-inner .card-header .ent-logo.logo-style-2.data-v-0bda02ee {
+  border-radius: 20rpx;
+}
+.premium-card .card-inner .card-header .ent-name.data-v-0bda02ee {
+  color: #fff;
+  font-size: 40rpx;
+  font-weight: 800;
+}
+.premium-card .card-inner .card-header .ent-slogan.data-v-0bda02ee {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 24rpx;
+  margin-top: 4rpx;
+  display: block;
+}
+.q-tag.data-v-0bda02ee {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  font-size: 20rpx;
+  padding: 6rpx 18rpx;
+  border-radius: 30rpx;
+  margin-right: 12rpx;
+  -webkit-backdrop-filter: blur(10rpx);
+          backdrop-filter: blur(10rpx);
+}
+
+/* 2. 内容卡片通用布局 */
+.main-content.data-v-0bda02ee {
+  padding: 0 24rpx;
+  margin-top: -20rpx;
+}
+.content-section.data-v-0bda02ee {
+  background: #fff;
+  border-radius: 24rpx;
+  padding: 32rpx;
+  margin-bottom: 24rpx;
+}
+.content-section .section-header.data-v-0bda02ee {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  margin-bottom: 24rpx;
+}
+.content-section .section-header .title-l.data-v-0bda02ee {
+  font-size: 30rpx;
+  font-weight: bold;
+  color: #333;
+}
+.content-section .section-header .title-line.data-v-0bda02ee {
+  flex: 1;
+  height: 1rpx;
+  background: #f0f0f0;
+}
+.brand-bio.data-v-0bda02ee {
+  font-size: 28rpx;
+  color: #666;
+  line-height: 1.6;
+}
+.core-value.data-v-0bda02ee {
+  margin-top: 20rpx;
+  font-size: 24rpx;
+  color: #444;
+  background: #F9FAFB;
+  padding: 12rpx 20rpx;
+  border-radius: 8rpx;
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+}
+
+/* 联系方式：列表布局 */
+.contact-row-item.data-v-0bda02ee {
+  display: flex;
+  align-items: center;
+  padding: 24rpx 0;
+  border-bottom: 1rpx solid #f8f8f8;
+}
+.contact-row-item.data-v-0bda02ee:last-child {
+  border-bottom: none;
+}
+.contact-row-item .c-icon.data-v-0bda02ee {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 50%;
+  background: #F9FAFB;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 24rpx;
+}
+.contact-row-item .c-body.data-v-0bda02ee {
+  flex: 1;
+}
+.contact-row-item .c-body .c-label.data-v-0bda02ee {
+  font-size: 20rpx;
+  color: #999;
+  display: block;
+}
+.contact-row-item .c-body .c-val.data-v-0bda02ee {
+  font-size: 28rpx;
+  color: #333;
+  font-weight: bold;
+}
+
+/* 社交媒体矩阵布局 */
+.social-matrix.data-v-0bda02ee {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+.social-matrix .social-cell.data-v-0bda02ee {
+  display: flex;
+  align-items: center;
+  background: #F9FAFB;
+  padding: 20rpx;
+  border-radius: 16rpx;
+}
+.social-matrix .social-cell .s-brand-icon.data-v-0bda02ee {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 20rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 20rpx;
+}
+.social-matrix .social-cell .s-brand-icon.wechat.data-v-0bda02ee {
+  background: #07C160;
+}
+.social-matrix .social-cell .s-brand-icon.video.data-v-0bda02ee {
+  background: #FF8600;
+}
+.social-matrix .social-cell .s-info.data-v-0bda02ee {
+  flex: 1;
+}
+.social-matrix .social-cell .s-info .s-type.data-v-0bda02ee {
+  font-size: 22rpx;
+  color: #999;
+  display: block;
+}
+.social-matrix .social-cell .s-info .s-name.data-v-0bda02ee {
+  font-size: 28rpx;
+  color: #333;
+  font-weight: bold;
+}
+.social-matrix .social-cell .s-action.data-v-0bda02ee {
+  font-size: 24rpx;
+  font-weight: bold;
+  border: 2rpx solid #FF8600;
+  padding: 6rpx 24rpx;
+  border-radius: 30rpx;
+}
+
+/* 门店样式 */
+.store-badge.data-v-0bda02ee {
+  padding: 8rpx 20rpx;
+  background: #F4F5F7;
+  border-radius: 8rpx;
+  font-size: 22rpx;
+  color: #666;
+  margin: 0 12rpx 12rpx 0;
+  display: inline-block;
+}
+.offline-address.data-v-0bda02ee {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  padding: 24rpx 0;
+  border-top: 1rpx solid #f8f8f8;
+}
+.offline-address .addr-txt.data-v-0bda02ee {
+  flex: 1;
+  font-size: 24rpx;
+  color: #666;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 媒体资产显示 */
+.video-container.data-v-0bda02ee {
+  width: 100%;
+  height: 380rpx;
+  border-radius: 20rpx;
+  overflow: hidden;
+  margin-bottom: 20rpx;
+  background: #000;
+}
+.video-container .brand-video.data-v-0bda02ee {
+  width: 100%;
+  height: 100%;
+}
+.gallery-masonry.data-v-0bda02ee {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10rpx;
+}
+.gallery-masonry .gallery-img.data-v-0bda02ee {
+  width: 100%;
+  height: 200rpx;
+  border-radius: 12rpx;
+}
+
+/* 底部悬浮操作 Bar */
+.floating-bar.data-v-0bda02ee {
+  position: fixed;
+  bottom: 40rpx;
+  left: 40rpx;
+  right: 40rpx;
+  height: 110rpx;
+  background: #fff;
+  border-radius: 60rpx;
+  display: flex;
+  align-items: center;
+  padding: 0 10rpx 0 40rpx;
+  box-shadow: 0 20rpx 40rpx rgba(0, 0, 0, 0.1);
+  z-index: 99;
+}
+.floating-bar .bar-left.data-v-0bda02ee {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  font-size: 26rpx;
+  color: #666;
+  margin-right: 40rpx;
+}
+.floating-bar .share-btn.data-v-0bda02ee {
+  flex: 1;
+  height: 90rpx;
+  border-radius: 50rpx;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12rpx;
+  font-size: 30rpx;
+  font-weight: bold;
+  border: none;
+}
+.floating-bar .share-btn.data-v-0bda02ee::after {
+  border: none;
+}
+
+/* 二维码预览弹窗 */
+.qr-box.data-v-0bda02ee {
+  background: #fff;
+  padding: 40rpx;
+  border-radius: 30rpx;
+  width: 520rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.qr-box .qr-title.data-v-0bda02ee {
+  font-size: 34rpx;
+  font-weight: bold;
+  margin-bottom: 30rpx;
+}
+.qr-box .qr-image.data-v-0bda02ee {
+  width: 380rpx;
+  height: 380rpx;
+}
+.qr-box .qr-tip.data-v-0bda02ee {
+  font-size: 24rpx;
+  color: #999;
+  margin: 30rpx 0;
+}
+.qr-box .qr-close.data-v-0bda02ee {
+  width: 100%;
+  height: 88rpx;
+  background: #f5f5f5;
+  color: #666;
+  border-radius: 44rpx;
+  font-size: 28rpx;
+  border: none;
+}
+.qr-box .qr-close.data-v-0bda02ee::after {
+  border: none;
+}

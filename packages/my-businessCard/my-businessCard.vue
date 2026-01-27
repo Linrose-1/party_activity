@@ -57,12 +57,11 @@
 
 			<!-- 场景 B: 已登录，陌生人-->
 			<view v-else-if="userStatus === 'STRANGER'" class="action-group">
-				<button class="btn btn-secondary" @click="openShareTypePopup">
-					<uni-icons type="paperplane" size="18" color="#fff"></uni-icons> 分享
+				<button class="btn btn-share-mini" @click="openShareTypePopup">
+					<uni-icons type="paperplane" size="18" color="#666"></uni-icons>
 				</button>
-				<button class="btn btn-primary" @click="handleAddCircle">
-					<uni-icons type="plusempty" size="18" color="#fff"></uni-icons> 加圈
-				</button>
+				<button class="btn btn-secondary" @click="handleInviteCircle">邀入我圈</button>
+				<button class="btn btn-primary" @click="handleAddCircle">加入TA圈</button>
 			</view>
 
 			<!-- 场景 C: 已登录，已是圈友 -->
@@ -118,6 +117,7 @@
 	</view>
 
 	<AddCircleConfirmPopup ref="addCirclePopup" />
+	<InviteCircleConfirmPopup ref="inviteCirclePopup" @success="onSocialActionSuccess" />
 
 	<ShareTypePopup ref="shareTypePopupRef" @selectMode="handleShareTypeSelect" @change="onShareTypePopupChange" />
 
@@ -137,6 +137,7 @@
 	import MyCard from '../../components/MyCard.vue';
 	import request from '../../utils/request.js';
 	import AddCircleConfirmPopup from '@/components/AddCircleConfirmPopup.vue';
+	import InviteCircleConfirmPopup from '@/components/InviteCircleConfirmPopup.vue';
 	import {
 		getInviteCode
 	} from '../../utils/user.js'; // 引入工具函数获取登录用户邀请码
@@ -163,6 +164,7 @@
 	const isPopupOpen = ref(false);
 
 	const addCirclePopup = ref(null);
+	const inviteCirclePopup = ref(null);
 	const shareTypePopupRef = ref(null);
 	const currentShareMode = ref('PROXY'); // 默认模式， 'SELF' | 'PROXY'
 	const isShareTypePopupOpen = ref(false);
@@ -1201,12 +1203,35 @@
 		});
 	};
 
+	/**
+	 * [方法] 处理：加入TA圈 (申请入圈)
+	 */
 	const handleAddCircle = () => {
 		const user = {
 			id: userInfo.value.id,
 			name: userInfo.value.realName || userInfo.value.nickname
 		};
 		addCirclePopup.value.open(user);
+	};
+
+	/**
+	 * [方法] 处理：邀入我圈 (邀请入圈)
+	 */
+	const handleInviteCircle = () => {
+		const user = {
+			id: userInfo.value.id,
+			name: userInfo.value.realName || userInfo.value.nickname
+		};
+		inviteCirclePopup.value.open(user);
+	};
+
+	/**
+	 * [方法] 社交操作成功后的回调
+	 */
+	const onSocialActionSuccess = (targetId) => {
+		console.log('社交操作成功，目标用户ID:', targetId);
+		// 可根据业务需求在此处刷新用户信息或更新本地状态
+		// initializePage(fromShare.value); 
 	};
 
 	/**
@@ -1367,6 +1392,28 @@
 		gap: 20rpx;
 		align-items: center;
 		width: 100%;
+	}
+
+	.btn-share-mini {
+		flex: 0 0 88rpx !important;
+		/* 不伸缩，固定宽度 */
+		background-color: #f5f5f5 !important;
+		padding: 0 !important;
+		margin-right: 10rpx;
+	}
+
+	.action-group {
+		display: flex;
+		gap: 15rpx;
+		/* 稍微缩小间距 */
+		align-items: center;
+		width: 100%;
+	}
+
+	.btn {
+		/* 确保文字在小屏幕下不会溢出 */
+		font-size: 26rpx;
+		white-space: nowrap;
 	}
 
 	.btn {

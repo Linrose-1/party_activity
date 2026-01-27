@@ -1,6 +1,26 @@
-
+/* 水平间距 */
+/* 水平间距 */
 .container.data-v-08c6f3b5 {
-		padding: 30rpx;
-		background-color: #fff;
-		min-height: 100vh;
+  padding: 30rpx;
+  background-color: #fff;
+  min-height: 100vh;
+}
+.rich-text-area.data-v-08c6f3b5 {
+  margin-bottom: 60rpx;
+}
+.divider-section.data-v-08c6f3b5 {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20rpx;
+  margin: 40rpx 0;
+}
+.divider-section .line.data-v-08c6f3b5 {
+  flex: 1;
+  height: 1rpx;
+  background-color: #eee;
+}
+.divider-section text.data-v-08c6f3b5 {
+  font-size: 24rpx;
+  color: #ccc;
 }

@@ -13,10 +13,11 @@ const _easycom_uni_load_more = () => "../../uni_modules/uni-load-more/components
 const _easycom_uni_icons = () => "../../uni_modules/uni-icons/components/uni-icons/uni-icons.js";
 const _easycom_uni_popup = () => "../../uni_modules/uni-popup/components/uni-popup/uni-popup.js";
 if (!Math) {
-  (_easycom_uni_load_more + _easycom_uni_icons + MyCard + _easycom_uni_popup + AddCircleConfirmPopup + ShareTypePopup)();
+  (_easycom_uni_load_more + _easycom_uni_icons + MyCard + _easycom_uni_popup + AddCircleConfirmPopup + InviteCircleConfirmPopup + ShareTypePopup)();
 }
 const MyCard = () => "../../components/MyCard.js";
 const AddCircleConfirmPopup = () => "../../components/AddCircleConfirmPopup.js";
+const InviteCircleConfirmPopup = () => "../../components/InviteCircleConfirmPopup.js";
 const ShareTypePopup = () => "../../components/ShareTypePopup.js";
 const _sfc_main = {
   __name: "my-businessCard",
@@ -37,6 +38,7 @@ const _sfc_main = {
     const showTimelineGuide = common_vendor.ref(false);
     const isPopupOpen = common_vendor.ref(false);
     const addCirclePopup = common_vendor.ref(null);
+    const inviteCirclePopup = common_vendor.ref(null);
     const shareTypePopupRef = common_vendor.ref(null);
     const currentShareMode = common_vendor.ref("PROXY");
     const isShareTypePopupOpen = common_vendor.ref(false);
@@ -56,7 +58,7 @@ const _sfc_main = {
       let finalOptions = options || {};
       if (finalOptions.scene) {
         const sceneStr = decodeURIComponent(finalOptions.scene);
-        common_vendor.index.__f__("log", "at packages/my-businessCard/my-businessCard.vue:207", `✅ [名片页] 在 onLoad 中检测到 scene: ${sceneStr}`);
+        common_vendor.index.__f__("log", "at packages/my-businessCard/my-businessCard.vue:209", `✅ [名片页] 在 onLoad 中检测到 scene: ${sceneStr}`);
         const sceneParams = {};
         sceneStr.split("&").forEach((item) => {
           const parts = item.split("=");
@@ -64,33 +66,33 @@ const _sfc_main = {
             sceneParams[parts[0]] = parts[1];
           }
         });
-        common_vendor.index.__f__("log", "at packages/my-businessCard/my-businessCard.vue:215", "✅ [名片页] scene 解析结果:", sceneParams);
-        common_vendor.index.__f__("log", "at packages/my-businessCard/my-businessCard.vue:216", "测试");
+        common_vendor.index.__f__("log", "at packages/my-businessCard/my-businessCard.vue:217", "✅ [名片页] scene 解析结果:", sceneParams);
+        common_vendor.index.__f__("log", "at packages/my-businessCard/my-businessCard.vue:218", "测试");
         finalOptions = {
           ...finalOptions,
           ...sceneParams
         };
       }
-      common_vendor.index.__f__("log", "at packages/my-businessCard/my-businessCard.vue:224", "[my-businessCard] onLoad 触发。最终选项:", JSON.stringify(finalOptions));
+      common_vendor.index.__f__("log", "at packages/my-businessCard/my-businessCard.vue:226", "[my-businessCard] onLoad 触发。最终选项:", JSON.stringify(finalOptions));
       const inviteCode = finalOptions.c || finalOptions.inviteCode;
       if (inviteCode) {
-        common_vendor.index.__f__("log", "at packages/my-businessCard/my-businessCard.vue:229", "✅ [邀请码] 捕获邀请码，暂存本地:", inviteCode);
+        common_vendor.index.__f__("log", "at packages/my-businessCard/my-businessCard.vue:231", "✅ [邀请码] 捕获邀请码，暂存本地:", inviteCode);
         common_vendor.index.setStorageSync("pendingInviteCode", inviteCode);
       }
       if (!token) {
-        common_vendor.index.__f__("log", "at packages/my-businessCard/my-businessCard.vue:235", "⚠️ 当前为游客模式（未登录），尝试允许查看名片数据...");
+        common_vendor.index.__f__("log", "at packages/my-businessCard/my-businessCard.vue:237", "⚠️ 当前为游客模式（未登录），尝试允许查看名片数据...");
       }
       const loggedInUserId = common_vendor.index.getStorageSync("userId");
       const targetId = finalOptions.i || finalOptions.id;
       const isFromShareStr = finalOptions.fromShare || finalOptions.fs;
-      common_vendor.index.__f__("log", "at packages/my-businessCard/my-businessCard.vue:252", "🔍 [Debug] fromShare/fs 原始值:", isFromShareStr);
+      common_vendor.index.__f__("log", "at packages/my-businessCard/my-businessCard.vue:254", "🔍 [Debug] fromShare/fs 原始值:", isFromShareStr);
       if (isFromShareStr === "1" || isFromShareStr === 1) {
         fromShare.value = true;
-        common_vendor.index.__f__("log", "at packages/my-businessCard/my-businessCard.vue:256", "✅ [Debug] 已识别为分享来源，fromShare = true");
+        common_vendor.index.__f__("log", "at packages/my-businessCard/my-businessCard.vue:258", "✅ [Debug] 已识别为分享来源，fromShare = true");
       } else {
-        common_vendor.index.__f__("log", "at packages/my-businessCard/my-businessCard.vue:258", "❌ [Debug] 未识别为分享来源");
+        common_vendor.index.__f__("log", "at packages/my-businessCard/my-businessCard.vue:260", "❌ [Debug] 未识别为分享来源");
       }
-      common_vendor.index.__f__("log", "at packages/my-businessCard/my-businessCard.vue:261", "打印结束");
+      common_vendor.index.__f__("log", "at packages/my-businessCard/my-businessCard.vue:263", "打印结束");
       if (targetId) {
         if (loggedInUserId && targetId == loggedInUserId) {
           isViewingOwnCard.value = true;
@@ -102,7 +104,7 @@ const _sfc_main = {
         if (token) {
           isViewingOwnCard.value = true;
         } else {
-          common_vendor.index.__f__("warn", "at packages/my-businessCard/my-businessCard.vue:281", "游客模式且无目标ID，无法展示内容，跳转登录页");
+          common_vendor.index.__f__("warn", "at packages/my-businessCard/my-businessCard.vue:283", "游客模式且无目标ID，无法展示内容，跳转登录页");
           common_vendor.index.reLaunch({
             url: "/pages/index/index"
           });
@@ -121,7 +123,7 @@ const _sfc_main = {
       isLoading.value = true;
       errorMsg.value = "";
       userInfo.value = null;
-      common_vendor.index.__f__("log", "at packages/my-businessCard/my-businessCard.vue:312", "🔄 [initializePage] 接收到的 isFromShare:", isFromShare);
+      common_vendor.index.__f__("log", "at packages/my-businessCard/my-businessCard.vue:314", "🔄 [initializePage] 接收到的 isFromShare:", isFromShare);
       try {
         const rawData = isViewingOwnCard.value ? await fetchOwnUserInfo() : await fetchTargetUserInfo(targetUserId.value, isFromShare);
         if (!rawData)
@@ -132,7 +134,7 @@ const _sfc_main = {
         }
         await fetchPromotionQrCode();
       } catch (err) {
-        common_vendor.index.__f__("error", "at packages/my-businessCard/my-businessCard.vue:331", "页面初始化失败:", err.message);
+        common_vendor.index.__f__("error", "at packages/my-businessCard/my-businessCard.vue:333", "页面初始化失败:", err.message);
         const ignoredErrors = [
           "权限不足，已引导至申请页。",
           "GUEST_ACCESS_DENIED"
@@ -201,9 +203,9 @@ const _sfc_main = {
           color: "#1890FF"
         });
         radarDatasets.value = newDatasets;
-        common_vendor.index.__f__("log", "at packages/my-businessCard/my-businessCard.vue:405", "✅ 评分数据加载完成，顺序：自我(0), 商友(1), 综合(2)");
+        common_vendor.index.__f__("log", "at packages/my-businessCard/my-businessCard.vue:407", "✅ 评分数据加载完成，顺序：自我(0), 商友(1), 综合(2)");
       } catch (e) {
-        common_vendor.index.__f__("error", "at packages/my-businessCard/my-businessCard.vue:407", "获取评分统计失败", e);
+        common_vendor.index.__f__("error", "at packages/my-businessCard/my-businessCard.vue:409", "获取评分统计失败", e);
       }
     };
     const fetchOwnUserInfo = async () => {
@@ -220,20 +222,20 @@ const _sfc_main = {
     const fetchPromotionQrCode = async () => {
       const token = common_vendor.index.getStorageSync("token");
       if (!token) {
-        common_vendor.index.__f__("log", "at packages/my-businessCard/my-businessCard.vue:496", "游客模式，跳过生成推广小程序码");
+        common_vendor.index.__f__("log", "at packages/my-businessCard/my-businessCard.vue:498", "游客模式，跳过生成推广小程序码");
         return;
       }
       if (!userInfo.value) {
-        common_vendor.index.__f__("warn", "at packages/my-businessCard/my-businessCard.vue:502", "无法生成小程序码，因为用户信息尚未加载。");
+        common_vendor.index.__f__("warn", "at packages/my-businessCard/my-businessCard.vue:504", "无法生成小程序码，因为用户信息尚未加载。");
         return;
       }
-      common_vendor.index.__f__("log", "at packages/my-businessCard/my-businessCard.vue:506", "🚀 [二维码生成] 开始生成小程序码...");
+      common_vendor.index.__f__("log", "at packages/my-businessCard/my-businessCard.vue:508", "🚀 [二维码生成] 开始生成小程序码...");
       const scene = generateSceneString();
       if (!scene) {
-        common_vendor.index.__f__("error", "at packages/my-businessCard/my-businessCard.vue:511", "❌ [二维码生成] 生成 scene 失败，无法继续。");
+        common_vendor.index.__f__("error", "at packages/my-businessCard/my-businessCard.vue:513", "❌ [二维码生成] 生成 scene 失败，无法继续。");
         return;
       }
-      common_vendor.index.__f__("log", "at packages/my-businessCard/my-businessCard.vue:514", `✅ [二维码生成] 使用的 scene: ${scene}`);
+      common_vendor.index.__f__("log", "at packages/my-businessCard/my-businessCard.vue:516", `✅ [二维码生成] 使用的 scene: ${scene}`);
       const payload = {
         scene,
         path: "packages/my-businessCard/my-businessCard",
@@ -250,12 +252,12 @@ const _sfc_main = {
         data: payload
       });
       if (error) {
-        common_vendor.index.__f__("error", "at packages/my-businessCard/my-businessCard.vue:538", "❌ [二维码生成] 调用接口失败:", error);
+        common_vendor.index.__f__("error", "at packages/my-businessCard/my-businessCard.vue:540", "❌ [二维码生成] 调用接口失败:", error);
         return;
       }
       const finalBase64 = base64Image.startsWith("data:image") ? base64Image : `data:image/png;base64,${base64Image}`;
       promotionQrCodeBase64.value = finalBase64;
-      common_vendor.index.__f__("log", "at packages/my-businessCard/my-businessCard.vue:552", "✅ [二维码生成] 成功获取并存储了小程序码 Base64 数据");
+      common_vendor.index.__f__("log", "at packages/my-businessCard/my-businessCard.vue:554", "✅ [二维码生成] 成功获取并存储了小程序码 Base64 数据");
     };
     const generateSceneString = () => {
       if (!userInfo.value)
@@ -273,20 +275,20 @@ const _sfc_main = {
       params.push("fs=1");
       const scene = params.join("&");
       if (scene.length > 32) {
-        common_vendor.index.__f__("warn", "at packages/my-businessCard/my-businessCard.vue:581", `生成的 scene 字符串长度为 ${scene.length}，超过了32个字符的限制！Scene: ${scene}`);
+        common_vendor.index.__f__("warn", "at packages/my-businessCard/my-businessCard.vue:583", `生成的 scene 字符串长度为 ${scene.length}，超过了32个字符的限制！Scene: ${scene}`);
       }
-      common_vendor.index.__f__("log", "at packages/my-businessCard/my-businessCard.vue:590", "scene", scene);
+      common_vendor.index.__f__("log", "at packages/my-businessCard/my-businessCard.vue:592", "scene", scene);
       return scene;
     };
     const fetchTargetUserInfo = async (userId, forceFree = false) => {
       const requestData = {
         readUserId: userId
       };
-      common_vendor.index.__f__("log", "at packages/my-businessCard/my-businessCard.vue:603", "🛠 [fetchTargetUserInfo] forceFree:", forceFree);
+      common_vendor.index.__f__("log", "at packages/my-businessCard/my-businessCard.vue:605", "🛠 [fetchTargetUserInfo] forceFree:", forceFree);
       if (forceFree) {
         requestData.notPay = 1;
       }
-      common_vendor.index.__f__("log", "at packages/my-businessCard/my-businessCard.vue:610", "[名片页] 游客/用户请求名片数据:", JSON.stringify(requestData));
+      common_vendor.index.__f__("log", "at packages/my-businessCard/my-businessCard.vue:612", "[名片页] 游客/用户请求名片数据:", JSON.stringify(requestData));
       const {
         data,
         error
@@ -295,10 +297,10 @@ const _sfc_main = {
         data: requestData
       });
       if (!error) {
-        common_vendor.index.__f__("log", "at packages/my-businessCard/my-businessCard.vue:622", "✅ 获取名片成功");
+        common_vendor.index.__f__("log", "at packages/my-businessCard/my-businessCard.vue:624", "✅ 获取名片成功");
         return data;
       }
-      common_vendor.index.__f__("error", "at packages/my-businessCard/my-businessCard.vue:627", "获取名片失败:", error);
+      common_vendor.index.__f__("error", "at packages/my-businessCard/my-businessCard.vue:629", "获取名片失败:", error);
       const token = common_vendor.index.getStorageSync("token");
       if (!token) {
         common_vendor.index.showModal({
@@ -333,9 +335,9 @@ const _sfc_main = {
           remainingShareQuota.value = 0;
         }
         isQuotaLoaded.value = true;
-        common_vendor.index.__f__("log", "at packages/my-businessCard/my-businessCard.vue:672", "剩余分享次数:", remainingShareQuota.value);
+        common_vendor.index.__f__("log", "at packages/my-businessCard/my-businessCard.vue:674", "剩余分享次数:", remainingShareQuota.value);
       } catch (e) {
-        common_vendor.index.__f__("error", "at packages/my-businessCard/my-businessCard.vue:674", "获取权益失败", e);
+        common_vendor.index.__f__("error", "at packages/my-businessCard/my-businessCard.vue:676", "获取权益失败", e);
       }
     };
     const deductShareQuota = async () => {
@@ -345,7 +347,7 @@ const _sfc_main = {
         });
         checkShareQuota();
       } catch (e) {
-        common_vendor.index.__f__("log", "at packages/my-businessCard/my-businessCard.vue:686", "扣减权益失败", e);
+        common_vendor.index.__f__("log", "at packages/my-businessCard/my-businessCard.vue:688", "扣减权益失败", e);
       }
     };
     const adaptUserInfo = (rawUserData) => {
@@ -424,7 +426,7 @@ const _sfc_main = {
       shareTypePopupRef.value.open();
     };
     const handleShareTypeSelect = (mode) => {
-      common_vendor.index.__f__("log", "at packages/my-businessCard/my-businessCard.vue:775", "用户选择了分享模式:", mode);
+      common_vendor.index.__f__("log", "at packages/my-businessCard/my-businessCard.vue:777", "用户选择了分享模式:", mode);
       currentShareMode.value = mode;
       if (shareTypePopupRef.value) {
         shareTypePopupRef.value.close();
@@ -446,14 +448,14 @@ const _sfc_main = {
       const bizId = options.i || options.id;
       const loggedInUserId = common_vendor.index.getStorageSync("userId");
       if (sharerId == loggedInUserId) {
-        common_vendor.index.__f__("log", "at packages/my-businessCard/my-businessCard.vue:815", "用户点击了自己的分享链接，不计分。");
+        common_vendor.index.__f__("log", "at packages/my-businessCard/my-businessCard.vue:817", "用户点击了自己的分享链接，不计分。");
         return;
       }
       if (loggedInUserId) {
-        common_vendor.index.__f__("log", "at packages/my-businessCard/my-businessCard.vue:821", "其他已登录用户点击，准备为分享者加分。");
+        common_vendor.index.__f__("log", "at packages/my-businessCard/my-businessCard.vue:823", "其他已登录用户点击，准备为分享者加分。");
         triggerShareHitApi(sharerId, bizId);
       } else {
-        common_vendor.index.__f__("log", "at packages/my-businessCard/my-businessCard.vue:826", "未登录用户点击，暂存分享信息。");
+        common_vendor.index.__f__("log", "at packages/my-businessCard/my-businessCard.vue:828", "未登录用户点击，暂存分享信息。");
         common_vendor.index.setStorageSync("pendingShareReward", {
           sharerId,
           bizId,
@@ -476,9 +478,9 @@ const _sfc_main = {
         }
       });
       if (error) {
-        common_vendor.index.__f__("error", "at packages/my-businessCard/my-businessCard.vue:851", "调用分享名片加分接口失败:", error);
+        common_vendor.index.__f__("error", "at packages/my-businessCard/my-businessCard.vue:853", "调用分享名片加分接口失败:", error);
       } else {
-        common_vendor.index.__f__("log", "at packages/my-businessCard/my-businessCard.vue:853", `成功为分享者(ID: ${sharerId})触发贡分增加`);
+        common_vendor.index.__f__("log", "at packages/my-businessCard/my-businessCard.vue:855", `成功为分享者(ID: ${sharerId})触发贡分增加`);
       }
     };
     common_vendor.onShareAppMessage((res) => {
@@ -499,14 +501,14 @@ const _sfc_main = {
       if (res.from === "button") {
         if (currentShareMode.value === "SELF") {
           finalInviteCode = utils_user.getInviteCode();
-          common_vendor.index.__f__("log", "at packages/my-businessCard/my-businessCard.vue:892", "分享模式：自发(推荐)，使用我的邀请码:", finalInviteCode);
+          common_vendor.index.__f__("log", "at packages/my-businessCard/my-businessCard.vue:894", "分享模式：自发(推荐)，使用我的邀请码:", finalInviteCode);
         } else {
           finalInviteCode = userInfo.value.shardCode;
-          common_vendor.index.__f__("log", "at packages/my-businessCard/my-businessCard.vue:896", "分享模式：代发(原样)，使用TA的邀请码:", finalInviteCode);
+          common_vendor.index.__f__("log", "at packages/my-businessCard/my-businessCard.vue:898", "分享模式：代发(原样)，使用TA的邀请码:", finalInviteCode);
         }
       } else {
         finalInviteCode = utils_user.getInviteCode() || userInfo.value.shardCode;
-        common_vendor.index.__f__("log", "at packages/my-businessCard/my-businessCard.vue:901", "分享模式：原生菜单触发，默认优先使用我的码:", finalInviteCode);
+        common_vendor.index.__f__("log", "at packages/my-businessCard/my-businessCard.vue:903", "分享模式：原生菜单触发，默认优先使用我的码:", finalInviteCode);
       }
       let sharePath = `/packages/my-businessCard/my-businessCard?id=${cardOwnerId}&fromShare=1`;
       if (loggedInUserId) {
@@ -523,7 +525,7 @@ const _sfc_main = {
         imageUrl: userInfo.value.avatar
         // 使用名片主人的头像作为分享卡片封面
       };
-      common_vendor.index.__f__("log", "at packages/my-businessCard/my-businessCard.vue:927", "🚀 [onShareAppMessage] 最终分享配置:", JSON.stringify(shareContent));
+      common_vendor.index.__f__("log", "at packages/my-businessCard/my-businessCard.vue:929", "🚀 [onShareAppMessage] 最终分享配置:", JSON.stringify(shareContent));
       return shareContent;
     });
     common_vendor.onShareTimeline(() => {
@@ -678,6 +680,16 @@ const _sfc_main = {
       };
       addCirclePopup.value.open(user);
     };
+    const handleInviteCircle = () => {
+      const user = {
+        id: userInfo.value.id,
+        name: userInfo.value.realName || userInfo.value.nickname
+      };
+      inviteCirclePopup.value.open(user);
+    };
+    const onSocialActionSuccess = (targetId) => {
+      common_vendor.index.__f__("log", "at packages/my-businessCard/my-businessCard.vue:1232", "社交操作成功，目标用户ID:", targetId);
+    };
     return (_ctx, _cache) => {
       return common_vendor.e({
         a: isLoading.value
@@ -734,14 +746,10 @@ const _sfc_main = {
         p: common_vendor.p({
           type: "paperplane",
           size: "18",
-          color: "#fff"
+          color: "#666"
         }),
         q: common_vendor.o(openShareTypePopup),
-        r: common_vendor.p({
-          type: "plusempty",
-          size: "18",
-          color: "#fff"
-        }),
+        r: common_vendor.o(handleInviteCircle),
         s: common_vendor.o(handleAddCircle)
       } : userStatus.value === "FRIEND" ? {
         v: common_vendor.p({
@@ -783,7 +791,7 @@ const _sfc_main = {
         }),
         J: common_vendor.o(guideShareTimeline),
         K: common_vendor.o(closeSharePopup),
-        L: common_vendor.sr(sharePopup, "34d71473-7", {
+        L: common_vendor.sr(sharePopup, "34d71473-6", {
           "k": "sharePopup"
         }),
         M: common_vendor.o(onPopupChange),
@@ -791,14 +799,18 @@ const _sfc_main = {
           type: "bottom",
           ["background-color"]: "#fff"
         }),
-        O: common_vendor.sr(addCirclePopup, "34d71473-10", {
+        O: common_vendor.sr(addCirclePopup, "34d71473-9", {
           "k": "addCirclePopup"
         }),
-        P: common_vendor.sr(shareTypePopupRef, "34d71473-11", {
+        P: common_vendor.sr(inviteCirclePopup, "34d71473-10", {
+          "k": "inviteCirclePopup"
+        }),
+        Q: common_vendor.o(onSocialActionSuccess),
+        R: common_vendor.sr(shareTypePopupRef, "34d71473-11", {
           "k": "shareTypePopupRef"
         }),
-        Q: common_vendor.o(handleShareTypeSelect),
-        R: common_vendor.o(onShareTypePopupChange)
+        S: common_vendor.o(handleShareTypeSelect),
+        T: common_vendor.o(onShareTypePopupChange)
       });
     };
   }

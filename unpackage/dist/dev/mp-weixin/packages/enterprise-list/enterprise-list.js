@@ -120,8 +120,7 @@ const _sfc_main = {
     };
     const goCard = (id) => {
       common_vendor.index.navigateTo({
-        url: `/pages/enterprise/card?id=${id}`
-        // 路径请按实际项目调整
+        url: `/packages/enterprise-card/enterprise-card?id=${id}`
       });
     };
     const handleGoAuth = (item) => {
@@ -131,10 +130,28 @@ const _sfc_main = {
           icon: "success"
         });
       }
-      common_vendor.index.showToast({
-        title: "认证模块正在对接中...",
-        icon: "none"
-      });
+      if (item.status === 2) {
+        return common_vendor.index.showToast({
+          title: "认证审核中，请耐心等待",
+          icon: "none"
+        });
+      }
+      if (item.status === 0) {
+        return common_vendor.index.showModal({
+          title: "无法认证",
+          content: "请先“编辑”并“保存发布”企业信息后再申请认证。",
+          confirmText: "去完善",
+          success: (res) => {
+            if (res.confirm)
+              goToEdit(item.id);
+          }
+        });
+      }
+      if (item.status === 1 || item.status === 4) {
+        common_vendor.index.navigateTo({
+          url: `/packages/enterprise-auth/enterprise-auth?enterpriseId=${item.id}&enterpriseName=${encodeURIComponent(item.enterpriseName)}`
+        });
+      }
     };
     const handleDelete = (item) => {
       common_vendor.index.showModal({
@@ -211,15 +228,32 @@ const _sfc_main = {
             }),
             o: common_vendor.o(($event) => goToEdit(item.id), item.id)
           } : {}, {
-            p: "378d963d-3-" + i0,
-            q: common_vendor.o(($event) => goDetail(item.id), item.id),
-            r: "378d963d-4-" + i0,
-            s: common_vendor.o(($event) => goCard(item.id), item.id),
-            t: "378d963d-5-" + i0,
-            v: common_vendor.o(($event) => handleGoAuth(item), item.id),
-            w: "378d963d-6-" + i0,
-            x: common_vendor.o(($event) => handleDelete(item), item.id),
-            y: item.id
+            p: item.status === 4
+          }, item.status === 4 ? {
+            q: "378d963d-3-" + i0,
+            r: common_vendor.p({
+              type: "clear",
+              size: "14",
+              color: "#F44336"
+            }),
+            s: common_vendor.t(item.statusDesc || "资料不符合规范，请重新上传"),
+            t: "378d963d-4-" + i0,
+            v: common_vendor.p({
+              type: "right",
+              size: "12",
+              color: "#F44336"
+            }),
+            w: common_vendor.o(($event) => handleGoAuth(item), item.id)
+          } : {}, {
+            x: "378d963d-5-" + i0,
+            y: common_vendor.o(($event) => goDetail(item.id), item.id),
+            z: "378d963d-6-" + i0,
+            A: common_vendor.o(($event) => goCard(item.id), item.id),
+            B: "378d963d-7-" + i0,
+            C: common_vendor.o(($event) => handleGoAuth(item), item.id),
+            D: "378d963d-8-" + i0,
+            E: common_vendor.o(($event) => handleDelete(item), item.id),
+            F: item.id
           });
         }),
         g: common_vendor.p({

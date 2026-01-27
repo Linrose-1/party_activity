@@ -1,0 +1,185 @@
+/* 水平间距 */
+/* 水平间距 */
+/* 主题色变量 */
+.page-container.data-v-5434b9df {
+  background-color: #F4F7F9;
+  min-height: 100vh;
+  padding: 20rpx;
+}
+
+/* 顶部概览卡片 */
+.summary-card.data-v-5434b9df {
+  background: #fff;
+  border-radius: 24rpx;
+  padding: 40rpx;
+  margin-bottom: 30rpx;
+  box-shadow: 0 10rpx 30rpx rgba(0, 0, 0, 0.05);
+}
+.summary-card .summary-header.data-v-5434b9df {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 30rpx;
+  margin-bottom: 30rpx;
+}
+.summary-card .summary-header .user-me.data-v-5434b9df,
+.summary-card .summary-header .user-target.data-v-5434b9df {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #333;
+}
+.summary-card .summary-header .user-target.data-v-5434b9df {
+  color: #FF6E00;
+}
+.summary-card .summary-details.data-v-5434b9df {
+  display: flex;
+  justify-content: space-around;
+  border-top: 2rpx solid #f5f5f5;
+  padding-top: 30rpx;
+}
+.summary-card .summary-details .s-item.data-v-5434b9df {
+  display: flex;
+  align-items: center;
+}
+.summary-card .summary-details .s-item .s-label.data-v-5434b9df {
+  font-size: 26rpx;
+  color: #999;
+}
+.summary-card .summary-details .s-item .s-val.data-v-5434b9df {
+  font-size: 28rpx;
+  color: #333;
+  font-weight: bold;
+}
+
+/* 路径分组标题 */
+.group-title.data-v-5434b9df {
+  padding: 20rpx 10rpx;
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #666;
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+}
+
+/* 路径详情卡片 */
+.path-card.data-v-5434b9df {
+  background: #fff;
+  border-radius: 20rpx;
+  padding: 30rpx;
+  margin-bottom: 30rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.02);
+}
+.path-card .path-card-header.data-v-5434b9df {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 30rpx;
+}
+.path-card .path-card-header .path-no.data-v-5434b9df {
+  font-size: 24rpx;
+  color: #bbb;
+}
+.path-card .path-card-header .path-tag.data-v-5434b9df {
+  font-size: 20rpx;
+  color: #FF6E00;
+  background: rgba(255, 110, 0, 0.1);
+  padding: 4rpx 12rpx;
+  border-radius: 4rpx;
+}
+
+/* 链路盒子：处理自动换行 */
+.chain-box.data-v-5434b9df {
+  display: flex;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  row-gap: 40rpx;
+}
+.chain-box .chain-item.data-v-5434b9df {
+  display: flex;
+  align-items: center;
+}
+
+/* 用户节点样式 */
+.user-node.data-v-5434b9df {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 110rpx;
+}
+.user-node .node-avatar.data-v-5434b9df {
+  width: 84rpx;
+  height: 84rpx;
+  border-radius: 50%;
+  border: 4rpx solid #fff;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
+  background: #f8f8f8;
+}
+.user-node .node-name.data-v-5434b9df {
+  font-size: 22rpx;
+  color: #333;
+  margin-top: 12rpx;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+  font-weight: 500;
+}
+
+/* 连接器：线条+文字 */
+.node-connector.data-v-5434b9df {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 80rpx;
+}
+.node-connector .arrow-line.data-v-5434b9df {
+  width: 50rpx;
+  height: 2rpx;
+  background: #ddd;
+  position: relative;
+  margin-top: 40rpx;
+}
+.node-connector .arrow-line.data-v-5434b9df::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  top: -6rpx;
+  width: 0;
+  height: 0;
+  border-left: 10rpx solid #ddd;
+  border-top: 8rpx solid transparent;
+  border-bottom: 8rpx solid transparent;
+}
+.node-connector .action-label.data-v-5434b9df {
+  font-size: 18rpx;
+  color: #bbb;
+  margin-top: 10rpx;
+}
+
+/* 异常状态容器 */
+.state-box.data-v-5434b9df {
+  padding: 100rpx 40rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.state-box.empty text.data-v-5434b9df {
+  color: #999;
+  margin-top: 30rpx;
+  text-align: center;
+}
+.state-box .empty-img.data-v-5434b9df {
+  width: 240rpx;
+  height: 240rpx;
+}
+.state-box .invite-now.data-v-5434b9df {
+  margin-top: 60rpx;
+  background: linear-gradient(to right, #FF6E00, #FF9546);
+  color: #fff;
+  border-radius: 40rpx;
+  font-size: 28rpx;
+  width: 320rpx;
+  font-weight: bold;
+  box-shadow: 0 6rpx 16rpx rgba(255, 110, 0, 0.3);
+}
