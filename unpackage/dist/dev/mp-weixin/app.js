@@ -73,6 +73,7 @@ if (!Math) {
   "./packages/enterprise-auth/enterprise-auth.js";
   "./packages/enterprise-card/enterprise-card.js";
   "./packages/relationship-path/relationship-path.js";
+  "./packages/user-view-trace/user-view-trace.js";
 }
 const _sfc_main = {
   data() {

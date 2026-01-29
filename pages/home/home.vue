@@ -59,6 +59,7 @@
 		</view>
 		<view class="tabs">
 			<view class="tab" :class="{ active: activeTab === 1 }" @click="handleTabClick(1)">推荐</view>
+			<view class="tab" :class="{ active: activeTab === 5 }" @click="handleTabClick(5)">企业</view>
 			<view class="tab" :class="{ active: activeTab === 2 }" @click="handleTabClick(2)">附近</view>
 			<view class="tab" :class="{ active: activeTab === 3 }" @click="handleTabClick(3)">关注</view>
 			<view class="tab" :class="{ active: activeTab === 4 }" @click="handleTabClick(4)">֍猎伙</view>
@@ -73,25 +74,29 @@
 			<view v-for="post in postList" :key="post.id" class="post-card" @click="handlePostClick(post)">
 				<!-- 3.1 卡片头部 -->
 				<view class="post-header">
-					<!-- <image :src="post.user.avatar" mode="aspectFill" class="avatar"
-						@click.stop="navigateToBusinessCard(post.user)" /> -->
-					<image :src="post.user.avatar" mode="aspectFill" class="avatar"
-						@click.stop="handleAvatarClick(post.user)" />
+					<view class="avatar-wrapper" @click.stop="handleAvatarClick(post.user)">
+						<image :src="post.user.avatar" mode="aspectFill" class="avatar"
+							:class="{ 'is-ent': post.user.isEnterpriseSource }" />
+						<!-- 蓝V图标：绝对定位到右下角 -->
+						<image v-if="post.user.showBlueV" src="/static/icon/企业认证.png" class="blue-v-badge" />
+					</view>
 					<view class="user-info">
-						<!-- 第一行：用户名 -->
-						<view class="user-name">{{ post.user.name }}</view>
+						<view class="user-name-box">
+							<text class="user-name">{{ post.user.name }}</text>
+						</view>
 
-						<!-- 第二行：认证标识 -->
-						<view class="user-certs-line">
-							<!-- 蓝V图标 (企业认证) -->
-							<image v-if="post.user.isEnterpriseVerified" src="/static/icon/企业认证.png"
-								class="cert-icon" />
+						<!-- 重新设计的认证标识行 -->
+						<view class="auth-badges-row">
+							<!-- 企业认证标识：金橙色勋章感 -->
+							<view v-if="post.user.isEntVerified" class="badge-premium ent-auth">
+								<uni-icons type="vip-filled" size="10" color="#fff"></uni-icons>
+								<text>企业认证</text>
+							</view>
 
-							<!-- 已实名 (个人认证) -->
-							<text v-if="post.user.isIdVerified" class="cert-badge real-name">已实名</text>
-
-							<!-- 已认证 (企业号认证) -->
-							<text v-if="post.user.isEnterprise" class="cert-badge enterprise">已认证</text>
+							<!-- 个人实名标识：清新蓝色 -->
+							<view v-if="post.user.isIdVerified" class="badge-soft id-auth">
+								<text>已实名</text>
+							</view>
 						</view>
 					</view>
 					<button v-if="isLogin && loggedInUserId !== post.user.id" class="follow-button"
@@ -704,6 +709,9 @@
 			params.longitude = location.longitude;
 			params.latitude = location.latitude;
 		}
+		if (activeTab.value === 5) {
+			params.isEnterprise = 1; // 仅看企业发布的商机
+		}
 
 		try {
 			const {
@@ -730,6 +738,25 @@
 				const isTruncated = plainText.length > 100;
 				const displayContent = isTruncated ? plainText.substring(0, 100) : plainText;
 
+				// 核心身份逻辑：判断是个人还是企业发布
+				const isEntPost = item.isEnterprise === 1 && item.enterpriseInfo;
+
+				// 构建展示用的“作者”对象
+				const author = {
+					id: isEntPost ? item.enterpriseInfo.id : (item.memberUser?.id || item.userId),
+					managerId: item.userId, 
+					name: isEntPost ? item.enterpriseInfo.enterpriseName : (item.memberUser
+						?.nickname || '商友'),
+					avatar: isEntPost ? item.enterpriseInfo.logoUrl : (item.memberUser?.avatar ||
+						defaultAvatarUrl),
+					// 标记：该作者是否为企业主体
+					isEnterpriseSource: isEntPost,
+					// 认证标识判断
+					showBlueV: isEntPost, // 企业发布必带蓝V
+					isIdVerified: !isEntPost && item.memberUser?.idCert === 1, // 仅个人显示实名标识
+					isEntVerified: isEntPost && item.enterpriseInfo.status === 3, // 企业且status为3显示已认证
+				};
+
 				return {
 					id: item.id,
 					title: item.postTitle,
@@ -753,18 +780,7 @@
 					isSaved: item.followFlag === 1,
 					isFollowedUser: item.followUserFlag === 1,
 					time: formatTimestamp(item.createTime),
-					user: {
-						id: item.memberUser?.id || item.userId,
-						name: item.memberUser?.nickname || '匿名用户',
-						avatar: item.memberUser?.avatar || defaultAvatarUrl,
-
-						// certType: 表示企业号认证
-						isEnterprise: item.memberUser?.certType === 1,
-						// idCert: 表示个人实名认证
-						isIdVerified: item.memberUser?.idCert === 1,
-						// enterpriseIdCert: 表示是否为企业
-						isEnterpriseVerified: item.memberUser?.enterpriseIdCert === 1,
-					}
+					user: author
 				}
 			});
 
@@ -867,8 +883,15 @@
 
 		switch (type) {
 			case 'viewCard':
-				// 原有的跳转名片逻辑
-				navigateToBusinessCard(user);
+				if (user.isEnterpriseSource) {
+					// 如果是企业身份发布的，跳转到企业名片
+					uni.navigateTo({
+						url: `/packages/enterprise-card/enterprise-card?id=${user.id}`
+					});
+				} else {
+					// 否则跳转到原有的个人名片逻辑
+					navigateToBusinessCard(user);
+				}
 				break;
 			case 'viewPath':
 				const displayName = user.realName || user.nickname || user.name || '商友';
@@ -1393,6 +1416,21 @@
 		});
 	};
 
+	/**
+	 * [方法] 处理身份点击（头像或名称）
+	 */
+	const handleIdentityClick = (author) => {
+		if (author.isEnterpriseSource) {
+			// 跳转到：企业名片页面
+			uni.navigateTo({
+				url: `/packages/enterprise-card/enterprise-card?id=${author.id}`
+			});
+		} else {
+			// 跳转到：个人名片页面
+			navigateToBusinessCard(author);
+		}
+	};
+
 	const postNew = async () => {
 		if (!await checkLoginGuard()) return;
 		uni.navigateTo({
@@ -1858,11 +1896,56 @@
 		align-items: center;
 	}
 
-	.avatar {
+	/* 头像包裹容器 */
+	.avatar-wrapper {
+		position: relative;
+		/* 核心：父元素相对定位 */
 		width: 90rpx;
 		height: 90rpx;
-		border-radius: 10rpx;
 		margin-right: 24rpx;
+		flex-shrink: 0;
+	}
+
+	/* 覆盖原有的 .avatar 样式，去掉 margin-right，因为现在外层容器有 margin */
+	.avatar {
+		width: 100%;
+		height: 100%;
+		border-radius: 10rpx;
+		/* 默认个人圆角 */
+	}
+
+	/* 企业头像改为大圆角方块 */
+	.avatar.is-ent {
+		border-radius: 20rpx !important;
+	}
+
+	/* 右下角蓝V徽章 */
+	.blue-v-badge {
+		position: absolute;
+		bottom: -4rpx;
+		/* 稍微超出边缘一点点，更有层次感 */
+		right: -4rpx;
+		width: 34rpx;
+		height: 34rpx;
+		z-index: 10;
+
+		/* 关键美化：加一个白色的圆圈背景/描边，防止与头像颜色混在一起 */
+		background-color: #fff;
+		border-radius: 50%;
+		border: 3rpx solid #fff;
+		box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.1);
+	}
+
+	/* 用户名区域保持整洁 */
+	.user-name-box {
+		display: flex;
+		align-items: center;
+	}
+
+	.user-name {
+		font-weight: 600;
+		font-size: 32rpx;
+		color: #333;
 	}
 
 	.user-info {
@@ -1887,7 +1970,63 @@
 		text-overflow: ellipsis;
 	}
 
-	/* 新增：认证行的样式 */
+	/* 1. 强制表单和布局可见性 (修正之前可能存在的塌陷) */
+	.user-name-box {
+		display: flex;
+		align-items: center;
+		gap: 8rpx;
+	}
+
+	.blue-v-icon {
+		width: 32rpx;
+		height: 32rpx;
+		flex-shrink: 0;
+	}
+
+	.auth-badges-row {
+		display: flex;
+		align-items: center;
+		gap: 12rpx;
+		margin-top: 4rpx;
+	}
+
+	/* 2. 企业认证勋章 - 移除 & 改为组合选择器 */
+	.badge-premium {
+		display: flex;
+		align-items: center;
+		gap: 4rpx;
+		padding: 2rpx 12rpx;
+		border-radius: 20rpx;
+		font-size: 18rpx;
+		font-weight: bold;
+	}
+
+	.badge-premium.ent-auth {
+		background: linear-gradient(90deg, #FFB347 0%, #FF8600 100%);
+		color: #fff;
+		box-shadow: 0 4rpx 8rpx rgba(255, 134, 0, 0.2);
+	}
+
+	/* 3. 个人实名标签 */
+	.badge-soft {
+		padding: 2rpx 12rpx;
+		border-radius: 6rpx;
+		font-size: 18rpx;
+	}
+
+	.badge-soft.id-auth {
+		background-color: rgba(64, 158, 255, 0.1);
+		color: #409EFF;
+		border: 1rpx solid rgba(64, 158, 255, 0.2);
+	}
+
+	/* 4. 头像圆角差异化 */
+	/* 这里是造成你报错的重灾区，不要用 &.is-ent */
+	.avatar.is-ent {
+		border-radius: 20rpx !important;
+	}
+
+	/* 认证行的样式 */
 	.user-certs-line {
 		display: flex;
 		align-items: center;

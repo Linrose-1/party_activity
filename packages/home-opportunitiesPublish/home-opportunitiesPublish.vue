@@ -15,6 +15,37 @@
 						maxlength="5000" />
 				</view>
 
+				<view class="form-card">
+					<view class="form-group">
+						<view class="form-label">发布身份</view>
+						<radio-group @change="handleIdentityChange" class="radio-group-container">
+							<label class="radio-item">
+								<radio value="0" :checked="form.isEnterprise === 0" color="#FF6A00" />
+								<text>个人身份</text>
+							</label>
+							<label class="radio-item">
+								<radio value="1" :checked="form.isEnterprise === 1" color="#FF6A00" />
+								<text>企业/品牌身份</text>
+							</label>
+						</radio-group>
+						<view class="identity-hint">
+							{{ form.isEnterprise === 1 ? '💡 将使用所选企业的品牌名称、Logo等信息发布商机' : '💡 将使用您个人的昵称、头像及名片信息发布商机' }}
+						</view>
+					</view>
+
+					<!-- 企业选择器：仅在选择企业身份时显示 -->
+					<view class="form-group animate-fade" v-if="form.isEnterprise === 1">
+						<view class="form-label">选择发布企业 *</view>
+						<view class="enterprise-selector-wrap">
+							<uni-data-select v-model="form.userEnterpriseId" :localdata="myEnterprises"
+								placeholder="请选择您名下的企业/品牌" @change="onEnterpriseSelect"></uni-data-select>
+						</view>
+						<view class="no-enterprise-tip" v-if="myEnterprises.length === 0" @click="goToCreateEnterprise">
+							<text>检测到您尚未创建已发布的企业，点击去创建 ></text>
+						</view>
+					</view>
+				</view>
+
 				<view class="form-group">
 					<view class="form-label">选择分类</view>
 					<radio-group @change="topicChange" class="radio-group-container">
@@ -110,6 +141,16 @@
 					<switch :checked="form.showProfile" @change="e => form.showProfile = e.detail.value"
 						color="#FF6A00" />
 				</view>
+
+				<!-- 阅读留痕设置 -->
+				<view class="setting-item">
+					<view class="setting-label-group">
+						<text class="setting-label">开启阅读留痕</text>
+						<text class="setting-desc">其他商友点击详情页阅读之后会留下头像，方便发现与匹配对贴子感兴趣的商友</text>
+					</view>
+					<switch :checked="form.isReadTrace === 1" @change="e => form.isReadTrace = e.detail.value ? 1 : 0"
+						color="#FF6A00" />
+				</view>
 			</view>
 
 			<button class="submit-btn" :class="{ 'disabled-btn': isQuotaLoaded && currentRemainingQuota <= 0 }"
@@ -152,7 +193,12 @@
 		postVideo: '',
 		businessCoverImageUrl: '',
 		showProfile: true,
+		isReadTrace: 1,
+		isEnterprise: 0, // 0-个人, 1-企业
+		userEnterpriseId: null // 企业主键ID
 	});
+
+	const myEnterprises = ref([]); // 存储我的企业列表
 
 	const tagSuggestions = ref([]); // 用于存储从API获取的标签建议
 	let tagSearchTimer = null; // 用于输入防抖
@@ -201,6 +247,7 @@
 
 		if (uni.getStorageSync('token')) {
 			checkPublishQuota();
+			fetchMyEnterprises();
 		}
 		checkDraft();
 		uni.showShareMenu({
@@ -729,6 +776,55 @@
 		submitPost();
 	};
 
+	/**
+	 * [方法] 获取我名下的企业列表 (对接 /my-list 接口)
+	 */
+	const fetchMyEnterprises = async () => {
+		const {
+			data,
+			error
+		} = await request('/app-api/member/user-enterprise-info/my-list', {
+			method: 'GET'
+		});
+		if (!error && data && data.list) {
+			// 过滤出只有“已发布”和“已认证”的企业，防止草稿误用
+			myEnterprises.value = data.list
+				.filter(item => item.status !== 0)
+				.map(item => ({
+					text: item.enterpriseName,
+					value: item.id
+				}));
+
+			console.log('✅ 可用发布身份企业数:', myEnterprises.value.length);
+		}
+	};
+
+	/**
+	 * [方法] 切换发布身份
+	 */
+	const handleIdentityChange = (e) => {
+		const val = Number(e.detail.value);
+		form.isEnterprise = val;
+
+		// 如果切回个人，清空企业ID
+		if (val === 0) {
+			form.userEnterpriseId = null;
+		} else if (myEnterprises.value.length === 1) {
+			// 如果只有一家企业，自动选中
+			form.userEnterpriseId = myEnterprises.value[0].value;
+		}
+	};
+
+	/**
+	 * [跳转] 如果没企业，引导去创建
+	 */
+	const goToCreateEnterprise = () => {
+		uni.navigateTo({
+			url: '/packages/enterprise-list/enterprise-list'
+		});
+	};
+
+
 	// --- 提交表单 ---
 	function submitPost() {
 		// 额度检查拦截
@@ -748,6 +844,12 @@
 			title: '请选择一个专题',
 			icon: 'none'
 		});
+		if (form.isEnterprise === 1 && !form.userEnterpriseId) {
+			return uni.showToast({
+				title: '请选择要发布的身份企业',
+				icon: 'none'
+			});
+		}
 
 		const postData = {
 			userId: uni.getStorageSync('userId') || 0, // 从缓存获取 userId
@@ -760,13 +862,16 @@
 			postedAt: new Date().toISOString(),
 			commentFlag: 1,
 			cardFlag: form.showProfile,
+			isReadTrace: form.isReadTrace,
+			isEnterprise: form.isEnterprise,
+			userEnterpriseId: form.userEnterpriseId || 0,
 			tags: form.tags,
 			status: 'active'
 		};
 
 		uni.showModal({
 			title: '确认发布',
-			content: '请确认您填写的内容无误。',
+			content: `您当前正以【${form.isEnterprise === 1 ? '企业/品牌' : '个人'}】身份发布商机，确认无误？`,
 			success: (res) => {
 				if (res.confirm) {
 					createOpportunities(postData);
@@ -1158,6 +1263,44 @@
 		font-size: 26rpx;
 	}
 
+	.identity-hint {
+		margin-top: 16rpx;
+		font-size: 22rpx;
+		color: #999;
+		background-color: #f9f9f9;
+		padding: 12rpx 20rpx;
+		border-radius: 8rpx;
+		line-height: 1.4;
+	}
+
+	.enterprise-selector-wrap {
+		margin-top: 10rpx;
+	}
+
+	.no-enterprise-tip {
+		margin-top: 16rpx;
+		font-size: 24rpx;
+		color: #FF6A00;
+		text-decoration: underline;
+		text-align: center;
+	}
+
+	.animate-fade {
+		animation: fadeIn 0.3s ease;
+	}
+
+	@keyframes fadeIn {
+		from {
+			opacity: 0;
+			transform: translateY(-10rpx);
+		}
+
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+
 	/* ==================== 标签建议区域样式 ==================== */
 	.tag-suggestions-scroll {
 		white-space: nowrap;
@@ -1294,6 +1437,20 @@
 	.setting-label {
 		font-size: 28rpx;
 		color: #555;
+	}
+
+	.setting-label-group {
+		display: flex;
+		flex-direction: column;
+		flex: 1;
+		padding-right: 20rpx;
+	}
+
+	.setting-desc {
+		font-size: 22rpx;
+		color: #999;
+		line-height: 1.4;
+		margin-top: 4rpx;
 	}
 
 	.submit-btn {

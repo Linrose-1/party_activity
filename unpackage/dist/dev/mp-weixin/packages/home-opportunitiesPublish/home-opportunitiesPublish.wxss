@@ -122,6 +122,38 @@
 		border-bottom-right-radius: 20rpx;
 		font-size: 26rpx;
 }
+.identity-hint.data-v-4f014bb0 {
+		margin-top: 16rpx;
+		font-size: 22rpx;
+		color: #999;
+		background-color: #f9f9f9;
+		padding: 12rpx 20rpx;
+		border-radius: 8rpx;
+		line-height: 1.4;
+}
+.enterprise-selector-wrap.data-v-4f014bb0 {
+		margin-top: 10rpx;
+}
+.no-enterprise-tip.data-v-4f014bb0 {
+		margin-top: 16rpx;
+		font-size: 24rpx;
+		color: #FF6A00;
+		text-decoration: underline;
+		text-align: center;
+}
+.animate-fade.data-v-4f014bb0 {
+		animation: fadeIn-4f014bb0 0.3s ease;
+}
+@keyframes fadeIn-4f014bb0 {
+from {
+			opacity: 0;
+			transform: translateY(-10rpx);
+}
+to {
+			opacity: 1;
+			transform: translateY(0);
+}
+}
 
 	/* ==================== 标签建议区域样式 ==================== */
 .tag-suggestions-scroll.data-v-4f014bb0 {
@@ -245,6 +277,18 @@
 .setting-label.data-v-4f014bb0 {
 		font-size: 28rpx;
 		color: #555;
+}
+.setting-label-group.data-v-4f014bb0 {
+		display: flex;
+		flex-direction: column;
+		flex: 1;
+		padding-right: 20rpx;
+}
+.setting-desc.data-v-4f014bb0 {
+		font-size: 22rpx;
+		color: #999;
+		line-height: 1.4;
+		margin-top: 4rpx;
 }
 .submit-btn.data-v-4f014bb0 {
 		background: linear-gradient(to right, #FF6A00, #FF8C37);

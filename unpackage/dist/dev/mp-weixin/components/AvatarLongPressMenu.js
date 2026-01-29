@@ -19,7 +19,9 @@ const _sfc_main = {
     const emit = __emit;
     const currentUserId = common_vendor.ref(null);
     const isSelf = common_vendor.computed(() => {
-      return currentUserId.value && targetUser.value.id && String(currentUserId.value) === String(targetUser.value.id);
+      const loggedInId = common_vendor.index.getStorageSync("userId");
+      const targetManagerId = targetUser.value.managerId;
+      return loggedInId && targetManagerId && String(loggedInId) === String(targetManagerId);
     });
     const open = (user) => {
       targetUser.value = user || {};
@@ -30,7 +32,8 @@ const _sfc_main = {
       popup.value.close();
     };
     const handleAction = (type) => {
-      if ((type === "addCircle" || type === "inviteCircle") && isSelf.value) {
+      const selfDisabledActions = ["addCircle", "inviteCircle", "viewPath"];
+      if (selfDisabledActions.includes(type) && isSelf.value) {
         return;
       }
       close();
@@ -62,35 +65,38 @@ const _sfc_main = {
         g: common_vendor.p({
           type: "staff-filled",
           size: "26",
-          color: "#FF7009"
+          color: isSelf.value ? "#999" : "#FF7009"
         }),
-        h: common_vendor.o(($event) => handleAction("viewPath")),
-        i: common_vendor.p({
+        h: common_vendor.n(isSelf.value ? "" : "path-style"),
+        i: common_vendor.t(isSelf.value ? "本人" : "人脉链路"),
+        j: common_vendor.n(isSelf.value ? "disabled" : "primary-outline"),
+        k: common_vendor.o(($event) => handleAction("viewPath")),
+        l: common_vendor.p({
           type: "star",
           size: "26",
           color: "#FF7009"
         }),
-        j: common_vendor.o(($event) => handleAction("comment")),
-        k: common_vendor.p({
+        m: common_vendor.o(($event) => handleAction("comment")),
+        n: common_vendor.p({
           type: "paperplane-filled",
           size: "26",
           color: "#FF7009"
         }),
-        l: common_vendor.t(isSelf.value ? "本人" : "邀入我圈"),
-        m: common_vendor.n(isSelf.value ? "disabled" : "primary-outline"),
-        n: common_vendor.o(($event) => handleAction("inviteCircle")),
-        o: common_vendor.p({
+        o: common_vendor.t(isSelf.value ? "本人" : "邀入我圈"),
+        p: common_vendor.n(isSelf.value ? "disabled" : "primary-outline"),
+        q: common_vendor.o(($event) => handleAction("inviteCircle")),
+        r: common_vendor.p({
           type: "plusempty",
           size: "26",
           color: "#FF7009"
         }),
-        p: common_vendor.t(isSelf.value ? "本人" : "加入TA圈"),
-        q: common_vendor.n(isSelf.value ? "disabled" : "primary-outline"),
-        r: common_vendor.o(($event) => handleAction("addCircle")),
-        s: common_vendor.sr(popup, "5571075f-0", {
+        s: common_vendor.t(isSelf.value ? "本人" : "加入TA圈"),
+        t: common_vendor.n(isSelf.value ? "disabled" : "primary-outline"),
+        v: common_vendor.o(($event) => handleAction("addCircle")),
+        w: common_vendor.sr(popup, "5571075f-0", {
           "k": "popup"
         }),
-        t: common_vendor.p({
+        x: common_vendor.p({
           type: "center",
           ["mask-click"]: true
         })

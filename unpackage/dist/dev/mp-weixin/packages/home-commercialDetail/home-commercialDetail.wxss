@@ -55,9 +55,59 @@
 		align-items: center;
 		margin-bottom: 36rpx;
 }
+
+	/* 详情页作者区域加固 */
+.name-and-badge.data-v-8303b14f {
+		display: flex;
+		align-items: center;
+		flex-wrap: wrap;
+		gap: 12rpx;
+		margin-bottom: 6rpx;
+}
 .author-avatar-wrapper.data-v-8303b14f {
 		position: relative;
-		flex-shrink: 0;
+		width: 112rpx;
+		height: 112rpx;
+}
+
+	/* 详情页头像圆角控制 */
+.author-avatar.is-ent.data-v-8303b14f {
+		border-radius: 24rpx !important;
+}
+
+	/* 右下角蓝V详情版 */
+.blue-v-badge-detail.data-v-8303b14f {
+		position: absolute;
+		bottom: -2rpx;
+		right: -2rpx;
+		width: 38rpx;
+		height: 38rpx;
+		background-color: #fff;
+		border-radius: 50%;
+		border: 4rpx solid #fff;
+		z-index: 5;
+}
+
+	/* 认证勋章设计 (详情版) */
+.badge-premium-detail.data-v-8303b14f {
+		display: flex;
+		align-items: center;
+		gap: 4rpx;
+		padding: 2rpx 12rpx;
+		border-radius: 20rpx;
+		font-size: 18rpx;
+		font-weight: bold;
+		color: #fff;
+		background: linear-gradient(90deg, #FFB347 0%, #FF8600 100%);
+		box-shadow: 0 4rpx 8rpx rgba(255, 134, 0, 0.15);
+}
+.badge-soft-detail.data-v-8303b14f {
+		padding: 2rpx 12rpx;
+		border-radius: 6rpx;
+		font-size: 18rpx;
+		background-color: rgba(64, 158, 255, 0.1);
+		color: #409EFF;
+		border: 1rpx solid rgba(64, 158, 255, 0.2);
 }
 .author-avatar.data-v-8303b14f {
 		width: 112rpx;
@@ -332,6 +382,146 @@
 .interaction-btn.active.data-v-8303b14f {
 		color: #FF6A00;
 }
+.viewer-section.data-v-8303b14f {
+		margin-top: 30rpx;
+		padding-top: 20rpx;
+		border-top: 2rpx solid #f5f5f5;
+}
+.viewer-header.data-v-8303b14f {
+		display: flex;
+		justify-content: space-between;
+		margin-bottom: 20rpx;
+}
+.viewer-title.data-v-8303b14f {
+		font-size: 26rpx;
+		color: #666;
+		font-weight: bold;
+}
+.viewer-title .count.data-v-8303b14f {
+		color: #FF6A00;
+		margin-left: 8rpx;
+}
+.more-link.data-v-8303b14f {
+		font-size: 24rpx;
+		color: #999;
+}
+.avatar-row.data-v-8303b14f {
+		display: flex;
+		align-items: center;
+		gap: 12rpx;
+}
+.viewer-avatar.data-v-8303b14f {
+		width: 64rpx;
+		height: 64rpx;
+		border-radius: 50%;
+		border: 2rpx solid #fff;
+}
+.avatar-more.data-v-8303b14f {
+		width: 64rpx;
+		height: 64rpx;
+		background: #f0f0f0;
+		border-radius: 50%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		color: #999;
+		font-size: 24rpx;
+}
+
+	/* 浏览留痕模块卡片容器 */
+.viewer-module-card.data-v-8303b14f {
+		background-color: #ffffff;
+		border-radius: 24rpx;
+		margin: 20rpx 30rpx;
+		padding: 30rpx;
+		box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.03);
+		border: 1rpx solid #f0f0f0;
+}
+.viewer-header.data-v-8303b14f {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 24rpx;
+}
+.left-title.data-v-8303b14f {
+		display: flex;
+		align-items: center;
+}
+.title-indicator.data-v-8303b14f {
+		width: 6rpx;
+		height: 28rpx;
+		background-color: #FF6A00;
+		border-radius: 4rpx;
+		margin-right: 12rpx;
+}
+.title-txt.data-v-8303b14f {
+		font-size: 28rpx;
+		font-weight: bold;
+		color: #333;
+}
+.title-count.data-v-8303b14f {
+		font-size: 24rpx;
+		color: #FF6A00;
+		background: rgba(255, 106, 0, 0.1);
+		padding: 2rpx 12rpx;
+		border-radius: 20rpx;
+		margin-left: 12rpx;
+}
+.right-more.data-v-8303b14f {
+		display: flex;
+		align-items: center;
+}
+.right-more text.data-v-8303b14f {
+		font-size: 24rpx;
+		color: #999;
+		margin-right: 4rpx;
+}
+.viewer-content.data-v-8303b14f {
+		display: flex;
+		flex-direction: column;
+}
+.avatar-stack.data-v-8303b14f {
+		display: flex;
+		align-items: center;
+		flex-wrap: wrap;
+}
+.avatar-item.data-v-8303b14f {
+		margin-right: 16rpx;
+		margin-bottom: 10rpx;
+}
+.v-avatar.data-v-8303b14f {
+		width: 72rpx;
+		height: 72rpx;
+		border-radius: 50%;
+		border: 2rpx solid #fff;
+		background-color: #f5f5f5;
+		box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.05);
+}
+.more-dots.data-v-8303b14f {
+		width: 72rpx;
+		height: 72rpx;
+		border-radius: 50%;
+		background-color: #f8f8f8;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+}
+.dot.data-v-8303b14f {
+		width: 6rpx;
+		height: 6rpx;
+		background-color: #ccc;
+		border-radius: 50%;
+		margin: 0 2rpx;
+}
+.viewer-tips.data-v-8303b14f {
+		font-size: 24rpx;
+		color: #bbb;
+		margin-top: 10rpx;
+}
+.viewer-module-card.data-v-8303b14f:active {
+		background-color: #fafafa;
+}
+
 
 	/* ==================================================================
 	 * 评论区 (.comments-section)

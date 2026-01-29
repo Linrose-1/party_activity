@@ -1,0 +1,48 @@
+
+.trace-page.data-v-e21cc623 {
+		background: #f8f9fa;
+		min-height: 100vh;
+		padding: 20rpx;
+}
+.trace-item.data-v-e21cc623 {
+		background: #fff;
+		border-radius: 20rpx;
+		padding: 30rpx;
+		display: flex;
+		align-items: center;
+		margin-bottom: 20rpx;
+}
+.u-avatar.data-v-e21cc623 {
+		width: 100rpx;
+		height: 100rpx;
+		border-radius: 50%;
+		margin-right: 24rpx;
+}
+.u-info.data-v-e21cc623 {
+		flex: 1;
+		min-width: 0;
+}
+.u-top.data-v-e21cc623 {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 8rpx;
+}
+.u-name.data-v-e21cc623 {
+		font-size: 30rpx;
+		font-weight: bold;
+		color: #333;
+}
+.u-time.data-v-e21cc623 {
+		font-size: 24rpx;
+		color: #bbb;
+}
+.u-desc.data-v-e21cc623 {
+		font-size: 26rpx;
+		color: #999;
+}
+.text-ellipsis.data-v-e21cc623 {
+		overflow: hidden;
+		white-space: nowrap;
+		text-overflow: ellipsis;
+}

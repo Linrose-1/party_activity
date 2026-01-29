@@ -258,9 +258,9 @@ const _sfc_main = {
         path: "/pages/my-order/my-order"
       },
       {
-        name: "我的券包",
-        desc: "查看您的猩友优惠券",
-        icon: "../../static/icon/我的券包.png",
+        name: "我的企业",
+        desc: "查看您创建发布的企业",
+        icon: "../../static/icon/认证企业.png",
         path: "/packages/enterprise-list/enterprise-list"
       },
       {

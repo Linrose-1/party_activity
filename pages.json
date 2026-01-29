@@ -527,6 +527,13 @@
 				{
 					"navigationBarTitleText" : "人脉链路"
 				}
+			},
+			{
+				"path" : "user-view-trace/user-view-trace",
+				"style" : 
+				{
+					"navigationBarTitleText" : "商机浏览记录"
+				}
 			}
 			// 如果还有其他页面要放进这个分包，继续在这里加
 		]

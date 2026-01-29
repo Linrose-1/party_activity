@@ -73,7 +73,8 @@
         "enterprise-detail/enterprise-detail",
         "enterprise-auth/enterprise-auth",
         "enterprise-card/enterprise-card",
-        "relationship-path/relationship-path"
+        "relationship-path/relationship-path",
+        "user-view-trace/user-view-trace"
       ]
     }
   ],

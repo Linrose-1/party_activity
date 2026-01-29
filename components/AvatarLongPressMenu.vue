@@ -27,10 +27,12 @@
 				</view>
 
 				<!-- 2. 人脉链路  -->
-				<view class="grid-item primary-outline" @click="handleAction('viewPath')">
-					<view class="icon-box path-style"><uni-icons type="staff-filled" size="26"
-							color="#FF7009"></uni-icons></view>
-					<text class="item-text">人脉链路</text>
+				<view class="grid-item" :class="isSelf ? 'disabled' : 'primary-outline'"
+					@click="handleAction('viewPath')">
+					<view class="icon-box" :class="isSelf ? '' : 'path-style'">
+						<uni-icons type="staff-filled" size="26" :color="isSelf ? '#999' : '#FF7009'"></uni-icons>
+					</view>
+					<text class="item-text">{{ isSelf ? '本人' : '人脉链路' }}</text>
 				</view>
 
 				<!-- 3. 商友点评 -->
@@ -87,8 +89,13 @@
 	const currentUserId = ref(null);
 
 	const isSelf = computed(() => {
-		return currentUserId.value && targetUser.value.id && String(currentUserId.value) === String(targetUser
-			.value.id);
+		// 获取当前登录人 ID
+		const loggedInId = uni.getStorageSync('userId');
+		// 获取当前被点击对象的管理者 ID
+		const targetManagerId = targetUser.value.managerId;
+
+		// 如果管理者 ID 等于当前登录人 ID，则视为“我本人”或“我的企业”
+		return loggedInId && targetManagerId && String(loggedInId) === String(targetManagerId);
 	});
 
 	const open = (user) => {
@@ -103,7 +110,10 @@
 
 	const handleAction = (type) => {
 		// 拦截自己操作
-		if ((type === 'addCircle' || type === 'inviteCircle') && isSelf.value) {
+		const selfDisabledActions = ['addCircle', 'inviteCircle', 'viewPath'];
+
+		if (selfDisabledActions.includes(type) && isSelf.value) {
+			// 如果是点击了禁止项且是本人，直接返回不执行后续 emit
 			return;
 		}
 		close();

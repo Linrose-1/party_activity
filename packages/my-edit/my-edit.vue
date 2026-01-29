@@ -79,13 +79,13 @@
 							</view>
 						</uni-forms-item>
 
-						<uni-forms-item label="企业号认证" name="enterpriseIdCert">
+						<!-- <uni-forms-item label="企业号认证" name="enterpriseIdCert">
 							<view class="switch-row">
 								<text class="switch-status">{{ form.enterpriseIdCert === 1 ? '已开启' : '未开启' }}</text>
 								<switch :checked="form.enterpriseIdCert === 1" @change="onEnterpriseSwitchChange"
 									color="#FF8700" style="transform:scale(0.8)" />
 							</view>
-						</uni-forms-item>
+						</uni-forms-item> -->
 					</view>
 
 					<!-- 模块：地域信息 -->

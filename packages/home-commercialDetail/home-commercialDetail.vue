@@ -3,25 +3,40 @@
 		<view class="container">
 			<!-- 商机卡片 -->
 			<view class="opportunity-card">
-				<view class="author-info">
+				<!-- 1. 修改后的作者信息区 -->
+				<view class="author-info" @click="handleAuthorClick">
+					<!-- 头像包裹容器 -->
 					<view class="author-avatar-wrapper">
-						<image :src="postDetail.avatar" mode="" class="author-avatar"
-							@click="navigateToBusinessCard({ id: postDetail.userId, name: postDetail.user, avatar: postDetail.avatar })">
-						</image>
+						<image :src="postDetail.avatar" mode="aspectFill" class="author-avatar"
+							:class="{ 'is-ent': postDetail.isEnterpriseSource }"></image>
+						<!-- 蓝V标识 -->
+						<image v-if="postDetail.isEnterpriseSource" src="/static/icon/企业认证.png"
+							class="blue-v-badge-detail" />
 					</view>
+
 					<view class="author-details">
-						<!-- 用户名现在可以自由换行 -->
-						<view class="author-name">{{ postDetail.user }}</view>
-						<!-- 将时间和按钮包裹在一个新的容器中，方便横向布局 -->
+						<view class="name-and-badge">
+							<view class="author-name">{{ postDetail.user }}</view>
+							<!-- 企业认证勋章 (status 3) -->
+							<view v-if="postDetail.isEntVerified" class="badge-premium-detail ent-auth">
+								<uni-icons type="vip-filled" size="10" color="#fff"></uni-icons>
+								<text>企业认证</text>
+							</view>
+							<!-- 个人实名标识 -->
+							<view v-if="postDetail.isIdVerified" class="badge-soft-detail id-auth">
+								<text>已实名</text>
+							</view>
+						</view>
+
 						<view class="time-and-actions">
 							<view class="post-time">
 								<uni-icons type="redo" size="14" color="#888"></uni-icons> {{ postDetail.time }}
 							</view>
-							<!-- 按钮移动到这里 -->
+							<!-- 关注/删除按钮逻辑保持不变 -->
 							<button v-if="showFollowButton" class="follow-button mini-style"
 								:class="{ 'followed': postDetail.isFollowedUser }"
 								@click.stop="toggleFollow(postDetail)">
-								{{ postDetail.isFollowedUser ? '已关注' : '关注' }} <!-- 建议用“已取关”或直接显示“关注”-->
+								{{ postDetail.isFollowedUser ? '已关注' : '关注' }}
 							</button>
 							<button v-else-if="loggedInUserId && loggedInUserId === postDetail.userId"
 								class="follow-button delete-post-button mini-style" @click.stop="deletePost">
@@ -31,6 +46,31 @@
 						</view>
 					</view>
 				</view>
+				<!-- <view class="author-info">
+					<view class="author-avatar-wrapper">
+						<image :src="postDetail.avatar" mode="" class="author-avatar"
+							@click="navigateToBusinessCard({ id: postDetail.userId, name: postDetail.user, avatar: postDetail.avatar })">
+						</image>
+					</view>
+					<view class="author-details">
+						<view class="author-name">{{ postDetail.user }}</view>
+						<view class="time-and-actions">
+							<view class="post-time">
+								<uni-icons type="redo" size="14" color="#888"></uni-icons> {{ postDetail.time }}
+							</view>
+							<button v-if="showFollowButton" class="follow-button mini-style"
+								:class="{ 'followed': postDetail.isFollowedUser }"
+								@click.stop="toggleFollow(postDetail)">
+								{{ postDetail.isFollowedUser ? '已关注' : '关注' }}
+							</button>
+							<button v-else-if="loggedInUserId && loggedInUserId === postDetail.userId"
+								class="follow-button delete-post-button mini-style" @click.stop="deletePost">
+								<uni-icons type="trash" size="12" color="#e74c3c"></uni-icons>
+								删除
+							</button>
+						</view>
+					</view>
+				</view> -->
 				<view style="font-weight: 700;font-size: 36rpx;"
 					@longpress.stop="handleLongPress(postDetail.postTitle)">
 					<text v-if="postDetail.postType == 1" class="detail-type-tag hunter">创业猎伙</text>
@@ -91,6 +131,38 @@
 						{{ postDetail.saved ? '已收藏' : '收藏' }}
 					</view>
 
+				</view>
+			</view>
+
+			<!-- 浏览留痕模块 -->
+			<view class="viewer-module-card"
+				v-if="postDetail && postDetail.userId == loggedInUserId && postDetail.isReadTrace === 1 && viewerTotal > 0">
+				<view class="viewer-header" @click="goToTraceList">
+					<view class="left-title">
+						<view class="title-indicator"></view>
+						<text class="title-txt">最近浏览</text>
+						<text class="title-count">{{ viewerTotal }}</text>
+					</view>
+					<view class="right-more">
+						<text>浏览详情</text>
+						<uni-icons type="right" size="14" color="#999"></uni-icons>
+					</view>
+				</view>
+
+				<view class="viewer-content" @click="goToTraceList">
+					<view class="avatar-stack">
+						<view class="avatar-item" v-for="(item, index) in viewerList" :key="item.id">
+							<image :src="item.memberUser.avatar" class="v-avatar" mode="aspectFill"></image>
+						</view>
+						<view v-if="viewerTotal > 7" class="more-dots">
+							<text class="dot"></text>
+							<text class="dot"></text>
+							<text class="dot"></text>
+						</view>
+					</view>
+					<view class="viewer-tips">
+						已有 {{ viewerTotal }} 位商友阅读了您的商机
+					</view>
 				</view>
 			</view>
 
@@ -264,6 +336,10 @@
 		id: null,
 		user: '',
 		userId: null,
+		avatar: '', // 显示的头像 (个人头像或企业Logo)
+		enterpriseId: null, // 如果是企业发布，存储企业主键ID
+		isEnterpriseSource: false, // 身份标记
+		isEntVerified: false, // 企业是否认证 (status 3)
 		time: '',
 		content: '',
 		images: [],
@@ -279,6 +355,9 @@
 		businessCoverImageUrl: '',
 		postType: 0,
 	});
+
+	const viewerList = ref([]);
+	const viewerTotal = ref(0);
 
 	const comments = ref([]);
 	const newCommentText = ref('');
@@ -587,7 +666,19 @@
 			console.log("商机详情", result)
 			if (result && !result.error && result.data) {
 				const item = result.data;
+				const isEnt = item.isEnterprise === 1 && item.enterpriseInfo;
+
 				postDetail.id = item.id;
+				postDetail.userId = item.userId; // 帖子管理者ID
+				postDetail.isEnterpriseSource = !!isEnt;
+				postDetail.enterpriseId = isEnt ? item.enterpriseInfo.id : null;
+				postDetail.user = isEnt ? item.enterpriseInfo.enterpriseName : (item.memberUser?.nickname ||
+					'匿名用户');
+				postDetail.avatar = isEnt ? item.enterpriseInfo.logoUrl : (item.memberUser?.avatar ||
+					defaultAvatarUrl);
+				postDetail.isEntVerified = isEnt && item.enterpriseInfo.status === 3;
+				postDetail.isIdVerified = !isEnt && item.memberUser?.idCert === 1;
+
 				postDetail.content = item.postContent;
 				postDetail.postTitle = item.postTitle;
 				postDetail.video = item.postVideo || '';
@@ -596,18 +687,23 @@
 				postDetail.likes = item.likesCount || 0;
 				postDetail.dislikes = item.dislikesCount || 0;
 				postDetail.time = formatTimestamp(item.createTime);
-				postDetail.user = item.memberUser?.nickname || '匿名用户';
-				postDetail.avatar = item.memberUser?.avatar || defaultAvatarUrl;
-				postDetail.userId = item.userId;
 				postDetail.saved = item.followFlag === 1;
 				postDetail.isFollowedUser = item.followUserFlag === 1;
 				postDetail.userAction = item.userLikeStr || null;
 				postDetail.cardFlag = item.cardFlag;
+				postDetail.isReadTrace = item.isReadTrace;
 				postDetail.commentFlag = item.commentFlag;
 				postDetail.postType = item.postType || 0;
 
 				if (loggedInUserId.value && item.userId && loggedInUserId.value != item.userId) {
 					showFollowButton.value = true;
+				}
+
+				if (item.userId == loggedInUserId.value && item.isReadTrace === 1) {
+					console.log('✅ 是本人发布的商机且开启了留痕，正在获取浏览记录...');
+					getViewerList();
+				} else {
+					console.log('ℹ️ 非本人或未开启留痕，不显示浏览记录');
 				}
 
 				if (item.checkContribution === 1) {
@@ -635,6 +731,72 @@
 		} finally {
 			isLoading.value = false;
 		}
+	};
+
+	// 获取浏览记录方法
+	const getViewerList = async () => {
+		const {
+			data
+		} = await request('/app-api/member/business-opportunities-view/page', {
+			method: 'GET',
+			data: {
+				businessOpportunitiesId: postId.value,
+				pageNo: 1,
+				pageSize: 7
+			}
+		});
+
+		console.log('📊 浏览记录接口返回:', data);
+
+		if (data) {
+			viewerList.value = data.list || [];
+			viewerTotal.value = data.total || 0;
+
+			// 打印这个来确认 v-if 的三个条件
+			console.log('🧐 显示留痕判断条件:', {
+				'是否本人': postDetail.userId == loggedInUserId.value,
+				'是否开启留痕': postDetail.isReadTrace === 1,
+				'浏览总数': viewerTotal.value
+			});
+		}
+	};
+
+	/**
+	 * [方法] 处理作者区域点击跳转
+	 * 逻辑：如果是企业身份，跳转到企业名片；如果是个人身份，跳转到个人名片。
+	 */
+	const handleAuthorClick = () => {
+		// 1. 权限检查：如果作者关闭了名片查看，则拦截
+		if (!postDetail.cardFlag) {
+			return uni.showToast({
+				title: '作者已关闭名片查看',
+				icon: 'none'
+			});
+		}
+
+		// 2. 根据身份进行分流跳转
+		if (postDetail.isEnterpriseSource) {
+			// --- 场景 A：企业发布的商机 ---
+			if (!postDetail.enterpriseId) return;
+			uni.navigateTo({
+				url: `/packages/enterprise-card/enterprise-card?id=${postDetail.enterpriseId}`
+			});
+		} else {
+			// --- 场景 B：个人发布的商机 ---
+			// 构造符合 navigateToBusinessCard 方法的对象
+			const userObj = {
+				id: postDetail.userId,
+				name: postDetail.user,
+				avatar: postDetail.avatar
+			};
+			navigateToBusinessCard(userObj);
+		}
+	};
+
+	const goToTraceList = () => {
+		uni.navigateTo({
+			url: `/packages/user-view-trace/user-view-trace?id=${postId.value}`
+		});
 	};
 
 	const flattenComments = (apiComments, replyToUser = null) => {
@@ -1216,9 +1378,60 @@
 		margin-bottom: 36rpx;
 	}
 
+	/* 详情页作者区域加固 */
+	.name-and-badge {
+		display: flex;
+		align-items: center;
+		flex-wrap: wrap;
+		gap: 12rpx;
+		margin-bottom: 6rpx;
+	}
+
 	.author-avatar-wrapper {
 		position: relative;
-		flex-shrink: 0;
+		width: 112rpx;
+		height: 112rpx;
+	}
+
+	/* 详情页头像圆角控制 */
+	.author-avatar.is-ent {
+		border-radius: 24rpx !important;
+	}
+
+	/* 右下角蓝V详情版 */
+	.blue-v-badge-detail {
+		position: absolute;
+		bottom: -2rpx;
+		right: -2rpx;
+		width: 38rpx;
+		height: 38rpx;
+		background-color: #fff;
+		border-radius: 50%;
+		border: 4rpx solid #fff;
+		z-index: 5;
+	}
+
+	/* 认证勋章设计 (详情版) */
+	.badge-premium-detail {
+		display: flex;
+		align-items: center;
+		gap: 4rpx;
+		padding: 2rpx 12rpx;
+		border-radius: 20rpx;
+		font-size: 18rpx;
+		font-weight: bold;
+		color: #fff;
+		background: linear-gradient(90deg, #FFB347 0%, #FF8600 100%);
+		box-shadow: 0 4rpx 8rpx rgba(255, 134, 0, 0.15);
+	}
+
+	.badge-soft-detail {
+		padding: 2rpx 12rpx;
+		border-radius: 6rpx;
+		font-size: 18rpx;
+		background-color: rgba(64, 158, 255, 0.1);
+		color: #409EFF;
+		border: 1rpx solid rgba(64, 158, 255, 0.2);
 	}
 
 	.author-avatar {
@@ -1522,6 +1735,170 @@
 	.interaction-btn.active {
 		color: #FF6A00;
 	}
+
+
+	.viewer-section {
+		margin-top: 30rpx;
+		padding-top: 20rpx;
+		border-top: 2rpx solid #f5f5f5;
+	}
+
+	.viewer-header {
+		display: flex;
+		justify-content: space-between;
+		margin-bottom: 20rpx;
+	}
+
+	.viewer-title {
+		font-size: 26rpx;
+		color: #666;
+		font-weight: bold;
+	}
+
+	.viewer-title .count {
+		color: #FF6A00;
+		margin-left: 8rpx;
+	}
+
+	.more-link {
+		font-size: 24rpx;
+		color: #999;
+	}
+
+	.avatar-row {
+		display: flex;
+		align-items: center;
+		gap: 12rpx;
+	}
+
+	.viewer-avatar {
+		width: 64rpx;
+		height: 64rpx;
+		border-radius: 50%;
+		border: 2rpx solid #fff;
+	}
+
+	.avatar-more {
+		width: 64rpx;
+		height: 64rpx;
+		background: #f0f0f0;
+		border-radius: 50%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		color: #999;
+		font-size: 24rpx;
+	}
+
+	/* 浏览留痕模块卡片容器 */
+	.viewer-module-card {
+		background-color: #ffffff;
+		border-radius: 24rpx;
+		margin: 20rpx 30rpx;
+		padding: 30rpx;
+		box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.03);
+		border: 1rpx solid #f0f0f0;
+	}
+
+	.viewer-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 24rpx;
+	}
+
+	.left-title {
+		display: flex;
+		align-items: center;
+	}
+
+	.title-indicator {
+		width: 6rpx;
+		height: 28rpx;
+		background-color: #FF6A00;
+		border-radius: 4rpx;
+		margin-right: 12rpx;
+	}
+
+	.title-txt {
+		font-size: 28rpx;
+		font-weight: bold;
+		color: #333;
+	}
+
+	.title-count {
+		font-size: 24rpx;
+		color: #FF6A00;
+		background: rgba(255, 106, 0, 0.1);
+		padding: 2rpx 12rpx;
+		border-radius: 20rpx;
+		margin-left: 12rpx;
+	}
+
+	.right-more {
+		display: flex;
+		align-items: center;
+	}
+
+	.right-more text {
+		font-size: 24rpx;
+		color: #999;
+		margin-right: 4rpx;
+	}
+
+	.viewer-content {
+		display: flex;
+		flex-direction: column;
+	}
+
+	.avatar-stack {
+		display: flex;
+		align-items: center;
+		flex-wrap: wrap;
+	}
+
+	.avatar-item {
+		margin-right: 16rpx;
+		margin-bottom: 10rpx;
+	}
+
+	.v-avatar {
+		width: 72rpx;
+		height: 72rpx;
+		border-radius: 50%;
+		border: 2rpx solid #fff;
+		background-color: #f5f5f5;
+		box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.05);
+	}
+
+	.more-dots {
+		width: 72rpx;
+		height: 72rpx;
+		border-radius: 50%;
+		background-color: #f8f8f8;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.dot {
+		width: 6rpx;
+		height: 6rpx;
+		background-color: #ccc;
+		border-radius: 50%;
+		margin: 0 2rpx;
+	}
+
+	.viewer-tips {
+		font-size: 24rpx;
+		color: #bbb;
+		margin-top: 10rpx;
+	}
+
+	.viewer-module-card:active {
+		background-color: #fafafa;
+	}
+
 
 	/* ==================================================================
 	 * 评论区 (.comments-section)
