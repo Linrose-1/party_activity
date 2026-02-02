@@ -1,251 +1,231 @@
-
+/* 水平间距 */
+/* 水平间距 */
 .my-opportunities-app.data-v-481e0091 {
-		background-color: #f9f9f9;
-		min-height: 100vh;
+  background-color: #F8F9FA;
+  min-height: 100vh;
 }
+
+/* 1. 筛选栏样式 */
 .segmented-wrapper.data-v-481e0091 {
-		background-color: #fff;
-		padding: 20rpx 30rpx;
-		position: -webkit-sticky;
-		position: sticky;
-		/* 吸顶效果 */
-		top: 0;
-		z-index: 99;
-		border-bottom: 1rpx solid #eee;
+  background-color: #fff;
+  padding: 20rpx 40rpx;
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
+.identity-filter-bar.data-v-481e0091 {
+  display: flex;
+  gap: 20rpx;
+  padding: 20rpx 40rpx;
+  background: #fff;
+  border-bottom: 1rpx solid #F0F0F0;
+}
+.identity-filter-bar .filter-chip.data-v-481e0091 {
+  font-size: 24rpx;
+  color: #666;
+  background: #F2F2F2;
+  padding: 10rpx 32rpx;
+  border-radius: 30rpx;
+}
+.identity-filter-bar .filter-chip.active.data-v-481e0091 {
+  background: #FFF5EE;
+  color: #FF6B00;
+  border: 1rpx solid #FF6B00;
+  font-weight: bold;
+}
+
+/* 2. 帖子卡片布局 */
 .post-list.data-v-481e0091 {
-		padding: 30rpx 0;
+  padding-top: 20rpx;
 }
 .post-card.data-v-481e0091 {
-		background: white;
-		border-radius: 20rpx;
-		padding: 30rpx;
-		margin: 0 30rpx 30rpx;
-		box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.04);
+  background: #fff;
+  border-radius: 32rpx;
+  padding: 32rpx;
+  margin: 0 24rpx 24rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.03);
 }
 .post-header.data-v-481e0091 {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		margin-bottom: 24rpx;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24rpx;
 }
-.user-info.data-v-481e0091 {
-		display: flex;
-		align-items: center;
-		flex: 1;
+.post-header .user-info.data-v-481e0091 {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
 }
-.avatar.data-v-481e0091 {
-		width: 80rpx;
-		height: 80rpx;
-		border-radius: 50%;
-		margin-right: 20rpx;
+.post-header .avatar-wrap.data-v-481e0091 {
+  position: relative;
+  width: 90rpx;
+  height: 90rpx;
 }
-.user-name.data-v-481e0091 {
-		font-weight: 600;
-		font-size: 30rpx;
+.post-header .avatar-wrap .avatar.data-v-481e0091 {
+  width: 100%;
+  height: 100%;
+  border-radius: 12rpx;
+  background: #f0f0f0;
 }
-.post-time.data-v-481e0091 {
-		font-size: 24rpx;
-		color: #999;
+.post-header .avatar-wrap .blue-v-tag.data-v-481e0091 {
+  position: absolute;
+  bottom: -4rpx;
+  right: -4rpx;
+  width: 32rpx;
+  height: 32rpx;
+  border: 3rpx solid #fff;
+  border-radius: 50%;
+}
+.post-header .user-name.data-v-481e0091 {
+  font-weight: bold;
+  font-size: 28rpx;
+  color: #333;
+}
+.post-header .post-time.data-v-481e0091 {
+  font-size: 22rpx;
+  color: #BBB;
+  margin-top: 4rpx;
 }
 
-	/* 【新增】状态标签样式 */
+/* 状态标签样式 */
 .status-tag.data-v-481e0091 {
-		font-size: 24rpx;
-		padding: 6rpx 16rpx;
-		border-radius: 30rpx;
-		font-weight: 500;
+  font-size: 20rpx;
+  padding: 6rpx 16rpx;
+  border-radius: 8rpx;
+  font-weight: bold;
 }
 .status-active.data-v-481e0091 {
-		background-color: #f6ffed;
-		color: #52c41a;
+  background: #EFFFF4;
+  color: #52c41a;
 }
 .status-hidden.data-v-481e0091 {
-		background-color: #fffbe6;
-		color: #faad14;
+  background: #FFF9E6;
+  color: #faad14;
 }
 .status-rejected.data-v-481e0091 {
-		background-color: #fff1f0;
-		color: #f5222d;
+  background: #FFF1F0;
+  color: #f5222d;
 }
-.status-completed.data-v-481e0091,
-	.status-closed.data-v-481e0091 {
-		background-color: #f0f0f0;
-		color: #999;
+.status-closed.data-v-481e0091 {
+  background: #f5f5f5;
+  color: #999;
 }
-.status-unknown.data-v-481e0091 {
-		background-color: #f0f0f0;
-		color: #999;
+.post-title.data-v-481e0091 {
+  font-size: 30rpx;
+  font-weight: bold;
+  margin-bottom: 12rpx;
+  color: #333;
 }
 .post-content.data-v-481e0091 {
-		font-size: 28rpx;
-		line-height: 1.6;
-		margin-bottom: 20rpx;
+  font-size: 28rpx;
+  color: #666;
+  line-height: 1.6;
+  margin-bottom: 20rpx;
 }
+
+/* 3. 媒体展示样式 */
 .post-images.data-v-481e0091 {
-		display: grid;
-		gap: 10rpx;
-		/* 网格间距 */
-		margin-bottom: 20rpx;
+  display: grid;
+  gap: 8rpx;
+  margin-bottom: 20rpx;
+}
+.images-count-1.data-v-481e0091 {
+  grid-template-columns: 1fr;
+}
+.images-count-1 .image-wrapper.data-v-481e0091 {
+  aspect-ratio: 16/9;
+}
+.images-count-2.data-v-481e0091,
+.images-count-4.data-v-481e0091 {
+  grid-template-columns: repeat(2, 1fr);
+}
+.post-images.data-v-481e0091:not(.images-count-1):not(.images-count-2):not(.images-count-4) {
+  grid-template-columns: repeat(3, 1fr);
 }
 .image-wrapper.data-v-481e0091 {
-		width: 100%;
-		border-radius: 8rpx;
-		overflow: hidden;
+  width: 100%;
+  aspect-ratio: 1/1;
+  border-radius: 12rpx;
+  overflow: hidden;
 }
-.post-image.data-v-481e0091 {
-		width: 100%;
-		height: 100%;
-		display: block;
-		/* 消除 image 标签底部空隙 */
+.image-wrapper .post-image.data-v-481e0091 {
+  width: 100%;
+  height: 100%;
 }
 .post-video-container.data-v-481e0091 {
-		width: 100%;
-		aspect-ratio: 16 / 9;
-		/* 保持16:9的宽高比 */
-		max-height: 400rpx;
-		border-radius: 8rpx;
-		overflow: hidden;
-		margin-bottom: 20rpx;
-		background-color: #000;
+  width: 100%;
+  aspect-ratio: 16/9;
+  border-radius: 12rpx;
+  overflow: hidden;
+  background: #000;
+  margin-bottom: 20rpx;
 }
-.post-video.data-v-481e0091 {
-		width: 100%;
-		height: 100%;
-		display: block;
+.post-video-container .post-video.data-v-481e0091 {
+  width: 100%;
+  height: 100%;
 }
 
-	/* 默认（3张及以上）: 3列网格 */
-.post-images.data-v-481e0091 {
-		grid-template-columns: repeat(3, 1fr);
-}
-.image-wrapper.data-v-481e0091 {
-		aspect-ratio: 1 / 1;
-		/* 多图时，保持1:1的正方形比例 */
-}
-
-	/* Case 1: 只有 1 张图片 */
-.images-count-1 .image-wrapper.data-v-481e0091 {
-		grid-column: 1 / -1;
-		/* 占据整行 */
-		aspect-ratio: unset;
-		/* 移除正方形限制，让图片以原始比例显示 */
-}
-
-	/* Case 2: 有 2 张或 4 张图片 */
-.images-count-2.data-v-481e0091,
-	.images-count-4.data-v-481e0091 {
-		grid-template-columns: repeat(2, 1fr);
-		/* 2列网格，布局更美观 */
-}
-.feedback-stats.data-v-481e0091 {
-		display: flex;
-		align-items: center;
-		padding: 10rpx 0;
-		font-size: 26rpx;
-		color: #666;
-		border-bottom: 1rpx solid #f5f5f5;
-		margin-bottom: 20rpx;
-}
-.like-count.data-v-481e0091 {
-		margin-right: 30rpx;
-		color: #e74c3c;
-}
-.dislike-count.data-v-481e0091 {
-		color: #3498db;
-}
-.like-count.data-v-481e0091,
-	.dislike-count.data-v-481e0091 {
-		display: flex;
-		align-items: center;
-}
-.like-count uni-icons.data-v-481e0091,
-	.dislike-count uni-icons.data-v-481e0091 {
-		margin-right: 8rpx;
-}
-
-	/* 底部操作按钮样式 */
+/* 4. 操作按钮区 */
 .card-actions.data-v-481e0091 {
-		display: flex;
-		justify-content: flex-end;
-		/* 按钮靠右对齐 */
-		gap: 20rpx;
-		padding-top: 20rpx;
+  display: flex;
+  justify-content: flex-end;
+  gap: 20rpx;
+  border-top: 1rpx solid #F8F8F8;
+  padding-top: 24rpx;
 }
-.action-btn.data-v-481e0091 {
-		display: flex;
-		align-items: center;
-		padding: 10rpx 24rpx;
-		font-size: 26rpx;
-		border-radius: 40rpx;
-		background-color: #f5f5f5;
-		color: #666;
-		margin: 0;
-		line-height: 1;
+.card-actions .action-btn.data-v-481e0091 {
+  display: flex;
+  align-items: center;
+  padding: 12rpx 28rpx;
+  font-size: 24rpx;
+  border-radius: 40rpx;
+  background: #F5F5F5;
+  color: #444;
+  margin: 0;
+  line-height: 1;
 }
-.action-btn.data-v-481e0091::after {
-		border: none;
+.card-actions .action-btn.data-v-481e0091::after {
+  border: none;
 }
-.action-btn uni-icons.data-v-481e0091 {
-		margin-right: 8rpx;
+.card-actions .edit-btn.data-v-481e0091 {
+  background: #FFF5EE;
+  color: #FF6B00;
 }
-.delete-btn.data-v-481e0091 {
-		color: #e74c3c;
+.card-actions .delete-btn.data-v-481e0091 {
+  color: #e74c3c;
 }
-.appeal-btn.data-v-481e0091 {
-		color: #3498db;
-}
-.appeal-btn.disabled.data-v-481e0091 {
-		background-color: #f5f5f5;
-		color: #ccc;
-		pointer-events: none;
-		/* 禁用点击事件 */
-}
-.no-posts-message.data-v-481e0091,
-	.empty-post-button.data-v-481e0091 {
-		/* 样式保持不变 */
+.card-actions .appeal-btn.disabled.data-v-481e0091 {
+  opacity: 0.4;
 }
 
-
-	/* 空状态引导容器的样式 */
+/* 5. 空状态 */
 .empty-state-container.data-v-481e0091 {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: center;
-		padding: 100rpx 40rpx;
-		margin: 30rpx;
-		/* 与 post-card 的外边距保持一致 */
-		background-color: #fff;
-		border-radius: 20rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 120rpx 60rpx;
 }
-.empty-text.data-v-481e0091 {
-		margin-top: 20rpx;
-		font-size: 32rpx;
-		font-weight: 600;
-		color: #333;
+.empty-state-container .empty-text.data-v-481e0091 {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+  margin-top: 30rpx;
 }
-.empty-subtext.data-v-481e0091 {
-		margin-top: 10rpx;
-		font-size: 26rpx;
-		color: #999;
-		margin-bottom: 40rpx;
+.empty-state-container .empty-subtext.data-v-481e0091 {
+  font-size: 26rpx;
+  color: #999;
+  margin: 16rpx 0 60rpx;
+  text-align: center;
 }
-.publish-button.data-v-481e0091 {
-		background: linear-gradient(135deg, #FF6A00, #FF8C00);
-		color: white;
-		border: none;
-		border-radius: 40rpx;
-		padding: 18rpx 80rpx;
-		font-size: 28rpx;
-		font-weight: bold;
-		box-shadow: 0 4rpx 12rpx rgba(255, 106, 0, 0.3);
-		transition: all 0.2s ease;
+.empty-state-container .publish-button.data-v-481e0091 {
+  background: linear-gradient(135deg, #FF9546, #FF6B00);
+  color: #fff;
+  padding: 24rpx 100rpx;
+  border-radius: 50rpx;
+  font-weight: bold;
+  box-shadow: 0 8rpx 20rpx rgba(255, 107, 0, 0.2);
 }
-.publish-button.data-v-481e0091::after {
-		border: none;
-}
-.publish-button.data-v-481e0091:active {
-		background: linear-gradient(135deg, #e05a00, #e07a00);
-		transform: scale(0.98);
+.empty-state-container .publish-button.data-v-481e0091::after {
+  border: none;
 }

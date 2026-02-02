@@ -534,6 +534,13 @@
 				{
 					"navigationBarTitleText" : "商机浏览记录"
 				}
+			},
+			{
+				"path" : "my-friendList/my-friendList",
+				"style" : 
+				{
+					"navigationBarTitleText" : "圈友列表"
+				}
 			}
 			// 如果还有其他页面要放进这个分包，继续在这里加
 		]

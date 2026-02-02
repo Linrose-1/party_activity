@@ -11,6 +11,7 @@ const _easycom_uni_load_more = () => "../../uni_modules/uni-load-more/components
 if (!Math) {
   (_easycom_uni_icons + _easycom_uni_load_more)();
 }
+const defaultAvatar = "https://img.gofor.club/mmexport1759211962539.jpg";
 const _sfc_main = {
   __name: "user-view-trace",
   setup(__props) {
@@ -59,15 +60,18 @@ const _sfc_main = {
     return (_ctx, _cache) => {
       return {
         a: common_vendor.f(list.value, (item, k0, i0) => {
-          return {
-            a: item.memberUser.avatar,
-            b: common_vendor.t(item.memberUser.nickname),
+          return common_vendor.e({
+            a: item.memberUser && item.memberUser.avatar ? item.memberUser.avatar : defaultAvatar,
+            b: common_vendor.t(item.memberUser ? item.memberUser.nickname || "商友" : "未知用户"),
             c: common_vendor.t(formatTime(item.createTime)),
-            d: common_vendor.t(item.viewCount),
-            e: "e21cc623-0-" + i0,
-            f: item.id,
-            g: common_vendor.o(($event) => goCard(item.memberUser), item.id)
-          };
+            d: item.viewCount !== null && item.viewCount !== void 0
+          }, item.viewCount !== null && item.viewCount !== void 0 ? {
+            e: common_vendor.t(item.viewCount)
+          } : {}, {
+            f: "e21cc623-0-" + i0,
+            g: item.id,
+            h: common_vendor.o(($event) => goCard(item.memberUser), item.id)
+          });
         }),
         b: common_vendor.p({
           type: "right",

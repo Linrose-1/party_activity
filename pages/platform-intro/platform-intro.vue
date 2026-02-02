@@ -13,7 +13,7 @@
 		</view>
 
 		<!-- 3. 使用封装好的二维码组件 -->
-		<ShareQrCode path="pages/home/home" label="首页专属推广码" />
+		<ShareQrCode path="pages/home/home" label="首页邀约码" />
 	</view>
 </template>
 

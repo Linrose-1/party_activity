@@ -847,13 +847,13 @@
 	 * @param {boolean} isFreeView - 是否免费查看，默认为 false
 	 */
 	const navigateToBusinessCard = (user, isFreeView = false) => {
-		if (!user || !user.id) {
-			uni.showToast({
-				title: '无法查看该用户主页',
-				icon: 'none'
-			});
-			return;
-		}
+		// if (!user || !user.id) {
+		// 	uni.showToast({
+		// 		title: '无法查看该用户主页',
+		// 		icon: 'none'
+		// 	});
+		// 	return;
+		// }
 
 		const defaultAvatar = '/static/images/default-avatar.png';
 		const name = user.nickname || '匿名用户';

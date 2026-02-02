@@ -1,0 +1,180 @@
+/* 水平间距 */
+/* 水平间距 */
+.friend-list-page.data-v-f2cf60c6 {
+  background-color: #F8F9FB;
+  min-height: 100vh;
+}
+
+/* 顶部圈主卡片 */
+.owner-header.data-v-f2cf60c6 {
+  padding: 60rpx 40rpx;
+  border-radius: 0 0 50rpx 50rpx;
+  color: #fff;
+  box-shadow: 0 10rpx 30rpx rgba(255, 106, 0, 0.2);
+}
+.owner-header .owner-content.data-v-f2cf60c6 {
+  display: flex;
+  align-items: center;
+  gap: 30rpx;
+  margin-bottom: 40rpx;
+}
+.owner-header .owner-content .owner-avatar.data-v-f2cf60c6 {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 50%;
+  border: 4rpx solid rgba(255, 255, 255, 0.6);
+}
+.owner-header .owner-content .owner-name.data-v-f2cf60c6 {
+  font-size: 36rpx;
+  font-weight: bold;
+  display: block;
+}
+.owner-header .owner-content .owner-desc.data-v-f2cf60c6 {
+  font-size: 24rpx;
+  opacity: 0.8;
+  margin-top: 6rpx;
+}
+.owner-header .owner-stats.data-v-f2cf60c6 {
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 20rpx;
+  border-radius: 20rpx;
+}
+.owner-header .owner-stats .stat-item.data-v-f2cf60c6 {
+  flex: 1;
+  text-align: center;
+}
+.owner-header .owner-stats .stat-item .num.data-v-f2cf60c6 {
+  font-size: 32rpx;
+  font-weight: bold;
+  display: block;
+}
+.owner-header .owner-stats .stat-item .label.data-v-f2cf60c6 {
+  font-size: 20rpx;
+  opacity: 0.7;
+}
+.owner-header .owner-stats .stat-line.data-v-f2cf60c6 {
+  width: 2rpx;
+  height: 40rpx;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* 搜索框 */
+.search-sticky.data-v-f2cf60c6 {
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  padding: 30rpx;
+  background: #F8F9FB;
+}
+.search-sticky .search-box.data-v-f2cf60c6 {
+  background: #fff;
+  border-radius: 40rpx;
+  padding: 0 30rpx;
+  height: 80rpx;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.03);
+}
+.search-sticky .search-box input.data-v-f2cf60c6 {
+  flex: 1;
+  margin: 0 20rpx;
+  font-size: 28rpx;
+}
+.search-sticky .search-box .search-btn.data-v-f2cf60c6 {
+  font-size: 28rpx;
+  color: #FF6A00;
+  font-weight: bold;
+}
+
+/* 圈友卡片 */
+.list-container.data-v-f2cf60c6 {
+  padding: 0 30rpx 40rpx;
+}
+.friend-card.data-v-f2cf60c6 {
+  background: #fff;
+  border-radius: 24rpx;
+  padding: 30rpx;
+  margin-bottom: 24rpx;
+  display: flex;
+  align-items: center;
+  gap: 24rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.02);
+}
+.friend-card .f-avatar.data-v-f2cf60c6 {
+  width: 100rpx;
+  height: 100rpx;
+  border-radius: 50%;
+  background: #f0f0f0;
+}
+.friend-card .f-body.data-v-f2cf60c6 {
+  flex: 1;
+  min-width: 0;
+}
+.friend-card .f-body .f-top.data-v-f2cf60c6 {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  margin-bottom: 8rpx;
+}
+.friend-card .f-body .f-top .f-name.data-v-f2cf60c6 {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+}
+.friend-card .f-body .f-desc.data-v-f2cf60c6 {
+  font-size: 26rpx;
+  color: #666;
+  margin-bottom: 8rpx;
+}
+.friend-card .f-body .f-footer.data-v-f2cf60c6 {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+.friend-card .f-body .f-footer .f-loc.data-v-f2cf60c6 {
+  font-size: 22rpx;
+  color: #bbb;
+}
+
+/* 关系标签 */
+.relation-tags.data-v-f2cf60c6 {
+  display: flex;
+  gap: 8rpx;
+}
+.relation-tags .r-tag.data-v-f2cf60c6 {
+  font-size: 18rpx;
+  padding: 2rpx 10rpx;
+  border-radius: 6rpx;
+}
+.relation-tags .r-tag.town.data-v-f2cf60c6 {
+  background: #E6F7FF;
+  color: #1890FF;
+}
+.relation-tags .r-tag.peer.data-v-f2cf60c6 {
+  background: #F6FFED;
+  color: #52C41A;
+}
+.relation-tags .r-tag.school.data-v-f2cf60c6 {
+  background: #FFF7E6;
+  color: #FA8C16;
+}
+.text-ellipsis.data-v-f2cf60c6 {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.empty-state.data-v-f2cf60c6 {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 100rpx;
+  color: #999;
+}
+.empty-state .empty-img.data-v-f2cf60c6 {
+  width: 200rpx;
+  height: 200rpx;
+  margin-bottom: 20rpx;
+}

@@ -74,7 +74,7 @@
 							<view class="currency-icon">
 								<i class="fas fa-gem"></i> <!-- 建议替换为 uni-icons 或图片 -->
 							</view>
-							<view class="cost-amount">1</view>
+							<view class="cost-amount">{{ costAmount }}</view>
 							<view class="cost-label">智米</view>
 						</view>
 					</view>
@@ -110,10 +110,25 @@
 				<uni-load-more status="loading" contentText="正在加载用户信息..."></uni-load-more>
 			</view>
 
+			<!-- 提示信息 -->
+			<view class="info-card">
+				<h1 class="info-card-title">
+					<i class="fas fa-info-circle"></i> 为什么需要支付智米？
+				</h1>
+				<p>为了维护猩聚社平台信任社交、价值社交、共建共享的生态，查看商友信息与连接商友需要消耗智米。这有助于：</p>
+				<ul>
+					<li>·确保联系人请求的严肃性</li>
+					<li>·保护用户免受非关联干扰</li>
+					<li>·维护高质量商业社交环境</li>
+					<li>·激励用户贡献高质量内容</li>
+				</ul>
+			</view>
+
+
 			<!-- 格式化申请好友语卡片 -->
 			<view class="friend-request-card" v-if="currentUserInfo && targetUserInfo">
 				<h1 class="friend-request-title">
-					<i class="fas fa-comment-dots"></i> 申请好友语
+					<i class="fas fa-comment-dots"></i> 申请微信好友语
 				</h1>
 				<p class="friend-request-desc">复制以下文字，方便快速添加对方微信：</p>
 				<view class="message-box">
@@ -124,19 +139,7 @@
 				</view>
 			</view>
 
-			<!-- 提示信息 -->
-			<view class="info-card">
-				<h1 class="info-card-title">
-					<i class="fas fa-info-circle"></i> 为什么需要支付智米？
-				</h1>
-				<p>为了维护平台的商业环境和用户隐私，查看他人联系方式需要消耗智米。这有助于：</p>
-				<ul>
-					<li>确保联系请求的严肃性</li>
-					<li>保护用户免受骚扰</li>
-					<li>维护高质量商业环境</li>
-					<li>激励用户贡献高质量内容</li>
-				</ul>
-			</view>
+
 		</view>
 	</view>
 </template>
@@ -161,9 +164,15 @@
 	const isReadyForDisplay = ref(false);
 	const isLoading = ref(true);
 
+	const friendOwnerUserId = ref(null);
+
 	// --- 页面生命周期 ---
 	onLoad((options) => {
 		console.log('[business-card-apply] onLoad 触发。收到的选项：', options);
+
+		if (options.friendOwnerUserId) {
+			friendOwnerUserId.value = options.friendOwnerUserId;
+		}
 
 		// 1. 快速的同步操作
 		if (options.id && options.name) {
@@ -195,6 +204,11 @@
 	});
 
 	// --- 初始化与数据获取 ---
+
+	// 动态计算本次查看需要多少智米
+	const costAmount = computed(() => {
+		return friendOwnerUserId.value ? 2 : 1;
+	});
 
 	// 页面初始化总函数
 	const initializePage = async () => {
@@ -229,7 +243,9 @@
 	// 任务一：检查权限，如果成功则直接跳转
 	const checkAccessPermission = async () => {
 		const requestData = {
-			readUserId: targetUserId.value
+			readUserId: targetUserId.value,
+			isReadByFriend: friendOwnerUserId.value ? 1 : 0,
+			friendOwnerUserId: friendOwnerUserId.value || 0
 		};
 		if (fromShare.value) {
 			requestData.notPay = 1;
@@ -245,8 +261,12 @@
 
 		if (data && !error) {
 			console.log("权限检查成功，直接跳转到名片页。");
+			let targetUrl = `/packages/my-businessCard/my-businessCard?id=${targetUserId.value}`;
+			if (friendOwnerUserId.value) {
+				targetUrl += `&friendOwnerUserId=${friendOwnerUserId.value}`;
+			}
 			uni.redirectTo({
-				url: `/packages/my-businessCard/my-businessCard?id=${targetUserId.value}&fromShare=${fromShare.value ? '1' : '0'}`
+				url: targetUrl
 			});
 			return true;
 		} else {
@@ -325,7 +345,7 @@
 			});
 			return;
 		}
-		if (currentUserInfo.value && currentUserInfo.value.point < 1) {
+		if (currentUserInfo.value && currentUserInfo.value.point < costAmount.value) {
 			showInsufficient.value = true;
 			uni.showToast({
 				title: '智米不足',
@@ -342,7 +362,9 @@
 		} = await request('/app-api/member/user/pay-read-card', {
 			method: 'POST',
 			data: {
-				readUserId: targetUserId.value
+				readUserId: targetUserId.value,
+				isReadByFriend: friendOwnerUserId.value ? 1 : 0,
+				friendOwnerUserId: friendOwnerUserId.value || 0
 			}
 		});
 
@@ -365,8 +387,12 @@
 			fetchCurrentUserInfo();
 
 			setTimeout(() => {
+				let finalUrl = `/packages/my-businessCard/my-businessCard?id=${targetUserId.value}`;
+				if (friendOwnerUserId.value) {
+					finalUrl += `&friendOwnerUserId=${friendOwnerUserId.value}`;
+				}
 				uni.redirectTo({
-					url: `/packages/my-businessCard/my-businessCard?id=${targetUserId.value}`
+					url: finalUrl
 				});
 			}, 2000);
 		} else {
@@ -442,7 +468,7 @@
 		const myCompany = currentUserInfo.value.companyName || '我的公司'; // 来自API
 		const myWork = currentUserInfo.value.professionalTitle || '我的职位'; // 来自API
 
-		return `您好 ${targetName}！我是${myCompany}的${myName}，目前在从事${myWork}工作。我从高伙猩球平台获得您的联系方式，希望可以认识一下。`;
+		return `您好 ${targetName}！我是${myCompany}的${myName}，目前在从事${myWork}工作。我从猩聚社平台获得您的联系方式，希望可以认识一下。`;
 	});
 
 	const copyFriendRequestMessage = () => {

@@ -61,13 +61,6 @@ const _sfc_main = {
       return paths.value.reduce((sum, item) => sum + item.degreePathUsers.length, 0);
     });
     const goUserCard = (user, uIdx) => {
-      if (!user || !user.id) {
-        common_vendor.index.showToast({
-          title: "无法查看该用户主页",
-          icon: "none"
-        });
-        return;
-      }
       const id = user.id;
       const name = uIdx === 0 ? "我" : user.realName || user.nickname || "商友";
       const avatarUrl = user.avatar || defaultAvatar;

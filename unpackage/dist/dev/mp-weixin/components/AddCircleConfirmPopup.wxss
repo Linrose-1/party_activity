@@ -39,6 +39,29 @@
   margin-bottom: 8rpx;
   text-align: center;
 }
+
+/* 扣费提示框样式 */
+.fee-notice.data-v-632577f1 {
+  margin-top: 30rpx;
+  background-color: #FFF9F5;
+  border-radius: 12rpx;
+  padding: 16rpx 20rpx;
+  display: flex;
+  align-items: flex-start;
+  gap: 10rpx;
+}
+.fee-notice .notice-text.data-v-632577f1 {
+  flex: 1;
+  font-size: 24rpx;
+  color: #FF7009;
+  line-height: 1.4;
+  text-align: left;
+}
+
+/* 适当微调 card-content 底部边距 */
+.card-content.data-v-632577f1 {
+  margin-bottom: 40rpx;
+}
 .sub-text.data-v-632577f1 {
   font-size: 24rpx;
   color: #999;

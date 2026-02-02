@@ -2,12 +2,14 @@
 const common_vendor = require("../common/vendor.js");
 const utils_request = require("../utils/request.js");
 if (!Array) {
+  const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
   const _easycom_uni_popup2 = common_vendor.resolveComponent("uni-popup");
-  _easycom_uni_popup2();
+  (_easycom_uni_icons2 + _easycom_uni_popup2)();
 }
+const _easycom_uni_icons = () => "../uni_modules/uni-icons/components/uni-icons/uni-icons.js";
 const _easycom_uni_popup = () => "../uni_modules/uni-popup/components/uni-popup/uni-popup.js";
 if (!Math) {
-  _easycom_uni_popup();
+  (_easycom_uni_icons + _easycom_uni_popup)();
 }
 const _sfc_main = {
   __name: "AddCircleConfirmPopup",
@@ -71,13 +73,18 @@ const _sfc_main = {
     return (_ctx, _cache) => {
       return {
         a: common_vendor.t(targetUser.value.name),
-        b: common_vendor.o(close),
-        c: common_vendor.o(confirm),
-        d: loading.value,
-        e: common_vendor.sr(popup, "632577f1-0", {
+        b: common_vendor.p({
+          type: "info-filled",
+          size: "14",
+          color: "#FF7009"
+        }),
+        c: common_vendor.o(close),
+        d: common_vendor.o(confirm),
+        e: loading.value,
+        f: common_vendor.sr(popup, "632577f1-0", {
           "k": "popup"
         }),
-        f: common_vendor.p({
+        g: common_vendor.p({
           type: "center",
           ["mask-click"]: false
         })

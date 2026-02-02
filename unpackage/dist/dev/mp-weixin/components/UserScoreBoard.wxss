@@ -8,6 +8,36 @@ text.data-v-ff62e0ca {
   width: 100%;
   overflow: hidden;
 }
+.legend-box.data-v-ff62e0ca {
+  display: flex;
+  justify-content: flex-start;
+  gap: 34rpx;
+  padding: 0 10rpx;
+  margin-bottom: 10rpx;
+}
+.legend-item.data-v-ff62e0ca {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+.legend-item .l-name.data-v-ff62e0ca {
+  font-size: 24rpx;
+  color: #333;
+}
+.legend-item .l-dash.data-v-ff62e0ca {
+  font-weight: bold;
+  font-size: 30rpx;
+  letter-spacing: -2rpx;
+}
+.legend-item .self-color.data-v-ff62e0ca {
+  color: #FF7D00;
+}
+.legend-item .friend-color.data-v-ff62e0ca {
+  color: #4CAF50;
+}
+.legend-item .total-color.data-v-ff62e0ca {
+  color: #1890FF;
+}
 
 /* 雷达图区域 */
 .chart-section.data-v-ff62e0ca {

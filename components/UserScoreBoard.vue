@@ -9,6 +9,21 @@
 			<MyRadarChart :categories="categories" :datasets="datasets" :maxVal="maxVal" />
 		</view>
 
+		<view class="legend-box">
+			<view class="legend-item">
+				<text class="l-name">自我评价</text>
+				<text class="l-dash self-color">——</text>
+			</view>
+			<view class="legend-item">
+				<text class="l-name">商友评价</text>
+				<text class="l-dash friend-color">——</text>
+			</view>
+			<view class="legend-item">
+				<text class="l-name">综合评价</text>
+				<text class="l-dash total-color">——</text>
+			</view>
+		</view>
+
 		<!-- 2. 评分标准卡片 (放在图表下方作为参考) -->
 		<view class="standard-card">
 			<view class="standard-title">
@@ -137,6 +152,43 @@
 	.score-board-container {
 		width: 100%;
 		overflow: hidden;
+	}
+
+	.legend-box {
+		display: flex;
+		justify-content: flex-start;
+		gap: 34rpx;
+		padding: 0 10rpx;
+		margin-bottom: 10rpx;
+	}
+
+	.legend-item {
+		display: flex;
+		align-items: center;
+		gap: 8rpx;
+
+		.l-name {
+			font-size: 24rpx;
+			color: #333;
+		}
+
+		.l-dash {
+			font-weight: bold;
+			font-size: 30rpx;
+			letter-spacing: -2rpx; // 让横线更紧凑
+		}
+
+		.self-color {
+			color: #FF7D00;
+		}
+
+		.friend-color {
+			color: #4CAF50;
+		}
+
+		.total-color {
+			color: #1890FF;
+		}
 	}
 
 	/* 雷达图区域 */

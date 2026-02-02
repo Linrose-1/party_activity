@@ -16,31 +16,35 @@
 				</view>
 
 				<view class="form-card">
+					<!-- 1. 发布身份选择：增加 :disabled="isEditMode" -->
 					<view class="form-group">
 						<view class="form-label">发布身份</view>
 						<radio-group @change="handleIdentityChange" class="radio-group-container">
 							<label class="radio-item">
-								<radio value="0" :checked="form.isEnterprise === 0" color="#FF6A00" />
-								<text>个人身份</text>
+								<!-- 禁用 radio -->
+								<radio value="0" :checked="form.isEnterprise === 0" :disabled="isEditMode"
+									color="#FF6A00" />
+								<text :style="{color: isEditMode ? '#999' : '#333'}">个人身份</text>
 							</label>
 							<label class="radio-item">
-								<radio value="1" :checked="form.isEnterprise === 1" color="#FF6A00" />
-								<text>企业/品牌身份</text>
+								<!-- 禁用 radio -->
+								<radio value="1" :checked="form.isEnterprise === 1" :disabled="isEditMode"
+									color="#FF6A00" />
+								<text :style="{color: isEditMode ? '#999' : '#333'}">企业/品牌身份</text>
 							</label>
 						</radio-group>
-						<view class="identity-hint">
-							{{ form.isEnterprise === 1 ? '💡 将使用所选企业的品牌名称、Logo等信息发布商机' : '💡 将使用您个人的昵称、头像及名片信息发布商机' }}
-						</view>
 					</view>
 
-					<!-- 企业选择器：仅在选择企业身份时显示 -->
-					<view class="form-group animate-fade" v-if="form.isEnterprise === 1">
-						<view class="form-label">选择发布企业 *</view>
+					<!-- 2. 企业下拉选择：增加 :disabled="isEditMode" -->
+					<view class="form-group" v-if="form.isEnterprise === 1">
+						<view class="form-label">选择发布企业</view>
 						<view class="enterprise-selector-wrap">
 							<uni-data-select v-model="form.userEnterpriseId" :localdata="myEnterprises"
-								placeholder="请选择您名下的企业/品牌" @change="onEnterpriseSelect"></uni-data-select>
+								:disabled="isEditMode" placeholder="请选择名下的企业"></uni-data-select>
 						</view>
-						<view class="no-enterprise-tip" v-if="myEnterprises.length === 0" @click="goToCreateEnterprise">
+						<!-- 编辑模式下隐藏“去创建”的提示，防止干扰 -->
+						<view class="no-enterprise-tip" v-if="myEnterprises.length === 0 && !isEditMode"
+							@click="goToCreateEnterprise">
 							<text>检测到您尚未创建已发布的企业，点击去创建 ></text>
 						</view>
 					</view>
@@ -50,14 +54,22 @@
 					<view class="form-label">选择分类</view>
 					<radio-group @change="topicChange" class="radio-group-container">
 						<label class="radio-item">
-							<radio value="商机分享" :checked="form.topic === '商机分享'" color="#FF6A00" />
-							<text>商机分享</text>
+							<!-- 禁用商机分享单选框 -->
+							<radio value="商机分享" :checked="form.topic === '商机分享'" :disabled="isEditMode"
+								color="#FF6A00" />
+							<text :style="{color: isEditMode ? '#999' : '#333'}">商机分享</text>
 						</label>
 						<label class="radio-item">
-							<radio value="创业猎伙" :checked="form.topic === '创业猎伙'" color="#FF6A00" />
-							<text>创业猎伙🔥</text>
+							<!-- 禁用创业猎伙单选框 -->
+							<radio value="创业猎伙" :checked="form.topic === '创业猎伙'" :disabled="isEditMode"
+								color="#FF6A00" />
+							<text :style="{color: isEditMode ? '#999' : '#333'}">创业猎伙🔥</text>
 						</label>
 					</radio-group>
+					<!-- 编辑模式下的温馨提示 -->
+					<view v-if="isEditMode" class="hint" style="margin-top: 8rpx; color: #BBB;">
+						注：商机发布后不可更改分类
+					</view>
 				</view>
 
 				<view class="form-group">
@@ -153,9 +165,10 @@
 				</view>
 			</view>
 
-			<button class="submit-btn" :class="{ 'disabled-btn': isQuotaLoaded && currentRemainingQuota <= 0 }"
+			<button class="submit-btn"
+				:class="{ 'disabled-btn': isQuotaLoaded && currentRemainingQuota <= 0 && !isEditMode }"
 				@click="handleSubmitClick">
-				发布帖子
+				{{ isEditMode ? '提交修改' : '发布帖子' }}
 			</button>
 		</view>
 	</view>
@@ -183,6 +196,7 @@
 
 	// --- 统一使用 reactive 管理所有表单状态 ---
 	const form = reactive({
+		id: null,
 		title: '',
 		content: '',
 		topic: '商机分享',
@@ -197,6 +211,8 @@
 		isEnterprise: 0, // 0-个人, 1-企业
 		userEnterpriseId: null // 企业主键ID
 	});
+
+	const isEditMode = ref(false); // 标记是否为编辑模式
 
 	const myEnterprises = ref([]); // 存储我的企业列表
 
@@ -224,7 +240,7 @@
 	});
 
 	// --- 生命周期钩子 ---
-	onLoad(() => {
+	onLoad(async (options) => {
 		const token = uni.getStorageSync('token');
 		if (!token) {
 			uni.showModal({
@@ -243,6 +259,20 @@
 				}
 			});
 			return;
+		}
+
+		if (options.id) {
+			isEditMode.value = true;
+			form.id = options.id;
+			// 设置导航栏标题
+			uni.setNavigationBarTitle({
+				title: '编辑商机'
+			});
+			// 获取详情数据进行反显
+			fetchOpportunityDetail(options.id);
+		} else {
+			// 创建模式才检查本地草稿
+			checkDraft();
 		}
 
 		if (uni.getStorageSync('token')) {
@@ -299,6 +329,47 @@
 	const clearDraft = () => {
 		uni.removeStorageSync(DRAFT_KEY);
 		console.log('🧹 草稿已清除');
+	};
+
+	/**
+	 * [新增方法] 获取详情并还原到表单
+	 */
+	const fetchOpportunityDetail = async (id) => {
+		uni.showLoading({
+			title: '正在获取内容...'
+		});
+		const {
+			data,
+			error
+		} = await request('/app-api/member/business-opportunities/get', {
+			method: 'GET',
+			data: {
+				id
+			}
+		});
+		uni.hideLoading();
+
+		if (!error && data) {
+			// 数据映射还原
+			form.title = data.postTitle;
+			form.content = data.postContent;
+			form.topic = data.postType == 1 ? '创业猎伙' : '商机分享';
+			form.tags = data.tags || [];
+			form.showProfile = data.cardFlag;
+			form.isReadTrace = data.isReadTrace;
+			form.isEnterprise = data.isEnterprise;
+			form.userEnterpriseId = data.userEnterpriseId;
+
+			// 媒体还原
+			if (data.postVideo) {
+				form.mediaType = 'video';
+				form.postVideo = data.postVideo;
+				form.businessCoverImageUrl = data.businessCoverImageUrl;
+			} else {
+				form.mediaType = 'image';
+				form.images = data.postImg ? data.postImg.split(',').filter(s => s) : [];
+			}
+		}
 	};
 
 	// 获取商机发布剩余次数
@@ -852,6 +923,7 @@
 		}
 
 		const postData = {
+			id: form.id,
 			userId: uni.getStorageSync('userId') || 0, // 从缓存获取 userId
 			postTitle: form.title,
 			postType: form.topic === '商机分享' ? '0' : '1',
@@ -870,15 +942,21 @@
 		};
 
 		uni.showModal({
-			title: '确认发布',
-			content: `您当前正以【${form.isEnterprise === 1 ? '企业/品牌' : '个人'}】身份发布商机，确认无误？`,
+			title: isEditMode.value ? '确认修改' : '确认发布',
+			content: '请确认您填写的内容无误。',
 			success: (res) => {
 				if (res.confirm) {
-					createOpportunities(postData);
+					// 根据模式执行不同的接口
+					if (isEditMode.value) {
+						performUpdate(postData); // 调用更新方法
+					} else {
+						createOpportunities(postData); // 调用原有的创建方法
+					}
 				}
 			}
 		});
 	}
+
 
 	const createOpportunities = async (postData) => {
 		uni.showLoading({
@@ -907,6 +985,38 @@
 		} else {
 			uni.showToast({
 				title: result.error || '发布失败',
+				icon: 'none'
+			});
+		}
+	};
+
+	/**
+	 * [方法] 执行更新接口
+	 */
+	const performUpdate = async (postData) => {
+		uni.showLoading({
+			title: '正在保存修改...',
+			mask: true
+		});
+		const result = await request('/app-api/member/business-opportunities/update', {
+			method: 'PUT', // 注意这里是 PUT
+			data: postData
+		});
+		uni.hideLoading();
+
+		if (!result.error) {
+
+			clearDraft();
+
+			uni.showToast({
+				title: '修改成功',
+				icon: 'success'
+			});
+			// 修改成功后延迟返回
+			setTimeout(() => uni.navigateBack(), 1500);
+		} else {
+			uni.showToast({
+				title: result.error || '保存失败',
 				icon: 'none'
 			});
 		}

@@ -351,13 +351,13 @@
 	 */
 	const navigateToBusinessCard = (user) => {
 		// 1. 检查传入的 user 对象和 user.id 是否有效
-		if (!user || !user.id) {
-			uni.showToast({
-				title: '无法查看该用户主页',
-				icon: 'none'
-			});
-			return;
-		}
+		// if (!user || !user.id) {
+		// 	uni.showToast({
+		// 		title: '无法查看该用户主页',
+		// 		icon: 'none'
+		// 	});
+		// 	return;
+		// }
 
 		// 2. 【核心】为 avatar 提供一个默认值，防止空字符串导致的问题
 		const defaultAvatar = '/static/icon/default-avatar.png'; // 请确保这个默认头像图片存在于你的项目中

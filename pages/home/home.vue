@@ -12,18 +12,31 @@
 		<view class="header wechat-style">
 
 			<!-- 轮播区域 -->
-			<swiper class="header-swiper" :indicator-dots="false" :autoplay="false" :circular="true" :vertical="false"
-				interval="4000" duration="500" indicator-color="rgba(255,255,255,0.4)" indicator-active-color="#FFFFFF"
-				@click="goToCustomizationPage">
-				<swiper-item v-for="(slide, index) in headerSlides" :key="index">
-					<view class="header-content">
-						<view class="app-title">{{ slide.title }}</view>
-						<view class="app-subtitle">{{ slide.slogan }}</view>
-						<!-- 描述文案是共用的，放在 swiper-item 里 -->
-						<view class="app-description">{{ pageDescription }}</view>
+			<swiper class="header-swiper" :indicator-dots="swiperList.length > 1" :autoplay="true" :circular="true"
+				interval="5000" duration="500" indicator-color="rgba(255,255,255,0.4)" indicator-active-color="#FFFFFF">
+
+				<swiper-item v-for="(item, index) in swiperList" :key="index">
+					<!-- 给内部容器绑定点击事件并传值 -->
+					<view class="header-content" @click="handleSwiperItemClick(item, index)">
+						<!-- 这里的字段对应接口返回的 homeTitle 和 homeSlogan -->
+						<view class="app-title">{{ item.homeTitle || '猩聚社' }}</view>
+						<view class="app-subtitle">{{ item.homeSlogan || '商友连接·商机分享' }}</view>
+						<!-- 描述文案调用函数生成 -->
+						<view class="app-description">{{ getPageDescription(item) }}</view>
 					</view>
 				</swiper-item>
 			</swiper>
+			<!-- <swiper class="header-swiper" :indicator-dots="false" :autoplay="false" :circular="true" :vertical="false"
+				interval="4000" duration="500" indicator-color="rgba(255,255,255,0.4)" indicator-active-color="#FFFFFF"
+				@click="goToCustomizationPage">
+				<swiper-item v-for="(item, index) in swiperList" :key="index">
+					<view class="header-content" @click="handleSwiperItemClick(item, index)">
+						<view class="app-title">{{ item.homeTitle || '猩聚社' }}</view>
+						<view class="app-subtitle">{{ item.homeSlogan || '商友连接·商机分享' }}</view>
+						<view class="app-description">{{ getPageDescription(item) }}</view>
+					</view>
+				</swiper-item>
+			</swiper> -->
 
 
 			<view class="search-section">
@@ -262,6 +275,9 @@
 
 	const currentUserInfo = ref(null);
 
+	// 存储从接口获取的轮播图数据
+	const swiperList = ref([]);
+
 	// 列表与筛选状态
 	const postList = ref([]);
 	const activeTab = ref(1);
@@ -477,6 +493,7 @@
 
 		if (uni.getStorageSync('token')) {
 			fetchScrollBarData();
+			fetchSwiperData();
 		}
 	});
 
@@ -505,7 +522,7 @@
 		const sharePath = `/pages/home/home${params.length > 0 ? '?' + params.join('&') : ''}`;
 
 		return {
-			title: '精英商友社交，您需要这个带工具的平台——猩聚社！点戳进入☞☞',
+			title: '猩聚社丨精英商友 · 跨域社交工具  Gofor Gathering ☞☞',
 			path: sharePath,
 			imageUrl: 'https://img.gofor.club/logo_share.jpg'
 		};
@@ -522,7 +539,7 @@
 		const queryString = params.join('&');
 
 		return {
-			title: '精英商友社交，您需要这个带工具的平台——猩聚社！点戳进入☞☞',
+			title: '猩聚社丨精英商友 · 跨域社交工具  Gofor Gathering ☞☞',
 			query: queryString,
 			imageUrl: 'https://img.gofor.club/logo_share.jpg'
 		};
@@ -540,6 +557,66 @@
 	// ============================
 	// 5. 主要业务方法 (Business Methods)
 	// ============================
+
+	/**
+	 * [方法] 获取动态轮播图口号数据
+	 */
+	const fetchSwiperData = async () => {
+		try {
+			const {
+				data,
+				error
+			} = await request('/app-api/member/user/get-slogans-by-Friend', {
+				method: 'GET'
+			});
+			if (!error && data) {
+				// 将接口返回的数组存入本地状态
+				swiperList.value = data;
+				console.log('✅ 轮播口号数据加载完成:', swiperList.value.length);
+			}
+		} catch (e) {
+			console.error('获取轮播数据异常', e);
+		}
+	};
+
+	/**
+	 * [方法] 处理轮播图点击跳转
+	 * @param {Object} item - 对应的数据项
+	 * @param {Number} index - 数组索引
+	 */
+	const handleSwiperItemClick = (item, index) => {
+		// 按照需求：第一个(index 0)表示自己
+		if (index === 0) {
+			// 跳转到：我的首页定制页面
+			goToCustomizationPage();
+		} else {
+			// 跳转到：该圈主的圈友列表页
+			// 优先取实名，其次取昵称，再次取企业标题
+			const displayName = item.realName || item.nickname || item.homeTitle || '商友圈';
+
+			// 组装路径并传递 ID 和 姓名
+			const url =
+				`/packages/my-friendList/my-friendList?userId=${item.id}&userName=${encodeURIComponent(displayName)}`;
+
+			console.log(`🚀 准备进入 [${displayName}] 的圈子:`, url);
+
+			uni.navigateTo({
+				url
+			});
+		}
+	};
+
+	/**
+	 * [计算属性优化] 页面描述文案
+	 * 根据当前 Swiper 内容动态判断是否显示后缀
+	 */
+	const getPageDescription = (item) => {
+		// 如果该项有定制标题，说明是个人/企业定制，增加 by 猩聚社 标识
+		if (item.homeTitle && item.homeTitle !== '猩聚社') {
+			return '连接全球精英商友——by猩聚社';
+		}
+		return '连接全球精英商友';
+	};
 
 	// 获取滚动条数据
 	const fetchScrollBarData = async () => {
@@ -744,7 +821,7 @@
 				// 构建展示用的“作者”对象
 				const author = {
 					id: isEntPost ? item.enterpriseInfo.id : (item.memberUser?.id || item.userId),
-					managerId: item.userId, 
+					managerId: item.userId,
 					name: isEntPost ? item.enterpriseInfo.enterpriseName : (item.memberUser
 						?.nickname || '商友'),
 					avatar: isEntPost ? item.enterpriseInfo.logoUrl : (item.memberUser?.avatar ||
@@ -1400,13 +1477,13 @@
 	};
 
 	const navigateToBusinessCard = (user) => {
-		if (!user || !user.id) {
-			uni.showToast({
-				title: '无法查看该用户主页',
-				icon: 'none'
-			});
-			return;
-		}
+		// if (!user || !user.id) {
+		// 	uni.showToast({
+		// 		title: '无法查看该用户主页',
+		// 		icon: 'none'
+		// 	});
+		// 	return;
+		// }
 		const avatarUrl = user.avatar || defaultAvatarUrl;
 		const url = `/packages/applicationBusinessCard/applicationBusinessCard?id=${user.id}` +
 			`&name=${encodeURIComponent(user.name)}` +

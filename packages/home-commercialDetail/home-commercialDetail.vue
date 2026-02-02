@@ -135,8 +135,7 @@
 			</view>
 
 			<!-- 浏览留痕模块 -->
-			<view class="viewer-module-card"
-				v-if="postDetail && postDetail.userId == loggedInUserId && postDetail.isReadTrace === 1 && viewerTotal > 0">
+			<view class="viewer-module-card" v-if="postDetail && postDetail.isReadTrace === 1 && viewerTotal > 0">
 				<view class="viewer-header" @click="goToTraceList">
 					<view class="left-title">
 						<view class="title-indicator"></view>
@@ -699,11 +698,9 @@
 					showFollowButton.value = true;
 				}
 
-				if (item.userId == loggedInUserId.value && item.isReadTrace === 1) {
-					console.log('✅ 是本人发布的商机且开启了留痕，正在获取浏览记录...');
+				if (item.isReadTrace === 1) {
+					console.log('🔍 该商机已开启阅读留痕，正在拉取浏览记录...');
 					getViewerList();
-				} else {
-					console.log('ℹ️ 非本人或未开启留痕，不显示浏览记录');
 				}
 
 				if (item.checkContribution === 1) {
@@ -1215,13 +1212,13 @@
 		}
 
 		// 然后检查 userId 是否有效
-		if (!user || !user.id) {
-			uni.showToast({
-				title: '无法查看该用户主页',
-				icon: 'none'
-			});
-			return;
-		}
+		// if (!user || !user.id) {
+		// 	uni.showToast({
+		// 		title: '无法查看该用户主页',
+		// 		icon: 'none'
+		// 	});
+		// 	return;
+		// }
 
 		// 使用 encodeURIComponent 确保名字和URL中的特殊字符不会导致问题
 		const url = `/packages/applicationBusinessCard/applicationBusinessCard?id=${user.id}` +

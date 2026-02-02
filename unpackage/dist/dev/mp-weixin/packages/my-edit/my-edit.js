@@ -858,7 +858,7 @@ const _sfc_main = {
         H: common_vendor.t(form.value.wechatQrCodeUrl ? "点击更换" : "点击上传"),
         I: common_vendor.o(chooseWechatQr),
         J: common_vendor.p({
-          label: "微信二维码",
+          label: "微信二维码(请到微信头像处获取微信二维码图)",
           name: "wechatQrCodeUrl",
           ["label-position"]: "top"
         }),

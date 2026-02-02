@@ -10,7 +10,7 @@
 			<view class="summary-details">
 				<view class="s-item">
 					<text class="s-label">关系距离：</text>
-					<text class="s-val">{{ minDegree }}级人脉</text>
+					<text class="s-val">{{ minDegree }}度人脉</text>
 				</view>
 				<view class="s-item">
 					<text class="s-label">发现路径：</text>
@@ -50,7 +50,7 @@
 								<!-- 连接箭头：最后一位用户后不再显示 -->
 								<view class="node-connector" v-if="uIdx < path.length - 1">
 									<view class="arrow-line"></view>
-									<text class="action-label">邀请</text>
+									<text class="action-label">连接</text>
 								</view>
 							</view>
 						</view>
@@ -153,13 +153,13 @@
 	 * @param {Number} uIdx 节点索引（用于判断是否为本人）
 	 */
 	const goUserCard = (user, uIdx) => {
-		if (!user || !user.id) {
-			uni.showToast({
-				title: '无法查看该用户主页',
-				icon: 'none'
-			});
-			return;
-		}
+		// if (!user || !user.id) {
+		// 	uni.showToast({
+		// 		title: '无法查看该用户主页',
+		// 		icon: 'none'
+		// 	});
+		// 	return;
+		// }
 
 		// 1. 准备跳转参数
 		const id = user.id;

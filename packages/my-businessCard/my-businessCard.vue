@@ -57,11 +57,16 @@
 
 			<!-- 场景 B: 已登录，陌生人-->
 			<view v-else-if="userStatus === 'STRANGER'" class="action-group">
-				<button class="btn btn-share-mini" @click="openShareTypePopup">
-					<uni-icons type="paperplane" size="18" color="#666"></uni-icons>
+				<!-- 1. 邀入我圈 (橙色) -->
+				<button class="btn btn-primary" @click="handleInviteCircle">邀入我圈</button>
+
+				<!-- 2. 加入TA圈 (绿色) -->
+				<button class="btn btn-secondary" @click="handleAddCircle">加入TA圈</button>
+
+				<!-- 3. 分享 (最右侧，小按钮，明显橙色) -->
+				<button class="btn btn-share-orange" @click="openShareTypePopup">
+					<uni-icons type="paperplane" size="18" color="#fff"></uni-icons>
 				</button>
-				<button class="btn btn-secondary" @click="handleInviteCircle">邀入我圈</button>
-				<button class="btn btn-primary" @click="handleAddCircle">加入TA圈</button>
 			</view>
 
 			<!-- 场景 C: 已登录，已是圈友 -->
@@ -139,7 +144,10 @@
 	import AddCircleConfirmPopup from '@/components/AddCircleConfirmPopup.vue';
 	import InviteCircleConfirmPopup from '@/components/InviteCircleConfirmPopup.vue';
 	import {
-		getInviteCode
+		getInviteCode,
+		getCachedUserInfo,
+		checkLoginGuard,
+		isUserFullyLoggedIn
 	} from '../../utils/user.js'; // 引入工具函数获取登录用户邀请码
 	import ShareTypePopup from '@/components/ShareTypePopup.vue'; // 引入新组件
 
@@ -177,8 +185,9 @@
 	 */
 	const userStatus = computed(() => {
 		// 1. 未登录 -> GUEST
-		const token = uni.getStorageSync('token');
-		if (!token) return 'GUEST';
+		// const token = uni.getStorageSync('token');
+		// if (!token) return 'GUEST';
+		if (!isUserFullyLoggedIn()) return 'GUEST';
 
 		// 2. 看自己 -> SELF
 		if (isViewingOwnCard.value) return 'SELF';
@@ -599,7 +608,9 @@
 	 */
 	const fetchTargetUserInfo = async (userId, forceFree = false) => {
 		const requestData = {
-			readUserId: userId
+			readUserId: userId,
+			// isReadByFriend: friendOwnerUserId.value ? 1 : 0,
+			// friendOwnerUserId: friendOwnerUserId.value || 0
 		};
 
 		console.log('🛠 [fetchTargetUserInfo] forceFree:', forceFree);
@@ -1389,7 +1400,7 @@
 
 	.action-group {
 		display: flex;
-		gap: 20rpx;
+		gap: 16rpx;
 		align-items: center;
 		width: 100%;
 	}
@@ -1404,29 +1415,40 @@
 
 	.action-group {
 		display: flex;
-		gap: 15rpx;
+		gap: 20rpx;
 		/* 稍微缩小间距 */
 		align-items: center;
 		width: 100%;
 	}
 
-	.btn {
-		/* 确保文字在小屏幕下不会溢出 */
-		font-size: 26rpx;
-		white-space: nowrap;
+	.btn-share-orange {
+		flex: 0 0 88rpx !important;
+		/* 固定宽度，不参与平分 */
+		height: 88rpx !important;
+		background: linear-gradient(to right, #FF8C00, #FF6B00) !important;
+		/* 明显的橙色渐变 */
+		padding: 0 !important;
+		border-radius: 50rpx !important;
+		/* 稍微方一点的圆角，更显商务 */
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		box-shadow: 0 4rpx 12rpx rgba(255, 106, 0, 0.3);
 	}
+
 
 	.btn {
 		flex: 1;
 		height: 88rpx;
 		line-height: 88rpx;
 		border-radius: 44rpx;
-		font-size: 30rpx;
+		font-size: 28rpx;
 		font-weight: 600;
 		border: none;
 		display: flex;
 		align-items: center;
 		justify-content: center;
+		white-space: nowrap;
 
 		&::after {
 			border: none;

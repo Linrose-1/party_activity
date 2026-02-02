@@ -30,7 +30,7 @@ const _sfc_main = {
       }, content.value ? {} : {}, {
         c: common_vendor.p({
           path: "pages/home/home",
-          label: "首页专属推广码"
+          label: "首页邀约码"
         })
       });
     };

@@ -2,15 +2,16 @@
 	<view class="trace-page">
 		<view class="list-container">
 			<view class="trace-item" v-for="item in list" :key="item.id" @click="goCard(item.memberUser)">
-				<image :src="item.memberUser.avatar" class="u-avatar" mode="aspectFill"></image>
+				<image :src="(item.memberUser && item.memberUser.avatar) ? item.memberUser.avatar : defaultAvatar"
+					class="u-avatar" mode="aspectFill"></image>
 				<view class="u-info">
 					<view class="u-top">
-						<text class="u-name">{{ item.memberUser.nickname }}</text>
+						<text class="u-name">{{ item.memberUser ? (item.memberUser.nickname || '商友') : '未知用户' }}</text>
 						<text class="u-time">{{ formatTime(item.createTime) }}</text>
 					</view>
-					<view class="u-desc text-ellipsis">
-						已查看 {{ item.viewCount }} 次
-					</view>
+					<text v-if="item.viewCount !== null && item.viewCount !== undefined">
+						· 已查看 {{ item.viewCount }} 次
+					</text>
 				</view>
 				<uni-icons type="right" size="16" color="#ccc"></uni-icons>
 			</view>
@@ -34,6 +35,8 @@
 	const list = ref([]);
 	const pageNo = ref(1);
 	const loadingStatus = ref('more');
+
+	const defaultAvatar = 'https://img.gofor.club/mmexport1759211962539.jpg';
 
 	onLoad((options) => {
 		postId.value = options.id;

@@ -464,13 +464,6 @@ const _sfc_main = {
       }
     };
     const navigateToBusinessCard = (user) => {
-      if (!user || !user.id) {
-        common_vendor.index.showToast({
-          title: "无法查看该用户主页",
-          icon: "none"
-        });
-        return;
-      }
       const defaultAvatar = "/static/images/default-avatar.png";
       const name = user.nickname || user.realName || "匿名用户";
       const avatarUrl = user.avatar || defaultAvatar;

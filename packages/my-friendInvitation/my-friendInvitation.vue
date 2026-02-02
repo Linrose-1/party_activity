@@ -43,7 +43,7 @@
 						<view class="inviter-info">
 							<view class="inviter-name">{{ platformInfo.name }} <text class="tag-platform">平台</text>
 							</view>
-							<view class="inviter-desc">点击查看平台介绍</view>
+							<view class="inviter-desc">点击查看平台介绍与首页邀约码</view>
 						</view>
 						<uni-icons type="right" size="16" color="#ccc"></uni-icons>
 					</view>
@@ -879,13 +879,13 @@
 	 */
 	const navigateToBusinessCard = (user) => {
 		// 1. 安全检查，确保 user 对象和 id 存在
-		if (!user || !user.id) {
-			uni.showToast({
-				title: '无法查看该用户主页',
-				icon: 'none'
-			});
-			return;
-		}
+		// if (!user || !user.id) {
+		// 	uni.showToast({
+		// 		title: '无法查看该用户主页',
+		// 		icon: 'none'
+		// 	});
+		// 	return;
+		// }
 
 		// 2. 准备传递的参数，并提供默认值
 		const defaultAvatar = '/static/images/default-avatar.png'; // 确保这个默认头像图片存在

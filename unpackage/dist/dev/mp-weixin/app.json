@@ -74,7 +74,8 @@
         "enterprise-auth/enterprise-auth",
         "enterprise-card/enterprise-card",
         "relationship-path/relationship-path",
-        "user-view-trace/user-view-trace"
+        "user-view-trace/user-view-trace",
+        "my-friendList/my-friendList"
       ]
     }
   ],

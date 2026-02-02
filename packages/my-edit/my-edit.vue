@@ -57,7 +57,7 @@
 							<uni-easyinput v-model="form.contactEmail" placeholder="请输入邮箱" />
 						</uni-forms-item>
 
-						<uni-forms-item label="微信二维码" name="wechatQrCodeUrl" label-position="top">
+						<uni-forms-item label="微信二维码(请到微信头像处获取微信二维码图)" name="wechatQrCodeUrl" label-position="top">
 							<view class="qr-uploader-centered" @click="chooseWechatQr">
 								<view class="qr-box">
 									<!-- 有图片时显示大图 -->

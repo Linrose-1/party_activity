@@ -74,6 +74,7 @@ if (!Math) {
   "./packages/enterprise-card/enterprise-card.js";
   "./packages/relationship-path/relationship-path.js";
   "./packages/user-view-trace/user-view-trace.js";
+  "./packages/my-friendList/my-friendList.js";
 }
 const _sfc_main = {
   data() {

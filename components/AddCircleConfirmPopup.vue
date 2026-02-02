@@ -11,9 +11,10 @@
 				<view class="desc-item">
 					<text>将您加入到TA的圈友网络中</text>
 				</view>
-				<!-- <view class="desc-item sub-text">
-					<text>（这将建立双向的圈友关系）</text>
-				</view> -->
+				<view class="fee-notice">
+					<uni-icons type="info-filled" size="14" color="#FF7009"></uni-icons>
+					<text class="notice-text">注：加入TA圈需扣除 1 智米。若对方拒绝，智米将原路退回。</text>
+				</view>
 			</view>
 
 			<view class="card-actions">
@@ -140,6 +141,30 @@
 		color: #666;
 		margin-bottom: 8rpx;
 		text-align: center;
+	}
+
+	/* 扣费提示框样式 */
+	.fee-notice {
+		margin-top: 30rpx;
+		background-color: #FFF9F5; // 极浅的橙色背景
+		border-radius: 12rpx;
+		padding: 16rpx 20rpx;
+		display: flex;
+		align-items: flex-start; // 顶部对齐
+		gap: 10rpx;
+
+		.notice-text {
+			flex: 1;
+			font-size: 24rpx;
+			color: #FF7009; // 使用主题色
+			line-height: 1.4;
+			text-align: left;
+		}
+	}
+
+	/* 适当微调 card-content 底部边距 */
+	.card-content {
+		margin-bottom: 40rpx;
 	}
 
 	.sub-text {

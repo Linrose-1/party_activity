@@ -143,4 +143,5 @@ exports.checkLoginGuard = checkLoginGuard;
 exports.getCachedUserInfo = getCachedUserInfo;
 exports.getInviteCode = getInviteCode;
 exports.globalSilentLogin = globalSilentLogin;
+exports.isUserFullyLoggedIn = isUserFullyLoggedIn;
 //# sourceMappingURL=../../.sourcemap/mp-weixin/utils/user.js.map

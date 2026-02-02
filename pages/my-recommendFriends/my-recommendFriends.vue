@@ -190,13 +190,13 @@
 	 */
 	const navigateToBusinessCard = (user) => {
 		// 1. 安全检查，确保 user 对象和 id 存在
-		if (!user || !user.id) {
-			uni.showToast({
-				title: '无法查看该用户主页',
-				icon: 'none'
-			});
-			return;
-		}
+		// if (!user || !user.id) {
+		// 	uni.showToast({
+		// 		title: '无法查看该用户主页',
+		// 		icon: 'none'
+		// 	});
+		// 	return;
+		// }
 
 		// 2. 准备传递的参数，并提供默认值
 		const defaultAvatar = '/static/images/default-avatar.png'; // 确保这个默认头像图片存在

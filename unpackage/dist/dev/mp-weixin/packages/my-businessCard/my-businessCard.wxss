@@ -106,7 +106,7 @@
 }
 .action-group.data-v-34d71473 {
   display: flex;
-  gap: 20rpx;
+  gap: 16rpx;
   align-items: center;
   width: 100%;
 }
@@ -119,27 +119,37 @@
 }
 .action-group.data-v-34d71473 {
   display: flex;
-  gap: 15rpx;
+  gap: 20rpx;
   /* 稍微缩小间距 */
   align-items: center;
   width: 100%;
 }
-.btn.data-v-34d71473 {
-  /* 确保文字在小屏幕下不会溢出 */
-  font-size: 26rpx;
-  white-space: nowrap;
+.btn-share-orange.data-v-34d71473 {
+  flex: 0 0 88rpx !important;
+  /* 固定宽度，不参与平分 */
+  height: 88rpx !important;
+  background: linear-gradient(to right, #FF8C00, #FF6B00) !important;
+  /* 明显的橙色渐变 */
+  padding: 0 !important;
+  border-radius: 50rpx !important;
+  /* 稍微方一点的圆角，更显商务 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4rpx 12rpx rgba(255, 106, 0, 0.3);
 }
 .btn.data-v-34d71473 {
   flex: 1;
   height: 88rpx;
   line-height: 88rpx;
   border-radius: 44rpx;
-  font-size: 30rpx;
+  font-size: 28rpx;
   font-weight: 600;
   border: none;
   display: flex;
   align-items: center;
   justify-content: center;
+  white-space: nowrap;
 }
 .btn.data-v-34d71473::after {
   border: none;
