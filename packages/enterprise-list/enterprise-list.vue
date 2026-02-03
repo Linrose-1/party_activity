@@ -19,14 +19,14 @@
 			<template v-if="list.length > 0">
 				<view class="enterprise-card" v-for="item in list" :key="item.id">
 
-					<!-- 右上角编辑操作 -->
+					<!-- 右上角悬浮编辑操作 -->
 					<view class="edit-corner" @click.stop="goToEdit(item.id)">
 						<uni-icons type="compose" size="14" color="#999"></uni-icons>
 						<text>编辑</text>
 					</view>
 
 					<view class="card-body" @click="goDetail(item.id)">
-						<!-- 左侧 Logo (点击可跳转) -->
+						<!-- 左侧 Logo 区域 -->
 						<view class="logo-box">
 							<image v-if="item.logoUrl" :src="item.logoUrl" mode="aspectFill" class="logo-img" />
 							<view v-else class="logo-placeholder">
@@ -34,13 +34,13 @@
 							</view>
 						</view>
 
-						<!-- 中间主要信息 -->
+						<!-- 中间核心信息区域 -->
 						<view class="info-area">
 							<view class="name-row">
 								<text class="ent-name">{{ truncateName(item.enterpriseName) }}</text>
 							</view>
 
-							<!-- 状态标签组 -->
+							<!-- 动态状态标签 -->
 							<view class="tag-row">
 								<view class="status-tag" :class="'status-' + item.status">
 									{{ getStatusConfig(item.status).label }}
@@ -48,19 +48,19 @@
 							</view>
 
 							<view class="detail-info">
-								<text>ID：{{ item.enterpriseId || '系统分配中...' }}</text>
+								<!-- <text>ID：{{ item.enterpriseId || '系统分配中...' }}</text> -->
 								<text>创建：{{ formatDate(item.createTime) }}</text>
 							</view>
 						</view>
 					</view>
 
-					<!-- A. 草稿状态提示 -->
+					<!-- 草稿提示：引导用户发布 -->
 					<view class="draft-notice" v-if="item.status === 0" @click="goToEdit(item.id)">
 						<uni-icons type="info-filled" size="14" color="#FF7919"></uni-icons>
 						<text>资料未发布，点击“编辑”完善信息后即可展示</text>
 					</view>
 
-					<!-- B. 认证失败状态提示-->
+					<!-- 认证失败原因提示：展示 statusDesc 并引导重新认证 -->
 					<view class="fail-notice" v-if="item.status === 4" @click="handleGoAuth(item)">
 						<view class="fail-header">
 							<uni-icons type="clear" size="14" color="#F44336"></uni-icons>
@@ -73,7 +73,7 @@
 						</view>
 					</view>
 
-					<!-- 底部操作按钮行 -->
+					<!-- 底部快捷操作行 -->
 					<view class="card-footer">
 						<view class="action-btn" @click="goDetail(item.id)">
 							<uni-icons type="info" size="16" color="#666"></uni-icons>
@@ -94,11 +94,11 @@
 					</view>
 				</view>
 
-				<!-- 加载反馈 -->
+				<!-- 分页加载组件 -->
 				<uni-load-more :status="loadStatus" color="#999" />
 			</template>
 
-			<!-- 3. 空状态展示 -->
+			<!-- 3. 列表空状态展示 -->
 			<view class="empty-state" v-else-if="loadStatus !== 'loading'">
 				<view class="empty-icon-wrap">
 					<text class="emoji">🏢</text>
@@ -113,87 +113,97 @@
 
 <script setup>
 	import {
-		ref,
-		onMounted
+		ref
 	} from 'vue';
 	import {
 		onPullDownRefresh,
-		onReachBottom
+		onReachBottom,
+		onShow
 	} from '@dcloudio/uni-app';
 	import request from '@/utils/request.js';
 
-	// --- 数据定义 ---
-	const list = ref([]); // 企业列表数据
-	const total = ref(0); // 总条数
-	const pageNo = ref(1); // 当前页码
-	const pageSize = 10; // 每页数量
-	const loadStatus = ref('more'); // 分页状态: more | loading | noMore
+	// --- 状态数据定义 ---
+	const list = ref([]); // 存储企业列表
+	const total = ref(0); // 存储总条数
+	const pageNo = ref(1); // 分页页码
+	const pageSize = 10; // 单页条数
+	const loadStatus = ref('more'); // 分页状态：more(可加载) | loading | noMore
 
 	/**
-	 * 生命周期：页面挂载
+	 * [生命周期] 每次进入页面时执行
+	 * 作用：实现无感刷新，确保数据实时性
 	 */
-	onMounted(() => {
-		fetchEnterpriseList(true);
+	onShow(() => {
+		// 执行无感重置刷新 (第二个参数传 false 表示不展示全屏 Loading)
+		fetchEnterpriseList(true, false);
 	});
 
 	/**
-	 * 下拉刷新触发
+	 * [生命周期] 下拉刷新
+	 * 作用：手动下拉时触发完整重载
 	 */
 	onPullDownRefresh(() => {
-		fetchEnterpriseList(true);
+		fetchEnterpriseList(true, true);
 	});
 
 	/**
-	 * 上拉触底触发（分页加载）
+	 * [生命周期] 上拉触底
+	 * 作用：加载下一页数据
 	 */
 	onReachBottom(() => {
 		if (loadStatus.value === 'noMore' || loadStatus.value === 'loading') return;
 		pageNo.value++;
-		fetchEnterpriseList(false);
+		fetchEnterpriseList(false, false);
 	});
 
 	/**
-	 * 核心方法：获取企业分页列表
-	 * @param {Boolean} isRefresh - 是否为重置刷新
+	 * [方法] 获取企业分页列表接口
+	 * @param {Boolean} isRefresh - 是否清空旧数据从第一页开始请求
+	 * @param {Boolean} showFullLoading - 是否需要展示全屏/顶部 Loading
 	 */
-	const fetchEnterpriseList = async (isRefresh = false) => {
+	const fetchEnterpriseList = async (isRefresh = false, showFullLoading = true) => {
 		if (isRefresh) {
 			pageNo.value = 1;
-			loadStatus.value = 'loading';
+			// 仅在明确需要展示加载态时修改 loadStatus
+			if (showFullLoading) loadStatus.value = 'loading';
 		}
 
-		const {
-			data,
-			error
-		} = await request('/app-api/member/user-enterprise-info/page', {
-			method: 'GET',
-			data: {
-				pageNo: pageNo.value,
-				pageSize: pageSize,
-				userId: uni.getStorageSync('userId')
-			}
-		});
-
-		if (isRefresh) uni.stopPullDownRefresh();
-
-		if (error) {
-			loadStatus.value = 'more';
-			uni.showToast({
-				title: error,
-				icon: 'none'
+		try {
+			const {
+				data,
+				error
+			} = await request('/app-api/member/user-enterprise-info/page', {
+				method: 'GET',
+				data: {
+					pageNo: pageNo.value,
+					pageSize: pageSize,
+					userId: uni.getStorageSync('userId') // 绑定当前登录人
+				}
 			});
-			return;
-		}
 
-		const newList = data.list || [];
-		list.value = isRefresh ? newList : [...list.value, ...newList];
-		total.value = data.total;
-		loadStatus.value = list.value.length >= data.total ? 'noMore' : 'more';
+			if (isRefresh) uni.stopPullDownRefresh(); // 停止下拉动画
+
+			if (error) {
+				loadStatus.value = 'more';
+				return;
+			}
+
+			const newList = data.list || [];
+			// 如果是刷新模式，直接替换数组，否则追加到末尾
+			list.value = isRefresh ? newList : [...list.value, ...newList];
+			total.value = data.total;
+
+			// 更新分页状态：对比当前已加载数量和总数
+			loadStatus.value = list.value.length >= data.total ? 'noMore' : 'more';
+		} catch (e) {
+			loadStatus.value = 'more';
+			console.error('获取列表异常:', e);
+		}
 	};
 
 	/**
-	 * 状态映射转换
-	 * @param {Number} status - 后端返回的状态码
+	 * [方法] 根据状态码转换显示配置
+	 * @param {Number} status 
 	 */
 	const getStatusConfig = (status) => {
 		const configs = {
@@ -219,14 +229,14 @@
 			}
 		};
 		return configs[status] || {
-			label: '未知状态',
+			label: '未知',
 			class: ''
 		};
 	};
 
 	/**
-	 * 获取行业默认图标
-	 * @param {String} type - 企业类型字符串
+	 * [方法] 获取缺省图标
+	 * @param {String} type 
 	 */
 	const getDefaultIcon = (type) => {
 		if (type?.includes('餐饮')) return '🏭';
@@ -235,8 +245,7 @@
 	};
 
 	/**
-	 * 格式化时间显示
-	 * @param {Number} ts - 时间戳
+	 * [方法] 格式化创建日期
 	 */
 	const formatDate = (ts) => {
 		if (!ts) return '-';
@@ -245,17 +254,16 @@
 	};
 
 	/**
-	 * 企业名称截断处理
+	 * [方法] 处理过长的企业名称
 	 */
 	const truncateName = (name) => {
 		if (!name) return '';
 		return name.length > 12 ? name.substring(0, 12) + '...' : name;
 	};
 
-	// --- 路由跳转方法 ---
-
 	/**
-	 * 跳转至创建/编辑页
+	 * [跳转] 跳转到编辑/创建页
+	 * @param {String} id - 为空代表创建，不为空代表编辑
 	 */
 	const goToEdit = (id = '') => {
 		uni.navigateTo({
@@ -264,7 +272,7 @@
 	};
 
 	/**
-	 * 跳转至企业详情页
+	 * [跳转] 跳转至详情预览
 	 */
 	const goDetail = (id) => {
 		uni.navigateTo({
@@ -273,7 +281,7 @@
 	};
 
 	/**
-	 * 跳转至名片展示页
+	 * [跳转] 跳转至名片展示
 	 */
 	const goCard = (id) => {
 		uni.navigateTo({
@@ -282,78 +290,66 @@
 	};
 
 	/**
-	 * [方法] 处理认证跳转逻辑
-	 * 只有已发布的记录才能发起认证申请
-	 * @param {Object} item - 当前点击的企业行数据
+	 * [方法] 处理认证按钮点击
+	 * 逻辑：仅发布后的企业可认证，状态4可重新认证
 	 */
 	const handleGoAuth = (item) => {
-		// 1. 已认证状态 (3)
 		if (item.status === 3) {
 			return uni.showToast({
 				title: '该企业已通过认证',
 				icon: 'success'
 			});
 		}
-
-		// 2. 审核中状态 (2)
 		if (item.status === 2) {
 			return uni.showToast({
 				title: '认证审核中，请耐心等待',
 				icon: 'none'
 			});
 		}
-
-		// 3. 草稿状态 (0)
 		if (item.status === 0) {
 			return uni.showModal({
-				title: '无法认证',
-				content: '请先“编辑”并“保存发布”企业信息后再申请认证。',
-				confirmText: '去完善',
+				title: '提示',
+				content: '当前为草稿，请先完成信息发布',
+				confirmText: '去编辑',
 				success: (res) => {
 					if (res.confirm) goToEdit(item.id);
 				}
 			});
 		}
-
-		// 4. 允许状态 1(已发布) 和 状态 4(认证失败) 跳转认证页
-		if (item.status === 1 || item.status === 4) {
-			uni.navigateTo({
-				url: `/packages/enterprise-auth/enterprise-auth?enterpriseId=${item.id}&enterpriseName=${encodeURIComponent(item.enterpriseName)}`
-			});
-		}
+		// 跳转认证
+		uni.navigateTo({
+			url: `/packages/enterprise-auth/enterprise-auth?enterpriseId=${item.id}&enterpriseName=${encodeURIComponent(item.enterpriseName)}`
+		});
 	};
 
 	/**
-	 * 删除企业（带二次确认逻辑）
-	 * @param {Object} item - 企业对象数据
+	 * [方法] 删除企业数据
+	 * 逻辑：二次确认 -> 调用拼接ID的DELETE请求 -> 成功刷新
 	 */
 	const handleDelete = (item) => {
 		uni.showModal({
 			title: '确定要删除吗？',
-			content: `删除后"${item.enterpriseName}"的主页及名片将立即失效，且数据不可找回。`,
+			content: `删除后"${item.enterpriseName}"的主页及名片将立即失效。`,
 			confirmText: '确认删除',
 			confirmColor: '#FF4D4F',
-			cancelText: '我再想想',
 			success: async (res) => {
 				if (res.confirm) {
 					uni.showLoading({
-						title: '正在处理...',
+						title: '处理中...',
 						mask: true
 					});
-					// 对接后端删除接口
 					const {
 						error
 					} = await request(`/app-api/member/user-enterprise-info/delete?id=${item.id}`, {
 						method: 'DELETE'
 					});
 					uni.hideLoading();
-
 					if (!error) {
 						uni.showToast({
 							title: '删除成功',
 							icon: 'success'
 						});
-						fetchEnterpriseList(true); // 刷新列表数据
+						fetchEnterpriseList(true, false); // 刷新列表
 					} else {
 						uni.showToast({
 							title: error,
@@ -375,7 +371,7 @@
 		padding: 30rpx;
 	}
 
-	/* 顶部区域 */
+	/* 顶部标题与创建按钮 */
 	.header-section {
 		margin-bottom: 40rpx;
 
@@ -416,7 +412,7 @@
 		padding-left: 10rpx;
 	}
 
-	/* 企业卡片 */
+	/* 企业卡片样式 */
 	.enterprise-card {
 		background-color: #fff;
 		border-radius: 30rpx;
@@ -425,7 +421,6 @@
 		position: relative;
 		box-shadow: 0 4rpx 24rpx rgba(0, 0, 0, 0.03);
 
-		/* 右上角编辑 */
 		.edit-corner {
 			position: absolute;
 			top: 30rpx;
@@ -496,7 +491,7 @@
 		}
 	}
 
-	/* 状态标签 */
+	/* 状态标签样式 */
 	.status-tag {
 		display: inline-block;
 		font-size: 20rpx;
@@ -544,7 +539,7 @@
 		}
 	}
 
-	/* 草稿提示 */
+	/* 草稿提示栏 */
 	.draft-notice {
 		background-color: #FFF9F5;
 		padding: 20rpx;
@@ -562,10 +557,9 @@
 		}
 	}
 
-	/* 认证失败提示栏样式 */
+	/* 失败原因提示栏 */
 	.fail-notice {
 		background-color: #FFF2F2;
-		/* 浅红色背景 */
 		padding: 20rpx 24rpx;
 		border-radius: 12rpx;
 		margin-bottom: 30rpx;
@@ -606,14 +600,13 @@
 				margin-right: 4rpx;
 			}
 		}
+
+		&:active {
+			background-color: #FFE5E5;
+		}
 	}
 
-	/* 按钮点击态增强 */
-	.fail-notice:active {
-		background-color: #FFE5E5;
-	}
-
-	/* 底部操作 */
+	/* 底部操作行 */
 	.card-footer {
 		border-top: 2rpx solid #F8F8F8;
 		padding-top: 24rpx;
@@ -647,7 +640,7 @@
 		}
 	}
 
-	/* 空状态 */
+	/* 空状态样式 */
 	.empty-state {
 		display: flex;
 		flex-direction: column;
@@ -688,7 +681,6 @@
 		.now-create-btn {
 			margin-top: 60rpx;
 			background-color: #333;
-			/* 黑色按钮更显高级感 */
 			color: #fff;
 			width: 340rpx;
 			height: 88rpx;

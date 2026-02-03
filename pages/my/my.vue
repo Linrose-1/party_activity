@@ -74,29 +74,13 @@
 			</template>
 		</view>
 
-		<!-- ==================== 名片分享模块 ==================== -->
-		<!-- <view class="card-section">
-			<view class="section-header">
-				<text class="section-title-main">名片分享</text>
-				<text class="view-all" @tap="onViewDetail">分享 ›</text>
-			</view>
-			<view class="ai-card">
-				<view class="qrcode-section" @tap="onViewDetail">
-					<text class="qrcode-title">微信二维码 - 扫码添加好友</text>
-					<view class="qrcode-container">
-						<image class="qrcode-img"
-							:src="userInfo.wechatQrCodeUrl || '../../static/images/default-qrcode.png'" />
-					</view>
-				</view>
-				<view class="contact-info">
-					<view class="contact-item" @tap="copyToClipboard(userInfo.shardCode)">
-						<text class="iconfont">我的邀请码：</text>
-						<text style="font-weight: bold;">{{ userInfo.shardCode || '暂无' }}</text>
-						<text class="copy-btn">复制</text>
-					</view>
-				</view>
-			</view>
-		</view> -->
+		<!-- 会员到期提醒条 -->
+		<!-- 逻辑：登录状态 且 isExpirySoon 为真时显示 -->
+		<view class="notice-bar-wrapper" v-if="isLogin && userInfo.isExpirySoon">
+			<uni-notice-bar show-icon scrollable :speed="50" color="#FF770F" background-color="#FFF9F5"
+				:text="`温馨提示：您的会员将于 ${formatDate(userInfo.expirationTime)} 到期，距离到期还有 ${userInfo.daysUntilExpiry} 天，可以到用户中心进行会员续期充值或者升级会员`"
+				@click="goToMemberRecharge" />
+		</view>
 
 		<!-- ==================== 社交资产模块 ==================== -->
 		<view class="core-features-section">
@@ -127,7 +111,8 @@
 			</view>
 			<view class="features-list">
 				<view class="feature-item" v-for="item in featureList" :key="item.name"
-					:class="{ 'full-width': item.fullWidth }" @tap="navigateToFeature(item)">
+					:class="{ 'full-width': item.fullWidth, 'highlight-border': item.highlight }"
+					@tap="navigateToFeature(item)">
 					<!-- 增加一个 inner 容器 -->
 					<view class="feature-item-inner">
 						<img :src="item.icon" alt="" class="feature-icon" />
@@ -467,7 +452,8 @@
 			name: '我的企业',
 			desc: '查看您创建发布的企业',
 			icon: '../../static/icon/认证企业.png',
-			path: '/packages/enterprise-list/enterprise-list'
+			path: '/packages/enterprise-list/enterprise-list',
+			highlight: true
 		},
 		{
 			name: '时空共享',
@@ -493,7 +479,8 @@
 			name: '资源匹配',
 			desc: '智能匹配供需资源对应的商友',
 			icon: '../../static/icon/资源匹配.png',
-			path: null
+			path: null,
+			highlight: true
 		}, // 新增
 		{
 			name: '数字营销',
@@ -506,7 +493,8 @@
 			name: '系统共建',
 			desc: '提供您对本平台的建议',
 			icon: '../../static/icon/系统建议.png',
-			path: '/packages/my-systemConstruction/my-systemConstruction'
+			path: '/packages/my-systemConstruction/my-systemConstruction',
+			highlight: true
 		},
 		{
 			name: '用户协议',
@@ -518,7 +506,7 @@
 			name: '平台客服',
 			desc: '联系我们，获取帮助',
 			icon: '../../static/icon/customer-service.png', // 假设您有一个客服图标
-			path: '/packages/ContactService/ContactService', 
+			path: '/packages/ContactService/ContactService',
 			// key: 'customerService', // 定义一个唯一的 key
 			// phone: '18024545855', // 【请在这里替换成您的真实客服电话】
 			fullWidth: true
@@ -777,6 +765,21 @@
 		}
 		wx.hideLoading();
 	};
+
+
+	// --- 时间格式化函数---
+	const formatDate = (timestamp) => {
+		if (!timestamp) return '';
+		const date = new Date(timestamp);
+		return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+	};
+
+	// --- 跳转会员中心方法 ---
+	const goToMemberRecharge = () => {
+		uni.navigateTo({
+			url: '/packages/my-member/my-member' // 对应“用户中心”路径
+		});
+	};
 </script>
 
 <style scoped>
@@ -1000,6 +1003,31 @@
 		margin-left: auto;
 		font-size: 40rpx;
 		color: rgba(255, 255, 255, 0.7);
+	}
+
+	/* 1. 创享中心特定项高亮边框 - 移除嵌套 */
+	.feature-item.highlight-border {
+		border: 2rpx solid #FF770F !important;
+		box-shadow: 0 4rpx 10rpx rgba(255, 119, 15, 0.1) !important;
+		background-color: #FFFBF8 !important;
+	}
+
+	/* 2. 提醒条外层容器 */
+	.notice-bar-wrapper {
+		margin-top: 20rpx;
+		padding: 0 10rpx;
+	}
+
+	/* 3. 修改组件内部样式 - 使用平铺写法 */
+	.notice-bar-wrapper ::v-deep .uni-noticebar {
+		border-radius: 12rpx !important;
+		margin-bottom: 0 !important;
+		border: 1rpx solid rgba(255, 119, 15, 0.2) !important;
+	}
+
+	/* 4. 适配：调整社交资产模块的间距，防止页面太挤 */
+	.core-features-section {
+		margin-top: 20rpx;
 	}
 
 	/* --- 2. 名片分享模块 (card-section) --- */

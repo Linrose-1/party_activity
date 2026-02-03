@@ -213,7 +213,7 @@
 			}
 		}
 		return membershipLevels.value[0] || {
-			name: '未知'
+			name: '游客'
 		};
 	});
 

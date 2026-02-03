@@ -4,11 +4,13 @@ const utils_request = require("../../utils/request.js");
 const utils_user = require("../../utils/user.js");
 if (!Array) {
   const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
-  _easycom_uni_icons2();
+  const _easycom_uni_notice_bar2 = common_vendor.resolveComponent("uni-notice-bar");
+  (_easycom_uni_icons2 + _easycom_uni_notice_bar2)();
 }
 const _easycom_uni_icons = () => "../../uni_modules/uni-icons/components/uni-icons/uni-icons.js";
+const _easycom_uni_notice_bar = () => "../../uni_modules/uni-notice-bar/components/uni-notice-bar/uni-notice-bar.js";
 if (!Math) {
-  _easycom_uni_icons();
+  (_easycom_uni_icons + _easycom_uni_notice_bar)();
 }
 const _sfc_main = {
   __name: "my",
@@ -46,14 +48,14 @@ const _sfc_main = {
         });
         if (!error && data) {
           userInfo.value = data;
-          common_vendor.index.__f__("log", "at pages/my/my.vue:205", "getUserInfo userInfo:", userInfo.value);
+          common_vendor.index.__f__("log", "at pages/my/my.vue:190", "getUserInfo userInfo:", userInfo.value);
         } else {
-          common_vendor.index.__f__("log", "at pages/my/my.vue:207", "获取用户信息失败:", error);
+          common_vendor.index.__f__("log", "at pages/my/my.vue:192", "获取用户信息失败:", error);
           isLogin.value = false;
           userInfo.value = {};
         }
       } catch (err) {
-        common_vendor.index.__f__("log", "at pages/my/my.vue:213", "请求异常:", err);
+        common_vendor.index.__f__("log", "at pages/my/my.vue:198", "请求异常:", err);
         isLogin.value = false;
         userInfo.value = {};
       }
@@ -261,7 +263,8 @@ const _sfc_main = {
         name: "我的企业",
         desc: "查看您创建发布的企业",
         icon: "../../static/icon/认证企业.png",
-        path: "/packages/enterprise-list/enterprise-list"
+        path: "/packages/enterprise-list/enterprise-list",
+        highlight: true
       },
       {
         name: "时空共享",
@@ -288,7 +291,8 @@ const _sfc_main = {
         name: "资源匹配",
         desc: "智能匹配供需资源对应的商友",
         icon: "../../static/icon/资源匹配.png",
-        path: null
+        path: null,
+        highlight: true
       },
       // 新增
       {
@@ -302,7 +306,8 @@ const _sfc_main = {
         name: "系统共建",
         desc: "提供您对本平台的建议",
         icon: "../../static/icon/系统建议.png",
-        path: "/packages/my-systemConstruction/my-systemConstruction"
+        path: "/packages/my-systemConstruction/my-systemConstruction",
+        highlight: true
       },
       {
         name: "用户协议",
@@ -344,10 +349,10 @@ const _sfc_main = {
         common_vendor.index.makePhoneCall({
           phoneNumber: item.phone,
           success: () => {
-            common_vendor.index.__f__("log", "at pages/my/my.vue:552", "拨打电话成功");
+            common_vendor.index.__f__("log", "at pages/my/my.vue:540", "拨打电话成功");
           },
           fail: (err) => {
-            common_vendor.index.__f__("log", "at pages/my/my.vue:555", "拨打电话失败:", err);
+            common_vendor.index.__f__("log", "at pages/my/my.vue:543", "拨打电话失败:", err);
           }
         });
         return;
@@ -388,6 +393,18 @@ const _sfc_main = {
         isLogin.value = true;
         getUserInfo();
       }
+    };
+    const formatDate = (timestamp) => {
+      if (!timestamp)
+        return "";
+      const date = new Date(timestamp);
+      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+    };
+    const goToMemberRecharge = () => {
+      common_vendor.index.navigateTo({
+        url: "/packages/my-member/my-member"
+        // 对应“用户中心”路径
+      });
     };
     return (_ctx, _cache) => {
       return common_vendor.e({
@@ -436,7 +453,19 @@ const _sfc_main = {
         }),
         v: common_vendor.o(handleLoginClick)
       }, {
-        w: common_vendor.f(coreFeatures.value, (item, k0, i0) => {
+        w: isLogin.value && userInfo.value.isExpirySoon
+      }, isLogin.value && userInfo.value.isExpirySoon ? {
+        x: common_vendor.o(goToMemberRecharge),
+        y: common_vendor.p({
+          ["show-icon"]: true,
+          scrollable: true,
+          speed: 50,
+          color: "#FF770F",
+          ["background-color"]: "#FFF9F5",
+          text: `温馨提示：您的会员将于 ${formatDate(userInfo.value.expirationTime)} 到期，距离到期还有 ${userInfo.value.daysUntilExpiry} 天，可以到用户中心进行会员续期充值或者升级会员`
+        })
+      } : {}, {
+        z: common_vendor.f(coreFeatures.value, (item, k0, i0) => {
           return {
             a: common_vendor.t(item.name),
             b: item.icon,
@@ -445,14 +474,15 @@ const _sfc_main = {
             e: common_vendor.o(($event) => navigateToCoreFeature(item), item.name)
           };
         }),
-        x: common_vendor.f(featureList.value, (item, k0, i0) => {
+        A: common_vendor.f(featureList.value, (item, k0, i0) => {
           return {
             a: item.icon,
             b: common_vendor.t(item.name),
             c: common_vendor.t(item.desc),
             d: item.name,
             e: item.fullWidth ? 1 : "",
-            f: common_vendor.o(($event) => navigateToFeature(item), item.name)
+            f: item.highlight ? 1 : "",
+            g: common_vendor.o(($event) => navigateToFeature(item), item.name)
           };
         })
       });

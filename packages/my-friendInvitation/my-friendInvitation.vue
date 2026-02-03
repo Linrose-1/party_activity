@@ -499,19 +499,19 @@
 	const viewParentCard = () => {
 
 		// 2. 数据校验
-		if (!userInfo.value || !userInfo.value.parentId) {
-			uni.showToast({
-				title: '无法获取上级信息',
-				icon: 'none'
-			});
-			return;
-		}
+		// if (!userInfo.value || !userInfo.value.parentId) {
+		// 	uni.showToast({
+		// 		title: '无法获取上级信息',
+		// 		icon: 'none'
+		// 	});
+		// 	return;
+		// }
 
 		// 3. 如果上级是平台（ID为0或特定值，或者名字是猩聚社），可能不跳转或跳转平台介绍
-		if (userInfo.value.parentName === '猩聚社') {
-			goToPlatformIntro();
-			return;
-		}
+		// if (userInfo.value.parentName === '猩聚社') {
+		// 	goToPlatformIntro();
+		// 	return;
+		// }
 
 		// 4. 构建参数
 		const targetId = userInfo.value.parentId;

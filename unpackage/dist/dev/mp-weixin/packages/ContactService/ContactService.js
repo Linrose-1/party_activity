@@ -1,5 +1,6 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
+const utils_request = require("../../utils/request.js");
 if (!Array) {
   const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
   _easycom_uni_icons2();
@@ -11,26 +12,57 @@ if (!Math) {
 const _sfc_main = {
   __name: "ContactService",
   setup(__props) {
+    const wechatId = common_vendor.ref("加载中...");
+    const phoneNumber = common_vendor.ref("加载中...");
     const qrCodeUrl = common_vendor.ref(
       "https://img.gofor.club/post/20260120/bYIigxFi4rpHd5c68a1fff9f38e5411a58c9b8cec504_1768890701193.png"
     );
-    const wechatId = common_vendor.ref("xiaodaxia2045");
-    const phoneNumber = common_vendor.ref("18024545855");
+    common_vendor.onMounted(() => {
+      fetchStaticConfig();
+    });
+    const fetchStaticConfig = async () => {
+      try {
+        const {
+          data,
+          error
+        } = await utils_request.request("/app-api/member/config/getStaticWord", {
+          method: "GET"
+        });
+        if (!error && data) {
+          wechatId.value = data.csWechatId || "XJS3026";
+          phoneNumber.value = data.csMobile || "18024545855";
+          if (data.csQrCode) {
+            qrCodeUrl.value = data.csQrCode;
+          }
+          common_vendor.index.__f__("log", "at packages/ContactService/ContactService.vue:91", "✅ 客服配置加载成功");
+        } else {
+          common_vendor.index.__f__("error", "at packages/ContactService/ContactService.vue:93", "获取配置失败:", error);
+        }
+      } catch (e) {
+        common_vendor.index.__f__("error", "at packages/ContactService/ContactService.vue:96", "获取配置异常:", e);
+      }
+    };
     const previewQrCode = () => {
+      if (!qrCodeUrl.value)
+        return;
       common_vendor.index.previewImage({
         urls: [qrCodeUrl.value],
         current: qrCodeUrl.value
       });
     };
     const makePhoneCall = () => {
+      if (phoneNumber.value === "加载中...")
+        return;
       common_vendor.index.makePhoneCall({
         phoneNumber: phoneNumber.value,
         fail: (err) => {
-          common_vendor.index.__f__("log", "at packages/ContactService/ContactService.vue:85", "拨打电话取消或失败", err);
+          common_vendor.index.__f__("log", "at packages/ContactService/ContactService.vue:119", "拨打电话取消或失败", err);
         }
       });
     };
     const copyWechat = () => {
+      if (wechatId.value === "加载中...")
+        return;
       common_vendor.index.setClipboardData({
         data: wechatId.value,
         success: () => {

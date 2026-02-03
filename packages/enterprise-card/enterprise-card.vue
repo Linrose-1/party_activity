@@ -48,7 +48,7 @@
 			</view>
 
 			<!-- 模块：联系我们 (一行一个列表布局) -->
-			<view class="content-section" v-if="ent.cardShowContact === 1">
+			<view class="content-section">
 				<view class="section-header">
 					<view class="title-l">联系我们</view>
 					<view class="title-line"></view>
@@ -99,7 +99,7 @@
 			</view>
 
 			<!-- 模块：社交媒体 (公众号/视频号) -->
-			<view class="content-section" v-if="ent.cardShowSocial === 1 && (ent.wechatMpName || ent.videoAccount)">
+			<view class="content-section">
 				<view class="section-header">
 					<view class="title-l">社交媒体</view>
 					<view class="title-line"></view>
@@ -133,7 +133,7 @@
 
 			<!-- 模块：门店入口 (线上+线下) -->
 			<view class="content-section"
-				v-if="ent.cardShowOnlineStore === 1 && (onlineStores.length || offlineStores.length)">
+				>
 				<view class="section-header">
 					<view class="title-l">门店入口</view>
 					<view class="title-line"></view>

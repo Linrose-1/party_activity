@@ -552,7 +552,7 @@ const _sfc_main = {
           modelValue: form.officePhone
         }),
         t: common_vendor.p({
-          label: "办公电话",
+          label: "联系电话",
           name: "officePhone"
         }),
         v: common_vendor.o(($event) => form.officialEmail = $event),
@@ -562,7 +562,7 @@ const _sfc_main = {
           modelValue: form.officialEmail
         }),
         x: common_vendor.p({
-          label: "官方邮箱",
+          label: "联系邮箱",
           name: "officialEmail"
         }),
         y: common_vendor.sr("formStep1", "657c9911-0"),

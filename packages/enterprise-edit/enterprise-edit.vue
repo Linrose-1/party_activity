@@ -40,11 +40,11 @@
 						<uni-forms-item label="成立日期" name="establishDate">
 							<uni-datetime-picker type="date" v-model="form.establishDate" class="custom-picker" />
 						</uni-forms-item>
-						<uni-forms-item label="办公电话" name="officePhone">
+						<uni-forms-item label="联系电话" name="officePhone">
 							<uni-easyinput v-model="form.officePhone" placeholder="例如：021-12345678" :inputBorder="false"
 								class="custom-input" />
 						</uni-forms-item>
-						<uni-forms-item label="官方邮箱" name="officialEmail">
+						<uni-forms-item label="联系邮箱" name="officialEmail">
 							<uni-easyinput v-model="form.officialEmail" placeholder="contact@abc.com"
 								:inputBorder="false" class="custom-input" />
 						</uni-forms-item>
@@ -108,7 +108,7 @@
 					</uni-forms>
 
 					<!-- 2. 社交媒体 (微信生态) -->
-					<view class="group-title m-t-30">社交媒体 (至少填写一项)</view>
+					<view class="group-title m-t-30">社交媒体</view>
 					<view class="social-inner-card">
 						<view class="sub-label">微信公众号</view>
 						<uni-easyinput v-model="form.wechatMpName" placeholder="名称：ABC科技" class="m-b-10 custom-input-bg"

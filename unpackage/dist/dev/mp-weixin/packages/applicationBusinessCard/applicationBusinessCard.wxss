@@ -294,6 +294,31 @@
 		/* 转换为 rpx */
 		color: #777;
 }
+
+	/* 1. 资费提示条主容器 */
+.price-policy-hint.data-v-fd2d3e1c {
+		margin: 20rpx 0;
+		background-color: #FFF9F5;
+		padding: 16rpx 24rpx;
+		border-radius: 12rpx;
+		display: flex;
+		flex-direction: row;
+		/* 显式声明布局方向 */
+		align-items: center;
+		gap: 10rpx;
+}
+
+	/* 2. 资费提示条内的文字 - 修复嵌套报错 */
+.price-policy-hint text.data-v-fd2d3e1c {
+		font-size: 24rpx;
+		color: #FF6A00;
+		font-weight: 500;
+}
+
+	/* 3. 强制调整余额区域间距 */
+.user-balance-adjust.data-v-fd2d3e1c {
+		margin-top: 20rpx !important;
+}
 .user-balance.data-v-fd2d3e1c {
 		display: flex;
 		justify-content: center;

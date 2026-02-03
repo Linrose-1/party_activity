@@ -79,7 +79,13 @@
 						</view>
 					</view>
 
-					<view class="user-balance" v-if="currentUserInfo">
+					<view class="price-policy-hint">
+						<uni-icons type="info-filled" size="14" color="#FF6A00"></uni-icons>
+						<text v-if="friendOwnerUserId">提示：您正在通过其他圈主的圈友列表查看用户名片，需支付 2 智米。</text>
+						<text v-else>提示：普通名片查看需支付 1 智米。</text>
+					</view>
+
+					<view class="user-balance user-balance-adjust" v-if="currentUserInfo">
 						<view class="balance-item">
 							<view>我的智米</view>
 							<view class="balance-value" :class="{ 'insufficient-value': currentUserInfo.point < 1 }">
@@ -805,6 +811,31 @@
 		font-size: 28rpx;
 		/* 转换为 rpx */
 		color: #777;
+	}
+
+	/* 1. 资费提示条主容器 */
+	.price-policy-hint {
+		margin: 20rpx 0;
+		background-color: #FFF9F5;
+		padding: 16rpx 24rpx;
+		border-radius: 12rpx;
+		display: flex;
+		flex-direction: row;
+		/* 显式声明布局方向 */
+		align-items: center;
+		gap: 10rpx;
+	}
+
+	/* 2. 资费提示条内的文字 - 修复嵌套报错 */
+	.price-policy-hint text {
+		font-size: 24rpx;
+		color: #FF6A00;
+		font-weight: 500;
+	}
+
+	/* 3. 强制调整余额区域间距 */
+	.user-balance-adjust {
+		margin-top: 20rpx !important;
 	}
 
 	.user-balance {

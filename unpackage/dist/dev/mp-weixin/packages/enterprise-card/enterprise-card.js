@@ -166,89 +166,83 @@ const _sfc_main = {
         }),
         o: common_vendor.t(ent.value.coreValue)
       } : {}, {
-        p: ent.value.cardShowContact === 1
-      }, ent.value.cardShowContact === 1 ? common_vendor.e({
-        q: common_vendor.p({
+        p: common_vendor.p({
           type: "phone-filled",
           size: "20",
           color: ent.value.cardMainColor
         }),
-        r: common_vendor.t(ent.value.customerServicePhone || "暂无"),
-        s: common_vendor.p({
+        q: common_vendor.t(ent.value.customerServicePhone || "暂无"),
+        r: common_vendor.p({
           type: "right",
           size: "14",
           color: "#ccc"
         }),
-        t: common_vendor.o(($event) => makePhoneCall(ent.value.customerServicePhone)),
-        v: common_vendor.p({
+        s: common_vendor.o(($event) => makePhoneCall(ent.value.customerServicePhone)),
+        t: common_vendor.p({
           type: "email-filled",
           size: "20",
           color: ent.value.cardMainColor
         }),
-        w: common_vendor.t(ent.value.officialEmail || "暂无"),
-        x: common_vendor.p({
+        v: common_vendor.t(ent.value.officialEmail || "暂无"),
+        w: common_vendor.p({
           type: "copy",
           size: "16",
           color: "#ccc"
         }),
-        y: common_vendor.o(($event) => copyText(ent.value.officialEmail, "邮箱已复制")),
-        z: common_vendor.p({
+        x: common_vendor.o(($event) => copyText(ent.value.officialEmail, "邮箱已复制")),
+        y: common_vendor.p({
           type: "auth-filled",
           size: "20",
           color: ent.value.cardMainColor
         }),
-        A: common_vendor.t(ent.value.businessCooperation || "暂无"),
-        B: common_vendor.p({
+        z: common_vendor.t(ent.value.businessCooperation || "暂无"),
+        A: common_vendor.p({
           type: "copy",
           size: "16",
           color: "#ccc"
         }),
-        C: common_vendor.o(($event) => copyText(ent.value.businessCooperation, "内容已复制")),
-        D: ent.value.officialWebsite
+        B: common_vendor.o(($event) => copyText(ent.value.businessCooperation, "内容已复制")),
+        C: ent.value.officialWebsite
       }, ent.value.officialWebsite ? {
-        E: common_vendor.p({
+        D: common_vendor.p({
           type: "paperplane-filled",
           size: "20",
           color: ent.value.cardMainColor
         }),
-        F: common_vendor.t(ent.value.officialWebsite),
-        G: common_vendor.p({
+        E: common_vendor.t(ent.value.officialWebsite),
+        F: common_vendor.p({
           type: "link",
           size: "16",
           color: "#ccc"
         }),
-        H: common_vendor.o(($event) => copyText(ent.value.officialWebsite, "链接已复制"))
-      } : {}) : {}, {
-        I: ent.value.cardShowSocial === 1 && (ent.value.wechatMpName || ent.value.videoAccount)
-      }, ent.value.cardShowSocial === 1 && (ent.value.wechatMpName || ent.value.videoAccount) ? common_vendor.e({
-        J: ent.value.wechatMpName
+        G: common_vendor.o(($event) => copyText(ent.value.officialWebsite, "链接已复制"))
+      } : {}, {
+        H: ent.value.wechatMpName
       }, ent.value.wechatMpName ? {
-        K: common_vendor.p({
+        I: common_vendor.p({
           type: "weixin",
           size: "30",
           color: "#fff"
         }),
-        L: common_vendor.t(ent.value.wechatMpName),
-        M: ent.value.cardMainColor,
-        N: ent.value.cardMainColor,
-        O: common_vendor.o(($event) => showQr(ent.value.wechatMpQrcode, ent.value.wechatMpName))
+        J: common_vendor.t(ent.value.wechatMpName),
+        K: ent.value.cardMainColor,
+        L: ent.value.cardMainColor,
+        M: common_vendor.o(($event) => showQr(ent.value.wechatMpQrcode, ent.value.wechatMpName))
       } : {}, {
-        P: ent.value.videoAccount
+        N: ent.value.videoAccount
       }, ent.value.videoAccount ? {
-        Q: common_vendor.p({
+        O: common_vendor.p({
           type: "videocam-filled",
           size: "30",
           color: "#fff"
         }),
-        R: ent.value.cardMainColor,
-        S: ent.value.cardMainColor,
-        T: common_vendor.o(($event) => showQr(ent.value.videoAccountQrcode, "官方视频号"))
-      } : {}) : {}, {
-        U: ent.value.cardShowOnlineStore === 1 && (onlineStores.value.length || offlineStores.value.length)
-      }, ent.value.cardShowOnlineStore === 1 && (onlineStores.value.length || offlineStores.value.length) ? common_vendor.e({
-        V: onlineStores.value.length
+        P: ent.value.cardMainColor,
+        Q: ent.value.cardMainColor,
+        R: common_vendor.o(($event) => showQr(ent.value.videoAccountQrcode, "官方视频号"))
+      } : {}, {
+        S: onlineStores.value.length
       }, onlineStores.value.length ? {
-        W: common_vendor.f(onlineStores.value, (s, i, i0) => {
+        T: common_vendor.f(onlineStores.value, (s, i, i0) => {
           return {
             a: common_vendor.t(s.platform),
             b: common_vendor.t(s.name),
@@ -257,7 +251,7 @@ const _sfc_main = {
           };
         })
       } : {}, {
-        X: common_vendor.f(offlineStores.value, (addr, i, i0) => {
+        U: common_vendor.f(offlineStores.value, (addr, i, i0) => {
           return {
             a: "0bda02ee-11-" + i0,
             b: common_vendor.t(addr.name),
@@ -267,24 +261,23 @@ const _sfc_main = {
             f: common_vendor.o(($event) => openMap(addr), "addr" + i)
           };
         }),
-        Y: common_vendor.p({
+        V: common_vendor.p({
           type: "location-filled",
           size: "18",
           color: "#666"
         }),
-        Z: common_vendor.p({
+        W: common_vendor.p({
           type: "right",
           size: "14",
           color: "#ccc"
-        })
-      }) : {}, {
-        aa: ent.value.videoUrl
+        }),
+        X: ent.value.videoUrl
       }, ent.value.videoUrl ? {
-        ab: ent.value.videoUrl
+        Y: ent.value.videoUrl
       } : {}, {
-        ac: brandImageList.value.length
+        Z: brandImageList.value.length
       }, brandImageList.value.length ? {
-        ad: common_vendor.f(brandImageList.value, (img, i, i0) => {
+        aa: common_vendor.f(brandImageList.value, (img, i, i0) => {
           return {
             a: i,
             b: img,
@@ -292,34 +285,34 @@ const _sfc_main = {
           };
         })
       } : {}, {
-        ae: common_vendor.p({
+        ab: common_vendor.p({
           type: "gear",
           size: "24",
           color: "#666"
         }),
-        af: common_vendor.o(openSettings),
-        ag: common_vendor.p({
+        ac: common_vendor.o(openSettings),
+        ad: common_vendor.p({
           type: "redo-filled",
           size: "20",
           color: "#fff"
         }),
-        ah: ent.value.cardMainColor,
-        ai: common_vendor.t(currentQrTitle.value),
-        aj: currentQrUrl.value,
-        ak: common_vendor.o(previewQrSingle),
-        al: common_vendor.o(($event) => qrPopup.value.close()),
-        am: common_vendor.sr(qrPopup, "0bda02ee-15", {
+        ae: ent.value.cardMainColor,
+        af: common_vendor.t(currentQrTitle.value),
+        ag: currentQrUrl.value,
+        ah: common_vendor.o(previewQrSingle),
+        ai: common_vendor.o(($event) => qrPopup.value.close()),
+        aj: common_vendor.sr(qrPopup, "0bda02ee-15", {
           "k": "qrPopup"
         }),
-        an: common_vendor.p({
+        ak: common_vendor.p({
           type: "center"
         }),
-        ao: common_vendor.sr(settingsRef, "0bda02ee-16", {
+        al: common_vendor.sr(settingsRef, "0bda02ee-16", {
           "k": "settingsRef"
         }),
-        ap: common_vendor.o(handleApplySettings),
-        aq: common_vendor.o(($event) => ent.value = $event),
-        ar: common_vendor.p({
+        am: common_vendor.o(handleApplySettings),
+        an: common_vendor.o(($event) => ent.value = $event),
+        ao: common_vendor.p({
           modelValue: ent.value
         })
       }) : {});

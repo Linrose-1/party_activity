@@ -188,17 +188,6 @@ const _sfc_main = {
       }
     };
     const viewParentCard = () => {
-      if (!userInfo.value || !userInfo.value.parentId) {
-        common_vendor.index.showToast({
-          title: "无法获取上级信息",
-          icon: "none"
-        });
-        return;
-      }
-      if (userInfo.value.parentName === "猩聚社") {
-        goToPlatformIntro();
-        return;
-      }
       const targetId = userInfo.value.parentId;
       const name = userInfo.value.parentName || "邀请人";
       const avatar = userInfo.value.parentAvatar || "";

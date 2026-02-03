@@ -10,7 +10,7 @@
 				<text class="subtitle">如果您在使用过程中有任何疑问，请随时联系我们</text>
 			</view>
 
-			<!-- 二维码显示区 -->
+			<!-- 二维码显示区 (二维码通常由后端在 content 或 独立字段返回，这里暂时保留原 URL 作为兜底) -->
 			<view class="qr-section">
 				<view class="qr-box" @click="previewQrCode">
 					<image :src="qrCodeUrl" mode="aspectFit" show-menu-by-longpress class="qr-image" />
@@ -27,7 +27,6 @@
 						<text class="label">客服微信号</text>
 					</view>
 					<view class="item-right">
-						<!-- selectable 属性支持长按选择复制 -->
 						<text class="value" selectable>{{ wechatId }}</text>
 						<view class="copy-btn" @click="copyWechat">复制</view>
 					</view>
@@ -46,29 +45,63 @@
 				</view>
 			</view>
 		</view>
-
-		<!-- 3. 底部服务时间提示 -->
-		<!-- <view class="service-time">
-			<text>服务时间：工作日 09:00 - 18:00</text>
-		</view> -->
 	</view>
 </template>
 
 <script setup>
 	import {
-		ref
+		ref,
+		onMounted
 	} from 'vue';
+	import request from '@/utils/request.js';
 
-	// 基础配置信息
+	// 1. 定义响应式变量
+	const wechatId = ref('加载中...'); // 初始显示加载中
+	const phoneNumber = ref('加载中...');
 	const qrCodeUrl = ref(
 		'https://img.gofor.club/post/20260120/bYIigxFi4rpHd5c68a1fff9f38e5411a58c9b8cec504_1768890701193.png');
-	const wechatId = ref('xiaodaxia2045');
-	const phoneNumber = ref('18024545855');
+
+	// 2. 生命周期：挂载时拉取配置数据
+	onMounted(() => {
+		fetchStaticConfig();
+	});
+
+	/**
+	 * [接口方法] 获取动态配置信息
+	 */
+	const fetchStaticConfig = async () => {
+		try {
+			const {
+				data,
+				error
+			} = await request('/app-api/member/config/getStaticWord', {
+				method: 'GET'
+			});
+
+			if (!error && data) {
+				// 核心赋值：从接口返回的 Map 中提取字段
+				wechatId.value = data.csWechatId || 'XJS3026'; // 如果后台没配，使用之前的默认值兜底
+				phoneNumber.value = data.csMobile || '18024545855';
+
+				// 如果接口返回了二维码地址，也可以同步更新 (假设字段名为 csQrCode)
+				if (data.csQrCode) {
+					qrCodeUrl.value = data.csQrCode;
+				}
+
+				console.log('✅ 客服配置加载成功');
+			} else {
+				console.error('获取配置失败:', error);
+			}
+		} catch (e) {
+			console.error('获取配置异常:', e);
+		}
+	};
 
 	/**
 	 * 预览二维码图片
 	 */
 	const previewQrCode = () => {
+		if (!qrCodeUrl.value) return;
 		uni.previewImage({
 			urls: [qrCodeUrl.value],
 			current: qrCodeUrl.value
@@ -79,6 +112,7 @@
 	 * 拨打客服电话
 	 */
 	const makePhoneCall = () => {
+		if (phoneNumber.value === '加载中...') return;
 		uni.makePhoneCall({
 			phoneNumber: phoneNumber.value,
 			fail: (err) => {
@@ -91,6 +125,7 @@
 	 * 复制微信号
 	 */
 	const copyWechat = () => {
+		if (wechatId.value === '加载中...') return;
 		uni.setClipboardData({
 			data: wechatId.value,
 			success: () => {
@@ -102,6 +137,7 @@
 		});
 	};
 </script>
+
 
 <style lang="scss" scoped>
 	$theme-color: #FF8400;

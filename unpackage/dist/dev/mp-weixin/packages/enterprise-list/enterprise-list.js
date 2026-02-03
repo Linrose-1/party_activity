@@ -19,48 +19,51 @@ const _sfc_main = {
     const total = common_vendor.ref(0);
     const pageNo = common_vendor.ref(1);
     const loadStatus = common_vendor.ref("more");
-    common_vendor.onMounted(() => {
-      fetchEnterpriseList(true);
+    common_vendor.onShow(() => {
+      fetchEnterpriseList(true, false);
     });
     common_vendor.onPullDownRefresh(() => {
-      fetchEnterpriseList(true);
+      fetchEnterpriseList(true, true);
     });
     common_vendor.onReachBottom(() => {
       if (loadStatus.value === "noMore" || loadStatus.value === "loading")
         return;
       pageNo.value++;
-      fetchEnterpriseList(false);
+      fetchEnterpriseList(false, false);
     });
-    const fetchEnterpriseList = async (isRefresh = false) => {
+    const fetchEnterpriseList = async (isRefresh = false, showFullLoading = true) => {
       if (isRefresh) {
         pageNo.value = 1;
-        loadStatus.value = "loading";
+        if (showFullLoading)
+          loadStatus.value = "loading";
       }
-      const {
-        data,
-        error
-      } = await utils_request.request("/app-api/member/user-enterprise-info/page", {
-        method: "GET",
-        data: {
-          pageNo: pageNo.value,
-          pageSize,
-          userId: common_vendor.index.getStorageSync("userId")
-        }
-      });
-      if (isRefresh)
-        common_vendor.index.stopPullDownRefresh();
-      if (error) {
-        loadStatus.value = "more";
-        common_vendor.index.showToast({
-          title: error,
-          icon: "none"
+      try {
+        const {
+          data,
+          error
+        } = await utils_request.request("/app-api/member/user-enterprise-info/page", {
+          method: "GET",
+          data: {
+            pageNo: pageNo.value,
+            pageSize,
+            userId: common_vendor.index.getStorageSync("userId")
+            // 绑定当前登录人
+          }
         });
-        return;
+        if (isRefresh)
+          common_vendor.index.stopPullDownRefresh();
+        if (error) {
+          loadStatus.value = "more";
+          return;
+        }
+        const newList = data.list || [];
+        list.value = isRefresh ? newList : [...list.value, ...newList];
+        total.value = data.total;
+        loadStatus.value = list.value.length >= data.total ? "noMore" : "more";
+      } catch (e) {
+        loadStatus.value = "more";
+        common_vendor.index.__f__("error", "at packages/enterprise-list/enterprise-list.vue:200", "获取列表异常:", e);
       }
-      const newList = data.list || [];
-      list.value = isRefresh ? newList : [...list.value, ...newList];
-      total.value = data.total;
-      loadStatus.value = list.value.length >= data.total ? "noMore" : "more";
     };
     const getStatusConfig = (status) => {
       const configs = {
@@ -86,7 +89,7 @@ const _sfc_main = {
         }
       };
       return configs[status] || {
-        label: "未知状态",
+        label: "未知",
         class: ""
       };
     };
@@ -138,32 +141,29 @@ const _sfc_main = {
       }
       if (item.status === 0) {
         return common_vendor.index.showModal({
-          title: "无法认证",
-          content: "请先“编辑”并“保存发布”企业信息后再申请认证。",
-          confirmText: "去完善",
+          title: "提示",
+          content: "当前为草稿，请先完成信息发布",
+          confirmText: "去编辑",
           success: (res) => {
             if (res.confirm)
               goToEdit(item.id);
           }
         });
       }
-      if (item.status === 1 || item.status === 4) {
-        common_vendor.index.navigateTo({
-          url: `/packages/enterprise-auth/enterprise-auth?enterpriseId=${item.id}&enterpriseName=${encodeURIComponent(item.enterpriseName)}`
-        });
-      }
+      common_vendor.index.navigateTo({
+        url: `/packages/enterprise-auth/enterprise-auth?enterpriseId=${item.id}&enterpriseName=${encodeURIComponent(item.enterpriseName)}`
+      });
     };
     const handleDelete = (item) => {
       common_vendor.index.showModal({
         title: "确定要删除吗？",
-        content: `删除后"${item.enterpriseName}"的主页及名片将立即失效，且数据不可找回。`,
+        content: `删除后"${item.enterpriseName}"的主页及名片将立即失效。`,
         confirmText: "确认删除",
         confirmColor: "#FF4D4F",
-        cancelText: "我再想想",
         success: async (res) => {
           if (res.confirm) {
             common_vendor.index.showLoading({
-              title: "正在处理...",
+              title: "处理中...",
               mask: true
             });
             const {
@@ -177,7 +177,7 @@ const _sfc_main = {
                 title: "删除成功",
                 icon: "success"
               });
-              fetchEnterpriseList(true);
+              fetchEnterpriseList(true, false);
             } else {
               common_vendor.index.showToast({
                 title: error,
@@ -215,45 +215,44 @@ const _sfc_main = {
             f: common_vendor.t(truncateName(item.enterpriseName)),
             g: common_vendor.t(getStatusConfig(item.status).label),
             h: common_vendor.n("status-" + item.status),
-            i: common_vendor.t(item.enterpriseId || "系统分配中..."),
-            j: common_vendor.t(formatDate(item.createTime)),
-            k: common_vendor.o(($event) => goDetail(item.id), item.id),
-            l: item.status === 0
+            i: common_vendor.t(formatDate(item.createTime)),
+            j: common_vendor.o(($event) => goDetail(item.id), item.id),
+            k: item.status === 0
           }, item.status === 0 ? {
-            m: "378d963d-2-" + i0,
-            n: common_vendor.p({
+            l: "378d963d-2-" + i0,
+            m: common_vendor.p({
               type: "info-filled",
               size: "14",
               color: "#FF7919"
             }),
-            o: common_vendor.o(($event) => goToEdit(item.id), item.id)
+            n: common_vendor.o(($event) => goToEdit(item.id), item.id)
           } : {}, {
-            p: item.status === 4
+            o: item.status === 4
           }, item.status === 4 ? {
-            q: "378d963d-3-" + i0,
-            r: common_vendor.p({
+            p: "378d963d-3-" + i0,
+            q: common_vendor.p({
               type: "clear",
               size: "14",
               color: "#F44336"
             }),
-            s: common_vendor.t(item.statusDesc || "资料不符合规范，请重新上传"),
-            t: "378d963d-4-" + i0,
-            v: common_vendor.p({
+            r: common_vendor.t(item.statusDesc || "资料不符合规范，请重新上传"),
+            s: "378d963d-4-" + i0,
+            t: common_vendor.p({
               type: "right",
               size: "12",
               color: "#F44336"
             }),
-            w: common_vendor.o(($event) => handleGoAuth(item), item.id)
+            v: common_vendor.o(($event) => handleGoAuth(item), item.id)
           } : {}, {
-            x: "378d963d-5-" + i0,
-            y: common_vendor.o(($event) => goDetail(item.id), item.id),
-            z: "378d963d-6-" + i0,
-            A: common_vendor.o(($event) => goCard(item.id), item.id),
-            B: "378d963d-7-" + i0,
-            C: common_vendor.o(($event) => handleGoAuth(item), item.id),
-            D: "378d963d-8-" + i0,
-            E: common_vendor.o(($event) => handleDelete(item), item.id),
-            F: item.id
+            w: "378d963d-5-" + i0,
+            x: common_vendor.o(($event) => goDetail(item.id), item.id),
+            y: "378d963d-6-" + i0,
+            z: common_vendor.o(($event) => goCard(item.id), item.id),
+            A: "378d963d-7-" + i0,
+            B: common_vendor.o(($event) => handleGoAuth(item), item.id),
+            C: "378d963d-8-" + i0,
+            D: common_vendor.o(($event) => handleDelete(item), item.id),
+            E: item.id
           });
         }),
         g: common_vendor.p({

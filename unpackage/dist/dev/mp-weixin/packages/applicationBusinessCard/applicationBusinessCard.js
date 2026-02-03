@@ -24,7 +24,7 @@ const _sfc_main = {
     const isLoading = common_vendor.ref(true);
     const friendOwnerUserId = common_vendor.ref(null);
     common_vendor.onLoad((options) => {
-      common_vendor.index.__f__("log", "at packages/applicationBusinessCard/applicationBusinessCard.vue:171", "[business-card-apply] onLoad 触发。收到的选项：", options);
+      common_vendor.index.__f__("log", "at packages/applicationBusinessCard/applicationBusinessCard.vue:177", "[business-card-apply] onLoad 触发。收到的选项：", options);
       if (options.friendOwnerUserId) {
         friendOwnerUserId.value = options.friendOwnerUserId;
       }
@@ -61,7 +61,7 @@ const _sfc_main = {
           fetchSimpleTargetUserInfo()
         ]);
       } catch (e) {
-        common_vendor.index.__f__("error", "at packages/applicationBusinessCard/applicationBusinessCard.vue:235", "初始化页面时发生错误:", e);
+        common_vendor.index.__f__("error", "at packages/applicationBusinessCard/applicationBusinessCard.vue:241", "初始化页面时发生错误:", e);
       } finally {
         isLoading.value = false;
       }
@@ -83,7 +83,7 @@ const _sfc_main = {
         data: requestData
       });
       if (data && !error) {
-        common_vendor.index.__f__("log", "at packages/applicationBusinessCard/applicationBusinessCard.vue:263", "权限检查成功，直接跳转到名片页。");
+        common_vendor.index.__f__("log", "at packages/applicationBusinessCard/applicationBusinessCard.vue:269", "权限检查成功，直接跳转到名片页。");
         let targetUrl = `/packages/my-businessCard/my-businessCard?id=${targetUserId.value}`;
         if (friendOwnerUserId.value) {
           targetUrl += `&friendOwnerUserId=${friendOwnerUserId.value}`;
@@ -93,13 +93,13 @@ const _sfc_main = {
         });
         return true;
       } else {
-        common_vendor.index.__f__("log", "at packages/applicationBusinessCard/applicationBusinessCard.vue:273", "权限检查失败，显示支付页面。", error);
+        common_vendor.index.__f__("log", "at packages/applicationBusinessCard/applicationBusinessCard.vue:279", "权限检查失败，显示支付页面。", error);
         return false;
       }
     };
     const fetchSimpleTargetUserInfo = async () => {
       if (!targetUserId.value) {
-        common_vendor.index.__f__("warn", "at packages/applicationBusinessCard/applicationBusinessCard.vue:285", "无法获取简要信息，因为 targetUserId 不存在。");
+        common_vendor.index.__f__("warn", "at packages/applicationBusinessCard/applicationBusinessCard.vue:291", "无法获取简要信息，因为 targetUserId 不存在。");
         return;
       }
       const {
@@ -113,11 +113,11 @@ const _sfc_main = {
           // 固定传 1
         }
       });
-      common_vendor.index.__f__("log", "at packages/applicationBusinessCard/applicationBusinessCard.vue:301", "----------- getSimpleUserInfo 接口返回数据 -----------");
-      common_vendor.index.__f__("log", "at packages/applicationBusinessCard/applicationBusinessCard.vue:302", JSON.stringify(data, null, 2));
-      common_vendor.index.__f__("log", "at packages/applicationBusinessCard/applicationBusinessCard.vue:303", "----------------------------------------------------");
+      common_vendor.index.__f__("log", "at packages/applicationBusinessCard/applicationBusinessCard.vue:307", "----------- getSimpleUserInfo 接口返回数据 -----------");
+      common_vendor.index.__f__("log", "at packages/applicationBusinessCard/applicationBusinessCard.vue:308", JSON.stringify(data, null, 2));
+      common_vendor.index.__f__("log", "at packages/applicationBusinessCard/applicationBusinessCard.vue:309", "----------------------------------------------------");
       if (error) {
-        common_vendor.index.__f__("error", "at packages/applicationBusinessCard/applicationBusinessCard.vue:307", "获取目标用户简要信息失败:", error);
+        common_vendor.index.__f__("error", "at packages/applicationBusinessCard/applicationBusinessCard.vue:313", "获取目标用户简要信息失败:", error);
         return;
       }
       if (data) {
@@ -137,7 +137,7 @@ const _sfc_main = {
       if (data) {
         currentUserInfo.value = data;
       } else {
-        common_vendor.index.__f__("error", "at packages/applicationBusinessCard/applicationBusinessCard.vue:334", "获取当前用户信息失败:", error);
+        common_vendor.index.__f__("error", "at packages/applicationBusinessCard/applicationBusinessCard.vue:340", "获取当前用户信息失败:", error);
       }
     };
     const handlePayToReadCard = async () => {
@@ -349,28 +349,35 @@ const _sfc_main = {
       } : {}, {
         B: common_vendor.t(targetUserInfo.value.realName || targetUserInfo.value.nickname),
         C: common_vendor.t(costAmount.value),
-        D: currentUserInfo.value
+        D: common_vendor.p({
+          type: "info-filled",
+          size: "14",
+          color: "#FF6A00"
+        }),
+        E: friendOwnerUserId.value
+      }, friendOwnerUserId.value ? {} : {}, {
+        F: currentUserInfo.value
       }, currentUserInfo.value ? {
-        E: common_vendor.t(currentUserInfo.value.point),
-        F: currentUserInfo.value.point < 1 ? 1 : ""
+        G: common_vendor.t(currentUserInfo.value.point),
+        H: currentUserInfo.value.point < 1 ? 1 : ""
       } : {}, {
-        G: showInsufficient.value
+        I: showInsufficient.value
       }, showInsufficient.value ? {} : {}, {
-        H: common_vendor.t(isPaying.value ? "支付中..." : "确认支付"),
-        I: common_vendor.o(handlePayToReadCard),
-        J: isPaying.value,
-        K: isPaying.value,
-        L: common_vendor.o(goToEarnPoints)
+        J: common_vendor.t(isPaying.value ? "支付中..." : "确认支付"),
+        K: common_vendor.o(handlePayToReadCard),
+        L: isPaying.value,
+        M: isPaying.value,
+        N: common_vendor.o(goToEarnPoints)
       }) : {
-        M: common_vendor.p({
+        O: common_vendor.p({
           status: "loading",
           contentText: "正在加载用户信息..."
         })
       }, {
-        N: currentUserInfo.value && targetUserInfo.value
+        P: currentUserInfo.value && targetUserInfo.value
       }, currentUserInfo.value && targetUserInfo.value ? {
-        O: common_vendor.t(formattedFriendRequestMessage.value),
-        P: common_vendor.o(copyFriendRequestMessage)
+        Q: common_vendor.t(formattedFriendRequestMessage.value),
+        R: common_vendor.o(copyFriendRequestMessage)
       } : {}));
     };
   }

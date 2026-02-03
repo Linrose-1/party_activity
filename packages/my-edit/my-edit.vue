@@ -57,7 +57,7 @@
 							<uni-easyinput v-model="form.contactEmail" placeholder="请输入邮箱" />
 						</uni-forms-item>
 
-						<uni-forms-item label="微信二维码(请到微信头像处获取微信二维码图)" name="wechatQrCodeUrl" label-position="top">
+						<uni-forms-item label="微信二维码" name="wechatQrCodeUrl" label-position="top">
 							<view class="qr-uploader-centered" @click="chooseWechatQr">
 								<view class="qr-box">
 									<!-- 有图片时显示大图 -->
@@ -76,6 +76,8 @@
 										style="margin-right: 4rpx;"></uni-icons>
 									<text class="action-text">{{ form.wechatQrCodeUrl ? '点击更换' : '点击上传' }}</text>
 								</view>
+
+								<text class="qr-guide-text">请到微信头像处获取微信二维码图</text>
 							</view>
 						</uni-forms-item>
 
@@ -213,7 +215,9 @@
 
 				</uni-forms>
 
-				<button class="save-btn" @click="submitForm">保存资料</button>
+				<view class="sticky-footer">
+					<button class="save-btn" @click="submitForm">保存资料</button>
+				</view>
 				<view class="bottom-spacer"></view>
 			</view>
 
@@ -276,6 +280,9 @@
 	const tabItems = ['基本信息', '数字标签'];
 	const initialDataState = ref('');
 	const userId = ref(uni.getStorageSync('userId'));
+
+	const isComplete = ref(1);
+
 	// --- 草稿缓存相关变量 ---
 	const DRAFT_KEY = 'user_profile_draft_v3'; // 换个新 Key，防止旧缓存干扰
 	const isDataLoaded = ref(false); // 【关键】标记后端数据是否已填充完毕
@@ -806,6 +813,19 @@
 			});
 		}
 		if (userInfo) {
+
+			isComplete.value = userInfo.isComplete;
+			// 如果用户未完善资料，弹出引导提示
+			if (isComplete.value === 0) {
+				uni.showModal({
+					title: '惊喜福利',
+					content: '首次完善资料，即可免费获赠【玄铁会员】权益！',
+					showCancel: false,
+					confirmText: '立即完善',
+					confirmColor: '#FF8700'
+				});
+			}
+
 			// 填充所有普通字段
 			Object.keys(form.value).forEach(key => {
 				if (userInfo[key] !== undefined && userInfo[key] !== null) {
@@ -1196,118 +1216,232 @@
 		});
 	};
 
+	/**
+	 * 【辅助工具】校验 7 个核心维度字段是否全部填写
+	 * 对应：联系认证、地域、商协会、公司、学校、资源、简介
+	 */
+	function checkIsAllDimensionsFilled(p) {
+		return (
+			p.contactEmail && p.wechatQrCodeUrl && // 1. 联系与认证
+			p.locationAddress && p.nativePlace && // 2. 地域分布
+			p.professionalTitle && // 3. 商协会与职务
+			p.companyName && p.industry && p.positionTitle && // 4. 公司/行业/职务
+			p.school && // 5. 毕业学校
+			p.haveResources && p.needResources && // 6. 资源供需
+			p.personalBio // 7. 个人简介
+		);
+	}
+
+	/**
+	 * 【核心方法】提交并保存个人资料
+	 */
 	const submitForm = () => {
+		// 1. 表单校验
 		formRef.value.validate().then(async () => {
 			uni.showLoading({
 				title: '正在保存...'
 			});
 
-			// 准备提交给后端的数据
+			// --- 2. 数据组装与格式化 ---
 			const payload = {
 				...form.value
 			};
 
-			//处理地区提交：ID数组 -> 最后一个ID
-			// if (Array.isArray(payload.locationAddress) && payload.locationAddress.length > 0) {
-			// 	payload.locationAddress = payload.locationAddress[payload.locationAddress.length - 1];
-			// }
-			// if (Array.isArray(payload.birthplace) && payload.birthplace.length > 0) {
-			// 	payload.birthplace = payload.birthplace[payload.birthplace.length - 1];
-			// }
+			// A. 处理地域分布：ID数组 -> 取最后一级ID
 			['locationAddress', 'birthplace', 'nativePlace'].forEach(key => {
 				if (Array.isArray(payload[key]) && payload[key].length > 0) {
 					payload[key] = payload[key][payload[key].length - 1];
 				}
 			});
 
-			// 爱好提交 
+			// B. 处理动态列表：数组 -> 逗号分隔字符串
+			payload.professionalTitle = professionsList.value.map(p => p.trim()).filter(p => p).join(',');
+			payload.school = schoolsList.value.map(s => s.trim()).filter(s => s).join(',');
+
+			// 公司相关字段（名称、行业名称、职务）
+			payload.companyName = companyAndIndustryList.value
+				.map(item => (item.name || '').trim()).filter(n => n).join(',');
+			payload.industry = companyAndIndustryList.value
+				.map(item => (item.industryName || '').trim()).join(',');
+			payload.positionTitle = companyAndIndustryList.value
+				.map(item => (item.positionTitle || '').trim()).filter(p => p).join(',');
+
+			// C. 处理个人爱好
 			let finalHobbies = selectedHobbies.value.filter(h => h !== '其他');
 			if (isOtherHobbySelected.value && otherHobbyText.value.trim()) {
 				finalHobbies.push(otherHobbyText.value.trim());
 			}
 			payload.hobby = finalHobbies.join(',');
 
-			payload.professionalTitle = professionsList.value.map(p => p.trim()).filter(p => p).join(',');
-			payload.school = schoolsList.value.map(s => s.trim()).filter(s => s).join(',');
-			payload.companyName = companyAndIndustryList.value
-				.map(item => (item.name || '').trim())
-				.filter(name => name)
-				.join(',');
-
-			payload.industry = companyAndIndustryList.value
-				.map(item => (item.industryName || '').trim()) // 直接使用 industryName
-				.join(',');
-
-			payload.positionTitle = companyAndIndustryList.value
-				.map(item => (item.positionTitle || '').trim())
-				.filter(title => title)
-				.join(',');
-
-			// 处理生日提交：YYYY-MM-DD -> 时间戳
+			// D. 处理生日：YYYY-MM-DD -> 时间戳
 			if (payload.birthday && typeof payload.birthday === 'string') {
-				const dateStr = payload.birthday.replace(/-/g, '/');
-				payload.birthday = new Date(dateStr).getTime();
+				payload.birthday = new Date(payload.birthday.replace(/-/g, '/')).getTime();
 			}
 
+			// --- 3. 执行保存资料接口 ---
 			const {
-				error
+				error: updateError
 			} = await Api.updateUser(payload);
-			uni.hideLoading();
 
-			if (error) {
-				uni.showToast({
-					title: error || '保存失败',
+			if (updateError) {
+				uni.hideLoading();
+				return uni.showToast({
+					title: updateError || '保存失败',
 					icon: 'none'
 				});
-			} else {
-				// 保存成功后，更新初始状态为当前状态
-				// initialDataState.value = JSON.stringify({
-				// 	form: form.value,
-				// 	professionsList: professionsList.value,
-				// 	schoolsList: schoolsList.value,
-				// 	companyAndIndustryList: companyAndIndustryList.value,
-				// 	selectedHobbies: selectedHobbies.value,
-				// 	otherHobbyText: otherHobbyText.value
-				// });
-
-				// uni.showToast({
-				// 	title: '保存成功',
-				// 	icon: 'success'
-				// });
-				// setTimeout(() => uni.navigateBack(), 1500);
-				// ==================== 【核心修改区域】 ====================
-				uni.removeStorageSync(DRAFT_KEY);
-				console.log('🧹 [提交成功] 草稿已清除');
-
-				uni.showToast({
-					title: '资料保存成功',
-					icon: 'success'
-				});
-
-				// 3. 延迟一小段时间后，弹出新的引导弹窗
-				setTimeout(() => {
-					uni.showModal({
-						title: '发布到商友圈',
-						content: '您的资料已更新，发布名片问候语到商友圈的“商友连接”模块，让商友们更快看见您！',
-						confirmText: '立即发布',
-						cancelText: '暂不发布',
-						success: (res) => {
-							if (res.confirm) {
-								// 用户选择“是”，调用自动发圈函数
-								handleAutoPost();
-							} else if (res.cancel) {
-								// 用户选择“否”，则返回上一页
-								uni.navigateBack();
-							}
-						}
-					});
-				}, 800); // 延迟800毫秒，确保用户看到了“保存成功”的提示
-				// =========================================================
 			}
+
+			// --- 4. 【核心逻辑】尝试触发“完善资料送会员” ---
+			// 判断 7 个核心维度是否已全部填写
+			if (checkIsAllDimensionsFilled(payload)) {
+				try {
+					const {
+						data: giveRes
+					} = await request('/app-api/member/user/complete-profile-give-member', {
+						method: 'POST'
+					});
+
+					// 如果后端判定为首次完善并赠送成功
+					if (giveRes === true) {
+						uni.hideLoading();
+						// 使用 Promise 阻塞，确保用户看完奖励弹窗再弹出下一个
+						await new Promise(resolve => {
+							uni.showModal({
+								title: '恭喜获得奖励',
+								content: '检测到您已完善核心商友资料，系统已为您赠送【玄铁会员】权益，快去体验吧！',
+								showCancel: false,
+								confirmText: '太棒了',
+								confirmColor: '#FF8700',
+								success: () => resolve()
+							});
+						});
+					}
+				} catch (e) {
+					console.error('申请赠送会员异常:', e);
+				}
+			}
+
+			// --- 5. 提交成功后的清理与引导逻辑 ---
+			uni.hideLoading();
+			uni.removeStorageSync(DRAFT_KEY); // 清除本地草稿
+			console.log('🧹 [提交成功] 草稿已清除');
+
+			uni.showToast({
+				title: '资料保存成功',
+				icon: 'success'
+			});
+
+			// 延迟弹出“发布到商友圈”引导
+			setTimeout(() => {
+				uni.showModal({
+					title: '发布到商友圈',
+					content: '您的资料已更新，发布名片问候语到商友圈的“商友连接”模块，让商友们更快看见您！',
+					confirmText: '立即发布',
+					cancelText: '暂不发布',
+					confirmColor: '#FF8700',
+					success: (res) => {
+						if (res.confirm) {
+							handleAutoPost(); // 执行自动发圈
+						} else {
+							uni.navigateBack(); // 返回上一页
+						}
+					}
+				});
+			}, 600);
+
 		}).catch(err => {
-			console.log('表单验证失败：', err);
+			console.log('表单验证未通过：', err);
 		});
 	};
+
+	// const submitForm = () => {
+	// 	formRef.value.validate().then(async () => {
+	// 		uni.showLoading({
+	// 			title: '正在保存...'
+	// 		});
+
+	// 		const payload = {
+	// 			...form.value
+	// 		};
+
+	// 		['locationAddress', 'birthplace', 'nativePlace'].forEach(key => {
+	// 			if (Array.isArray(payload[key]) && payload[key].length > 0) {
+	// 				payload[key] = payload[key][payload[key].length - 1];
+	// 			}
+	// 		});
+
+	// 		// 爱好提交 
+	// 		let finalHobbies = selectedHobbies.value.filter(h => h !== '其他');
+	// 		if (isOtherHobbySelected.value && otherHobbyText.value.trim()) {
+	// 			finalHobbies.push(otherHobbyText.value.trim());
+	// 		}
+	// 		payload.hobby = finalHobbies.join(',');
+
+	// 		payload.professionalTitle = professionsList.value.map(p => p.trim()).filter(p => p).join(',');
+	// 		payload.school = schoolsList.value.map(s => s.trim()).filter(s => s).join(',');
+	// 		payload.companyName = companyAndIndustryList.value
+	// 			.map(item => (item.name || '').trim())
+	// 			.filter(name => name)
+	// 			.join(',');
+
+	// 		payload.industry = companyAndIndustryList.value
+	// 			.map(item => (item.industryName || '').trim()) // 直接使用 industryName
+	// 			.join(',');
+
+	// 		payload.positionTitle = companyAndIndustryList.value
+	// 			.map(item => (item.positionTitle || '').trim())
+	// 			.filter(title => title)
+	// 			.join(',');
+
+	// 		// 处理生日提交：YYYY-MM-DD -> 时间戳
+	// 		if (payload.birthday && typeof payload.birthday === 'string') {
+	// 			const dateStr = payload.birthday.replace(/-/g, '/');
+	// 			payload.birthday = new Date(dateStr).getTime();
+	// 		}
+
+	// 		const {
+	// 			error
+	// 		} = await Api.updateUser(payload);
+	// 		uni.hideLoading();
+
+	// 		if (error) {
+	// 			uni.showToast({
+	// 				title: error || '保存失败',
+	// 				icon: 'none'
+	// 			});
+	// 		} else {
+	// 			uni.removeStorageSync(DRAFT_KEY);
+	// 			console.log('🧹 [提交成功] 草稿已清除');
+
+	// 			uni.showToast({
+	// 				title: '资料保存成功',
+	// 				icon: 'success'
+	// 			});
+
+	// 			// 3. 延迟一小段时间后，弹出新的引导弹窗
+	// 			setTimeout(() => {
+	// 				uni.showModal({
+	// 					title: '发布到商友圈',
+	// 					content: '您的资料已更新，发布名片问候语到商友圈的“商友连接”模块，让商友们更快看见您！',
+	// 					confirmText: '立即发布',
+	// 					cancelText: '暂不发布',
+	// 					success: (res) => {
+	// 						if (res.confirm) {
+	// 							// 用户选择“是”，调用自动发圈函数
+	// 							handleAutoPost();
+	// 						} else if (res.cancel) {
+	// 							// 用户选择“否”，则返回上一页
+	// 							uni.navigateBack();
+	// 						}
+	// 					}
+	// 				});
+	// 			}, 800); // 延迟800毫秒，确保用户看到了“保存成功”的提示
+	// 			// =========================================================
+	// 		}
+	// 	}).catch(err => {
+	// 		console.log('表单验证失败：', err);
+	// 	});
+	// };
 
 	/**
 	 * 处理自动发圈的函数
@@ -1738,7 +1872,33 @@
 		font-weight: 500;
 	}
 
+	/* 二维码获取引导文字样式 */
+	.qr-guide-text {
+		margin-top: 16rpx;
+		font-size: 24rpx;
+		color: #999; // 灰色
+		text-align: center;
+	}
+
 	/* --- 底部按钮 --- */
+	.sticky-footer {
+		position: fixed;
+		bottom: 0;
+		left: 0;
+		width: 100%;
+		background-color: #fff;
+		padding: 20rpx 40rpx;
+		padding-bottom: calc(20rpx + env(safe-area-inset-bottom)); // 适配全面屏
+		box-sizing: border-box;
+		box-shadow: 0 -4rpx 20rpx rgba(0, 0, 0, 0.05);
+		z-index: 10; // 核心：设为10，确保低于 uni-popup 的 99
+	}
+
+	.content-area {
+		padding: 30rpx;
+		padding-bottom: 200rpx; // 核心：给底部固定栏留出空间，防止内容被遮挡
+	}
+
 	.save-btn {
 		background: linear-gradient(135deg, #FF9A44, $theme-color);
 		color: white;
