@@ -215,7 +215,7 @@
 
 				</uni-forms>
 
-				<view class="sticky-footer">
+				<view class="sticky-footer" v-if="!isKeyboardShow">
 					<button class="save-btn" @click="submitForm">保存资料</button>
 				</view>
 				<view class="bottom-spacer"></view>
@@ -282,6 +282,7 @@
 	const userId = ref(uni.getStorageSync('userId'));
 
 	const isComplete = ref(1);
+	const isKeyboardShow = ref(false);
 
 	// --- 草稿缓存相关变量 ---
 	const DRAFT_KEY = 'user_profile_draft_v3'; // 换个新 Key，防止旧缓存干扰
@@ -524,6 +525,10 @@
 		// 再获取用户信息并填充
 		await fetchUserInfoAndPopulateForm();
 		uni.hideLoading();
+
+		uni.onKeyboardHeightChange(res => {
+			isKeyboardShow.value = res.height > 0;
+		});
 	});
 
 	onBackPress((options) => {

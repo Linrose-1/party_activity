@@ -35,6 +35,7 @@ const _sfc_main = {
     common_vendor.ref("");
     const userId = common_vendor.ref(common_vendor.index.getStorageSync("userId"));
     const isComplete = common_vendor.ref(1);
+    const isKeyboardShow = common_vendor.ref(false);
     const isDataLoaded = common_vendor.ref(false);
     let draftTimer = null;
     const formRef = common_vendor.ref(null);
@@ -178,9 +179,9 @@ const _sfc_main = {
         };
         try {
           common_vendor.index.setStorageSync(DRAFT_KEY, JSON.stringify(draftData));
-          common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:455", "✅ [自动保存] 资料已写入缓存", (/* @__PURE__ */ new Date()).toLocaleTimeString());
+          common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:456", "✅ [自动保存] 资料已写入缓存", (/* @__PURE__ */ new Date()).toLocaleTimeString());
         } catch (e) {
-          common_vendor.index.__f__("error", "at packages/my-edit/my-edit.vue:457", "保存缓存失败", e);
+          common_vendor.index.__f__("error", "at packages/my-edit/my-edit.vue:458", "保存缓存失败", e);
         }
       }, 1e3);
     }, {
@@ -237,6 +238,9 @@ const _sfc_main = {
       ]);
       await fetchUserInfoAndPopulateForm();
       common_vendor.index.hideLoading();
+      common_vendor.index.onKeyboardHeightChange((res) => {
+        isKeyboardShow.value = res.height > 0;
+      });
     });
     common_vendor.onBackPress((options) => {
       if (options.from === "navigateBack") {
@@ -297,9 +301,9 @@ const _sfc_main = {
           color: "#1890FF"
         });
         radarDatasets.value = newDatasets;
-        common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:616", "✅ 统计数据加载完毕，索引已固定：[0]自我, [1]商友, [2]综合");
+        common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:621", "✅ 统计数据加载完毕，索引已固定：[0]自我, [1]商友, [2]综合");
       } catch (e) {
-        common_vendor.index.__f__("error", "at packages/my-edit/my-edit.vue:619", "获取统计数据异常", e);
+        common_vendor.index.__f__("error", "at packages/my-edit/my-edit.vue:624", "获取统计数据异常", e);
       }
     };
     const getAreaTreeData = async () => {
@@ -308,7 +312,7 @@ const _sfc_main = {
         error
       } = await Api.getAreaTree();
       if (error) {
-        common_vendor.index.__f__("error", "at packages/my-edit/my-edit.vue:686", "获取地区树失败:", error);
+        common_vendor.index.__f__("error", "at packages/my-edit/my-edit.vue:691", "获取地区树失败:", error);
       } else {
         areaTree.value = data || [];
       }
@@ -356,7 +360,7 @@ const _sfc_main = {
         finalIndustryName = nodes.map((n) => n.text || n.name).join("/");
       }
       companyAndIndustryList.value[index].industryName = finalIndustryName;
-      common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:754", `第 ${index + 1} 组行业选择完毕:`, finalIndustryName);
+      common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:759", `第 ${index + 1} 组行业选择完毕:`, finalIndustryName);
     };
     const getIndustryTreeData = async () => {
       const {
@@ -364,10 +368,10 @@ const _sfc_main = {
         error
       } = await Api.getIndustryTree();
       if (error) {
-        common_vendor.index.__f__("error", "at packages/my-edit/my-edit.vue:763", "获取行业树失败:", error);
+        common_vendor.index.__f__("error", "at packages/my-edit/my-edit.vue:768", "获取行业树失败:", error);
       } else {
         industryTree.value = processIndustryTree(data || []);
-        common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:767", "处理后的行业树:", industryTree.value);
+        common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:772", "处理后的行业树:", industryTree.value);
       }
     };
     function findPathById(tree, targetId) {
@@ -471,14 +475,14 @@ const _sfc_main = {
       }
       setTimeout(() => {
         isDataLoaded.value = true;
-        common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:940", "✅ [系统状态] 数据初始化完成，开始监听修改...");
+        common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:945", "✅ [系统状态] 数据初始化完成，开始监听修改...");
         checkAndRestoreDraft();
       }, 500);
     };
     const checkAndRestoreDraft = () => {
       const draftStr = common_vendor.index.getStorageSync(DRAFT_KEY);
       if (!draftStr) {
-        common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:951", "📭 [缓存检查] 无本地草稿");
+        common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:956", "📭 [缓存检查] 无本地草稿");
         return;
       }
       common_vendor.index.showModal({
@@ -590,7 +594,7 @@ const _sfc_main = {
             src: tempFilePath,
             cropScale: "1:1",
             success: (cropRes) => uploadAvatar(cropRes.tempFilePath),
-            fail: (err) => common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:1082", "用户取消裁剪或裁剪失败:", err)
+            fail: (err) => common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:1087", "用户取消裁剪或裁剪失败:", err)
           });
         }
       });
@@ -629,11 +633,11 @@ const _sfc_main = {
             src: tempFilePath,
             cropScale: "1:1",
             success: (cropRes) => {
-              common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:1134", "二维码裁剪成功");
+              common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:1139", "二维码裁剪成功");
               uploadQrCode(cropRes.tempFilePath);
             },
             fail: (err) => {
-              common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:1138", "取消裁剪或失败:", err);
+              common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:1143", "取消裁剪或失败:", err);
             }
           });
         }
@@ -715,7 +719,7 @@ const _sfc_main = {
         }
         common_vendor.index.hideLoading();
         common_vendor.index.removeStorageSync(DRAFT_KEY);
-        common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:1293", "🧹 [提交成功] 草稿已清除");
+        common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:1298", "🧹 [提交成功] 草稿已清除");
         if (checkIsAllDimensionsFilled(payload)) {
           try {
             const {
@@ -737,7 +741,7 @@ const _sfc_main = {
               });
             }
           } catch (e) {
-            common_vendor.index.__f__("error", "at packages/my-edit/my-edit.vue:1321", "奖励接口异常:", e);
+            common_vendor.index.__f__("error", "at packages/my-edit/my-edit.vue:1326", "奖励接口异常:", e);
           }
         }
         common_vendor.index.showModal({
@@ -755,7 +759,7 @@ const _sfc_main = {
           }
         });
       }).catch((err) => {
-        common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:1343", "表单验证未通过：", err);
+        common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:1348", "表单验证未通过：", err);
       });
     };
     const handleAutoPost = async () => {
@@ -1132,19 +1136,17 @@ const _sfc_main = {
           ["label-width"]: "85px",
           ["label-position"]: "top"
         }),
-        aB: common_vendor.o(submitForm),
-        aC: currentTab.value === 0,
-        aD: currentTab.value === 1
+        aB: !isKeyboardShow.value
+      }, !isKeyboardShow.value ? {
+        aC: common_vendor.o(submitForm)
+      } : {}, {
+        aD: currentTab.value === 0,
+        aE: currentTab.value === 1
       }, currentTab.value === 1 ? {
-        aE: common_vendor.p({
+        aF: common_vendor.p({
           type: "info",
           size: "24",
           color: "#FF8700"
-        }),
-        aF: common_vendor.p({
-          type: "checkmarkempty",
-          size: "14",
-          color: "#fff"
         }),
         aG: common_vendor.p({
           type: "checkmarkempty",
@@ -1157,12 +1159,17 @@ const _sfc_main = {
           color: "#fff"
         }),
         aI: common_vendor.p({
+          type: "checkmarkempty",
+          size: "14",
+          color: "#fff"
+        }),
+        aJ: common_vendor.p({
           type: "compose",
           color: "#fff",
           size: "18"
         }),
-        aJ: common_vendor.o(goToLabelEditPage),
-        aK: common_vendor.p({
+        aK: common_vendor.o(goToLabelEditPage),
+        aL: common_vendor.p({
           datasets: radarDatasets.value,
           showTitle: true
         })

@@ -668,11 +668,13 @@
 		else {
 			const displayName = item.realName || item.nickname || item.homeTitle || '商友圈';
 
+			const avatarUrl = item.avatar || '';
+
 			// 组装路径并传递 ID 和 姓名
 			const url =
-				`/packages/my-friendList/my-friendList?userId=${item.id}&userName=${encodeURIComponent(displayName)}`;
+				`/packages/my-friendList/my-friendList?userId=${item.id}&userName=${encodeURIComponent(displayName)}&avatar=${encodeURIComponent(avatarUrl)}`;
 
-			console.log(`🚀 准备进入 [${displayName}] 的圈子:`, url);
+			console.log(`🚀 准备进入 [${displayName}] 的圈子，头像地址:`, avatarUrl);
 
 			uni.navigateTo({
 				url
