@@ -1,65 +1,89 @@
 <template>
 	<view class="system-construction-app">
-		<!-- ==================== 1. 顶部搜索区 ==================== -->
+		<!-- 1. 顶部搜索区：品牌渐变色背景 -->
 		<view class="header">
 			<view class="page-title">系统共建</view>
 			<view class="search-container">
-				<uni-icons type="search" size="20" color="#FF852B"></uni-icons>
-				<input type="text" v-model="searchQuery" class="search-input" placeholder="按标题搜索建议"
+				<uni-icons type="search" size="18" color="#999"></uni-icons>
+				<input type="text" v-model="searchQuery" class="search-input" placeholder="搜索您感兴趣的建议标题..."
 					confirm-type="search" @confirm="handleSearch" />
-				<button class="search-button" @click="handleSearch">搜索</button>
+				<view class="search-confirm-btn" @click="handleSearch">搜索</view>
 			</view>
 		</view>
 
-		<!-- ==================== 2. 导航Tabs ==================== -->
-		<view class="tabs">
-			<view class="tab" :class="{ active: activeTab === 'all' }" @click="handleTabClick('all')">全部建议</view>
-			<view class="tab" :class="{ active: activeTab === 'mine' }" @click="handleTabClick('mine')">我的建议</view>
+		<!-- 2. 导航Tabs：悬浮胶囊风格 -->
+		<view class="tabs-wrapper">
+			<view class="tabs">
+				<view class="tab" :class="{ active: activeTab === 'all' }" @click="handleTabClick('all')">
+					<text>全部建议</text>
+					<view class="active-line"></view>
+				</view>
+				<view class="tab" :class="{ active: activeTab === 'mine' }" @click="handleTabClick('mine')">
+					<text>我的发布</text>
+					<view class="active-line"></view>
+				</view>
+			</view>
 		</view>
 
-		<!-- ==================== 3. 建议列表 ==================== -->
+		<!-- 3. 建议列表区 -->
 		<view class="suggestion-list">
 			<view v-for="suggestion in suggestionList" :key="suggestion.id" class="suggestion-card">
-				<!-- 3.1 卡片头部：用户信息 -->
+				<!-- 3.1 卡片头部：用户信息与管理操作 -->
 				<view class="card-header">
-					<image :src="suggestion.user.avatar" mode="aspectFill" class="avatar" />
-					<view class="user-info">
-						<view class="user-name">{{ suggestion.user.name }}</view>
-						<view class="suggestion-time">{{ suggestion.time }}</view>
+					<view class="user-meta" @click.stop="goUserCard(suggestion.user.id)">
+						<image :src="suggestion.user.avatar || defaultAvatarUrl" mode="aspectFill" class="avatar" />
+						<view class="user-detail">
+							<text class="user-name">{{ suggestion.user.name }}</text>
+							<text class="post-time">{{ suggestion.time }}</text>
+						</view>
+					</view>
+
+					<!-- 管理操作区：仅本人可见 -->
+					<view v-if="loggedInUserId == suggestion.user.id" class="manage-group">
+						<view class="btn-mini edit" @click.stop="handleEditSuggestion(suggestion.id)">
+							<uni-icons type="compose" size="14" color="#FF852B"></uni-icons>
+							<text>编辑</text>
+						</view>
+						<view class="btn-mini delete" @click.stop="handleDeleteSuggestion(suggestion.id)">
+							<uni-icons type="trash" size="14" color="#999"></uni-icons>
+						</view>
 					</view>
 				</view>
 
-				<!-- 3.2 卡片内容：建议详情 -->
+				<!-- 3.2 卡片主体：内容展示 -->
 				<view class="card-body">
-					<view class="suggestion-title">{{ suggestion.title }}</view>
+					<view class="suggestion-title">
+						<!-- <text class="status-badge"
+							:class="'status-' + suggestion.rawStatus">{{ getStatusText(suggestion.rawStatus) }}</text> -->
+						{{ suggestion.title }}
+					</view>
 					<view v-if="suggestion.content" class="suggestion-content">{{ suggestion.content }}</view>
-					<!-- 使用 v-if 判断是否存在图片 -->
+
+					<!-- 图片展示网格 -->
 					<view class="suggestion-images" v-if="suggestion.images && suggestion.images.length > 0"
 						:class="['images-count-' + suggestion.images.length]">
-
-						<!-- 使用 v-for 循环渲染图片 -->
 						<view v-for="(image, imgIndex) in suggestion.images" :key="imgIndex" class="image-wrapper">
-							<image :src="image" class="suggestion-image"
-								:mode="suggestion.images.length === 1 ? 'widthFix' : 'aspectFill'"
+							<image :src="image" class="suggestion-image" mode="aspectFill"
 								@click.stop="previewImage(suggestion.images, imgIndex)" />
 						</view>
 					</view>
 				</view>
 			</view>
 
-			<!-- 3.3 列表加载状态 -->
+			<!-- 3.3 状态提示 -->
 			<view class="loading-status">
-				<view v-if="suggestionList.length === 0 && loadingStatus === 'noMore'" class="no-data-message">
-					暂无相关建议
+				<view v-if="suggestionList.length === 0 && loadingStatus === 'noMore'" class="empty-box">
+					<uni-icons type="info" size="50" color="#ddd"></uni-icons>
+					<text>暂无相关建议信息</text>
 				</view>
 				<uni-load-more v-else :status="loadingStatus" />
 			</view>
 		</view>
 
-		<!-- ==================== 4. 新建建议按钮 (FAB) ==================== -->
-		<view class="fab-container" @click="navigateToCreate">
+		<!-- 4. 悬浮新建按钮 -->
+		<view class="fab-btn" @click="navigateToCreate">
 			<uni-icons type="plusempty" size="24" color="#FFFFFF"></uni-icons>
-			<text class="fab-text">新建建议</text>
+			<text>提建议</text>
 		</view>
 	</view>
 </template>
@@ -71,407 +95,467 @@
 	import {
 		onLoad,
 		onReachBottom,
-		onPullDownRefresh
+		onPullDownRefresh,
+		onShow
 	} from '@dcloudio/uni-app';
-	import request from '../../utils/request.js'; // 确认路径是否正确
+	import request from '../../utils/request.js';
 
 	// ============================
-	// 1. 响应式状态定义
+	// 1. 响应式数据
 	// ============================
 	const loggedInUserId = ref(null);
 	const suggestionList = ref([]);
 	const searchQuery = ref('');
-	const activeTab = ref('all'); // 'all' 或 'mine'
-
+	const activeTab = ref('all');
 	const pageNo = ref(1);
-	const pageSize = ref(10);
-	const loadingStatus = ref('more'); // 'more', 'loading', 'noMore'
-	const defaultAvatarUrl = '/static/icon/default-avatar.png'; // 默认头像路径
+	const pageSize = 10;
+	const loadingStatus = ref('more');
+	const defaultAvatarUrl = '/static/icon/default-avatar.png';
 
 	// ============================
-	// 2. 生命周期钩子
+	// 2. 生命周期
 	// ============================
 	onLoad(() => {
 		loggedInUserId.value = uni.getStorageSync('userId');
-		getSuggestionList(true);
+	});
+
+	onShow(() => {
+		// 每次进入页面刷新列表，确保编辑后的内容同步
+		fetchSuggestionList(true);
 	});
 
 	onReachBottom(() => {
-		if (loadingStatus.value === 'more') {
-			getSuggestionList();
-		}
+		if (loadingStatus.value === 'more') fetchSuggestionList();
 	});
 
 	onPullDownRefresh(() => {
-		getSuggestionList(true);
+		fetchSuggestionList(true);
 	});
 
 	// ============================
-	// 3. 主要业务方法
+	// 3. 业务逻辑方法
 	// ============================
-	const getSuggestionList = async (isRefresh = false) => {
-		if (loadingStatus.value === 'loading' && !isRefresh) return;
 
+	/**
+	 * [接口方法] 获取建议列表
+	 * @param {Boolean} isRefresh 是否重置刷新
+	 */
+	const fetchSuggestionList = async (isRefresh = false) => {
+		if (loadingStatus.value === 'loading' && !isRefresh) return;
 		if (isRefresh) {
 			pageNo.value = 1;
-			suggestionList.value = [];
 			loadingStatus.value = 'more';
 		}
-
 		loadingStatus.value = 'loading';
 
-		// 构建请求参数
 		const params = {
 			pageNo: pageNo.value,
-			pageSize: pageSize.value,
+			pageSize: pageSize,
+			title: searchQuery.value || ''
 		};
-		if (searchQuery.value) {
-			params.title = searchQuery.value;
-		}
-		if (activeTab.value === 'mine' && loggedInUserId.value) {
-			params.creator = loggedInUserId.value;
-		}
+		// 如果是“我的”Tab，增加过滤条件
+		if (activeTab.value === 'mine') params.creator = loggedInUserId.value;
 
 		try {
 			const {
-				data: apiData,
+				data,
 				error
 			} = await request('/app-api/member/suggestion/list', {
 				method: 'GET',
 				data: params
 			});
 
-			if (error || !apiData || !apiData.list) {
+			if (isRefresh) uni.stopPullDownRefresh();
+
+			if (error || !data) {
 				loadingStatus.value = 'noMore';
-				if (error) uni.showToast({
-					title: `加载失败: ${error}`,
-					icon: 'none'
-				});
 				return;
 			}
 
-			// 数据映射，转换为模板友好的格式
-			const mappedData = apiData.list.map(item => ({
+			const mappedData = data.list.map(item => ({
 				id: item.id,
 				title: item.title,
 				content: item.content,
-				// images: item.img ? item.img.split(',').filter(Boolean) : [],
+				rawStatus: item.status, // 保存原始状态码用于样式
 				images: item.img ? item.img.split(',').filter(Boolean) : [],
 				time: formatTimestamp(item.createTime),
 				user: {
 					id: item.memberUser?.id || item.creator,
-					name: item.memberUser?.nickname || '匿名用户',
+					name: item.memberUser?.nickname || '商友',
 					avatar: item.memberUser?.avatar || defaultAvatarUrl
 				}
 			}));
 
 			suggestionList.value = isRefresh ? mappedData : [...suggestionList.value, ...mappedData];
-
-			// 更新加载状态
-			if (suggestionList.value.length >= apiData.total) {
-				loadingStatus.value = 'noMore';
-			} else {
-				loadingStatus.value = 'more';
-				pageNo.value++;
-			}
+			loadingStatus.value = suggestionList.value.length >= data.total ? 'noMore' : 'more';
+			if (loadingStatus.value === 'more') pageNo.value++;
 
 		} catch (err) {
-			console.error('getSuggestionList 逻辑异常:', err);
 			loadingStatus.value = 'more';
-			uni.showToast({
-				title: '页面加载异常',
-				icon: 'none'
-			});
-		} finally {
-			uni.stopPullDownRefresh();
 		}
 	};
 
-	// ============================
-	// 4. 事件处理方法
-	// ============================
-	const handleSearch = () => {
-		getSuggestionList(true);
+	/**
+	 * [方法] 执行删除操作
+	 */
+	const handleDeleteSuggestion = (id) => {
+		uni.showModal({
+			title: '确定删除？',
+			content: '删除后此共建建议将不再对他人展示。',
+			confirmColor: '#FF852B',
+			success: async (res) => {
+				if (res.confirm) {
+					uni.showLoading({
+						title: '处理中...'
+					});
+					const {
+						error
+					} = await request(`/app-api/member/suggestion/delete?id=${id}`, {
+						method: 'DELETE'
+					});
+					uni.hideLoading();
+					if (!error) {
+						uni.showToast({
+							title: '已删除'
+						});
+						suggestionList.value = suggestionList.value.filter(item => item.id !== id);
+					}
+				}
+			}
+		});
 	};
 
+	/**
+	 * [方法] 跳转至编辑页
+	 */
+	const handleEditSuggestion = (id) => {
+		uni.navigateTo({
+			url: `/pages/my-systemSuggestions/my-systemSuggestions?id=${id}`
+		});
+	};
+
+	/**
+	 * [方法] 跳转到详情页面
+	 * @param {Number} id - 建议ID
+	 */
+	const goDetail = (id) => {
+		uni.navigateTo({
+			url: `/packages/suggestion-detail/suggestion-detail?id=${id}`
+		});
+	};
+
+	/**
+	 * [方法] 切换Tab筛选
+	 */
 	const handleTabClick = (tab) => {
 		if (activeTab.value === tab) return;
 		activeTab.value = tab;
-		getSuggestionList(true);
+		fetchSuggestionList(true);
 	};
 
+	/**
+	 * [方法] 处理搜索
+	 */
+	const handleSearch = () => fetchSuggestionList(true);
 
-
+	/**
+	 * [方法] 新建建议跳转
+	 */
 	const navigateToCreate = () => {
 		uni.navigateTo({
-			url: '/pages/my-systemSuggestions/my-systemSuggestions' // 请确认此路径是否正确
+			url: '/pages/my-systemSuggestions/my-systemSuggestions'
 		});
 	};
 
-	const previewImage = (images, currentIndex) => {
+	/**
+	 * [方法] 图片大图预览
+	 */
+	const previewImage = (images, index) => {
 		uni.previewImage({
-			urls: images, // 传入图片数组
-			current: currentIndex // 传入当前点击的图片索引
+			urls: images,
+			current: index
+		});
+	};
+
+	/**
+	 * [方法] 跳转至用户名片
+	 */
+	const goUserCard = (userId) => {
+		if (!userId) return;
+		uni.navigateTo({
+			url: `/packages/my-businessCard/my-businessCard?id=${userId}`
 		});
 	};
 
 	// ============================
-	// 5. 辅助函数
+	// 4. 辅助函数
 	// ============================
-	const formatTimestamp = (timestamp) => {
-		if (!timestamp) return '';
-		const date = new Date(timestamp);
-		const Y = date.getFullYear();
-		const M = (date.getMonth() + 1).toString().padStart(2, '0');
-		const D = date.getDate().toString().padStart(2, '0');
-		const h = date.getHours().toString().padStart(2, '0');
-		const m = date.getMinutes().toString().padStart(2, '0');
-		return `${Y}-${M}-${D} ${h}:${m}`;
+	const getStatusText = (status) => {
+		const map = {
+			0: '待处理',
+			1: '已采纳',
+			2: '处理中'
+		};
+		return map[status] || '已公示';
+	};
+
+	const formatTimestamp = (ts) => {
+		if (!ts) return '';
+		const d = new Date(ts);
+		return `${d.getMonth() + 1}-${d.getDate()} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
 	};
 </script>
 
-<style scoped>
-	/* 主题色 */
-	:root {
-		--theme-color: #FF852B;
-	}
+<style scoped lang="scss">
+	$theme: #FF852B;
 
 	.system-construction-app {
-		background-color: #f7f8fa;
+		background-color: #F8F9FA;
 		min-height: 100vh;
-		padding-bottom: 180rpx;
-		/* 为FAB按钮留出空间 */
+		padding-bottom: 200rpx;
 	}
 
-	/* 1. 顶部搜索区 */
+	/* 1. 顶部 Header */
 	.header {
-		background: linear-gradient(135deg, #FF852B, #FFAC70);
-		padding: 30rpx 30rpx 40rpx;
-		border-radius: 0 0 40rpx 40rpx;
+		background: linear-gradient(135deg, $theme, #FFAC70);
+		padding: 40rpx 30rpx 60rpx;
+		border-radius: 0 0 50rpx 50rpx;
+
+		.page-title {
+			font-size: 40rpx;
+			font-weight: bold;
+			color: #fff;
+			margin-bottom: 30rpx;
+		}
+
+		.search-container {
+			display: flex;
+			align-items: center;
+			background: #fff;
+			border-radius: 50rpx;
+			padding: 10rpx 10rpx 10rpx 30rpx;
+
+			.search-input {
+				flex: 1;
+				font-size: 26rpx;
+			}
+
+			.search-confirm-btn {
+				background: $theme;
+				color: #fff;
+				font-size: 24rpx;
+				font-weight: bold;
+				padding: 12rpx 30rpx;
+				border-radius: 40rpx;
+				margin-left: 10rpx;
+			}
+		}
 	}
 
-	.page-title {
-		font-size: 44rpx;
-		font-weight: bold;
-		color: white;
-		margin-bottom: 30rpx;
-		text-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.1);
+	/* 2. Tabs 胶囊风格 */
+	.tabs-wrapper {
+		padding: 0 30rpx;
+		margin-top: -30rpx;
 	}
 
-	.search-container {
-		display: flex;
-		align-items: center;
-		background: #ffffff;
-		border-radius: 50rpx;
-		padding: 10rpx 20rpx;
-	}
-
-	.search-input {
-		flex: 1;
-		font-size: 28rpx;
-		margin-left: 16rpx;
-	}
-
-	.search-button {
-		background: #FF852B;
-		color: white;
-		border-radius: 30rpx;
-		padding: 10rpx 30rpx;
-		font-size: 28rpx;
-		margin-left: 20rpx;
-		line-height: 1.5;
-	}
-
-	.search-button::after {
-		border: none;
-	}
-
-	/* 2. 导航Tabs */
 	.tabs {
 		display: flex;
-		background: white;
-		margin: 30rpx;
-		border-radius: 16rpx;
-		box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.04);
+		background: #fff;
+		border-radius: 20rpx;
+		box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.05);
+
+		.tab {
+			flex: 1;
+			text-align: center;
+			padding: 24rpx 0;
+			font-size: 28rpx;
+			color: #666;
+			position: relative;
+
+			&.active {
+				color: $theme;
+				font-weight: bold;
+
+				.active-line {
+					position: absolute;
+					bottom: 0;
+					left: 50%;
+					transform: translateX(-50%);
+					width: 40rpx;
+					height: 6rpx;
+					background: $theme;
+					border-radius: 3rpx;
+				}
+			}
+		}
 	}
 
-	.tab {
-		flex: 1;
-		text-align: center;
-		padding: 24rpx 0;
-		font-size: 30rpx;
-		color: #666;
-		position: relative;
-	}
-
-	.tab.active {
-		color: #FF852B;
-		font-weight: bold;
-	}
-
-	.tab.active::after {
-		content: "";
-		position: absolute;
-		bottom: 0;
-		left: 50%;
-		transform: translateX(-50%);
-		width: 60rpx;
-		height: 6rpx;
-		background-color: #FF852B;
-		border-radius: 3rpx;
-	}
-
-	/* 3. 建议列表 */
+	/* 3. 建议卡片设计 */
 	.suggestion-list {
-		padding: 0 30rpx;
+		padding: 30rpx;
 	}
 
 	.suggestion-card {
-		background: white;
-		border-radius: 20rpx;
+		background: #fff;
+		border-radius: 24rpx;
 		padding: 30rpx;
 		margin-bottom: 30rpx;
-		box-shadow: 0 6rpx 24rpx rgba(0, 0, 0, 0.06);
+		box-shadow: 0 4rpx 24rpx rgba(0, 0, 0, 0.02);
+
+		&:active {
+			transform: scale(0.99);
+		}
 	}
 
 	.card-header {
 		display: flex;
-		align-items: center;
+		justify-content: space-between;
+		align-items: flex-start;
 		margin-bottom: 24rpx;
+
+		.user-meta {
+			display: flex;
+			align-items: center;
+			gap: 16rpx;
+
+			.avatar {
+				width: 72rpx;
+				height: 72rpx;
+				border-radius: 50%;
+				background: #f0f0f0;
+			}
+
+			.user-name {
+				font-size: 28rpx;
+				font-weight: bold;
+				color: #333;
+				display: block;
+			}
+
+			.post-time {
+				font-size: 20rpx;
+				color: #BBB;
+			}
+		}
 	}
 
-	.avatar {
-		width: 80rpx;
-		height: 80rpx;
-		border-radius: 50%;
-		margin-right: 20rpx;
-		background-color: #eee;
-		flex-shrink: 0;
+	/* 按钮组 */
+	.manage-group {
+		display: flex;
+		gap: 16rpx;
 	}
 
-	.user-info {
-		flex: 1;
-	}
+	.btn-mini {
+		padding: 8rpx 20rpx;
+		border-radius: 30rpx;
+		font-size: 22rpx;
+		display: flex;
+		align-items: center;
+		gap: 4rpx;
 
-	.user-name {
-		font-size: 30rpx;
-		font-weight: 600;
-		color: #333;
-	}
+		&.edit {
+			background: #FFF5EE;
+			color: $theme;
+			border: 1rpx solid rgba($theme, 0.2);
+		}
 
-	.suggestion-time {
-		font-size: 24rpx;
-		color: #999;
+		&.delete {
+			background: #F8F8F8;
+			color: #999;
+		}
 	}
-
-	.card-body {}
 
 	.suggestion-title {
-		font-size: 32rpx;
+		font-size: 30rpx;
 		font-weight: bold;
 		color: #222;
-		margin-bottom: 16rpx;
+		margin-bottom: 12rpx;
+		display: flex;
+		align-items: center;
+		gap: 12rpx;
+
+		.status-badge {
+			font-size: 18rpx;
+			padding: 4rpx 12rpx;
+			border-radius: 6rpx;
+			font-weight: normal;
+
+			&.status-0 {
+				background: #f0f0f0;
+				color: #999;
+			}
+
+			&.status-1 {
+				background: #EFFFF4;
+				color: #4CAF50;
+			}
+		}
 	}
 
 	.suggestion-content {
-		font-size: 28rpx;
-		color: #555;
+		font-size: 26rpx;
+		color: #666;
 		line-height: 1.6;
 		margin-bottom: 20rpx;
-		white-space: pre-wrap;
 	}
 
-	/* .suggestion-image {
-		width: 100%;
-		border-radius: 12rpx;
-		margin-top: 10rpx;
-	} */
-	/* ==================== 【新增】3x3 网格布局样式 ==================== */
+	/* 图片网格自适应 */
 	.suggestion-images {
 		display: grid;
 		grid-template-columns: repeat(3, 1fr);
-		/* 创建3列等宽网格 */
 		gap: 10rpx;
-		/* 图片之间的间距 */
 		margin-top: 20rpx;
 	}
 
 	.image-wrapper {
 		width: 100%;
+		aspect-ratio: 1/1;
 		border-radius: 12rpx;
 		overflow: hidden;
-		aspect-ratio: 1 / 1;
-		/* 保持1:1的正方形比例 */
+
+		.suggestion-image {
+			width: 100%;
+			height: 100%;
+		}
 	}
 
-	.suggestion-image {
-		width: 100%;
-		height: 100%;
-		display: block;
+	.images-count-1 {
+		grid-template-columns: 1fr;
+
+		.image-wrapper {
+			aspect-ratio: 16/9;
+		}
 	}
 
-	.images-count-1 .image-wrapper {
-		grid-column: 1 / -1;
-		/* 占据所有列 */
-		aspect-ratio: unset;
-		/* 取消正方形比例限制 */
-		width: 100%;
-		/* 确保容器宽度 100% */
-	}
-
-	.images-count-1 .suggestion-image {
-		width: 100%;
-		/* 宽度撑满 */
-		height: auto;
-		/* 高度自适应 */
-		max-height: 500rpx;
-		/* (可选) 防止长图占满整个屏幕，稍微限制一下最大高度 */
-		border-radius: 12rpx;
-		display: block;
-		/* 消除图片底部空隙 */
-	}
-
-	/* 为2张或4张图片时使用2列布局，更美观 */
 	.images-count-2,
 	.images-count-4 {
 		grid-template-columns: repeat(2, 1fr);
 	}
 
-	/* ============================================================== */
-
-	.loading-status {
-		padding: 20rpx 0;
-	}
-
-	.no-data-message {
-		text-align: center;
-		color: #999;
-		padding: 40rpx 0;
-	}
-
-	/* 4. 新建建议按钮 (FAB) */
-	.fab-container {
+	/* 悬浮按钮 */
+	.fab-btn {
 		position: fixed;
-		bottom: 100rpx;
+		bottom: 60rpx;
 		right: 40rpx;
-		background: linear-gradient(135deg, #FF852B, #FFAC70);
-		color: white;
+		background: linear-gradient(135deg, $theme, #FFAC70);
+		color: #fff;
 		border-radius: 50rpx;
-		padding: 20rpx 40rpx;
+		padding: 24rpx 46rpx;
 		display: flex;
 		align-items: center;
-		box-shadow: 0 8rpx 24rpx rgba(255, 133, 43, 0.4);
-		z-index: 10;
-		transition: transform 0.2s ease-in-out;
-	}
-
-	.fab-container:active {
-		transform: scale(0.95);
-	}
-
-	.fab-text {
+		gap: 10rpx;
+		box-shadow: 0 10rpx 30rpx rgba($theme, 0.3);
+		font-weight: bold;
 		font-size: 28rpx;
-		font-weight: 500;
-		margin-left: 10rpx;
+	}
+
+	.empty-box {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		padding-top: 100rpx;
+		color: #ccc;
+		font-size: 24rpx;
+		gap: 20rpx;
 	}
 </style>

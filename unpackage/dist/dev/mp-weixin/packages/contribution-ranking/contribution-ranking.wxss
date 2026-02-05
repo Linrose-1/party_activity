@@ -1,0 +1,212 @@
+/* 水平间距 */
+/* 水平间距 */
+.rank-page.data-v-3c4f4856 {
+  background-color: #F8F9FB;
+  min-height: 100vh;
+}
+
+/* 1. 顶部荣誉背景 */
+.rank-header.data-v-3c4f4856 {
+  background: linear-gradient(180deg, #FF7D00 0%, #FFAC70 100%);
+  padding: 60rpx 30rpx 40rpx;
+  border-radius: 0 0 60rpx 60rpx;
+  color: #fff;
+}
+.rank-header .rank-title-box.data-v-3c4f4856 {
+  text-align: center;
+  margin-bottom: 60rpx;
+}
+.rank-header .rank-title-box .rank-main-title.data-v-3c4f4856 {
+  font-size: 48rpx;
+  font-weight: 900;
+  display: block;
+  letter-spacing: 4rpx;
+}
+.rank-header .rank-title-box .rank-sub-title.data-v-3c4f4856 {
+  font-size: 24rpx;
+  opacity: 0.8;
+  margin-top: 10rpx;
+  display: block;
+}
+
+/* 2. 领奖台样式 */
+.podium.data-v-3c4f4856 {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 20rpx;
+  margin-bottom: 20rpx;
+}
+.podium .podium-item.data-v-3c4f4856 {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+}
+.podium .podium-item .avatar-wrap.data-v-3c4f4856 {
+  position: relative;
+  margin-bottom: 16rpx;
+}
+.podium .podium-item .avatar-wrap .avatar.data-v-3c4f4856 {
+  border: 6rpx solid #fff;
+  box-shadow: 0 10rpx 20rpx rgba(0, 0, 0, 0.1);
+}
+.podium .podium-item .avatar-wrap .crown.data-v-3c4f4856 {
+  position: absolute;
+  bottom: -10rpx;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 44rpx;
+  height: 44rpx;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24rpx;
+  font-weight: bold;
+  color: #fff;
+  border: 4rpx solid #fff;
+}
+.podium .podium-item .avatar-wrap .crown.gold.data-v-3c4f4856 {
+  background: linear-gradient(135deg, #FFD700, #FFA500);
+  width: 56rpx;
+  height: 56rpx;
+  bottom: -15rpx;
+}
+.podium .podium-item .avatar-wrap .crown.silver.data-v-3c4f4856 {
+  background: #B8C4D9;
+}
+.podium .podium-item .avatar-wrap .crown.bronze.data-v-3c4f4856 {
+  background: #CD7F32;
+}
+.podium .podium-item .name.data-v-3c4f4856 {
+  font-size: 28rpx;
+  font-weight: bold;
+  width: 160rpx;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.podium .podium-item .score.data-v-3c4f4856 {
+  font-size: 22rpx;
+  opacity: 0.9;
+  margin-top: 4rpx;
+}
+.podium .podium-item.rank-1.data-v-3c4f4856 {
+  order: 2;
+  margin-bottom: 40rpx;
+}
+.podium .podium-item.rank-1 .avatar.data-v-3c4f4856 {
+  width: 160rpx;
+  height: 160rpx;
+  border-radius: 50%;
+}
+.podium .podium-item.rank-2.data-v-3c4f4856 {
+  order: 1;
+}
+.podium .podium-item.rank-2 .avatar.data-v-3c4f4856 {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 50%;
+}
+.podium .podium-item.rank-3.data-v-3c4f4856 {
+  order: 3;
+}
+.podium .podium-item.rank-3 .avatar.data-v-3c4f4856 {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 50%;
+}
+
+/* 3. 列表区域 */
+.rank-list-content.data-v-3c4f4856 {
+  padding: 40rpx 30rpx;
+}
+.rank-list-content .list-header.data-v-3c4f4856 {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30rpx;
+}
+.rank-list-content .list-header text.data-v-3c4f4856 {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+}
+.rank-list-content .list-header .limit-tip.data-v-3c4f4856 {
+  font-size: 22rpx;
+  color: #999;
+  font-weight: normal;
+}
+.rank-item.data-v-3c4f4856 {
+  background: #fff;
+  border-radius: 24rpx;
+  padding: 24rpx 30rpx;
+  margin-bottom: 20rpx;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.02);
+}
+.rank-item .rank-num.data-v-3c4f4856 {
+  width: 60rpx;
+  font-size: 32rpx;
+  font-style: italic;
+  color: #BBB;
+  font-weight: bold;
+}
+.rank-item .u-avatar.data-v-3c4f4856 {
+  width: 90rpx;
+  height: 90rpx;
+  border-radius: 50%;
+  margin-right: 20rpx;
+  background: #f0f0f0;
+}
+.rank-item .u-info.data-v-3c4f4856 {
+  flex: 1;
+  min-width: 0;
+}
+.rank-item .u-info .u-top.data-v-3c4f4856 {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  margin-bottom: 6rpx;
+}
+.rank-item .u-info .u-name.data-v-3c4f4856 {
+  font-size: 30rpx;
+  font-weight: bold;
+  color: #333;
+}
+.rank-item .u-info .u-level.data-v-3c4f4856 {
+  font-size: 18rpx;
+  color: #FF7D00;
+  border: 1rpx solid #FF7D00;
+  padding: 2rpx 10rpx;
+  border-radius: 20rpx;
+}
+.rank-item .u-info .u-desc.data-v-3c4f4856 {
+  font-size: 24rpx;
+  color: #999;
+}
+.rank-item .u-score.data-v-3c4f4856 {
+  text-align: right;
+}
+.rank-item .u-score .score-val.data-v-3c4f4856 {
+  font-size: 36rpx;
+  font-weight: 800;
+  color: #FF7D00;
+  display: block;
+  line-height: 1;
+}
+.rank-item .u-score .score-unit.data-v-3c4f4856 {
+  font-size: 20rpx;
+  color: #999;
+}
+.text-ellipsis.data-v-3c4f4856 {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.loading-box.data-v-3c4f4856 {
+  padding-top: 100rpx;
+}

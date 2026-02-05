@@ -75,6 +75,9 @@ if (!Math) {
   "./packages/relationship-path/relationship-path.js";
   "./packages/user-view-trace/user-view-trace.js";
   "./packages/my-friendList/my-friendList.js";
+  "./packages/resource-match/resource-match.js";
+  "./packages/contribution-ranking/contribution-ranking.js";
+  "./packages/suggestion-detail/suggestion-detail.js";
 }
 const _sfc_main = {
   data() {

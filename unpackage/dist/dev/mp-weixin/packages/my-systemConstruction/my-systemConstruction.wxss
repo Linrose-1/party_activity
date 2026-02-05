@@ -1,218 +1,222 @@
-
-	/* 主题色 */
-.data-v-d9b70221:root {
-		--theme-color: #FF852B;
-}
+/* 水平间距 */
+/* 水平间距 */
 .system-construction-app.data-v-d9b70221 {
-		background-color: #f7f8fa;
-		min-height: 100vh;
-		padding-bottom: 180rpx;
-		/* 为FAB按钮留出空间 */
+  background-color: #F8F9FA;
+  min-height: 100vh;
+  padding-bottom: 200rpx;
 }
 
-	/* 1. 顶部搜索区 */
+/* 1. 顶部 Header */
 .header.data-v-d9b70221 {
-		background: linear-gradient(135deg, #FF852B, #FFAC70);
-		padding: 30rpx 30rpx 40rpx;
-		border-radius: 0 0 40rpx 40rpx;
+  background: linear-gradient(135deg, #FF852B, #FFAC70);
+  padding: 40rpx 30rpx 60rpx;
+  border-radius: 0 0 50rpx 50rpx;
 }
-.page-title.data-v-d9b70221 {
-		font-size: 44rpx;
-		font-weight: bold;
-		color: white;
-		margin-bottom: 30rpx;
-		text-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.1);
+.header .page-title.data-v-d9b70221 {
+  font-size: 40rpx;
+  font-weight: bold;
+  color: #fff;
+  margin-bottom: 30rpx;
 }
-.search-container.data-v-d9b70221 {
-		display: flex;
-		align-items: center;
-		background: #ffffff;
-		border-radius: 50rpx;
-		padding: 10rpx 20rpx;
+.header .search-container.data-v-d9b70221 {
+  display: flex;
+  align-items: center;
+  background: #fff;
+  border-radius: 50rpx;
+  padding: 10rpx 10rpx 10rpx 30rpx;
 }
-.search-input.data-v-d9b70221 {
-		flex: 1;
-		font-size: 28rpx;
-		margin-left: 16rpx;
+.header .search-container .search-input.data-v-d9b70221 {
+  flex: 1;
+  font-size: 26rpx;
 }
-.search-button.data-v-d9b70221 {
-		background: #FF852B;
-		color: white;
-		border-radius: 30rpx;
-		padding: 10rpx 30rpx;
-		font-size: 28rpx;
-		margin-left: 20rpx;
-		line-height: 1.5;
-}
-.search-button.data-v-d9b70221::after {
-		border: none;
+.header .search-container .search-confirm-btn.data-v-d9b70221 {
+  background: #FF852B;
+  color: #fff;
+  font-size: 24rpx;
+  font-weight: bold;
+  padding: 12rpx 30rpx;
+  border-radius: 40rpx;
+  margin-left: 10rpx;
 }
 
-	/* 2. 导航Tabs */
+/* 2. Tabs 胶囊风格 */
+.tabs-wrapper.data-v-d9b70221 {
+  padding: 0 30rpx;
+  margin-top: -30rpx;
+}
 .tabs.data-v-d9b70221 {
-		display: flex;
-		background: white;
-		margin: 30rpx;
-		border-radius: 16rpx;
-		box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.04);
+  display: flex;
+  background: #fff;
+  border-radius: 20rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.05);
 }
-.tab.data-v-d9b70221 {
-		flex: 1;
-		text-align: center;
-		padding: 24rpx 0;
-		font-size: 30rpx;
-		color: #666;
-		position: relative;
+.tabs .tab.data-v-d9b70221 {
+  flex: 1;
+  text-align: center;
+  padding: 24rpx 0;
+  font-size: 28rpx;
+  color: #666;
+  position: relative;
 }
-.tab.active.data-v-d9b70221 {
-		color: #FF852B;
-		font-weight: bold;
+.tabs .tab.active.data-v-d9b70221 {
+  color: #FF852B;
+  font-weight: bold;
 }
-.tab.active.data-v-d9b70221::after {
-		content: "";
-		position: absolute;
-		bottom: 0;
-		left: 50%;
-		transform: translateX(-50%);
-		width: 60rpx;
-		height: 6rpx;
-		background-color: #FF852B;
-		border-radius: 3rpx;
+.tabs .tab.active .active-line.data-v-d9b70221 {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40rpx;
+  height: 6rpx;
+  background: #FF852B;
+  border-radius: 3rpx;
 }
 
-	/* 3. 建议列表 */
+/* 3. 建议卡片设计 */
 .suggestion-list.data-v-d9b70221 {
-		padding: 0 30rpx;
+  padding: 30rpx;
 }
 .suggestion-card.data-v-d9b70221 {
-		background: white;
-		border-radius: 20rpx;
-		padding: 30rpx;
-		margin-bottom: 30rpx;
-		box-shadow: 0 6rpx 24rpx rgba(0, 0, 0, 0.06);
+  background: #fff;
+  border-radius: 24rpx;
+  padding: 30rpx;
+  margin-bottom: 30rpx;
+  box-shadow: 0 4rpx 24rpx rgba(0, 0, 0, 0.02);
+}
+.suggestion-card.data-v-d9b70221:active {
+  transform: scale(0.99);
 }
 .card-header.data-v-d9b70221 {
-		display: flex;
-		align-items: center;
-		margin-bottom: 24rpx;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24rpx;
 }
-.avatar.data-v-d9b70221 {
-		width: 80rpx;
-		height: 80rpx;
-		border-radius: 50%;
-		margin-right: 20rpx;
-		background-color: #eee;
-		flex-shrink: 0;
+.card-header .user-meta.data-v-d9b70221 {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
 }
-.user-info.data-v-d9b70221 {
-		flex: 1;
+.card-header .user-meta .avatar.data-v-d9b70221 {
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: 50%;
+  background: #f0f0f0;
 }
-.user-name.data-v-d9b70221 {
-		font-size: 30rpx;
-		font-weight: 600;
-		color: #333;
+.card-header .user-meta .user-name.data-v-d9b70221 {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #333;
+  display: block;
 }
-.suggestion-time.data-v-d9b70221 {
-		font-size: 24rpx;
-		color: #999;
+.card-header .user-meta .post-time.data-v-d9b70221 {
+  font-size: 20rpx;
+  color: #BBB;
 }
-.card-body.data-v-d9b70221 {}
+
+/* 按钮组 */
+.manage-group.data-v-d9b70221 {
+  display: flex;
+  gap: 16rpx;
+}
+.btn-mini.data-v-d9b70221 {
+  padding: 8rpx 20rpx;
+  border-radius: 30rpx;
+  font-size: 22rpx;
+  display: flex;
+  align-items: center;
+  gap: 4rpx;
+}
+.btn-mini.edit.data-v-d9b70221 {
+  background: #FFF5EE;
+  color: #FF852B;
+  border: 1rpx solid rgba(255, 133, 43, 0.2);
+}
+.btn-mini.delete.data-v-d9b70221 {
+  background: #F8F8F8;
+  color: #999;
+}
 .suggestion-title.data-v-d9b70221 {
-		font-size: 32rpx;
-		font-weight: bold;
-		color: #222;
-		margin-bottom: 16rpx;
+  font-size: 30rpx;
+  font-weight: bold;
+  color: #222;
+  margin-bottom: 12rpx;
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+.suggestion-title .status-badge.data-v-d9b70221 {
+  font-size: 18rpx;
+  padding: 4rpx 12rpx;
+  border-radius: 6rpx;
+  font-weight: normal;
+}
+.suggestion-title .status-badge.status-0.data-v-d9b70221 {
+  background: #f0f0f0;
+  color: #999;
+}
+.suggestion-title .status-badge.status-1.data-v-d9b70221 {
+  background: #EFFFF4;
+  color: #4CAF50;
 }
 .suggestion-content.data-v-d9b70221 {
-		font-size: 28rpx;
-		color: #555;
-		line-height: 1.6;
-		margin-bottom: 20rpx;
-		white-space: pre-wrap;
+  font-size: 26rpx;
+  color: #666;
+  line-height: 1.6;
+  margin-bottom: 20rpx;
 }
 
-	/* .suggestion-image {
-		width: 100%;
-		border-radius: 12rpx;
-		margin-top: 10rpx;
-	} */
-	/* ==================== 【新增】3x3 网格布局样式 ==================== */
+/* 图片网格自适应 */
 .suggestion-images.data-v-d9b70221 {
-		display: grid;
-		grid-template-columns: repeat(3, 1fr);
-		/* 创建3列等宽网格 */
-		gap: 10rpx;
-		/* 图片之间的间距 */
-		margin-top: 20rpx;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10rpx;
+  margin-top: 20rpx;
 }
 .image-wrapper.data-v-d9b70221 {
-		width: 100%;
-		border-radius: 12rpx;
-		overflow: hidden;
-		aspect-ratio: 1 / 1;
-		/* 保持1:1的正方形比例 */
+  width: 100%;
+  aspect-ratio: 1/1;
+  border-radius: 12rpx;
+  overflow: hidden;
 }
-.suggestion-image.data-v-d9b70221 {
-		width: 100%;
-		height: 100%;
-		display: block;
+.image-wrapper .suggestion-image.data-v-d9b70221 {
+  width: 100%;
+  height: 100%;
+}
+.images-count-1.data-v-d9b70221 {
+  grid-template-columns: 1fr;
 }
 .images-count-1 .image-wrapper.data-v-d9b70221 {
-		grid-column: 1 / -1;
-		/* 占据所有列 */
-		aspect-ratio: unset;
-		/* 取消正方形比例限制 */
-		width: 100%;
-		/* 确保容器宽度 100% */
+  aspect-ratio: 16/9;
 }
-.images-count-1 .suggestion-image.data-v-d9b70221 {
-		width: 100%;
-		/* 宽度撑满 */
-		height: auto;
-		/* 高度自适应 */
-		max-height: 500rpx;
-		/* (可选) 防止长图占满整个屏幕，稍微限制一下最大高度 */
-		border-radius: 12rpx;
-		display: block;
-		/* 消除图片底部空隙 */
-}
-
-	/* 为2张或4张图片时使用2列布局，更美观 */
 .images-count-2.data-v-d9b70221,
-	.images-count-4.data-v-d9b70221 {
-		grid-template-columns: repeat(2, 1fr);
+.images-count-4.data-v-d9b70221 {
+  grid-template-columns: repeat(2, 1fr);
 }
 
-	/* ============================================================== */
-.loading-status.data-v-d9b70221 {
-		padding: 20rpx 0;
+/* 悬浮按钮 */
+.fab-btn.data-v-d9b70221 {
+  position: fixed;
+  bottom: 60rpx;
+  right: 40rpx;
+  background: linear-gradient(135deg, #FF852B, #FFAC70);
+  color: #fff;
+  border-radius: 50rpx;
+  padding: 24rpx 46rpx;
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  box-shadow: 0 10rpx 30rpx rgba(255, 133, 43, 0.3);
+  font-weight: bold;
+  font-size: 28rpx;
 }
-.no-data-message.data-v-d9b70221 {
-		text-align: center;
-		color: #999;
-		padding: 40rpx 0;
-}
-
-	/* 4. 新建建议按钮 (FAB) */
-.fab-container.data-v-d9b70221 {
-		position: fixed;
-		bottom: 100rpx;
-		right: 40rpx;
-		background: linear-gradient(135deg, #FF852B, #FFAC70);
-		color: white;
-		border-radius: 50rpx;
-		padding: 20rpx 40rpx;
-		display: flex;
-		align-items: center;
-		box-shadow: 0 8rpx 24rpx rgba(255, 133, 43, 0.4);
-		z-index: 10;
-		transition: transform 0.2s ease-in-out;
-}
-.fab-container.data-v-d9b70221:active {
-		transform: scale(0.95);
-}
-.fab-text.data-v-d9b70221 {
-		font-size: 28rpx;
-		font-weight: 500;
-		margin-left: 10rpx;
+.empty-box.data-v-d9b70221 {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 100rpx;
+  color: #ccc;
+  font-size: 24rpx;
+  gap: 20rpx;
 }

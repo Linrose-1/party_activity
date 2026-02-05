@@ -75,7 +75,10 @@
         "enterprise-card/enterprise-card",
         "relationship-path/relationship-path",
         "user-view-trace/user-view-trace",
-        "my-friendList/my-friendList"
+        "my-friendList/my-friendList",
+        "resource-match/resource-match",
+        "contribution-ranking/contribution-ranking",
+        "suggestion-detail/suggestion-detail"
       ]
     }
   ],

@@ -112,10 +112,23 @@
 							</view>
 						</view>
 					</view>
-					<button v-if="isLogin && loggedInUserId !== post.user.id" class="follow-button"
+					<!-- <button v-if="isLogin && loggedInUserId !== post.user.id" class="follow-button"
 						:class="{ 'followed': post.isFollowedUser }" @click.stop="toggleFollow(post)">
 						{{ post.isFollowedUser ? '已关注' : '关注' }}
-					</button>
+					</button> -->
+					<view class="header-right-action" v-if="isLogin">
+						<!-- 场景 A: 别人的帖子 -> 显示关注/已关注 -->
+						<button v-if="loggedInUserId !== post.user.managerId" class="follow-button"
+							:class="{ 'followed': post.isFollowedUser }" @click.stop="toggleFollow(post)">
+							{{ post.isFollowedUser ? '已关注' : '关注' }}
+						</button>
+
+						<!-- 场景 B: 自己的帖子 -> 显示编辑按钮 -->
+						<button v-else class="home-edit-btn" @click.stop="handleEdit(post.id)">
+							<uni-icons type="compose" size="14" color="#FF6A00"></uni-icons>
+							<text>编辑</text>
+						</button>
+					</view>
 				</view>
 
 				<!-- 3.2 卡片内容-->
@@ -183,7 +196,11 @@
 								:color="post.isSaved ? '#FF6A00' : '#666'" />
 							<span>{{ post.isSaved ? '已收藏' : '收藏' }}</span>
 						</view>
-						<view class="action delete-btn" v-if="isLogin && loggedInUserId === post.user.id"
+						<!-- <view class="action delete-btn" v-if="isLogin && loggedInUserId === post.user.id"
+							@click.stop="deletePost(post)">
+							<uni-icons type="trash" size="20" color="#e74c3c" />
+						</view> -->
+						<view class="action delete-btn" v-if="isLogin && loggedInUserId == post.user.managerId"
 							@click.stop="deletePost(post)">
 							<uni-icons type="trash" size="20" color="#e74c3c" />
 						</view>
@@ -562,6 +579,21 @@
 	 * [方法] 获取动态轮播图口号数据
 	 */
 	const fetchSwiperData = async () => {
+		// 1. 定义平台默认的兜底数据
+		const defaultSlide = {
+			id: 0,
+			homeTitle: '猩聚社',
+			homeSlogan: '商友连接·商机分享'
+		};
+
+		const token = uni.getStorageSync('token');
+
+		// 2. 如果未登录，直接显示兜底图并返回
+		if (!token) {
+			swiperList.value = [defaultSlide];
+			return;
+		}
+
 		try {
 			const {
 				data,
@@ -569,12 +601,18 @@
 			} = await request('/app-api/member/user/get-slogans-by-Friend', {
 				method: 'GET'
 			});
-			if (!error && data) {
-				// 将接口返回的数组存入本地状态
+
+			// 3. 如果接口成功且有数据，使用接口数据
+			if (!error && data && data.length > 0) {
 				swiperList.value = data;
-				console.log('✅ 轮播口号数据加载完成:', swiperList.value.length);
+				console.log('✅ 轮播口号加载完成');
+			} else {
+				// 4. 如果接口返回空或者报错，使用兜底数据
+				swiperList.value = [defaultSlide];
 			}
 		} catch (e) {
+			// 5. 网络异常情况下的保底
+			swiperList.value = [defaultSlide];
 			console.error('获取轮播数据异常', e);
 		}
 	};
@@ -584,14 +622,50 @@
 	 * @param {Object} item - 对应的数据项
 	 * @param {Number} index - 数组索引
 	 */
+	// const handleSwiperItemClick = (item, index) => {
+	// 	// 按照需求：第一个(index 0)表示自己
+	// 	if (index === 0) {
+	// 		// 跳转到：我的首页定制页面
+	// 		goToCustomizationPage();
+	// 	} else {
+	// 		// 跳转到：该圈主的圈友列表页
+	// 		// 优先取实名，其次取昵称，再次取企业标题
+	// 		const displayName = item.realName || item.nickname || item.homeTitle || '商友圈';
+
+	// 		// 组装路径并传递 ID 和 姓名
+	// 		const url =
+	// 			`/packages/my-friendList/my-friendList?userId=${item.id}&userName=${encodeURIComponent(displayName)}`;
+
+	// 		console.log(`🚀 准备进入 [${displayName}] 的圈子:`, url);
+
+	// 		uni.navigateTo({
+	// 			url
+	// 		});
+	// 	}
+	// };
+	/**
+	 * [方法] 处理轮播图点击跳转
+	 * @param {Object} item - 对应的数据项
+	 * @param {Number} index - 数组索引
+	 */
 	const handleSwiperItemClick = (item, index) => {
-		// 按照需求：第一个(index 0)表示自己
+		// --- 【核心优化点】 ---
+		// 1. 判断是否为最后一项（平台官方展示）
+		// 逻辑：如果索引是数组的最后一个，或者是 ID 为 0 的项，直接拦截，不执行任何操作
+		const isLastItem = index === swiperList.value.length - 1;
+
+		if (item.id === 0 || isLastItem) {
+			console.log('💡 点击了平台官方展示项，该项仅作展示，不执行跳转');
+			return; // 直接返回，屏蔽后续所有跳转逻辑
+		}
+		// ---------------------
+
+		// 2. 处理第一项（本人身份）：跳转至定制页
 		if (index === 0) {
-			// 跳转到：我的首页定制页面
 			goToCustomizationPage();
-		} else {
-			// 跳转到：该圈主的圈友列表页
-			// 优先取实名，其次取昵称，再次取企业标题
+		}
+		// 3. 处理中间项（圈友身份）：跳转至该圈主的圈友列表页
+		else {
 			const displayName = item.realName || item.nickname || item.homeTitle || '商友圈';
 
 			// 组装路径并传递 ID 和 姓名
@@ -801,12 +875,27 @@
 
 			if (error || !apiData || !apiData.list) {
 				loadingStatus.value = error ? 'more' : 'noMore';
-				if (error) uni.showToast({
-					title: `加载失败: ${error}`,
+				if (error.includes('信息绑定')) {
+					console.warn('捕获到业务限制：需绑定信息');
+					// 2. 立即触发登录守卫弹窗
+					// 不需要判断返回值，因为 checkLoginGuard 内部会自动弹窗引导
+					await checkLoginGuard();
+					return;
+				}
+
+				// 3. 其他普通错误，按原样提示
+				if (isRefresh) uni.stopPullDownRefresh();
+				uni.showToast({
+					title: error,
 					icon: 'none'
 				});
-				if (isRefresh) postList.value = [];
 				return;
+				// if (error) uni.showToast({
+				// 	title: `加载失败: ${error}`,
+				// 	icon: 'none'
+				// });
+				// if (isRefresh) postList.value = [];
+				// return;
 			}
 
 			const mappedData = apiData.list.map(item => {
@@ -894,7 +983,9 @@
 		getBusinessOpportunitiesList(true);
 	};
 
-	const handleTabClick = (tabIndex) => {
+	const handleTabClick = async (tabIndex) => {
+		if (!await checkLoginGuard()) return;
+
 		if (activeTab.value === tabIndex) return;
 		activeTab.value = tabIndex;
 
@@ -1524,6 +1615,16 @@
 	const skipCommercialDetail = (postId) => uni.navigateTo({
 		url: `/packages/home-commercialDetail/home-commercialDetail?id=${postId}`
 	});
+	/**
+	 * [方法] 跳转到商机编辑页面
+	 * @param {Number|String} id - 商机帖子ID
+	 */
+	const handleEdit = (id) => {
+		if (!id) return;
+		uni.navigateTo({
+			url: `/packages/home-opportunitiesPublish/home-opportunitiesPublish?id=${id}`
+		});
+	};
 
 	// ============================
 	// 8. 辅助/工具函数 (Helper/Util Functions)
@@ -2157,6 +2258,41 @@
 	.post-footer .post-time {
 		font-size: 26rpx;
 		color: #999;
+	}
+
+	/* 首页帖子头部右侧编辑按钮 */
+	.home-edit-btn {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 6rpx;
+		padding: 8rpx 24rpx;
+		background-color: #FFF5EE;
+		/* 浅橙色背景 */
+		border: 1rpx solid rgba(255, 106, 0, 0.3);
+		border-radius: 40rpx;
+		height: auto;
+		line-height: 1.4;
+		margin: 0;
+		margin-left: 20rpx;
+	}
+
+	.home-edit-btn text {
+		font-size: 24rpx;
+		color: #FF6A00;
+		font-weight: bold;
+	}
+
+	.home-edit-btn:active {
+		opacity: 0.8;
+		background-color: #FFE8D9;
+	}
+
+	/* 按钮容器，确保垂直居中 */
+	.header-right-action {
+		display: flex;
+		align-items: center;
+		flex-shrink: 0;
 	}
 
 

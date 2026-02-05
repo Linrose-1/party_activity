@@ -52,13 +52,15 @@
 						</view>
 
 						<view class="f-desc text-ellipsis">
-							{{ item.positionTitle || '精英商友' }} | {{ item.companyName || '暂无公司信息' }}
+							{{ getFirstItem(item.positionTitle, '精英商友') }}
+							|
+							{{ getFirstItem(item.companyName, '暂无公司信息') }}
 						</view>
 
-						<view class="f-footer">
+						<!-- <view class="f-footer">
 							<uni-icons type="location-filled" size="12" color="#bbb"></uni-icons>
 							<text class="f-loc">{{ item.locationAddressStr || '暂未设置位置' }}</text>
-						</view>
+						</view> -->
 					</view>
 
 					<uni-icons type="right" size="16" color="#eee"></uni-icons>
@@ -212,6 +214,17 @@
 				url: `/packages/relationship-path/relationship-path?targetUserId=${user.id}&name=${encodeURIComponent(user.name)}`
 			});
 		}
+	};
+
+	/**
+	 * [工具] 提取逗号分隔字符串的第一项
+	 * @param {String} str 原始字符串
+	 * @param {String} fallback 兜底文案
+	 */
+	const getFirstItem = (str, fallback) => {
+		if (!str) return fallback;
+		// 按照逗号分割，取第一项并去除空格
+		return str.split(',')[0].trim();
 	};
 </script>
 

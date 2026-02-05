@@ -162,6 +162,20 @@ const _sfc_main = {
           method: "GET",
           data: params
         });
+        if (result.error) {
+          if (result.error.includes("信息绑定")) {
+            common_vendor.index.__f__("warn", "at pages/active/active.vue:343", "捕获到业务限制：需绑定信息才能查看更多聚会");
+            await utils_user.checkLoginGuard();
+            loading.value = false;
+            return;
+          }
+          common_vendor.index.showToast({
+            title: result.error,
+            icon: "none"
+          });
+          hasMore.value = false;
+          return;
+        }
         if (result && !result.error && result.data) {
           const {
             list = [],
@@ -175,18 +189,18 @@ const _sfc_main = {
           hasMore.value = activitiesData.value.length < total;
           pageNo.value++;
         } else {
-          common_vendor.index.__f__("error", "at pages/active/active.vue:357", "获取聚会列表失败:", result ? result.error : "无有效返回");
+          common_vendor.index.__f__("error", "at pages/active/active.vue:376", "获取聚会列表失败:", result ? result.error : "无有效返回");
           hasMore.value = false;
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/active/active.vue:361", "请求异常:", error);
+        common_vendor.index.__f__("error", "at pages/active/active.vue:380", "请求异常:", error);
         hasMore.value = false;
       } finally {
         loading.value = false;
       }
     };
     const resetFilters = () => {
-      common_vendor.index.__f__("log", "at pages/active/active.vue:371", "--- 重置所有筛选条件 ---");
+      common_vendor.index.__f__("log", "at pages/active/active.vue:390", "--- 重置所有筛选条件 ---");
       searchKeyword.value = "";
       typeIndex.value = 0;
       selectedCategory.value = "";
@@ -220,7 +234,7 @@ const _sfc_main = {
           };
         },
         fail: (err) => {
-          common_vendor.index.__f__("log", "at pages/active/active.vue:421", "选择位置失败:", err);
+          common_vendor.index.__f__("log", "at pages/active/active.vue:440", "选择位置失败:", err);
           if (err.errMsg.includes("auth deny") || err.errMsg.includes("auth denied")) {
             common_vendor.index.showModal({
               title: "定位权限未开启",
@@ -252,11 +266,11 @@ const _sfc_main = {
       if (!await utils_user.checkLoginGuard())
         return;
       if (!banner || !banner.targetUrl) {
-        common_vendor.index.__f__("log", "at pages/active/active.vue:462", "该轮播图没有配置跳转链接，不执行任何操作。");
+        common_vendor.index.__f__("log", "at pages/active/active.vue:481", "该轮播图没有配置跳转链接，不执行任何操作。");
         return;
       }
       const activityId = banner.targetUrl;
-      common_vendor.index.__f__("log", "at pages/active/active.vue:468", `用户点击了轮播图，准备跳转到聚会详情页，ID: ${activityId}`);
+      common_vendor.index.__f__("log", "at pages/active/active.vue:487", `用户点击了轮播图，准备跳转到聚会详情页，ID: ${activityId}`);
       common_vendor.index.navigateTo({
         url: `/packages/active-detail/active-detail?id=${activityId}`
       });
@@ -266,7 +280,7 @@ const _sfc_main = {
       () => {
         clearTimeout(filterDebounceTimer);
         filterDebounceTimer = setTimeout(() => {
-          common_vendor.index.__f__("log", "at pages/active/active.vue:502", "筛选条件变化（已防抖），重新搜索...");
+          common_vendor.index.__f__("log", "at pages/active/active.vue:521", "筛选条件变化（已防抖），重新搜索...");
           common_vendor.index.showLoading({
             title: "正在筛选..."
           });
@@ -281,7 +295,7 @@ const _sfc_main = {
     );
     common_vendor.onShareAppMessage(() => {
       const inviteCode = utils_user.getInviteCode();
-      common_vendor.index.__f__("log", "at pages/active/active.vue:525", `[分享] 准备分享给好友，获取到邀请码: ${inviteCode}`);
+      common_vendor.index.__f__("log", "at pages/active/active.vue:544", `[分享] 准备分享给好友，获取到邀请码: ${inviteCode}`);
       let sharePath = "/pages/active/active";
       if (inviteCode) {
         sharePath += `?inviteCode=${inviteCode}`;
@@ -294,12 +308,12 @@ const _sfc_main = {
         imageUrl: "https://img.gofor.club/logo.png"
         // 自定义分享封面图，建议使用一个有代表性的图片URL
       };
-      common_vendor.index.__f__("log", "at pages/active/active.vue:542", "[分享] 分享给好友的内容:", JSON.stringify(shareContent));
+      common_vendor.index.__f__("log", "at pages/active/active.vue:561", "[分享] 分享给好友的内容:", JSON.stringify(shareContent));
       return shareContent;
     });
     common_vendor.onShareTimeline(() => {
       const inviteCode = utils_user.getInviteCode();
-      common_vendor.index.__f__("log", "at pages/active/active.vue:554", `[分享] 准备分享到朋友圈，获取到邀请码: ${inviteCode}`);
+      common_vendor.index.__f__("log", "at pages/active/active.vue:573", `[分享] 准备分享到朋友圈，获取到邀请码: ${inviteCode}`);
       let queryString = "";
       if (inviteCode) {
         queryString = `inviteCode=${inviteCode}`;
@@ -312,7 +326,7 @@ const _sfc_main = {
         imageUrl: "https://img.gofor.club/logo.png"
         // 朋友圈分享的封面图
       };
-      common_vendor.index.__f__("log", "at pages/active/active.vue:570", "[分享] 分享到朋友圈的内容:", JSON.stringify(shareContent));
+      common_vendor.index.__f__("log", "at pages/active/active.vue:589", "[分享] 分享到朋友圈的内容:", JSON.stringify(shareContent));
       return shareContent;
     });
     return (_ctx, _cache) => {

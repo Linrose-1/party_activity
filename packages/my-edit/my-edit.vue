@@ -1254,31 +1254,27 @@
 				}
 			});
 
-			// B. 处理动态列表：数组 -> 逗号分隔字符串
+			// B. 处理动态列表
 			payload.professionalTitle = professionsList.value.map(p => p.trim()).filter(p => p).join(',');
 			payload.school = schoolsList.value.map(s => s.trim()).filter(s => s).join(',');
+			payload.companyName = companyAndIndustryList.value.map(item => (item.name || '').trim())
+				.filter(n => n).join(',');
+			payload.industry = companyAndIndustryList.value.map(item => (item.industryName || '').trim())
+				.join(',');
+			payload.positionTitle = companyAndIndustryList.value.map(item => (item.positionTitle || '')
+				.trim()).filter(p => p).join(',');
 
-			// 公司相关字段（名称、行业名称、职务）
-			payload.companyName = companyAndIndustryList.value
-				.map(item => (item.name || '').trim()).filter(n => n).join(',');
-			payload.industry = companyAndIndustryList.value
-				.map(item => (item.industryName || '').trim()).join(',');
-			payload.positionTitle = companyAndIndustryList.value
-				.map(item => (item.positionTitle || '').trim()).filter(p => p).join(',');
-
-			// C. 处理个人爱好
+			// C. 处理生日和爱好
+			if (payload.birthday && typeof payload.birthday === 'string') {
+				payload.birthday = new Date(payload.birthday.replace(/-/g, '/')).getTime();
+			}
 			let finalHobbies = selectedHobbies.value.filter(h => h !== '其他');
 			if (isOtherHobbySelected.value && otherHobbyText.value.trim()) {
 				finalHobbies.push(otherHobbyText.value.trim());
 			}
 			payload.hobby = finalHobbies.join(',');
 
-			// D. 处理生日：YYYY-MM-DD -> 时间戳
-			if (payload.birthday && typeof payload.birthday === 'string') {
-				payload.birthday = new Date(payload.birthday.replace(/-/g, '/')).getTime();
-			}
-
-			// --- 3. 执行保存资料接口 ---
+			// --- 3. 执行主更新接口 ---
 			const {
 				error: updateError
 			} = await Api.updateUser(payload);
@@ -1291,8 +1287,14 @@
 				});
 			}
 
-			// --- 4. 【核心逻辑】尝试触发“完善资料送会员” ---
-			// 判断 7 个核心维度是否已全部填写
+			// 标记保存成功
+			uni.hideLoading();
+			uni.removeStorageSync(DRAFT_KEY); // 清除草稿
+			console.log('🧹 [提交成功] 草稿已清除');
+
+			// --- 4. 【关键优化】奖励逻辑与引导逻辑的串行执行 ---
+
+			// 步骤 A: 检查是否满足 7 个维度的赠送条件
 			if (checkIsAllDimensionsFilled(payload)) {
 				try {
 					const {
@@ -1301,53 +1303,41 @@
 						method: 'POST'
 					});
 
-					// 如果后端判定为首次完善并赠送成功
+					// 如果是首次完善并赠送成功
 					if (giveRes === true) {
-						uni.hideLoading();
-						// 使用 Promise 阻塞，确保用户看完奖励弹窗再弹出下一个
-						await new Promise(resolve => {
+						// 【核心修复】使用 Promise 等待用户关闭第一个弹窗
+						await new Promise((resolve) => {
 							uni.showModal({
 								title: '恭喜获得奖励',
-								content: '检测到您已完善核心商友资料，系统已为您赠送【玄铁会员】权益，快去体验吧！',
+								content: '检测到您已完善核心资料，系统已为您赠送一年的【玄铁会员】权益，感谢您对猩聚社的贡献！',
 								showCancel: false,
 								confirmText: '太棒了',
 								confirmColor: '#FF8700',
-								success: () => resolve()
+								success: () => resolve() // 用户点击后才继续下一步
 							});
 						});
 					}
 				} catch (e) {
-					console.error('申请赠送会员异常:', e);
+					console.error('奖励接口异常:', e);
 				}
 			}
 
-			// --- 5. 提交成功后的清理与引导逻辑 ---
-			uni.hideLoading();
-			uni.removeStorageSync(DRAFT_KEY); // 清除本地草稿
-			console.log('🧹 [提交成功] 草稿已清除');
-
-			uni.showToast({
-				title: '资料保存成功',
-				icon: 'success'
-			});
-
-			// 延迟弹出“发布到商友圈”引导
-			setTimeout(() => {
-				uni.showModal({
-					title: '发布到商友圈',
-					content: '您的资料已更新，发布名片问候语到商友圈的“商友连接”模块，让商友们更快看见您！',
-					confirmText: '立即发布',
-					cancelText: '暂不发布',
-					confirmColor: '#FF8700',
-					success: (res) => {
-						if (res.confirm) {
-							handleAutoPost(); // 执行自动发圈
-						} else {
-							uni.navigateBack(); // 返回上一页
-						}
+			// 步骤 B: 弹出“发布到商友圈”引导
+			// 无论有没有领到奖励，只要保存成功且走完上面的 Promise，就会执行这里
+			uni.showModal({
+				title: '发布到商友圈',
+				content: '您的资料已更新，发布名片问候语到商友圈的“商友连接”模块，让商友们更快看见您！',
+				confirmText: '立即发布',
+				cancelText: '暂不发布',
+				confirmColor: '#FF8700',
+				success: (res) => {
+					if (res.confirm) {
+						handleAutoPost(); // 执行自动发圈
+					} else {
+						uni.navigateBack(); // 返回上一页
 					}
-				});
-			}, 600);
+				}
+			});
 
 		}).catch(err => {
 			console.log('表单验证未通过：', err);

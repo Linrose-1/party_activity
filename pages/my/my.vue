@@ -76,9 +76,10 @@
 
 		<!-- 会员到期提醒条 -->
 		<!-- 逻辑：登录状态 且 isExpirySoon 为真时显示 -->
-		<view class="notice-bar-wrapper" v-if="isLogin && userInfo.isExpirySoon">
+		<view class="notice-bar-wrapper"
+			v-if="isLogin && userInfo && userInfo.topUpLevel && userInfo.topUpLevel.isExpirySoon">
 			<uni-notice-bar show-icon scrollable :speed="50" color="#FF770F" background-color="#FFF9F5"
-				:text="`温馨提示：您的会员将于 ${formatDate(userInfo.expirationTime)} 到期，距离到期还有 ${userInfo.daysUntilExpiry} 天，可以到用户中心进行会员续期充值或者升级会员`"
+				:text="`温馨提示：您的会员将于 ${formatDate(userInfo.topUpLevel?.expirationTime)} 到期，距离到期还有 ${userInfo.topUpLevel?.daysUntilExpiry} 天，可以到用户中心进行会员续期充值或者升级会员`"
 				@click="goToMemberRecharge" />
 		</view>
 
@@ -351,8 +352,8 @@
 			desc: '猩球贡献榜单',
 			icon: '../../static/icon/榜单.png',
 			iconBg: 'linear-gradient(135deg, #30CFD0, #330867)',
-			key: 'membershipCenter'
-			// path: '/pages/index/index'
+			// key: 'membershipCenter'
+			path: '/packages/contribution-ranking/contribution-ranking'
 		},
 		// {
 		// 	name: '精准投放',
@@ -479,7 +480,7 @@
 			name: '资源匹配',
 			desc: '智能匹配供需资源对应的商友',
 			icon: '../../static/icon/资源匹配.png',
-			path: null,
+			path: '/packages/resource-match/resource-match',
 			highlight: true
 		}, // 新增
 		{

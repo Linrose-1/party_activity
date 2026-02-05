@@ -32,7 +32,7 @@ const _sfc_main = {
     const loadingStatus = common_vendor.ref("more");
     const menuRef = common_vendor.ref(null);
     common_vendor.onLoad((options) => {
-      common_vendor.index.__f__("log", "at packages/my-friendList/my-friendList.vue:118", "options", options);
+      common_vendor.index.__f__("log", "at packages/my-friendList/my-friendList.vue:120", "options", options);
       if (options.userId) {
         ownerInfo.id = options.userId;
         ownerInfo.name = decodeURIComponent(options.userName || "");
@@ -105,6 +105,11 @@ const _sfc_main = {
         });
       }
     };
+    const getFirstItem = (str, fallback) => {
+      if (!str)
+        return fallback;
+      return str.split(",")[0].trim();
+    };
     return (_ctx, _cache) => {
       return common_vendor.e({
         a: ownerInfo.avatar || defaultAvatar,
@@ -134,36 +139,29 @@ const _sfc_main = {
           }, item.peerFlag === 1 ? {} : {}, {
             f: item.classmateFlag === 1
           }, item.classmateFlag === 1 ? {} : {}, {
-            g: common_vendor.t(item.positionTitle || "精英商友"),
-            h: common_vendor.t(item.companyName || "暂无公司信息"),
+            g: common_vendor.t(getFirstItem(item.positionTitle, "精英商友")),
+            h: common_vendor.t(getFirstItem(item.companyName, "暂无公司信息")),
             i: "f2cf60c6-1-" + i0,
-            j: common_vendor.t(item.locationAddressStr || "暂未设置位置"),
-            k: "f2cf60c6-2-" + i0,
-            l: item.id,
-            m: common_vendor.o(($event) => handleUserClick(item), item.id)
+            j: item.id,
+            k: common_vendor.o(($event) => handleUserClick(item), item.id)
           });
         }),
         m: common_vendor.p({
-          type: "location-filled",
-          size: "12",
-          color: "#bbb"
-        }),
-        n: common_vendor.p({
           type: "right",
           size: "16",
           color: "#eee"
         }),
-        o: common_vendor.p({
+        n: common_vendor.p({
           status: loadingStatus.value
         })
       } : loadingStatus.value !== "loading" ? {
-        q: common_assets._imports_0$7
+        p: common_assets._imports_0$7
       } : {}, {
-        p: loadingStatus.value !== "loading",
-        r: common_vendor.sr(menuRef, "f2cf60c6-4", {
+        o: loadingStatus.value !== "loading",
+        q: common_vendor.sr(menuRef, "f2cf60c6-3", {
           "k": "menuRef"
         }),
-        s: common_vendor.o(handleMenuAction)
+        r: common_vendor.o(handleMenuAction)
       });
     };
   }

@@ -21,26 +21,77 @@ const _sfc_main = {
       title: "",
       content: "",
       images: []
-      // 用于存储上传成功的图片URL
+      // 已上传成功的图片URL数组
     });
+    const isEditMode = common_vendor.ref(false);
+    const suggestionId = common_vendor.ref(0);
     const isLoading = common_vendor.ref(false);
     const isButtonDisabled = common_vendor.computed(() => {
       return !suggestion.title || !suggestion.content || isLoading.value;
     });
+    const submitText = common_vendor.computed(() => {
+      if (isLoading.value)
+        return "正在处理...";
+      return isEditMode.value ? "保存修改" : "立即提交";
+    });
+    common_vendor.onLoad((options) => {
+      if (options.id) {
+        isEditMode.value = true;
+        suggestionId.value = options.id;
+        common_vendor.index.setNavigationBarTitle({
+          title: "修改建议"
+        });
+        fetchDetail(options.id);
+      }
+    });
+    const fetchDetail = async (id) => {
+      common_vendor.index.showLoading({
+        title: "加载资料中...",
+        mask: true
+      });
+      try {
+        const {
+          data,
+          error
+        } = await utils_request.request("/app-api/member/suggestion/get", {
+          method: "GET",
+          data: {
+            id
+          }
+        });
+        if (!error && data) {
+          suggestion.title = data.title;
+          suggestion.content = data.content;
+          suggestion.images = data.img ? data.img.split(",").filter(Boolean) : [];
+        }
+      } catch (e) {
+        common_vendor.index.__f__("error", "at pages/my-systemSuggestions/my-systemSuggestions.vue:145", "详情拉取异常:", e);
+      } finally {
+        common_vendor.index.hideLoading();
+      }
+    };
     const handleChooseImage = () => {
       common_vendor.index.chooseImage({
         count: 9 - suggestion.images.length,
-        // 动态计算可选数量
+        // 动态剩余张数
         sourceType: ["album", "camera"],
         success: async (res) => {
           const validFiles = res.tempFiles.filter((file) => file.size <= 5 * 1024 * 1024);
           if (res.tempFiles.length > validFiles.length) {
-            common_vendor.index.showToast({ title: "部分文件过大(>5MB)，已忽略", icon: "none" });
+            common_vendor.index.showToast({
+              title: "部分文件过大(>5MB)，已自动忽略",
+              icon: "none"
+            });
           }
           if (validFiles.length === 0)
             return;
-          common_vendor.index.showLoading({ title: `正在上传 ${validFiles.length} 张图片...`, mask: true });
-          const uploadPromises = validFiles.map((file) => utils_upload.uploadFile(file, { directory: "suggestion" }));
+          common_vendor.index.showLoading({
+            title: `同步中(0/${validFiles.length})`,
+            mask: true
+          });
+          const uploadPromises = validFiles.map((file) => utils_upload.uploadFile(file, {
+            directory: "suggestion"
+          }));
           const results = await Promise.all(uploadPromises);
           common_vendor.index.hideLoading();
           const successfulUrls = [];
@@ -48,20 +99,23 @@ const _sfc_main = {
             if (result.data) {
               successfulUrls.push(result.data);
             } else {
-              common_vendor.index.__f__("error", "at pages/my-systemSuggestions/my-systemSuggestions.vue:104", "图片上传失败:", result.error);
+              common_vendor.index.__f__("error", "at pages/my-systemSuggestions/my-systemSuggestions.vue:187", "上传器内部报错:", result.error);
             }
           });
           suggestion.images.push(...successfulUrls);
           if (successfulUrls.length < validFiles.length) {
-            common_vendor.index.showToast({ title: `${validFiles.length - successfulUrls.length} 张图片上传失败`, icon: "none" });
+            common_vendor.index.showToast({
+              title: "部分图片由于网络原因失败",
+              icon: "none"
+            });
           }
         }
       });
     };
     const deleteImage = (index) => {
       common_vendor.index.showModal({
-        title: "提示",
-        content: "确定要删除这张图片吗？",
+        title: "操作提示",
+        content: "确定要从建议中移除此图片吗？",
         success: (res) => {
           if (res.confirm) {
             suggestion.images.splice(index, 1);
@@ -76,42 +130,53 @@ const _sfc_main = {
       });
     };
     const handleSubmit = async () => {
-      if (!suggestion.title) {
-        common_vendor.index.showToast({ title: "请输入建议标题", icon: "none" });
-        return;
-      }
-      if (!suggestion.content) {
-        common_vendor.index.showToast({ title: "请输入建议内容", icon: "none" });
-        return;
-      }
+      if (!suggestion.title.trim())
+        return common_vendor.index.showToast({
+          title: "标题不能为空",
+          icon: "none"
+        });
+      if (!suggestion.content.trim())
+        return common_vendor.index.showToast({
+          title: "内容不能为空",
+          icon: "none"
+        });
       isLoading.value = true;
       try {
         const postData = {
-          id: 0,
-          // 根据接口文档，创建时 id 传 0
+          id: isEditMode.value ? suggestionId.value : 0,
+          // 编辑模式传原ID，新建传0
           title: suggestion.title,
           content: suggestion.content,
           img: suggestion.images.join(",")
-          // 将图片数组用逗号拼接成字符串
+          // 将图片数组转换回逗号分隔的字符串
         };
-        const { data, error } = await utils_request.request("/app-api/member/suggestion/create", {
-          method: "POST",
+        const apiPath = isEditMode.value ? "/app-api/member/suggestion/update" : "/app-api/member/suggestion/create";
+        const apiMethod = isEditMode.value ? "PUT" : "POST";
+        const {
+          error
+        } = await utils_request.request(apiPath, {
+          method: apiMethod,
           data: postData
-          // 发送构建好的数据
         });
         if (error) {
-          common_vendor.index.showToast({ title: `提交失败: ${typeof error === "object" ? error.msg : error}`, icon: "none" });
+          common_vendor.index.showToast({
+            title: `操作失败: ${error}`,
+            icon: "none"
+          });
         } else {
-          common_vendor.index.showToast({ title: "感谢您的建议！", icon: "success" });
-          suggestion.title = "";
-          suggestion.content = "";
-          suggestion.images = [];
+          common_vendor.index.showToast({
+            title: isEditMode.value ? "资料已更新" : "提交成功，感谢共建！",
+            icon: "success"
+          });
           setTimeout(() => {
             common_vendor.index.navigateBack();
           }, 1500);
         }
       } catch (e) {
-        common_vendor.index.showToast({ title: "提交失败，请稍后再试", icon: "none" });
+        common_vendor.index.showToast({
+          title: "网络连接异常，请重试",
+          icon: "none"
+        });
       } finally {
         isLoading.value = false;
       }
@@ -123,16 +188,17 @@ const _sfc_main = {
           size: "24",
           color: themeColor
         }),
-        b: suggestion.title,
-        c: common_vendor.o(common_vendor.m(($event) => suggestion.title = $event.detail.value, {
+        b: common_vendor.t(isEditMode.value ? "修改您的建议" : "提交您的建议"),
+        c: suggestion.title,
+        d: common_vendor.o(common_vendor.m(($event) => suggestion.title = $event.detail.value, {
           trim: true
         })),
-        d: suggestion.content,
-        e: common_vendor.o(common_vendor.m(($event) => suggestion.content = $event.detail.value, {
+        e: suggestion.content,
+        f: common_vendor.o(common_vendor.m(($event) => suggestion.content = $event.detail.value, {
           trim: true
         })),
-        f: common_vendor.t(suggestion.content.length),
-        g: common_vendor.f(suggestion.images, (imgUrl, index, i0) => {
+        g: common_vendor.t(suggestion.content.length),
+        h: common_vendor.f(suggestion.images, (imgUrl, index, i0) => {
           return {
             a: imgUrl,
             b: common_vendor.o(($event) => previewImage(index), index),
@@ -140,25 +206,25 @@ const _sfc_main = {
             d: index
           };
         }),
-        h: suggestion.images.length < 9
+        i: suggestion.images.length < 9
       }, suggestion.images.length < 9 ? {
-        i: common_vendor.p({
+        j: common_vendor.p({
           type: "plusempty",
           size: "24",
           color: "#ccc"
         }),
-        j: common_vendor.o(handleChooseImage)
+        k: common_vendor.o(handleChooseImage)
       } : {}, {
-        k: common_vendor.p({
+        l: common_vendor.p({
           type: "notification-filled",
           size: "18",
           color: themeColor
         }),
-        l: common_vendor.t(isLoading.value ? "正在提交..." : "立即提交"),
-        m: common_vendor.o(handleSubmit),
-        n: isLoading.value,
-        o: isButtonDisabled.value,
-        p: common_vendor.s(_ctx.__cssVars())
+        m: common_vendor.t(submitText.value),
+        n: common_vendor.o(handleSubmit),
+        o: isLoading.value,
+        p: isButtonDisabled.value,
+        q: common_vendor.s(_ctx.__cssVars())
       });
     };
   }

@@ -541,6 +541,27 @@
 				{
 					"navigationBarTitleText" : "圈友列表"
 				}
+			},
+			{
+				"path" : "resource-match/resource-match",
+				"style" : 
+				{
+					"navigationBarTitleText" : "资源匹配"
+				}
+			},
+			{
+				"path" : "contribution-ranking/contribution-ranking",
+				"style" : 
+				{
+					"navigationBarTitleText" : "猩球榜单"
+				}
+			},
+			{
+				"path" : "suggestion-detail/suggestion-detail",
+				"style" : 
+				{
+					"navigationBarTitleText" : "建议详情"
+				}
 			}
 			// 如果还有其他页面要放进这个分包，继续在这里加
 		]

@@ -695,14 +695,14 @@ const _sfc_main = {
         payload.companyName = companyAndIndustryList.value.map((item) => (item.name || "").trim()).filter((n) => n).join(",");
         payload.industry = companyAndIndustryList.value.map((item) => (item.industryName || "").trim()).join(",");
         payload.positionTitle = companyAndIndustryList.value.map((item) => (item.positionTitle || "").trim()).filter((p) => p).join(",");
+        if (payload.birthday && typeof payload.birthday === "string") {
+          payload.birthday = new Date(payload.birthday.replace(/-/g, "/")).getTime();
+        }
         let finalHobbies = selectedHobbies.value.filter((h) => h !== "其他");
         if (isOtherHobbySelected.value && otherHobbyText.value.trim()) {
           finalHobbies.push(otherHobbyText.value.trim());
         }
         payload.hobby = finalHobbies.join(",");
-        if (payload.birthday && typeof payload.birthday === "string") {
-          payload.birthday = new Date(payload.birthday.replace(/-/g, "/")).getTime();
-        }
         const {
           error: updateError
         } = await Api.updateUser(payload);
@@ -713,6 +713,9 @@ const _sfc_main = {
             icon: "none"
           });
         }
+        common_vendor.index.hideLoading();
+        common_vendor.index.removeStorageSync(DRAFT_KEY);
+        common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:1293", "🧹 [提交成功] 草稿已清除");
         if (checkIsAllDimensionsFilled(payload)) {
           try {
             const {
@@ -721,47 +724,38 @@ const _sfc_main = {
               method: "POST"
             });
             if (giveRes === true) {
-              common_vendor.index.hideLoading();
               await new Promise((resolve) => {
                 common_vendor.index.showModal({
                   title: "恭喜获得奖励",
-                  content: "检测到您已完善核心商友资料，系统已为您赠送【玄铁会员】权益，快去体验吧！",
+                  content: "检测到您已完善核心资料，系统已为您赠送一年的【玄铁会员】权益，感谢您对猩聚社的贡献！",
                   showCancel: false,
                   confirmText: "太棒了",
                   confirmColor: "#FF8700",
                   success: () => resolve()
+                  // 用户点击后才继续下一步
                 });
               });
             }
           } catch (e) {
-            common_vendor.index.__f__("error", "at packages/my-edit/my-edit.vue:1320", "申请赠送会员异常:", e);
+            common_vendor.index.__f__("error", "at packages/my-edit/my-edit.vue:1321", "奖励接口异常:", e);
           }
         }
-        common_vendor.index.hideLoading();
-        common_vendor.index.removeStorageSync(DRAFT_KEY);
-        common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:1327", "🧹 [提交成功] 草稿已清除");
-        common_vendor.index.showToast({
-          title: "资料保存成功",
-          icon: "success"
-        });
-        setTimeout(() => {
-          common_vendor.index.showModal({
-            title: "发布到商友圈",
-            content: "您的资料已更新，发布名片问候语到商友圈的“商友连接”模块，让商友们更快看见您！",
-            confirmText: "立即发布",
-            cancelText: "暂不发布",
-            confirmColor: "#FF8700",
-            success: (res) => {
-              if (res.confirm) {
-                handleAutoPost();
-              } else {
-                common_vendor.index.navigateBack();
-              }
+        common_vendor.index.showModal({
+          title: "发布到商友圈",
+          content: "您的资料已更新，发布名片问候语到商友圈的“商友连接”模块，让商友们更快看见您！",
+          confirmText: "立即发布",
+          cancelText: "暂不发布",
+          confirmColor: "#FF8700",
+          success: (res) => {
+            if (res.confirm) {
+              handleAutoPost();
+            } else {
+              common_vendor.index.navigateBack();
             }
-          });
-        }, 600);
+          }
+        });
       }).catch((err) => {
-        common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:1353", "表单验证未通过：", err);
+        common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:1343", "表单验证未通过：", err);
       });
     };
     const handleAutoPost = async () => {

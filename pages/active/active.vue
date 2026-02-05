@@ -337,6 +337,25 @@
 				data: params
 			});
 
+			if (result.error) {
+				// 如果后端返回了需要绑定的信息（报错文本包含“绑定”）
+				if (result.error.includes('信息绑定')) {
+					console.warn('捕获到业务限制：需绑定信息才能查看更多聚会');
+					// 触发登录守卫弹窗
+					await checkLoginGuard();
+					loading.value = false;
+					return;
+				}
+
+				// 其他普通错误
+				uni.showToast({
+					title: result.error,
+					icon: 'none'
+				});
+				hasMore.value = false;
+				return;
+			}
+
 			if (result && !result.error && result.data) {
 				const {
 					list = [], total = 0

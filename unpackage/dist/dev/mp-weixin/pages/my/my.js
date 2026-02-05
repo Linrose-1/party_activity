@@ -48,14 +48,14 @@ const _sfc_main = {
         });
         if (!error && data) {
           userInfo.value = data;
-          common_vendor.index.__f__("log", "at pages/my/my.vue:190", "getUserInfo userInfo:", userInfo.value);
+          common_vendor.index.__f__("log", "at pages/my/my.vue:191", "getUserInfo userInfo:", userInfo.value);
         } else {
-          common_vendor.index.__f__("log", "at pages/my/my.vue:192", "获取用户信息失败:", error);
+          common_vendor.index.__f__("log", "at pages/my/my.vue:193", "获取用户信息失败:", error);
           isLogin.value = false;
           userInfo.value = {};
         }
       } catch (err) {
-        common_vendor.index.__f__("log", "at pages/my/my.vue:198", "请求异常:", err);
+        common_vendor.index.__f__("log", "at pages/my/my.vue:199", "请求异常:", err);
         isLogin.value = false;
         userInfo.value = {};
       }
@@ -169,8 +169,8 @@ const _sfc_main = {
         desc: "猩球贡献榜单",
         icon: "../../static/icon/榜单.png",
         iconBg: "linear-gradient(135deg, #30CFD0, #330867)",
-        key: "membershipCenter"
-        // path: '/pages/index/index'
+        // key: 'membershipCenter'
+        path: "/packages/contribution-ranking/contribution-ranking"
       }
       // {
       // 	name: '精准投放',
@@ -291,7 +291,7 @@ const _sfc_main = {
         name: "资源匹配",
         desc: "智能匹配供需资源对应的商友",
         icon: "../../static/icon/资源匹配.png",
-        path: null,
+        path: "/packages/resource-match/resource-match",
         highlight: true
       },
       // 新增
@@ -349,10 +349,10 @@ const _sfc_main = {
         common_vendor.index.makePhoneCall({
           phoneNumber: item.phone,
           success: () => {
-            common_vendor.index.__f__("log", "at pages/my/my.vue:540", "拨打电话成功");
+            common_vendor.index.__f__("log", "at pages/my/my.vue:541", "拨打电话成功");
           },
           fail: (err) => {
-            common_vendor.index.__f__("log", "at pages/my/my.vue:543", "拨打电话失败:", err);
+            common_vendor.index.__f__("log", "at pages/my/my.vue:544", "拨打电话失败:", err);
           }
         });
         return;
@@ -407,6 +407,7 @@ const _sfc_main = {
       });
     };
     return (_ctx, _cache) => {
+      var _a, _b;
       return common_vendor.e({
         a: isLogin.value
       }, isLogin.value ? {
@@ -453,8 +454,8 @@ const _sfc_main = {
         }),
         v: common_vendor.o(handleLoginClick)
       }, {
-        w: isLogin.value && userInfo.value.isExpirySoon
-      }, isLogin.value && userInfo.value.isExpirySoon ? {
+        w: isLogin.value && userInfo.value && userInfo.value.topUpLevel && userInfo.value.topUpLevel.isExpirySoon
+      }, isLogin.value && userInfo.value && userInfo.value.topUpLevel && userInfo.value.topUpLevel.isExpirySoon ? {
         x: common_vendor.o(goToMemberRecharge),
         y: common_vendor.p({
           ["show-icon"]: true,
@@ -462,7 +463,7 @@ const _sfc_main = {
           speed: 50,
           color: "#FF770F",
           ["background-color"]: "#FFF9F5",
-          text: `温馨提示：您的会员将于 ${formatDate(userInfo.value.expirationTime)} 到期，距离到期还有 ${userInfo.value.daysUntilExpiry} 天，可以到用户中心进行会员续期充值或者升级会员`
+          text: `温馨提示：您的会员将于 ${formatDate((_a = userInfo.value.topUpLevel) == null ? void 0 : _a.expirationTime)} 到期，距离到期还有 ${(_b = userInfo.value.topUpLevel) == null ? void 0 : _b.daysUntilExpiry} 天，可以到用户中心进行会员续期充值或者升级会员`
         })
       } : {}, {
         z: common_vendor.f(coreFeatures.value, (item, k0, i0) => {

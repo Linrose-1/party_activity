@@ -205,7 +205,7 @@
 						<view class="action-area" @click.stop="confirmDeleteFriend(friend)">
 							<!-- 比如显示一个互圈的图标 -->
 							<uni-icons type="checkbox-filled" size="20" color="#4cd964"></uni-icons>
-							<text class="friend-status">已互圈</text>
+							<text class="friend-status">已圈</text>
 						</view>
 					</view>
 				</view>

@@ -120,7 +120,7 @@
 	import request from '../../utils/request.js';
 	import {
 		getInviteCode,
-		checkLoginGuard 
+		checkLoginGuard
 	} from '../../utils/user.js';
 
 	// --- 状态变量 ---
@@ -357,6 +357,13 @@
 		loadingMore.value = false;
 
 		if (error) {
+			if (error.includes('信息绑定')) {
+				console.warn('捕获到业务限制：需绑定信息才能查看更多店铺');
+				// 触发登录守卫弹窗（内部会自动处理跳转逻辑）
+				await checkLoginGuard();
+				return;
+			}
+
 			console.error('获取店铺列表失败:', error);
 			uni.showToast({
 				title: error,
@@ -364,6 +371,15 @@
 			});
 			return;
 		}
+
+		// if (error) {
+		// 	console.error('获取店铺列表失败:', error);
+		// 	uni.showToast({
+		// 		title: error,
+		// 		icon: 'none'
+		// 	});
+		// 	return;
+		// }
 
 		const newList = result ? result.list : [];
 		const total = result ? result.total : 0;

@@ -1,13 +1,16 @@
 /* 水平间距 */
 /* 水平间距 */
+/* 页面基础容器 */
 .page-container.data-v-b548d100 {
   padding: 32rpx;
   background-color: #f7f8fa;
   min-height: 100vh;
 }
+
+/* 表单背景卡片 */
 .card.data-v-b548d100 {
   background-color: #ffffff;
-  border-radius: 20rpx;
+  border-radius: 24rpx;
   padding: 30rpx;
   box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.05);
 }
@@ -15,55 +18,62 @@
   display: flex;
   align-items: center;
   padding-bottom: 24rpx;
-  margin-bottom: 24rpx;
+  margin-bottom: 30rpx;
   border-bottom: 1rpx solid #f0f2f5;
 }
 .card-title.data-v-b548d100 {
   font-size: 34rpx;
-  font-weight: 600;
+  font-weight: bold;
   color: #303133;
   margin-left: 16rpx;
 }
+
+/* 表单项布局 */
 .form-item.data-v-b548d100 {
-  margin-bottom: 30rpx;
+  margin-bottom: 40rpx;
 }
 .form-item.data-v-b548d100:last-child {
   margin-bottom: 0;
 }
 .label.data-v-b548d100 {
   font-size: 30rpx;
-  color: #606266;
+  color: #333;
+  font-weight: 500;
   margin-bottom: 16rpx;
   display: block;
 }
+
+/* 输入框样式 */
 .input-field.data-v-b548d100 {
-  height: 90rpx;
-  line-height: 90rpx;
+  height: 96rpx;
+  line-height: 96rpx;
   font-size: 28rpx;
   padding: 0 24rpx;
   background-color: #f5f7fa;
-  border-radius: 12rpx;
+  border-radius: 16rpx;
 }
 .textarea-field.data-v-b548d100 {
   width: 100%;
-  height: 300rpx;
+  height: 320rpx;
   font-size: 28rpx;
   padding: 24rpx;
   background-color: #f5f7fa;
-  border-radius: 12rpx;
+  border-radius: 16rpx;
   box-sizing: border-box;
   line-height: 1.6;
 }
 .char-counter.data-v-b548d100 {
   text-align: right;
   font-size: 24rpx;
-  color: #909399;
+  color: #999;
   margin-top: 10rpx;
 }
+
+/* 底部奖励提示条 */
 .tips-section.data-v-b548d100 {
   display: flex;
   align-items: center;
-  padding: 24rpx;
+  padding: 24rpx 30rpx;
   background-color: #fff8f2;
   border-radius: 16rpx;
   margin-top: 40rpx;
@@ -72,46 +82,49 @@
   color: var(--4caf15f4);
   font-size: 26rpx;
   margin-left: 16rpx;
+  font-weight: 500;
 }
+
+/* 提交按钮美化 */
 .submit-button.data-v-b548d100 {
   margin-top: 60rpx;
   background-color: var(--4caf15f4);
   color: #ffffff;
   font-size: 32rpx;
+  font-weight: bold;
   border-radius: 50rpx;
-  height: 96rpx;
-  line-height: 96rpx;
-  transition: opacity 0.3s;
+  height: 100rpx;
+  line-height: 100rpx;
+  box-shadow: 0 8rpx 20rpx rgba(254, 106, 0, 0.2);
+  transition: transform 0.2s, opacity 0.3s;
 }
 .submit-button[disabled].data-v-b548d100 {
   background-color: #fabba0;
   color: #ffffff;
-  opacity: 0.7;
+  opacity: 0.6;
+  box-shadow: none;
+}
+.submit-button.data-v-b548d100:active {
+  transform: scale(0.98);
 }
 .submit-button.data-v-b548d100::after {
   border: none;
 }
 
-/* ==================== 【新增】图片上传相关样式 ==================== */
-/* (直接从商机发布页复制并稍作调整) */
-.hint.data-v-b548d100 {
-  font-size: 24rpx;
-  color: #999;
-  margin-top: 10rpx;
-  display: block;
-}
+/* 图片九图网格布局样式 */
 .image-preview.data-v-b548d100 {
   display: flex;
   flex-wrap: wrap;
-  gap: 16rpx;
+  gap: 20rpx;
   margin-top: 10rpx;
 }
 .image-wrapper.data-v-b548d100 {
   position: relative;
-  width: 150rpx;
-  height: 150rpx;
+  width: 154rpx;
+  height: 154rpx;
   border-radius: 12rpx;
   overflow: hidden;
+  background-color: #eee;
 }
 .preview-img.data-v-b548d100 {
   width: 100%;
@@ -120,26 +133,22 @@
 }
 .delete-image-btn.data-v-b548d100 {
   position: absolute;
-  top: 0rpx;
-  right: 0rpx;
-  width: 40rpx;
-  height: 40rpx;
+  top: 0;
+  right: 0;
+  width: 44rpx;
+  height: 44rpx;
   background-color: rgba(0, 0, 0, 0.5);
   color: white;
-  border-radius: 0 12rpx 0 12rpx;
+  border-bottom-left-radius: 12rpx;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 28rpx;
-  font-weight: bold;
+  font-size: 32rpx;
   z-index: 10;
 }
-.delete-image-btn.data-v-b548d100:active {
-  background-color: rgba(0, 0, 0, 0.7);
-}
 .add-img-placeholder.data-v-b548d100 {
-  width: 150rpx;
-  height: 150rpx;
+  width: 154rpx;
+  height: 154rpx;
   border: 2rpx dashed #ccc;
   border-radius: 12rpx;
   display: flex;
@@ -147,10 +156,12 @@
   align-items: center;
   justify-content: center;
   color: #999;
-  font-size: 24rpx;
-  transition: border-color 0.2s ease, color 0.2s ease;
+  background-color: #fafafa;
+  font-size: 22rpx;
 }
-.add-img-placeholder.data-v-b548d100:active {
-  border-color: var(--4caf15f4);
-  color: var(--4caf15f4);
+.hint.data-v-b548d100 {
+  font-size: 22rpx;
+  color: #BBB;
+  margin-top: 12rpx;
+  display: block;
 }

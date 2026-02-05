@@ -7297,9 +7297,9 @@ function initOnError() {
   };
 }
 function initRuntimeSocketService() {
-  const hosts = "172.20.10.4,127.0.0.1";
+  const hosts = "172.20.10.6,127.0.0.1";
   const port = "8090";
-  const id = "mp-weixin_6Y4I9i";
+  const id = "mp-weixin_dIdfSK";
   const lazy = typeof swan !== "undefined";
   let restoreError = lazy ? () => {
   } : initOnError();
@@ -8683,6 +8683,24 @@ const subPackages = [
         path: "my-friendList/my-friendList",
         style: {
           navigationBarTitleText: "圈友列表"
+        }
+      },
+      {
+        path: "resource-match/resource-match",
+        style: {
+          navigationBarTitleText: "资源匹配"
+        }
+      },
+      {
+        path: "contribution-ranking/contribution-ranking",
+        style: {
+          navigationBarTitleText: "猩球榜单"
+        }
+      },
+      {
+        path: "suggestion-detail/suggestion-detail",
+        style: {
+          navigationBarTitleText: "建议详情"
         }
       }
     ]
