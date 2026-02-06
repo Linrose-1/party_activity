@@ -36,23 +36,14 @@ const _sfc_main = {
       try {
         const hoursData = JSON.parse(storeDetail.value.operatingHours);
         const businessHours = hoursData.business_hours;
-        if (!businessHours)
+        if (!businessHours || !businessHours.regular)
           return defaultResult;
-        const dayMap = {
-          monday: "周一",
-          tuesday: "周二",
-          wednesday: "周三",
-          thursday: "周四",
-          friday: "周五",
-          saturday: "周六",
-          sunday: "周日"
-        };
-        const dayOrder = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
-        const regular = dayOrder.filter((day) => businessHours.regular[day] && businessHours.regular[day].is_open).map((day) => {
-          const time = businessHours.regular[day];
+        const dailySegments = businessHours.regular.filter((item) => item.date === "周一" && item.is_open);
+        const regular = dailySegments.map((s) => {
           return {
-            day: dayMap[day],
-            time: `${time.open} - ${time.close}`
+            // 如果用户填了描述（如“上午”），就显示描述，没填则不显示
+            label: s.description && s.description !== "周一" ? s.description : "营业时段",
+            time: `${s.open} - ${s.close}`
           };
         });
         const special = (businessHours.special_dates || []).map((item) => {
@@ -70,8 +61,8 @@ const _sfc_main = {
         common_vendor.index.__f__("error", "at pages/shop-detail/shop-detail.vue:230", "解析营业时间失败:", error);
         return {
           regular: [{
-            day: "营业时间",
-            time: storeDetail.value.operatingHours
+            label: "营业时间",
+            time: "点击联系商家确认"
           }],
           special: []
         };
@@ -98,7 +89,7 @@ const _sfc_main = {
       });
       isLoading.value = false;
       if (error) {
-        common_vendor.index.__f__("error", "at pages/shop-detail/shop-detail.vue:268", "获取聚店详情失败:", error);
+        common_vendor.index.__f__("error", "at pages/shop-detail/shop-detail.vue:267", "获取聚店详情失败:", error);
         common_vendor.index.showToast({
           title: error,
           icon: "none"
@@ -106,7 +97,7 @@ const _sfc_main = {
         return;
       }
       storeDetail.value = data;
-      common_vendor.index.__f__("log", "at pages/shop-detail/shop-detail.vue:277", "聚店详情数据:", storeDetail.value);
+      common_vendor.index.__f__("log", "at pages/shop-detail/shop-detail.vue:276", "聚店详情数据:", storeDetail.value);
       if (data.checkContribution === 1) {
         setTimeout(() => {
           if (pointsPopup.value) {
@@ -221,21 +212,21 @@ const _sfc_main = {
         l: common_vendor.t(storeDetail.value.fullAddress || "暂无地址信息"),
         m: formattedOperatingHours.value.regular.length > 0
       }, formattedOperatingHours.value.regular.length > 0 ? common_vendor.e({
-        n: common_vendor.f(formattedOperatingHours.value.regular, (item, k0, i0) => {
+        n: common_vendor.f(formattedOperatingHours.value.regular, (item, index, i0) => {
           return {
-            a: common_vendor.t(item.day),
+            a: common_vendor.t(item.label),
             b: common_vendor.t(item.time),
-            c: item.day
+            c: index
           };
         }),
         o: formattedOperatingHours.value.special.length > 0
       }, formattedOperatingHours.value.special.length > 0 ? {
-        p: common_vendor.f(formattedOperatingHours.value.special, (item, k0, i0) => {
+        p: common_vendor.f(formattedOperatingHours.value.special, (item, index, i0) => {
           return {
             a: common_vendor.t(item.date),
             b: common_vendor.t(item.description),
             c: common_vendor.t(item.status),
-            d: item.date
+            d: index
           };
         })
       } : {}) : {}, {

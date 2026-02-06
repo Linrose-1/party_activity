@@ -66,20 +66,22 @@ const _sfc_main = {
       return 0;
     });
     const currentMembershipLevel = common_vendor.computed(() => {
-      if (!userInfo.value || typeof userInfo.value.topUpExperience === "undefined" || membershipLevels.value.length === 0) {
+      if (!userInfo.value || membershipLevels.value.length === 0) {
         return {
           name: "加载中..."
         };
       }
-      const amount = userInfo.value.topUpExperience;
-      for (let i = membershipLevels.value.length - 1; i >= 0; i--) {
-        if (amount >= membershipLevels.value[i].experience) {
-          return membershipLevels.value[i];
-        }
+      const backendLevel = userInfo.value.topUpLevel;
+      if (!backendLevel || backendLevel.id === null || backendLevel.name === "游客") {
+        return {
+          name: "游客",
+          level: 0,
+          color: "#999",
+          icon: "👤"
+        };
       }
-      return membershipLevels.value[0] || {
-        name: "游客"
-      };
+      const matchedLevel = membershipLevels.value.find((l) => Number(l.id) === Number(backendLevel.id));
+      return matchedLevel || backendLevel;
     });
     common_vendor.computed(() => {
       if (membershipLevels.value.length === 0)
@@ -135,7 +137,7 @@ const _sfc_main = {
       return "👤";
     };
     const formatDate = (timestamp) => {
-      if (!timestamp)
+      if (!timestamp || timestamp === 0)
         return "未开通";
       const date = new Date(timestamp);
       const Y = date.getFullYear();

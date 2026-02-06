@@ -198,24 +198,58 @@
 	// ======================= 会员等级：数据和计算属性 =======================
 
 	const currentMembershipLevel = computed(() => {
-		// 确保依赖的数据都已加载
-		if (!userInfo.value || typeof userInfo.value.topUpExperience === 'undefined' || membershipLevels.value
-			.length === 0) {
+		// 1. 基础数据未加载时的保护
+		if (!userInfo.value || membershipLevels.value.length === 0) {
 			return {
 				name: '加载中...'
 			};
 		}
-		const amount = userInfo.value.topUpExperience;
-		// 从高到低遍历，找到第一个满足条件的等级
-		for (let i = membershipLevels.value.length - 1; i >= 0; i--) {
-			if (amount >= membershipLevels.value[i].experience) {
-				return membershipLevels.value[i];
-			}
+
+		// 2. 获取后端返回的等级对象
+		const backendLevel = userInfo.value.topUpLevel;
+
+		// 3. 【核心判定】：如果 id 为 null 或名称明确为“游客”，直接判定为游客
+		if (!backendLevel || backendLevel.id === null || backendLevel.name === '游客') {
+			return {
+				name: '游客',
+				level: 0,
+				color: '#999',
+				icon: '👤'
+			};
 		}
-		return membershipLevels.value[0] || {
-			name: '游客'
-		};
+
+		// 4. 【正式会员处理】：通过 ID 在本地等级配置表中查找对应的 UI 样式（背景色、图标等）
+		// 注意：后端返回的 id 通常是数字，确保匹配逻辑稳健
+		const matchedLevel = membershipLevels.value.find(l => Number(l.id) === Number(backendLevel.id));
+
+		// 5. 返回匹配到的带样式的对象，若没匹配到则直接返回后端原始对象
+		return matchedLevel || backendLevel;
 	});
+
+	// const currentMembershipLevel = computed(() => {
+	// 	// 确保依赖的数据都已加载
+	// 	if (!userInfo.value || typeof userInfo.value.topUpExperience === 'undefined' || membershipLevels.value
+	// 		.length === 0) {
+	// 		return {
+	// 			name: '加载中...'
+	// 		};
+	// 	}
+	// 	if (userInfo.value.topUpLevel?.id === null || userInfo.value.topUpLevel?.id === undefined) {
+	// 		return {
+	// 			name: '游客'
+	// 		};
+	// 	}
+	// 	const amount = userInfo.value.topUpExperience;
+	// 	// 从高到低遍历，找到第一个满足条件的等级
+	// 	for (let i = membershipLevels.value.length - 1; i >= 0; i--) {
+	// 		if (amount >= membershipLevels.value[i].experience) {
+	// 			return membershipLevels.value[i];
+	// 		}
+	// 	}
+	// 	return membershipLevels.value[0] || {
+	// 		name: '游客'
+	// 	};
+	// });
 
 	const nextMembershipLevel = computed(() => {
 		if (membershipLevels.value.length === 0) return null;
@@ -283,7 +317,7 @@
 
 	// --- 时间格式化 ---
 	const formatDate = (timestamp) => {
-		if (!timestamp) return '未开通';
+		if (!timestamp || timestamp === 0) return '未开通';
 		const date = new Date(timestamp);
 		const Y = date.getFullYear();
 		const M = (date.getMonth() + 1).toString().padStart(2, '0');

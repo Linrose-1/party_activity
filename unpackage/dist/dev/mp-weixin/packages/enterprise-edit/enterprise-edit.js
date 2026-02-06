@@ -232,9 +232,9 @@ const _sfc_main = {
         } else {
           form.industryFirst = level1Name;
           form.industrySecond = level2Name;
-          industryLabel.value = nodes.map((n) => n.text || n.name).join("/");
+          industryLabel.value = level2Name || level1Name;
         }
-        common_vendor.index.__f__("log", "at packages/enterprise-edit/enterprise-edit.vue:555", "✅ 最终存储结果:", form.industryFirst, form.industrySecond);
+        common_vendor.index.__f__("log", "at packages/enterprise-edit/enterprise-edit.vue:556", "✅ 最终存储结果:", form.industryFirst, form.industrySecond);
       }
     };
     const fetchEnterpriseDetail = async (id) => {
@@ -253,7 +253,7 @@ const _sfc_main = {
     const applyDataToForm = (data) => {
       Object.assign(form, data);
       if (data.industryFirst) {
-        industryLabel.value = data.industryFirst + (data.industrySecond ? `/${data.industrySecond}` : "");
+        industryLabel.value = data.industrySecond || data.industryFirst;
       }
       if (data.brandImages) {
         brandImageList.value = data.brandImages.split(",").filter((i) => i);
@@ -268,7 +268,7 @@ const _sfc_main = {
         else if (Array.isArray(data.offlineStores))
           offlineStores.value = data.offlineStores;
       } catch (e) {
-        common_vendor.index.__f__("error", "at packages/enterprise-edit/enterprise-edit.vue:597", "数据格式转换失败:", e);
+        common_vendor.index.__f__("error", "at packages/enterprise-edit/enterprise-edit.vue:598", "数据格式转换失败:", e);
       }
     };
     const handleImageUpload = (field, dir) => {
@@ -357,7 +357,7 @@ const _sfc_main = {
           }
         },
         fail: (err) => {
-          common_vendor.index.__f__("log", "at packages/enterprise-edit/enterprise-edit.vue:701", "用户取消视频选择", err);
+          common_vendor.index.__f__("log", "at packages/enterprise-edit/enterprise-edit.vue:702", "用户取消视频选择", err);
         }
       });
     };
@@ -418,7 +418,7 @@ const _sfc_main = {
           });
         },
         fail: (err) => {
-          common_vendor.index.__f__("log", "at packages/enterprise-edit/enterprise-edit.vue:778", "用户取消了位置选择");
+          common_vendor.index.__f__("log", "at packages/enterprise-edit/enterprise-edit.vue:779", "用户取消了位置选择");
         }
       });
     };

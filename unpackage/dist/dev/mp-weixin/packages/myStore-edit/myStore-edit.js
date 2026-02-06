@@ -47,39 +47,17 @@ const _sfc_main = {
       return map;
     });
     const editableHours = common_vendor.reactive({
-      regular: [],
+      // regular 现在代表“每天”的时间段列表
+      // 默认初始化一个 09:00 - 22:00 的段
+      regular: [{
+        open: "09:00",
+        close: "22:00",
+        is_open: true,
+        description: "全天"
+      }],
       special: []
     });
-    const weekdays = [
-      {
-        key: "monday",
-        label: "周一"
-      },
-      {
-        key: "tuesday",
-        label: "周二"
-      },
-      {
-        key: "wednesday",
-        label: "周三"
-      },
-      {
-        key: "thursday",
-        label: "周四"
-      },
-      {
-        key: "friday",
-        label: "周五"
-      },
-      {
-        key: "saturday",
-        label: "周六"
-      },
-      {
-        key: "sunday",
-        label: "周日"
-      }
-    ];
+    const weekDayLabels = ["周一", "周二", "周三", "周四", "周五", "周六", "周日"];
     common_vendor.onLoad(async (options) => {
       await getStoreCategories();
       const storeId = options.id;
@@ -117,7 +95,7 @@ const _sfc_main = {
       }
       if (data && Array.isArray(data)) {
         categoryList.value = data;
-        common_vendor.index.__f__("log", "at packages/myStore-edit/myStore-edit.vue:331", "成功获取聚店类别:", categoryList.value);
+        common_vendor.index.__f__("log", "at packages/myStore-edit/myStore-edit.vue:319", "成功获取聚店类别:", categoryList.value);
       }
     };
     const getStoreDetails = async (storeId) => {
@@ -147,40 +125,67 @@ const _sfc_main = {
         }
       }
     };
+    const addTimeSegment = () => {
+      editableHours.regular.push({
+        open: "09:00",
+        close: "18:00",
+        is_open: true,
+        description: ""
+      });
+    };
+    const removeTimeSegment = (index) => {
+      editableHours.regular.splice(index, 1);
+    };
     const parseOperatingHours = (jsonString) => {
       var _a;
       try {
-        const data = (_a = JSON.parse(jsonString)) == null ? void 0 : _a.business_hours;
-        if (!data || !data.regular)
-          throw new Error("无效的营业时间格式");
-        editableHours.regular = weekdays.map((dayInfo) => {
-          const dayData = data.regular[dayInfo.key];
-          return {
-            key: dayInfo.key,
-            label: dayInfo.label,
-            isOpen: (dayData == null ? void 0 : dayData.is_open) ?? false,
-            openTime: (dayData == null ? void 0 : dayData.open) ?? "09:00",
-            closeTime: (dayData == null ? void 0 : dayData.close) ?? "22:00"
-          };
-        });
-        editableHours.special = (data.special_dates || []).map((d) => ({
-          date: d.date || "",
-          is_open: d.is_open ?? true,
-          open: d.open || "10:00",
-          close: d.close || "22:00",
-          description: d.description || ""
+        const rawData = (_a = JSON.parse(jsonString)) == null ? void 0 : _a.business_hours;
+        if (!rawData || !rawData.regular)
+          throw new Error("empty");
+        const firstDayLabel = weekDayLabels[0];
+        const dailySegments = rawData.regular.filter((item) => item.date === firstDayLabel);
+        if (dailySegments.length > 0) {
+          editableHours.regular = dailySegments.map((s) => ({
+            open: s.open || "09:00",
+            close: s.close || "22:00",
+            is_open: s.is_open ?? true,
+            description: s.description === firstDayLabel ? "营业时间" : s.description
+          }));
+        }
+        editableHours.special = (rawData.special_dates || []).map((d) => ({
+          ...d
         }));
       } catch (e) {
-        common_vendor.index.__f__("warn", "at packages/myStore-edit/myStore-edit.vue:398", "解析营业时间失败或为新建状态，将使用默认值:", e.message);
-        editableHours.regular = weekdays.map((dayInfo) => ({
-          key: dayInfo.key,
-          label: dayInfo.label,
-          isOpen: true,
-          openTime: "09:00",
-          closeTime: "22:00"
-        }));
+        editableHours.regular = [{
+          open: "09:00",
+          close: "22:00",
+          is_open: true,
+          description: "营业时间"
+        }];
         editableHours.special = [];
       }
+    };
+    const serializeOperatingHours = () => {
+      const regularArray = [];
+      weekDayLabels.forEach((dayName) => {
+        editableHours.regular.forEach((segment) => {
+          regularArray.push({
+            date: dayName,
+            is_open: segment.is_open,
+            description: segment.description || dayName,
+            open: segment.open,
+            close: segment.close
+          });
+        });
+      });
+      const dataToSerialize = {
+        business_hours: {
+          timezone: "Asia/Shanghai",
+          special_dates: editableHours.special,
+          regular: regularArray
+        }
+      };
+      return JSON.stringify(dataToSerialize);
     };
     const addSpecialHour = () => {
       const today = (/* @__PURE__ */ new Date()).toISOString().split("T")[0];
@@ -202,24 +207,6 @@ const _sfc_main = {
           }
         }
       });
-    };
-    const serializeOperatingHours = () => {
-      const regularData = editableHours.regular.reduce((acc, day) => {
-        acc[day.key] = {
-          open: day.openTime,
-          close: day.closeTime,
-          is_open: day.isOpen
-        };
-        return acc;
-      }, {});
-      const dataToSerialize = {
-        business_hours: {
-          regular: regularData,
-          special_dates: editableHours.special,
-          timezone: "Asia/Shanghai"
-        }
-      };
-      return JSON.stringify(dataToSerialize);
     };
     const handleImageUpload = (type) => {
       common_vendor.index.chooseImage({
@@ -428,40 +415,55 @@ const _sfc_main = {
           placeholderStyle: "color:#bbb;font-size:28rpx;",
           modelValue: form.value.storeDescription
         }),
-        v: common_vendor.f(editableHours.regular, (day, index, i0) => {
-          return common_vendor.e({
-            a: common_vendor.t(day.label),
-            b: day.isOpen
-          }, day.isOpen ? {
-            c: common_vendor.t(day.openTime),
-            d: day.openTime,
-            e: common_vendor.o((e) => day.openTime = e.detail.value, index),
-            f: common_vendor.t(day.closeTime),
-            g: day.closeTime,
-            h: common_vendor.o((e) => day.closeTime = e.detail.value, index)
-          } : {}, {
-            i: day.isOpen,
-            j: common_vendor.o((e) => day.isOpen = e.detail.value, index),
-            k: index
-          });
-        }),
+        v: editableHours.regular.length < 3
+      }, editableHours.regular.length < 3 ? {
         w: common_vendor.p({
           type: "plusempty",
           size: "12",
           color: "#FF6B00"
         }),
-        x: common_vendor.o(addSpecialHour),
-        y: editableHours.special.length === 0
-      }, editableHours.special.length === 0 ? {} : {}, {
-        z: common_vendor.f(editableHours.special, (specialDay, index, i0) => {
+        x: common_vendor.o(addTimeSegment)
+      } : {}, {
+        y: common_vendor.f(editableHours.regular, (item, index, i0) => {
           return common_vendor.e({
-            a: "856a9ece-8-" + i0,
+            a: common_vendor.t(item.open),
+            b: item.open,
+            c: common_vendor.o((e) => item.open = e.detail.value, index),
+            d: common_vendor.t(item.close),
+            e: item.close,
+            f: common_vendor.o((e) => item.close = e.detail.value, index),
+            g: item.description,
+            h: common_vendor.o(($event) => item.description = $event.detail.value, index)
+          }, editableHours.regular.length > 1 ? {
+            i: "856a9ece-8-" + i0,
+            j: common_vendor.p({
+              type: "trash",
+              size: "18",
+              color: "#999"
+            }),
+            k: common_vendor.o(($event) => removeTimeSegment(index), index)
+          } : {}, {
+            l: index
+          });
+        }),
+        z: editableHours.regular.length > 1,
+        A: common_vendor.p({
+          type: "plusempty",
+          size: "12",
+          color: "#FF6B00"
+        }),
+        B: common_vendor.o(addSpecialHour),
+        C: editableHours.special.length === 0
+      }, editableHours.special.length === 0 ? {} : {}, {
+        D: common_vendor.f(editableHours.special, (specialDay, index, i0) => {
+          return common_vendor.e({
+            a: "856a9ece-10-" + i0,
             b: common_vendor.t(specialDay.date || "选择日期"),
             c: specialDay.date,
             d: common_vendor.o((e) => specialDay.date = e.detail.value, index),
             e: specialDay.is_open,
             f: common_vendor.o((e) => specialDay.is_open = e.detail.value, index),
-            g: "856a9ece-9-" + i0,
+            g: "856a9ece-11-" + i0,
             h: common_vendor.o(($event) => removeSpecialHour(index), index),
             i: specialDay.is_open
           }, specialDay.is_open ? {
@@ -477,18 +479,18 @@ const _sfc_main = {
             r: index
           });
         }),
-        A: common_vendor.p({
+        E: common_vendor.p({
           type: "calendar",
           size: "14",
           color: "#666"
         }),
-        B: common_vendor.p({
+        F: common_vendor.p({
           type: "trash",
           size: "16",
           color: "#999"
         }),
-        C: common_vendor.o(($event) => form.value.contactPhone = $event),
-        D: common_vendor.p({
+        G: common_vendor.o(($event) => form.value.contactPhone = $event),
+        H: common_vendor.p({
           type: "number",
           placeholder: "请输入电话",
           inputBorder: false,
@@ -497,8 +499,8 @@ const _sfc_main = {
           },
           modelValue: form.value.contactPhone
         }),
-        E: common_vendor.o(($event) => form.value.averageConsumptionRange = $event),
-        F: common_vendor.p({
+        I: common_vendor.o(($event) => form.value.averageConsumptionRange = $event),
+        J: common_vendor.p({
           type: "text",
           placeholder: "如: 100-200",
           inputBorder: false,
@@ -507,23 +509,23 @@ const _sfc_main = {
           },
           modelValue: form.value.averageConsumptionRange
         }),
-        G: form.value.contactWechatQrCodeUrl
+        K: form.value.contactWechatQrCodeUrl
       }, form.value.contactWechatQrCodeUrl ? {
-        H: form.value.contactWechatQrCodeUrl
+        L: form.value.contactWechatQrCodeUrl
       } : {
-        I: common_vendor.p({
+        M: common_vendor.p({
           type: "scan",
           size: "30",
           color: "#ccc"
         })
       }, {
-        J: common_vendor.o(($event) => handleImageUpload("wechat")),
-        K: common_vendor.t(isSubmitting.value ? "正在提交..." : form.value.id ? "保存修改" : "自荐聚店"),
-        L: common_vendor.o(handleSubmit),
-        M: isSubmitting.value,
-        N: isSubmitting.value
+        N: common_vendor.o(($event) => handleImageUpload("wechat")),
+        O: common_vendor.t(isSubmitting.value ? "正在提交..." : form.value.id ? "保存修改" : "自荐聚店"),
+        P: common_vendor.o(handleSubmit),
+        Q: isSubmitting.value,
+        R: isSubmitting.value
       }) : {
-        O: common_vendor.p({
+        S: common_vendor.p({
           type: "spinner-cycle",
           size: "40",
           color: "#ccc"

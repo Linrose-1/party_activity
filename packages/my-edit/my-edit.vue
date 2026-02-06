@@ -736,27 +736,22 @@
 		const nodes = event.detail.value; // 获取选中的路径节点数组
 		if (!nodes || nodes.length === 0) return;
 
+		const level1Name = nodes[0].text || nodes[0].name;
 		const lastNode = nodes[nodes.length - 1];
-		// 关键：由于配置了 map，组件内部可能会将 name 转换为 text
 		const lastNodeText = lastNode.text || lastNode.name;
 
-		let finalIndustryName = '';
+		let finalName = '';
 
 		if (lastNodeText === '全部分类') {
-			// 如果选的是“全部分类”，则取其父级的名称
-			// 逻辑：如果路径是 [制造业, 全部分类]，结果就是 "制造业"
-			const parentNode = nodes[nodes.length - 2];
-			finalIndustryName = parentNode ? (parentNode.text || parentNode.name) : '';
+			// 选了全部分类，存父级名称
+			finalName = level1Name;
 		} else {
-			// 如果选的是正常的末级分类，拼接完整路径
-			finalIndustryName = nodes.map(n => n.text || n.name).join('/');
+			// 选了具体二级，直接存二级名称
+			finalName = lastNodeText;
 		}
 
-		// 强制更新对应索引的数据，确保响应式
-		companyAndIndustryList.value[index].industryName = finalIndustryName;
-
-		// 调试打印，现在应该能看到正确的值了
-		console.log(`第 ${index + 1} 组行业选择完毕:`, finalIndustryName);
+		companyAndIndustryList.value[index].industryName = finalName;
+		console.log(`第 ${index + 1} 组行业选择结果:`, finalName);
 	};
 
 	const getIndustryTreeData = async () => {
@@ -886,22 +881,32 @@
 			// 公司/行业/职务 反显
 			if (userInfo.companyName || userInfo.industry || userInfo.positionTitle) {
 				const companyNames = (userInfo.companyName || '').split(',');
+				// 1. 确保变量名为 industryNames
 				const industryNames = (userInfo.industry || '').split(',');
 				const positionTitles = (userInfo.positionTitle || '').split(',');
 
-				// 以最长的数组为基准进行映射，避免数据丢失
+				// 以最长的数组为基准进行映射
 				const maxLength = Math.max(companyNames.length, industryNames.length, positionTitles.length);
 				const newList = [];
+
 				for (let i = 0; i < maxLength; i++) {
-					// 确保即使某个字段为空也能正确映射
+					// 2. 获取原始路径字符串
+					const rawPath = (industryNames[i] || '').trim();
+
+					// 3. 处理路径：只取叶子节点名称（例如 "制造业/汽车业" -> "汽车业"）
+					// 这样组件才能在树中正确匹配并显示
+					const leafName = rawPath.includes('/') ? rawPath.split('/').pop() : rawPath;
+
 					if (companyNames[i] || industryNames[i] || positionTitles[i]) {
 						newList.push({
-							name: companyNames[i] || '',
-							industryName: industryNames[i] || '',
-							positionTitle: positionTitles[i] || ''
+							name: (companyNames[i] || '').trim(),
+							industryName: leafName, // 塞入处理后的末级名称
+							positionTitle: (positionTitles[i] || '').trim()
 						});
 					}
 				}
+
+				// 赋值给响应式列表
 				companyAndIndustryList.value = newList.length > 0 ? newList : [{
 					name: '',
 					industryName: '',
@@ -909,6 +914,7 @@
 				}];
 
 			} else {
+				// 无数据时的默认空项
 				companyAndIndustryList.value = [{
 					name: '',
 					industryName: '',

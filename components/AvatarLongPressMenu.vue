@@ -1,80 +1,75 @@
 <template>
-	<uni-popup ref="popup" type="center" :mask-click="true">
-		<view class="menu-card">
-			<!-- 1. 头部信息区 -->
-			<view class="card-header">
-				<view class="avatar-wrapper">
-					<image :src="targetUser.avatar || '/static/icon/default-avatar.png'" class="menu-avatar"
-						mode="aspectFill"></image>
+	<view>
+		<uni-popup ref="popup" type="center" :mask-click="true">
+			<view class="menu-card">
+				<!-- 1. 头部信息区 -->
+				<view class="card-header">
+					<view class="avatar-wrapper">
+						<image :src="targetUser.avatar || defaultAvatar" class="menu-avatar" mode="aspectFill"></image>
+					</view>
+					<view class="user-info">
+						<text class="user-name">{{ targetUser.name || '商友' }}</text>
+						<text class="user-desc">与您相遇在猩聚社</text>
+					</view>
+					<view class="close-icon" @click="close">
+						<uni-icons type="closeempty" size="24" color="#fff"></uni-icons>
+					</view>
 				</view>
-				<view class="user-info">
-					<text class="user-name">{{ targetUser.name || '商友' }}</text>
-					<text class="user-desc">与您相遇在猩聚社</text>
-				</view>
-				<view class="close-icon" @click="close">
-					<uni-icons type="closeempty" size="24" color="#fff"></uni-icons>
+
+				<!-- 2. 操作按钮区 (3x2 布局) -->
+				<view class="action-grid">
+					<!-- 查看名片 -->
+					<view class="grid-item primary-outline" @click="handleAction('viewCard')">
+						<view class="icon-box"><uni-icons type="person" size="26" color="#FF7009" /></view>
+						<text class="item-text">查看名片</text>
+					</view>
+
+					<!-- 人脉链路 -->
+					<view class="grid-item" :class="isSelf ? 'disabled' : 'primary-outline'"
+						@click="handleAction('viewPath')">
+						<view class="icon-box" :class="{ 'path-style': !isSelf }">
+							<uni-icons type="staff-filled" size="26" :color="isSelf ? '#999' : '#FF7009'" />
+						</view>
+						<text class="item-text">{{ isSelf ? '本人' : '人脉链路' }}</text>
+					</view>
+
+					<!-- 商友点评 -->
+					<view class="grid-item primary-outline" @click="handleAction('comment')">
+						<view class="icon-box"><uni-icons type="star" size="26" color="#FF7009" /></view>
+						<text class="item-text">商友点评</text>
+					</view>
+
+					<!-- 邀入我圈 -->
+					<view class="grid-item" :class="isSelf ? 'disabled' : 'primary-outline'"
+						@click="handleAction('inviteCircle')">
+						<view class="icon-box"><uni-icons type="paperplane-filled" size="26"
+								:color="isSelf ? '#999' : '#FF7009'" /></view>
+						<text class="item-text">{{ isSelf ? '本人' : '邀入我圈' }}</text>
+					</view>
+
+					<!-- 加入TA圈 -->
+					<view class="grid-item" :class="isSelf ? 'disabled' : 'primary-outline'"
+						@click="handleAction('addCircle')">
+						<view class="icon-box"><uni-icons type="plusempty" size="26"
+								color="isSelf ? '#999' : '#FF7009'" /></view>
+						<text class="item-text">{{ isSelf ? '本人' : '加入TA圈' }}</text>
+					</view>
+
+					<!-- 资源匹配 -->
+					<view class="grid-item primary-outline"
+						@click="handleAction('resourceMatch')">
+						<view class="icon-box"><uni-icons type="search" size="26"
+								color="#FF7009" /></view>
+						<text class="item-text">资源匹配</text>
+					</view>
 				</view>
 			</view>
+		</uni-popup>
 
-			<!-- 2. 操作按钮区 (2x2 布局) -->
-			<view class="action-grid">
-
-				<!-- 1. 查看名片 -->
-				<view class="grid-item primary-outline" @click="handleAction('viewCard')">
-					<view class="icon-box invite-style"><uni-icons type="person" size="26" color="#FF7009"></uni-icons>
-					</view>
-					<text class="item-text">查看名片</text>
-				</view>
-
-				<!-- 2. 人脉链路  -->
-				<view class="grid-item" :class="isSelf ? 'disabled' : 'primary-outline'"
-					@click="handleAction('viewPath')">
-					<view class="icon-box" :class="isSelf ? '' : 'path-style'">
-						<uni-icons type="staff-filled" size="26" :color="isSelf ? '#999' : '#FF7009'"></uni-icons>
-					</view>
-					<text class="item-text">{{ isSelf ? '本人' : '人脉链路' }}</text>
-				</view>
-
-				<!-- 3. 商友点评 -->
-				<view class="grid-item primary-outline" @click="handleAction('comment')">
-					<view class="icon-box invite-style"><uni-icons type="star" size="26" color="#FF7009"></uni-icons>
-					</view>
-					<text class="item-text">商友点评</text>
-				</view>
-
-				<!-- 4. 邀入我圈 -->
-				<view class="grid-item" :class="isSelf ? 'disabled' : 'primary-outline'"
-					@click="handleAction('inviteCircle')">
-					<view class="icon-box invite-style"><uni-icons type="paperplane-filled" size="26"
-							color="#FF7009"></uni-icons></view>
-					<text class="item-text">{{ isSelf ? '本人' : '邀入我圈' }}</text>
-				</view>
-
-				<!-- 5. 加入TA圈 -->
-				<view class="grid-item" :class="isSelf ? 'disabled' : 'primary-outline'"
-					@click="handleAction('addCircle')">
-					<view class="icon-box invite-style"><uni-icons type="plusempty" size="26"
-							color="#FF7009"></uni-icons></view>
-					<text class="item-text">{{ isSelf ? '本人' : '加入TA圈' }}</text>
-				</view>
-
-				<!-- <view class="grid-item" @click="handleAction('removeCircle')">
-									<view class="icon-box danger">
-										<uni-icons type="minus" size="24" color="#ff4d4f"></uni-icons>
-									</view>
-									<text class="item-text">一键脱圈</text>
-								</view> -->
-
-				<!-- <view class="grid-item" @click="handleAction('disconnect')">
-									<view class="icon-box danger">
-										<uni-icons type="closeempty" size="24" color="#ff4d4f"></uni-icons>
-									</view>
-									<text class="item-text">一键脱连</text>
-								</view> -->
-
-			</view>
-		</view>
-	</uni-popup>
+		<!-- 3. 内置：加圈与邀圈的确认弹窗 (实现内部闭环) -->
+		<AddCircleConfirmPopup ref="addCircleRef" @success="onSocialSuccess" />
+		<InviteCircleConfirmPopup ref="inviteCircleRef" @success="onSocialSuccess" />
+	</view>
 </template>
 
 <script setup>
@@ -82,45 +77,121 @@
 		ref,
 		computed
 	} from 'vue';
+	import AddCircleConfirmPopup from '@/components/AddCircleConfirmPopup.vue';
+	import InviteCircleConfirmPopup from '@/components/InviteCircleConfirmPopup.vue';
 
-	const popup = ref(null);
-	const targetUser = ref({});
-	const emit = defineEmits(['action']);
-	const currentUserId = ref(null);
-
-	const isSelf = computed(() => {
-		// 获取当前登录人 ID
-		const loggedInId = uni.getStorageSync('userId');
-		// 获取当前被点击对象的管理者 ID
-		const targetManagerId = targetUser.value.managerId;
-
-		// 如果管理者 ID 等于当前登录人 ID，则视为“我本人”或“我的企业”
-		return loggedInId && targetManagerId && String(loggedInId) === String(targetManagerId);
+	// --- Props 定义 ---
+	const props = defineProps({
+		// 支持外部传入路径覆盖默认配置
+		config: {
+			type: Object,
+			default: () => ({})
+		}
 	});
 
+	const emit = defineEmits(['actionSuccess']);
+
+	// --- 状态变量 ---
+	const popup = ref(null);
+	const addCircleRef = ref(null);
+	const inviteCircleRef = ref(null);
+	const targetUser = ref({});
+	const defaultAvatar = '/static/icon/default-avatar.png';
+
+	/**
+	 * 默认业务路径配置
+	 */
+	const PATHS = {
+		personalCard: '/packages/applicationBusinessCard/applicationBusinessCard',
+		enterpriseCard: '/packages/enterprise-card/enterprise-card',
+		relationshipPath: '/packages/relationship-path/relationship-path',
+		reviews: '/packages/user-reviews/user-reviews',
+		resourceMatch: '/packages/resource-match/resource-match'
+	};
+
+	/**
+	 * [计算属性] 判定是否为“我本人”或“我的企业”
+	 */
+	const isSelf = computed(() => {
+		const loggedInId = uni.getStorageSync('userId');
+		const managerId = targetUser.value.managerId || targetUser.value.id;
+		return loggedInId && managerId && String(loggedInId) === String(managerId);
+	});
+
+	/**
+	 * [方法] 打开菜单
+	 */
 	const open = (user) => {
 		targetUser.value = user || {};
-		currentUserId.value = uni.getStorageSync('userId');
 		popup.value.open();
 	};
 
-	const close = () => {
-		popup.value.close();
+	/**
+	 * [方法] 关闭菜单
+	 */
+	const close = () => popup.value.close();
+
+	/**
+	 * [核心逻辑] 统一处理点击动作
+	 */
+	const handleAction = (type) => {
+		// 1. 权限拦截：本人不可操作社交项
+		const socialTypes = ['addCircle', 'inviteCircle', 'viewPath'];
+		if (isSelf.value && socialTypes.includes(type)) return;
+
+		const user = targetUser.value;
+
+		// 2. 分流处理
+		switch (type) {
+			case 'viewCard': // 3. 查看名片 (自动分流：企业 vs 个人)
+				if (user.isEnterpriseSource) {
+					uni.navigateTo({
+						url: `${PATHS.enterpriseCard}?id=${user.id}`
+					});
+				} else {
+					const url =
+						`${PATHS.personalCard}?id=${user.id}&name=${encodeURIComponent(user.name)}&avatar=${encodeURIComponent(user.avatar || '')}`;
+					uni.navigateTo({
+						url
+					});
+				}
+				break;
+
+			case 'viewPath': // 4. 人脉链路
+				uni.navigateTo({
+					url: `${PATHS.relationshipPath}?targetUserId=${user.id}&name=${encodeURIComponent(user.name || '商友')}`
+				});
+				break;
+
+			case 'comment': // 5. 商友点评
+				uni.navigateTo({
+					url: `${PATHS.reviews}?userId=${user.id}`
+				});
+				break;
+
+			case 'resourceMatch': // 6. 资源匹配
+				uni.navigateTo({
+					url: `${PATHS.resourceMatch}?targetUserId=${user.id}`
+				});
+				break;
+
+			case 'addCircle': // 7. 加入TA圈 (唤起内部组件)
+				addCircleRef.value.open(user);
+				break;
+
+			case 'inviteCircle': // 8. 邀入我圈 (唤起内部组件)
+				inviteCircleRef.value.open(user);
+				break;
+		}
+
+		close(); // 操作后关闭菜单
 	};
 
-	const handleAction = (type) => {
-		// 拦截自己操作
-		const selfDisabledActions = ['addCircle', 'inviteCircle', 'viewPath'];
-
-		if (selfDisabledActions.includes(type) && isSelf.value) {
-			// 如果是点击了禁止项且是本人，直接返回不执行后续 emit
-			return;
-		}
-		close();
-		emit('action', {
-			type,
-			user: targetUser.value
-		});
+	/**
+	 * [方法] 内部弹窗操作成功后的回调
+	 */
+	const onSocialSuccess = (id) => {
+		emit('actionSuccess', id);
 	};
 
 	defineExpose({
@@ -130,10 +201,11 @@
 </script>
 
 <style lang="scss" scoped>
+	/* 样式保持 3x2 布局及 #FF7009 主题色 */
 	.menu-card {
-		width: 600rpx;
+		width: 620rpx;
 		background-color: #fff;
-		border-radius: 24rpx;
+		border-radius: 32rpx;
 		overflow: hidden;
 		position: relative;
 	}
@@ -143,7 +215,6 @@
 		padding: 40rpx 30rpx;
 		display: flex;
 		align-items: center;
-		position: relative;
 	}
 
 	.avatar-wrapper {
@@ -164,18 +235,18 @@
 		flex: 1;
 		display: flex;
 		flex-direction: column;
-	}
 
-	.user-name {
-		font-size: 36rpx;
-		font-weight: bold;
-		color: #fff;
-		margin-bottom: 8rpx;
-	}
+		.user-name {
+			font-size: 34rpx;
+			font-weight: bold;
+			color: #fff;
+			margin-bottom: 4rpx;
+		}
 
-	.user-desc {
-		font-size: 24rpx;
-		color: rgba(255, 255, 255, 0.9);
+		.user-desc {
+			font-size: 22rpx;
+			color: rgba(255, 255, 255, 0.8);
+		}
 	}
 
 	.close-icon {
@@ -183,22 +254,13 @@
 		top: 20rpx;
 		right: 20rpx;
 		padding: 10rpx;
-		opacity: 0.8;
 	}
 
-	/* --- 2x2 网格布局修改 --- */
 	.action-grid {
 		display: grid;
 		grid-template-columns: repeat(3, 1fr);
-		/* 改为3列布局 */
-		gap: 30rpx;
-		padding: 40rpx 20rpx;
-	}
-
-	.icon-box.path-style {
-		background-color: #FFF5EE;
-		/* 给链路按钮一个浅橙色底，稍微区别开 */
-		border: 2rpx solid #FF7009;
+		gap: 40rpx 10rpx;
+		padding: 50rpx 20rpx;
 	}
 
 	.grid-item {
@@ -208,63 +270,44 @@
 		justify-content: center;
 
 		&:active {
+			transform: scale(0.95);
 			opacity: 0.8;
-			transform: scale(0.98);
 		}
-	}
 
-	.icon-box {
-		width: 110rpx;
-		/* 稍微加大图标区域 */
-		height: 110rpx;
-		border-radius: 50%;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		margin-bottom: 16rpx;
-		box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
-	}
+		.icon-box {
+			width: 100rpx;
+			height: 100rpx;
+			border-radius: 50%;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			margin-bottom: 12rpx;
+			border: 2rpx solid #FF7009;
+			box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
+		}
 
-	/* 申请入圈 (实心橙色) */
-	.grid-item.primary .icon-box {
-		background: linear-gradient(135deg, #FF7009, #FF8C00);
-		box-shadow: 0 6rpx 16rpx rgba(255, 112, 9, 0.3);
-	}
+		.icon-box.path-style {
+			background-color: #FFF5EE;
+		}
 
-	/* 邀请入圈 (空心/浅橙色描边风格) */
-	.grid-item.primary-outline .icon-box.invite-style {
-		background-color: #fff;
-		border: 2rpx solid #FF7009;
-		color: #FF7009;
-	}
-
-	/* 查看名片 */
-	.icon-box.secondary {
-		background-color: #FFF3E0;
-	}
-
-	/* 点评 */
-	.icon-box.normal {
-		background-color: #f5f5f5;
+		.item-text {
+			font-size: 26rpx;
+			color: #333;
+			font-weight: 500;
+		}
 	}
 
 	.grid-item.disabled {
 		pointer-events: none;
 
 		.icon-box {
-			background-color: #dcdcdc;
+			background-color: #f2f2f2;
+			border-color: #ddd;
 			box-shadow: none;
-			border: none;
 		}
 
 		.item-text {
-			color: #999;
+			color: #bbb;
 		}
-	}
-
-	.item-text {
-		font-size: 28rpx;
-		color: #333;
-		font-weight: 500;
 	}
 </style>

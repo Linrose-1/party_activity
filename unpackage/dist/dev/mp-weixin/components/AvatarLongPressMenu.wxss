@@ -1,9 +1,10 @@
 /* 水平间距 */
 /* 水平间距 */
+/* 样式保持 3x2 布局及 #FF7009 主题色 */
 .menu-card.data-v-5571075f {
-  width: 600rpx;
+  width: 620rpx;
   background-color: #fff;
-  border-radius: 24rpx;
+  border-radius: 32rpx;
   overflow: hidden;
   position: relative;
 }
@@ -12,7 +13,6 @@
   padding: 40rpx 30rpx;
   display: flex;
   align-items: center;
-  position: relative;
 }
 .avatar-wrapper.data-v-5571075f {
   width: 100rpx;
@@ -31,36 +31,27 @@
   display: flex;
   flex-direction: column;
 }
-.user-name.data-v-5571075f {
-  font-size: 36rpx;
+.user-info .user-name.data-v-5571075f {
+  font-size: 34rpx;
   font-weight: bold;
   color: #fff;
-  margin-bottom: 8rpx;
+  margin-bottom: 4rpx;
 }
-.user-desc.data-v-5571075f {
-  font-size: 24rpx;
-  color: rgba(255, 255, 255, 0.9);
+.user-info .user-desc.data-v-5571075f {
+  font-size: 22rpx;
+  color: rgba(255, 255, 255, 0.8);
 }
 .close-icon.data-v-5571075f {
   position: absolute;
   top: 20rpx;
   right: 20rpx;
   padding: 10rpx;
-  opacity: 0.8;
 }
-
-/* --- 2x2 网格布局修改 --- */
 .action-grid.data-v-5571075f {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  /* 改为3列布局 */
-  gap: 30rpx;
-  padding: 40rpx 20rpx;
-}
-.icon-box.path-style.data-v-5571075f {
-  background-color: #FFF5EE;
-  /* 给链路按钮一个浅橙色底，稍微区别开 */
-  border: 2rpx solid #FF7009;
+  gap: 40rpx 10rpx;
+  padding: 50rpx 20rpx;
 }
 .grid-item.data-v-5571075f {
   display: flex;
@@ -69,56 +60,36 @@
   justify-content: center;
 }
 .grid-item.data-v-5571075f:active {
+  transform: scale(0.95);
   opacity: 0.8;
-  transform: scale(0.98);
 }
-.icon-box.data-v-5571075f {
-  width: 110rpx;
-  /* 稍微加大图标区域 */
-  height: 110rpx;
+.grid-item .icon-box.data-v-5571075f {
+  width: 100rpx;
+  height: 100rpx;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 16rpx;
+  margin-bottom: 12rpx;
+  border: 2rpx solid #FF7009;
   box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
 }
-
-/* 申请入圈 (实心橙色) */
-.grid-item.primary .icon-box.data-v-5571075f {
-  background: linear-gradient(135deg, #FF7009, #FF8C00);
-  box-shadow: 0 6rpx 16rpx rgba(255, 112, 9, 0.3);
+.grid-item .icon-box.path-style.data-v-5571075f {
+  background-color: #FFF5EE;
 }
-
-/* 邀请入圈 (空心/浅橙色描边风格) */
-.grid-item.primary-outline .icon-box.invite-style.data-v-5571075f {
-  background-color: #fff;
-  border: 2rpx solid #FF7009;
-  color: #FF7009;
-}
-
-/* 查看名片 */
-.icon-box.secondary.data-v-5571075f {
-  background-color: #FFF3E0;
-}
-
-/* 点评 */
-.icon-box.normal.data-v-5571075f {
-  background-color: #f5f5f5;
+.grid-item .item-text.data-v-5571075f {
+  font-size: 26rpx;
+  color: #333;
+  font-weight: 500;
 }
 .grid-item.disabled.data-v-5571075f {
   pointer-events: none;
 }
 .grid-item.disabled .icon-box.data-v-5571075f {
-  background-color: #dcdcdc;
+  background-color: #f2f2f2;
+  border-color: #ddd;
   box-shadow: none;
-  border: none;
 }
 .grid-item.disabled .item-text.data-v-5571075f {
-  color: #999;
-}
-.item-text.data-v-5571075f {
-  font-size: 28rpx;
-  color: #333;
-  font-weight: 500;
+  color: #bbb;
 }

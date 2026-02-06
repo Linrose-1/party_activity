@@ -2,11 +2,11 @@
 	<view class="container">
 		<!-- 1. 顶部 Tabs -->
 		<view class="tabs">
-			<view class="tab-item" :class="{ active: currentTab === 0 }" @click="switchTab(0)">
+			<view class="tab-item" :class="{ active: currentTab === 0 }" @click="handleTabSwitch(0)">
 				赞踩
 				<view class="active-line" v-if="currentTab === 0"></view>
 			</view>
-			<view class="tab-item" :class="{ active: currentTab === 1 }" @click="switchTab(1)">
+			<view class="tab-item" :class="{ active: currentTab === 1 }" @click="handleTabSwitch(1)">
 				评分
 				<view class="active-line" v-if="currentTab === 1"></view>
 			</view>
@@ -130,7 +130,8 @@
 		onMounted
 	} from 'vue';
 	import {
-		onLoad
+		onLoad,
+		onShow
 	} from '@dcloudio/uni-app';
 	import request from '@/utils/request.js';
 	import ScoreForm from '@/components/ScoreForm.vue';
@@ -266,13 +267,42 @@
 		}
 	});
 
+	onShow(() => {
+		if (targetUserId.value) {
+			// 每次进入页面，静默执行一次当前 Tab 的数据刷新
+			refreshTabData();
+		}
+	});
+
 	// ==========================================
 	// 4. 方法逻辑区域
 	// ==========================================
 
+	/**
+	 * [方法] 根据当前 Tab 无感刷新对应数据
+	 */
+	const refreshTabData = () => {
+		if (currentTab.value === 0) {
+			// 赞踩 Tab：刷新评价列表和我给对方的评价状态
+			fetchRecentReviews();
+			fetchMyReviewToTarget();
+		} else {
+			// 评分 Tab：刷新统计数据和我给对方的打分记录
+			fetchMyHistoryScore();
+			fetchRadarStatistics();
+		}
+	};
+
 	// --- 通用方法 ---
-	const switchTab = (index) => {
+	/**
+	 * [方法] 处理 Tab 切换点击
+	 */
+	const handleTabSwitch = (index) => {
+		if (currentTab.value === index) return;
 		currentTab.value = index;
+
+		// 关键：切换时立即触发无感刷新，保证数据永远是最新的
+		refreshTabData();
 	};
 
 	const formatTime = (timeStr) => {
@@ -529,7 +559,7 @@
 					],
 					color: '#4CAF50'
 				});
-			}else {
+			} else {
 				newDatasets.push({
 					name: '商友评价',
 					data: [
@@ -554,7 +584,7 @@
 					],
 					color: '#1890FF'
 				});
-			}else {
+			} else {
 				newDatasets.push({
 					name: '综合评价',
 					data: [

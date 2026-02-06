@@ -550,7 +550,8 @@
 				form.industryFirst = level1Name;
 				form.industrySecond = level2Name;
 				// 输入框显示完整路径
-				industryLabel.value = nodes.map(n => n.text || n.name).join('/');
+				// industryLabel.value = nodes.map(n => n.text || n.name).join('/');
+				industryLabel.value = level2Name || level1Name;
 			}
 			console.log('✅ 最终存储结果:', form.industryFirst, form.industrySecond);
 		}
@@ -580,7 +581,7 @@
 		Object.assign(form, data);
 		// 还原行业显示文本
 		if (data.industryFirst) {
-			industryLabel.value = data.industryFirst + (data.industrySecond ? `/${data.industrySecond}` : '');
+			industryLabel.value = data.industrySecond || data.industryFirst;
 		}
 		// 还原九图组件数组
 		if (data.brandImages) {

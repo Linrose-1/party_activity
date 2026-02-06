@@ -117,8 +117,25 @@ const _sfc_main = {
         fetchRadarStatistics();
       }
     });
-    const switchTab = (index) => {
+    common_vendor.onShow(() => {
+      if (targetUserId.value) {
+        refreshTabData();
+      }
+    });
+    const refreshTabData = () => {
+      if (currentTab.value === 0) {
+        fetchRecentReviews();
+        fetchMyReviewToTarget();
+      } else {
+        fetchMyHistoryScore();
+        fetchRadarStatistics();
+      }
+    };
+    const handleTabSwitch = (index) => {
+      if (currentTab.value === index)
+        return;
       currentTab.value = index;
+      refreshTabData();
     };
     const formatTime = (timeStr) => {
       if (!timeStr)
@@ -147,13 +164,13 @@ const _sfc_main = {
           reviewForm.reviewContent = myReview.reviewContent;
           reviewRecordId.value = myReview.id;
           isReviewEditMode.value = true;
-          common_vendor.index.__f__("log", "at packages/user-reviews/user-reviews.vue:313", "✅ 回显我的历史评价:", myReview);
+          common_vendor.index.__f__("log", "at packages/user-reviews/user-reviews.vue:343", "✅ 回显我的历史评价:", myReview);
         } else {
           isReviewEditMode.value = false;
           reviewRecordId.value = null;
         }
       } catch (e) {
-        common_vendor.index.__f__("error", "at packages/user-reviews/user-reviews.vue:320", "获取我的评价失败", e);
+        common_vendor.index.__f__("error", "at packages/user-reviews/user-reviews.vue:350", "获取我的评价失败", e);
       }
     };
     const selectLike = (val) => {
@@ -236,7 +253,7 @@ const _sfc_main = {
           totalReviews.value = data.total || 0;
         }
       } catch (e) {
-        common_vendor.index.__f__("error", "at packages/user-reviews/user-reviews.vue:414", "获取最近反馈失败", e);
+        common_vendor.index.__f__("error", "at packages/user-reviews/user-reviews.vue:444", "获取最近反馈失败", e);
       }
     };
     const handleReviewDelete = () => {
@@ -372,7 +389,7 @@ const _sfc_main = {
         }
         radarDatasets.value = newDatasets;
       } catch (e) {
-        common_vendor.index.__f__("error", "at packages/user-reviews/user-reviews.vue:572", "获取统计数据失败", e);
+        common_vendor.index.__f__("error", "at packages/user-reviews/user-reviews.vue:602", "获取统计数据失败", e);
       }
     };
     const fetchMyHistoryScore = async () => {
@@ -382,7 +399,7 @@ const _sfc_main = {
           error
         } = await ScoreApi.getInfo(targetUserId.value);
         if (!error && data) {
-          common_vendor.index.__f__("log", "at packages/user-reviews/user-reviews.vue:585", "✅ 获取到历史评分:", data);
+          common_vendor.index.__f__("log", "at packages/user-reviews/user-reviews.vue:615", "✅ 获取到历史评分:", data);
           if (data.id)
             scoreRecordId.value = data.id;
           Object.keys(scores.value).forEach((key) => {
@@ -392,7 +409,7 @@ const _sfc_main = {
           });
         }
       } catch (e) {
-        common_vendor.index.__f__("error", "at packages/user-reviews/user-reviews.vue:595", "获取历史评分异常:", e);
+        common_vendor.index.__f__("error", "at packages/user-reviews/user-reviews.vue:625", "获取历史评分异常:", e);
       }
     };
     return (_ctx, _cache) => {
@@ -400,11 +417,11 @@ const _sfc_main = {
         a: currentTab.value === 0
       }, currentTab.value === 0 ? {} : {}, {
         b: currentTab.value === 0 ? 1 : "",
-        c: common_vendor.o(($event) => switchTab(0)),
+        c: common_vendor.o(($event) => handleTabSwitch(0)),
         d: currentTab.value === 1
       }, currentTab.value === 1 ? {} : {}, {
         e: currentTab.value === 1 ? 1 : "",
-        f: common_vendor.o(($event) => switchTab(1)),
+        f: common_vendor.o(($event) => handleTabSwitch(1)),
         g: currentTab.value === 0
       }, currentTab.value === 0 ? common_vendor.e({
         h: isSelf.value

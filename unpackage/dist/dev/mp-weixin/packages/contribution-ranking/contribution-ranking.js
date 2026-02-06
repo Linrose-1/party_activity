@@ -80,7 +80,7 @@ const _sfc_main = {
         c: topThree.value[1].avatar || defaultAvatar,
         d: common_vendor.t(topThree.value[1].realName || topThree.value[1].nickname),
         e: common_vendor.t(topThree.value[1].experience),
-        f: common_vendor.o(($event) => goCard(topThree.value[1]))
+        f: common_vendor.o(($event) => handleAvatarClick(topThree.value[1]))
       } : {}, {
         g: topThree.value[0]
       }, topThree.value[0] ? {
@@ -92,14 +92,14 @@ const _sfc_main = {
         }),
         j: common_vendor.t(topThree.value[0].realName || topThree.value[0].nickname),
         k: common_vendor.t(topThree.value[0].experience),
-        l: common_vendor.o(($event) => goCard(topThree.value[0]))
+        l: common_vendor.o(($event) => handleAvatarClick(topThree.value[0]))
       } : {}, {
         m: topThree.value[2]
       }, topThree.value[2] ? {
         n: topThree.value[2].avatar || defaultAvatar,
         o: common_vendor.t(topThree.value[2].realName || topThree.value[2].nickname),
         p: common_vendor.t(topThree.value[2].experience),
-        q: common_vendor.o(($event) => goCard(topThree.value[2]))
+        q: common_vendor.o(($event) => handleAvatarClick(topThree.value[2]))
       } : {}) : {}, {
         r: loading.value
       }, loading.value ? {
@@ -117,8 +117,8 @@ const _sfc_main = {
           }, user.topUpLevelName ? {
             f: common_vendor.t(user.topUpLevelName)
           } : {}, {
-            g: common_vendor.t(user.positionTitle || "精英商友"),
-            h: common_vendor.t(user.companyName || "平台建设者"),
+            g: common_vendor.t(user.positionTitle || "暂无填写职位"),
+            h: common_vendor.t(user.companyName || "暂无填写公司"),
             i: common_vendor.t(user.experience),
             j: user.id,
             k: common_vendor.o(($event) => goCard(user), user.id)

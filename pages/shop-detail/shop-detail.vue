@@ -64,19 +64,26 @@
 				</view>
 
 				<!-- 营业时间 (v-if 判断是否存在) -->
+				<!-- 营业时间模块 -->
+				<!-- 营业时间模块 -->
 				<view class="info-item" v-if="formattedOperatingHours.regular.length > 0">
 					<view class="info-content">
-						<view class="info-title">🕒营业时间</view>
-						<!-- 使用 v-for 循环渲染解析后的常规营业时间 -->
-						<view class="hours-item" v-for="item in formattedOperatingHours.regular" :key="item.day">
-							<view class="hours-day">{{ item.day }}</view>
-							<view class="hours-time">{{ item.time }}</view>
+						<view class="info-title">🕒 每天营业时间</view>
+
+						<!-- 循环显示用户定义的每一个时段 -->
+						<view class="hours-item-row" v-for="(item, index) in formattedOperatingHours.regular"
+							:key="index">
+							<text class="hours-label">{{ item.label }}</text>
+							<text class="hours-val">{{ item.time }}</text>
 						</view>
-						<!-- 渲染特殊日期 -->
-						<view v-if="formattedOperatingHours.special.length > 0" class="special-hours">
-							<view class="hours-item" v-for="item in formattedOperatingHours.special" :key="item.date">
-								<view class="hours-day">{{ item.date }} ({{ item.description }})</view>
-								<view class="hours-time">{{ item.status }}</view>
+
+						<!-- 特殊日期安排 -->
+						<view v-if="formattedOperatingHours.special.length > 0" class="special-section">
+							<view class="special-tag">特殊日期安排</view>
+							<view class="hours-item-row" v-for="(item, index) in formattedOperatingHours.special"
+								:key="index">
+								<text class="hours-label">{{ item.date }} ({{ item.description }})</text>
+								<text class="hours-val">{{ item.status }}</text>
 							</view>
 						</view>
 					</view>
@@ -174,6 +181,10 @@
 	});
 
 	// --- 解析营业时间的计算属性 ---
+	/**
+	 * [计算属性] 解析并格式化营业时间
+	 * 逻辑：提取用户在编辑页设置的“每天”时段，不重复展示周一至周日
+	 */
 	const formattedOperatingHours = computed(() => {
 		const defaultResult = {
 			regular: [],
@@ -184,36 +195,24 @@
 		}
 
 		try {
-			// 1. 解析JSON字符串
+			// 1. 解析后端返回的 JSON 字符串
 			const hoursData = JSON.parse(storeDetail.value.operatingHours);
 			const businessHours = hoursData.business_hours;
+			if (!businessHours || !businessHours.regular) return defaultResult;
 
-			if (!businessHours) return defaultResult;
+			// 2. 【核心优化】：提取“每天”的营业时段
+			// 因为编辑页是将同一套时段赋给了周一到周日，所以我们只需要抓取“周一”的时段作为代表
+			const dailySegments = businessHours.regular.filter(item => item.date === '周一' && item.is_open);
 
-			// 2. 定义星期映射和顺序
-			const dayMap = {
-				monday: '周一',
-				tuesday: '周二',
-				wednesday: '周三',
-				thursday: '周四',
-				friday: '周五',
-				saturday: '周六',
-				sunday: '周日',
-			};
-			const dayOrder = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+			const regular = dailySegments.map(s => {
+				return {
+					// 如果用户填了描述（如“上午”），就显示描述，没填则不显示
+					label: s.description && s.description !== '周一' ? s.description : '营业时段',
+					time: `${s.open} - ${s.close}`
+				};
+			});
 
-			// 3. 处理常规营业时间
-			const regular = dayOrder
-				.filter(day => businessHours.regular[day] && businessHours.regular[day].is_open)
-				.map(day => {
-					const time = businessHours.regular[day];
-					return {
-						day: dayMap[day],
-						time: `${time.open} - ${time.close}`
-					};
-				});
-
-			// 4. 处理特殊日期
+			// 3. 处理特殊日期安排 (保持原样)
 			const special = (businessHours.special_dates || []).map(item => {
 				return {
 					date: item.date,
@@ -226,13 +225,13 @@
 				regular,
 				special
 			};
+
 		} catch (error) {
 			console.error('解析营业时间失败:', error);
-			// 如果解析失败，返回原始字符串或一个提示
 			return {
 				regular: [{
-					day: '营业时间',
-					time: storeDetail.value.operatingHours
+					label: '营业时间',
+					time: '点击联系商家确认'
 				}],
 				special: []
 			};
@@ -665,5 +664,42 @@
 
 	.loading-state text {
 		margin-top: 10rpx;
+	}
+
+	/* 营业时间列表优化 */
+	.hours-item-row {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: 12rpx 0;
+		font-size: 28rpx;
+	}
+
+	.hours-label {
+		color: #999;
+		font-size: 26rpx;
+	}
+
+	.hours-val {
+		color: #333;
+		font-weight: bold;
+		font-variant-numeric: tabular-nums;
+		/* 让数字等宽对齐 */
+	}
+
+	.special-section {
+		margin-top: 20rpx;
+		padding-top: 20rpx;
+		border-top: 2rpx dashed #eee;
+	}
+
+	.special-tag {
+		font-size: 20rpx;
+		color: #FF6B00;
+		background: rgba(255, 107, 0, 0.08);
+		padding: 4rpx 12rpx;
+		border-radius: 6rpx;
+		display: inline-block;
+		margin-bottom: 16rpx;
 	}
 </style>

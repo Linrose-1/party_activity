@@ -237,7 +237,8 @@
 
 	<GuidePopup ref="guidePopupRef" />
 
-	<AvatarLongPressMenu ref="avatarMenuRef" @action="handleMenuAction" />
+	<!-- <AvatarLongPressMenu ref="avatarMenuRef" @action="handleMenuAction" /> -->
+	<AvatarLongPressMenu ref="avatarMenuRef" />
 
 	<AddCircleConfirmPopup ref="addCirclePopup" />
 
@@ -1036,12 +1037,20 @@
 		});
 	};
 
+	// const handleAvatarClick = async (user) => {
+	// 	if (!await checkLoginGuard()) return;
+
+	// 	if (avatarMenuRef.value) {
+	// 		avatarMenuRef.value.open(user);
+	// 	}
+	// };
+	// 点击头像只需要这一句：
 	const handleAvatarClick = async (user) => {
+		// 这里依然可以保留登录检查
 		if (!await checkLoginGuard()) return;
 
-		if (avatarMenuRef.value) {
-			avatarMenuRef.value.open(user);
-		}
+		// 打开弹窗，剩下的跳转、加圈逻辑，全部由组件内部搞定！
+		avatarMenuRef.value.open(user);
 	};
 
 	// 处理菜单项点击

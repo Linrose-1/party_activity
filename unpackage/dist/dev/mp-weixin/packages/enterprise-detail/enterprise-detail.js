@@ -95,12 +95,20 @@ const _sfc_main = {
       return code.substring(0, 8) + "******" + code.substring(code.length - 4);
     });
     const formatEstablishDate = common_vendor.computed(() => {
-      var _a;
-      const ts = (_a = ent.value) == null ? void 0 : _a.establishDate;
-      if (!ts || ts === 0)
+      var _a, _b;
+      const rawDate = ((_a = ent.value) == null ? void 0 : _a.establishDate) || ((_b = ent.value) == null ? void 0 : _b.createTime);
+      if (!rawDate || rawDate === 0 || rawDate === "0") {
         return "待完善";
-      const d = new Date(ts);
-      return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`;
+      }
+      const timestamp = typeof rawDate === "string" ? parseInt(rawDate, 10) : rawDate;
+      const date = new Date(timestamp);
+      if (isNaN(date.getTime())) {
+        return "待完善";
+      }
+      const Y = date.getFullYear();
+      const M = date.getMonth() + 1;
+      const D = date.getDate();
+      return `${Y}年${M}月${D}日`;
     });
     const toggleCreditCode = () => {
       showFullCreditCode.value = !showFullCreditCode.value;

@@ -76,29 +76,34 @@
 
 				<!-- 卡片 4: 营业时间 -->
 				<view class="card-box">
-					<view class="card-header">营业时间</view>
-
 					<!-- 常规时间 -->
-					<view class="hours-group">
-						<view v-for="(day, index) in editableHours.regular" :key="index" class="hour-row">
-							<text class="week-label">{{ day.label }}</text>
-							<view class="hour-controls">
-								<template v-if="day.isOpen">
-									<picker mode="time" :value="day.openTime"
-										@change="e => day.openTime = e.detail.value">
-										<view class="time-pill">{{ day.openTime }}</view>
-									</picker>
-									<text class="to-text">至</text>
-									<picker mode="time" :value="day.closeTime"
-										@change="e => day.closeTime = e.detail.value">
-										<view class="time-pill">{{ day.closeTime }}</view>
-									</picker>
-								</template>
-								<text v-else class="closed-text">休息</text>
-								<switch :checked="day.isOpen" @change="e => day.isOpen = e.detail.value" color="#FF6B00"
-									style="transform:scale(0.7); margin-left: 10rpx;" />
+					<view class="card-header">
+						<text>每天营业时间</text>
+						<view class="add-segment-btn" @click="addTimeSegment" v-if="editableHours.regular.length < 3">
+							<uni-icons type="plusempty" size="12" color="#FF6B00"></uni-icons> 添加时段
+						</view>
+					</view>
+
+					<view class="hours-group-daily">
+						<view v-for="(item, index) in editableHours.regular" :key="index" class="daily-hour-row">
+							<view class="segment-main">
+								<picker mode="time" :value="item.open" @change="e => item.open = e.detail.value">
+									<view class="time-pill">{{ item.open }}</view>
+								</picker>
+								<text class="to-text">至</text>
+								<picker mode="time" :value="item.close" @change="e => item.close = e.detail.value">
+									<view class="time-pill">{{ item.close }}</view>
+								</picker>
+							</view>
+
+							<input class="segment-desc" v-model="item.description" placeholder="时段描述(如:上午)" />
+
+							<view class="del-segment" @click="removeTimeSegment(index)"
+								v-if="editableHours.regular.length > 1">
+								<uni-icons type="trash" size="18" color="#999"></uni-icons>
 							</view>
 						</view>
+						<view class="form-tip-mini">注：以上时间段将应用于周一至周日全周。</view>
 					</view>
 
 					<!-- 特殊时间 -->
@@ -252,36 +257,19 @@
 
 
 	const editableHours = reactive({
-		regular: [],
+		// regular 现在代表“每天”的时间段列表
+		// 默认初始化一个 09:00 - 22:00 的段
+		regular: [{
+			open: '09:00',
+			close: '22:00',
+			is_open: true,
+			description: '全天'
+		}],
 		special: []
 	});
 
-	const weekdays = [{
-			key: 'monday',
-			label: '周一'
-		}, {
-			key: 'tuesday',
-			label: '周二'
-		},
-		{
-			key: 'wednesday',
-			label: '周三'
-		}, {
-			key: 'thursday',
-			label: '周四'
-		},
-		{
-			key: 'friday',
-			label: '周五'
-		}, {
-			key: 'saturday',
-			label: '周六'
-		},
-		{
-			key: 'sunday',
-			label: '周日'
-		},
-	];
+	// 定义周一到周日的常量，用于最终序列化
+	const weekDayLabels = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
 
 	// onLoad 逻辑调整
 	onLoad(async (options) => {
@@ -367,45 +355,133 @@
 		// parseOperatingHours(data.operatingHours);
 	};
 
-	// 此函数现在能处理空数据，用于新建初始化
+	/**
+	 * [方法] 添加一个新的时间段
+	 */
+	const addTimeSegment = () => {
+		editableHours.regular.push({
+			open: '09:00',
+			close: '18:00',
+			is_open: true,
+			description: ''
+		});
+	};
+
+	/**
+	 * [方法] 删除一个时间段
+	 */
+	const removeTimeSegment = (index) => {
+		editableHours.regular.splice(index, 1);
+	};
+
+	/**
+	 * [解析逻辑] 将后端返回的 7天数组 还原为 UI 的“每天”列表
+	 */
 	const parseOperatingHours = (jsonString) => {
 		try {
-			// 如果 jsonString 无效或为空，会进入 catch 块
-			const data = JSON.parse(jsonString)?.business_hours;
-			if (!data || !data.regular) throw new Error("无效的营业时间格式");
+			const rawData = JSON.parse(jsonString)?.business_hours;
+			if (!rawData || !rawData.regular) throw new Error("empty");
 
-			editableHours.regular = weekdays.map(dayInfo => {
-				const dayData = data.regular[dayInfo.key];
-				return {
-					key: dayInfo.key,
-					label: dayInfo.label,
-					isOpen: dayData?.is_open ?? false,
-					openTime: dayData?.open ?? '09:00',
-					closeTime: dayData?.close ?? '22:00',
-				};
-			});
+			// 后端返回的是 7天(或更多)的平铺数组
+			// 我们取第一天（周一）的数据作为“每天”的显示基准
+			const firstDayLabel = weekDayLabels[0];
+			const dailySegments = rawData.regular.filter(item => item.date === firstDayLabel);
 
-			editableHours.special = (data.special_dates || []).map(d => ({
-				date: d.date || '',
-				is_open: d.is_open ?? true,
-				open: d.open || '10:00',
-				close: d.close || '22:00',
-				description: d.description || ''
+			if (dailySegments.length > 0) {
+				editableHours.regular = dailySegments.map(s => ({
+					open: s.open || '09:00',
+					close: s.close || '22:00',
+					is_open: s.is_open ?? true,
+					description: s.description === firstDayLabel ? '营业时间' : s.description
+				}));
+			}
+
+			// 特殊日期部分保持不变
+			editableHours.special = (rawData.special_dates || []).map(d => ({
+				...d
 			}));
 
 		} catch (e) {
-			// 当新建或解析失败时，提供默认的初始状态
-			console.warn("解析营业时间失败或为新建状态，将使用默认值:", e.message);
-			editableHours.regular = weekdays.map(dayInfo => ({
-				key: dayInfo.key,
-				label: dayInfo.label,
-				isOpen: true,
-				openTime: '09:00',
-				closeTime: '22:00',
-			}));
+			// 默认值
+			editableHours.regular = [{
+				open: '09:00',
+				close: '22:00',
+				is_open: true,
+				description: '营业时间'
+			}];
 			editableHours.special = [];
 		}
 	};
+
+	/**
+	 * [序列化逻辑] 将 UI 的“每天”列表 封装为后端需要的 7天平铺数组
+	 */
+	const serializeOperatingHours = () => {
+		const regularArray = [];
+
+		// 循环周一到周日
+		weekDayLabels.forEach(dayName => {
+			// 将用户填写的每一个“每天时段”都复制给这一天
+			editableHours.regular.forEach(segment => {
+				regularArray.push({
+					date: dayName,
+					is_open: segment.is_open,
+					description: segment.description || dayName,
+					open: segment.open,
+					close: segment.close
+				});
+			});
+		});
+
+		const dataToSerialize = {
+			business_hours: {
+				timezone: "Asia/Shanghai",
+				special_dates: editableHours.special,
+				regular: regularArray
+			}
+		};
+		return JSON.stringify(dataToSerialize);
+	};
+
+	// 此函数现在能处理空数据，用于新建初始化
+	// const parseOperatingHours = (jsonString) => {
+	// 	try {
+	// 		// 如果 jsonString 无效或为空，会进入 catch 块
+	// 		const data = JSON.parse(jsonString)?.business_hours;
+	// 		if (!data || !data.regular) throw new Error("无效的营业时间格式");
+
+	// 		editableHours.regular = weekdays.map(dayInfo => {
+	// 			const dayData = data.regular[dayInfo.key];
+	// 			return {
+	// 				key: dayInfo.key,
+	// 				label: dayInfo.label,
+	// 				isOpen: dayData?.is_open ?? false,
+	// 				openTime: dayData?.open ?? '09:00',
+	// 				closeTime: dayData?.close ?? '22:00',
+	// 			};
+	// 		});
+
+	// 		editableHours.special = (data.special_dates || []).map(d => ({
+	// 			date: d.date || '',
+	// 			is_open: d.is_open ?? true,
+	// 			open: d.open || '10:00',
+	// 			close: d.close || '22:00',
+	// 			description: d.description || ''
+	// 		}));
+
+	// 	} catch (e) {
+	// 		// 当新建或解析失败时，提供默认的初始状态
+	// 		console.warn("解析营业时间失败或为新建状态，将使用默认值:", e.message);
+	// 		editableHours.regular = weekdays.map(dayInfo => ({
+	// 			key: dayInfo.key,
+	// 			label: dayInfo.label,
+	// 			isOpen: true,
+	// 			openTime: '09:00',
+	// 			closeTime: '22:00',
+	// 		}));
+	// 		editableHours.special = [];
+	// 	}
+	// };
 
 	const addSpecialHour = () => {
 		const today = new Date().toISOString().split('T')[0];
@@ -430,25 +506,25 @@
 		});
 	};
 
-	const serializeOperatingHours = () => {
-		const regularData = editableHours.regular.reduce((acc, day) => {
-			acc[day.key] = {
-				open: day.openTime,
-				close: day.closeTime,
-				is_open: day.isOpen
-			};
-			return acc;
-		}, {});
+	// const serializeOperatingHours = () => {
+	// 	const regularData = editableHours.regular.reduce((acc, day) => {
+	// 		acc[day.key] = {
+	// 			open: day.openTime,
+	// 			close: day.closeTime,
+	// 			is_open: day.isOpen
+	// 		};
+	// 		return acc;
+	// 	}, {});
 
-		const dataToSerialize = {
-			business_hours: {
-				regular: regularData,
-				special_dates: editableHours.special,
-				timezone: "Asia/Shanghai"
-			}
-		};
-		return JSON.stringify(dataToSerialize);
-	};
+	// 	const dataToSerialize = {
+	// 		business_hours: {
+	// 			regular: regularData,
+	// 			special_dates: editableHours.special,
+	// 			timezone: "Asia/Shanghai"
+	// 		}
+	// 	};
+	// 	return JSON.stringify(dataToSerialize);
+	// };
 
 	const handleImageUpload = (type) => {
 		uni.chooseImage({
@@ -1068,6 +1144,44 @@
 		color: $text-placeholder;
 		font-size: 26rpx;
 		margin-right: 10rpx;
+	}
+
+	.daily-hour-row {
+		display: flex;
+		align-items: center;
+		padding: 20rpx 0;
+		border-bottom: 1rpx solid #f5f5f5;
+		gap: 15rpx;
+
+		.segment-main {
+			display: flex;
+			align-items: center;
+			flex-shrink: 0;
+		}
+
+		.segment-desc {
+			flex: 1;
+			font-size: 24rpx;
+			background: #f8f8f8;
+			padding: 10rpx 20rpx;
+			border-radius: 8rpx;
+			text-align: center;
+		}
+	}
+
+	.add-segment-btn {
+		font-size: 24rpx;
+		color: #FF6B00;
+		background: rgba(255, 107, 0, 0.1);
+		padding: 8rpx 20rpx;
+		border-radius: 30rpx;
+	}
+
+	.form-tip-mini {
+		font-size: 22rpx;
+		color: #999;
+		margin-top: 15rpx;
+		font-style: italic;
 	}
 
 	/* 特殊营业时间 */

@@ -10,7 +10,7 @@
 			<!-- 2. 前三名领奖台 -->
 			<view class="podium" v-if="topThree.length > 0">
 				<!-- 亚军 (Rank 2) -->
-				<view class="podium-item rank-2" v-if="topThree[1]" @click="goCard(topThree[1])">
+				<view class="podium-item rank-2" v-if="topThree[1]" @click="handleAvatarClick(topThree[1])">
 					<view class="avatar-wrap">
 						<image :src="topThree[1].avatar || defaultAvatar" mode="aspectFill" class="avatar" />
 						<view class="crown silver">2</view>
@@ -20,7 +20,7 @@
 				</view>
 
 				<!-- 冠军 (Rank 1) -->
-				<view class="podium-item rank-1" v-if="topThree[0]" @click="goCard(topThree[0])">
+				<view class="podium-item rank-1" v-if="topThree[0]" @click="handleAvatarClick(topThree[0])">
 					<view class="avatar-wrap">
 						<image :src="topThree[0].avatar || defaultAvatar" mode="aspectFill" class="avatar" />
 						<view class="crown gold">
@@ -32,7 +32,7 @@
 				</view>
 
 				<!-- 季军 (Rank 3) -->
-				<view class="podium-item rank-3" v-if="topThree[2]" @click="goCard(topThree[2])">
+				<view class="podium-item rank-3" v-if="topThree[2]" @click="handleAvatarClick(topThree[2])">
 					<view class="avatar-wrap">
 						<image :src="topThree[2].avatar || defaultAvatar" mode="aspectFill" class="avatar" />
 						<view class="crown bronze">3</view>
@@ -69,7 +69,7 @@
 							<text class="u-level" v-if="user.topUpLevelName">{{ user.topUpLevelName }}</text>
 						</view>
 						<view class="u-desc text-ellipsis">
-							{{ user.positionTitle || '精英商友' }} | {{ user.companyName || '平台建设者' }}
+							{{ user.positionTitle || '暂无填写职位' }} | {{ user.companyName || '暂无填写公司' }}
 						</view>
 					</view>
 

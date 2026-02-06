@@ -267,3 +267,36 @@
 .loading-state text.data-v-b8678dae {
 		margin-top: 10rpx;
 }
+
+	/* 营业时间列表优化 */
+.hours-item-row.data-v-b8678dae {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: 12rpx 0;
+		font-size: 28rpx;
+}
+.hours-label.data-v-b8678dae {
+		color: #999;
+		font-size: 26rpx;
+}
+.hours-val.data-v-b8678dae {
+		color: #333;
+		font-weight: bold;
+		font-variant-numeric: tabular-nums;
+		/* 让数字等宽对齐 */
+}
+.special-section.data-v-b8678dae {
+		margin-top: 20rpx;
+		padding-top: 20rpx;
+		border-top: 2rpx dashed #eee;
+}
+.special-tag.data-v-b8678dae {
+		font-size: 20rpx;
+		color: #FF6B00;
+		background: rgba(255, 107, 0, 0.08);
+		padding: 4rpx 12rpx;
+		border-radius: 6rpx;
+		display: inline-block;
+		margin-bottom: 16rpx;
+}

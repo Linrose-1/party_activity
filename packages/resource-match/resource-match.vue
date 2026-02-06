@@ -3,11 +3,11 @@
 		<!-- 1. 顶部 Tab 切换 -->
 		<view class="tabs-box">
 			<view class="tab-item" :class="{ active: matchType === 0 }" @click="handleTabChange(0)">
-				<text>我需资源</text>
+				<text>我需资源·匹配</text>
 				<view class="line"></view>
 			</view>
 			<view class="tab-item" :class="{ active: matchType === 1 }" @click="handleTabChange(1)">
-				<text>我有资源</text>
+				<text>我有资源·匹配</text>
 				<view class="line"></view>
 			</view>
 		</view>
@@ -69,7 +69,7 @@
 							{{ user.positionTitle || '核心高伙' }} | {{ user.companyName || '暂无公司信息' }}
 						</view>
 
-						<view class="resource-preview text-ellipsis">
+						<view class="resource-preview">
 							<text class="label">{{ matchType === 0 ? 'TA拥有：' : 'TA需求：' }}</text>
 							<text class="val">{{ matchType === 0 ? user.haveResources : user.needResources }}</text>
 						</view>
@@ -411,11 +411,15 @@
 	.user-card {
 		background: #fff;
 		border-radius: 24rpx;
-		padding: 24rpx;
+		padding: 30rpx;
+		/* 增加内边距 */
 		margin-bottom: 24rpx;
 		display: flex;
-		align-items: center;
+		align-items: flex-start;
+		/* 关键：顶部对齐，防止头像随内容变长而居中 */
 		gap: 20rpx;
+		box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.02);
+
 
 		.u-avatar {
 			width: 110rpx;
@@ -447,17 +451,33 @@
 			}
 
 			.resource-preview {
-				font-size: 22rpx;
+				font-size: 24rpx;
+				/* 稍微调大一点点，更易读 */
 				background: #F9FAFB;
-				padding: 10rpx 16rpx;
-				border-radius: 8rpx;
+				padding: 20rpx;
+				/* 增加内边距 */
+				border-radius: 12rpx;
+				margin-top: 10rpx;
+				line-height: 1.6;
+				/* 增加行高，防止文字挤在一起 */
+
+				/* 核心逻辑：允许换行 */
+				white-space: pre-wrap;
+				/* 保留后端传来的换行符并自动换行 */
+				word-break: break-all;
+				/* 防止长字母/数字串撑破布局 */
 
 				.label {
 					color: #999;
+					font-weight: bold;
+					margin-bottom: 6rpx;
+					display: block;
+					/* 让标签独占一行或者紧贴内容，根据喜好调整 */
 				}
 
 				.val {
-					color: #666;
+					color: #444;
+					/* 深一点的灰色，方便阅读 */
 				}
 			}
 		}

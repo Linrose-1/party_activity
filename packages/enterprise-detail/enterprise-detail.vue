@@ -313,13 +313,32 @@
 	});
 
 	/**
-	 * 成立日期格式化
+	 * [计算属性] 格式化显示成立日期
+	 * 逻辑：优先显示 establishDate（成立日期），如果没有，则显示 createTime（发布时间）
 	 */
 	const formatEstablishDate = computed(() => {
-		const ts = ent.value?.establishDate;
-		if (!ts || ts === 0) return '待完善';
-		const d = new Date(ts);
-		return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`;
+		// 1. 获取原始值（优先取成立日期，无则取创建时间）
+		const rawDate = ent.value?.establishDate || ent.value?.createTime;
+
+		// 2. 判空：如果是 0、null、undefined 或空字符串，返回待完善
+		if (!rawDate || rawDate === 0 || rawDate === '0') {
+			return '待完善';
+		}
+
+		// 3. 转换：强制转为数字类型，防止字符串时间戳导致 new Date 解析失败
+		const timestamp = typeof rawDate === 'string' ? parseInt(rawDate, 10) : rawDate;
+		const date = new Date(timestamp);
+
+		// 4. 校验：检查转换后的日期是否合法
+		if (isNaN(date.getTime())) {
+			return '待完善';
+		}
+
+		// 5. 格式化输出
+		const Y = date.getFullYear();
+		const M = date.getMonth() + 1;
+		const D = date.getDate();
+		return `${Y}年${M}月${D}日`;
 	});
 
 	// --- 交互逻辑方法 ---
