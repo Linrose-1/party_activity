@@ -9,11 +9,8 @@ if (!Math) {
   "./pages/active/active.js";
   "./pages/shop/shop.js";
   "./pages/my/my.js";
-  "./pages/shop-detail/shop-detail.js";
   "./pages/shop-recommend/shop-recommend.js";
-  "./pages/my-opportunity/my-opportunity.js";
   "./pages/user-agreement/user-agreement.js";
-  "./pages/location/location.js";
   "./pages/shop-list/shop-list.js";
   "./pages/my-setting/my-setting.js";
   "./pages/my-follow/my-follow.js";
@@ -28,13 +25,11 @@ if (!Math) {
   "./pages/my-active-registeredUser/my-active-registeredUser.js";
   "./pages/my-active-secondRegistration/my-active-secondRegistration.js";
   "./pages/my-recommendFriends/my-recommendFriends.js";
-  "./pages/recharge/recharge.js";
   "./pages/my-memberDetails/my-memberDetails.js";
   "./pages/my-order/my-order.js";
   "./pages/relation/relation.js";
   "./pages/shop-apply/shop-apply.js";
   "./pages/my-systemSuggestions/my-systemSuggestions.js";
-  "./pages/my-auth/my-auth.js";
   "./pages/platform-intro/platform-intro.js";
   "./pages/my-order-detail/my-order-detail.js";
   "./pages/sponsor-detail/sponsor-detail.js";
@@ -46,12 +41,15 @@ if (!Math) {
   "./packages/active-publish/active-publish.js";
   "./packages/active-detail/active-detail.js";
   "./packages/active-enroll/active-enroll.js";
+  "./packages/shop-detail/shop-detail.js";
   "./packages/my-points/my-points.js";
+  "./packages/my-opportunity/my-opportunity.js";
   "./packages/my-zhimi/my-zhimi.js";
   "./packages/getPoints/getPoints.js";
   "./packages/my-member/my-member.js";
   "./packages/my-friendInvitation/my-friendInvitation.js";
   "./packages/my-systemConstruction/my-systemConstruction.js";
+  "./packages/location/location.js";
   "./packages/user-opportunities/user-opportunities.js";
   "./packages/home-customization/home-customization.js";
   "./packages/my-businessCard/my-businessCard.js";
@@ -65,6 +63,7 @@ if (!Math) {
   "./packages/social-interaction/social-interaction.js";
   "./packages/my-reviews/my-reviews.js";
   "./packages/ContactService/ContactService.js";
+  "./packages/my-auth/my-auth.js";
   "./packages/smart-rice-records/smart-rice-records.js";
   "./packages/experience-records/experience-records.js";
   "./packages/enterprise-edit/enterprise-edit.js";
@@ -76,6 +75,7 @@ if (!Math) {
   "./packages/user-view-trace/user-view-trace.js";
   "./packages/my-friendList/my-friendList.js";
   "./packages/resource-match/resource-match.js";
+  "./packages/recharge/recharge.js";
   "./packages/contribution-ranking/contribution-ranking.js";
   "./packages/suggestion-detail/suggestion-detail.js";
 }

@@ -336,7 +336,7 @@
 	const goToDiscover = () => {
 		// 跳转到可以发现商友的页面，例如“附近”或“商机”首页
 		uni.switchTab({
-			url: '/pages/location/location'
+			url: '/packages/location/location'
 		});
 	};
 

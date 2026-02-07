@@ -119,7 +119,7 @@
 	const goToRecharge = () => {
 		close();
 		uni.navigateTo({
-			url: '/pages/recharge/recharge?type=zhimi' // 假设有这个参数控制跳到智米Tab
+			url: '/packages/recharge/recharge?type=zhimi' // 假设有这个参数控制跳到智米Tab
 		});
 	};
 

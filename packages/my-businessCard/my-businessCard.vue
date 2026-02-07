@@ -34,6 +34,7 @@
 				:remark-name="userInfo.remarkName" :is-viewing-own-card="isViewingOwnCard"
 				@editRemark="handleEditRemark" :pinyin-name="userInfo.pinyinName" :title="userInfo.titleName"
 				:era="userInfo.era" :company-name="userInfo.companyName" :position-title="userInfo.positionTitle"
+				 :association-name="userInfo.associationName" 
 				:industry="userInfo.industry" :professional-title="userInfo.professionalTitle"
 				:have-resources="userInfo.haveResources" :need-resources="userInfo.needResources"
 				:signature="userInfo.signature" :personal-bio="userInfo.personalBio"
@@ -721,7 +722,7 @@
 			positionTitle: rawUserData.positionTitle, // 新增：职务
 			industry: rawUserData.industry, // 新增：行业
 			professionalTitle: rawUserData.professionalTitle, // 新增：社会职务
-
+			associationName: rawUserData.associationName,
 			// --- 资源信息 ---
 			haveResources: rawUserData.haveResources, // 新增：我有资源
 			needResources: rawUserData.needResources, // 新增：我需资源
@@ -1147,7 +1148,7 @@
 				success: (res) => {
 					if (res.confirm) {
 						uni.navigateTo({
-							url: '/pages/recharge/recharge?type=membership'
+							url: '/packages/recharge/recharge?type=membership'
 						});
 					}
 				}

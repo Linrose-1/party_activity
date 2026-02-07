@@ -439,7 +439,7 @@ const _sfc_main = {
         });
         return;
       }
-      const targetPath = "/pages/shop-detail/shop-detail";
+      const targetPath = "/packages/shop-detail/shop-detail";
       const url = `${targetPath}?id=${store.id}`;
       common_vendor.index.__f__("log", "at packages/active-detail/active-detail.vue:898", "从聚会详情页跳转到聚店详情页, URL:", url);
       common_vendor.index.navigateTo({

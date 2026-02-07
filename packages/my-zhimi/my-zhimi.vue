@@ -126,7 +126,7 @@
 
 	const handleRechargeSmartRice = () => {
 		uni.navigateTo({
-			url: '/pages/recharge/recharge'
+			url: '/packages/recharge/recharge'
 		});
 	};
 </script>

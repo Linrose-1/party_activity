@@ -83,6 +83,23 @@ const _sfc_main = {
       }
       return result;
     });
+    const formattedAssociations = common_vendor.computed(() => {
+      if (!userInfo.value)
+        return [];
+      const associations = splitToArray(userInfo.value.associationName);
+      const titles = splitToArray(userInfo.value.professionalTitle);
+      const maxLength = Math.max(associations.length, titles.length);
+      if (maxLength === 0)
+        return [];
+      const result = [];
+      for (let i = 0; i < maxLength; i++) {
+        result.push({
+          name: associations[i] || "组织名称未填写",
+          title: titles[i] || "职务未填写"
+        });
+      }
+      return result;
+    });
     const fetchScoreStatistics = async (userId) => {
       try {
         const [selfRes, friendRes, complexRes] = await Promise.all([
@@ -141,7 +158,7 @@ const _sfc_main = {
         });
         radarDatasets.value = newDatasets;
       } catch (e) {
-        common_vendor.index.__f__("error", "at packages/my-account-informationDetails/my-account-informationDetails.vue:340", "获取评分数据失败", e);
+        common_vendor.index.__f__("error", "at packages/my-account-informationDetails/my-account-informationDetails.vue:369", "获取评分数据失败", e);
         radarDatasets.value = [];
       }
     };
@@ -153,7 +170,7 @@ const _sfc_main = {
       return "未设置";
     };
     const goToResourceMatch = () => {
-      common_vendor.index.__f__("log", "at packages/my-account-informationDetails/my-account-informationDetails.vue:352", "跳转到资源匹配页面");
+      common_vendor.index.__f__("log", "at packages/my-account-informationDetails/my-account-informationDetails.vue:381", "跳转到资源匹配页面");
       common_vendor.index.showToast({
         title: "资源匹配功能即将上线",
         icon: "none"
@@ -202,15 +219,22 @@ const _sfc_main = {
           size: "24",
           color: themeColor
         }),
-        n: common_vendor.f(splitToArray(userInfo.value.professionalTitle), (item, index, i0) => {
+        n: common_vendor.f(formattedAssociations.value, (item, index, i0) => {
           return {
-            a: common_vendor.t(item),
-            b: index
+            a: "991800d7-3-" + i0,
+            b: common_vendor.t(item.name),
+            c: common_vendor.t(item.title),
+            d: index
           };
         }),
-        o: !userInfo.value.professionalTitle
-      }, !userInfo.value.professionalTitle ? {} : {}, {
-        p: common_vendor.f(formattedCompanies.value, (company, index, i0) => {
+        o: common_vendor.p({
+          type: "auth-filled",
+          size: "18",
+          color: "#C9A063"
+        }),
+        p: formattedAssociations.value.length === 0
+      }, formattedAssociations.value.length === 0 ? {} : {}, {
+        q: common_vendor.f(formattedCompanies.value, (company, index, i0) => {
           return {
             a: common_vendor.t(company.name || "公司名称未填写"),
             b: common_vendor.t(company.industry || "行业未填写"),
@@ -218,69 +242,69 @@ const _sfc_main = {
             d: index
           };
         }),
-        q: formattedCompanies.value.length === 0
+        r: formattedCompanies.value.length === 0
       }, formattedCompanies.value.length === 0 ? {} : {}, {
-        r: common_vendor.f(splitToArray(userInfo.value.school), (item, index, i0) => {
+        s: common_vendor.f(splitToArray(userInfo.value.school), (item, index, i0) => {
           return {
             a: common_vendor.t(item),
             b: index
           };
         }),
-        s: !userInfo.value.school
+        t: !userInfo.value.school
       }, !userInfo.value.school ? {} : {}, {
-        t: common_vendor.f(splitToArray(userInfo.value.hobby), (item, index, i0) => {
+        v: common_vendor.f(splitToArray(userInfo.value.hobby), (item, index, i0) => {
           return {
             a: common_vendor.t(item),
             b: index
           };
         }),
-        v: !userInfo.value.hobby
+        w: !userInfo.value.hobby
       }, !userInfo.value.hobby ? {} : {}, {
-        w: common_vendor.t(userInfo.value.contactEmail || "未填写"),
-        x: userInfo.value.wechatQrCodeUrl
+        x: common_vendor.t(userInfo.value.contactEmail || "未填写"),
+        y: userInfo.value.wechatQrCodeUrl
       }, userInfo.value.wechatQrCodeUrl ? {
-        y: userInfo.value.wechatQrCodeUrl,
-        z: common_vendor.o(($event) => previewImage(userInfo.value.wechatQrCodeUrl))
+        z: userInfo.value.wechatQrCodeUrl,
+        A: common_vendor.o(($event) => previewImage(userInfo.value.wechatQrCodeUrl))
       } : {}, {
-        A: common_vendor.p({
+        B: common_vendor.p({
           type: "chat-filled",
           size: "24",
           color: themeColor
         }),
-        B: common_vendor.p({
+        C: common_vendor.p({
           type: "sound",
           size: "20",
           color: "#666"
         }),
-        C: common_vendor.t(userInfo.value.signature || "这位朋友很酷，什么也没留下。"),
-        D: common_vendor.p({
+        D: common_vendor.t(userInfo.value.signature || "这位朋友很酷，什么也没留下。"),
+        E: common_vendor.p({
           type: "sound-filled",
           size: "20",
           color: "#666"
         }),
-        E: common_vendor.t(userInfo.value.personalBio || "未填写"),
-        F: userInfo.value.haveResources
+        F: common_vendor.t(userInfo.value.personalBio || "未填写"),
+        G: userInfo.value.haveResources
       }, userInfo.value.haveResources ? {
-        G: common_vendor.t(userInfo.value.haveResources)
+        H: common_vendor.t(userInfo.value.haveResources)
       } : {}, {
-        H: userInfo.value.needResources
+        I: userInfo.value.needResources
       }, userInfo.value.needResources ? {
-        I: common_vendor.t(userInfo.value.needResources)
+        J: common_vendor.t(userInfo.value.needResources)
       } : {}, {
-        J: common_vendor.p({
+        K: common_vendor.p({
           type: "link",
           size: "20",
           color: "#fff"
         }),
-        K: common_vendor.o(goToResourceMatch),
-        L: common_vendor.p({
+        L: common_vendor.o(goToResourceMatch),
+        M: common_vendor.p({
           type: "map-filled",
           size: "24",
           color: themeColor
         }),
-        M: radarDatasets.value.length > 0
+        N: radarDatasets.value.length > 0
       }, radarDatasets.value.length > 0 ? {
-        N: common_vendor.p({
+        O: common_vendor.p({
           datasets: radarDatasets.value,
           showCard: false,
           showTitle: false

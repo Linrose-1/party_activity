@@ -341,7 +341,7 @@
 
 		return {
 			title: storeDetail.value.storeName + " - 聚店推荐",
-			path: `/pages/shop-detail/shop-detail?id=${storeDetail.value.id}`,
+			path: `/packages/shop-detail/shop-detail?id=${storeDetail.value.id}`,
 			imageUrl: coverImages.value[0] || "" // 封面图（支持可选）
 		};
 	});

@@ -1,11 +1,11 @@
 /* 水平间距 */
 /* 水平间距 */
 /* 您的样式完全不用修改，这里省略以保持简洁 */
-.nearby-container.data-v-4d9b4fcb {
+.nearby-container.data-v-302d9b55 {
   background-color: #f8f9fa;
   min-height: 100vh;
 }
-.header.data-v-4d9b4fcb {
+.header.data-v-302d9b55 {
   background-color: #fff;
   padding: 20rpx 30rpx;
   position: -webkit-sticky;
@@ -15,13 +15,13 @@
   box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
   padding-top: var(--status-bar-height);
 }
-.header .tabs-wrapper.data-v-4d9b4fcb {
+.header .tabs-wrapper.data-v-302d9b55 {
   margin: 0 auto;
 }
-.content-area.data-v-4d9b4fcb {
+.content-area.data-v-302d9b55 {
   padding: 0 32rpx;
 }
-.shake-container.data-v-4d9b4fcb {
+.shake-container.data-v-302d9b55 {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -29,7 +29,7 @@
   height: 70vh;
   text-align: center;
 }
-.shake-btn.data-v-4d9b4fcb {
+.shake-btn.data-v-302d9b55 {
   width: 320rpx;
   height: 320rpx;
   border-radius: 50%;
@@ -44,21 +44,21 @@
   box-shadow: 0 20rpx 50rpx rgba(255, 107, 0, 0.3);
   transition: all 0.2s ease;
 }
-.shake-btn.data-v-4d9b4fcb:active {
+.shake-btn.data-v-302d9b55:active {
   transform: scale(0.95);
   box-shadow: 0 10rpx 30rpx rgba(255, 107, 0, 0.4);
 }
-.shake-icon.data-v-4d9b4fcb {
-  animation: pulse-4d9b4fcb 2s infinite;
+.shake-icon.data-v-302d9b55 {
+  animation: pulse-302d9b55 2s infinite;
 }
-.shake-hint.data-v-4d9b4fcb {
+.shake-hint.data-v-302d9b55 {
   margin-top: 40rpx;
   font-size: 28rpx;
   color: #666;
   max-width: 600rpx;
   line-height: 1.6;
 }
-.loading-container.data-v-4d9b4fcb {
+.loading-container.data-v-302d9b55 {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -66,38 +66,38 @@
   padding: 80rpx 0;
   color: #666;
 }
-.loading-spinner.data-v-4d9b4fcb {
+.loading-spinner.data-v-302d9b55 {
   width: 50rpx;
   height: 50rpx;
   border: 4rpx solid #e0e0e0;
   border-top-color: #ff6b00;
   border-radius: 50%;
-  animation: spin-4d9b4fcb 1s linear infinite;
+  animation: spin-302d9b55 1s linear infinite;
   margin-bottom: 20rpx;
 }
-.loading-text.data-v-4d9b4fcb {
+.loading-text.data-v-302d9b55 {
   font-size: 28rpx;
 }
-.no-more-content.data-v-4d9b4fcb {
+.no-more-content.data-v-302d9b55 {
   text-align: center;
   color: #999;
   padding: 30rpx 0;
   font-size: 28rpx;
 }
-.list-container.data-v-4d9b4fcb {
+.list-container.data-v-302d9b55 {
   padding-top: 30rpx;
 }
-.list-title.data-v-4d9b4fcb {
+.list-title.data-v-302d9b55 {
   font-size: 36rpx;
   font-weight: 600;
   margin-bottom: 30rpx;
   display: flex;
   align-items: center;
 }
-.list-title text.data-v-4d9b4fcb {
+.list-title text.data-v-302d9b55 {
   margin-left: 16rpx;
 }
-.business-card.data-v-4d9b4fcb {
+.business-card.data-v-302d9b55 {
   background: white;
   border-radius: 24rpx;
   padding: 30rpx;
@@ -106,15 +106,15 @@
   margin-bottom: 30rpx;
   box-shadow: 0 4rpx 24rpx rgba(0, 0, 0, 0.05);
 }
-.business-card .business-avatar.data-v-4d9b4fcb {
+.business-card .business-avatar.data-v-302d9b55 {
   width: 120rpx;
   height: 120rpx;
   border-radius: 50%;
   margin-right: 30rpx;
   flex-shrink: 0;
 }
-.business-card .card-position.data-v-4d9b4fcb,
-.business-card .card-company.data-v-4d9b4fcb {
+.business-card .card-position.data-v-302d9b55,
+.business-card .card-company.data-v-302d9b55 {
   font-size: 26rpx;
   color: #666;
   margin-top: 8rpx;
@@ -122,20 +122,20 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.business-card .business-info.data-v-4d9b4fcb {
+.business-card .business-info.data-v-302d9b55 {
   flex: 1;
   min-width: 0;
   /* 为移动后的标签容器添加样式 */
 }
-.business-card .business-info .name-line.data-v-4d9b4fcb {
+.business-card .business-info .name-line.data-v-302d9b55 {
   margin-bottom: 10rpx;
 }
-.business-card .business-info .business-name.data-v-4d9b4fcb {
+.business-card .business-info .business-name.data-v-302d9b55 {
   font-size: 32rpx;
   font-weight: 600;
 }
-.business-card .business-info .card-position.data-v-4d9b4fcb,
-.business-card .business-info .card-company.data-v-4d9b4fcb {
+.business-card .business-info .card-position.data-v-302d9b55,
+.business-card .business-info .card-company.data-v-302d9b55 {
   font-size: 26rpx;
   color: #666;
   margin-top: 8rpx;
@@ -143,47 +143,47 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.business-card .business-info .relation-tags.data-v-4d9b4fcb {
+.business-card .business-info .relation-tags.data-v-302d9b55 {
   display: flex;
   gap: 10rpx;
   margin-top: 16rpx;
   /* 与上方的公司信息拉开距离 */
 }
-.business-card .business-info .tag.data-v-4d9b4fcb {
+.business-card .business-info .tag.data-v-302d9b55 {
   font-size: 16rpx;
   padding: 3rpx 12rpx;
   border-radius: 6rpx;
   font-weight: 500;
   white-space: nowrap;
 }
-.business-card .business-info .fellow-townsman.data-v-4d9b4fcb {
+.business-card .business-info .fellow-townsman.data-v-302d9b55 {
   background-color: #e8f5e9;
   color: #388e3c;
   border: 1rpx solid #a5d6a7;
 }
-.business-card .business-info .fellow-circle.data-v-4d9b4fcb {
+.business-card .business-info .fellow-circle.data-v-302d9b55 {
   background-color: #f3e5f5;
   /* 浅紫色背景 */
   color: #9c27b0;
   /* 紫色文字 */
   border: 1rpx solid #e1bee7;
 }
-.business-card .business-info .peer.data-v-4d9b4fcb {
+.business-card .business-info .peer.data-v-302d9b55 {
   background-color: #e3f2fd;
   color: #1976d2;
   border: 1rpx solid #90caf9;
 }
-.business-card .business-info .classmate.data-v-4d9b4fcb {
+.business-card .business-info .classmate.data-v-302d9b55 {
   background-color: #fff3e0;
   color: #ef6c00;
   border: 1rpx solid #ffcc80;
 }
-.business-card .business-name.data-v-4d9b4fcb {
+.business-card .business-name.data-v-302d9b55 {
   font-size: 32rpx;
   font-weight: 600;
   margin-bottom: 10rpx;
 }
-.business-card .connect-btn.data-v-4d9b4fcb {
+.business-card .connect-btn.data-v-302d9b55 {
   background: linear-gradient(135deg, #ff6b00 0%, #ff8c00 100%);
   color: white;
   border: none;
@@ -197,14 +197,14 @@
   margin-left: 20rpx;
   white-space: nowrap;
 }
-.business-card .connect-btn.data-v-4d9b4fcb::after {
+.business-card .connect-btn.data-v-302d9b55::after {
   border: none;
 }
-.business-card .connect-btn.connected.data-v-4d9b4fcb {
+.business-card .connect-btn.connected.data-v-302d9b55 {
   background: #f0f2f5;
   color: #999;
 }
-@keyframes pulse-4d9b4fcb {
+@keyframes pulse-302d9b55 {
 0% {
     transform: scale(1);
 }
@@ -215,7 +215,7 @@
     transform: scale(1);
 }
 }
-@keyframes spin-4d9b4fcb {
+@keyframes spin-302d9b55 {
 0% {
     transform: rotate(0deg);
 }
@@ -223,10 +223,10 @@
     transform: rotate(360deg);
 }
 }
-.fade-in.data-v-4d9b4fcb {
-  animation: fadeIn-4d9b4fcb 0.5s ease-out;
+.fade-in.data-v-302d9b55 {
+  animation: fadeIn-302d9b55 0.5s ease-out;
 }
-@keyframes fadeIn-4d9b4fcb {
+@keyframes fadeIn-302d9b55 {
 from {
     opacity: 0;
     transform: translateY(20px);
@@ -236,6 +236,6 @@ to {
     transform: translateY(0);
 }
 }
-.iconfont.data-v-4d9b4fcb {
+.iconfont.data-v-302d9b55 {
   margin-right: 10rpx;
 }

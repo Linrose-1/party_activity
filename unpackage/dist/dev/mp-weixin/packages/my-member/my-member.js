@@ -106,7 +106,7 @@ const _sfc_main = {
     };
     const navigateToMembershipRecharge = () => {
       common_vendor.index.navigateTo({
-        url: "/pages/recharge/recharge?type=membership"
+        url: "/packages/recharge/recharge?type=membership"
       });
     };
     const navigateToGetPoints = () => {

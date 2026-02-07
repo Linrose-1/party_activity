@@ -288,7 +288,7 @@
 
 	const navigateToMembershipRecharge = () => {
 		uni.navigateTo({
-			url: '/pages/recharge/recharge?type=membership'
+			url: '/packages/recharge/recharge?type=membership'
 		});
 	};
 

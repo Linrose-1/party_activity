@@ -125,6 +125,40 @@
   background-color: #fdf6ec;
   color: #e6a23c;
 }
+.association-group.data-v-991800d7 {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
+.association-card.data-v-991800d7 {
+  background-color: #fff;
+  border: 1rpx solid #fdf5e6;
+  padding: 20rpx;
+  border-radius: 12rpx;
+  background: linear-gradient(to right, #ffffff, #fffcf5);
+}
+.association-name.data-v-991800d7 {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8rpx;
+}
+.association-name .name-text.data-v-991800d7 {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #303133;
+  margin-left: 10rpx;
+}
+.association-title.data-v-991800d7 {
+  font-size: 26rpx;
+  padding-left: 48rpx;
+}
+.association-title .title-label.data-v-991800d7 {
+  color: #909399;
+}
+.association-title .title-value.data-v-991800d7 {
+  color: #C9A063;
+  font-weight: 500;
+}
 .company-group.data-v-991800d7 {
   display: flex;
   flex-direction: column;

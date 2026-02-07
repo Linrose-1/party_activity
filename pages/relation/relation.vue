@@ -427,14 +427,14 @@
 		if (!await checkLoginGuard()) return;
 
 		uni.navigateTo({
-			url: '/pages/location/location?autoShake=true'
+			url: '/packages/location/location?autoShake=true'
 		});
 	};
 	const goToviewPath = async () => {
 		if (!await checkLoginGuard()) return;
 	
 		uni.navigateTo({
-			url: '/pages/location/location?autoShake=true'
+			url: '/packages/location/location?autoShake=true'
 		});
 	};
 

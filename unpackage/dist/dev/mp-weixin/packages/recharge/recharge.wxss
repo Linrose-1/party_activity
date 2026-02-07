@@ -1,7 +1,7 @@
 /* 水平间距 */
 /* 水平间距 */
 /* 保持原有样式不变 */
-.recharge-container.data-v-2984a38c {
+.recharge-container.data-v-540da4e9 {
   min-height: 100vh;
   background-color: #f5f6fa;
   display: flex;
@@ -11,7 +11,7 @@
 
 /* ... (此处省略未改动的样式，请保留你原有的样式代码) ... */
 /* 为了完整性，这里补充关键样式 */
-.tabs-header.data-v-2984a38c {
+.tabs-header.data-v-540da4e9 {
   display: flex;
   background-color: #fff;
   padding: 0 30rpx;
@@ -19,7 +19,7 @@
   align-items: center;
   box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.03);
 }
-.tabs-header .tab-item.data-v-2984a38c {
+.tabs-header .tab-item.data-v-540da4e9 {
   flex: 1;
   text-align: center;
   font-size: 30rpx;
@@ -32,12 +32,12 @@
   font-weight: 500;
   transition: all 0.3s;
 }
-.tabs-header .tab-item.active.data-v-2984a38c {
+.tabs-header .tab-item.active.data-v-540da4e9 {
   color: #FF6E00;
   font-size: 32rpx;
   font-weight: bold;
 }
-.tabs-header .tab-item .active-line.data-v-2984a38c {
+.tabs-header .tab-item .active-line.data-v-540da4e9 {
   position: absolute;
   bottom: 0;
   width: 40rpx;
@@ -45,10 +45,10 @@
   background-color: #FF6E00;
   border-radius: 6rpx;
 }
-.content-body.data-v-2984a38c {
+.content-body.data-v-540da4e9 {
   padding: 30rpx;
 }
-.section-title.data-v-2984a38c {
+.section-title.data-v-540da4e9 {
   font-size: 30rpx;
   font-weight: bold;
   color: #333;
@@ -57,13 +57,13 @@
 }
 
 /* 智米充值样式 */
-.amount-grid.data-v-2984a38c {
+.amount-grid.data-v-540da4e9 {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 20rpx;
   margin-bottom: 40rpx;
 }
-.amount-grid .grid-item.data-v-2984a38c {
+.amount-grid .grid-item.data-v-540da4e9 {
   background-color: #fff;
   border: 2rpx solid transparent;
   border-radius: 16rpx;
@@ -74,90 +74,90 @@
   justify-content: center;
   transition: all 0.2s;
 }
-.amount-grid .grid-item .item-price.data-v-2984a38c {
+.amount-grid .grid-item .item-price.data-v-540da4e9 {
   font-size: 32rpx;
   font-weight: bold;
   color: #333;
 }
-.amount-grid .grid-item .item-desc.data-v-2984a38c {
+.amount-grid .grid-item .item-desc.data-v-540da4e9 {
   font-size: 22rpx;
   color: #999;
   margin-top: 6rpx;
 }
-.amount-grid .grid-item.active.data-v-2984a38c {
+.amount-grid .grid-item.active.data-v-540da4e9 {
   border-color: #FF6E00;
   background-color: #fff8f0;
 }
-.amount-grid .grid-item.active .item-price.data-v-2984a38c {
+.amount-grid .grid-item.active .item-price.data-v-540da4e9 {
   color: #FF6E00;
 }
-.amount-grid .grid-item.active .item-desc.data-v-2984a38c {
+.amount-grid .grid-item.active .item-desc.data-v-540da4e9 {
   color: #FF6E00;
 }
-.custom-amount-section.data-v-2984a38c {
+.custom-amount-section.data-v-540da4e9 {
   background-color: #fff;
   border-radius: 16rpx;
   padding: 30rpx;
 }
-.custom-amount-section .input-wrapper.data-v-2984a38c {
+.custom-amount-section .input-wrapper.data-v-540da4e9 {
   display: flex;
   align-items: center;
   border-bottom: 1rpx solid #eee;
   padding: 20rpx 0;
   margin-top: 10rpx;
 }
-.custom-amount-section .input-wrapper .custom-input.data-v-2984a38c {
+.custom-amount-section .input-wrapper .custom-input.data-v-540da4e9 {
   flex: 1;
   font-size: 40rpx;
   font-weight: bold;
   height: 60rpx;
 }
-.custom-amount-section .input-wrapper .unit.data-v-2984a38c {
+.custom-amount-section .input-wrapper .unit.data-v-540da4e9 {
   font-size: 28rpx;
   color: #333;
   margin-left: 10rpx;
 }
-.custom-amount-section .tip-text.data-v-2984a38c {
+.custom-amount-section .tip-text.data-v-540da4e9 {
   font-size: 24rpx;
   color: #999;
   margin-top: 20rpx;
 }
 
 /* 会员充值样式 */
-.section-header.data-v-2984a38c {
+.section-header.data-v-540da4e9 {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20rpx;
   margin-top: 10rpx;
 }
-.section-header .current-level-info.data-v-2984a38c {
+.section-header .current-level-info.data-v-540da4e9 {
   font-size: 30rpx;
   color: #333;
   font-weight: bold;
 }
-.section-header .current-level-info .highlight.data-v-2984a38c {
+.section-header .current-level-info .highlight.data-v-540da4e9 {
   color: #FF6E00;
   margin-left: 10rpx;
 }
 
 /* 查看详情链接样式 */
-.details-link.data-v-2984a38c {
+.details-link.data-v-540da4e9 {
   font-size: 26rpx;
   color: #FF6E00;
   display: flex;
   align-items: center;
   padding: 10rpx;
 }
-.details-link uni-icons.data-v-2984a38c {
+.details-link uni-icons.data-v-540da4e9 {
   margin-left: 4rpx;
 }
-.member-list.data-v-2984a38c {
+.member-list.data-v-540da4e9 {
   display: flex;
   flex-direction: column;
   gap: 20rpx;
 }
-.member-card.data-v-2984a38c {
+.member-card.data-v-540da4e9 {
   background-color: #fff;
   border-radius: 20rpx;
   padding: 30rpx;
@@ -169,7 +169,7 @@
   overflow: hidden;
   /* 推荐标签样式 */
 }
-.member-card .recommend-tag.data-v-2984a38c {
+.member-card .recommend-tag.data-v-540da4e9 {
   position: absolute;
   top: 0;
   left: 0;
@@ -179,25 +179,25 @@
   padding: 4rpx 12rpx;
   border-bottom-right-radius: 12rpx;
 }
-.member-card.active.data-v-2984a38c {
+.member-card.active.data-v-540da4e9 {
   border-color: #FF6E00;
   background-color: #fff8f0;
 }
-.member-card.disabled.data-v-2984a38c {
+.member-card.disabled.data-v-540da4e9 {
   background-color: #f0f0f0;
   opacity: 0.8;
 }
-.member-card.disabled .level-name.data-v-2984a38c,
-.member-card.disabled .original-price.data-v-2984a38c,
-.member-card.disabled .currency.data-v-2984a38c,
-.member-card.disabled .price.data-v-2984a38c {
+.member-card.disabled .level-name.data-v-540da4e9,
+.member-card.disabled .original-price.data-v-540da4e9,
+.member-card.disabled .currency.data-v-540da4e9,
+.member-card.disabled .price.data-v-540da4e9 {
   color: #999 !important;
 }
-.member-card.disabled .radio-circle.data-v-2984a38c {
+.member-card.disabled .radio-circle.data-v-540da4e9 {
   background-color: #e0e0e0;
   border-color: #ccc;
 }
-.member-card .disabled-mask.data-v-2984a38c {
+.member-card .disabled-mask.data-v-540da4e9 {
   position: absolute;
   right: 0;
   top: 0;
@@ -207,46 +207,46 @@
   padding: 4rpx 12rpx;
   border-bottom-left-radius: 12rpx;
 }
-.member-card .card-left .level-name.data-v-2984a38c {
+.member-card .card-left .level-name.data-v-540da4e9 {
   font-size: 32rpx;
   font-weight: bold;
   color: #333;
 }
-.member-card .card-left .level-desc.data-v-2984a38c {
+.member-card .card-left .level-desc.data-v-540da4e9 {
   font-size: 24rpx;
   color: #666;
 }
-.member-card .card-left .original-price.data-v-2984a38c {
+.member-card .card-left .original-price.data-v-540da4e9 {
   font-size: 24rpx;
   color: #999;
   text-decoration: line-through;
   margin-top: 4rpx;
 }
-.member-card .card-right.data-v-2984a38c {
+.member-card .card-right.data-v-540da4e9 {
   display: flex;
   align-items: center;
 }
-.member-card .card-right .price-label.data-v-2984a38c {
+.member-card .card-right .price-label.data-v-540da4e9 {
   font-size: 22rpx;
   color: #999;
   margin-right: 10rpx;
 }
-.member-card .card-right .price-wrapper.data-v-2984a38c {
+.member-card .card-right .price-wrapper.data-v-540da4e9 {
   display: flex;
   align-items: baseline;
   margin-right: 20rpx;
 }
-.member-card .card-right .currency.data-v-2984a38c {
+.member-card .card-right .currency.data-v-540da4e9 {
   font-size: 24rpx;
   color: #333;
 }
-.member-card .card-right .price.data-v-2984a38c {
+.member-card .card-right .price.data-v-540da4e9 {
   font-size: 40rpx;
   font-weight: bold;
   color: #333;
   margin-left: 4rpx;
 }
-.member-card .card-right .radio-circle.data-v-2984a38c {
+.member-card .card-right .radio-circle.data-v-540da4e9 {
   width: 36rpx;
   height: 36rpx;
   border-radius: 50%;
@@ -256,16 +256,16 @@
   justify-content: center;
   background-color: #fff;
 }
-.member-card .card-right .radio-circle .radio-inner.data-v-2984a38c {
+.member-card .card-right .radio-circle .radio-inner.data-v-540da4e9 {
   width: 20rpx;
   height: 20rpx;
   border-radius: 50%;
   background-color: #FF6E00;
 }
-.member-card .exchange-wrapper.data-v-2984a38c {
+.member-card .exchange-wrapper.data-v-540da4e9 {
   margin-right: 20rpx;
 }
-.member-card .exchange-tag.data-v-2984a38c {
+.member-card .exchange-tag.data-v-540da4e9 {
   font-size: 24rpx;
   color: #52c41a;
   /* 绿色 */
@@ -275,13 +275,13 @@
   border-radius: 8rpx;
   font-weight: bold;
 }
-.member-card.active .radio-circle.data-v-2984a38c {
+.member-card.active .radio-circle.data-v-540da4e9 {
   border-color: #FF6E00;
 }
-.member-card.active .price.data-v-2984a38c, .member-card.active .currency.data-v-2984a38c {
+.member-card.active .price.data-v-540da4e9, .member-card.active .currency.data-v-540da4e9 {
   color: #FF6E00;
 }
-.price-diff-tip.data-v-2984a38c {
+.price-diff-tip.data-v-540da4e9 {
   margin-top: 30rpx;
   font-size: 22rpx;
   color: #999;
@@ -292,13 +292,13 @@
   align-items: flex-start;
   line-height: 1.5;
 }
-.price-diff-tip uni-icons.data-v-2984a38c {
+.price-diff-tip uni-icons.data-v-540da4e9 {
   margin-right: 8rpx;
   margin-top: 4rpx;
 }
 
 /* 底部结算栏 */
-.footer-bar.data-v-2984a38c {
+.footer-bar.data-v-540da4e9 {
   position: fixed;
   bottom: 0;
   left: 0;
@@ -309,7 +309,7 @@
   display: flex;
   flex-direction: column;
 }
-.compliance-text.data-v-2984a38c {
+.compliance-text.data-v-540da4e9 {
   font-size: 22rpx;
   color: #999;
   background-color: #fcfcfc;
@@ -317,27 +317,27 @@
   line-height: 1.4;
   border-bottom: 1rpx solid #eee;
 }
-.action-area.data-v-2984a38c {
+.action-area.data-v-540da4e9 {
   padding: 20rpx 30rpx;
   padding-bottom: calc(20rpx + env(safe-area-inset-bottom));
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
-.action-area .total-info.data-v-2984a38c {
+.action-area .total-info.data-v-540da4e9 {
   display: flex;
   align-items: baseline;
 }
-.action-area .total-info .label.data-v-2984a38c {
+.action-area .total-info .label.data-v-540da4e9 {
   font-size: 28rpx;
   color: #333;
 }
-.action-area .total-info .amount.data-v-2984a38c {
+.action-area .total-info .amount.data-v-540da4e9 {
   font-size: 40rpx;
   font-weight: bold;
   color: #FF6E00;
 }
-.action-area .pay-btn.data-v-2984a38c {
+.action-area .pay-btn.data-v-540da4e9 {
   background: linear-gradient(135deg, #FF6E00, #ff8c00);
   color: white;
   font-size: 30rpx;
@@ -348,10 +348,10 @@
   border-radius: 40rpx;
   margin: 0;
 }
-.action-area .pay-btn[disabled].data-v-2984a38c {
+.action-area .pay-btn[disabled].data-v-540da4e9 {
   background: #ccc;
   color: #fff;
 }
-.action-area .pay-btn.data-v-2984a38c::after {
+.action-area .pay-btn.data-v-540da4e9::after {
   border: none;
 }

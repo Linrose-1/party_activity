@@ -61,7 +61,7 @@ const _sfc_main = {
     };
     const handleRechargeSmartRice = () => {
       common_vendor.index.navigateTo({
-        url: "/pages/recharge/recharge"
+        url: "/packages/recharge/recharge"
       });
     };
     return (_ctx, _cache) => {

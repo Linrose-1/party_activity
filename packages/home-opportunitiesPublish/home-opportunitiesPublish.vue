@@ -831,7 +831,7 @@
 				if (res.confirm) {
 					// 跳转到会员充值页
 					uni.navigateTo({
-						url: '/pages/recharge/recharge?type=membership'
+						url: '/packages/recharge/recharge?type=membership'
 					});
 				}
 			}

@@ -58,7 +58,7 @@ const _sfc_main = {
           special
         };
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/shop-detail/shop-detail.vue:230", "解析营业时间失败:", error);
+        common_vendor.index.__f__("error", "at packages/shop-detail/shop-detail.vue:230", "解析营业时间失败:", error);
         return {
           regular: [{
             label: "营业时间",
@@ -89,7 +89,7 @@ const _sfc_main = {
       });
       isLoading.value = false;
       if (error) {
-        common_vendor.index.__f__("error", "at pages/shop-detail/shop-detail.vue:267", "获取聚店详情失败:", error);
+        common_vendor.index.__f__("error", "at packages/shop-detail/shop-detail.vue:267", "获取聚店详情失败:", error);
         common_vendor.index.showToast({
           title: error,
           icon: "none"
@@ -97,7 +97,7 @@ const _sfc_main = {
         return;
       }
       storeDetail.value = data;
-      common_vendor.index.__f__("log", "at pages/shop-detail/shop-detail.vue:276", "聚店详情数据:", storeDetail.value);
+      common_vendor.index.__f__("log", "at packages/shop-detail/shop-detail.vue:276", "聚店详情数据:", storeDetail.value);
       if (data.checkContribution === 1) {
         setTimeout(() => {
           if (pointsPopup.value) {
@@ -159,7 +159,7 @@ const _sfc_main = {
         return {};
       return {
         title: storeDetail.value.storeName + " - 聚店推荐",
-        path: `/pages/shop-detail/shop-detail?id=${storeDetail.value.id}`,
+        path: `/packages/shop-detail/shop-detail?id=${storeDetail.value.id}`,
         imageUrl: coverImages.value[0] || ""
         // 封面图（支持可选）
       };
@@ -261,7 +261,7 @@ const _sfc_main = {
           size: "20"
         }),
         D: common_vendor.o(callPhone),
-        E: common_vendor.sr(pointsPopup, "b8678dae-4", {
+        E: common_vendor.sr(pointsPopup, "4c71c098-4", {
           "k": "pointsPopup"
         })
       }) : {
@@ -274,7 +274,7 @@ const _sfc_main = {
     };
   }
 };
-const MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["__scopeId", "data-v-b8678dae"]]);
+const MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["__scopeId", "data-v-4c71c098"]]);
 _sfc_main.__runtimeHooks = 6;
 wx.createPage(MiniProgramPage);
-//# sourceMappingURL=../../../.sourcemap/mp-weixin/pages/shop-detail/shop-detail.js.map
+//# sourceMappingURL=../../../.sourcemap/mp-weixin/packages/shop-detail/shop-detail.js.map

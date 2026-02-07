@@ -1,6 +1,6 @@
 // const baseURL = 'https://jyj.gofor.club';
-// const baseURL = 'https://test-api.gofor.club';
-const baseURL = 'https://test-api.gofor.club/local';
+const baseURL = 'https://test-api.gofor.club';
+// const baseURL = 'https://test-api.gofor.club/local';
 const timeout = 10000;
 
 const request = async (url, options = {}) => {

@@ -112,7 +112,7 @@ const _sfc_main = {
       } else {
         payload.amount = parseFloat(payAmount.value);
       }
-      common_vendor.index.__f__("log", "at pages/recharge/recharge.vue:285", "1. 开始创建订单, 参数:", payload);
+      common_vendor.index.__f__("log", "at packages/recharge/recharge.vue:285", "1. 开始创建订单, 参数:", payload);
       const {
         data,
         error
@@ -125,7 +125,7 @@ const _sfc_main = {
       return data;
     };
     const getPayParams = async (orderNo) => {
-      common_vendor.index.__f__("log", "at pages/recharge/recharge.vue:300", "正在获取支付签名，订单号:", orderNo);
+      common_vendor.index.__f__("log", "at packages/recharge/recharge.vue:300", "正在获取支付签名，订单号:", orderNo);
       const {
         data,
         error
@@ -353,6 +353,6 @@ const _sfc_main = {
     };
   }
 };
-const MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["__scopeId", "data-v-2984a38c"]]);
+const MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["__scopeId", "data-v-540da4e9"]]);
 wx.createPage(MiniProgramPage);
-//# sourceMappingURL=../../../.sourcemap/mp-weixin/pages/recharge/recharge.js.map
+//# sourceMappingURL=../../../.sourcemap/mp-weixin/packages/recharge/recharge.js.map

@@ -70,12 +70,12 @@
 		// 		"navigationBarTitleText": "个人名片"
 		// 	}
 		// },
-		{
-			"path": "pages/shop-detail/shop-detail",
-			"style": {
-				"navigationBarTitleText": "聚店详情"
-			}
-		},
+		// {
+		// 	"path": "pages/shop-detail/shop-detail",
+		// 	"style": {
+		// 		"navigationBarTitleText": "聚店详情"
+		// 	}
+		// },
 		// {
 		// 	"path": "pages/home-commercialDetail/home-commercialDetail",
 		// 	"style": {
@@ -106,12 +106,12 @@
 		// 		"navigationBarTitleText": "我的聚会"
 		// 	}
 		// },
-		{
-			"path": "pages/my-opportunity/my-opportunity",
-			"style": {
-				"navigationBarTitleText": "我的商机"
-			}
-		},
+		// {
+		// 	"path": "pages/my-opportunity/my-opportunity",
+		// 	"style": {
+		// 		"navigationBarTitleText": "我的商机"
+		// 	}
+		// },
 		// {
 		// 	"path": "pages/my-collection/my-collection",
 		// 	"style": {
@@ -124,12 +124,12 @@
 				"navigationBarTitleText": "协议"
 			}
 		},
-		{
-			"path": "pages/location/location",
-			"style": {
-				"navigationBarTitleText": "摇一摇"
-			}
-		},
+		// {
+		// 	"path": "pages/location/location",
+		// 	"style": {
+		// 		"navigationBarTitleText": "摇一摇"
+		// 	}
+		// },
 		{
 			"path": "pages/shop-list/shop-list",
 			"style": {
@@ -226,12 +226,12 @@
 				"navigationBarTitleText": "我的推荐商友"
 			}
 		},
-		{
-			"path": "pages/recharge/recharge",
-			"style": {
-				"navigationBarTitleText": "充值"
-			}
-		},
+		// {
+		// 	"path": "pages/recharge/recharge",
+		// 	"style": {
+		// 		"navigationBarTitleText": "充值"
+		// 	}
+		// },
 		{
 			"path": "pages/my-memberDetails/my-memberDetails",
 			"style": {
@@ -262,31 +262,28 @@
 				"navigationBarTitleText": "系统建议"
 			}
 		},
+		// {
+		// 	"path": "pages/my-auth/my-auth",
+		// 	"style": {
+		// 		"navigationBarTitleText": "平台认证"
+		// 	}
+		// },
 		{
-			"path": "pages/my-auth/my-auth",
+			"path": "pages/platform-intro/platform-intro",
 			"style": {
-				"navigationBarTitleText": "平台认证"
+				"navigationBarTitleText": "平台详情"
 			}
 		},
 		{
-			"path" : "pages/platform-intro/platform-intro",
-			"style" : 
-			{
-				"navigationBarTitleText" : "平台详情"
+			"path": "pages/my-order-detail/my-order-detail",
+			"style": {
+				"navigationBarTitleText": "订单详情"
 			}
 		},
 		{
-			"path" : "pages/my-order-detail/my-order-detail",
-			"style" : 
-			{
-				"navigationBarTitleText" : "订单详情"
-			}
-		},
-		{
-			"path" : "pages/sponsor-detail/sponsor-detail",
-			"style" : 
-			{
-				"navigationBarTitleText" : "赞助信息详情"
+			"path": "pages/sponsor-detail/sponsor-detail",
+			"style": {
+				"navigationBarTitleText": "赞助信息详情"
 			}
 		}
 	],
@@ -345,59 +342,69 @@
 				}
 			},
 			{
-				"path" : "my-points/my-points",
-				"style" : 
-				{
-					"navigationBarTitleText" : "我的贡分"
+				"path": "shop-detail/shop-detail",
+				"style": {
+					"navigationBarTitleText": "聚店详情"
 				}
 			},
 			{
-				"path" : "my-zhimi/my-zhimi",
-				"style" : 
-				{
-					"navigationBarTitleText" : "我的智米"
+				"path": "my-points/my-points",
+				"style": {
+					"navigationBarTitleText": "我的贡分"
 				}
 			},
 			{
-				"path" : "getPoints/getPoints",
-				"style" : 
-				{
-					"navigationBarTitleText" : "获取贡分"
+				"path": "my-opportunity/my-opportunity",
+				"style": {
+					"navigationBarTitleText": "我的商机"
 				}
 			},
 			{
-				"path" : "my-member/my-member",
-				"style" : 
-				{
-					"navigationBarTitleText" : "用户中心"
+				"path": "my-zhimi/my-zhimi",
+				"style": {
+					"navigationBarTitleText": "我的智米"
 				}
 			},
 			{
-				"path" : "my-friendInvitation/my-friendInvitation",
-				"style" : 
-				{
-					"navigationBarTitleText" : "商友邀请"
+				"path": "getPoints/getPoints",
+				"style": {
+					"navigationBarTitleText": "获取贡分"
 				}
 			},
 			{
-				"path" : "my-systemConstruction/my-systemConstruction",
-				"style" : 
-				{
-					"navigationBarTitleText" : "系统共建"
+				"path": "my-member/my-member",
+				"style": {
+					"navigationBarTitleText": "用户中心"
 				}
 			},
 			{
-				"path" : "user-opportunities/user-opportunities",
-				"style" : 
-				{
-					"navigationBarTitleText" : "商友圈"
+				"path": "my-friendInvitation/my-friendInvitation",
+				"style": {
+					"navigationBarTitleText": "商友邀请"
 				}
 			},
 			{
-				"path" : "home-customization/home-customization",
-				"style" : 
-				{
-					"navigationBarTitleText" : "猩聚社定制"
+				"path": "my-systemConstruction/my-systemConstruction",
+				"style": {
+					"navigationBarTitleText": "系统共建"
+				}
+			},
+			{
+				"path": "location/location",
+				"style": {
+					"navigationBarTitleText": "摇一摇"
+				}
+			},
+			{
+				"path": "user-opportunities/user-opportunities",
+				"style": {
+					"navigationBarTitleText": "商友圈"
+				}
+			},
+			{
+				"path": "home-customization/home-customization",
+				"style": {
+					"navigationBarTitleText": "猩聚社定制"
 				}
 			},
 			{
@@ -431,136 +438,129 @@
 				}
 			},
 			{
-				"path" : "participant-detail/participant-detail",
-				"style" : 
-				{
-					"navigationBarTitleText" : "参会名单"
+				"path": "participant-detail/participant-detail",
+				"style": {
+					"navigationBarTitleText": "参会名单"
 				}
 			},
 			{
-				"path" : "user-reviews/user-reviews",
-				"style" : 
-				{
-					"navigationBarTitleText" : "商友点评"
+				"path": "user-reviews/user-reviews",
+				"style": {
+					"navigationBarTitleText": "商友点评"
 				}
 			},
 			{
-				"path" : "user-review-list/user-review-list",
-				"style" : 
-				{
-					"navigationBarTitleText" : "商友评论列表"
+				"path": "user-review-list/user-review-list",
+				"style": {
+					"navigationBarTitleText": "商友评论列表"
 				}
 			},
 			{
-				"path" : "social-interaction/social-interaction",
-				"style" : 
-				{
-					"navigationBarTitleText" : "社交互动"
+				"path": "social-interaction/social-interaction",
+				"style": {
+					"navigationBarTitleText": "社交互动"
 				}
 			},
 			{
-				"path" : "my-reviews/my-reviews",
-				"style" : 
-				{
-					"navigationBarTitleText" : "我的点评"
+				"path": "my-reviews/my-reviews",
+				"style": {
+					"navigationBarTitleText": "我的点评"
 				}
 			},
 			{
-				"path" : "ContactService/ContactService",
-				"style" : 
-				{
-					"navigationBarTitleText" : "平台客服"
+				"path": "ContactService/ContactService",
+				"style": {
+					"navigationBarTitleText": "平台客服"
 				}
 			},
 			{
-				"path" : "smart-rice-records/smart-rice-records",
-				"style" : 
-				{
-					"navigationBarTitleText" : "智米记录"
+				"path": "my-auth/my-auth",
+				"style": {
+					"navigationBarTitleText": "平台认证"
 				}
 			},
 			{
-				"path" : "experience-records/experience-records",
-				"style" : 
-				{
-					"navigationBarTitleText" : "全部贡分记录"
+				"path": "smart-rice-records/smart-rice-records",
+				"style": {
+					"navigationBarTitleText": "智米记录"
 				}
 			},
 			{
-				"path" : "enterprise-edit/enterprise-edit",
-				"style" : 
-				{
-					"navigationBarTitleText" : "创建企业/品牌"
+				"path": "experience-records/experience-records",
+				"style": {
+					"navigationBarTitleText": "全部贡分记录"
 				}
 			},
 			{
-				"path" : "enterprise-list/enterprise-list",
-				"style" : 
-				{
-					"navigationBarTitleText" : "我的企业/品牌"
+				"path": "enterprise-edit/enterprise-edit",
+				"style": {
+					"navigationBarTitleText": "创建企业/品牌"
 				}
 			},
 			{
-				"path" : "enterprise-detail/enterprise-detail",
-				"style" : 
-				{
-					"navigationBarTitleText" : "企业/品牌详情"
+				"path": "enterprise-list/enterprise-list",
+				"style": {
+					"navigationBarTitleText": "我的企业/品牌"
 				}
 			},
 			{
-				"path" : "enterprise-auth/enterprise-auth",
-				"style" : 
-				{
-					"navigationBarTitleText" : "企业认证"
+				"path": "enterprise-detail/enterprise-detail",
+				"style": {
+					"navigationBarTitleText": "企业/品牌详情"
 				}
 			},
 			{
-				"path" : "enterprise-card/enterprise-card",
-				"style" : 
-				{
-					"navigationBarTitleText" : "企业名片"
+				"path": "enterprise-auth/enterprise-auth",
+				"style": {
+					"navigationBarTitleText": "企业认证"
 				}
 			},
 			{
-				"path" : "relationship-path/relationship-path",
-				"style" : 
-				{
-					"navigationBarTitleText" : "人脉链路"
+				"path": "enterprise-card/enterprise-card",
+				"style": {
+					"navigationBarTitleText": "企业名片"
 				}
 			},
 			{
-				"path" : "user-view-trace/user-view-trace",
-				"style" : 
-				{
-					"navigationBarTitleText" : "商机浏览记录"
+				"path": "relationship-path/relationship-path",
+				"style": {
+					"navigationBarTitleText": "人脉链路"
 				}
 			},
 			{
-				"path" : "my-friendList/my-friendList",
-				"style" : 
-				{
-					"navigationBarTitleText" : "圈友列表"
+				"path": "user-view-trace/user-view-trace",
+				"style": {
+					"navigationBarTitleText": "商机浏览记录"
 				}
 			},
 			{
-				"path" : "resource-match/resource-match",
-				"style" : 
-				{
-					"navigationBarTitleText" : "资源匹配"
+				"path": "my-friendList/my-friendList",
+				"style": {
+					"navigationBarTitleText": "圈友列表"
 				}
 			},
 			{
-				"path" : "contribution-ranking/contribution-ranking",
-				"style" : 
-				{
-					"navigationBarTitleText" : "猩球榜单"
+				"path": "resource-match/resource-match",
+				"style": {
+					"navigationBarTitleText": "资源匹配"
 				}
 			},
 			{
-				"path" : "suggestion-detail/suggestion-detail",
-				"style" : 
-				{
-					"navigationBarTitleText" : "建议详情"
+				"path": "recharge/recharge",
+				"style": {
+					"navigationBarTitleText": "充值"
+				}
+			},
+			{
+				"path": "contribution-ranking/contribution-ranking",
+				"style": {
+					"navigationBarTitleText": "猩球榜单"
+				}
+			},
+			{
+				"path": "suggestion-detail/suggestion-detail",
+				"style": {
+					"navigationBarTitleText": "建议详情"
 				}
 			}
 			// 如果还有其他页面要放进这个分包，继续在这里加

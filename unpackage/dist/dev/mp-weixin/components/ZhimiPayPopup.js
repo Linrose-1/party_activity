@@ -73,7 +73,7 @@ const _sfc_main = {
     const goToRecharge = () => {
       close();
       common_vendor.index.navigateTo({
-        url: "/pages/recharge/recharge?type=zhimi"
+        url: "/packages/recharge/recharge?type=zhimi"
         // 假设有这个参数控制跳到智米Tab
       });
     };

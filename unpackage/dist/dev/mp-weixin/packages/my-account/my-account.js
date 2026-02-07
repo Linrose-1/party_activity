@@ -115,7 +115,7 @@ const _sfc_main = {
     };
     const navigateToMembershipRecharge = () => {
       common_vendor.index.navigateTo({
-        url: "/pages/recharge/recharge?type=membership"
+        url: "/packages/recharge/recharge?type=membership"
       });
     };
     const nextMembershipLevel = common_vendor.computed(() => {
@@ -280,7 +280,7 @@ const _sfc_main = {
     const handleRechargeSmartRice = () => {
       common_vendor.index.__f__("log", "at packages/my-account/my-account.vue:591", "用户点击了充值智米，跳转到充值页面...");
       common_vendor.index.navigateTo({
-        url: "/pages/recharge/recharge"
+        url: "/packages/recharge/recharge"
         // 跳转到充值页面
       });
     };

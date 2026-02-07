@@ -93,7 +93,7 @@ const _sfc_main = {
         }
       } catch (e) {
         loadStatus.value = "more";
-        common_vendor.index.__f__("error", "at pages/my-opportunity/my-opportunity.vue:220", "数据加载异常:", e);
+        common_vendor.index.__f__("error", "at packages/my-opportunity/my-opportunity.vue:220", "数据加载异常:", e);
       }
     };
     const switchTab = (e) => {
@@ -246,7 +246,7 @@ const _sfc_main = {
             c: common_assets._imports_0
           } : {}, {
             d: common_vendor.t(post.isEnterprise === 1 ? (_b = post.enterpriseInfo) == null ? void 0 : _b.enterpriseName : post.memberUser.nickname),
-            e: "481e0091-1-" + i0,
+            e: "b7876dfc-1-" + i0,
             f: common_vendor.t(formatTimestamp(post.createTime)),
             g: common_vendor.t(getStatusInfo(post).text),
             h: common_vendor.n(getStatusInfo(post).class),
@@ -272,9 +272,9 @@ const _sfc_main = {
             r: common_vendor.n("images-count-" + post.images.length)
           } : {}, {
             p: post.images && post.images.length > 0,
-            s: "481e0091-2-" + i0,
+            s: "b7876dfc-2-" + i0,
             t: common_vendor.o(($event) => handleEdit(post.id), post.id),
-            v: "481e0091-3-" + i0,
+            v: "b7876dfc-3-" + i0,
             w: common_vendor.p({
               type: "chat-filled",
               size: "16",
@@ -283,7 +283,7 @@ const _sfc_main = {
             x: post.status !== "hidden" ? 1 : "",
             y: post.status !== "hidden",
             z: common_vendor.o(($event) => openAppealModal(post), post.id),
-            A: "481e0091-4-" + i0,
+            A: "b7876dfc-4-" + i0,
             B: common_vendor.o(($event) => deleteOpportunity(post.id), post.id),
             C: post.id,
             D: common_vendor.o(($event) => skipCommercialDetail(post.id), post.id)
@@ -325,7 +325,7 @@ const _sfc_main = {
           title: "提交申诉",
           placeholder: "请输入申诉详细理由..."
         }),
-        r: common_vendor.sr(appealPopup, "481e0091-7", {
+        r: common_vendor.sr(appealPopup, "b7876dfc-7", {
           "k": "appealPopup"
         }),
         s: common_vendor.p({
@@ -335,6 +335,6 @@ const _sfc_main = {
     };
   }
 };
-const MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["__scopeId", "data-v-481e0091"]]);
+const MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["__scopeId", "data-v-b7876dfc"]]);
 wx.createPage(MiniProgramPage);
-//# sourceMappingURL=../../../.sourcemap/mp-weixin/pages/my-opportunity/my-opportunity.js.map
+//# sourceMappingURL=../../../.sourcemap/mp-weixin/packages/my-opportunity/my-opportunity.js.map

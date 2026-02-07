@@ -7299,7 +7299,7 @@ function initOnError() {
 function initRuntimeSocketService() {
   const hosts = "172.20.10.4,127.0.0.1";
   const port = "8090";
-  const id = "mp-weixin_B4mQb2";
+  const id = "mp-weixin_PvIXKu";
   const lazy = typeof swan !== "undefined";
   let restoreError = lazy ? () => {
   } : initOnError();
@@ -8285,33 +8285,15 @@ const pages = [
     }
   },
   {
-    path: "pages/shop-detail/shop-detail",
-    style: {
-      navigationBarTitleText: "聚店详情"
-    }
-  },
-  {
     path: "pages/shop-recommend/shop-recommend",
     style: {
       navigationBarTitleText: "推荐聚店"
     }
   },
   {
-    path: "pages/my-opportunity/my-opportunity",
-    style: {
-      navigationBarTitleText: "我的商机"
-    }
-  },
-  {
     path: "pages/user-agreement/user-agreement",
     style: {
       navigationBarTitleText: "协议"
-    }
-  },
-  {
-    path: "pages/location/location",
-    style: {
-      navigationBarTitleText: "摇一摇"
     }
   },
   {
@@ -8399,12 +8381,6 @@ const pages = [
     }
   },
   {
-    path: "pages/recharge/recharge",
-    style: {
-      navigationBarTitleText: "充值"
-    }
-  },
-  {
     path: "pages/my-memberDetails/my-memberDetails",
     style: {
       navigationBarTitleText: "会员详情"
@@ -8432,12 +8408,6 @@ const pages = [
     path: "pages/my-systemSuggestions/my-systemSuggestions",
     style: {
       navigationBarTitleText: "系统建议"
-    }
-  },
-  {
-    path: "pages/my-auth/my-auth",
-    style: {
-      navigationBarTitleText: "平台认证"
     }
   },
   {
@@ -8512,9 +8482,21 @@ const subPackages = [
         }
       },
       {
+        path: "shop-detail/shop-detail",
+        style: {
+          navigationBarTitleText: "聚店详情"
+        }
+      },
+      {
         path: "my-points/my-points",
         style: {
           navigationBarTitleText: "我的贡分"
+        }
+      },
+      {
+        path: "my-opportunity/my-opportunity",
+        style: {
+          navigationBarTitleText: "我的商机"
         }
       },
       {
@@ -8545,6 +8527,12 @@ const subPackages = [
         path: "my-systemConstruction/my-systemConstruction",
         style: {
           navigationBarTitleText: "系统共建"
+        }
+      },
+      {
+        path: "location/location",
+        style: {
+          navigationBarTitleText: "摇一摇"
         }
       },
       {
@@ -8626,6 +8614,12 @@ const subPackages = [
         }
       },
       {
+        path: "my-auth/my-auth",
+        style: {
+          navigationBarTitleText: "平台认证"
+        }
+      },
+      {
         path: "smart-rice-records/smart-rice-records",
         style: {
           navigationBarTitleText: "智米记录"
@@ -8689,6 +8683,12 @@ const subPackages = [
         path: "resource-match/resource-match",
         style: {
           navigationBarTitleText: "资源匹配"
+        }
+      },
+      {
+        path: "recharge/recharge",
+        style: {
+          navigationBarTitleText: "充值"
         }
       },
       {

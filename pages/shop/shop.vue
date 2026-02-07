@@ -532,7 +532,7 @@
 	const goToStoreDetail = async (store) => {
 		if (!await checkLoginGuard()) return;
 		uni.navigateTo({
-			url: `/pages/shop-detail/shop-detail?id=${store.id}`
+			url: `/packages/shop-detail/shop-detail?id=${store.id}`
 		});
 	};
 

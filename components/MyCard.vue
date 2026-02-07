@@ -50,14 +50,23 @@
 			</view>
 
 			<!-- 3. 社会职务区 -->
-			<view class="section-block professional-section" v-if="professionalTitles.length > 0">
+			<view class="section-block professional-section" v-if="socialGroups.length > 0">
 				<view class="section-title">
 					<uni-icons type="staff-filled" size="18" color="#C9A063"></uni-icons>
-					<text>社会职务</text>
+					<text>组织/机构/职务</text>
 				</view>
-				<view class="tag-list">
-					<text class="tag" selectable v-for="(item, index) in professionalTitles"
-						:key="index">{{ item }}</text>
+
+				<view class="social-group" v-for="(group, index) in socialGroups" :key="index">
+					<view class="social-row">
+						<text class="social-label">组织：</text>
+						<text class="social-value" selectable>{{ group.association }}</text>
+					</view>
+					<view class="social-row">
+						<text class="social-label">职务：</text>
+						<text class="social-value" selectable>{{ group.title }}</text>
+					</view>
+					<!-- 分割线：如果是多组，在组之间加个微弱的分割 -->
+					<view v-if="index < socialGroups.length - 1" class="group-divider"></view>
 				</view>
 			</view>
 
@@ -258,6 +267,10 @@
 			type: String,
 			default: ''
 		}, // 社会职务
+		associationName: {
+			type: String,
+			default: ''
+		},
 
 		// --- 资源信息 ---
 		haveResources: {
@@ -376,6 +389,29 @@
 			});
 		}
 
+		return groups;
+	});
+
+	const socialGroups = computed(() => {
+		// 将“组织机构”和“社会职务”按逗号拆分
+		const associations = props.associationName ? props.associationName.split(',') : [];
+		const titles = props.professionalTitle ? props.professionalTitle.split(',') : [];
+
+		const maxLength = Math.max(associations.length, titles.length);
+		const groups = [];
+
+		for (let i = 0; i < maxLength; i++) {
+			const assoc = (associations[i] || '').trim();
+			const title = (titles[i] || '').trim();
+
+			// 只有当组织或职务至少有一个不为空时才添加
+			if (assoc || title) {
+				groups.push({
+					association: assoc || '未填写组织',
+					title: title || '未填写职务'
+				});
+			}
+		}
 		return groups;
 	});
 
@@ -621,6 +657,36 @@
 			font-size: 26rpx;
 			padding: 8rpx 20rpx;
 			border-radius: 30rpx;
+		}
+
+		.social-group {
+			padding: 10rpx 0;
+
+			.social-row {
+				display: flex;
+				font-size: 28rpx;
+				margin-bottom: 8rpx;
+				line-height: 1.4;
+			}
+
+			.social-label {
+				color: #A37E4A; // 使用更深一点的金色
+				width: 100rpx;
+				flex-shrink: 0;
+				font-size: 26rpx;
+			}
+
+			.social-value {
+				color: #333;
+				font-weight: 500;
+				word-break: break-all;
+			}
+
+			.group-divider {
+				height: 1rpx;
+				background-color: rgba(201, 160, 99, 0.1);
+				margin: 15rpx 0;
+			}
 		}
 	}
 

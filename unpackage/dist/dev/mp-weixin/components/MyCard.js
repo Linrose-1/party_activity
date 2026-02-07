@@ -64,6 +64,10 @@ const _sfc_main = {
       default: ""
     },
     // 社会职务
+    associationName: {
+      type: String,
+      default: ""
+    },
     // --- 资源信息 ---
     haveResources: {
       type: String,
@@ -151,7 +155,7 @@ const _sfc_main = {
   emits: ["goToOpportunities"],
   setup(__props, { emit: __emit }) {
     const props = __props;
-    const professionalTitles = common_vendor.computed(() => {
+    common_vendor.computed(() => {
       return props.professionalTitle ? props.professionalTitle.split(",").filter((item) => item.trim()) : [];
     });
     const careerGroups = common_vendor.computed(() => {
@@ -166,6 +170,23 @@ const _sfc_main = {
           position: (positions[i] || "未填写").trim(),
           industry: (industries[i] || "未填写").trim()
         });
+      }
+      return groups;
+    });
+    const socialGroups = common_vendor.computed(() => {
+      const associations = props.associationName ? props.associationName.split(",") : [];
+      const titles = props.professionalTitle ? props.professionalTitle.split(",") : [];
+      const maxLength = Math.max(associations.length, titles.length);
+      const groups = [];
+      for (let i = 0; i < maxLength; i++) {
+        const assoc = (associations[i] || "").trim();
+        const title = (titles[i] || "").trim();
+        if (assoc || title) {
+          groups.push({
+            association: assoc || "未填写组织",
+            title: title || "未填写职务"
+          });
+        }
       }
       return groups;
     });
@@ -242,18 +263,21 @@ const _sfc_main = {
             e: index
           };
         }),
-        q: professionalTitles.value.length > 0
-      }, professionalTitles.value.length > 0 ? {
+        q: socialGroups.value.length > 0
+      }, socialGroups.value.length > 0 ? {
         r: common_vendor.p({
           type: "staff-filled",
           size: "18",
           color: "#C9A063"
         }),
-        s: common_vendor.f(professionalTitles.value, (item, index, i0) => {
-          return {
-            a: common_vendor.t(item),
-            b: index
-          };
+        s: common_vendor.f(socialGroups.value, (group, index, i0) => {
+          return common_vendor.e({
+            a: common_vendor.t(group.association),
+            b: common_vendor.t(group.title),
+            c: index < socialGroups.value.length - 1
+          }, index < socialGroups.value.length - 1 ? {} : {}, {
+            d: index
+          });
         })
       } : {}, {
         t: careerGroups.value.length > 0

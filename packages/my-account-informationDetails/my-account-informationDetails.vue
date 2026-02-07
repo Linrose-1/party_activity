@@ -61,11 +61,19 @@
 			<view class="list-container">
 				<!-- 商协会职务 -->
 				<view class="list-item wide-item">
-					<text class="label">商协会职务</text>
-					<view class="tag-group">
-						<view v-for="(item, index) in splitToArray(userInfo.professionalTitle)" :key="index"
-							class="tag">{{ item }}</view>
-						<text v-if="!userInfo.professionalTitle" class="value-placeholder">未填写</text>
+					<text class="label">组织/机构/职务</text>
+					<view class="association-group">
+						<view v-for="(item, index) in formattedAssociations" :key="index" class="association-card">
+							<view class="association-name">
+								<uni-icons type="auth-filled" size="18" color="#C9A063"></uni-icons>
+								<text class="name-text">{{ item.name }}</text>
+							</view>
+							<view class="association-title">
+								<text class="title-label">担任：</text>
+								<text class="title-value">{{ item.title }}</text>
+							</view>
+						</view>
+						<text v-if="formattedAssociations.length === 0" class="value-placeholder">未填写</text>
 					</view>
 				</view>
 
@@ -271,6 +279,27 @@
 				name: companies[i] || '',
 				industry: industries[i] || '',
 				position: positions[i] || ''
+			});
+		}
+		return result;
+	});
+
+	/**
+	 * 计算属性：将商协会名称与对应职务格式化为对象数组
+	 */
+	const formattedAssociations = computed(() => {
+		if (!userInfo.value) return [];
+		const associations = splitToArray(userInfo.value.associationName); // 组织机构
+		const titles = splitToArray(userInfo.value.professionalTitle); // 担任职务
+
+		const maxLength = Math.max(associations.length, titles.length);
+		if (maxLength === 0) return [];
+
+		const result = [];
+		for (let i = 0; i < maxLength; i++) {
+			result.push({
+				name: associations[i] || '组织名称未填写',
+				title: titles[i] || '职务未填写'
 			});
 		}
 		return result;
@@ -516,6 +545,47 @@
 		&.hobby {
 			background-color: #fdf6ec;
 			color: #e6a23c;
+		}
+	}
+
+	.association-group {
+		display: flex;
+		flex-direction: column;
+		gap: 16rpx;
+	}
+
+	.association-card {
+		background-color: #fff;
+		border: 1rpx solid #fdf5e6; // 浅浅的金色边框
+		padding: 20rpx;
+		border-radius: 12rpx;
+		background: linear-gradient(to right, #ffffff, #fffcf5);
+	}
+
+	.association-name {
+		display: flex;
+		align-items: center;
+		margin-bottom: 8rpx;
+
+		.name-text {
+			font-size: 28rpx;
+			font-weight: bold;
+			color: #303133;
+			margin-left: 10rpx;
+		}
+	}
+
+	.association-title {
+		font-size: 26rpx;
+		padding-left: 48rpx; // 对齐图标后的文字
+
+		.title-label {
+			color: #909399;
+		}
+
+		.title-value {
+			color: #C9A063; // 金色文字突出职务
+			font-weight: 500;
 		}
 	}
 

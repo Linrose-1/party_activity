@@ -110,15 +110,15 @@
 					<!-- 模块：职业背景 (动态) -->
 					<view class="form-card">
 						<view class="card-header-row">
-							<view class="card-title">社会组织与职务</view>
+							<view class="card-title">组织/机构/职务</view>
 							<view v-if="professionsList.length < 3" class="add-text-btn" @click="addProfession">
-								<uni-icons type="plusempty" size="14" color="#FF8700"></uni-icons> 添加组
+								<uni-icons type="plusempty" size="14" color="#FF8700"></uni-icons> 添加
 							</view>
 						</view>
 
 						<view v-for="(item, index) in professionsList" :key="index" class="dynamic-block-item">
 							<view class="block-header">
-								<text class="block-index">项目 #{{ index + 1 }}</text>
+								<text class="block-index">#{{ index + 1 }}</text>
 								<view v-if="professionsList.length > 1" class="delete-text"
 									@click="removeProfession(index)">删除</view>
 							</view>
@@ -1541,7 +1541,7 @@
 	// 跳转到实名认证页面的方法
 	const goToAuthPage = () => {
 		uni.navigateTo({
-			url: '/pages/my-auth/my-auth'
+			url: '/packages/my-auth/my-auth'
 		});
 	};
 </script>

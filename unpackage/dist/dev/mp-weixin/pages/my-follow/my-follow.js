@@ -225,7 +225,7 @@ const _sfc_main = {
     };
     const goToDiscover = () => {
       common_vendor.index.switchTab({
-        url: "/pages/location/location"
+        url: "/packages/location/location"
       });
     };
     return (_ctx, _cache) => {

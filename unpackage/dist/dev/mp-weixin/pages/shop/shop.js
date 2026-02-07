@@ -230,7 +230,7 @@ const _sfc_main = {
       if (!await utils_user.checkLoginGuard())
         return;
       common_vendor.index.navigateTo({
-        url: `/pages/shop-detail/shop-detail?id=${store.id}`
+        url: `/packages/shop-detail/shop-detail?id=${store.id}`
       });
     };
     const shareStore = async () => {

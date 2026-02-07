@@ -890,7 +890,7 @@
 			return;
 		}
 
-		const targetPath = '/pages/shop-detail/shop-detail'; // <--- 请确认此路径是否正确！
+		const targetPath = '/packages/shop-detail/shop-detail'; // <--- 请确认此路径是否正确！
 
 		// 2. 构建URL
 		const url = `${targetPath}?id=${store.id}`;

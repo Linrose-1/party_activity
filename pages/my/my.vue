@@ -213,7 +213,7 @@
 			{
 				value: user.postCount || 0,
 				label: '我的商机',
-				path: '/pages/my-opportunity/my-opportunity'
+				path: '/packages/my-opportunity/my-opportunity'
 			},
 			{
 				value: user.currExperience || 0,
@@ -408,7 +408,7 @@
 		// 	name: '我的商机',
 		// 	desc: '查看您发布的商机内容',
 		// 	icon: '../../static/icon/商机.png',
-		// 	path: '/pages/my-opportunity/my-opportunity'
+		// 	path: '/packages/my-opportunity/my-opportunity'
 		// },
 		// {
 		// 	name: '我的聚会',
@@ -517,7 +517,7 @@
 			name: '平台认证',
 			desc: '通过认证，开启更多功能',
 			icon: '../../static/icon/平台认证.png',
-			path: '/pages/my-auth/my-auth',
+			path: '/packages/my-auth/my-auth',
 			fullWidth: true
 		} // 新增，带特殊标记
 	]);

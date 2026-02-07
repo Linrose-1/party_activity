@@ -223,14 +223,14 @@ const _sfc_main = {
       if (!await utils_user.checkLoginGuard())
         return;
       common_vendor.index.navigateTo({
-        url: "/pages/location/location?autoShake=true"
+        url: "/packages/location/location?autoShake=true"
       });
     };
     const goToviewPath = async () => {
       if (!await utils_user.checkLoginGuard())
         return;
       common_vendor.index.navigateTo({
-        url: "/pages/location/location?autoShake=true"
+        url: "/packages/location/location?autoShake=true"
       });
     };
     common_vendor.watch([destination, timeRange], updateNextLocation);

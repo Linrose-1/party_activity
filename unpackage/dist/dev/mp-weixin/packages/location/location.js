@@ -39,7 +39,7 @@ const _sfc_main = {
     const activities = common_vendor.ref([]);
     const businesses = common_vendor.ref([]);
     const resetState = () => {
-      common_vendor.index.__f__("log", "at pages/location/location.vue:138", "页面状态已重置");
+      common_vendor.index.__f__("log", "at packages/location/location.vue:138", "页面状态已重置");
       shaken.value = false;
       loading.value = false;
       activities.value = [];
@@ -57,11 +57,11 @@ const _sfc_main = {
       if (loading.value)
         return;
       currentTab.value = e.currentIndex;
-      common_vendor.index.__f__("log", "at pages/location/location.vue:161", "🔥点击切换tab！当前 Tab 索引为:", currentTab.value);
+      common_vendor.index.__f__("log", "at packages/location/location.vue:161", "🔥点击切换tab！当前 Tab 索引为:", currentTab.value);
     };
     const triggerShakeSequence = () => {
       const savedTabIndex = currentTab.value;
-      common_vendor.index.__f__("log", "at pages/location/location.vue:168", "🔥 摇一摇触发！当前 Tab 索引为:", savedTabIndex);
+      common_vendor.index.__f__("log", "at packages/location/location.vue:168", "🔥 摇一摇触发！当前 Tab 索引为:", savedTabIndex);
       lockShake();
       if (shakeAudioContext) {
         shakeAudioContext.stop();
@@ -92,7 +92,7 @@ const _sfc_main = {
               getNearbyBusinesses(true)
             ]);
           } catch (error) {
-            common_vendor.index.__f__("error", "at pages/location/location.vue:210", "加载错误:", error);
+            common_vendor.index.__f__("error", "at packages/location/location.vue:210", "加载错误:", error);
           } finally {
             loading.value = false;
             if (currentTab.value !== savedTabIndex) {
@@ -231,7 +231,7 @@ const _sfc_main = {
       const name = user.nickname || "匿名用户";
       const avatarUrl = user.avatar || defaultAvatar;
       const url = `/packages/applicationBusinessCard/applicationBusinessCard?id=${user.id}&name=${encodeURIComponent(name)}&avatar=${encodeURIComponent(avatarUrl)}`;
-      common_vendor.index.__f__("log", "at pages/location/location.vue:388", "从摇一摇页跳转，URL:", url);
+      common_vendor.index.__f__("log", "at packages/location/location.vue:388", "从摇一摇页跳转，URL:", url);
       common_vendor.index.navigateTo({
         url
       });
@@ -239,7 +239,7 @@ const _sfc_main = {
     common_vendor.onLoad((options) => {
       resetState();
       if (options.autoShake === "true") {
-        common_vendor.index.__f__("log", "at pages/location/location.vue:401", "onLoad: 接收到自动摇一摇指令");
+        common_vendor.index.__f__("log", "at packages/location/location.vue:401", "onLoad: 接收到自动摇一摇指令");
         autoShakeOnLoad.value = true;
       }
     });
@@ -250,7 +250,7 @@ const _sfc_main = {
         shakeAudioContext.src = "https://img.gofor.club/wechat_shake.mp3";
       }
       if (autoShakeOnLoad.value) {
-        common_vendor.index.__f__("log", "at pages/location/location.vue:418", "onShow: 执行自动摇一摇流程");
+        common_vendor.index.__f__("log", "at packages/location/location.vue:418", "onShow: 执行自动摇一摇流程");
         resetState();
         triggerShakeSequence();
         autoShakeOnLoad.value = false;
@@ -274,13 +274,13 @@ const _sfc_main = {
       switch (currentTab.value) {
         case 0:
           if (businessLoadingStatus.value === "more") {
-            common_vendor.index.__f__("log", "at pages/location/location.vue:454", "触底加载更多商友...");
+            common_vendor.index.__f__("log", "at packages/location/location.vue:454", "触底加载更多商友...");
             getNearbyBusinesses();
           }
           break;
         case 1:
           if (activityLoadingStatus.value === "more") {
-            common_vendor.index.__f__("log", "at pages/location/location.vue:461", "触底加载更多聚会...");
+            common_vendor.index.__f__("log", "at packages/location/location.vue:461", "触底加载更多聚会...");
             getNearbyActivities();
           }
           break;
@@ -352,7 +352,7 @@ const _sfc_main = {
         m: common_vendor.f(activities.value, (activity, k0, i0) => {
           return {
             a: activity.id,
-            b: "4d9b4fcb-5-" + i0,
+            b: "302d9b55-5-" + i0,
             c: common_vendor.p({
               activity,
               ["is-login"]: isUserLoggedIn.value
@@ -371,6 +371,6 @@ const _sfc_main = {
     };
   }
 };
-const MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["__scopeId", "data-v-4d9b4fcb"]]);
+const MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["__scopeId", "data-v-302d9b55"]]);
 wx.createPage(MiniProgramPage);
-//# sourceMappingURL=../../../.sourcemap/mp-weixin/pages/location/location.js.map
+//# sourceMappingURL=../../../.sourcemap/mp-weixin/packages/location/location.js.map

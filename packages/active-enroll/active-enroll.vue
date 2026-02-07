@@ -227,7 +227,7 @@
 	// 跳转到实名认证页面的函数
 	const goToAuthPage = () => {
 		uni.navigateTo({
-			url: '/pages/my-auth/my-auth'
+			url: '/packages/my-auth/my-auth'
 		});
 	};
 
@@ -608,7 +608,7 @@
 			// 			if (res.confirm) {
 			// 				// 用户确认，跳转到实名认证页面
 			// 				uni.navigateTo({
-			// 					url: '/pages/my-auth/my-auth'
+			// 					url: '/packages/my-auth/my-auth'
 			// 				});
 			// 			}
 			// 		}

@@ -526,7 +526,7 @@ const _sfc_main = {
         success: (res) => {
           if (res.confirm) {
             common_vendor.index.navigateTo({
-              url: "/pages/recharge/recharge?type=membership"
+              url: "/packages/recharge/recharge?type=membership"
             });
           }
         }

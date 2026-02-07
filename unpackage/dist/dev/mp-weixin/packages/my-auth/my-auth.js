@@ -216,7 +216,7 @@ const _sfc_main = {
           title: "认证中...",
           mask: true
         });
-        common_vendor.index.__f__("log", "at pages/my-auth/my-auth.vue:358", "提交实名认证参数:", realNameForm.value);
+        common_vendor.index.__f__("log", "at packages/my-auth/my-auth.vue:358", "提交实名认证参数:", realNameForm.value);
         const {
           data,
           error
@@ -240,7 +240,7 @@ const _sfc_main = {
           }, 1500);
         }
       }).catch((err) => {
-        common_vendor.index.__f__("log", "at pages/my-auth/my-auth.vue:382", "表单校验失败：", err);
+        common_vendor.index.__f__("log", "at packages/my-auth/my-auth.vue:382", "表单校验失败：", err);
       });
     };
     return (_ctx, _cache) => {
@@ -290,7 +290,7 @@ const _sfc_main = {
           label: "手机号",
           name: "phone"
         }),
-        s: common_vendor.sr(realNameFormRef, "32098fb6-1", {
+        s: common_vendor.sr(realNameFormRef, "de1a68b5-1", {
           "k": "realNameFormRef"
         }),
         t: common_vendor.p({
@@ -341,7 +341,7 @@ const _sfc_main = {
           label: "上传资料",
           required: true
         }),
-        J: common_vendor.sr(certFormRef, "32098fb6-8", {
+        J: common_vendor.sr(certFormRef, "de1a68b5-8", {
           "k": "certFormRef"
         }),
         K: common_vendor.p({
@@ -355,6 +355,6 @@ const _sfc_main = {
     };
   }
 };
-const MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["__scopeId", "data-v-32098fb6"]]);
+const MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["__scopeId", "data-v-de1a68b5"]]);
 wx.createPage(MiniProgramPage);
-//# sourceMappingURL=../../../.sourcemap/mp-weixin/pages/my-auth/my-auth.js.map
+//# sourceMappingURL=../../../.sourcemap/mp-weixin/packages/my-auth/my-auth.js.map

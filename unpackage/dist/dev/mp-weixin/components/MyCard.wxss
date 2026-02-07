@@ -181,6 +181,31 @@
   padding: 8rpx 20rpx;
   border-radius: 30rpx;
 }
+.professional-section .social-group.data-v-0262bca8 {
+  padding: 10rpx 0;
+}
+.professional-section .social-group .social-row.data-v-0262bca8 {
+  display: flex;
+  font-size: 28rpx;
+  margin-bottom: 8rpx;
+  line-height: 1.4;
+}
+.professional-section .social-group .social-label.data-v-0262bca8 {
+  color: #A37E4A;
+  width: 100rpx;
+  flex-shrink: 0;
+  font-size: 26rpx;
+}
+.professional-section .social-group .social-value.data-v-0262bca8 {
+  color: #333;
+  font-weight: 500;
+  word-break: break-all;
+}
+.professional-section .social-group .group-divider.data-v-0262bca8 {
+  height: 1rpx;
+  background-color: rgba(201, 160, 99, 0.1);
+  margin: 15rpx 0;
+}
 .career-section .section-title.data-v-0262bca8 {
   display: flex;
   align-items: center;

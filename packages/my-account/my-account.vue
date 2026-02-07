@@ -408,7 +408,7 @@
 		// 注意：这里跳转到和智米充值相同的页面
 		// 将来可以通过参数区分充值类型，例如：?type=membership
 		uni.navigateTo({
-			url: '/pages/recharge/recharge?type=membership'
+			url: '/packages/recharge/recharge?type=membership'
 		});
 	};
 
@@ -590,7 +590,7 @@
 	const handleRechargeSmartRice = () => {
 		console.log('用户点击了充值智米，跳转到充值页面...');
 		uni.navigateTo({
-			url: '/pages/recharge/recharge' // 跳转到充值页面
+			url: '/packages/recharge/recharge' // 跳转到充值页面
 		});
 	};
 
