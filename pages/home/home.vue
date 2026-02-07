@@ -205,6 +205,24 @@
 							<uni-icons type="trash" size="20" color="#e74c3c" />
 						</view>
 					</view>
+
+					<!-- 首页商机卡片底部浏览记录展示区 -->
+					<view class="post-view-trace" v-if="post.isReadTrace === 1 && post.viewers.length > 0"
+						@click.stop="handleViewTrace(post)">
+						<view class="view-avatar-row">
+							<!-- 增加 v-if 保护 -->
+							<template v-for="(viewer, vIdx) in post.viewers.slice(0, 8)" :key="vIdx">
+								<image v-if="viewer.memberUser" 
+									:src="viewer.memberUser.avatar || defaultAvatarUrl" class="tiny-avatar"
+									mode="aspectFill" />
+							</template>
+
+							<text class="view-count-txt" v-if="post.viewNum > 0">
+								等{{ post.viewNum }}位商友看过
+							</text>
+						</view>
+						<uni-icons type="right" size="12" color="#ccc" />
+					</view>
 				</template>
 			</view>
 
@@ -949,7 +967,11 @@
 					isSaved: item.followFlag === 1,
 					isFollowedUser: item.followUserFlag === 1,
 					time: formatTimestamp(item.createTime),
-					user: author
+					user: author,
+					isReadTrace: item.isReadTrace, // 1表示开启留痕
+					viewNum: item.businessOpportunitiesViewNum || 0, // 总浏览人数
+					viewers: item.businessOpportunitiesViews ?
+						item.businessOpportunitiesViews.filter(v => v && v.memberUser) : []
 				}
 			});
 
@@ -1473,6 +1495,16 @@
 	// ============================
 	// 7. 导航方法 (Navigation Methods)
 	// ============================
+
+	/**
+	 * [方法] 点击浏览记录区域跳转到详情页
+	 */
+	const handleViewTrace = (post) => {
+		// 跳转到之前做好的浏览记录详情页
+		uni.navigateTo({
+			url: `/packages/user-view-trace/user-view-trace?id=${post.id}`
+		});
+	};
 
 	// 跳转到定制页的函数
 	const goToCustomizationPage = async () => {
@@ -2490,6 +2522,50 @@
 
 	.action.delete-btn {
 		padding: 0 10rpx;
+	}
+
+
+	/* 首页商机卡片底部浏览记录样式 */
+	.post-view-trace {
+		margin-top: 24rpx;
+		padding-top: 20rpx;
+		border-top: 1rpx solid #f8f8f8;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+	}
+
+	.view-avatar-row {
+		display: flex;
+		align-items: center;
+	}
+
+	/* 微型头像样式 */
+	.tiny-avatar {
+		width: 36rpx;
+		height: 36rpx;
+		border-radius: 50%;
+		border: 2rpx solid #fff;
+		background-color: #f0f0f0;
+		/* 头像重叠效果：负边距让头像挨得更紧 */
+		margin-right: -10rpx;
+	}
+
+	/* 最后一个头像留出间距给文字 */
+	.tiny-avatar:last-child {
+		margin-right: 0;
+	}
+
+	.view-count-txt {
+		font-size: 22rpx;
+		color: #999;
+		margin-left: 20rpx;
+		/* 补偿负边距，与文字拉开距离 */
+	}
+
+	/* 点击反馈 */
+	.post-view-trace:active {
+		opacity: 0.7;
 	}
 
 	/* =========================

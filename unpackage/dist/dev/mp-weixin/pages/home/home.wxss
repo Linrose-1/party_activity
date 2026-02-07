@@ -727,6 +727,48 @@
 		padding: 0 10rpx;
 }
 
+
+	/* 首页商机卡片底部浏览记录样式 */
+.post-view-trace.data-v-07e72d3c {
+		margin-top: 24rpx;
+		padding-top: 20rpx;
+		border-top: 1rpx solid #f8f8f8;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+}
+.view-avatar-row.data-v-07e72d3c {
+		display: flex;
+		align-items: center;
+}
+
+	/* 微型头像样式 */
+.tiny-avatar.data-v-07e72d3c {
+		width: 36rpx;
+		height: 36rpx;
+		border-radius: 50%;
+		border: 2rpx solid #fff;
+		background-color: #f0f0f0;
+		/* 头像重叠效果：负边距让头像挨得更紧 */
+		margin-right: -10rpx;
+}
+
+	/* 最后一个头像留出间距给文字 */
+.tiny-avatar.data-v-07e72d3c:last-child {
+		margin-right: 0;
+}
+.view-count-txt.data-v-07e72d3c {
+		font-size: 22rpx;
+		color: #999;
+		margin-left: 20rpx;
+		/* 补偿负边距，与文字拉开距离 */
+}
+
+	/* 点击反馈 */
+.post-view-trace.data-v-07e72d3c:active {
+		opacity: 0.7;
+}
+
 	/* =========================
 	 * 4. 列表状态提示样式
 	 * ========================= */

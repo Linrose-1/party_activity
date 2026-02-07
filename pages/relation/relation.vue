@@ -1,16 +1,16 @@
 <template>
 	<view class="connections-page">
-		<view class="header-section" @click="goToShakePage">
+		<view class="header-section" >
 			<image src="/static/connections-bg.png" mode="aspectFill" class="header-bg"></image>
 			<view class="header-content">
 				<!-- 左侧标题 -->
-				<view class="header-title-group">
+				<view class="header-title-group"  @click="goToviewPath">
 					<h1 class="page-title">六度人脉</h1>
 					<p class="page-subtitle">连接每一个有价值的相遇</p>
 				</view>
 
 				<!-- 右侧新的摇一摇入口 -->
-				<view class="shake-entry-new">
+				<view class="shake-entry-new" @click="goToShakePage">
 					<!-- 单个图标 -->
 					<uni-icons type="personadd" size="42" color="#fff" class="entry-icon"></uni-icons>
 					<!-- 文字组合 -->
@@ -426,6 +426,13 @@
 	const goToShakePage = async () => {
 		if (!await checkLoginGuard()) return;
 
+		uni.navigateTo({
+			url: '/pages/location/location?autoShake=true'
+		});
+	};
+	const goToviewPath = async () => {
+		if (!await checkLoginGuard()) return;
+	
 		uni.navigateTo({
 			url: '/pages/location/location?autoShake=true'
 		});

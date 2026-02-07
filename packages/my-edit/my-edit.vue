@@ -110,19 +110,30 @@
 					<!-- 模块：职业背景 (动态) -->
 					<view class="form-card">
 						<view class="card-header-row">
-							<view class="card-title">商会/协会与职务</view>
+							<view class="card-title">社会组织与职务</view>
 							<view v-if="professionsList.length < 3" class="add-text-btn" @click="addProfession">
-								<uni-icons type="plusempty" size="14" color="#FF8700"></uni-icons> 添加
+								<uni-icons type="plusempty" size="14" color="#FF8700"></uni-icons> 添加组
 							</view>
 						</view>
 
-						<view v-for="(profession, index) in professionsList" :key="index" class="dynamic-row-item">
-							<uni-easyinput v-model="professionsList[index]" placeholder="示例：XXX商会/会长"
-								:inputBorder="false" />
-							<view v-if="professionsList.length > 1" class="delete-icon"
-								@click="removeProfession(index)">
-								<uni-icons type="trash" size="18" color="#999"></uni-icons>
+						<view v-for="(item, index) in professionsList" :key="index" class="dynamic-block-item">
+							<view class="block-header">
+								<text class="block-index">项目 #{{ index + 1 }}</text>
+								<view v-if="professionsList.length > 1" class="delete-text"
+									@click="removeProfession(index)">删除</view>
 							</view>
+
+							<uni-forms-item label="组织机构" label-width="70px">
+								<uni-easyinput v-model="item.associationName" placeholder="请填写各类组织/机构,如商会协会等"
+									:inputBorder="false" class="custom-input" />
+							</uni-forms-item>
+
+							<view class="divider"></view>
+
+							<uni-forms-item label="担任职务" label-width="70px">
+								<uni-easyinput v-model="item.professionalTitle" placeholder="如会长/副会长/秘书长/理事/会员等"
+									:inputBorder="false" class="custom-input" />
+							</uni-forms-item>
 						</view>
 					</view>
 
@@ -298,7 +309,8 @@
 		birthday: '',
 		locationAddress: null, // 将存储ID数组用于反显，或单个ID用于提交
 		birthplace: null, // 将存储ID数组用于反显，或单个ID用于提交
-		professionalTitle: '',
+		associationName: '', // 组织机构名称
+		professionalTitle: '', // 担任职务
 		industry: '',
 		companyName: '',
 		school: '',
@@ -345,7 +357,10 @@
 	const selectedHobbies = ref([]);
 	const otherHobbyText = ref('');
 	const isOtherHobbySelected = computed(() => selectedHobbies.value.includes('其他'));
-	const professionsList = ref(['']); // 职业列表
+	const professionsList = ref([{
+		associationName: '',
+		professionalTitle: ''
+	}]);
 	const schoolsList = ref(['']); // 学校列表
 	// 动态公司/行业列表
 	const companyAndIndustryList = ref([{
@@ -865,10 +880,30 @@
 			}
 
 			// 职业反显 (修改点2)
-			if (userInfo.professionalTitle) {
-				professionsList.value = userInfo.professionalTitle.split(',');
+			if (userInfo.associationName || userInfo.professionalTitle) {
+				const assocNames = (userInfo.associationName || '').split(',');
+				const profTitles = (userInfo.professionalTitle || '').split(',');
+
+				const maxLength = Math.max(assocNames.length, profTitles.length);
+				const newList = [];
+
+				for (let i = 0; i < maxLength; i++) {
+					if (assocNames[i] || profTitles[i]) {
+						newList.push({
+							associationName: (assocNames[i] || '').trim(),
+							professionalTitle: (profTitles[i] || '').trim()
+						});
+					}
+				}
+				professionsList.value = newList.length > 0 ? newList : [{
+					associationName: '',
+					professionalTitle: ''
+				}];
 			} else {
-				professionsList.value = ['']; // 保证至少有一个空输入框
+				professionsList.value = [{
+					associationName: '',
+					professionalTitle: ''
+				}];
 			}
 
 			// 学校反显 (修改点1)
@@ -1063,7 +1098,12 @@
 	};
 
 	const addProfession = () => {
-		if (professionsList.value.length < 3) professionsList.value.push('');
+		if (professionsList.value.length < 3) {
+			professionsList.value.push({
+				associationName: '',
+				professionalTitle: ''
+			});
+		}
 	};
 	const removeProfession = (index) => {
 		professionsList.value.splice(index, 1);
@@ -1235,7 +1275,7 @@
 		return (
 			p.contactEmail && p.wechatQrCodeUrl && // 1. 联系与认证
 			p.locationAddress && p.nativePlace && // 2. 地域分布
-			p.professionalTitle && // 3. 商协会与职务
+			p.associationName && p.professionalTitle &&
 			p.companyName && p.industry && p.positionTitle && // 4. 公司/行业/职务
 			p.school && // 5. 毕业学校
 			p.haveResources && p.needResources && // 6. 资源供需
@@ -1266,7 +1306,17 @@
 			});
 
 			// B. 处理动态列表
-			payload.professionalTitle = professionsList.value.map(p => p.trim()).filter(p => p).join(',');
+			// 1. 处理组织机构名称
+			payload.associationName = professionsList.value
+				.map(p => (typeof p.associationName === 'string' ? p.associationName.trim() : ''))
+				.filter(v => v)
+				.join(',');
+
+			// 2. 处理担任职务
+			payload.professionalTitle = professionsList.value
+				.map(p => (typeof p.professionalTitle === 'string' ? p.professionalTitle.trim() : ''))
+				.filter(v => v)
+				.join(',');
 			payload.school = schoolsList.value.map(s => s.trim()).filter(s => s).join(',');
 			payload.companyName = companyAndIndustryList.value.map(item => (item.name || '').trim())
 				.filter(n => n).join(',');
