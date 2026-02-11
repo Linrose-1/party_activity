@@ -137,7 +137,7 @@ const _sfc_main = {
         r: common_vendor.p({
           type: "plusempty",
           size: "26",
-          color: "isSelf ? '#999' : '#FF7009'"
+          color: isSelf.value ? "#999" : "#FF7009"
         }),
         s: common_vendor.t(isSelf.value ? "本人" : "加入TA圈"),
         t: common_vendor.n(isSelf.value ? "disabled" : "primary-outline"),

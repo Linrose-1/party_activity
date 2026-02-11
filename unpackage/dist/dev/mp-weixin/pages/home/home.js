@@ -266,8 +266,8 @@ const _sfc_main = {
     const handleSwiperItemClick = (item, index) => {
       const isLastItem = index === swiperList.value.length - 1;
       if (item.id === 0 || isLastItem) {
-        common_vendor.index.__f__("log", "at pages/home/home.vue:754", "💡 点击了平台官方展示项，该项仅作展示，不执行跳转");
-        return;
+        common_vendor.index.__f__("log", "at pages/home/home.vue:754", "💡 点击了平台官方展示项，跳转到平台介绍页");
+        goToPlatformIntro();
       }
       if (index === 0) {
         goToCustomizationPage();
@@ -884,6 +884,11 @@ const _sfc_main = {
         url: `/packages/home-opportunitiesPublish/home-opportunitiesPublish?id=${id}`
       });
     };
+    const goToPlatformIntro = () => {
+      common_vendor.index.navigateTo({
+        url: "/pages/platform-intro/platform-intro"
+      });
+    };
     const formatTimestamp = (timestamp) => {
       if (!timestamp)
         return "";
@@ -918,7 +923,7 @@ const _sfc_main = {
           });
         },
         fail: (err) => {
-          common_vendor.index.__f__("error", "at pages/home/home.vue:1791", "setClipboardData failed:", err);
+          common_vendor.index.__f__("error", "at pages/home/home.vue:1798", "setClipboardData failed:", err);
           common_vendor.index.showToast({
             title: "复制失败",
             icon: "none"

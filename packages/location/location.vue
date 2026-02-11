@@ -61,7 +61,7 @@
 					</view>
 					<uni-load-more :status="businessLoadingStatus"></uni-load-more>
 					<view v-if="businesses.length === 0 && businessLoadingStatus === 'noMore'" class="no-more-content">
-						附近暂无商友，去别处看看吧
+						附近15公里无商友，去<text class="underline-link" @click="navigateToInvite">邀请</text>附近商友加入猩聚社，或去<text class="underline-link" @click="navigateToSearch">别处</text>找找商友？
 					</view>
 				</view>
 
@@ -75,7 +75,7 @@
 						:is-login="isUserLoggedIn" />
 					<uni-load-more :status="activityLoadingStatus"></uni-load-more>
 					<view v-if="activities.length === 0 && activityLoadingStatus === 'noMore'" class="no-more-content">
-						附近暂无聚会，去别处看看吧
+						附近15公里无聚会，去<text class="underline-link" @click="navigateToPublish">发起</text>聚会，或去<text class="underline-link" @click="navigateToSearchActive">别处</text>找找聚会？
 					</view>
 
 
@@ -393,6 +393,42 @@
 		});
 	};
 
+	/**
+	 * 跳转到邀请注册页面
+	 */
+	const navigateToInvite = () => {
+		uni.navigateTo({
+			url: '/packages/my-friendInvitation/my-friendInvitation'
+		});
+	};
+
+	/**
+	 * 跳转到导航搜索页面
+	 */
+	const navigateToSearch = () => {
+		uni.navigateTo({
+			url: '/packages/my-friendInvitation/my-friendInvitation'
+		});
+	};
+	
+	/**
+	 * 跳转到聚会导航搜索页面
+	 */
+	const navigateToSearchActive = () => {
+		uni.switchTab({
+			url: '/pages/active/active'
+		});
+	};
+
+	/**
+	 * 跳转到聚会发起页面
+	 */
+	const navigateToPublish = () => {
+		uni.navigateTo({
+			url: '/packages/active-publish/active-publish'
+		});
+	};
+
 	// --- 生命周期钩子 ---
 	onLoad((options) => {
 		resetState();
@@ -562,6 +598,13 @@
 		color: #999;
 		padding: 30rpx 0;
 		font-size: 28rpx;
+	}
+
+	.underline-link {
+		color: #FF6B00;
+		border-bottom: 1rpx solid #FF6B00;
+		padding: 0 4rpx;
+		margin: 0 2rpx;
 	}
 
 	.list-container {

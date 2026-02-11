@@ -236,10 +236,30 @@ const _sfc_main = {
         url
       });
     };
+    const navigateToInvite = () => {
+      common_vendor.index.navigateTo({
+        url: "/packages/my-friendInvitation/my-friendInvitation"
+      });
+    };
+    const navigateToSearch = () => {
+      common_vendor.index.navigateTo({
+        url: "/packages/my-friendInvitation/my-friendInvitation"
+      });
+    };
+    const navigateToSearchActive = () => {
+      common_vendor.index.switchTab({
+        url: "/pages/active/active"
+      });
+    };
+    const navigateToPublish = () => {
+      common_vendor.index.navigateTo({
+        url: "/packages/active-publish/active-publish"
+      });
+    };
     common_vendor.onLoad((options) => {
       resetState();
       if (options.autoShake === "true") {
-        common_vendor.index.__f__("log", "at packages/location/location.vue:401", "onLoad: 接收到自动摇一摇指令");
+        common_vendor.index.__f__("log", "at packages/location/location.vue:437", "onLoad: 接收到自动摇一摇指令");
         autoShakeOnLoad.value = true;
       }
     });
@@ -250,7 +270,7 @@ const _sfc_main = {
         shakeAudioContext.src = "https://img.gofor.club/wechat_shake.mp3";
       }
       if (autoShakeOnLoad.value) {
-        common_vendor.index.__f__("log", "at packages/location/location.vue:418", "onShow: 执行自动摇一摇流程");
+        common_vendor.index.__f__("log", "at packages/location/location.vue:454", "onShow: 执行自动摇一摇流程");
         resetState();
         triggerShakeSequence();
         autoShakeOnLoad.value = false;
@@ -274,13 +294,13 @@ const _sfc_main = {
       switch (currentTab.value) {
         case 0:
           if (businessLoadingStatus.value === "more") {
-            common_vendor.index.__f__("log", "at packages/location/location.vue:454", "触底加载更多商友...");
+            common_vendor.index.__f__("log", "at packages/location/location.vue:490", "触底加载更多商友...");
             getNearbyBusinesses();
           }
           break;
         case 1:
           if (activityLoadingStatus.value === "more") {
-            common_vendor.index.__f__("log", "at packages/location/location.vue:461", "触底加载更多聚会...");
+            common_vendor.index.__f__("log", "at packages/location/location.vue:497", "触底加载更多聚会...");
             getNearbyActivities();
           }
           break;
@@ -342,14 +362,17 @@ const _sfc_main = {
           status: businessLoadingStatus.value
         }),
         j: businesses.value.length === 0 && businessLoadingStatus.value === "noMore"
-      }, businesses.value.length === 0 && businessLoadingStatus.value === "noMore" ? {} : {}, {
-        k: currentTab.value === 0,
-        l: common_vendor.p({
+      }, businesses.value.length === 0 && businessLoadingStatus.value === "noMore" ? {
+        k: common_vendor.o(navigateToInvite),
+        l: common_vendor.o(navigateToSearch)
+      } : {}, {
+        m: currentTab.value === 0,
+        n: common_vendor.p({
           type: "calendar-filled",
           size: "20",
           color: "#FF6B00"
         }),
-        m: common_vendor.f(activities.value, (activity, k0, i0) => {
+        o: common_vendor.f(activities.value, (activity, k0, i0) => {
           return {
             a: activity.id,
             b: "302d9b55-5-" + i0,
@@ -359,12 +382,15 @@ const _sfc_main = {
             })
           };
         }),
-        n: common_vendor.p({
+        p: common_vendor.p({
           status: activityLoadingStatus.value
         }),
-        o: activities.value.length === 0 && activityLoadingStatus.value === "noMore"
-      }, activities.value.length === 0 && activityLoadingStatus.value === "noMore" ? {} : {}, {
-        p: currentTab.value === 1
+        q: activities.value.length === 0 && activityLoadingStatus.value === "noMore"
+      }, activities.value.length === 0 && activityLoadingStatus.value === "noMore" ? {
+        r: common_vendor.o(navigateToPublish),
+        s: common_vendor.o(navigateToSearchActive)
+      } : {}, {
+        t: currentTab.value === 1
       }), {
         f: loading.value
       });

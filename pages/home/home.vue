@@ -152,7 +152,8 @@
 				<!-- Case 1: 如果存在视频 (post.video)，则优先渲染视频播放器 -->
 				<view v-if="post.video" class="post-video-container">
 					<video :id="'video-' + post.id" :src="post.video" class="post-video" :show-center-play-btn="true"
-						:show-play-btn="true" @play="handleVideoPlay(post.id)" @pause="handleVideoPause" @click.stop object-fit="cover" poster=""></video>
+						:show-play-btn="true" @play="handleVideoPlay(post.id)" @pause="handleVideoPause" @click.stop
+						object-fit="cover" poster=""></video>
 				</view>
 
 				<!-- Case 2: 如果没有视频，但存在图片，则渲染图片网格 (保持原有逻辑) -->
@@ -212,9 +213,8 @@
 						<view class="view-avatar-row">
 							<!-- 增加 v-if 保护 -->
 							<template v-for="(viewer, vIdx) in post.viewers.slice(0, 8)" :key="vIdx">
-								<image v-if="viewer.memberUser" 
-									:src="viewer.memberUser.avatar || defaultAvatarUrl" class="tiny-avatar"
-									mode="aspectFill" />
+								<image v-if="viewer.memberUser" :src="viewer.memberUser.avatar || defaultAvatarUrl"
+									class="tiny-avatar" mode="aspectFill" />
 							</template>
 
 							<text class="view-count-txt" v-if="post.viewNum > 0">
@@ -751,8 +751,8 @@
 		const isLastItem = index === swiperList.value.length - 1;
 
 		if (item.id === 0 || isLastItem) {
-			console.log('💡 点击了平台官方展示项，该项仅作展示，不执行跳转');
-			return; // 直接返回，屏蔽后续所有跳转逻辑
+			console.log('💡 点击了平台官方展示项，跳转到平台介绍页');
+			goToPlatformIntro()
 		}
 		// ---------------------
 
@@ -1743,6 +1743,13 @@
 		if (!id) return;
 		uni.navigateTo({
 			url: `/packages/home-opportunitiesPublish/home-opportunitiesPublish?id=${id}`
+		});
+	};
+
+	// 跳转平台介绍
+	const goToPlatformIntro = () => {
+		uni.navigateTo({
+			url: '/pages/platform-intro/platform-intro'
 		});
 	};
 

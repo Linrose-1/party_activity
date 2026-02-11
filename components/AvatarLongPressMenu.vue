@@ -51,7 +51,7 @@
 					<view class="grid-item" :class="isSelf ? 'disabled' : 'primary-outline'"
 						@click="handleAction('addCircle')">
 						<view class="icon-box"><uni-icons type="plusempty" size="26"
-								color="isSelf ? '#999' : '#FF7009'" /></view>
+								:color="isSelf ? '#999' : '#FF7009'" /></view>
 						<text class="item-text">{{ isSelf ? '本人' : '加入TA圈' }}</text>
 					</view>
 
