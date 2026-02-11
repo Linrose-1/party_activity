@@ -100,41 +100,51 @@
 </template>
 
 <script setup>
-	import {
-		ref,
-		computed
-	} from 'vue';
-	import {
-		onLoad
-	} from '@dcloudio/uni-app';
-	// 导入所有需要的工具
+	import { ref, computed } from 'vue';
+	import { onLoad } from '@dcloudio/uni-app';
+	// 导入工具模块
 	import request from '../../utils/request.js';
 	import uploadFile from '../../utils/upload.js';
 
-	// --- 页面状态 (无修改) ---
-	const currentTab = ref(0);
-	const activityInfo = ref({});
-	const fullActivityData = ref(null);
-	const participantList = ref([]);
-	const bannerText = ref('');
-	const pageMode = ref('individual');
+	// ==================== 页面状态定义 ====================
+	const currentTab = ref(0); // 当前选中的标签页，0=待处理，1=已完成
+	const activityInfo = ref({}); // 聚会基本信息
+	const fullActivityData = ref(null); // 完整的聚会数据对象
+	const participantList = ref([]); // 参与者列表
+	const bannerText = ref(''); // 顶部警告栏文本
+	const pageMode = ref('individual'); // 页面模式：individual=个人退款，group=集体退款
 
-	// --- 计算属性 (无修改) ---
+	// ==================== 计算属性 ====================
+	/**
+	 * 获取待处理的用户列表（支付状态为3）
+	 */
 	const pendingUsers = computed(() =>
 		participantList.value.filter(u => u.paymentStatus === '3')
 	);
+
+	/**
+	 * 获取已完成的用户列表（支付状态为6）
+	 */
 	const completedUsers = computed(() =>
 		participantList.value.filter(u => u.paymentStatus === '6')
 	);
 
-	// --- 页面加载 (无修改) ---
+	// ==================== 页面生命周期 ====================
+	/**
+	 * 页面加载时初始化数据
+	 * @param {Object} options - 页面参数
+	 * @param {string} options.item - 聚会数据的JSON字符串
+	 * @param {string} options.mode - 页面模式
+	 */
 	onLoad((options) => {
+		// 解析传递的聚会数据
 		if (options.item) {
 			try {
 				const decodedData = decodeURIComponent(options.item);
 				const parsedData = JSON.parse(decodedData);
 				fullActivityData.value = parsedData;
 
+				// 提取聚会基本信息
 				activityInfo.value = {
 					id: parsedData.id,
 					title: parsedData.activityTitle,
@@ -146,28 +156,36 @@
 					},
 					totalRefundAmount: null
 				};
-
 			} catch (e) {
 				console.error("解析聚会数据失败:", e);
 				return;
 			}
 		}
 
+		// 设置页面模式和提示文案
 		pageMode.value = options.mode || 'individual';
 		bannerText.value = pageMode.value === 'individual' ?
 			'请为提交申请的用户办理退款' :
 			'聚会已取消，请为所有报名用户办理退款';
 
+		// 获取退款列表
 		fetchRefundList();
+
+		// 对接后端接口获取静态词配置
+		fetchStaticWord();
 	});
 
-	// --- 核心方法：获取退款用户列表 (无修改) ---
+	// ==================== 数据获取方法 ====================
+	/**
+	 * 获取退款用户列表
+	 * 根据当前标签页状态获取对应的退款用户数据
+	 */
 	const fetchRefundList = async () => {
 		if (!fullActivityData.value) return;
-		uni.showLoading({
-			title: '加载中...'
-		});
 
+		uni.showLoading({ title: '加载中...' });
+
+		// 根据当前标签页确定要查询的支付状态
 		const statusToFetch = currentTab.value === 0 ? '3' : '6';
 
 		const params = {
@@ -193,65 +211,28 @@
 		}
 	};
 
-	// --- 【核心修改】上传凭证并更新状态 ---
 	/**
-	 * 处理单个用户的退款凭证上传和状态确认
-	 * @param {object} user - 当前操作的用户对象，包含 id 等信息
+	 * 获取静态词配置
+	 * 对接后端接口 /app-api/member/config/getStaticWord
 	 */
-	// const uploadProof = (user) => {
-	//   // 1. 让用户选择图片
-	//   uni.chooseImage({
-	//     count: 1,
-	//     success: async (res) => {
-	//       const tempFilePath = res.tempFilePaths[0];
+	const fetchStaticWord = async () => {
+		try {
+			const result = await request('/app-api/member/config/getStaticWord', {
+				method: 'GET'
+			});
+			// 将接口返回的数据打印到控制台
+			console.log('【静态词配置数据】', result);
+			console.log('【静态词配置数据-完整】', JSON.stringify(result, null, 2));
+		} catch (error) {
+			console.error('获取静态词配置失败:', error);
+		}
+	};
 
-	//       uni.showLoading({ title: '正在上传并确认...' });
-
-	//       try {
-	//         // 2. 调用 uploadFile 工具上传凭证图片
-	//         const uploadResult = await uploadFile(tempFilePath, { directory: 'refund_proof' });
-	//         if (uploadResult.error) {
-	//           // 如果上传失败，直接抛出错误，终止流程
-	//           throw new Error(`上传失败: ${uploadResult.error}`);
-	//         }
-
-	//         // 获取上传成功后的凭证 URL
-	//         const proofUrl = uploadResult.data;
-
-	//         // 3. 构造请求体，完全匹配新接口文档
-	//         const payload = {
-	//           id: user.id, // 报名记录的唯一标识符
-	//           refundConfirmScreenshotUrl: proofUrl // 上传后的凭证URL
-	//         };
-
-	//         console.log('确认退款接口请求体:', payload);
-
-	//         // 4. 调用新的、专门的“确认退款”接口
-	//         const confirmResult = await request('/app-api/member/activity-join/confirm-join-user-refund', {
-	//             method: 'POST',
-	//             data: payload
-	//         });
-
-	//         if (confirmResult.error) {
-	//             // 如果接口调用失败，抛出错误
-	//             throw new Error(`确认失败: ${confirmResult.error}`);
-	//         }
-
-	//         uni.showToast({ title: '操作成功', icon: 'success' });
-
-	//         // 5. 实时刷新UI：重新请求当前tab的列表
-	//         fetchRefundList();
-
-	//       } catch (error) {
-	//         // 统一处理所有可能的错误（上传失败或接口调用失败）
-	//         uni.showToast({ title: error.message || '操作失败', icon: 'none', duration: 2000 });
-	//       } finally {
-	//         // 确保 loading 状态被关闭
-	//         uni.hideLoading();
-	//       }
-	//     }
-	//   });
-	// };
+	// ==================== 业务操作方法 ====================
+	/**
+	 * 上传退款凭证
+	 * @param {Object} user - 用户对象
+	 */
 	const uploadProof = (user) => {
 		// 1. 让用户选择图片
 		uni.chooseImage({
@@ -259,8 +240,7 @@
 			sizeType: ['original', 'compressed'],
 			sourceType: ['album', 'camera'],
 			success: async (res) => {
-
-				// 2. 【核心修复点 A】使用双重检查逻辑，安全地获取文件路径
+				// 2. 使用双重检查逻辑，安全地获取文件路径
 				let tempFilePath = '';
 				if (res.tempFilePaths && res.tempFilePaths.length > 0) {
 					// 优先使用官方推荐的 tempFilePaths
@@ -280,12 +260,10 @@
 					return;
 				}
 
-				uni.showLoading({
-					title: '正在上传并确认...'
-				});
+				uni.showLoading({ title: '正在上传并确认...' });
 
 				try {
-					// 3. 【核心修复点 B】使用正确的参数格式 { path: ... } 来调用 uploadFile
+					// 3. 使用正确的参数格式 { path: ... } 来调用 uploadFile
 					const uploadResult = await uploadFile({
 						path: tempFilePath
 					}, {
@@ -294,29 +272,26 @@
 
 					if (uploadResult.error) {
 						// 如果上传失败（包括内容安全检查失败），直接抛出错误
-						const errorMsg = typeof uploadResult.error === 'object' ? uploadResult.error.msg :
-							uploadResult.error;
+						const errorMsg = typeof uploadResult.error === 'object' ? uploadResult.error.msg : uploadResult.error;
 						throw new Error(errorMsg || '上传失败');
 					}
 
 					// 获取上传成功后的凭证 URL
 					const proofUrl = uploadResult.data;
 
-					// 4. 调用后端接口确认退款 (您的业务逻辑)
+					// 4. 调用后端接口确认退款
 					const payload = {
 						id: user.id,
 						refundConfirmScreenshotUrl: proofUrl
 					};
 
-					const confirmResult = await request(
-						'/app-api/member/activity-join/confirm-join-user-refund', {
-							method: 'POST',
-							data: payload
-						});
+					const confirmResult = await request('/app-api/member/activity-join/confirm-join-user-refund', {
+						method: 'POST',
+						data: payload
+					});
 
 					if (confirmResult.error) {
-						const errorMsg = typeof confirmResult.error === 'object' ? confirmResult.error
-							.msg : confirmResult.error;
+						const errorMsg = typeof confirmResult.error === 'object' ? confirmResult.error.msg : confirmResult.error;
 						throw new Error(errorMsg || '确认失败');
 					}
 
@@ -353,14 +328,21 @@
 		});
 	};
 
-
-	// --- 事件处理 (无修改) ---
+	// ==================== 事件处理方法 ====================
+	/**
+	 * 切换标签页
+	 * @param {number} index - 标签页索引
+	 */
 	const switchTab = (index) => {
 		if (currentTab.value === index) return;
 		currentTab.value = index;
 		fetchRefundList();
 	};
 
+	/**
+	 * 预览图片
+	 * @param {string} url - 图片URL
+	 */
 	const previewImage = (url) => {
 		if (!url) return;
 		uni.previewImage({
@@ -368,7 +350,12 @@
 		});
 	};
 
-	// --- 辅助函数 (无修改) ---
+	// ==================== 辅助工具方法 ====================
+	/**
+	 * 格式化日期时间
+	 * @param {string} dateTimeStr - 日期时间字符串
+	 * @returns {string} 格式化后的日期（YYYY-MM-DD）
+	 */
 	const formatDateTime = (dateTimeStr) => {
 		if (!dateTimeStr) return '时间待定';
 		const date = new Date(dateTimeStr);

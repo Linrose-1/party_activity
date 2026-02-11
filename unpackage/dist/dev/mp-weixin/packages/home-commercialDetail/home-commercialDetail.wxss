@@ -599,9 +599,7 @@
 		flex-grow: 1;
 }
 .comment-header.data-v-8303b14f {
-		display: flex;
-		align-items: center;
-		margin-bottom: 16rpx;
+		margin-bottom: 12rpx;
 }
 .commenter-name.data-v-8303b14f {
 		font-weight: 600;
@@ -610,8 +608,8 @@
 }
 .comment-time.data-v-8303b14f {
 		font-size: 24rpx;
-		color: #888;
-		margin-left: 24rpx;
+		color: #999;
+		margin-bottom: 16rpx;
 }
 .comment-text.data-v-8303b14f {
 		font-size: 30rpx;

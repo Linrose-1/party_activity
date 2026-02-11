@@ -1355,17 +1355,21 @@
 
 			// --- 4. 【关键优化】奖励逻辑与引导逻辑的串行执行 ---
 
-			// 步骤 A: 检查是否满足 7 个维度的赠送条件
+			// 步骤 A: 检查是否满足 7 个维度的赠送条件，并调用赠送接口
+			let shouldGiveReward = false;
 			if (checkIsAllDimensionsFilled(payload)) {
 				try {
-					const {
-						data: giveRes
-					} = await request('/app-api/member/user/complete-profile-give-member', {
+					const giveRes = await request('/app-api/member/user/complete-profile-give-member', {
 						method: 'POST'
 					});
 
-					// 如果是首次完善并赠送成功
-					if (giveRes === true) {
+					// 兼容多种返回格式：true / {success: true} / {data: true}
+					if (giveRes === true || (giveRes && (giveRes.success === true || giveRes.data === true))) {
+						shouldGiveReward = true;
+						console.log('✅ 符合赠送条件，准备弹出奖励提示');
+					}
+					// 步骤 B: 如果满足赠送条件，先弹出奖励提示，等待用户确认后再继续
+					if (shouldGiveReward) {
 						// 【核心修复】使用 Promise 等待用户关闭第一个弹窗
 						await new Promise((resolve) => {
 							uni.showModal({

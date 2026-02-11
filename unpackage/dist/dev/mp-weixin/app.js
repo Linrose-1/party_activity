@@ -16,7 +16,6 @@ if (!Math) {
   "./pages/my-follow/my-follow.js";
   "./pages/my-active-apply/my-active-apply.js";
   "./pages/my-active-manage/my-active-manage.js";
-  "./pages/my-active-approval/my-active-approval.js";
   "./pages/my-shop/my-shop.js";
   "./pages/my-shopRecommend/my-shopRecommend.js";
   "./pages/login/login.js";
@@ -49,6 +48,7 @@ if (!Math) {
   "./packages/my-member/my-member.js";
   "./packages/my-friendInvitation/my-friendInvitation.js";
   "./packages/my-systemConstruction/my-systemConstruction.js";
+  "./packages/business-interaction/business-interaction.js";
   "./packages/location/location.js";
   "./packages/user-opportunities/user-opportunities.js";
   "./packages/home-customization/home-customization.js";

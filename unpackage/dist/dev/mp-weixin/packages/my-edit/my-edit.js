@@ -751,14 +751,17 @@ const _sfc_main = {
         common_vendor.index.hideLoading();
         common_vendor.index.removeStorageSync(DRAFT_KEY);
         common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:1354", "🧹 [提交成功] 草稿已清除");
+        let shouldGiveReward = false;
         if (checkIsAllDimensionsFilled(payload)) {
           try {
-            const {
-              data: giveRes
-            } = await utils_request.request("/app-api/member/user/complete-profile-give-member", {
+            const giveRes = await utils_request.request("/app-api/member/user/complete-profile-give-member", {
               method: "POST"
             });
-            if (giveRes === true) {
+            if (giveRes === true || giveRes && (giveRes.success === true || giveRes.data === true)) {
+              shouldGiveReward = true;
+              common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:1369", "✅ 符合赠送条件，准备弹出奖励提示");
+            }
+            if (shouldGiveReward) {
               await new Promise((resolve) => {
                 common_vendor.index.showModal({
                   title: "恭喜获得奖励",
@@ -772,7 +775,7 @@ const _sfc_main = {
               });
             }
           } catch (e) {
-            common_vendor.index.__f__("error", "at packages/my-edit/my-edit.vue:1382", "奖励接口异常:", e);
+            common_vendor.index.__f__("error", "at packages/my-edit/my-edit.vue:1386", "奖励接口异常:", e);
           }
         }
         common_vendor.index.showModal({
@@ -790,7 +793,7 @@ const _sfc_main = {
           }
         });
       }).catch((err) => {
-        common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:1404", "表单验证未通过：", err);
+        common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:1408", "表单验证未通过：", err);
       });
     };
     const handleAutoPost = async () => {

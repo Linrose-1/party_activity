@@ -28,9 +28,8 @@ const _sfc_main = {
           });
           break;
         case "business":
-          common_vendor.index.showToast({
-            title: "商机互动功能开发中",
-            icon: "none"
+          common_vendor.index.navigateTo({
+            url: "/packages/business-interaction/business-interaction"
           });
           break;
       }

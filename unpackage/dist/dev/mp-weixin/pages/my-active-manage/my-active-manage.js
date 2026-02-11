@@ -43,20 +43,19 @@ const _sfc_main = {
             totalRefundAmount: null
           };
         } catch (e) {
-          common_vendor.index.__f__("error", "at pages/my-active-manage/my-active-manage.vue:151", "解析聚会数据失败:", e);
+          common_vendor.index.__f__("error", "at pages/my-active-manage/my-active-manage.vue:160", "解析聚会数据失败:", e);
           return;
         }
       }
       pageMode.value = options.mode || "individual";
       bannerText.value = pageMode.value === "individual" ? "请为提交申请的用户办理退款" : "聚会已取消，请为所有报名用户办理退款";
       fetchRefundList();
+      fetchStaticWord();
     });
     const fetchRefundList = async () => {
       if (!fullActivityData.value)
         return;
-      common_vendor.index.showLoading({
-        title: "加载中..."
-      });
+      common_vendor.index.showLoading({ title: "加载中..." });
       const statusToFetch = currentTab.value === 0 ? "3" : "6";
       const params = {
         activityId: fullActivityData.value.id,
@@ -79,6 +78,17 @@ const _sfc_main = {
         common_vendor.index.hideLoading();
       }
     };
+    const fetchStaticWord = async () => {
+      try {
+        const result = await utils_request.request("/app-api/member/config/getStaticWord", {
+          method: "GET"
+        });
+        common_vendor.index.__f__("log", "at pages/my-active-manage/my-active-manage.vue:224", "【静态词配置数据】", result);
+        common_vendor.index.__f__("log", "at pages/my-active-manage/my-active-manage.vue:225", "【静态词配置数据-完整】", JSON.stringify(result, null, 2));
+      } catch (error) {
+        common_vendor.index.__f__("error", "at pages/my-active-manage/my-active-manage.vue:227", "获取静态词配置失败:", error);
+      }
+    };
     const uploadProof = (user) => {
       common_vendor.index.chooseImage({
         count: 1,
@@ -96,12 +106,10 @@ const _sfc_main = {
               title: "未能获取到图片文件，请重试",
               icon: "none"
             });
-            common_vendor.index.__f__("error", "at pages/my-active-manage/my-active-manage.vue:279", "【严重错误】 无法从 chooseImage 的返回值中提取任何有效路径!", res);
+            common_vendor.index.__f__("error", "at pages/my-active-manage/my-active-manage.vue:259", "【严重错误】 无法从 chooseImage 的返回值中提取任何有效路径!", res);
             return;
           }
-          common_vendor.index.showLoading({
-            title: "正在上传并确认..."
-          });
+          common_vendor.index.showLoading({ title: "正在上传并确认..." });
           try {
             const uploadResult = await utils_upload.uploadFile({
               path: tempFilePath
@@ -117,13 +125,10 @@ const _sfc_main = {
               id: user.id,
               refundConfirmScreenshotUrl: proofUrl
             };
-            const confirmResult = await utils_request.request(
-              "/app-api/member/activity-join/confirm-join-user-refund",
-              {
-                method: "POST",
-                data: payload
-              }
-            );
+            const confirmResult = await utils_request.request("/app-api/member/activity-join/confirm-join-user-refund", {
+              method: "POST",
+              data: payload
+            });
             if (confirmResult.error) {
               const errorMsg = typeof confirmResult.error === "object" ? confirmResult.error.msg : confirmResult.error;
               throw new Error(errorMsg || "确认失败");
@@ -145,7 +150,7 @@ const _sfc_main = {
         },
         fail: (err) => {
           if (err.errMsg && !err.errMsg.includes("cancel")) {
-            common_vendor.index.__f__("error", "at pages/my-active-manage/my-active-manage.vue:346", "选择图片失败:", err);
+            common_vendor.index.__f__("error", "at pages/my-active-manage/my-active-manage.vue:321", "选择图片失败:", err);
             common_vendor.index.showToast({
               title: "选择图片失败",
               icon: "none"

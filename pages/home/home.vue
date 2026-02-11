@@ -152,7 +152,7 @@
 				<!-- Case 1: 如果存在视频 (post.video)，则优先渲染视频播放器 -->
 				<view v-if="post.video" class="post-video-container">
 					<video :id="'video-' + post.id" :src="post.video" class="post-video" :show-center-play-btn="true"
-						:show-play-btn="true" @click.stop object-fit="cover" poster=""></video>
+						:show-play-btn="true" @play="handleVideoPlay(post.id)" @pause="handleVideoPause" @click.stop object-fit="cover" poster=""></video>
 				</view>
 
 				<!-- Case 2: 如果没有视频，但存在图片，则渲染图片网格 (保持原有逻辑) -->
@@ -281,6 +281,7 @@
 		onReachBottom,
 		onPullDownRefresh,
 		onShow,
+		onHide,
 		onShareAppMessage,
 		onShareTimeline
 	} from '@dcloudio/uni-app';
@@ -354,6 +355,10 @@
 	const scrollPointsPopup = ref(null);
 
 	const payPopup = ref(null);
+
+	// 视频播放管理
+	const currentPlayingVideoId = ref(null); // 当前正在播放的视频ID
+	const shouldResumePlayback = ref(false); // 是否应该恢复播放（用于判断页面重新显示时是否自动播放）
 
 
 
@@ -543,6 +548,18 @@
 		getBusinessOpportunitiesList(true);
 	});
 
+	// 页面隐藏时暂停所有视频
+	onHide(() => {
+		pauseAllVideos();
+		// 标记不需要恢复播放
+		shouldResumePlayback.value = false;
+	});
+
+	// 页面卸载时暂停所有视频
+	onUnmounted(() => {
+		pauseAllVideos();
+	});
+
 	// ============================
 	// 4. 分享逻辑 (Sharing Logic)
 	// ============================
@@ -591,7 +608,67 @@
 	};
 
 	// ============================
-	// 5. 主要业务方法 (Business Methods)
+	// 5. 视频播放管理方法 (Video Playback Management)
+	// ============================
+
+	/**
+	 * 处理视频播放事件
+	 * 确保一次只播放一个视频
+	 * @param {number} videoId - 视频对应的帖子ID
+	 */
+	const handleVideoPlay = (videoId) => {
+		// 检查是否应该自动播放（用户主动点击才播放）
+		if (!shouldResumePlayback.value) {
+			// 如果不是恢复播放模式，说明是用户主动点击，允许播放
+			shouldResumePlayback.value = true;
+		} else {
+			// 如果是恢复播放模式但当前没有正在播放的视频，则不播放
+			if (currentPlayingVideoId.value === null) {
+				shouldResumePlayback.value = false;
+				return;
+			}
+		}
+
+		// 如果已有视频在播放，且不是当前点击的视频，则暂停之前的视频
+		if (currentPlayingVideoId.value && currentPlayingVideoId.value !== videoId) {
+			const prevVideoContext = uni.createVideoContext(`video-${currentPlayingVideoId.value}`);
+			if (prevVideoContext) {
+				prevVideoContext.pause();
+			}
+		}
+		// 更新当前播放的视频ID
+		currentPlayingVideoId.value = videoId;
+		console.log(`视频 ${videoId} 开始播放`);
+	};
+
+	/**
+	 * 处理视频暂停事件
+	 */
+	const handleVideoPause = () => {
+		currentPlayingVideoId.value = null;
+		// 暂停时不允许恢复播放
+		shouldResumePlayback.value = false;
+		console.log('视频已暂停');
+	};
+
+	/**
+	 * 暂停所有视频
+	 */
+	const pauseAllVideos = () => {
+		if (!currentPlayingVideoId.value) return;
+
+		const videoContext = uni.createVideoContext(`video-${currentPlayingVideoId.value}`);
+		if (videoContext) {
+			videoContext.pause();
+		}
+		currentPlayingVideoId.value = null;
+		// 暂停时不允许恢复播放
+		shouldResumePlayback.value = false;
+		console.log('已暂停所有视频');
+	};
+
+	// ============================
+	// 6. 主要业务方法 (Business Methods)
 	// ============================
 
 	/**

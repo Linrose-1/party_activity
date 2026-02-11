@@ -7297,9 +7297,9 @@ function initOnError() {
   };
 }
 function initRuntimeSocketService() {
-  const hosts = "172.20.10.4,127.0.0.1";
+  const hosts = "192.168.110.17,127.0.0.1";
   const port = "8090";
-  const id = "mp-weixin_PvIXKu";
+  const id = "mp-weixin_z_cNr8";
   const lazy = typeof swan !== "undefined";
   let restoreError = lazy ? () => {
   } : initOnError();
@@ -8327,12 +8327,6 @@ const pages = [
     }
   },
   {
-    path: "pages/my-active-approval/my-active-approval",
-    style: {
-      navigationBarTitleText: "退款审批"
-    }
-  },
-  {
     path: "pages/my-shop/my-shop",
     style: {
       navigationBarTitleText: "我的聚店"
@@ -8527,6 +8521,12 @@ const subPackages = [
         path: "my-systemConstruction/my-systemConstruction",
         style: {
           navigationBarTitleText: "系统共建"
+        }
+      },
+      {
+        path: "business-interaction/business-interaction",
+        style: {
+          navigationBarTitleText: "商机评论"
         }
       },
       {

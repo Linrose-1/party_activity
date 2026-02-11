@@ -175,15 +175,16 @@
 
 					<view class="comment-list">
 						<view class="comment" v-for="comment in comments" :key="comment.id"
-							:class="{ 'is-reply': comment.parentId !== 0 }">
+							:class="{ 'is-reply': comment.parentId !== 0 }"
+							:data-comment-id="comment.id">
 							<image :src="comment.avatar" mode="" class="comment-avatar"
 								@click="!comment.anonymous && navigateToBusinessCard({ id: comment.userId, name: comment.user, avatar: comment.avatar })">
 							</image>
 							<view class="comment-content">
 								<view class="comment-header">
 									<view class="commenter-name">{{ comment.user || '匿名用户' }}</view>
-									<view class="comment-time">{{ comment.time }}</view>
 								</view>
+								<view class="comment-time">{{ comment.time }}</view>
 								<view class="comment-text">{{ comment.text }}</view>
 								<view class="comment-actions">
 									<view class="comment-action" @click="replyComment(comment)">
@@ -362,6 +363,7 @@
 	const newCommentText = ref('');
 	const replyToCommentId = ref(0);
 	const replyToNickname = ref('');
+	const targetCommentId = ref(null); // 目标评论ID，用于定位到指定评论
 
 	const isAnonymous = ref(false);
 
@@ -402,6 +404,12 @@
 			const inviteCode = options.inviteCode;
 			console.log(`✅ [商机详情页] 在 onLoad 中捕获到邀请码: ${inviteCode}`);
 			uni.setStorageSync('pendingInviteCode', inviteCode);
+		}
+
+		// 接收commentId参数，用于定位到指定评论
+		if (options && options.commentId) {
+			targetCommentId.value = options.commentId;
+			console.log(`✅ [商机详情页] 接收到目标评论ID: ${targetCommentId.value}`);
 		}
 
 
@@ -534,6 +542,56 @@
 				}
 			});
 		}, 100); // 延迟100毫秒，给页面渲染留出更充足的时间
+	};
+
+	/**
+	 * 滚动到指定评论位置
+	 * @param {string|number} commentId - 评论ID
+	 */
+	const scrollToTargetComment = (commentId) => {
+		if (!commentId) {
+			console.warn('未提供评论ID，无法定位');
+			return;
+		}
+
+		console.log(`准备滚动到评论ID: ${commentId}`);
+
+		// 使用延迟确保DOM已渲染
+		setTimeout(() => {
+			const query = uni.createSelectorQuery();
+			// 查找具有指定评论ID的元素
+			query.select(`[data-comment-id="${commentId}"]`).boundingClientRect();
+			query.selectViewport().scrollOffset();
+			query.exec(res => {
+				if (res && res[0] && res[1]) {
+					const elementTop = res[0].top;
+					const scrollTop = res[1].scrollTop;
+					const finalScrollTop = scrollTop + elementTop - 100; // 减去100rpx，留出顶部空间
+
+					console.log(`找到评论元素，准备滚动到位置: ${finalScrollTop}`);
+					uni.pageScrollTo({
+						scrollTop: finalScrollTop,
+						duration: 300,
+						success: () => {
+							console.log('滚动到评论成功');
+							// 添加高亮效果提示用户
+							uni.showToast({
+								title: '已定位到该评论',
+								icon: 'none',
+								duration: 1500
+							});
+						},
+						fail: (err) => {
+							console.error('滚动失败:', err);
+						}
+					});
+				} else {
+					console.warn(`未找到评论ID为 ${commentId} 的元素`);
+					// 如果找不到具体评论，至少滚动到评论区
+					scrollToCommentsSection();
+				}
+			});
+		}, 300);
 	};
 
 	// ==================== 定义分享给好友的内容 ====================
@@ -847,6 +905,16 @@
 			});
 			if (result && !result.error && Array.isArray(result.data)) {
 				comments.value = flattenComments(result.data);
+
+				// 如果存在目标评论ID，则滚动到该评论位置
+				if (targetCommentId.value) {
+					// 使用nextTick确保DOM已更新
+					nextTick(() => {
+						setTimeout(() => {
+							scrollToTargetComment(targetCommentId.value);
+						}, 200);
+					});
+				}
 			} else {
 				comments.value = [];
 			}
@@ -1982,9 +2050,7 @@
 	}
 
 	.comment-header {
-		display: flex;
-		align-items: center;
-		margin-bottom: 16rpx;
+		margin-bottom: 12rpx;
 	}
 
 	.commenter-name {
@@ -1995,8 +2061,8 @@
 
 	.comment-time {
 		font-size: 24rpx;
-		color: #888;
-		margin-left: 24rpx;
+		color: #999;
+		margin-bottom: 16rpx;
 	}
 
 	.comment-text {

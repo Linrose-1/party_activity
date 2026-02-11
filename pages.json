@@ -160,12 +160,12 @@
 				"navigationBarTitleText": "处理退款"
 			}
 		},
-		{
-			"path": "pages/my-active-approval/my-active-approval",
-			"style": {
-				"navigationBarTitleText": "退款审批"
-			}
-		},
+		// {
+		// 	"path": "pages/my-active-approval/my-active-approval",
+		// 	"style": {
+		// 		"navigationBarTitleText": "退款审批"
+		// 	}
+		// },
 		{
 			"path": "pages/my-shop/my-shop",
 			"style": {
@@ -387,6 +387,12 @@
 				"path": "my-systemConstruction/my-systemConstruction",
 				"style": {
 					"navigationBarTitleText": "系统共建"
+				}
+			},
+			{
+				"path": "business-interaction/business-interaction",
+				"style": {
+					"navigationBarTitleText": "商机评论"
 				}
 			},
 			{

@@ -35,7 +35,7 @@
 				</view>
 				<view class="content">
 					<view class="title">商机互动</view>
-					<view class="desc">发现潜在商业机会与合作</view>
+					<view class="desc">查看商友与我发布商机的互动</view>
 				</view>
 				<uni-icons type="right" size="16" color="#ccc"></uni-icons>
 			</view>
@@ -65,9 +65,8 @@
 				});
 				break;
 			case 'business':
-				uni.showToast({
-					title: '商机互动功能开发中',
-					icon: 'none'
+				uni.navigateTo({
+					url: '/packages/business-interaction/business-interaction'
 				});
 				break;
 		}
