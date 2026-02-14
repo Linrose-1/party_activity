@@ -65,20 +65,22 @@ const _sfc_main = {
         recommendUsers.value = data.map((user) => {
           const tags = [];
           if (user.classmateFlag)
-            tags.push("同校校友");
+            tags.push("同学");
           if (user.peerFlag)
-            tags.push("行业同行");
+            tags.push("同行");
           if (user.fellowTownspeopleFlag)
-            tags.push("家乡同乡");
+            tags.push("同乡");
+          if (user.friendParentFlag)
+            tags.push("同圈");
           if (tags.length === 0)
             tags.push("深度契合");
           return {
             ...user,
             matchTags: tags,
-            companyName: getFirstItem(user.companyName) || "保密",
-            school: getFirstItem(user.school) || "优秀院校",
+            companyName: getFirstItem(user.companyName) || "暂未设置公司",
+            school: getFirstItem(user.school) || "暂未设置学校",
             positionTitle: getFirstItem(user.positionTitle) || "",
-            professionalTitle: getFirstItem(user.professionalTitle) || "精英商友"
+            professionalTitle: getFirstItem(user.professionalTitle) || "暂未设置社会职务"
           };
         });
       }
@@ -169,11 +171,11 @@ const _sfc_main = {
           return common_vendor.e({
             a: user.avatar || "/static/images/default-avatar.png",
             b: common_vendor.t(user.nickname),
-            c: user.isComplete
-          }, user.isComplete ? {} : {}, {
+            c: user.idCert === 1
+          }, user.idCert === 1 ? {} : {}, {
             d: common_vendor.t(user.professionalTitle || "暂未设置社会职务"),
-            e: common_vendor.t(user.companyName || "保密"),
-            f: common_vendor.t(user.school || "优秀院校"),
+            e: common_vendor.t(user.companyName || "暂未设置公司"),
+            f: common_vendor.t(user.school || "暂未设置学校"),
             g: common_vendor.f(user.matchTags, (tag, idx, i1) => {
               return {
                 a: common_vendor.t(tag),

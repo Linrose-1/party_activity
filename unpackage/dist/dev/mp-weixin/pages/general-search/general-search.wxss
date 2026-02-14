@@ -1,13 +1,11 @@
 /* 水平间距 */
 /* 水平间距 */
 .search-page.data-v-797ccd59 {
-  background-color: #F8F9FB;
+  background: #F7F8FA;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
 }
-
-/* 顶部搜索区 */
 .header-section.data-v-797ccd59 {
   background: #FFF;
   padding: 20rpx 30rpx;
@@ -15,7 +13,7 @@
   position: sticky;
   top: 0;
   z-index: 100;
-  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
 }
 .header-section .search-bar.data-v-797ccd59 {
   background: #F2F3F5;
@@ -35,36 +33,40 @@
   font-weight: bold;
   font-size: 28rpx;
   padding-left: 20rpx;
-  border-left: 1rpx solid #DDD;
+  border-left: 1px solid #DDD;
 }
 .header-section .filter-toggle.data-v-797ccd59 {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  text-align: center;
   padding-top: 16rpx;
-  gap: 8rpx;
   color: #FF8400;
   font-size: 24rpx;
+  display: flex;
+  justify-content: center;
+  gap: 8rpx;
   font-weight: 500;
 }
-
-/* 筛选面板展开动画 */
 .filter-panel.data-v-797ccd59 {
-  background-color: #FFF;
+  background: #FFF;
   max-height: 0;
   overflow: hidden;
-  transition: max-height 0.3s ease-out;
+  transition: all 0.3s;
 }
 .filter-panel.expanded.data-v-797ccd59 {
-  max-height: 1200rpx;
+  /* 展开时的最大高度要足够大 */
+  max-height: 1400rpx;
+  /* 关键修复：展开完成后允许内容溢出，这样下拉框才能正常显示 */
+  overflow: visible;
   border-bottom: 1rpx solid #EEE;
+  padding-bottom: 100rpx;
 }
 .filter-panel .filter-inner.data-v-797ccd59 {
-  padding: 20rpx 40rpx 40rpx;
+  padding: 20rpx 40rpx;
+  overflow: visible;
 }
 .filter-panel .filter-inner .filter-grid.data-v-797ccd59 {
   display: flex;
   gap: 30rpx;
+  overflow: visible;
 }
 .filter-panel .filter-inner .filter-grid.data-v-797ccd59 .uni-forms-item {
   flex: 1;
@@ -77,7 +79,7 @@
 .filter-panel .filter-actions.data-v-797ccd59 {
   display: flex;
   gap: 20rpx;
-  margin-top: 20rpx;
+  padding: 0 40rpx;
 }
 .filter-panel .filter-actions .reset-btn.data-v-797ccd59 {
   flex: 1;
@@ -100,260 +102,201 @@
   font-weight: bold;
   font-size: 28rpx;
 }
-.result-scroll.data-v-797ccd59 {
-  flex: 1;
-  height: 0;
-}
 .result-container.data-v-797ccd59 {
   padding: 30rpx;
 }
-
-/* 总数统计 */
 .total-stats.data-v-797ccd59 {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 30rpx 0;
-  margin-bottom: 20rpx;
-}
-.total-stats .stats-label.data-v-797ccd59 {
-  font-size: 28rpx;
-  color: #666;
-}
-.total-stats .stats-num.data-v-797ccd59 {
-  font-size: 40rpx;
-  font-weight: bold;
-  color: #FF8400;
-  margin: 0 10rpx;
-}
-.section-header.data-v-797ccd59 {
-  margin: 20rpx 0 24rpx;
-  display: flex;
-  align-items: center;
-}
-.section-header .title.data-v-797ccd59 {
-  font-size: 30rpx;
-  font-weight: bold;
-  color: #222;
-}
-.section-header .total-count.data-v-797ccd59 {
+  text-align: center;
+  padding: 10rpx 0 30rpx;
   font-size: 24rpx;
   color: #999;
-  margin-left: 16rpx;
 }
 
-/* 精英名片卡片 */
+/* 商友精英名片 */
 .user-card.data-v-797ccd59 {
   background: #FFF;
-  border-radius: 28rpx;
+  border-radius: 24rpx;
   padding: 30rpx;
   margin-bottom: 24rpx;
   box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.02);
-  /* 锁定状态模糊 */
 }
-.user-card .card-body.data-v-797ccd59 {
+.user-card .card-main.data-v-797ccd59 {
   display: flex;
   align-items: center;
+  margin-bottom: 24rpx;
 }
-.user-card .card-body .avatar.data-v-797ccd59 {
-  width: 110rpx;
-  height: 110rpx;
+.user-card .card-main .avatar.data-v-797ccd59 {
+  width: 100rpx;
+  height: 100rpx;
   border-radius: 50%;
   background: #EEE;
 }
-.user-card .card-body .main-info.data-v-797ccd59 {
+.user-card .card-main .info-content.data-v-797ccd59 {
   flex: 1;
-  margin-left: 20rpx;
+  margin-left: 24rpx;
 }
-.user-card .card-body .main-info .name-row.data-v-797ccd59 {
+.user-card .card-main .info-content .name-row.data-v-797ccd59 {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  margin-bottom: 8rpx;
 }
-.user-card .card-body .main-info .name-row .name.data-v-797ccd59 {
+.user-card .card-main .info-content .name-row .name.data-v-797ccd59 {
   font-size: 32rpx;
   font-weight: bold;
+  color: #222;
 }
-.user-card .card-body .main-info .name-row .match-score.data-v-797ccd59 {
+.user-card .card-main .info-content .name-row .verify-badge.data-v-797ccd59 {
+  margin-left: 12rpx;
+  background: #FFF7E6;
+  border-radius: 4rpx;
+  padding: 0 8rpx;
+  display: flex;
+  align-items: center;
+  gap: 4rpx;
+}
+.user-card .card-main .info-content .name-row .verify-badge text.data-v-797ccd59 {
   color: #FF8400;
-  font-size: 22rpx;
+  font-size: 18rpx;
   font-weight: bold;
 }
-.user-card .card-body .main-info .star-row.data-v-797ccd59 {
-  margin: 6rpx 0;
-}
-.user-card .card-body .main-info .profession-line.data-v-797ccd59 {
+.user-card .card-main .info-content .major-title.data-v-797ccd59 {
   font-size: 24rpx;
-  color: #8E8E93;
+  color: #666;
+}
+.user-card .card-body.data-v-797ccd59 {
+  background: #F9FAFB;
+  border-radius: 16rpx;
+  padding: 20rpx 24rpx;
+  margin-bottom: 24rpx;
+}
+.user-card .card-body .info-item.data-v-797ccd59 {
+  display: flex;
+  font-size: 24rpx;
+  margin-bottom: 12rpx;
+}
+.user-card .card-body .info-item.data-v-797ccd59:last-child {
+  margin-bottom: 0;
+}
+.user-card .card-body .info-item .label.data-v-797ccd59 {
+  color: #999;
+  width: 80rpx;
+  flex-shrink: 0;
+}
+.user-card .card-body .info-item .val.data-v-797ccd59 {
+  color: #444;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 500;
 }
 .user-card .card-footer.data-v-797ccd59 {
-  margin-top: 24rpx;
-  padding-top: 24rpx;
-  border-top: 1rpx solid #F5F5F5;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  border-top: 1px solid #F3F4F6;
+  padding-top: 24rpx;
 }
-.user-card .card-footer .common-tag.data-v-797ccd59 {
-  font-size: 24rpx;
-  color: #666;
-  background: #F8F9FB;
-  padding: 6rpx 20rpx;
-  border-radius: 12rpx;
+.user-card .card-footer .location-text.data-v-797ccd59 {
+  font-size: 22rpx;
+  color: #999;
 }
-.user-card .card-footer .detail-btn.data-v-797ccd59 {
-  background: #333;
+.user-card .card-footer .action-btn.data-v-797ccd59 {
+  background: #1A1A1A;
   color: #FFF;
   font-size: 24rpx;
-  padding: 12rpx 32rpx;
+  padding: 14rpx 36rpx;
   border-radius: 40rpx;
-  font-weight: bold;
-}
-.user-card.locked.data-v-797ccd59 {
-  position: relative;
-  overflow: hidden;
-}
-.user-card.locked .locked-mask.data-v-797ccd59 {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 10;
-  background: rgba(255, 255, 255, 0.7);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-.user-card.locked .locked-mask text.data-v-797ccd59 {
-  font-size: 24rpx;
-  color: #999;
-  margin-top: 12rpx;
-}
-.user-card.locked .blur-box.data-v-797ccd59 {
-  filter: blur(6rpx);
-}
-.user-card.locked .line.data-v-797ccd59 {
-  height: 20rpx;
-  background: #F0F0F0;
-  border-radius: 10rpx;
-  margin-bottom: 12rpx;
-}
-.user-card.locked .line.long.data-v-797ccd59 {
-  width: 200rpx;
-}
-.user-card.locked .line.mid.data-v-797ccd59 {
-  width: 260rpx;
-}
-.user-card.locked .line.short.data-v-797ccd59 {
-  width: 150rpx;
+  font-weight: 600;
 }
 
-/* 付费选购区域 (黑金风格) */
+/* 解锁区域样式 */
 .unlock-purchase-card.data-v-797ccd59 {
-  background: linear-gradient(135deg, #333 0%, #000 100%);
-  border-radius: 36rpx;
+  background: linear-gradient(135deg, #2D2D2D, #000);
+  border-radius: 32rpx;
   padding: 44rpx 32rpx;
-  margin: 40rpx 0;
   text-align: center;
+  margin: 40rpx 0;
 }
 .unlock-purchase-card .card-tip.data-v-797ccd59 {
-  color: #FFBD70;
   font-size: 26rpx;
+  color: #FFBD70;
   margin-bottom: 34rpx;
   display: block;
 }
 .unlock-purchase-card .tier-selector.data-v-797ccd59 {
   display: flex;
-  gap: 16rpx;
-  margin-bottom: 44rpx;
+  gap: 20rpx;
+  margin-bottom: 34rpx;
 }
 .unlock-purchase-card .tier-selector .tier-item.data-v-797ccd59 {
   flex: 1;
   background: rgba(255, 255, 255, 0.08);
-  border: 2rpx solid transparent;
-  border-radius: 24rpx;
-  padding: 28rpx 10rpx;
+  padding: 24rpx 0;
+  border-radius: 20rpx;
   display: flex;
   flex-direction: column;
-  position: relative;
-  transition: all 0.3s;
+  border: 1px solid transparent;
+  transition: all 0.2s;
 }
 .unlock-purchase-card .tier-selector .tier-item.active.data-v-797ccd59 {
   border-color: #FF8400;
   background: rgba(255, 132, 0, 0.15);
 }
-.unlock-purchase-card .tier-selector .tier-item .hot-tag.data-v-797ccd59 {
-  position: absolute;
-  top: -14rpx;
-  left: 50%;
-  transform: translateX(-50%);
-  background: #FF8400;
-  color: #FFF;
-  font-size: 18rpx;
-  padding: 2rpx 14rpx;
-  border-radius: 100rpx;
-}
 .unlock-purchase-card .tier-selector .tier-item .t-count.data-v-797ccd59 {
-  color: #FFF;
-  font-size: 34rpx;
+  font-size: 32rpx;
   font-weight: bold;
+  color: #FFF;
 }
 .unlock-purchase-card .tier-selector .tier-item .t-cost.data-v-797ccd59 {
-  color: rgba(255, 255, 255, 0.4);
-  font-size: 22rpx;
-  margin: 4rpx 0;
-}
-.unlock-purchase-card .tier-selector .tier-item .t-benefit.data-v-797ccd59 {
-  color: #FF8400;
-  font-size: 18rpx;
-  font-weight: bold;
+  font-size: 20rpx;
+  color: rgba(255, 255, 255, 0.5);
+  margin-top: 4rpx;
 }
 .unlock-purchase-card .pay-btn.data-v-797ccd59 {
   background: linear-gradient(90deg, #FFBD70, #FF8400);
   color: #FFF;
-  height: 94rpx;
-  line-height: 94rpx;
-  border-radius: 47rpx;
-  font-size: 30rpx;
+  height: 88rpx;
+  line-height: 88rpx;
+  border-radius: 44rpx;
   font-weight: bold;
-  box-shadow: 0 12rpx 24rpx rgba(0, 0, 0, 0.3);
+  font-size: 28rpx;
+  box-shadow: 0 8rpx 20rpx rgba(0, 0, 0, 0.3);
 }
-.unlock-purchase-card .pay-btn.data-v-797ccd59:active {
-  transform: scale(0.98);
+.locked-divider.data-v-797ccd59 {
+  text-align: center;
+  margin: 50rpx 0 30rpx;
+  position: relative;
 }
-.unlock-purchase-card .pay-sub-tip.data-v-797ccd59 {
-  font-size: 20rpx;
-  color: rgba(255, 255, 255, 0.3);
-  margin-top: 18rpx;
-  display: block;
+.locked-divider.data-v-797ccd59::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: #E5E7EB;
+  z-index: 1;
 }
-
-/* 已查看所有商友提示 */
-.all-viewed-tip.data-v-797ccd59 {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 40rpx 20rpx;
-  margin-top: 20rpx;
-  background: #F6FFED;
-  border-radius: 20rpx;
-  color: #52C41A;
-  font-size: 26rpx;
-  gap: 10rpx;
+.locked-divider text.data-v-797ccd59 {
+  position: relative;
+  z-index: 2;
+  background: #F7F8FA;
+  padding: 0 24rpx;
+  font-size: 22rpx;
+  color: #999;
 }
 .empty-box.data-v-797ccd59 {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding-top: 100rpx;
+  padding-top: 150rpx;
 }
 .empty-box .empty-img.data-v-797ccd59 {
   width: 240rpx;
   height: 240rpx;
   margin-bottom: 30rpx;
-  opacity: 0.5;
+  opacity: 0.6;
 }
 .empty-box text.data-v-797ccd59 {
   font-size: 26rpx;

@@ -30,36 +30,33 @@ const _sfc_main = {
       common_vendor.index.hideLoading();
       loading.value = false;
       if (!error && data) {
+        const getFirstItem = (value) => {
+          if (!value)
+            return "";
+          if (Array.isArray(value) && value.length > 0)
+            return value[0];
+          if (typeof value === "string" && value.includes(","))
+            return value.split(",")[0].trim();
+          return value;
+        };
         users.value = data.map((u) => {
           const tags = [];
-          if (u.classmateFlag)
-            tags.push("同校校友");
-          if (u.peerFlag)
-            tags.push("行业同行");
-          if (u.fellowTownspeopleFlag)
-            tags.push("家乡同乡");
-          if (u.matchTagCount > 0)
-            tags.push(`${u.matchTagCount}项需求匹配`);
+          if (u.classmateFlag === 1)
+            tags.push("同学");
+          if (u.peerFlag === 1)
+            tags.push("同行");
+          if (u.fellowTownspeopleFlag === 1)
+            tags.push("同乡");
+          if (u.friendParentFlag === 1)
+            tags.push("同圈");
           if (tags.length === 0)
-            tags.push("优质商友");
-          const getFirstItem = (value) => {
-            if (!value)
-              return "";
-            if (Array.isArray(value) && value.length > 0) {
-              return value[0];
-            }
-            if (typeof value === "string" && value.includes(",")) {
-              return value.split(",")[0].trim();
-            }
-            return value;
-          };
+            tags.push("深度契合");
           return {
             ...u,
             matchTags: tags,
-            companyName: getFirstItem(u.companyName) || "保密机构",
-            school: getFirstItem(u.school) || "知名大学",
-            positionTitle: getFirstItem(u.positionTitle) || "",
-            professionalTitle: getFirstItem(u.professionalTitle) || "精英人士"
+            companyName: getFirstItem(u.companyName),
+            school: getFirstItem(u.school),
+            professionalTitle: getFirstItem(u.professionalTitle)
           };
         });
       }
@@ -81,12 +78,12 @@ const _sfc_main = {
           return common_vendor.e({
             a: user.avatar || "/static/images/default-avatar.png",
             b: common_vendor.t(user.nickname),
-            c: user.isComplete
-          }, user.isComplete ? {} : {}, {
-            d: common_vendor.t(user.professionalTitle || "精英人士"),
-            e: common_vendor.t(90 + index % 10),
-            f: common_vendor.t(user.companyName || "保密机构"),
-            g: common_vendor.t(user.school || "知名大学"),
+            c: user.idCert === 1
+          }, user.idCert === 1 ? {} : user.isComplete === 1 ? {} : {}, {
+            d: user.isComplete === 1,
+            e: common_vendor.t(user.professionalTitle || "暂未设置社会职务"),
+            f: common_vendor.t(user.companyName || "暂未设置公司"),
+            g: common_vendor.t(user.school || "暂未设置学校"),
             h: common_vendor.f(user.matchTags, (tag, tidx, i1) => {
               return {
                 a: common_vendor.t(tag),
@@ -94,13 +91,13 @@ const _sfc_main = {
               };
             }),
             i: "6e53aa0e-0-" + i0,
-            j: common_vendor.t(user.locationAddressStr || "全国"),
+            j: common_vendor.t(user.locationAddressStr || "暂未设置商务/办公地"),
             k: user.id,
             l: common_vendor.o(($event) => goToDetail(user), user.id)
           });
         }),
         b: common_vendor.p({
-          type: "location",
+          type: "location-filled",
           size: "14",
           color: "#8E8E93"
         }),

@@ -79,7 +79,7 @@
 						<view class="main-meta">
 							<view class="name-row">
 								<text class="u-name">{{ user.nickname }}</text>
-								<text class="u-verify" v-if="user.isComplete">已认证</text>
+								<text class="u-verify" v-if="user.idCert === 1">已实名</text>
 							</view>
 							<text class="u-title">{{ user.professionalTitle || '暂未设置社会职务' }}</text>
 						</view>
@@ -90,12 +90,12 @@
 
 					<view class="card-body">
 						<view class="info-item">
-							<text class="label">当前企业</text>
-							<text class="val">{{ user.companyName || '保密' }}</text>
+							<text class="label">当前公司</text>
+							<text class="val">{{ user.companyName || '暂未设置公司' }}</text>
 						</view>
 						<view class="info-item">
 							<text class="label">教育背景</text>
-							<text class="val">{{ user.school || '优秀院校' }}</text>
+							<text class="val">{{ user.school || '暂未设置学校' }}</text>
 						</view>
 					</view>
 
@@ -110,7 +110,7 @@
 						<text class="location">
 							{{ user.locationAddressStr || '暂未设置商务/办公地' }}
 						</text>
-						<view class="connect-btn">立即建立连接</view>
+						<view class="connect-btn">详细数字身份</view>
 					</view>
 				</view>
 
@@ -211,19 +211,20 @@
 			// 处理数据，生成推荐理由标签
 			recommendUsers.value = data.map(user => {
 				const tags = [];
-				if (user.classmateFlag) tags.push('同校校友');
-				if (user.peerFlag) tags.push('行业同行');
-				if (user.fellowTownspeopleFlag) tags.push('家乡同乡');
+				if (user.classmateFlag) tags.push('同学');
+				if (user.peerFlag) tags.push('同行');
+				if (user.fellowTownspeopleFlag) tags.push('同乡');
+				if (user.friendParentFlag) tags.push('同圈');
 				// if (user.matchTagCount > 0) tags.push(`${user.matchTagCount}项资源匹配`);
 				if (tags.length === 0) tags.push('深度契合');
 
 				return {
 					...user,
 					matchTags: tags,
-					companyName: getFirstItem(user.companyName) || '保密',
-					school: getFirstItem(user.school) || '优秀院校',
+					companyName: getFirstItem(user.companyName) || '暂未设置公司',
+					school: getFirstItem(user.school) || '暂未设置学校',
 					positionTitle: getFirstItem(user.positionTitle) || '',
-					professionalTitle: getFirstItem(user.professionalTitle) || '精英商友'
+					professionalTitle: getFirstItem(user.professionalTitle) || '暂未设置社会职务'
 				};
 			});
 		}

@@ -314,7 +314,7 @@
   font-size: 24rpx;
   color: #8E8E93;
   display: block;
-  margin-top: 5rpx;
+  margin-top: 10rpx;
 }
 .user-card .card-top .connection-tag.data-v-132afe13 {
   font-size: 20rpx;

@@ -26,37 +26,13 @@ if (!Math) {
 const _sfc_main = {
   __name: "general-search",
   setup(__props) {
-    const isFilterExpanded = common_vendor.ref(false);
     const list = common_vendor.ref([]);
     const totalCount = common_vendor.ref(0);
     const loadStatus = common_vendor.ref("more");
+    const isFilterExpanded = common_vendor.ref(false);
+    const hasUnlocked = common_vendor.ref(false);
     const areaTree = common_vendor.ref([]);
     const industryTree = common_vendor.ref([]);
-    const hasUnlocked = common_vendor.ref(false);
-    const unlockTiers = [
-      {
-        id: 1,
-        count: 1,
-        price: 1,
-        benefit: "单人查看",
-        hot: false
-      },
-      {
-        id: 2,
-        count: 6,
-        price: 5,
-        benefit: "加送1位",
-        hot: true
-      },
-      {
-        id: 3,
-        count: 15,
-        price: 10,
-        benefit: "买10送5",
-        hot: false
-      }
-    ];
-    const selectedTier = common_vendor.ref(unlockTiers[1]);
     const queryParams = common_vendor.reactive({
       keyword: "",
       nickname: "",
@@ -87,12 +63,29 @@ const _sfc_main = {
         text: "不问年代"
       }
     ];
+    const unlockTiers = [
+      {
+        id: 1,
+        count: 1,
+        price: 1
+      },
+      {
+        id: 2,
+        count: 6,
+        price: 5
+      },
+      {
+        id: 3,
+        count: 15,
+        price: 10
+      }
+    ];
+    const selectedTier = common_vendor.ref(unlockTiers[1]);
     const freeList = common_vendor.computed(() => list.value.slice(0, 10));
     const paidList = common_vendor.computed(() => list.value.slice(10));
     common_vendor.onLoad((options) => {
-      if (options.keyword) {
+      if (options.keyword)
         queryParams.keyword = decodeURIComponent(options.keyword);
-      }
       initBaseData();
       handleSearch();
     });
@@ -109,41 +102,24 @@ const _sfc_main = {
         industryTree.value = indRes.data;
     };
     const handleSearch = async () => {
-      var _a, _b, _c, _d, _e, _f, _g, _h;
-      const hasSearchCondition = ((_a = queryParams.keyword) == null ? void 0 : _a.trim()) || ((_b = queryParams.nickname) == null ? void 0 : _b.trim()) || ((_c = queryParams.school) == null ? void 0 : _c.trim()) || ((_d = queryParams.industry) == null ? void 0 : _d.trim()) || ((_e = queryParams.haveResources) == null ? void 0 : _e.trim()) || ((_f = queryParams.needResources) == null ? void 0 : _f.trim()) || queryParams.nativePlace || queryParams.locationAddress || ((_g = queryParams.era) == null ? void 0 : _g.trim()) || ((_h = queryParams.hobby) == null ? void 0 : _h.trim());
-      if (!hasSearchCondition) {
-        list.value = [];
-        totalCount.value = 0;
-        loadStatus.value = "noMore";
-        common_vendor.index.showToast({
-          title: "请输入搜索关键词或选择筛选条件",
-          icon: "none",
-          duration: 2e3
+      const hasValue = Object.values(queryParams).some((v) => v && String(v).trim() !== "");
+      if (!hasValue)
+        return common_vendor.index.showToast({
+          title: "请输入关键词",
+          icon: "none"
         });
-        return;
-      }
-      hasUnlocked.value = false;
       list.value = [];
+      hasUnlocked.value = false;
       isFilterExpanded.value = false;
-      await fetchUsers(true);
+      await fetchUsers();
     };
-    const fetchUsers = async (isFirstLoad = false) => {
+    const fetchUsers = async () => {
       loadStatus.value = "loading";
-      let requestData;
-      if (!hasUnlocked.value) {
-        requestData = {
-          ...queryParams,
-          pageNo: 1,
-          pageSize: 10
-        };
-      } else {
-        const paidCount = Math.min(selectedTier.value.count, totalCount.value - 10);
-        requestData = {
-          ...queryParams,
-          pageNo: 2,
-          pageSize: paidCount
-        };
-      }
+      const requestData = {
+        ...queryParams,
+        pageNo: hasUnlocked.value ? 2 : 1,
+        pageSize: hasUnlocked.value ? selectedTier.value.count : 10
+      };
       const {
         data,
         error
@@ -152,35 +128,40 @@ const _sfc_main = {
         data: requestData
       });
       if (!error && data) {
-        const newList = data.list || [];
-        if (!hasUnlocked.value) {
-          list.value = newList;
-        } else {
-          list.value = [...list.value, ...newList];
-        }
+        const getFirstItem = (val) => {
+          if (!val)
+            return "";
+          if (Array.isArray(val) && val.length > 0)
+            return val[0];
+          if (typeof val === "string" && val.includes(","))
+            return val.split(",")[0].trim();
+          return val;
+        };
+        const mapped = (data.list || []).map((u) => ({
+          ...u,
+          displayTitle: getFirstItem(u.positionTitle) || getFirstItem(u.professionalTitle) || "精英人士",
+          displayCompany: getFirstItem(u.companyName) || "暂未设置公司",
+          displaySchool: getFirstItem(u.school) || "暂未设置学校"
+        }));
+        list.value = hasUnlocked.value ? [...list.value, ...mapped] : mapped;
         totalCount.value = data.total || 0;
         loadStatus.value = list.value.length >= totalCount.value ? "noMore" : "more";
       } else {
         loadStatus.value = "noMore";
       }
     };
-    const resetFilters = () => {
-      Object.keys(queryParams).forEach((key) => {
-        queryParams[key] = "";
-      });
-    };
     const handleUnlock = async () => {
-      const canProceed = await utils_user.checkLoginGuard(`解锁更多精英需消耗 ${selectedTier.value.price} 智米，是否继续？`);
+      const canProceed = await utils_user.checkLoginGuard();
       if (!canProceed)
         return;
       common_vendor.index.showModal({
-        title: "确认解锁",
-        content: `确认消耗 ${selectedTier.value.price} 智米兑换 ${selectedTier.value.count} 个搜索查看名额？`,
+        title: "解锁商友",
+        content: `将消耗 ${selectedTier.value.price} 智米解锁后续 ${selectedTier.value.count} 位商友，是否继续？`,
         confirmColor: "#FF8400",
         success: async (res) => {
           if (res.confirm) {
             common_vendor.index.showLoading({
-              title: "正在解锁..."
+              title: "处理中..."
             });
             const {
               error
@@ -197,36 +178,19 @@ const _sfc_main = {
                 icon: "success"
               });
               hasUnlocked.value = true;
-              setTimeout(() => {
-                fetchUsers();
-              }, 1e3);
+              fetchUsers();
             }
           }
         }
       });
     };
-    const getCommonality = (user) => {
-      const p = [];
-      if (user.classmateFlag)
-        p.push("校友");
-      if (user.peerFlag)
-        p.push("同行");
-      if (user.fellowTownspeopleFlag)
-        p.push("同乡");
-      if (user.matchTagCount > 0)
-        p.push("资源高度匹配");
-      return p.length > 0 ? p.join(" · ") : "潜力合作伙伴";
+    const resetFilters = () => {
+      Object.keys(queryParams).forEach((key) => queryParams[key] = "");
     };
-    const goToDetail = async (user) => {
-      const canProceed = await utils_user.checkLoginGuard();
-      if (canProceed) {
-        const defaultAvatar = "/static/icon/default-avatar.png";
-        const name = user.nickname || "匿名用户";
-        const avatarUrl = user.avatar || defaultAvatar;
-        common_vendor.index.navigateTo({
-          url: `/packages/applicationBusinessCard/applicationBusinessCard?id=${user.id}&name=${encodeURIComponent(name)}&avatar=${encodeURIComponent(avatarUrl)}`
-        });
-      }
+    const goToDetail = (user) => {
+      common_vendor.index.navigateTo({
+        url: `/packages/applicationBusinessCard/applicationBusinessCard?id=${user.id}&name=${encodeURIComponent(user.nickname)}&avatar=${encodeURIComponent(user.avatar)}`
+      });
     };
     return (_ctx, _cache) => {
       return common_vendor.e({
@@ -353,105 +317,61 @@ const _sfc_main = {
       }, totalCount.value > 0 ? {
         Q: common_vendor.t(totalCount.value)
       } : {}, {
-        R: freeList.value.length > 0
-      }, freeList.value.length > 0 ? {} : {}, {
-        S: common_vendor.f(freeList.value, (user, index, i0) => {
-          return {
-            a: user.avatar || "/static/images/default-avatar.png",
-            b: common_vendor.t(user.nickname),
-            c: common_vendor.t(90 + (10 - index)),
-            d: common_vendor.f(5, (s, k1, i1) => {
-              return {
-                a: s,
-                b: "797ccd59-21-" + i0 + "-" + i1
-              };
-            }),
-            e: common_vendor.t(user.professionalTitle || "精英人士"),
-            f: common_vendor.t(user.school || "知名院校"),
-            g: common_vendor.t(user.locationAddressStr || "核心城市"),
-            h: common_vendor.t(getCommonality(user)),
-            i: user.id,
-            j: common_vendor.o(($event) => goToDetail(user), user.id)
-          };
-        }),
-        T: common_vendor.p({
-          type: "star-filled",
-          size: "14",
-          color: "#FF8400"
-        }),
-        U: totalCount.value > 10
-      }, totalCount.value > 10 ? common_vendor.e({
-        V: common_vendor.t(totalCount.value - 10),
-        W: common_vendor.f(paidList.value, (user, index, i0) => {
-          return {
-            a: user.avatar || "/static/images/default-avatar.png",
-            b: common_vendor.t(user.nickname),
-            c: common_vendor.t(85 - index),
-            d: common_vendor.f(5, (s, k1, i1) => {
-              return {
-                a: s,
-                b: "797ccd59-22-" + i0 + "-" + i1
-              };
-            }),
-            e: common_vendor.t(user.professionalTitle || "精英人士"),
-            f: common_vendor.t(user.school || "知名院校"),
-            g: common_vendor.t(user.locationAddressStr || "核心城市"),
-            h: common_vendor.t(getCommonality(user)),
-            i: user.id,
-            j: common_vendor.o(($event) => goToDetail(user), user.id)
-          };
-        }),
-        X: common_vendor.p({
-          type: "star-filled",
-          size: "14",
-          color: "#FF8400"
-        }),
-        Y: list.value.length < totalCount.value
-      }, list.value.length < totalCount.value ? common_vendor.e({
-        Z: paidList.value.length > 0
-      }, paidList.value.length > 0 ? {
-        aa: common_vendor.t(paidList.value.length)
-      } : {}, {
-        ab: common_vendor.f(unlockTiers, (tier, k0, i0) => {
+        R: common_vendor.f(freeList.value, (user, index, i0) => {
           return common_vendor.e({
-            a: tier.hot
-          }, tier.hot ? {} : {}, {
-            b: common_vendor.t(tier.count),
-            c: common_vendor.t(tier.price),
-            d: common_vendor.t(tier.benefit),
-            e: tier.id,
-            f: selectedTier.value.id === tier.id ? 1 : "",
-            g: common_vendor.o(($event) => selectedTier.value = tier, tier.id)
+            a: user.avatar || "/static/images/default-avatar.png",
+            b: common_vendor.t(user.nickname),
+            c: user.idCert === 1
+          }, user.idCert === 1 ? {
+            d: "797ccd59-21-" + i0,
+            e: common_vendor.p({
+              type: "auth-filled",
+              size: "12",
+              color: "#FF8400"
+            })
+          } : {}, {
+            f: common_vendor.t(user.displayTitle),
+            g: common_vendor.t(user.displayCompany),
+            h: common_vendor.t(user.displaySchool),
+            i: common_vendor.t(user.locationAddressStr || "全国"),
+            j: user.id,
+            k: common_vendor.o(($event) => goToDetail(user), user.id)
           });
         }),
-        ac: common_vendor.t(selectedTier.value.price),
-        ad: common_vendor.o(handleUnlock)
-      }) : {}, {
-        ae: paidList.value.length === 0
-      }, paidList.value.length === 0 ? {
-        af: common_vendor.f(Math.min(2, totalCount.value - 10), (i, k0, i0) => {
+        S: totalCount.value > 10
+      }, totalCount.value > 10 ? common_vendor.e({
+        T: common_vendor.f(paidList.value, (user, index, i0) => {
+          return common_vendor.e({
+            a: user.avatar,
+            b: common_vendor.t(user.nickname),
+            c: user.idCert === 1
+          }, user.idCert === 1 ? {} : {}, {
+            d: common_vendor.t(user.displayTitle),
+            e: common_vendor.t(user.locationAddressStr),
+            f: user.id,
+            g: common_vendor.o(($event) => goToDetail(user), user.id)
+          });
+        }),
+        U: list.value.length < totalCount.value
+      }, list.value.length < totalCount.value ? common_vendor.e({
+        V: paidList.value.length > 0
+      }, paidList.value.length > 0 ? {
+        W: common_vendor.t(paidList.value.length)
+      } : {}, {
+        X: common_vendor.f(unlockTiers, (tier, k0, i0) => {
           return {
-            a: "797ccd59-23-" + i0,
-            b: "locked-" + i
+            a: common_vendor.t(tier.count),
+            b: common_vendor.t(tier.price),
+            c: tier.id,
+            d: selectedTier.value.id === tier.id ? 1 : "",
+            e: common_vendor.o(($event) => selectedTier.value = tier, tier.id)
           };
         }),
-        ag: common_vendor.p({
-          type: "locked-filled",
-          size: "30",
-          color: "#CCC"
-        })
-      } : {}) : {}, {
-        ah: totalCount.value > 0 && list.value.length >= totalCount.value
-      }, totalCount.value > 0 && list.value.length >= totalCount.value ? {
-        ai: common_vendor.p({
-          type: "checkmarkempty",
-          size: "24",
-          color: "#52C41A"
-        })
-      } : {}), {
-        aj: list.value.length > 0
+        Y: common_vendor.o(handleUnlock)
+      }) : {}) : {}), {
+        Z: list.value.length > 0
       }, list.value.length > 0 ? {
-        ak: common_vendor.p({
+        aa: common_vendor.p({
           status: loadStatus.value
         })
       } : {});

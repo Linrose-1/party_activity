@@ -2,7 +2,6 @@
 const common_vendor = require("../../common/vendor.js");
 const common_assets = require("../../common/assets.js");
 const utils_request = require("../../utils/request.js");
-const utils_shakeLock = require("../../utils/shakeLock.js");
 const utils_user = require("../../utils/user.js");
 if (!Array) {
   const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
@@ -16,23 +15,19 @@ const _easycom_uni_load_more = () => "../../uni_modules/uni-load-more/components
 if (!Math) {
   (_easycom_uni_icons + _easycom_uni_datetime_picker + _easycom_uni_load_more)();
 }
-const themeColor = "#FF7500";
 const _sfc_main = {
   __name: "relation",
   setup(__props) {
-    const {
-      isShakeLocked,
-      lockShake
-    } = utils_shakeLock.useShakeLock();
     const formatDateTime = (date) => {
-      if (!(date instanceof Date))
+      if (!date)
         return "";
-      const Y = date.getFullYear();
-      const M = (date.getMonth() + 1).toString().padStart(2, "0");
-      const D = date.getDate().toString().padStart(2, "0");
-      const h = date.getHours().toString().padStart(2, "0");
-      const m = date.getMinutes().toString().padStart(2, "0");
-      const s = date.getSeconds().toString().padStart(2, "0");
+      const d = new Date(date);
+      const Y = d.getFullYear();
+      const M = (d.getMonth() + 1).toString().padStart(2, "0");
+      const D = d.getDate().toString().padStart(2, "0");
+      const h = d.getHours().toString().padStart(2, "0");
+      const m = d.getMinutes().toString().padStart(2, "0");
+      const s = d.getSeconds().toString().padStart(2, "0");
       return `${Y}-${M}-${D} ${h}:${m}:${s}`;
     };
     const destination = common_vendor.ref({});
@@ -46,21 +41,19 @@ const _sfc_main = {
       pageSize: 10
     });
     const isFollowActionInProgress = common_vendor.ref(false);
-    common_vendor.ref(false);
     const timeRangeText = common_vendor.computed(() => {
       if (timeRange.value && timeRange.value.length === 2) {
         const start = timeRange.value[0].slice(5, 16);
         const end = timeRange.value[1].slice(5, 16);
-        return `${start} - ${end}`;
+        return `${start} 至 ${end}`;
       }
       return "请选择拟访友时段";
     });
     const isListEmpty = common_vendor.computed(() => userList.value.length === 0 && loadingStatus.value !== "loading");
     const fetchUserList = async (isRefresh = false) => {
-      if (isRefresh) {
+      if (isRefresh)
         common_vendor.index.stopPullDownRefresh();
-      }
-      if (!destination.value.longitude || timeRange.value.length < 2) {
+      if (!destination.value.longitude || !timeRange.value || timeRange.value.length < 2) {
         userList.value = [];
         loadingStatus.value = "noMore";
         return;
@@ -70,7 +63,6 @@ const _sfc_main = {
       if (isRefresh) {
         queryParams.pageNo = 1;
         userList.value = [];
-        loadingStatus.value = "more";
       }
       loadingStatus.value = "loading";
       try {
@@ -83,7 +75,9 @@ const _sfc_main = {
             ...queryParams,
             longitude: destination.value.longitude,
             latitude: destination.value.latitude,
-            nextLocationTime: formatDateTime(new Date(timeRange.value[0])),
+            // 【修改点】：更新为后端新的两个字段
+            nextStartLocationTime: formatDateTime(timeRange.value[0]),
+            nextEndLocationTime: formatDateTime(timeRange.value[1]),
             tabIndex: activeTab.value
           }
         });
@@ -91,7 +85,7 @@ const _sfc_main = {
           throw new Error(error);
         const newList = data.list || [];
         userList.value = isRefresh ? newList : [...userList.value, ...newList];
-        total.value = data.total;
+        total.value = data.total || 0;
         loadingStatus.value = userList.value.length >= total.value ? "noMore" : "more";
       } catch (err) {
         loadingStatus.value = "more";
@@ -101,11 +95,11 @@ const _sfc_main = {
         });
       }
     };
-    const updateNextLocation = async () => {
-      if (!destination.value.longitude || timeRange.value.length < 2)
+    const handleCriteriaChange = async () => {
+      if (!destination.value.longitude || !timeRange.value || timeRange.value.length < 2)
         return;
       common_vendor.index.showLoading({
-        title: "正在规划行程..."
+        title: "同步行程..."
       });
       const {
         error
@@ -114,21 +108,15 @@ const _sfc_main = {
         data: {
           longitude: destination.value.longitude,
           latitude: destination.value.latitude,
-          nextLocationStartTime: formatDateTime(new Date(timeRange.value[0])),
-          nextLocationEndTime: formatDateTime(new Date(timeRange.value[1]))
+          // 1. 移除 encodeURIComponent，直接传 formatDateTime 的结果
+          // 2. 检查字段名：如果后端报“结束时间不能为空”，说明它没认出 nextEndLocationTime
+          // 请确认 POST 接口是否应使用原来的字段名：nextLocationStartTime 和 nextLocationEndTime
+          nextLocationStartTime: formatDateTime(timeRange.value[0]),
+          nextLocationEndTime: formatDateTime(timeRange.value[1])
         }
       });
       common_vendor.index.hideLoading();
-      if (error) {
-        common_vendor.index.showToast({
-          title: `行程规划失败: ${error}`,
-          icon: "none"
-        });
-      } else {
-        common_vendor.index.showToast({
-          title: "行程已更新",
-          icon: "success"
-        });
+      if (!error) {
         fetchUserList(true);
       }
     };
@@ -136,70 +124,52 @@ const _sfc_main = {
       if (isFollowActionInProgress.value)
         return;
       const currentUserId = common_vendor.index.getStorageSync("userId");
-      if (!currentUserId) {
-        common_vendor.index.showToast({
+      if (!currentUserId)
+        return common_vendor.index.showToast({
           title: "请先登录",
           icon: "none"
         });
-        return;
-      }
       isFollowActionInProgress.value = true;
-      const originalFollowStatus = user.followToFlag;
-      const newFollowStatus = originalFollowStatus === 1 ? 0 : 1;
-      const apiUrl = newFollowStatus === 1 ? "/app-api/member/follow/add" : "/app-api/member/follow/del";
-      const successMsg = newFollowStatus === 1 ? "关注成功" : "已取消关注";
-      user.followToFlag = newFollowStatus;
+      const originalStatus = user.followToFlag;
+      const newStatus = originalStatus === 1 ? 0 : 1;
+      user.followToFlag = newStatus;
       try {
+        const apiUrl = newStatus === 1 ? "/app-api/member/follow/add" : "/app-api/member/follow/del";
         const {
           error
         } = await utils_request.request(apiUrl, {
           method: "POST",
           data: {
-            userId: currentUserId,
             targetId: user.id,
             targetType: "post_user"
           }
         });
-        if (error) {
+        if (error)
           throw new Error(error);
-        }
         common_vendor.index.showToast({
-          title: successMsg,
+          title: newStatus === 1 ? "关注成功" : "已取消关注",
           icon: "success"
         });
       } catch (err) {
-        user.followToFlag = originalFollowStatus;
+        user.followToFlag = originalStatus;
         common_vendor.index.showToast({
-          title: err.message || "操作失败，请重试",
+          title: "操作失败",
           icon: "none"
         });
       } finally {
         isFollowActionInProgress.value = false;
       }
     };
-    const navigateToBusinessCard = (user) => {
-      const defaultAvatar = "/static/icon/default-avatar.png";
-      const name = user.nickname || "匿名用户";
-      const avatarUrl = user.avatar || defaultAvatar;
-      const url = `/packages/applicationBusinessCard/applicationBusinessCard?id=${user.id}&name=${encodeURIComponent(name)}&avatar=${encodeURIComponent(avatarUrl)}`;
-      common_vendor.index.__f__("log", "at pages/relation/relation.vue:373", "从人脉列表页跳转，URL:", url);
-      common_vendor.index.navigateTo({
-        url
-      });
-    };
     const resetFilters = () => {
       common_vendor.index.showModal({
         title: "提示",
-        content: "确定要重置所有筛选条件吗？",
+        content: "确定要重置筛选条件吗？",
         success: (res) => {
           if (res.confirm) {
             destination.value = {};
             timeRange.value = [];
-            fetchUserList(true);
-            common_vendor.index.showToast({
-              title: "已重置",
-              icon: "none"
-            });
+            userList.value = [];
+            loadingStatus.value = "noMore";
           }
         }
       });
@@ -208,192 +178,106 @@ const _sfc_main = {
       if (!await utils_user.checkLoginGuard())
         return;
       common_vendor.index.chooseLocation({
-        success: (res) => destination.value = res
-      });
-    };
-    const handleTimeChange = async (e) => {
-      if (!await utils_user.checkLoginGuard()) {
-        timeRange.value = [];
-        return;
-      }
-      timeRange.value = e;
-    };
-    const switchTab = (tabIndex) => activeTab.value = tabIndex;
-    const goToShakePage = async () => {
-      if (!await utils_user.checkLoginGuard())
-        return;
-      common_vendor.index.navigateTo({
-        url: "/packages/location/location?autoShake=true"
-      });
-    };
-    const goToviewPath = async () => {
-      if (!await utils_user.checkLoginGuard())
-        return;
-      common_vendor.index.navigateTo({
-        url: "/packages/location/location?autoShake=true"
-      });
-    };
-    common_vendor.watch([destination, timeRange], updateNextLocation);
-    common_vendor.watch(activeTab, () => fetchUserList(true));
-    common_vendor.onShow(() => {
-      common_vendor.index.__f__("log", "at pages/relation/relation.vue:448", "人脉页 onShow: 开始监听摇一摇");
-      common_vendor.index.onAccelerometerChange((res) => {
-        if (Math.abs(res.x) > 1.5 || Math.abs(res.y) > 1.5 || Math.abs(res.z) > 1.5) {
-          if (!isShakeLocked.value) {
-            lockShake();
-            common_vendor.index.__f__("log", "at pages/relation/relation.vue:460", "检测到摇一摇，准备跳转...");
-            goToShakePage();
-          }
+        success: (res) => {
+          destination.value = res;
+          handleCriteriaChange();
         }
       });
-    });
-    common_vendor.onHide(() => {
-      common_vendor.index.__f__("log", "at pages/relation/relation.vue:471", "人脉页 onHide: 停止监听摇一摇");
-      common_vendor.index.stopAccelerometer();
-    });
-    common_vendor.onLoad(() => {
-    });
-    common_vendor.onPullDownRefresh(() => {
+    };
+    const handleTimeChange = (e) => {
+      timeRange.value = e;
+      handleCriteriaChange();
+    };
+    const switchTab = (index) => {
+      activeTab.value = index;
       fetchUserList(true);
-    });
+    };
+    const navigateToBusinessCard = (user) => {
+      common_vendor.index.navigateTo({
+        url: `/packages/applicationBusinessCard/applicationBusinessCard?id=${user.id}&name=${encodeURIComponent(user.nickname)}&avatar=${encodeURIComponent(user.avatar || "")}`
+      });
+    };
+    common_vendor.onPullDownRefresh(() => fetchUserList(true));
     common_vendor.onReachBottom(() => {
       if (loadingStatus.value === "more") {
         queryParams.pageNo++;
-        fetchUserList(false);
+        fetchUserList();
       }
-    });
-    common_vendor.onShareAppMessage(() => {
-      const inviteCode = utils_user.getInviteCode();
-      common_vendor.index.__f__("log", "at pages/relation/relation.vue:495", `[分享] 准备分享人脉页面给好友，邀请码: ${inviteCode}`);
-      let sharePath = "/pages/relation/relation";
-      if (inviteCode) {
-        sharePath += `?inviteCode=${inviteCode}`;
-      }
-      const shareContent = {
-        title: "来这里拓展你的人脉圈，发现无限商机！",
-        path: sharePath,
-        imageUrl: "/static/connections-bg.png"
-        // 使用页面头部的背景图作为分享封面
-      };
-      common_vendor.index.__f__("log", "at pages/relation/relation.vue:511", "[分享] 分享给好友的内容:", JSON.stringify(shareContent));
-      return shareContent;
-    });
-    common_vendor.onShareTimeline(() => {
-      const inviteCode = utils_user.getInviteCode();
-      common_vendor.index.__f__("log", "at pages/relation/relation.vue:523", `[分享] 准备分享人脉页面到朋友圈，邀请码: ${inviteCode}`);
-      let queryString = "";
-      if (inviteCode) {
-        queryString = `inviteCode=${inviteCode}`;
-      }
-      const shareContent = {
-        title: "来这里拓展你的人脉圈，发现无限商机！",
-        query: queryString,
-        imageUrl: "/static/connections-bg.png"
-        // 使用页面头部的背景图作为分享封面
-      };
-      common_vendor.index.__f__("log", "at pages/relation/relation.vue:538", "[分享] 分享到朋友圈的内容:", JSON.stringify(shareContent));
-      return shareContent;
     });
     return (_ctx, _cache) => {
       return common_vendor.e({
         a: common_assets._imports_0$1,
-        b: common_vendor.o(goToviewPath),
-        c: common_vendor.p({
-          type: "personadd",
-          size: "42",
-          color: "#fff"
-        }),
-        d: common_vendor.o(goToShakePage),
-        e: common_vendor.p({
+        b: common_vendor.p({
           type: "refreshempty",
           size: "16",
           color: "#666"
         }),
-        f: common_vendor.o(resetFilters),
-        g: common_vendor.p({
-          type: "paperplane",
+        c: common_vendor.o(resetFilters),
+        d: common_vendor.p({
+          type: "paperplane-filled",
           size: "20",
-          color: "#999"
+          color: "#FF8400"
         }),
-        h: common_vendor.t(destination.value.name || "请选择拟访友地点"),
-        i: common_vendor.p({
+        e: common_vendor.t(destination.value.name || "请选择拟访友地点"),
+        f: common_vendor.p({
           type: "right",
           size: "16",
-          color: "#999"
+          color: "#CCC"
         }),
-        j: common_vendor.o(handleChooseLocation),
-        k: common_vendor.p({
-          type: "calendar",
+        g: common_vendor.o(handleChooseLocation),
+        h: common_vendor.p({
+          type: "calendar-filled",
           size: "20",
-          color: "#999"
+          color: "#FF8400"
         }),
-        l: common_vendor.t(timeRangeText.value),
-        m: common_vendor.o(handleTimeChange),
-        n: common_vendor.o(($event) => timeRange.value = $event),
-        o: common_vendor.p({
+        i: common_vendor.t(timeRangeText.value),
+        j: common_vendor.o(handleTimeChange),
+        k: common_vendor.o(($event) => timeRange.value = $event),
+        l: common_vendor.p({
           type: "datetimerange",
           modelValue: timeRange.value
         }),
-        p: common_vendor.p({
+        m: common_vendor.p({
           type: "right",
           size: "16",
-          color: "#999"
+          color: "#CCC"
         }),
-        q: common_vendor.p({
-          type: "paperplane-filled",
-          size: "18",
-          color: activeTab.value === 0 ? themeColor : "#666"
-        }),
-        r: activeTab.value === 0 ? 1 : "",
-        s: common_vendor.o(($event) => switchTab(0)),
-        t: common_vendor.p({
-          type: "heart-filled",
-          size: "18",
-          color: activeTab.value === 1 ? themeColor : "#666"
-        }),
-        v: activeTab.value === 1 ? 1 : "",
-        w: common_vendor.o(($event) => switchTab(1)),
-        x: common_vendor.f(userList.value, (user, k0, i0) => {
+        n: activeTab.value === 0 ? 1 : "",
+        o: common_vendor.o(($event) => switchTab(0)),
+        p: activeTab.value === 1 ? 1 : "",
+        q: common_vendor.o(($event) => switchTab(1)),
+        r: common_vendor.f(userList.value, (user, k0, i0) => {
           return common_vendor.e({
-            a: user.avatar,
+            a: user.avatar || "/static/images/default-avatar.png",
             b: common_vendor.o(($event) => navigateToBusinessCard(user), user.id),
             c: common_vendor.t(user.nickname),
-            d: user.levelName
-          }, user.levelName ? {
-            e: common_vendor.t(user.levelName)
-          } : {}, {
-            f: common_vendor.t(user.companyName),
-            g: activeTab.value === 1 && user.followMyFlag === 1
-          }, activeTab.value === 1 && user.followMyFlag === 1 ? {} : {}, {
-            h: common_vendor.t(user.followToFlag === 1 ? "已关注" : "+ 关注"),
-            i: user.followToFlag === 1 ? 1 : "",
-            j: common_vendor.o(($event) => handleFollowAction(user), user.id),
-            k: user.id
+            d: user.idCert === 1
+          }, user.idCert === 1 ? {} : {}, {
+            e: common_vendor.t(user.companyName || "保密机构"),
+            f: common_vendor.t(user.positionTitle || user.professionalTitle || "精英商友"),
+            g: common_vendor.t(user.followToFlag === 1 ? "已关注" : "+ 关注"),
+            h: user.followToFlag === 1 ? 1 : "",
+            i: common_vendor.o(($event) => handleFollowAction(user), user.id),
+            j: user.id
           });
         }),
-        y: isListEmpty.value
+        s: isListEmpty.value
       }, isListEmpty.value ? {
-        z: common_vendor.p({
+        t: common_vendor.p({
           type: "staff",
           size: "60",
           color: "#e0e0e0"
         })
       } : {}, {
-        A: userList.value.length > 0 || loadingStatus.value === "loading"
+        v: userList.value.length > 0 || loadingStatus.value === "loading"
       }, userList.value.length > 0 || loadingStatus.value === "loading" ? {
-        B: common_vendor.p({
-          status: loadingStatus.value,
-          contentText: {
-            contentdown: "上拉加载更多",
-            contentrefresh: "正在加载...",
-            contentnomore: "—— 我是有底线的 ——"
-          }
+        w: common_vendor.p({
+          status: loadingStatus.value
         })
       } : {});
     };
   }
 };
 const MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["__scopeId", "data-v-85e55c19"]]);
-_sfc_main.__runtimeHooks = 6;
 wx.createPage(MiniProgramPage);
 //# sourceMappingURL=../../../.sourcemap/mp-weixin/pages/relation/relation.js.map

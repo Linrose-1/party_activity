@@ -63,26 +63,26 @@
 
 				<view class="description">
 					您正在申请查看<span
-						class="highlight">{{ targetUserInfo.realName || targetUserInfo.nickname }}</span>的联系方式。请选择一种方式支付查看费用：
+						class="highlight">{{ targetUserInfo.realName || targetUserInfo.nickname }}</span>的数字名片。请选择以下方式获取：
 				</view>
 
 				<view class="cost-section">
-					<view class="cost-title">选择支付方式</view>
+					<view class="cost-title">选择获取方式</view>
 
 					<view class="cost-options">
 						<view class="cost-option selected"> <!-- 只有一个选项，直接设为选中 -->
 							<view class="currency-icon">
 								<i class="fas fa-gem"></i> <!-- 建议替换为 uni-icons 或图片 -->
 							</view>
-							<view class="cost-amount">{{ costAmount }}</view>
-							<view class="cost-label">智米</view>
+							<view class="cost-amount">{{ costAmount }}智米</view>
+							<view class="cost-label">消耗智米</view>
 						</view>
 					</view>
 
 					<view class="price-policy-hint">
 						<uni-icons type="info-filled" size="14" color="#FF6A00"></uni-icons>
-						<text v-if="friendOwnerUserId">提示：您正在通过其他圈主的圈友列表查看用户名片，需支付 2 智米。</text>
-						<text v-else>提示：普通名片查看需支付 1 智米。</text>
+						<text v-if="friendOwnerUserId">提示：您正在通过其他圈主的圈友列表查看数字名片，需消耗 2 智米。</text>
+						<text v-else>提示：数字名片查看需消耗 1 智米。</text>
 					</view>
 
 					<view class="user-balance user-balance-adjust" v-if="currentUserInfo">
@@ -95,7 +95,7 @@
 					</view>
 
 					<view class="insufficient" v-if="showInsufficient">
-						<i class="fas fa-exclamation-circle"></i> 您的智米不足，请先获取更多积分
+						<i class="fas fa-exclamation-circle"></i> 您的智米不足，请先获取更多智米
 					</view>
 				</view>
 
