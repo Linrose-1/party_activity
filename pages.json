@@ -594,6 +594,13 @@
 				{
 					"navigationBarTitleText" : "我发出的评论"
 				}
+			},
+			{
+				"path" : "credit-score/credit-score",
+				"style" : 
+				{
+					"navigationBarTitleText" : "猩球信用"
+				}
 			}
 			// 如果还有其他页面要放进这个分包，继续在这里加
 		]

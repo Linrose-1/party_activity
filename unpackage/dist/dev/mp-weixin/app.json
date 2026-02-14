@@ -82,7 +82,8 @@
         "contribution-ranking/contribution-ranking",
         "suggestion-detail/suggestion-detail",
         "recommend-list/recommend-list",
-        "my-comments/my-comments"
+        "my-comments/my-comments",
+        "credit-score/credit-score"
       ]
     }
   ],

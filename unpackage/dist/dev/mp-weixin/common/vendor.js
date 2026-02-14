@@ -8726,6 +8726,12 @@ const subPackages = [
         style: {
           navigationBarTitleText: "我发出的评论"
         }
+      },
+      {
+        path: "credit-score/credit-score",
+        style: {
+          navigationBarTitleText: "猩球信用"
+        }
       }
     ]
   }

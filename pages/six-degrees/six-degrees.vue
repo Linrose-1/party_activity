@@ -54,7 +54,7 @@
 							<text class="c-title">自定义 访友搜索</text>
 							<text class="c-desc">跨城出差 提前布局</text>
 						</view>
-						<view class="cost-tag">需消耗 2 智米</view>
+						<!-- <view class="cost-tag">需消耗 2 智米</view> -->
 					</view>
 				</view>
 			</view>

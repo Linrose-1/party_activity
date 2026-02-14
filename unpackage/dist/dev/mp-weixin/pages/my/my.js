@@ -87,8 +87,7 @@ const _sfc_main = {
           value: "--",
           // 或者 '查看'，或其他占位符
           label: "猩球信用",
-          path: null
-          // 使用 null 作为特殊标记
+          path: "/packages/credit-score/credit-score"
         }
       ];
     });

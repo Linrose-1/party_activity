@@ -1,6 +1,6 @@
 "use strict";
 const common_vendor = require("../common/vendor.js");
-const baseURL = "https://test-api.gofor.club";
+const baseURL = "https://jyj.gofor.club";
 const timeout = 1e4;
 const request = async (url, options = {}) => {
   const headers = {
