@@ -567,7 +567,7 @@ const _sfc_main = {
       } : {}, {
         A: friendList.value.length === 0 && loadStatus.value === "noMore"
       }, friendList.value.length === 0 && loadStatus.value === "noMore" ? {
-        B: common_assets._imports_0$4
+        B: common_assets._imports_0$5
       } : {}, {
         C: currentTab.value === 0,
         D: common_vendor.o(handleCircleSearch),

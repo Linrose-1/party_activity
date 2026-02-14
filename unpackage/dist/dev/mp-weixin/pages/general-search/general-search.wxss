@@ -1,0 +1,361 @@
+/* 水平间距 */
+/* 水平间距 */
+.search-page.data-v-797ccd59 {
+  background-color: #F8F9FB;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 顶部搜索区 */
+.header-section.data-v-797ccd59 {
+  background: #FFF;
+  padding: 20rpx 30rpx;
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.05);
+}
+.header-section .search-bar.data-v-797ccd59 {
+  background: #F2F3F5;
+  height: 84rpx;
+  border-radius: 42rpx;
+  display: flex;
+  align-items: center;
+  padding: 0 30rpx;
+}
+.header-section .search-bar .main-input.data-v-797ccd59 {
+  flex: 1;
+  margin: 0 20rpx;
+  font-size: 28rpx;
+}
+.header-section .search-bar .search-btn.data-v-797ccd59 {
+  color: #FF8400;
+  font-weight: bold;
+  font-size: 28rpx;
+  padding-left: 20rpx;
+  border-left: 1rpx solid #DDD;
+}
+.header-section .filter-toggle.data-v-797ccd59 {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-top: 16rpx;
+  gap: 8rpx;
+  color: #FF8400;
+  font-size: 24rpx;
+  font-weight: 500;
+}
+
+/* 筛选面板展开动画 */
+.filter-panel.data-v-797ccd59 {
+  background-color: #FFF;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-out;
+}
+.filter-panel.expanded.data-v-797ccd59 {
+  max-height: 1200rpx;
+  border-bottom: 1rpx solid #EEE;
+}
+.filter-panel .filter-inner.data-v-797ccd59 {
+  padding: 20rpx 40rpx 40rpx;
+}
+.filter-panel .filter-inner .filter-grid.data-v-797ccd59 {
+  display: flex;
+  gap: 30rpx;
+}
+.filter-panel .filter-inner .filter-grid.data-v-797ccd59 .uni-forms-item {
+  flex: 1;
+}
+.filter-panel .filter-inner .custom-input.data-v-797ccd59 {
+  background: #F9F9F9;
+  border-radius: 12rpx;
+  padding: 0 20rpx;
+}
+.filter-panel .filter-actions.data-v-797ccd59 {
+  display: flex;
+  gap: 20rpx;
+  margin-top: 20rpx;
+}
+.filter-panel .filter-actions .reset-btn.data-v-797ccd59 {
+  flex: 1;
+  height: 80rpx;
+  line-height: 80rpx;
+  text-align: center;
+  background: #F5F5F5;
+  border-radius: 40rpx;
+  color: #666;
+  font-size: 28rpx;
+}
+.filter-panel .filter-actions .confirm-btn.data-v-797ccd59 {
+  flex: 2;
+  height: 80rpx;
+  line-height: 80rpx;
+  text-align: center;
+  background: #FF8400;
+  border-radius: 40rpx;
+  color: #FFF;
+  font-weight: bold;
+  font-size: 28rpx;
+}
+.result-scroll.data-v-797ccd59 {
+  flex: 1;
+  height: 0;
+}
+.result-container.data-v-797ccd59 {
+  padding: 30rpx;
+}
+
+/* 总数统计 */
+.total-stats.data-v-797ccd59 {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 30rpx 0;
+  margin-bottom: 20rpx;
+}
+.total-stats .stats-label.data-v-797ccd59 {
+  font-size: 28rpx;
+  color: #666;
+}
+.total-stats .stats-num.data-v-797ccd59 {
+  font-size: 40rpx;
+  font-weight: bold;
+  color: #FF8400;
+  margin: 0 10rpx;
+}
+.section-header.data-v-797ccd59 {
+  margin: 20rpx 0 24rpx;
+  display: flex;
+  align-items: center;
+}
+.section-header .title.data-v-797ccd59 {
+  font-size: 30rpx;
+  font-weight: bold;
+  color: #222;
+}
+.section-header .total-count.data-v-797ccd59 {
+  font-size: 24rpx;
+  color: #999;
+  margin-left: 16rpx;
+}
+
+/* 精英名片卡片 */
+.user-card.data-v-797ccd59 {
+  background: #FFF;
+  border-radius: 28rpx;
+  padding: 30rpx;
+  margin-bottom: 24rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.02);
+  /* 锁定状态模糊 */
+}
+.user-card .card-body.data-v-797ccd59 {
+  display: flex;
+  align-items: center;
+}
+.user-card .card-body .avatar.data-v-797ccd59 {
+  width: 110rpx;
+  height: 110rpx;
+  border-radius: 50%;
+  background: #EEE;
+}
+.user-card .card-body .main-info.data-v-797ccd59 {
+  flex: 1;
+  margin-left: 20rpx;
+}
+.user-card .card-body .main-info .name-row.data-v-797ccd59 {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.user-card .card-body .main-info .name-row .name.data-v-797ccd59 {
+  font-size: 32rpx;
+  font-weight: bold;
+}
+.user-card .card-body .main-info .name-row .match-score.data-v-797ccd59 {
+  color: #FF8400;
+  font-size: 22rpx;
+  font-weight: bold;
+}
+.user-card .card-body .main-info .star-row.data-v-797ccd59 {
+  margin: 6rpx 0;
+}
+.user-card .card-body .main-info .profession-line.data-v-797ccd59 {
+  font-size: 24rpx;
+  color: #8E8E93;
+}
+.user-card .card-footer.data-v-797ccd59 {
+  margin-top: 24rpx;
+  padding-top: 24rpx;
+  border-top: 1rpx solid #F5F5F5;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.user-card .card-footer .common-tag.data-v-797ccd59 {
+  font-size: 24rpx;
+  color: #666;
+  background: #F8F9FB;
+  padding: 6rpx 20rpx;
+  border-radius: 12rpx;
+}
+.user-card .card-footer .detail-btn.data-v-797ccd59 {
+  background: #333;
+  color: #FFF;
+  font-size: 24rpx;
+  padding: 12rpx 32rpx;
+  border-radius: 40rpx;
+  font-weight: bold;
+}
+.user-card.locked.data-v-797ccd59 {
+  position: relative;
+  overflow: hidden;
+}
+.user-card.locked .locked-mask.data-v-797ccd59 {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10;
+  background: rgba(255, 255, 255, 0.7);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.user-card.locked .locked-mask text.data-v-797ccd59 {
+  font-size: 24rpx;
+  color: #999;
+  margin-top: 12rpx;
+}
+.user-card.locked .blur-box.data-v-797ccd59 {
+  filter: blur(6rpx);
+}
+.user-card.locked .line.data-v-797ccd59 {
+  height: 20rpx;
+  background: #F0F0F0;
+  border-radius: 10rpx;
+  margin-bottom: 12rpx;
+}
+.user-card.locked .line.long.data-v-797ccd59 {
+  width: 200rpx;
+}
+.user-card.locked .line.mid.data-v-797ccd59 {
+  width: 260rpx;
+}
+.user-card.locked .line.short.data-v-797ccd59 {
+  width: 150rpx;
+}
+
+/* 付费选购区域 (黑金风格) */
+.unlock-purchase-card.data-v-797ccd59 {
+  background: linear-gradient(135deg, #333 0%, #000 100%);
+  border-radius: 36rpx;
+  padding: 44rpx 32rpx;
+  margin: 40rpx 0;
+  text-align: center;
+}
+.unlock-purchase-card .card-tip.data-v-797ccd59 {
+  color: #FFBD70;
+  font-size: 26rpx;
+  margin-bottom: 34rpx;
+  display: block;
+}
+.unlock-purchase-card .tier-selector.data-v-797ccd59 {
+  display: flex;
+  gap: 16rpx;
+  margin-bottom: 44rpx;
+}
+.unlock-purchase-card .tier-selector .tier-item.data-v-797ccd59 {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.08);
+  border: 2rpx solid transparent;
+  border-radius: 24rpx;
+  padding: 28rpx 10rpx;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  transition: all 0.3s;
+}
+.unlock-purchase-card .tier-selector .tier-item.active.data-v-797ccd59 {
+  border-color: #FF8400;
+  background: rgba(255, 132, 0, 0.15);
+}
+.unlock-purchase-card .tier-selector .tier-item .hot-tag.data-v-797ccd59 {
+  position: absolute;
+  top: -14rpx;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #FF8400;
+  color: #FFF;
+  font-size: 18rpx;
+  padding: 2rpx 14rpx;
+  border-radius: 100rpx;
+}
+.unlock-purchase-card .tier-selector .tier-item .t-count.data-v-797ccd59 {
+  color: #FFF;
+  font-size: 34rpx;
+  font-weight: bold;
+}
+.unlock-purchase-card .tier-selector .tier-item .t-cost.data-v-797ccd59 {
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 22rpx;
+  margin: 4rpx 0;
+}
+.unlock-purchase-card .tier-selector .tier-item .t-benefit.data-v-797ccd59 {
+  color: #FF8400;
+  font-size: 18rpx;
+  font-weight: bold;
+}
+.unlock-purchase-card .pay-btn.data-v-797ccd59 {
+  background: linear-gradient(90deg, #FFBD70, #FF8400);
+  color: #FFF;
+  height: 94rpx;
+  line-height: 94rpx;
+  border-radius: 47rpx;
+  font-size: 30rpx;
+  font-weight: bold;
+  box-shadow: 0 12rpx 24rpx rgba(0, 0, 0, 0.3);
+}
+.unlock-purchase-card .pay-btn.data-v-797ccd59:active {
+  transform: scale(0.98);
+}
+.unlock-purchase-card .pay-sub-tip.data-v-797ccd59 {
+  font-size: 20rpx;
+  color: rgba(255, 255, 255, 0.3);
+  margin-top: 18rpx;
+  display: block;
+}
+
+/* 已查看所有商友提示 */
+.all-viewed-tip.data-v-797ccd59 {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40rpx 20rpx;
+  margin-top: 20rpx;
+  background: #F6FFED;
+  border-radius: 20rpx;
+  color: #52C41A;
+  font-size: 26rpx;
+  gap: 10rpx;
+}
+.empty-box.data-v-797ccd59 {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 100rpx;
+}
+.empty-box .empty-img.data-v-797ccd59 {
+  width: 240rpx;
+  height: 240rpx;
+  margin-bottom: 30rpx;
+  opacity: 0.5;
+}
+.empty-box text.data-v-797ccd59 {
+  font-size: 26rpx;
+  color: #999;
+}

@@ -844,7 +844,7 @@ const _sfc_main = {
       }, form.value.avatar ? {
         d: form.value.avatar
       } : {
-        e: common_assets._imports_0$3
+        e: common_assets._imports_0$4
       }, {
         f: common_vendor.p({
           type: "camera-filled",

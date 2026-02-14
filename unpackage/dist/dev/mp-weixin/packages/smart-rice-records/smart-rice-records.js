@@ -155,7 +155,7 @@ const _sfc_main = {
           status: loadingStatus.value
         })
       } : loadingStatus.value !== "loading" ? {
-        n: common_assets._imports_0$5
+        n: common_assets._imports_0$6
       } : {}, {
         m: loadingStatus.value !== "loading"
       });

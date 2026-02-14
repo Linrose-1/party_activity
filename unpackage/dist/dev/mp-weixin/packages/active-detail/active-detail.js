@@ -603,7 +603,7 @@ const _sfc_main = {
         }),
         ak: showTimelineGuide.value
       }, showTimelineGuide.value ? {
-        al: common_assets._imports_0$2,
+        al: common_assets._imports_0$3,
         am: common_vendor.o(hideTimelineGuide)
       } : {}, {
         an: common_vendor.sr(pointsPopup, "9217aa1c-8", {

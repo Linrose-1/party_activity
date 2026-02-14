@@ -1,0 +1,875 @@
+<template>
+	<view class="search-page">
+		<!-- 1. 顶部搜索与高级筛选入口 -->
+		<view class="header-section">
+			<view class="search-bar">
+				<uni-icons type="search" size="18" color="#999"></uni-icons>
+				<input type="text" v-model="queryParams.keyword" placeholder="搜索姓名/行业/学校/资源..." class="main-input"
+					@confirm="handleSearch" />
+				<view class="search-btn" @click="handleSearch">搜索</view>
+			</view>
+			<view class="filter-toggle" @click="isFilterExpanded = !isFilterExpanded">
+				<text>高级筛选</text>
+				<uni-icons :type="isFilterExpanded ? 'arrowup' : 'arrowdown'" size="14" color="#FF8400"></uni-icons>
+			</view>
+		</view>
+
+		<!-- 2. 可折叠高级筛选面板 -->
+		<view class="filter-panel" :class="{ 'expanded': isFilterExpanded }">
+			<view class="filter-inner">
+				<uni-forms label-position="top" label-width="100">
+					<view class="filter-grid">
+						<uni-forms-item label="用户名/昵称">
+							<uni-easyinput v-model="queryParams.nickname" placeholder="请输入" :inputBorder="false"
+								class="custom-input" />
+						</uni-forms-item>
+						<uni-forms-item label="学校/学历">
+							<uni-easyinput v-model="queryParams.school" placeholder="请输入学校" :inputBorder="false"
+								class="custom-input" />
+						</uni-forms-item>
+					</view>
+
+					<uni-forms-item label="行业领域">
+						<uni-data-picker :localdata="industryTree" v-model="queryParams.industry" placeholder="请选择行业"
+							:map="{text: 'name', value: 'name'}" />
+					</uni-forms-item>
+
+					<view class="filter-grid">
+						<uni-forms-item label="我有资源">
+							<uni-easyinput v-model="queryParams.haveResources" placeholder="提供资源" :inputBorder="false"
+								class="custom-input" />
+						</uni-forms-item>
+						<uni-forms-item label="我需资源">
+							<uni-easyinput v-model="queryParams.needResources" placeholder="需求资源" :inputBorder="false"
+								class="custom-input" />
+						</uni-forms-item>
+					</view>
+
+					<view class="filter-grid">
+						<uni-forms-item label="籍贯/家乡">
+							<uni-data-picker :localdata="areaTree" v-model="queryParams.nativePlace" placeholder="请选择"
+								:map="{text: 'name', value: 'id'}" />
+						</uni-forms-item>
+						<uni-forms-item label="商务办公地">
+							<uni-data-picker :localdata="areaTree" v-model="queryParams.locationAddress"
+								placeholder="请选择" :map="{text: 'name', value: 'id'}" />
+						</uni-forms-item>
+					</view>
+
+					<view class="filter-grid">
+						<uni-forms-item label="出生年代">
+							<uni-data-select v-model="queryParams.era" :localdata="eraOptions" placeholder="选择年代" />
+						</uni-forms-item>
+						<uni-forms-item label="兴趣爱好">
+							<uni-easyinput v-model="queryParams.hobby" placeholder="如：登山/高尔夫" :inputBorder="false"
+								class="custom-input" />
+						</uni-forms-item>
+					</view>
+				</uni-forms>
+
+				<view class="filter-actions">
+					<view class="reset-btn" @click="resetFilters">重置条件</view>
+					<view class="confirm-btn" @click="handleSearch">确认筛选</view>
+				</view>
+			</view>
+		</view>
+
+		<!-- 3. 搜索结果列表区域 -->
+		<scroll-view scroll-y class="result-scroll">
+			<view class="result-container">
+
+				<!-- 空状态 -->
+				<view class="empty-box" v-if="list.length === 0 && loadStatus !== 'loading'">
+					<image src="/static/images/empty.png" mode="aspectFit" class="empty-img" />
+					<text>未搜到匹配的精英商友，尝试调整筛选条件</text>
+				</view>
+
+				<!-- 有结果时显示 -->
+				<block v-else>
+					<!-- 总数统计 -->
+					<view class="total-stats" v-if="totalCount > 0">
+						<text class="stats-label">共搜索到</text>
+						<text class="stats-num">{{ totalCount }}</text>
+						<text class="stats-label">位商友</text>
+					</view>
+
+					<!-- 3.1 免费查看区 (前10位) -->
+					<view class="section-header" v-if="freeList.length > 0">
+						<view class="left">
+							<text class="title">🔓 免费查看 (前10位)</text>
+						</view>
+					</view>
+
+					<view class="user-card" v-for="(user, index) in freeList" :key="user.id" @click="goToDetail(user)">
+						<view class="card-body">
+							<image :src="user.avatar || '/static/images/default-avatar.png'" class="avatar"
+								mode="aspectFill" />
+							<view class="main-info">
+								<view class="name-row">
+									<text class="name">{{ user.nickname }}</text>
+									<text class="match-score">匹配度 {{ 90 + (10 - index) }}%</text>
+								</view>
+								<view class="star-row">
+									<uni-icons type="star-filled" size="14" color="#FF8400" v-for="s in 5"
+										:key="s"></uni-icons>
+								</view>
+								<view class="profession-line">
+									{{ user.professionalTitle || '精英人士' }} | {{ user.school || '知名院校' }} |
+									{{ user.locationAddressStr || '核心城市' }}
+								</view>
+							</view>
+						</view>
+						<view class="card-footer">
+							<view class="common-tag">共同点：{{ getCommonality(user) }}</view>
+							<view class="detail-btn">查看详情</view>
+						</view>
+					</view>
+
+					<!-- 3.2 付费解锁区 -->
+					<block v-if="totalCount > 10">
+						<view class="section-header locked-header">
+							<view class="left">
+								<text class="title">🔒 付费解锁查看</text>
+								<text class="total-count">剩余 {{ totalCount - 10 }} 位深度匹配商友</text>
+							</view>
+						</view>
+
+						<!-- 已解锁的付费商友列表 -->
+						<view class="user-card" v-for="(user, index) in paidList" :key="user.id" @click="goToDetail(user)">
+							<view class="card-body">
+								<image :src="user.avatar || '/static/images/default-avatar.png'" class="avatar"
+									mode="aspectFill" />
+								<view class="main-info">
+									<view class="name-row">
+										<text class="name">{{ user.nickname }}</text>
+										<text class="match-score">匹配度 {{ 85 - index }}%</text>
+									</view>
+									<view class="star-row">
+										<uni-icons type="star-filled" size="14" color="#FF8400" v-for="s in 5"
+											:key="s"></uni-icons>
+									</view>
+									<view class="profession-line">
+										{{ user.professionalTitle || '精英人士' }} | {{ user.school || '知名院校' }} |
+										{{ user.locationAddressStr || '核心城市' }}
+									</view>
+								</view>
+							</view>
+							<view class="card-footer">
+								<view class="common-tag">共同点：{{ getCommonality(user) }}</view>
+								<view class="detail-btn">查看详情</view>
+							</view>
+						</view>
+
+						<!-- 付费购买卡片 - 有剩余未解锁商友时显示 -->
+						<view class="unlock-purchase-card" v-if="list.length < totalCount">
+							<text class="card-tip" v-if="paidList.length > 0">已解锁 {{ paidList.length }} 位，继续解锁查看更多</text>
+							<text class="card-tip" v-else>免费额度已用完，解锁后可查看更多精英资料</text>
+
+							<view class="tier-selector">
+								<view class="tier-item" v-for="tier in unlockTiers" :key="tier.id"
+									:class="{ active: selectedTier.id === tier.id }" @click="selectedTier = tier">
+									<view class="hot-tag" v-if="tier.hot">推荐</view>
+									<text class="t-count">{{ tier.count }}人</text>
+									<text class="t-cost">{{ tier.price }} 智米</text>
+									<text class="t-benefit">{{ tier.benefit }}</text>
+								</view>
+							</view>
+
+							<view class="pay-btn" @click="handleUnlock">
+								立即支付 {{ selectedTier.price }} 智米解锁
+							</view>
+						</view>
+
+						<!-- 模糊占位卡片 (仅在未解锁时显示) -->
+						<block v-if="paidList.length === 0">
+							<view class="user-card locked" v-for="i in Math.min(2, totalCount - 10)" :key="'locked-'+i">
+								<view class="locked-mask">
+									<uni-icons type="locked-filled" size="30" color="#CCC"></uni-icons>
+									<text>解锁后查看完整背景</text>
+								</view>
+								<view class="card-body blur-box">
+									<view class="avatar gray"></view>
+									<view class="main-info">
+										<view class="line long"></view>
+										<view class="line mid"></view>
+										<view class="line short"></view>
+									</view>
+								</view>
+							</view>
+						</block>
+					</block>
+
+					<!-- 已查看所有商友的提示 -->
+					<view class="all-viewed-tip" v-if="totalCount > 0 && list.length >= totalCount">
+						<uni-icons type="checkmarkempty" size="24" color="#52C41A"></uni-icons>
+						<text>已查看全部商友，没有更多了</text>
+					</view>
+				</block>
+
+				<uni-load-more :status="loadStatus" v-if="list.length > 0" />
+			</view>
+		</scroll-view>
+	</view>
+</template>
+
+<script setup>
+	import {
+		ref,
+		reactive,
+		computed
+	} from 'vue';
+	import {
+		onLoad
+	} from '@dcloudio/uni-app';
+	import request from '@/utils/request.js';
+	import {
+		checkLoginGuard
+	} from '@/utils/user.js';
+
+	// --- 状态定义 ---
+	const isFilterExpanded = ref(false);
+	const list = ref([]); // 所有已加载的商友
+	const totalCount = ref(0); // 总的商友数量
+	const loadStatus = ref('more');
+	const areaTree = ref([]);
+	const industryTree = ref([]);
+	const hasUnlocked = ref(false); // 标记是否已付费解锁
+
+	// 解锁档位配置
+	const unlockTiers = [{
+			id: 1,
+			count: 1,
+			price: 1,
+			benefit: '单人查看',
+			hot: false
+		},
+		{
+			id: 2,
+			count: 6,
+			price: 5,
+			benefit: '加送1位',
+			hot: true
+		},
+		{
+			id: 3,
+			count: 15,
+			price: 10,
+			benefit: '买10送5',
+			hot: false
+		}
+	];
+	const selectedTier = ref(unlockTiers[1]);
+
+	const queryParams = reactive({
+		keyword: '',
+		nickname: '',
+		school: '',
+		industry: '',
+		haveResources: '',
+		needResources: '',
+		nativePlace: '',
+		locationAddress: '',
+		era: '',
+		hobby: ''
+	});
+
+	const eraOptions = [{
+			value: '50/60',
+			text: '50/60'
+		}, {
+			value: '70/80',
+			text: '70/80'
+		},
+		{
+			value: '90/00',
+			text: '90/00'
+		}, {
+			value: '不问年代',
+			text: '不问年代'
+		}
+	];
+
+	// --- 计算属性 ---
+	const freeList = computed(() => list.value.slice(0, 10)); // 前10位免费
+	const paidList = computed(() => list.value.slice(10)); // 第11位开始的付费解锁
+
+	// --- 生命周期与初始化 ---
+	onLoad((options) => {
+		if (options.keyword) {
+			queryParams.keyword = decodeURIComponent(options.keyword);
+		}
+		initBaseData();
+		handleSearch();
+	});
+
+	const initBaseData = async () => {
+		const [areaRes, indRes] = await Promise.all([
+			request('/app-api/system/area/tree'),
+			request('/app-api/member/national-industry/tree', {
+				method: 'POST'
+			})
+		]);
+		if (!areaRes.error) areaTree.value = areaRes.data;
+		if (!indRes.error) industryTree.value = indRes.data;
+	};
+
+	// --- 核心业务逻辑 ---
+	const handleSearch = async () => {
+		// 验证：检查是否至少有一个搜索条件
+		const hasSearchCondition = 
+			queryParams.keyword?.trim() ||
+			queryParams.nickname?.trim() ||
+			queryParams.school?.trim() ||
+			queryParams.industry?.trim() ||
+			queryParams.haveResources?.trim() ||
+			queryParams.needResources?.trim() ||
+			queryParams.nativePlace ||
+			queryParams.locationAddress ||
+			queryParams.era?.trim() ||
+			queryParams.hobby?.trim();
+
+		if (!hasSearchCondition) {
+			// 没有搜索条件，清空列表并提示用户
+			list.value = [];
+			totalCount.value = 0;
+			loadStatus.value = 'noMore';
+			uni.showToast({
+				title: '请输入搜索关键词或选择筛选条件',
+				icon: 'none',
+				duration: 2000
+			});
+			return;
+		}
+
+		hasUnlocked.value = false; // 重置解锁状态
+		list.value = [];
+		isFilterExpanded.value = false;
+		await fetchUsers(true);
+	};
+
+	const fetchUsers = async (isFirstLoad = false) => {
+		loadStatus.value = 'loading';
+		
+		let requestData;
+		if (!hasUnlocked.value) {
+			// 初始搜索：pageNo=1, pageSize=10（前10位免费）
+			requestData = {
+				...queryParams,
+				pageNo: 1,
+				pageSize: 10
+			};
+		} else {
+			// 解锁后加载：pageNo=2, pageSize=解锁的数量
+			const paidCount = Math.min(selectedTier.value.count, totalCount.value - 10);
+			requestData = {
+				...queryParams,
+				pageNo: 2,
+				pageSize: paidCount
+			};
+		}
+
+		const {
+			data,
+			error
+		} = await request('/app-api/member/user/general-search-process', {
+			method: 'POST',
+			data: requestData
+		});
+
+		if (!error && data) {
+			const newList = data.list || [];
+			if (!hasUnlocked.value) {
+				// 初始搜索，直接赋值
+				list.value = newList;
+			} else {
+				// 解锁后，追加到列表
+				list.value = [...list.value, ...newList];
+			}
+			totalCount.value = data.total || 0;
+			loadStatus.value = list.value.length >= totalCount.value ? 'noMore' : 'more';
+		} else {
+			loadStatus.value = 'noMore';
+		}
+	};
+
+	const resetFilters = () => {
+		Object.keys(queryParams).forEach(key => {
+			queryParams[key] = '';
+		});
+	};
+
+	const handleUnlock = async () => {
+		const canProceed = await checkLoginGuard(`解锁更多精英需消耗 ${selectedTier.value.price} 智米，是否继续？`);
+		if (!canProceed) return;
+
+		uni.showModal({
+			title: '确认解锁',
+			content: `确认消耗 ${selectedTier.value.price} 智米兑换 ${selectedTier.value.count} 个搜索查看名额？`,
+			confirmColor: '#FF8400',
+			success: async (res) => {
+				if (res.confirm) {
+					uni.showLoading({
+						title: '正在解锁...'
+					});
+					// 对接接口：增加普通搜索查看次数
+					const {
+						error
+					} = await request(
+						`/app-api/member/user/add-normal-search-count?viewCount=${selectedTier.value.count}`, {
+							method: 'POST'
+						});
+					uni.hideLoading();
+					if (!error) {
+						uni.showToast({
+							title: '解锁成功',
+							icon: 'success'
+						});
+						// 标记已解锁
+						hasUnlocked.value = true;
+						// 加载解锁后的商友列表
+						setTimeout(() => {
+							fetchUsers();
+						}, 1000);
+					}
+				}
+			}
+		});
+	};
+
+	const getCommonality = (user) => {
+		const p = [];
+		if (user.classmateFlag) p.push('校友');
+		if (user.peerFlag) p.push('同行');
+		if (user.fellowTownspeopleFlag) p.push('同乡');
+		if (user.matchTagCount > 0) p.push('资源高度匹配');
+		return p.length > 0 ? p.join(' · ') : '潜力合作伙伴';
+	};
+
+	const goToDetail = async (user) => {
+		const canProceed = await checkLoginGuard();
+		if (canProceed) {
+			const defaultAvatar = '/static/icon/default-avatar.png';
+			const name = user.nickname || '匿名用户';
+			const avatarUrl = user.avatar || defaultAvatar;
+			
+			uni.navigateTo({
+				url: `/packages/applicationBusinessCard/applicationBusinessCard?id=${user.id}&name=${encodeURIComponent(name)}&avatar=${encodeURIComponent(avatarUrl)}`
+			});
+		}
+	};
+</script>
+
+<style lang="scss" scoped>
+	$theme-color: #FF8400;
+
+	.search-page {
+		background-color: #F8F9FB;
+		min-height: 100vh;
+		display: flex;
+		flex-direction: column;
+	}
+
+	/* 顶部搜索区 */
+	.header-section {
+		background: #FFF;
+		padding: 20rpx 30rpx;
+		position: sticky;
+		top: 0;
+		z-index: 100;
+		box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.05);
+
+		.search-bar {
+			background: #F2F3F5;
+			height: 84rpx;
+			border-radius: 42rpx;
+			display: flex;
+			align-items: center;
+			padding: 0 30rpx;
+
+			.main-input {
+				flex: 1;
+				margin: 0 20rpx;
+				font-size: 28rpx;
+			}
+
+			.search-btn {
+				color: $theme-color;
+				font-weight: bold;
+				font-size: 28rpx;
+				padding-left: 20rpx;
+				border-left: 1rpx solid #DDD;
+			}
+		}
+
+		.filter-toggle {
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			padding-top: 16rpx;
+			gap: 8rpx;
+			color: $theme-color;
+			font-size: 24rpx;
+			font-weight: 500;
+		}
+	}
+
+	/* 筛选面板展开动画 */
+	.filter-panel {
+		background-color: #FFF;
+		max-height: 0;
+		overflow: hidden;
+		transition: max-height 0.3s ease-out;
+
+		&.expanded {
+			max-height: 1200rpx;
+			border-bottom: 1rpx solid #EEE;
+		}
+
+		.filter-inner {
+			padding: 20rpx 40rpx 40rpx;
+
+			.filter-grid {
+				display: flex;
+				gap: 30rpx;
+
+				::v-deep .uni-forms-item {
+					flex: 1;
+				}
+			}
+
+			.custom-input {
+				background: #F9F9F9;
+				border-radius: 12rpx;
+				padding: 0 20rpx;
+			}
+		}
+
+		.filter-actions {
+			display: flex;
+			gap: 20rpx;
+			margin-top: 20rpx;
+
+			.reset-btn {
+				flex: 1;
+				height: 80rpx;
+				line-height: 80rpx;
+				text-align: center;
+				background: #F5F5F5;
+				border-radius: 40rpx;
+				color: #666;
+				font-size: 28rpx;
+			}
+
+			.confirm-btn {
+				flex: 2;
+				height: 80rpx;
+				line-height: 80rpx;
+				text-align: center;
+				background: $theme-color;
+				border-radius: 40rpx;
+				color: #FFF;
+				font-weight: bold;
+				font-size: 28rpx;
+			}
+		}
+	}
+
+	.result-scroll {
+		flex: 1;
+		height: 0;
+	}
+
+	.result-container {
+		padding: 30rpx;
+	}
+
+	/* 总数统计 */
+	.total-stats {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		padding: 30rpx 0;
+		margin-bottom: 20rpx;
+
+		.stats-label {
+			font-size: 28rpx;
+			color: #666;
+		}
+
+		.stats-num {
+			font-size: 40rpx;
+			font-weight: bold;
+			color: $theme-color;
+			margin: 0 10rpx;
+		}
+	}
+
+	.section-header {
+		margin: 20rpx 0 24rpx;
+		display: flex;
+		align-items: center;
+
+		.title {
+			font-size: 30rpx;
+			font-weight: bold;
+			color: #222;
+		}
+
+		.total-count {
+			font-size: 24rpx;
+			color: #999;
+			margin-left: 16rpx;
+		}
+	}
+
+	/* 精英名片卡片 */
+	.user-card {
+		background: #FFF;
+		border-radius: 28rpx;
+		padding: 30rpx;
+		margin-bottom: 24rpx;
+		box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.02);
+
+		.card-body {
+			display: flex;
+			align-items: center;
+
+			.avatar {
+				width: 110rpx;
+				height: 110rpx;
+				border-radius: 50%;
+				background: #EEE;
+			}
+
+			.main-info {
+				flex: 1;
+				margin-left: 20rpx;
+
+				.name-row {
+					display: flex;
+					justify-content: space-between;
+					align-items: center;
+
+					.name {
+						font-size: 32rpx;
+						font-weight: bold;
+					}
+
+					.match-score {
+						color: $theme-color;
+						font-size: 22rpx;
+						font-weight: bold;
+					}
+				}
+
+				.star-row {
+					margin: 6rpx 0;
+				}
+
+				.profession-line {
+					font-size: 24rpx;
+					color: #8E8E93;
+				}
+			}
+		}
+
+		.card-footer {
+			margin-top: 24rpx;
+			padding-top: 24rpx;
+			border-top: 1rpx solid #F5F5F5;
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+
+			.common-tag {
+				font-size: 24rpx;
+				color: #666;
+				background: #F8F9FB;
+				padding: 6rpx 20rpx;
+				border-radius: 12rpx;
+			}
+
+			.detail-btn {
+				background: #333;
+				color: #FFF;
+				font-size: 24rpx;
+				padding: 12rpx 32rpx;
+				border-radius: 40rpx;
+				font-weight: bold;
+			}
+		}
+
+		/* 锁定状态模糊 */
+		&.locked {
+			position: relative;
+			overflow: hidden;
+
+			.locked-mask {
+				position: absolute;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+				z-index: 10;
+				background: rgba(255, 255, 255, 0.7);
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				justify-content: center;
+
+				text {
+					font-size: 24rpx;
+					color: #999;
+					margin-top: 12rpx;
+				}
+			}
+
+			.blur-box {
+				filter: blur(6rpx);
+			}
+
+			.line {
+				height: 20rpx;
+				background: #F0F0F0;
+				border-radius: 10rpx;
+				margin-bottom: 12rpx;
+
+				&.long {
+					width: 200rpx;
+				}
+
+				&.mid {
+					width: 260rpx;
+				}
+
+				&.short {
+					width: 150rpx;
+				}
+			}
+		}
+	}
+
+	/* 付费选购区域 (黑金风格) */
+	.unlock-purchase-card {
+		background: linear-gradient(135deg, #333 0%, #000 100%);
+		border-radius: 36rpx;
+		padding: 44rpx 32rpx;
+		margin: 40rpx 0;
+		text-align: center;
+
+		.card-tip {
+			color: #FFBD70;
+			font-size: 26rpx;
+			margin-bottom: 34rpx;
+			display: block;
+		}
+
+		.tier-selector {
+			display: flex;
+			gap: 16rpx;
+			margin-bottom: 44rpx;
+
+			.tier-item {
+				flex: 1;
+				background: rgba(255, 255, 255, 0.08);
+				border: 2rpx solid transparent;
+				border-radius: 24rpx;
+				padding: 28rpx 10rpx;
+				display: flex;
+				flex-direction: column;
+				position: relative;
+				transition: all 0.3s;
+
+				&.active {
+					border-color: $theme-color;
+					background: rgba($theme-color, 0.15);
+				}
+
+				.hot-tag {
+					position: absolute;
+					top: -14rpx;
+					left: 50%;
+					transform: translateX(-50%);
+					background: $theme-color;
+					color: #FFF;
+					font-size: 18rpx;
+					padding: 2rpx 14rpx;
+					border-radius: 100rpx;
+				}
+
+				.t-count {
+					color: #FFF;
+					font-size: 34rpx;
+					font-weight: bold;
+				}
+
+				.t-cost {
+					color: rgba(255, 255, 255, 0.4);
+					font-size: 22rpx;
+					margin: 4rpx 0;
+				}
+
+				.t-benefit {
+					color: $theme-color;
+					font-size: 18rpx;
+					font-weight: bold;
+				}
+			}
+		}
+
+		.pay-btn {
+			background: linear-gradient(90deg, #FFBD70, $theme-color);
+			color: #FFF;
+			height: 94rpx;
+			line-height: 94rpx;
+			border-radius: 47rpx;
+			font-size: 30rpx;
+			font-weight: bold;
+			box-shadow: 0 12rpx 24rpx rgba(0, 0, 0, 0.3);
+
+			&:active {
+				transform: scale(0.98);
+			}
+		}
+
+		.pay-sub-tip {
+			font-size: 20rpx;
+			color: rgba(255, 255, 255, 0.3);
+			margin-top: 18rpx;
+			display: block;
+		}
+	}
+
+	/* 已查看所有商友提示 */
+	.all-viewed-tip {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		padding: 40rpx 20rpx;
+		margin-top: 20rpx;
+		background: #F6FFED;
+		border-radius: 20rpx;
+		color: #52C41A;
+		font-size: 26rpx;
+		gap: 10rpx;
+	}
+
+	.empty-box {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		padding-top: 100rpx;
+
+		.empty-img {
+			width: 240rpx;
+			height: 240rpx;
+			margin-bottom: 30rpx;
+			opacity: 0.5;
+		}
+
+		text {
+			font-size: 26rpx;
+			color: #999;
+		}
+	}
+</style>

@@ -244,10 +244,22 @@
 				"navigationBarTitleText": "订单"
 			}
 		},
-		{
+{
 			"path": "pages/relation/relation",
 			"style": {
 				"navigationBarTitleText": "六度人脉"
+			}
+		},
+		{
+			"path": "pages/six-degrees/six-degrees",
+			"style": {
+				"navigationBarTitleText": "六度人脉"
+			}
+		},
+		{
+			"path": "pages/general-search/general-search",
+			"style": {
+				"navigationBarTitleText": "普通搜索"
 			}
 		},
 		{
@@ -568,6 +580,20 @@
 				"style": {
 					"navigationBarTitleText": "建议详情"
 				}
+			},
+			{
+				"path" : "recommend-list/recommend-list",
+				"style" : 
+				{
+					"navigationBarTitleText" : "智能推荐列表"
+				}
+			},
+			{
+				"path" : "my-comments/my-comments",
+				"style" : 
+				{
+					"navigationBarTitleText" : "我发出的评论"
+				}
 			}
 			// 如果还有其他页面要放进这个分包，继续在这里加
 		]
@@ -590,18 +616,18 @@
 				"iconPath": "/static/tabbar/active.png",
 				"selectedIconPath": "/static/tabbar/active-active.png"
 			},
-			// {
-			// 	"pagePath": "pages/location/location",
-			// 	"text": "附近",
-			// 	"iconPath": "/static/tabbar/location.png",
-			// 	"selectedIconPath": "/static/tabbar/location-active.png"
-			// },
 			{
-				"pagePath": "pages/relation/relation",
+				"pagePath": "pages/six-degrees/six-degrees",
 				"text": "六度人脉",
 				"iconPath": "/static/tabbar/location.png",
 				"selectedIconPath": "/static/tabbar/location-active.png"
 			},
+			// {
+			// 	"pagePath": "pages/relation/relation",
+			// 	"text": "六度人脉",
+			// 	"iconPath": "/static/tabbar/location.png",
+			// 	"selectedIconPath": "/static/tabbar/location-active.png"
+			// },
 			{
 				"pagePath": "pages/shop/shop",
 				"text": "聚店",

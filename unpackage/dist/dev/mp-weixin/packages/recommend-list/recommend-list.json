@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "智能推荐列表",
+  "usingComponents": {
+    "uni-icons": "../../uni_modules/uni-icons/components/uni-icons/uni-icons"
+  }
+}

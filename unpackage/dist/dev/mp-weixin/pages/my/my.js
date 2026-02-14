@@ -277,7 +277,8 @@ const _sfc_main = {
         name: "我的评论",
         desc: "查看对您发布的评论信息",
         icon: "../../static/icon/我的评论.png",
-        path: null
+        path: "/packages/my-comments/my-comments",
+        highlight: true
       },
       // 新增
       // 第 5 行
@@ -349,10 +350,10 @@ const _sfc_main = {
         common_vendor.index.makePhoneCall({
           phoneNumber: item.phone,
           success: () => {
-            common_vendor.index.__f__("log", "at pages/my/my.vue:541", "拨打电话成功");
+            common_vendor.index.__f__("log", "at pages/my/my.vue:542", "拨打电话成功");
           },
           fail: (err) => {
-            common_vendor.index.__f__("log", "at pages/my/my.vue:544", "拨打电话失败:", err);
+            common_vendor.index.__f__("log", "at pages/my/my.vue:545", "拨打电话失败:", err);
           }
         });
         return;

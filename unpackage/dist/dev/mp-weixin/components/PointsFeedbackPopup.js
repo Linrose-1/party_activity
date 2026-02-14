@@ -40,7 +40,7 @@ const _sfc_main = {
       return common_vendor.e({
         a: hasIcon.value
       }, hasIcon.value ? {
-        b: common_assets._imports_0$9
+        b: common_assets._imports_0$10
       } : {
         c: common_vendor.p({
           type: "gift-filled",

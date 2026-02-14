@@ -126,7 +126,7 @@ const _sfc_main = {
           contentText: "正在计算最优人脉路径..."
         })
       } : paths.value.length === 0 ? {
-        j: common_assets._imports_0$6,
+        j: common_assets._imports_0$7,
         k: common_vendor.o(handleInviteAction)
       } : {}, {
         i: paths.value.length === 0

@@ -371,7 +371,11 @@ const _sfc_main = {
       }) : {
         O: common_vendor.p({
           status: "loading",
-          contentText: "正在加载用户信息..."
+          contentText: {
+            contentdown: "上拉加载更多",
+            contentrefresh: "正在加载用户信息...",
+            contentnomore: "—— 我是有底线的 ——"
+          }
         })
       }, {
         P: currentUserInfo.value && targetUserInfo.value

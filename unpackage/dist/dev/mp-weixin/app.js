@@ -27,6 +27,8 @@ if (!Math) {
   "./pages/my-memberDetails/my-memberDetails.js";
   "./pages/my-order/my-order.js";
   "./pages/relation/relation.js";
+  "./pages/six-degrees/six-degrees.js";
+  "./pages/general-search/general-search.js";
   "./pages/shop-apply/shop-apply.js";
   "./pages/my-systemSuggestions/my-systemSuggestions.js";
   "./pages/platform-intro/platform-intro.js";
@@ -78,6 +80,8 @@ if (!Math) {
   "./packages/recharge/recharge.js";
   "./packages/contribution-ranking/contribution-ranking.js";
   "./packages/suggestion-detail/suggestion-detail.js";
+  "./packages/recommend-list/recommend-list.js";
+  "./packages/my-comments/my-comments.js";
 }
 const _sfc_main = {
   data() {

@@ -8393,6 +8393,18 @@ const pages = [
     }
   },
   {
+    path: "pages/six-degrees/six-degrees",
+    style: {
+      navigationBarTitleText: "六度人脉"
+    }
+  },
+  {
+    path: "pages/general-search/general-search",
+    style: {
+      navigationBarTitleText: "普通搜索"
+    }
+  },
+  {
     path: "pages/shop-apply/shop-apply",
     style: {
       navigationBarTitleText: "申请上榜"
@@ -8702,6 +8714,18 @@ const subPackages = [
         style: {
           navigationBarTitleText: "建议详情"
         }
+      },
+      {
+        path: "recommend-list/recommend-list",
+        style: {
+          navigationBarTitleText: "智能推荐列表"
+        }
+      },
+      {
+        path: "my-comments/my-comments",
+        style: {
+          navigationBarTitleText: "我发出的评论"
+        }
       }
     ]
   }
@@ -8724,7 +8748,7 @@ const tabBar = {
       selectedIconPath: "/static/tabbar/active-active.png"
     },
     {
-      pagePath: "pages/relation/relation",
+      pagePath: "pages/six-degrees/six-degrees",
       text: "六度人脉",
       iconPath: "/static/tabbar/location.png",
       selectedIconPath: "/static/tabbar/location-active.png"

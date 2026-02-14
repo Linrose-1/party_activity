@@ -113,7 +113,7 @@
 			</view>
 			<!-- 加载中的占位符 -->
 			<view v-else class="loading-placeholder">
-				<uni-load-more status="loading" contentText="正在加载用户信息..."></uni-load-more>
+				<uni-load-more status="loading" :contentText="{ contentdown: '上拉加载更多', contentrefresh: '正在加载用户信息...', contentnomore: '—— 我是有底线的 ——' }"></uni-load-more>
 			</view>
 
 			<!-- 提示信息 -->

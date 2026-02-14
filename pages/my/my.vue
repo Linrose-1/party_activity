@@ -466,7 +466,8 @@
 			name: '我的评论',
 			desc: '查看对您发布的评论信息',
 			icon: '../../static/icon/我的评论.png',
-			path: null
+			path: '/packages/my-comments/my-comments',
+			highlight: true
 		}, // 新增
 		// 第 5 行
 		// {

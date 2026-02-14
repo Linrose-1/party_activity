@@ -1,0 +1,183 @@
+/* 水平间距 */
+/* 水平间距 */
+.recommend-list-page.data-v-6e53aa0e {
+  background-color: #1A1A1A;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 导航栏 */
+.nav-header.data-v-6e53aa0e {
+  padding: 100rpx 40rpx 40rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(to bottom, #2A2A2A, #1A1A1A);
+}
+.nav-header .title-area.data-v-6e53aa0e {
+  flex: 1;
+  margin-left: 20rpx;
+}
+.nav-header .title-area .main-title.data-v-6e53aa0e {
+  color: #FFF;
+  font-size: 36rpx;
+  font-weight: bold;
+  display: block;
+}
+.nav-header .title-area .sub-title.data-v-6e53aa0e {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 20rpx;
+}
+.nav-header .refresh-action.data-v-6e53aa0e {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  background: rgba(255, 111, 0, 0.1);
+  padding: 12rpx 24rpx;
+  border-radius: 40rpx;
+}
+.nav-header .refresh-action text.data-v-6e53aa0e {
+  color: #FF6F00;
+  font-size: 24rpx;
+  font-weight: bold;
+}
+.list-scroll.data-v-6e53aa0e {
+  flex: 1;
+  height: 0;
+}
+.list-container.data-v-6e53aa0e {
+  padding: 0 30rpx 60rpx;
+}
+
+/* 推荐名片样式 - 优化为更紧凑高级的样式 */
+.user-card.data-v-6e53aa0e {
+  background: #FFF;
+  border-radius: 32rpx;
+  padding: 30rpx;
+  margin-bottom: 30rpx;
+  box-shadow: 0 10rpx 30rpx rgba(0, 0, 0, 0.2);
+}
+.user-card .card-header.data-v-6e53aa0e {
+  display: flex;
+  align-items: center;
+  margin-bottom: 24rpx;
+}
+.user-card .card-header .avatar.data-v-6e53aa0e {
+  width: 100rpx;
+  height: 100rpx;
+  border-radius: 50%;
+  background: #F0F0F0;
+}
+.user-card .card-header .meta.data-v-6e53aa0e {
+  flex: 1;
+  margin-left: 20rpx;
+}
+.user-card .card-header .meta .name.data-v-6e53aa0e {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #1A1A1A;
+}
+.user-card .card-header .meta .verify-tag.data-v-6e53aa0e {
+  margin-left: 12rpx;
+  font-size: 18rpx;
+  color: #52C41A;
+  background: #F6FFED;
+  padding: 2rpx 10rpx;
+  border-radius: 4rpx;
+}
+.user-card .card-header .meta .title.data-v-6e53aa0e {
+  font-size: 24rpx;
+  color: #8E8E93;
+  display: block;
+  margin-top: 4rpx;
+}
+.user-card .card-header .match-score.data-v-6e53aa0e {
+  text-align: center;
+}
+.user-card .card-header .match-score .score-val.data-v-6e53aa0e {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #FF6F00;
+  display: block;
+  line-height: 1;
+}
+.user-card .card-header .match-score .score-unit.data-v-6e53aa0e {
+  font-size: 18rpx;
+  color: #FF6F00;
+  opacity: 0.8;
+}
+.user-card .card-info.data-v-6e53aa0e {
+  background: #F8F9FA;
+  border-radius: 20rpx;
+  padding: 20rpx;
+}
+.user-card .card-info .info-row.data-v-6e53aa0e {
+  display: flex;
+  margin-bottom: 8rpx;
+}
+.user-card .card-info .info-row.data-v-6e53aa0e:last-child {
+  margin-bottom: 0;
+}
+.user-card .card-info .info-row .label.data-v-6e53aa0e {
+  width: 120rpx;
+  font-size: 22rpx;
+  color: #8E8E93;
+}
+.user-card .card-info .info-row .val.data-v-6e53aa0e {
+  flex: 1;
+  font-size: 24rpx;
+  color: #333;
+  font-weight: 500;
+}
+.user-card .tag-box.data-v-6e53aa0e {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+  margin-top: 24rpx;
+}
+.user-card .tag-box .tag.data-v-6e53aa0e {
+  background: #FFF5EE;
+  color: #A0522D;
+  font-size: 22rpx;
+  padding: 6rpx 16rpx;
+  border-radius: 8rpx;
+}
+.user-card .card-footer.data-v-6e53aa0e {
+  margin-top: 30rpx;
+  padding-top: 24rpx;
+  border-top: 1px solid #F0F0F0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.user-card .card-footer .location.data-v-6e53aa0e {
+  color: #8E8E93;
+  font-size: 24rpx;
+  display: flex;
+  align-items: center;
+  gap: 6rpx;
+}
+.user-card .card-footer .connect-btn.data-v-6e53aa0e {
+  background: #1A1A1A;
+  color: #FFF;
+  font-size: 24rpx;
+  font-weight: bold;
+  padding: 14rpx 36rpx;
+  border-radius: 40rpx;
+}
+.empty-state.data-v-6e53aa0e {
+  padding-top: 200rpx;
+  text-align: center;
+}
+.empty-state image.data-v-6e53aa0e {
+  width: 200rpx;
+  height: 200rpx;
+  opacity: 0.3;
+}
+.empty-state text.data-v-6e53aa0e {
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 26rpx;
+  margin-top: 20rpx;
+  display: block;
+}

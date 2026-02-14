@@ -23,6 +23,8 @@
     "pages/my-memberDetails/my-memberDetails",
     "pages/my-order/my-order",
     "pages/relation/relation",
+    "pages/six-degrees/six-degrees",
+    "pages/general-search/general-search",
     "pages/shop-apply/shop-apply",
     "pages/my-systemSuggestions/my-systemSuggestions",
     "pages/platform-intro/platform-intro",
@@ -78,7 +80,9 @@
         "resource-match/resource-match",
         "recharge/recharge",
         "contribution-ranking/contribution-ranking",
-        "suggestion-detail/suggestion-detail"
+        "suggestion-detail/suggestion-detail",
+        "recommend-list/recommend-list",
+        "my-comments/my-comments"
       ]
     }
   ],
@@ -106,7 +110,7 @@
         "selectedIconPath": "/static/tabbar/active-active.png"
       },
       {
-        "pagePath": "pages/relation/relation",
+        "pagePath": "pages/six-degrees/six-degrees",
         "text": "六度人脉",
         "iconPath": "/static/tabbar/location.png",
         "selectedIconPath": "/static/tabbar/location-active.png"
