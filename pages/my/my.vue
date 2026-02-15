@@ -159,6 +159,7 @@
 
 	const userInfo = ref({})
 	const isLogin = ref(false);
+	const creditScore = ref(null); // 猩球信用分
 
 	// 【新增】一个整合的函数，用于检查登录状态并获取数据
 	const checkLoginStatusAndFetchData = () => {
@@ -189,6 +190,8 @@
 			if (!error && data) {
 				userInfo.value = data;
 				console.log('getUserInfo userInfo:', userInfo.value);
+				// 获取用户信息成功后，获取信用分
+				getCreditScore();
 			} else {
 				console.log('获取用户信息失败:', error);
 				// 如果获取用户信息失败（比如token过期），也应该更新为未登录状态
@@ -199,6 +202,24 @@
 			console.log('请求异常:', err);
 			isLogin.value = false;
 			userInfo.value = {};
+		}
+	};
+
+	// 获取猩球信用分
+	const getCreditScore = async () => {
+		try {
+			const {
+				data,
+				error
+			} = await request('/app-api/member/user/credit-score', {
+				method: 'GET',
+			});
+			if (!error && data) {
+				creditScore.value = data.totalScore || null;
+				console.log('getCreditScore:', creditScore.value);
+			}
+		} catch (err) {
+			console.log('获取信用分失败:', err);
 		}
 	};
 
@@ -226,7 +247,7 @@
 				path: '/packages/my-zhimi/my-zhimi'
 			},
 			{
-				value: '--', // 或者 '查看'，或其他占位符
+				value: creditScore.value !== null ? creditScore.value : '--',
 				label: '猩球信用',
 				path: '/packages/credit-score/credit-score'
 			}

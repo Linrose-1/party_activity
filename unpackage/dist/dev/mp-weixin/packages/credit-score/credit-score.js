@@ -24,39 +24,39 @@ const _sfc_main = {
     });
     const rules = [
       {
-        name: "钻石商友",
+        name: "钻级猩友",
         icon: "💎",
         range: "900-1000"
       },
       {
-        name: "金牌商友",
+        name: "金级猩友",
         icon: "🥇",
         range: "800-899"
       },
       {
-        name: "银牌商友",
+        name: "银级猩友",
         icon: "🥈",
         range: "700-799"
       },
       {
-        name: "铜牌商友",
+        name: "铜级猩友",
         icon: "🥉",
         range: "600-699"
       },
       {
-        name: "优质商友",
-        icon: "⭐",
+        name: "铁级猩友",
+        icon: "🔘",
         range: "500-599"
       },
       {
-        name: "待提升",
-        icon: "⚠️",
+        name: "普级猩友",
+        icon: "⭐️",
         range: "<500"
       }
     ];
     const getLevelIcon = (level) => {
       const rule = rules.find((r) => r.name === level);
-      return rule ? rule.icon : "⚠️";
+      return rule ? rule.icon : "⭐";
     };
     const fetchCreditScore = async () => {
       common_vendor.index.showLoading({
@@ -89,7 +89,7 @@ const _sfc_main = {
         e: common_vendor.t(scoreData.value.contributionScore),
         f: scoreData.value.contributionScore / 300 * 100 + "%",
         g: common_vendor.p({
-          type: "coin-filled",
+          type: "vip-filled",
           size: "20",
           color: "#FF8300"
         }),

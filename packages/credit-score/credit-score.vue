@@ -40,7 +40,7 @@
 				<view class="dimension-item">
 					<view class="item-top">
 						<view class="label-group">
-							<uni-icons type="coin-filled" size="20" color="#FF8300"></uni-icons>
+							<uni-icons type="vip-filled" size="20" color="#FF8300"></uni-icons>
 							<text class="label">智米权重</text>
 						</view>
 						<text class="value">{{ scoreData.pointScore }}<text class="max">/200</text></text>
@@ -55,7 +55,7 @@
 					<view class="item-top">
 						<view class="label-group">
 							<uni-icons type="chat-filled" size="20" color="#FF8300"></uni-icons>
-							<text class="label">商友互动</text>
+							<text class="label">商友点评</text>
 						</view>
 						<text class="value">{{ scoreData.interactionScore }}<text class="max">/200</text></text>
 					</view>
@@ -150,40 +150,40 @@
 	});
 
 	const rules = [{
-			name: '钻石商友',
+			name: '钻级猩友',
 			icon: '💎',
 			range: '900-1000'
 		},
 		{
-			name: '金牌商友',
+			name: '金级猩友',
 			icon: '🥇',
 			range: '800-899'
 		},
 		{
-			name: '银牌商友',
+			name: '银级猩友',
 			icon: '🥈',
 			range: '700-799'
 		},
 		{
-			name: '铜牌商友',
+			name: '铜级猩友',
 			icon: '🥉',
 			range: '600-699'
 		},
 		{
-			name: '优质商友',
-			icon: '⭐',
+			name: '铁级猩友',
+			icon: '🔘',
 			range: '500-599'
 		},
 		{
-			name: '待提升',
-			icon: '⚠️',
+			name: '普级猩友',
+			icon: '⭐️',
 			range: '<500'
 		}
 	];
 
 	const getLevelIcon = (level) => {
 		const rule = rules.find(r => r.name === level);
-		return rule ? rule.icon : '⚠️';
+		return rule ? rule.icon : '⭐';
 	};
 
 	const fetchCreditScore = async () => {

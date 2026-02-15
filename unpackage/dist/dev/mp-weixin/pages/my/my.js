@@ -26,6 +26,7 @@ const _sfc_main = {
     });
     const userInfo = common_vendor.ref({});
     const isLogin = common_vendor.ref(false);
+    const creditScore = common_vendor.ref(null);
     const checkLoginStatusAndFetchData = () => {
       const token = common_vendor.index.getStorageSync("token");
       if (token) {
@@ -48,16 +49,33 @@ const _sfc_main = {
         });
         if (!error && data) {
           userInfo.value = data;
-          common_vendor.index.__f__("log", "at pages/my/my.vue:191", "getUserInfo userInfo:", userInfo.value);
+          common_vendor.index.__f__("log", "at pages/my/my.vue:192", "getUserInfo userInfo:", userInfo.value);
+          getCreditScore();
         } else {
-          common_vendor.index.__f__("log", "at pages/my/my.vue:193", "获取用户信息失败:", error);
+          common_vendor.index.__f__("log", "at pages/my/my.vue:196", "获取用户信息失败:", error);
           isLogin.value = false;
           userInfo.value = {};
         }
       } catch (err) {
-        common_vendor.index.__f__("log", "at pages/my/my.vue:199", "请求异常:", err);
+        common_vendor.index.__f__("log", "at pages/my/my.vue:202", "请求异常:", err);
         isLogin.value = false;
         userInfo.value = {};
+      }
+    };
+    const getCreditScore = async () => {
+      try {
+        const {
+          data,
+          error
+        } = await utils_request.request("/app-api/member/user/credit-score", {
+          method: "GET"
+        });
+        if (!error && data) {
+          creditScore.value = data.totalScore || null;
+          common_vendor.index.__f__("log", "at pages/my/my.vue:219", "getCreditScore:", creditScore.value);
+        }
+      } catch (err) {
+        common_vendor.index.__f__("log", "at pages/my/my.vue:222", "获取信用分失败:", err);
       }
     };
     const accountList = common_vendor.computed(() => {
@@ -84,8 +102,7 @@ const _sfc_main = {
           path: "/packages/my-zhimi/my-zhimi"
         },
         {
-          value: "--",
-          // 或者 '查看'，或其他占位符
+          value: creditScore.value !== null ? creditScore.value : "--",
           label: "猩球信用",
           path: "/packages/credit-score/credit-score"
         }
@@ -349,10 +366,10 @@ const _sfc_main = {
         common_vendor.index.makePhoneCall({
           phoneNumber: item.phone,
           success: () => {
-            common_vendor.index.__f__("log", "at pages/my/my.vue:542", "拨打电话成功");
+            common_vendor.index.__f__("log", "at pages/my/my.vue:563", "拨打电话成功");
           },
           fail: (err) => {
-            common_vendor.index.__f__("log", "at pages/my/my.vue:545", "拨打电话失败:", err);
+            common_vendor.index.__f__("log", "at pages/my/my.vue:566", "拨打电话失败:", err);
           }
         });
         return;
