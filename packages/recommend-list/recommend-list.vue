@@ -47,7 +47,7 @@
 							<uni-icons type="location-filled" size="14" color="#8E8E93"></uni-icons>
 							<text>{{ user.locationAddressStr || '暂未设置商务/办公地' }}</text>
 						</view>
-						<view class="connect-btn">详细数字身份</view>
+						<view class="connect-btn">查看数字名片</view>
 					</view>
 				</view>
 

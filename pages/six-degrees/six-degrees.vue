@@ -110,13 +110,13 @@
 						<text class="location">
 							{{ user.locationAddressStr || '暂未设置商务/办公地' }}
 						</text>
-						<view class="connect-btn">详细数字身份</view>
+						<view class="connect-btn">查看数字名片</view>
 					</view>
 				</view>
 
 				<!-- 无数据展示 -->
 				<view class="empty-recommend" v-if="recommendUsers.length === 0">
-					<text>暂无推荐，点击换一批试试</text>
+					<text>暂无推荐商友</text>
 				</view>
 			</view>
 
