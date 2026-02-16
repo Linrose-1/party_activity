@@ -325,7 +325,7 @@
 	$theme-color: #FF8400;
 
 	.connections-page {
-		background-color: #f8f9fb;
+		background-color: #FFF5F0;
 		min-height: 100vh;
 	}
 
@@ -343,7 +343,7 @@
 			width: 100%;
 			height: 100%;
 			z-index: 1;
-			background-color: #1A1A1A;
+			background: linear-gradient(135deg, #FF6F00 0%, #FF5500 50%, #FF8C00 100%);
 		}
 	}
 
@@ -358,13 +358,15 @@
 			font-size: 44rpx;
 			font-weight: bold;
 			display: block;
+			text-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.15);
 		}
 
 		.page-subtitle {
 			font-size: 24rpx;
-			opacity: 0.6;
+			opacity: 0.7;
 			margin-top: 10rpx;
 			display: block;
+			text-shadow: 0 1rpx 4rpx rgba(0, 0, 0, 0.1);
 		}
 	}
 
@@ -518,7 +520,7 @@
 		}
 
 		.follow-btn {
-			background: #333;
+			background: linear-gradient(135deg, #FF6F00 0%, #FF5500 100%);
 			color: #FFF;
 			font-size: 24rpx;
 			padding: 0 30rpx;
@@ -526,10 +528,12 @@
 			line-height: 60rpx;
 			border-radius: 30rpx;
 			font-weight: bold;
+			box-shadow: 0 4rpx 12rpx rgba(255, 111, 0, 0.3);
 
 			&.followed-btn {
 				background: #F5F5F5;
 				color: #CCC;
+				box-shadow: none;
 			}
 		}
 	}

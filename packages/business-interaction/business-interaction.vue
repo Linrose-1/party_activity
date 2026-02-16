@@ -251,8 +251,9 @@
 	 */
 	const goToTarget = (item) => {
 		if (item.targetId) {
+			// 携带评论ID参数，用于在详情页定位到对应评论
 			uni.navigateTo({
-				url: `/packages/home-commercialDetail/home-commercialDetail?id=${item.targetId}`
+				url: `/packages/home-commercialDetail/home-commercialDetail?id=${item.targetId}&commentId=${item.id}`
 			});
 		}
 	};

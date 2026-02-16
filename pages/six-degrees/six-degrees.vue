@@ -325,7 +325,7 @@
 	$dark-bg: #1A1A1A;
 
 	.premium-header {
-		background-color: $dark-bg;
+		background: linear-gradient(135deg, #FF6F00 0%, #FF5500 50%, #FF8C00 100%);
 		height: 280rpx;
 		padding: 90rpx 40rpx 0;
 		position: relative;
@@ -350,7 +350,7 @@
 				right: -100rpx;
 				width: 450rpx;
 				height: 450rpx;
-				background: radial-gradient(circle, rgba($primary, 0.15) 0%, rgba($primary, 0) 70%);
+				background: radial-gradient(circle, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0) 70%);
 			}
 
 			.grid-mesh {
@@ -359,8 +359,8 @@
 				left: 0;
 				width: 100%;
 				height: 100%;
-				background-image: linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-					linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+				background-image: linear-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px),
+					linear-gradient(90deg, rgba(255, 255, 255, 0.08) 1px, transparent 1px);
 				background-size: 40rpx 40rpx;
 			}
 		}
@@ -376,7 +376,7 @@
 			margin-bottom: 12rpx;
 
 			.brand-name {
-				color: rgba(255, 255, 255, 0.35);
+				color: rgba(255, 255, 255, 0.5);
 				font-size: 20rpx;
 				letter-spacing: 6rpx;
 				font-weight: 800;
@@ -400,13 +400,15 @@
 				font-size: 36rpx;
 				font-weight: 700;
 				display: block;
+				text-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.15);
 			}
 
 			.sub-quote {
-				color: rgba(255, 255, 255, 0.5);
+				color: rgba(255, 255, 255, 0.7);
 				font-size: 22rpx;
 				margin-top: 10rpx;
 				display: block;
+				text-shadow: 0 1rpx 4rpx rgba(0, 0, 0, 0.1);
 			}
 		}
 	}
@@ -469,7 +471,7 @@
 	}
 
 	.six-degrees-container {
-		background-color: #F4F5F7;
+		background-color: #FFF5F0;
 		min-height: 100vh;
 	}
 
@@ -759,12 +761,13 @@
 			}
 
 			.connect-btn {
-				background: $dark;
+				background: linear-gradient(135deg, #FF6F00 0%, #FF5500 100%);
 				color: #FFF;
 				font-size: 24rpx;
 				padding: 14rpx 28rpx;
 				border-radius: 100rpx;
 				font-weight: 600;
+				box-shadow: 0 4rpx 12rpx rgba(255, 111, 0, 0.3);
 			}
 		}
 	}
@@ -837,7 +840,7 @@
 		}
 
 		.submit-btn {
-			background: linear-gradient(135deg, $dark 0%, #333 100%);
+			background: linear-gradient(135deg, #FF6F00 0%, #FF5500 100%);
 			color: #FFF;
 			height: 90rpx;
 			border-radius: 45rpx;
@@ -846,7 +849,7 @@
 			justify-content: center;
 			font-size: 28rpx;
 			font-weight: 700;
-			box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.15);
+			box-shadow: 0 8rpx 24rpx rgba(255, 111, 0, 0.35);
 		}
 	}
 

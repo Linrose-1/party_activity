@@ -105,7 +105,7 @@ const _sfc_main = {
     const goToTarget = (item) => {
       if (item.targetId) {
         common_vendor.index.navigateTo({
-          url: `/packages/home-commercialDetail/home-commercialDetail?id=${item.targetId}`
+          url: `/packages/home-commercialDetail/home-commercialDetail?id=${item.targetId}&commentId=${item.id}`
         });
       }
     };

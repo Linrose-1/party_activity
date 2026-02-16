@@ -238,7 +238,7 @@ const _sfc_main = {
     };
     const navigateToInvite = () => {
       common_vendor.index.navigateTo({
-        url: "/packages/my-friendInvitation/my-friendInvitation"
+        url: "/pages/index/index"
       });
     };
     const navigateToSearch = () => {

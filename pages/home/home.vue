@@ -832,6 +832,24 @@
 					});
 				}
 
+				// 4. 【新增】他人评论
+				if (data.otherCommentCount > 0) {
+					list.push({
+						type: 'otherComment',
+						label: '他人评论',
+						count: data.otherCommentCount
+					});
+				}
+
+				// 5. 【新增】评论他人
+				if (data.myCommentCount > 0) {
+					list.push({
+						type: 'myComment',
+						label: '评论他人',
+						count: data.myCommentCount
+					});
+				}
+
 				scrollBarData.value = list;
 			}
 		} catch (e) {
@@ -1291,6 +1309,18 @@
 			// 跳转到“我的聚会 - 我的发布”页面，那里有处理申请的入口
 			uni.navigateTo({
 				url: '/packages/my-active/my-active?currentTab=1'
+			});
+		} else if (item.type === 'otherComment') {
+			// 【新增】点击"他人评论"
+			// 跳转到商友点评列表页面
+			uni.navigateTo({
+				url: '/packages/business-interaction/business-interaction'
+			});
+		} else if (item.type === 'myComment') {
+			// 【新增】点击"评论他人"
+			// 跳转到商机评论页面
+			uni.navigateTo({
+				url: '/packages/my-comments/my-comments'
 			});
 		}
 	};

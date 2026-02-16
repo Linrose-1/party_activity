@@ -17,8 +17,20 @@ const _sfc_main = {
     const activityInfo = common_vendor.ref({});
     const fullActivityData = common_vendor.ref(null);
     const participantList = common_vendor.ref([]);
-    const bannerText = common_vendor.ref("");
     const pageMode = common_vendor.ref("individual");
+    const staticWords = common_vendor.ref({
+      // 可以预设一些默认值，防止接口还没返回时页面空白
+      individual_refund_banner: "请为提交申请的用户办理退款",
+      group_refund_banner: "聚会已取消，请为所有报名用户办理退款"
+      // ... 其他你需要的 key
+    });
+    const bannerText = common_vendor.computed(() => {
+      if (pageMode.value === "individual") {
+        return staticWords.value.individual_refund_banner || "请为提交申请的用户办理退款1";
+      } else {
+        return staticWords.value.group_refund_banner || "聚会已取消，请为所有报名用户办理退款1";
+      }
+    });
     const pendingUsers = common_vendor.computed(
       () => participantList.value.filter((u) => u.paymentStatus === "3")
     );
@@ -43,19 +55,20 @@ const _sfc_main = {
             totalRefundAmount: null
           };
         } catch (e) {
-          common_vendor.index.__f__("error", "at pages/my-active-manage/my-active-manage.vue:160", "解析聚会数据失败:", e);
+          common_vendor.index.__f__("error", "at pages/my-active-manage/my-active-manage.vue:181", "解析聚会数据失败:", e);
           return;
         }
       }
       pageMode.value = options.mode || "individual";
-      bannerText.value = pageMode.value === "individual" ? "请为提交申请的用户办理退款" : "聚会已取消，请为所有报名用户办理退款";
       fetchRefundList();
       fetchStaticWord();
     });
     const fetchRefundList = async () => {
       if (!fullActivityData.value)
         return;
-      common_vendor.index.showLoading({ title: "加载中..." });
+      common_vendor.index.showLoading({
+        title: "加载中..."
+      });
       const statusToFetch = currentTab.value === 0 ? "3" : "6";
       const params = {
         activityId: fullActivityData.value.id,
@@ -83,10 +96,15 @@ const _sfc_main = {
         const result = await utils_request.request("/app-api/member/config/getStaticWord", {
           method: "GET"
         });
-        common_vendor.index.__f__("log", "at pages/my-active-manage/my-active-manage.vue:224", "【静态词配置数据】", result);
-        common_vendor.index.__f__("log", "at pages/my-active-manage/my-active-manage.vue:225", "【静态词配置数据-完整】", JSON.stringify(result, null, 2));
+        if (!result.error && result.data) {
+          staticWords.value = {
+            ...staticWords.value,
+            ...result.data
+          };
+          common_vendor.index.__f__("log", "at pages/my-active-manage/my-active-manage.vue:256", "【静态词已储存】", staticWords.value);
+        }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/my-active-manage/my-active-manage.vue:227", "获取静态词配置失败:", error);
+        common_vendor.index.__f__("error", "at pages/my-active-manage/my-active-manage.vue:259", "获取静态词配置失败:", error);
       }
     };
     const uploadProof = (user) => {
@@ -106,10 +124,12 @@ const _sfc_main = {
               title: "未能获取到图片文件，请重试",
               icon: "none"
             });
-            common_vendor.index.__f__("error", "at pages/my-active-manage/my-active-manage.vue:259", "【严重错误】 无法从 chooseImage 的返回值中提取任何有效路径!", res);
+            common_vendor.index.__f__("error", "at pages/my-active-manage/my-active-manage.vue:291", "【严重错误】 无法从 chooseImage 的返回值中提取任何有效路径!", res);
             return;
           }
-          common_vendor.index.showLoading({ title: "正在上传并确认..." });
+          common_vendor.index.showLoading({
+            title: "正在上传并确认..."
+          });
           try {
             const uploadResult = await utils_upload.uploadFile({
               path: tempFilePath
@@ -125,10 +145,13 @@ const _sfc_main = {
               id: user.id,
               refundConfirmScreenshotUrl: proofUrl
             };
-            const confirmResult = await utils_request.request("/app-api/member/activity-join/confirm-join-user-refund", {
-              method: "POST",
-              data: payload
-            });
+            const confirmResult = await utils_request.request(
+              "/app-api/member/activity-join/confirm-join-user-refund",
+              {
+                method: "POST",
+                data: payload
+              }
+            );
             if (confirmResult.error) {
               const errorMsg = typeof confirmResult.error === "object" ? confirmResult.error.msg : confirmResult.error;
               throw new Error(errorMsg || "确认失败");
@@ -150,7 +173,7 @@ const _sfc_main = {
         },
         fail: (err) => {
           if (err.errMsg && !err.errMsg.includes("cancel")) {
-            common_vendor.index.__f__("error", "at pages/my-active-manage/my-active-manage.vue:321", "选择图片失败:", err);
+            common_vendor.index.__f__("error", "at pages/my-active-manage/my-active-manage.vue:358", "选择图片失败:", err);
             common_vendor.index.showToast({
               title: "选择图片失败",
               icon: "none"
@@ -255,12 +278,13 @@ const _sfc_main = {
           type: "plusempty",
           color: "#FF6B00",
           size: "16"
-        })
+        }),
+        B: common_vendor.t(staticWords.value.uploadTransferVoucher || "上传转账凭证")
       } : {}, {
-        B: currentTab.value === 0,
-        C: completedUsers.value.length > 0
+        C: currentTab.value === 0,
+        D: completedUsers.value.length > 0
       }, completedUsers.value.length > 0 ? {
-        D: common_vendor.f(completedUsers.value, (user, k0, i0) => {
+        E: common_vendor.f(completedUsers.value, (user, k0, i0) => {
           var _a, _b;
           return {
             a: ((_a = user.memberUser) == null ? void 0 : _a.avatar) || "../../static/avatar-placeholder.png",
@@ -271,7 +295,7 @@ const _sfc_main = {
           };
         })
       } : {}, {
-        E: currentTab.value === 1
+        F: currentTab.value === 1
       });
     };
   }

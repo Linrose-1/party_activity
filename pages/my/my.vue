@@ -479,7 +479,7 @@
 		},
 		{
 			name: '时空共享',
-			desc: '一键共享创业社交空间',
+			desc: '一键共享创业驿站',
 			icon: '../../static/icon/时空共享.png',
 			path: null
 		}, // 新增
@@ -506,8 +506,8 @@
 			highlight: true
 		}, // 新增
 		{
-			name: '数字营销',
-			desc: '广告精准触达',
+			name: '智能营销',
+			desc: '智能匹配商友资源',
 			icon: '../../static/icon/广告投放2.0.png',
 			path: null
 		},
@@ -527,7 +527,7 @@
 		},
 		{
 			name: '平台客服',
-			desc: '联系我们，获取帮助',
+			desc: '联系我们，获得平台助力',
 			icon: '../../static/icon/customer-service.png', // 假设您有一个客服图标
 			path: '/packages/ContactService/ContactService',
 			// key: 'customerService', // 定义一个唯一的 key
@@ -580,7 +580,7 @@
 		// 3. 处理其他开发中的项 (保持原有逻辑)
 		else {
 			uni.showToast({
-				title: '该功能正在开发中',
+				title: '稍后解锁，敬请期待',
 				icon: 'none'
 			});
 		}

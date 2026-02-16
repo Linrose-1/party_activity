@@ -284,7 +284,7 @@ const _sfc_main = {
       },
       {
         name: "时空共享",
-        desc: "一键共享创业社交空间",
+        desc: "一键共享创业驿站",
         icon: "../../static/icon/时空共享.png",
         path: null
       },
@@ -313,8 +313,8 @@ const _sfc_main = {
       },
       // 新增
       {
-        name: "数字营销",
-        desc: "广告精准触达",
+        name: "智能营销",
+        desc: "智能匹配商友资源",
         icon: "../../static/icon/广告投放2.0.png",
         path: null
       },
@@ -334,7 +334,7 @@ const _sfc_main = {
       },
       {
         name: "平台客服",
-        desc: "联系我们，获取帮助",
+        desc: "联系我们，获得平台助力",
         icon: "../../static/icon/customer-service.png",
         // 假设您有一个客服图标
         path: "/packages/ContactService/ContactService",
@@ -380,7 +380,7 @@ const _sfc_main = {
         });
       } else {
         common_vendor.index.showToast({
-          title: "该功能正在开发中",
+          title: "稍后解锁，敬请期待",
           icon: "none"
         });
       }

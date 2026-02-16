@@ -824,7 +824,7 @@
 				success: (res) => {
 					if (res.confirm) {
 						uni.navigateTo({
-							url: '/pages/login/login'
+							url: '/pages/index/index'
 						});
 					}
 				}

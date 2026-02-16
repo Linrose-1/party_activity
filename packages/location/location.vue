@@ -398,7 +398,7 @@
 	 */
 	const navigateToInvite = () => {
 		uni.navigateTo({
-			url: '/packages/my-friendInvitation/my-friendInvitation'
+			url: '/pages/index/index'
 		});
 	};
 

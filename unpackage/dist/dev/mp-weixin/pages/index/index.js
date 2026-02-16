@@ -326,7 +326,7 @@ const _sfc_main = {
         sharePath += `?inviteCode=${finalInviteCode}`;
       }
       const shareContent = {
-        title: "猩聚社 - 链接商机，共创未来，快来加入我们！",
+        title: "猩聚社丨精英商友·跨域社交工具 Gofor Gathering ☞☞",
         path: sharePath,
         imageUrl: "https://img.gofor.club/logo_share.jpg"
       };
@@ -342,7 +342,7 @@ const _sfc_main = {
         queryString = `inviteCode=${finalInviteCode}`;
       }
       const shareContent = {
-        title: "猩聚社 - 链接商机，共创未来，快来加入我们！",
+        title: "猩聚社丨精英商友·跨域社交工具 Gofor Gathering ☞☞",
         query: queryString,
         imageUrl: "https://img.gofor.club/logo_share.jpg"
       };

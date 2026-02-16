@@ -64,7 +64,7 @@
 						<view class="proof-section">
 							<button class="upload-proof-btn" @click="uploadProof(user)">
 								<uni-icons type="plusempty" color="#FF6B00" size="16"></uni-icons>
-								上传转账凭证
+								{{ staticWords.uploadTransferVoucher || '上传转账凭证' }}
 							</button>
 						</view>
 					</view>
@@ -100,8 +100,13 @@
 </template>
 
 <script setup>
-	import { ref, computed } from 'vue';
-	import { onLoad } from '@dcloudio/uni-app';
+	import {
+		ref,
+		computed
+	} from 'vue';
+	import {
+		onLoad
+	} from '@dcloudio/uni-app';
 	// 导入工具模块
 	import request from '../../utils/request.js';
 	import uploadFile from '../../utils/upload.js';
@@ -111,8 +116,24 @@
 	const activityInfo = ref({}); // 聚会基本信息
 	const fullActivityData = ref(null); // 完整的聚会数据对象
 	const participantList = ref([]); // 参与者列表
-	const bannerText = ref(''); // 顶部警告栏文本
+	// const bannerText = ref(''); // 顶部警告栏文本
 	const pageMode = ref('individual'); // 页面模式：individual=个人退款，group=集体退款
+
+	const staticWords = ref({
+		// 可以预设一些默认值，防止接口还没返回时页面空白
+		individual_refund_banner: '请为提交申请的用户办理退款',
+		group_refund_banner: '聚会已取消，请为所有报名用户办理退款',
+		// ... 其他你需要的 key
+	});
+
+	const bannerText = computed(() => {
+		if (pageMode.value === 'individual') {
+			// 如果接口返回了对应的 key，就用接口的，否则用默认值
+			return staticWords.value.individual_refund_banner || '请为提交申请的用户办理退款1';
+		} else {
+			return staticWords.value.group_refund_banner || '聚会已取消，请为所有报名用户办理退款1';
+		}
+	});
 
 	// ==================== 计算属性 ====================
 	/**
@@ -164,9 +185,10 @@
 
 		// 设置页面模式和提示文案
 		pageMode.value = options.mode || 'individual';
-		bannerText.value = pageMode.value === 'individual' ?
-			'请为提交申请的用户办理退款' :
-			'聚会已取消，请为所有报名用户办理退款';
+		// pageMode.value = options.mode || 'individual';
+		// bannerText.value = pageMode.value === 'individual' ?
+		// 	'请为提交申请的用户办理退款' :
+		// 	'聚会已取消，请为所有报名用户办理退款';
 
 		// 获取退款列表
 		fetchRefundList();
@@ -183,7 +205,9 @@
 	const fetchRefundList = async () => {
 		if (!fullActivityData.value) return;
 
-		uni.showLoading({ title: '加载中...' });
+		uni.showLoading({
+			title: '加载中...'
+		});
 
 		// 根据当前标签页确定要查询的支付状态
 		const statusToFetch = currentTab.value === 0 ? '3' : '6';
@@ -220,9 +244,17 @@
 			const result = await request('/app-api/member/config/getStaticWord', {
 				method: 'GET'
 			});
-			// 将接口返回的数据打印到控制台
-			console.log('【静态词配置数据】', result);
-			console.log('【静态词配置数据-完整】', JSON.stringify(result, null, 2));
+
+			if (!result.error && result.data) {
+				// 将接口返回的对象合并到 staticWords 中
+				// 假设接口返回结构是 { individual_refund_banner: "...", ... }
+				staticWords.value = {
+					...staticWords.value,
+					...result.data
+				};
+
+				console.log('【静态词已储存】', staticWords.value);
+			}
 		} catch (error) {
 			console.error('获取静态词配置失败:', error);
 		}
@@ -260,7 +292,9 @@
 					return;
 				}
 
-				uni.showLoading({ title: '正在上传并确认...' });
+				uni.showLoading({
+					title: '正在上传并确认...'
+				});
 
 				try {
 					// 3. 使用正确的参数格式 { path: ... } 来调用 uploadFile
@@ -272,7 +306,8 @@
 
 					if (uploadResult.error) {
 						// 如果上传失败（包括内容安全检查失败），直接抛出错误
-						const errorMsg = typeof uploadResult.error === 'object' ? uploadResult.error.msg : uploadResult.error;
+						const errorMsg = typeof uploadResult.error === 'object' ? uploadResult.error.msg :
+							uploadResult.error;
 						throw new Error(errorMsg || '上传失败');
 					}
 
@@ -285,13 +320,15 @@
 						refundConfirmScreenshotUrl: proofUrl
 					};
 
-					const confirmResult = await request('/app-api/member/activity-join/confirm-join-user-refund', {
-						method: 'POST',
-						data: payload
-					});
+					const confirmResult = await request(
+						'/app-api/member/activity-join/confirm-join-user-refund', {
+							method: 'POST',
+							data: payload
+						});
 
 					if (confirmResult.error) {
-						const errorMsg = typeof confirmResult.error === 'object' ? confirmResult.error.msg : confirmResult.error;
+						const errorMsg = typeof confirmResult.error === 'object' ? confirmResult.error
+							.msg : confirmResult.error;
 						throw new Error(errorMsg || '确认失败');
 					}
 
