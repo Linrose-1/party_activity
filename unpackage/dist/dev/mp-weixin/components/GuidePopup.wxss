@@ -91,4 +91,5 @@
 .btn-secondary.data-v-7e85ea7b {
   background-color: #f5f5f5;
   color: #999;
+  border: #FF8C37 solid 1rpx;
 }

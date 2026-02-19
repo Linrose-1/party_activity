@@ -9,13 +9,13 @@
 				<view class="intro-text">建议您完成以下两个操作：</view>
 
 				<view class="step-item">
-					<text class="step-title">📌 第一步：添加到桌面</text>
+					<text class="step-title">📌 添加到桌面</text>
 					<view class="step-desc">1. 点击右上角 <text class="dots">···</text></view>
 					<view class="step-desc">2. 选择「添加到桌面」</view>
 				</view>
 
 				<view class="step-item">
-					<text class="step-title">⭐ 第二步：收藏到小程序</text>
+					<text class="step-title">⭐ 收藏到小程序</text>
 					<view class="step-desc">1. 点击右上角 <text class="dots">···</text></view>
 					<view class="step-desc">2. 选择「收藏」</view>
 				</view>
@@ -188,5 +188,6 @@
 	.btn-secondary {
 		background-color: #f5f5f5;
 		color: #999;
+		border: #FF8C37 solid 1rpx;
 	}
 </style>
