@@ -106,7 +106,7 @@ const _sfc_main = {
         },
         {
           icon: "location-filled",
-          label: "地址",
+          label: "商域",
           value: "广东省广州市天河区珠江新城"
         }
       ]
