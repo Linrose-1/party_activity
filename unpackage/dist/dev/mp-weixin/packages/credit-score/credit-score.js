@@ -46,12 +46,12 @@ const _sfc_main = {
       {
         name: "铁级猩友",
         icon: "🔘",
-        range: "500-599"
+        range: "300-599"
       },
       {
         name: "普级猩友",
         icon: "⭐️",
-        range: "<500"
+        range: "<300"
       }
     ];
     const getLevelIcon = (level) => {

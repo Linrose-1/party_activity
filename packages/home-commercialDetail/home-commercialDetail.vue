@@ -46,31 +46,7 @@
 						</view>
 					</view>
 				</view>
-				<!-- <view class="author-info">
-					<view class="author-avatar-wrapper">
-						<image :src="postDetail.avatar" mode="" class="author-avatar"
-							@click="navigateToBusinessCard({ id: postDetail.userId, name: postDetail.user, avatar: postDetail.avatar })">
-						</image>
-					</view>
-					<view class="author-details">
-						<view class="author-name">{{ postDetail.user }}</view>
-						<view class="time-and-actions">
-							<view class="post-time">
-								<uni-icons type="redo" size="14" color="#888"></uni-icons> {{ postDetail.time }}
-							</view>
-							<button v-if="showFollowButton" class="follow-button mini-style"
-								:class="{ 'followed': postDetail.isFollowedUser }"
-								@click.stop="toggleFollow(postDetail)">
-								{{ postDetail.isFollowedUser ? '已关注' : '关注' }}
-							</button>
-							<button v-else-if="loggedInUserId && loggedInUserId === postDetail.userId"
-								class="follow-button delete-post-button mini-style" @click.stop="deletePost">
-								<uni-icons type="trash" size="12" color="#e74c3c"></uni-icons>
-								删除
-							</button>
-						</view>
-					</view>
-				</view> -->
+				
 				<view style="font-weight: 700;font-size: 36rpx;"
 					@longpress.stop="handleLongPress(postDetail.postTitle)">
 					<text v-if="postDetail.postType == 1" class="detail-type-tag hunter">创业猎伙</text>
@@ -792,10 +768,11 @@
 	const getViewerList = async () => {
 		const {
 			data
-		} = await request('/app-api/member/business-opportunities-view/page', {
+		} = await request('/app-api/member/target-view/page', {
 			method: 'GET',
 			data: {
-				businessOpportunitiesId: postId.value,
+				targetId: postId.value,
+				targetType:'post',
 				pageNo: 1,
 				pageSize: 7
 			}

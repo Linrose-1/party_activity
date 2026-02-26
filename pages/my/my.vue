@@ -256,11 +256,30 @@
 
 	// 显示商协会职务
 	const userProfessionalTitleDisplay = computed(() => {
+		// 1. 登录校验
 		if (!isLogin.value) return '登录后查看';
-		const titles = userInfo.value.professionalTitle; // e.g., "XXX协会会长,it工作者"
-		if (titles) {
-			return titles.split(',')[0].trim();
+
+		const info = userInfo.value || {};
+
+		// 辅助函数：安全地获取逗号分隔字符串的第一个元素
+		const getFirst = (str) => {
+			if (!str || typeof str !== 'string') return '';
+			const parts = str.split(',');
+			return parts[0] ? parts[0].trim() : '';
+		};
+
+		// 2. 分别提取第一个“协会名”和第一个“职业头衔”
+		const firstAssoc = getFirst(info.associationName); // e.g., "XXX协会"
+		const firstTitle = getFirst(info.professionalTitle); // e.g., "会长"
+
+		// 3. 组合逻辑
+		// 如果两个都有，拼接返回；如果只有一个，返回那个；如果都没有，返回提示
+		if (firstAssoc && firstTitle) {
+			return `${firstAssoc}${firstTitle}`; // 结果：XXX协会会长
+		} else if (firstAssoc || firstTitle) {
+			return firstAssoc || firstTitle;
 		}
+
 		return '暂未设置商协会职务';
 	});
 

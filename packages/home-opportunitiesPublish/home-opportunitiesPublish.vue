@@ -213,6 +213,7 @@
 	});
 
 	const isEditMode = ref(false); // 标记是否为编辑模式
+	let hasCheckedDraft = false; // 草稿检查锁
 
 	const myEnterprises = ref([]); // 存储我的企业列表
 
@@ -279,7 +280,6 @@
 			checkPublishQuota();
 			fetchMyEnterprises();
 		}
-		checkDraft();
 		uni.showShareMenu({
 			// withShareTicket: true,
 			menus: ["shareAppMessage", "shareTimeline"]
@@ -309,6 +309,7 @@
 	const checkDraft = () => {
 		const draft = uni.getStorageSync(DRAFT_KEY);
 		if (draft) {
+			hasCheckedDraft = true;
 			uni.showModal({
 				title: '发现未完成的草稿',
 				content: '是否恢复上次编辑的内容？',

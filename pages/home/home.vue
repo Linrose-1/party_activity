@@ -149,11 +149,13 @@
 				</view>
 				<!-- ==================== 【视频/图片】 ==================== -->
 
-				<!-- Case 1: 如果存在视频 (post.video)，则优先渲染视频播放器 -->
+				<!-- Case 1: 视频容器，即使视频不渲染，容器也保持 16:9 比例占位 -->
 				<view v-if="post.video" class="post-video-container">
-					<video :id="'video-' + post.id" :src="post.video" class="post-video" :show-center-play-btn="true"
-						:show-play-btn="true" @play="handleVideoPlay(post.id)" @pause="handleVideoPause" @click.stop
-						object-fit="cover" poster=""></video>
+					<video v-if="isVideoRendered" :id="'video-' + post.id" :src="post.video" class="post-video"
+						:show-center-play-btn="true" :show-play-btn="true" @play="handleVideoPlay(post.id)"
+						@pause="handleVideoPause" @click.stop object-fit="cover"></video>
+					<!-- 当视频被杀死时，显示一个黑色占位，防止布局坍塌 -->
+					<view v-else class="video-placeholder"></view>
 				</view>
 
 				<!-- Case 2: 如果没有视频，但存在图片，则渲染图片网格 (保持原有逻辑) -->
@@ -360,8 +362,9 @@
 	const currentPlayingVideoId = ref(null); // 当前正在播放的视频ID
 	const shouldResumePlayback = ref(false); // 是否应该恢复播放（用于判断页面重新显示时是否自动播放）
 
+	const isPageActive = ref(false); // 页面是否处于前台激活状态
 
-
+	const isVideoRendered = ref(false); // 专门控制视频组件的生死
 
 	// ============================
 	// 2. 计算属性 (Computed)
@@ -469,6 +472,16 @@
 	});
 
 	onShow(async () => {
+		isPageActive.value = true;
+
+		currentPlayingVideoId.value = null;
+		shouldResumePlayback.value = false;
+
+		// 2. 重新挂载视频组件 (建议给一个微小的延迟，确保页面渲染性能)
+		setTimeout(() => {
+			isVideoRendered.value = true;
+		}, 100);
+
 		// --- 静默登录逻辑 ---
 		// 1. 获取当前缓存中的 userId
 		let currentUserId = uni.getStorageSync('userId');
@@ -550,9 +563,13 @@
 
 	// 页面隐藏时暂停所有视频
 	onHide(() => {
-		pauseAllVideos();
-		// 标记不需要恢复播放
-		shouldResumePlayback.value = false;
+		isPageActive.value = false;
+		setTimeout(() => {
+			if (!isPageActive.value) { // 确保此时用户没回来
+				isVideoRendered.value = false;
+				currentPlayingVideoId.value = null;
+			}
+		}, 300);
 	});
 
 	// 页面卸载时暂停所有视频
@@ -617,54 +634,51 @@
 	 * @param {number} videoId - 视频对应的帖子ID
 	 */
 	const handleVideoPlay = (videoId) => {
-		// 检查是否应该自动播放（用户主动点击才播放）
-		if (!shouldResumePlayback.value) {
-			// 如果不是恢复播放模式，说明是用户主动点击，允许播放
-			shouldResumePlayback.value = true;
-		} else {
-			// 如果是恢复播放模式但当前没有正在播放的视频，则不播放
-			if (currentPlayingVideoId.value === null) {
-				shouldResumePlayback.value = false;
-				return;
-			}
+		// 【关键】防幽灵播放：如果页面不在前台（或者是系统自动触发的），立即暂停
+		if (!isPageActive.value) {
+			const ghostVideo = uni.createVideoContext(`video-${videoId}`);
+			if (ghostVideo) ghostVideo.pause();
+			return;
 		}
 
-		// 如果已有视频在播放，且不是当前点击的视频，则暂停之前的视频
+		// 1. 如果当前有别的视频在播放，先把它关了
 		if (currentPlayingVideoId.value && currentPlayingVideoId.value !== videoId) {
 			const prevVideoContext = uni.createVideoContext(`video-${currentPlayingVideoId.value}`);
 			if (prevVideoContext) {
 				prevVideoContext.pause();
 			}
 		}
-		// 更新当前播放的视频ID
+
+		// 2. 更新状态
 		currentPlayingVideoId.value = videoId;
-		console.log(`视频 ${videoId} 开始播放`);
+		shouldResumePlayback.value = true;
+		console.log(`视频 ${videoId} 确认播放`);
 	};
 
 	/**
 	 * 处理视频暂停事件
 	 */
 	const handleVideoPause = () => {
+		// 只有当暂停的视频确实是当前记录的视频时，才清空 ID
+		// 这样可以避免“切页暂停”和“手动点击暂停”逻辑冲突
 		currentPlayingVideoId.value = null;
-		// 暂停时不允许恢复播放
 		shouldResumePlayback.value = false;
-		console.log('视频已暂停');
 	};
 
 	/**
 	 * 暂停所有视频
 	 */
-	const pauseAllVideos = () => {
-		if (!currentPlayingVideoId.value) return;
-
-		const videoContext = uni.createVideoContext(`video-${currentPlayingVideoId.value}`);
-		if (videoContext) {
-			videoContext.pause();
+	const pauseAllVideos = (clearId = true) => {
+		if (currentPlayingVideoId.value) {
+			const videoContext = uni.createVideoContext(`video-${currentPlayingVideoId.value}`);
+			if (videoContext) {
+				videoContext.pause();
+			}
 		}
-		currentPlayingVideoId.value = null;
-		// 暂停时不允许恢复播放
-		shouldResumePlayback.value = false;
-		console.log('已暂停所有视频');
+		if (clearId) {
+			currentPlayingVideoId.value = null;
+			shouldResumePlayback.value = false;
+		}
 	};
 
 	// ============================
@@ -1064,9 +1078,9 @@
 					time: formatTimestamp(item.createTime),
 					user: author,
 					isReadTrace: item.isReadTrace, // 1表示开启留痕
-					viewNum: item.businessOpportunitiesViewNum || 0, // 总浏览人数
-					viewers: item.businessOpportunitiesViews ?
-						item.businessOpportunitiesViews.filter(v => v && v.memberUser) : []
+					viewNum: item.targetViewNum || 0, // 总浏览人数
+					viewers: item.targetViews ?
+						item.targetViews.filter(v => v && v.memberUser) : []
 				}
 			});
 
@@ -1560,6 +1574,10 @@
 	};
 
 	const deletePost = (postToDelete) => {
+		if (!isPageActive.value) {
+			console.log('拦截到误触：页面不活跃，不执行删除逻辑');
+			return;
+		}
 		uni.showModal({
 			title: '确认删除',
 			content: '您确定要删除这条商机吗？删除后将无法恢复。',

@@ -111,9 +111,19 @@ const _sfc_main = {
     const userProfessionalTitleDisplay = common_vendor.computed(() => {
       if (!isLogin.value)
         return "登录后查看";
-      const titles = userInfo.value.professionalTitle;
-      if (titles) {
-        return titles.split(",")[0].trim();
+      const info = userInfo.value || {};
+      const getFirst = (str) => {
+        if (!str || typeof str !== "string")
+          return "";
+        const parts = str.split(",");
+        return parts[0] ? parts[0].trim() : "";
+      };
+      const firstAssoc = getFirst(info.associationName);
+      const firstTitle = getFirst(info.professionalTitle);
+      if (firstAssoc && firstTitle) {
+        return `${firstAssoc}${firstTitle}`;
+      } else if (firstAssoc || firstTitle) {
+        return firstAssoc || firstTitle;
       }
       return "暂未设置商协会职务";
     });
@@ -366,10 +376,10 @@ const _sfc_main = {
         common_vendor.index.makePhoneCall({
           phoneNumber: item.phone,
           success: () => {
-            common_vendor.index.__f__("log", "at pages/my/my.vue:563", "拨打电话成功");
+            common_vendor.index.__f__("log", "at pages/my/my.vue:582", "拨打电话成功");
           },
           fail: (err) => {
-            common_vendor.index.__f__("log", "at pages/my/my.vue:566", "拨打电话失败:", err);
+            common_vendor.index.__f__("log", "at pages/my/my.vue:585", "拨打电话失败:", err);
           }
         });
         return;
