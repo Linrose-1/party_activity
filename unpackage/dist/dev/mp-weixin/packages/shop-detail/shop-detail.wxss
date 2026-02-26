@@ -214,6 +214,93 @@
 		text-align: center;
 		font-size: 28rpx;
 }
+
+	/* 浏览留痕模块样式 */
+.viewer-module-card.data-v-4c71c098 {
+		background-color: #ffffff;
+		border-radius: 16rpx;
+		margin-top: 30rpx;
+		padding: 24rpx;
+		border: 1rpx solid #f0f0f0;
+}
+.viewer-header.data-v-4c71c098 {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 20rpx;
+}
+.left-title.data-v-4c71c098 {
+		display: flex;
+		align-items: center;
+}
+.title-indicator.data-v-4c71c098 {
+		width: 6rpx;
+		height: 24rpx;
+		background-color: #FF6B00;
+		border-radius: 4rpx;
+		margin-right: 12rpx;
+}
+.title-txt.data-v-4c71c098 {
+		font-size: 26rpx;
+		font-weight: bold;
+		color: #333;
+}
+.title-count.data-v-4c71c098 {
+		font-size: 22rpx;
+		color: #FF6B00;
+		background: rgba(255, 107, 0, 0.1);
+		padding: 2rpx 12rpx;
+		border-radius: 20rpx;
+		margin-left: 10rpx;
+}
+.right-more.data-v-4c71c098 {
+		display: flex;
+		align-items: center;
+}
+.right-more text.data-v-4c71c098 {
+		font-size: 22rpx;
+		color: #999;
+		margin-right: 4rpx;
+}
+.avatar-stack.data-v-4c71c098 {
+		display: flex;
+		align-items: center;
+		flex-wrap: wrap;
+		margin-bottom: 12rpx;
+}
+.avatar-item.data-v-4c71c098 {
+		margin-right: 12rpx;
+}
+.v-avatar.data-v-4c71c098 {
+		width: 64rpx;
+		height: 64rpx;
+		border-radius: 50%;
+		border: 2rpx solid #fff;
+		background-color: #f5f5f5;
+}
+.more-dots.data-v-4c71c098 {
+		width: 64rpx;
+		height: 64rpx;
+		border-radius: 50%;
+		background-color: #f8f8f8;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+}
+.dot.data-v-4c71c098 {
+		width: 4rpx;
+		height: 4rpx;
+		background-color: #ccc;
+		border-radius: 50%;
+		margin: 0 2rpx;
+}
+.viewer-tips.data-v-4c71c098 {
+		font-size: 22rpx;
+		color: #bbb;
+}
+.viewer-module-card.data-v-4c71c098:active {
+		background-color: #fafafa;
+}
 .action-bar.data-v-4c71c098 {
 		background: white;
 		padding: 20rpx 30rpx;

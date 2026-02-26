@@ -236,6 +236,38 @@
 			</span>
 		</view>
 
+		<!-- ==================== 浏览留痕模块 ==================== -->
+		<view class="viewer-module-card" v-if="activityDetail && activityDetail.isReadTrace === 1 && viewerTotal > 0">
+			<view class="viewer-header" @click="goToTraceList">
+				<view class="left-title">
+					<view class="title-indicator"></view>
+					<text class="title-txt">最近浏览</text>
+					<text class="title-count">{{ viewerTotal }}</text>
+				</view>
+				<view class="right-more">
+					<text>浏览详情</text>
+					<uni-icons type="right" size="14" color="#999"></uni-icons>
+				</view>
+			</view>
+
+			<view class="viewer-content" @click="goToTraceList">
+				<view class="avatar-stack">
+					<view class="avatar-item" v-for="(item, index) in viewerList" :key="item.id">
+						<image :src="item.memberUser?.avatar || '/static/icon/default-avatar.png'" class="v-avatar"
+							mode="aspectFill"></image>
+					</view>
+					<view v-if="viewerTotal > 7" class="more-dots">
+						<text class="dot"></text>
+						<text class="dot"></text>
+						<text class="dot"></text>
+					</view>
+				</view>
+				<view class="viewer-tips">
+					已有 {{ viewerTotal }} 位商友关注了您的聚会
+				</view>
+			</view>
+		</view>
+
 		<view style="width: 100%;height: 100rpx;"></view>
 
 
@@ -329,6 +361,9 @@
 	const participantTotal = ref(0);
 
 	const pointsPopup = ref(null);
+
+	const viewerList = ref([]);
+	const viewerTotal = ref(0);
 
 	onLoad((options) => {
 		if (options && options.inviteCode) {
@@ -520,8 +555,11 @@
 			}
 		});
 		if (result && !result.error) {
-			// 【修改】将获取到的数据赋值给 activityDetail
+			// 将获取到的数据赋值给 activityDetail
 			activityDetail.value = result.data;
+
+			getViewerList(activityId.value);
+
 			if (result.data.memberSponsorList && Array.isArray(result.data.memberSponsorList)) {
 				sponsorList.value = result.data.memberSponsorList;
 			} else {
@@ -726,6 +764,34 @@
 		uni.previewImage({
 			urls: bannerImages.value,
 			current: index
+		});
+	};
+
+	// [方法] 获取浏览记录
+	const getViewerList = async (id) => {
+		// 只有本人创建的聚会，后端接口才会返回数据
+		const {
+			data
+		} = await request('/app-api/member/target-view/page', {
+			method: 'GET',
+			data: {
+				targetId: id,
+				targetType: 'activity', // 【关键】设置为 activity
+				pageNo: 1,
+				pageSize: 7
+			}
+		});
+
+		if (data) {
+			viewerList.value = data.list || [];
+			viewerTotal.value = data.total || 0;
+		}
+	};
+
+	// [方法] 跳转至完整留痕列表页
+	const goToTraceList = () => {
+		uni.navigateTo({
+			url: `/packages/user-view-trace/user-view-trace?id=${activityId.value}&type=activity`
 		});
 	};
 
@@ -1311,6 +1377,109 @@
 	.registered-count {
 		color: #FF6B00;
 		font-weight: bold;
+	}
+
+	/* 浏览留痕模块样式 (聚会版) */
+	.viewer-module-card {
+		background-color: #ffffff;
+		border-radius: 20rpx;
+		margin: 30rpx;
+		padding: 30rpx;
+		box-shadow: 0 10rpx 20rpx rgba(0, 0, 0, 0.05);
+		border: 1rpx solid #f0f0f0;
+	}
+
+	.viewer-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 24rpx;
+	}
+
+	.left-title {
+		display: flex;
+		align-items: center;
+	}
+
+	.title-indicator {
+		width: 6rpx;
+		height: 28rpx;
+		background-color: #FF6B00;
+		border-radius: 4rpx;
+		margin-right: 12rpx;
+	}
+
+	.title-txt {
+		font-size: 28rpx;
+		font-weight: bold;
+		color: #333;
+	}
+
+	.title-count {
+		font-size: 24rpx;
+		color: #FF6B00;
+		background: rgba(255, 107, 0, 0.1);
+		padding: 2rpx 12rpx;
+		border-radius: 20rpx;
+		margin-left: 12rpx;
+	}
+
+	.right-more {
+		display: flex;
+		align-items: center;
+	}
+
+	.right-more text {
+		font-size: 24rpx;
+		color: #999;
+		margin-right: 4rpx;
+	}
+
+	.avatar-stack {
+		display: flex;
+		align-items: center;
+		flex-wrap: wrap;
+		margin-bottom: 16rpx;
+	}
+
+	.avatar-item {
+		margin-right: 16rpx;
+	}
+
+	.v-avatar {
+		width: 72rpx;
+		height: 72rpx;
+		border-radius: 50%;
+		border: 2rpx solid #fff;
+		background-color: #f5f5f5;
+		box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.05);
+	}
+
+	.more-dots {
+		width: 72rpx;
+		height: 72rpx;
+		border-radius: 50%;
+		background-color: #f8f8f8;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.dot {
+		width: 6rpx;
+		height: 6rpx;
+		background-color: #ccc;
+		border-radius: 50%;
+		margin: 0 2rpx;
+	}
+
+	.viewer-tips {
+		font-size: 24rpx;
+		color: #bbb;
+	}
+
+	.viewer-module-card:active {
+		background-color: #fafafa;
 	}
 
 	/* ==================================================================

@@ -32,21 +32,24 @@
 							<view class="post-time">
 								<uni-icons type="redo" size="14" color="#888"></uni-icons> {{ postDetail.time }}
 							</view>
-							<!-- 关注/删除按钮逻辑保持不变 -->
-							<button v-if="showFollowButton" class="follow-button mini-style"
-								:class="{ 'followed': postDetail.isFollowedUser }"
-								@click.stop="toggleFollow(postDetail)">
-								{{ postDetail.isFollowedUser ? '已关注' : '关注' }}
-							</button>
-							<button v-else-if="loggedInUserId && loggedInUserId === postDetail.userId"
-								class="follow-button delete-post-button mini-style" @click.stop="deletePost">
-								<uni-icons type="trash" size="12" color="#e74c3c"></uni-icons>
-								删除
-							</button>
+							<view class="header-right-action" v-if="loggedInUserId">
+								<!-- 场景 A: 别人的商机 -> 显示关注/已关注 -->
+								<button v-if="loggedInUserId !== postDetail.userId" class="follow-button mini-style"
+									:class="{ 'followed': postDetail.isFollowedUser }"
+									@click.stop="toggleFollow(postDetail)">
+									{{ postDetail.isFollowedUser ? '已关注' : '关注' }}
+								</button>
+
+								<!-- 场景 B: 自己的商机 -> 仅显示编辑 -->
+								<button v-else class="edit-button-detail mini-style" @click.stop="handleEdit">
+									<uni-icons type="compose" size="14" color="#FF6A00"></uni-icons>
+									<text>编辑</text>
+								</button>
+							</view>
 						</view>
 					</view>
 				</view>
-				
+
 				<view style="font-weight: 700;font-size: 36rpx;"
 					@longpress.stop="handleLongPress(postDetail.postTitle)">
 					<text v-if="postDetail.postType == 1" class="detail-type-tag hunter">创业猎伙</text>
@@ -97,14 +100,16 @@
 					<view class="interaction-btn" @click="openSharePopup">
 						<uni-icons type="redo" size="18" color="#666"></uni-icons> 分享
 					</view>
-					<!-- <button class="interaction-btn share-btn" open-type="share">
-						<uni-icons type="redo" size="18" color="#666"></uni-icons> 分享
-					</button> -->
 					<view class="interaction-btn" :class="{ active: postDetail.saved }"
 						@click="toggleBookmark(postDetail)">
 						<uni-icons :type="postDetail.saved ? 'star-filled' : 'star'" size="18"
 							:color="postDetail.saved ? '#FF6A00' : '#666'"></uni-icons>
 						{{ postDetail.saved ? '已收藏' : '收藏' }}
+					</view>
+
+					<view class="interaction-btn delete-action"
+						v-if="loggedInUserId && loggedInUserId === postDetail.userId" @click.stop="deletePost">
+						<uni-icons type="trash" size="20" color="#e74c3c"></uni-icons>
 					</view>
 
 				</view>
@@ -151,8 +156,7 @@
 
 					<view class="comment-list">
 						<view class="comment" v-for="comment in comments" :key="comment.id"
-							:class="{ 'is-reply': comment.parentId !== 0 }"
-							:data-comment-id="comment.id">
+							:class="{ 'is-reply': comment.parentId !== 0 }" :data-comment-id="comment.id">
 							<image :src="comment.avatar" mode="" class="comment-avatar"
 								@click="!comment.anonymous && navigateToBusinessCard({ id: comment.userId, name: comment.user, avatar: comment.avatar })">
 							</image>
@@ -181,20 +185,6 @@
 					</view>
 				</view>
 
-				<!-- 底部添加评论区域 -->
-				<!-- <view class="add-comment" :style="{ bottom: keyboardHeight + 'px' }">
-					<textarea auto-height maxlength="200" v-model="newCommentText"
-						:placeholder="commentInputPlaceholder" :adjust-position="false"
-						class="comment-textarea"></textarea>
-
-					<view class="anonymous-checkbox" @click="isAnonymous = !isAnonymous">
-						<uni-icons :type="isAnonymous ? 'checkbox-filled' : 'circle'" size="20"
-							:color="isAnonymous ? '#FF6A00' : '#ccc'"></uni-icons>
-						<text>匿名</text>
-					</view>
-
-					<button @click="addComment">发送</button>
-				</view> -->
 				<!-- 底部悬浮评论栏 -->
 				<view class="add-comment-bar" :style="{ bottom: keyboardHeight + 'px' }">
 					<view class="input-container">
@@ -772,7 +762,7 @@
 			method: 'GET',
 			data: {
 				targetId: postId.value,
-				targetType:'post',
+				targetType: 'post',
 				pageNo: 1,
 				pageSize: 7
 			}
@@ -826,8 +816,12 @@
 	};
 
 	const goToTraceList = () => {
+		// 检查 postId.value 是否真的存在且不是对象
+		const id = (typeof postId.value === 'object') ? postId.value.id : postId.value;
+
 		uni.navigateTo({
-			url: `/packages/user-view-trace/user-view-trace?id=${postId.value}`
+			// 增加 type=post，明确告诉留痕页这是商机
+			url: `/packages/user-view-trace/user-view-trace?id=${id}&type=post`
 		});
 	};
 
@@ -1313,6 +1307,16 @@
 		});
 	};
 
+	/**
+	 * 处理编辑商机跳转
+	 */
+	const handleEdit = () => {
+		if (!postId.value) return;
+		uni.navigateTo({
+			url: `/packages/home-opportunitiesPublish/home-opportunitiesPublish?id=${postId.value}`
+		});
+	};
+
 
 	//简化长按复制菜单的状态，不再需要坐标
 	const copyMenu = reactive({
@@ -1555,6 +1559,79 @@
 
 	.post-time uni-icons {
 		margin-right: 10rpx;
+	}
+
+	/* 按钮组容器 */
+	.owner-action-group {
+		display: flex;
+		align-items: center;
+		gap: 16rpx;
+		/* 两个按钮之间的间距 */
+	}
+
+	/* 编辑按钮样式 - 参考首页风格 */
+	.edit-button-detail {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 6rpx;
+		padding: 8rpx 24rpx;
+		background-color: #FFF5EE;
+		/* 浅橙色背景 */
+		border: 1rpx solid rgba(255, 106, 0, 0.3);
+		border-radius: 40rpx;
+		height: auto;
+		line-height: 1.4;
+		margin: 0;
+	}
+
+	.edit-button-detail text {
+		font-size: 24rpx;
+		color: #FF6A00;
+		font-weight: bold;
+	}
+
+	.edit-button-detail:active {
+		background-color: #FFE8D9;
+	}
+
+	/* 删除按钮样式 - 增强视觉区分 */
+	.delete-post-button-detail {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 4rpx;
+		padding: 6rpx 20rpx;
+		background-color: #FFF5F5;
+		border: 1rpx solid rgba(231, 76, 60, 0.2);
+		border-radius: 40rpx;
+		color: #e74c3c;
+		font-size: 24rpx;
+		font-weight: bold;
+		line-height: 1.4;
+	}
+
+	.interaction-btn.delete-action {
+		margin-left: auto;
+		/* 如果想让删除图标靠最右侧，可以开启这行 */
+		padding: 10rpx;
+	}
+
+	.interaction-btn.delete-action:active {
+		background: rgba(231, 76, 60, 0.1);
+		/* 点击时浅红色反馈 */
+		border-radius: 50%;
+	}
+
+	/* 统一取消原生按钮边框 */
+	.edit-button-detail::after,
+	.delete-post-button-detail::after {
+		border: none;
+	}
+
+	.edit-button-detail:active,
+	.delete-post-button-detail:active {
+		opacity: 0.7;
 	}
 
 	.follow-button {

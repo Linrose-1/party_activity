@@ -120,6 +120,39 @@
 					<uni-icons type="map-pin-ellipse" size="40" color="#ccc"></uni-icons>
 					<view class="map-overlay">点击查看地图位置</view>
 				</view>
+
+				<!-- ==================== 浏览留痕模块 ==================== -->
+				<view class="viewer-module-card" v-if="storeDetail && storeDetail.isReadTrace === 1 && viewerTotal > 0">
+					<view class="viewer-header" @click="goToTraceList">
+						<view class="left-title">
+							<view class="title-indicator"></view>
+							<text class="title-txt">最近浏览</text>
+							<text class="title-count">{{ viewerTotal }}</text>
+						</view>
+						<view class="right-more">
+							<text>浏览详情</text>
+							<uni-icons type="right" size="14" color="#999"></uni-icons>
+						</view>
+					</view>
+
+					<view class="viewer-content" @click="goToTraceList">
+						<view class="avatar-stack">
+							<view class="avatar-item" v-for="(item, index) in viewerList" :key="item.id">
+								<image :src="item.memberUser?.avatar || '/static/icon/default-avatar.png'"
+									class="v-avatar" mode="aspectFill"></image>
+							</view>
+							<view v-if="viewerTotal > 7" class="more-dots">
+								<text class="dot"></text>
+								<text class="dot"></text>
+								<text class="dot"></text>
+							</view>
+						</view>
+						<view class="viewer-tips">
+							已有 {{ viewerTotal }} 位商友进入了您的聚店
+						</view>
+					</view>
+				</view>
+
 			</view>
 
 		</scroll-view>
@@ -162,6 +195,10 @@
 	} from '@dcloudio/uni-app';
 	import request from '../../utils/request.js';
 	import PointsFeedbackPopup from '@/components/PointsFeedbackPopup.vue';
+
+	const loggedInUserId = ref(uni.getStorageSync('userId'));
+	const viewerList = ref([]);
+	const viewerTotal = ref(0);
 
 	const storeDetail = ref(null);
 	const isLoading = ref(true);
@@ -282,6 +319,8 @@
 				}
 			}, 500); // 延迟 500ms 显示
 		}
+
+		getViewerList(storeId);
 	});
 
 	const openMap = () => {
@@ -332,6 +371,34 @@
 		uni.previewImage({
 			urls: finalUrls,
 			current: Array.isArray(urls) ? urls[current] : urls // 兼容旧的单图预览
+		});
+	};
+
+	// [方法] 获取浏览记录
+	const getViewerList = async (storeId) => {
+		// 只有本人创建的店，后端接口才会返回数据
+		const {
+			data
+		} = await request('/app-api/member/target-view/page', {
+			method: 'GET',
+			data: {
+				targetId: storeId,
+				targetType: 'store', // 【关键】设置为 store
+				pageNo: 1,
+				pageSize: 7
+			}
+		});
+
+		if (data) {
+			viewerList.value = data.list || [];
+			viewerTotal.value = data.total || 0;
+		}
+	};
+
+	// [方法] 跳转至完整留痕列表页
+	const goToTraceList = () => {
+		uni.navigateTo({
+			url: `/packages/user-view-trace/user-view-trace?id=${storeDetail.value.id}&type=store`
 		});
 	};
 
@@ -604,6 +671,108 @@
 		text-align: center;
 		font-size: 28rpx;
 	}
+
+	/* 浏览留痕模块样式 */
+	.viewer-module-card {
+		background-color: #ffffff;
+		border-radius: 16rpx;
+		margin-top: 30rpx;
+		padding: 24rpx;
+		border: 1rpx solid #f0f0f0;
+	}
+
+	.viewer-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 20rpx;
+	}
+
+	.left-title {
+		display: flex;
+		align-items: center;
+	}
+
+	.title-indicator {
+		width: 6rpx;
+		height: 24rpx;
+		background-color: #FF6B00;
+		border-radius: 4rpx;
+		margin-right: 12rpx;
+	}
+
+	.title-txt {
+		font-size: 26rpx;
+		font-weight: bold;
+		color: #333;
+	}
+
+	.title-count {
+		font-size: 22rpx;
+		color: #FF6B00;
+		background: rgba(255, 107, 0, 0.1);
+		padding: 2rpx 12rpx;
+		border-radius: 20rpx;
+		margin-left: 10rpx;
+	}
+
+	.right-more {
+		display: flex;
+		align-items: center;
+	}
+
+	.right-more text {
+		font-size: 22rpx;
+		color: #999;
+		margin-right: 4rpx;
+	}
+
+	.avatar-stack {
+		display: flex;
+		align-items: center;
+		flex-wrap: wrap;
+		margin-bottom: 12rpx;
+	}
+
+	.avatar-item {
+		margin-right: 12rpx;
+	}
+
+	.v-avatar {
+		width: 64rpx;
+		height: 64rpx;
+		border-radius: 50%;
+		border: 2rpx solid #fff;
+		background-color: #f5f5f5;
+	}
+
+	.more-dots {
+		width: 64rpx;
+		height: 64rpx;
+		border-radius: 50%;
+		background-color: #f8f8f8;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.dot {
+		width: 4rpx;
+		height: 4rpx;
+		background-color: #ccc;
+		border-radius: 50%;
+		margin: 0 2rpx;
+	}
+
+	.viewer-tips {
+		font-size: 22rpx;
+		color: #bbb;
+	}
+
+	.viewer-module-card:active {
+		background-color: #fafafa;
+	}
+
 
 	.action-bar {
 		background: white;

@@ -2,21 +2,23 @@
 .trace-page.data-v-e21cc623 {
 		background: #f8f9fa;
 		min-height: 100vh;
-		padding: 20rpx;
+		padding: 20rpx 30rpx;
 }
 .trace-item.data-v-e21cc623 {
 		background: #fff;
-		border-radius: 20rpx;
+		border-radius: 24rpx;
 		padding: 30rpx;
 		display: flex;
 		align-items: center;
 		margin-bottom: 20rpx;
+		box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.03);
 }
 .u-avatar.data-v-e21cc623 {
 		width: 100rpx;
 		height: 100rpx;
 		border-radius: 50%;
 		margin-right: 24rpx;
+		background-color: #f0f0f0;
 }
 .u-info.data-v-e21cc623 {
 		flex: 1;
@@ -26,10 +28,10 @@
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		margin-bottom: 8rpx;
+		margin-bottom: 6rpx;
 }
 .u-name.data-v-e21cc623 {
-		font-size: 30rpx;
+		font-size: 32rpx;
 		font-weight: bold;
 		color: #333;
 }
@@ -37,12 +39,70 @@
 		font-size: 24rpx;
 		color: #bbb;
 }
-.u-desc.data-v-e21cc623 {
-		font-size: 26rpx;
+
+	/* 商务信息行 */
+	/* 商协会职务行样式 */
+.u-assoc-row.data-v-e21cc623 {
+		display: flex;
+		align-items: center;
+		margin: 10rpx 0;
+		background-color: #FFF9F5;
+		/* 极浅的橙色背景 */
+		padding: 6rpx 16rpx;
+		border-radius: 8rpx;
+		width: -webkit-fit-content;
+		width: fit-content;
+		/* 宽度自适应内容 */
+		max-width: 100%;
+}
+.u-assoc-text.data-v-e21cc623 {
+		font-size: 24rpx;
+		color: #FF6A00;
+		/* 使用主题橙色 */
+		margin-left: 8rpx;
+		font-weight: 500;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+}
+
+	/* 暂未填写时的弱化样式 */
+.u-assoc-text.is-empty.data-v-e21cc623 {
 		color: #999;
 }
-.text-ellipsis.data-v-e21cc623 {
-		overflow: hidden;
-		white-space: nowrap;
-		text-overflow: ellipsis;
+.u-assoc-row .uni-icons.data-v-e21cc623 {
+		flex-shrink: 0;
+}
+
+	/* 调整统计行间距 */
+.u-stats.data-v-e21cc623 {
+		margin-top: 4rpx;
+		padding-left: 10rpx;
+}
+
+	/* 统计行 */
+.u-stats.data-v-e21cc623 {
+		display: flex;
+		align-items: center;
+		gap: 6rpx;
+}
+.u-count.data-v-e21cc623 {
+		font-size: 22rpx;
+		color: #999;
+}
+
+	/* 空状态样式 */
+.empty-box.data-v-e21cc623 {
+		padding-top: 200rpx;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		color: #999;
+		font-size: 28rpx;
+}
+.empty-img.data-v-e21cc623 {
+		width: 200rpx;
+		height: 200rpx;
+		margin-bottom: 20rpx;
+		opacity: 0.5;
 }

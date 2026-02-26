@@ -13,6 +13,9 @@ const PointsFeedbackPopup = () => "../../components/PointsFeedbackPopup.js";
 const _sfc_main = {
   __name: "shop-detail",
   setup(__props) {
+    common_vendor.ref(common_vendor.index.getStorageSync("userId"));
+    const viewerList = common_vendor.ref([]);
+    const viewerTotal = common_vendor.ref(0);
     const storeDetail = common_vendor.ref(null);
     const isLoading = common_vendor.ref(true);
     const pointsPopup = common_vendor.ref(null);
@@ -58,7 +61,7 @@ const _sfc_main = {
           special
         };
       } catch (error) {
-        common_vendor.index.__f__("error", "at packages/shop-detail/shop-detail.vue:230", "解析营业时间失败:", error);
+        common_vendor.index.__f__("error", "at packages/shop-detail/shop-detail.vue:267", "解析营业时间失败:", error);
         return {
           regular: [{
             label: "营业时间",
@@ -89,7 +92,7 @@ const _sfc_main = {
       });
       isLoading.value = false;
       if (error) {
-        common_vendor.index.__f__("error", "at packages/shop-detail/shop-detail.vue:267", "获取聚店详情失败:", error);
+        common_vendor.index.__f__("error", "at packages/shop-detail/shop-detail.vue:304", "获取聚店详情失败:", error);
         common_vendor.index.showToast({
           title: error,
           icon: "none"
@@ -97,7 +100,7 @@ const _sfc_main = {
         return;
       }
       storeDetail.value = data;
-      common_vendor.index.__f__("log", "at packages/shop-detail/shop-detail.vue:276", "聚店详情数据:", storeDetail.value);
+      common_vendor.index.__f__("log", "at packages/shop-detail/shop-detail.vue:313", "聚店详情数据:", storeDetail.value);
       if (data.checkContribution === 1) {
         setTimeout(() => {
           if (pointsPopup.value) {
@@ -105,6 +108,7 @@ const _sfc_main = {
           }
         }, 500);
       }
+      getViewerList(storeId);
     });
     const openMap = () => {
       if (!storeDetail.value)
@@ -152,6 +156,29 @@ const _sfc_main = {
         urls: finalUrls,
         current: Array.isArray(urls) ? urls[current] : urls
         // 兼容旧的单图预览
+      });
+    };
+    const getViewerList = async (storeId) => {
+      const {
+        data
+      } = await utils_request.request("/app-api/member/target-view/page", {
+        method: "GET",
+        data: {
+          targetId: storeId,
+          targetType: "store",
+          // 【关键】设置为 store
+          pageNo: 1,
+          pageSize: 7
+        }
+      });
+      if (data) {
+        viewerList.value = data.list || [];
+        viewerTotal.value = data.total || 0;
+      }
+    };
+    const goToTraceList = () => {
+      common_vendor.index.navigateTo({
+        url: `/packages/user-view-trace/user-view-trace?id=${storeDetail.value.id}&type=store`
       });
     };
     common_vendor.onShareAppMessage(() => {
@@ -249,23 +276,44 @@ const _sfc_main = {
           color: "#ccc"
         }),
         z: common_vendor.o(openMap),
-        A: common_vendor.p({
+        A: storeDetail.value && storeDetail.value.isReadTrace === 1 && viewerTotal.value > 0
+      }, storeDetail.value && storeDetail.value.isReadTrace === 1 && viewerTotal.value > 0 ? common_vendor.e({
+        B: common_vendor.t(viewerTotal.value),
+        C: common_vendor.p({
+          type: "right",
+          size: "14",
+          color: "#999"
+        }),
+        D: common_vendor.o(goToTraceList),
+        E: common_vendor.f(viewerList.value, (item, index, i0) => {
+          var _a;
+          return {
+            a: ((_a = item.memberUser) == null ? void 0 : _a.avatar) || "/static/icon/default-avatar.png",
+            b: item.id
+          };
+        }),
+        F: viewerTotal.value > 7
+      }, viewerTotal.value > 7 ? {} : {}, {
+        G: common_vendor.t(viewerTotal.value),
+        H: common_vendor.o(goToTraceList)
+      }) : {}, {
+        I: common_vendor.p({
           type: "map-filled",
           color: "#FF6B00",
           size: "20"
         }),
-        B: common_vendor.o((...args) => common_vendor.unref(openNavigation) && common_vendor.unref(openNavigation)(...args)),
-        C: common_vendor.p({
+        J: common_vendor.o((...args) => common_vendor.unref(openNavigation) && common_vendor.unref(openNavigation)(...args)),
+        K: common_vendor.p({
           type: "phone-filled",
           color: "#fff",
           size: "20"
         }),
-        D: common_vendor.o(callPhone),
-        E: common_vendor.sr(pointsPopup, "4c71c098-4", {
+        L: common_vendor.o(callPhone),
+        M: common_vendor.sr(pointsPopup, "4c71c098-5", {
           "k": "pointsPopup"
         })
       }) : {
-        F: common_vendor.p({
+        N: common_vendor.p({
           type: "spinner-cycle",
           size: "30",
           color: "#999"
