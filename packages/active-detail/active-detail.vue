@@ -268,6 +268,36 @@
 			</view>
 		</view>
 
+		<!-- 评论预览模块 -->
+		<view class="comment-preview-card">
+			<view class="preview-header" @click="goToCommentPage">
+				<view class="left-title">
+					<view class="title-indicator"></view>
+					<text class="title-txt">商友评论</text>
+					<text class="title-count" v-if="commentTotal > 0">{{ commentTotal }}</text>
+				</view>
+				<view class="right-more">
+					<text>查看全部</text>
+					<uni-icons type="right" size="14" color="#999"></uni-icons>
+				</view>
+			</view>
+
+			<!-- 简单评论列表 (展示最新2条) -->
+			<view class="preview-list" v-if="commentPreviewList.length > 0" @click="goToCommentPage">
+				<view class="preview-item" v-for="c in commentPreviewList" :key="c.id">
+					<text
+						class="p-user">{{ c.anonymous === 1 ? '匿名商友' : (c.memberUserBaseVO?.nickname || '商友') }}:</text>
+					<text class="p-content">{{ c.content }}</text>
+				</view>
+			</view>
+
+			<!-- 无评论时的占位 -->
+			<view v-else class="preview-empty" @click="goToCommentPage">
+				<uni-icons type="chatbubble" size="18" color="#ccc"></uni-icons>
+				<text>暂无评论，点击发表第一条评论</text>
+			</view>
+		</view>
+
 		<view style="width: 100%;height: 100rpx;"></view>
 
 
@@ -380,6 +410,7 @@
 			getActiveDetail();
 			// 在获取聚会详情后，接着获取报名用户列表
 			getParticipantList();
+			getCommentPreview(); 
 		} else {
 			console.error('未接收到聚会ID！');
 			uni.showToast({
@@ -786,6 +817,33 @@
 			viewerList.value = data.list || [];
 			viewerTotal.value = data.total || 0;
 		}
+	};
+
+	const commentPreviewList = ref([]);
+	const commentTotal = ref(0);
+
+	const getCommentPreview = async () => {
+		if (!activityId.value) return;
+		const {
+			data
+		} = await request('/app-api/member/comment/select-type-target-id', {
+			method: 'GET',
+			data: {
+				targetId: activityId.value, // 或者是 storeId
+				targetType: 'activity' // 或者是 'store'
+			}
+		});
+		if (data && Array.isArray(data)) {
+			commentTotal.value = data.length;
+			// 只取前2条做预览
+			commentPreviewList.value = data.slice(0, 2);
+		}
+	};
+
+	const goToCommentPage = () => {
+		uni.navigateTo({
+			url: `/packages/comment-page/comment-page?id=${activityId.value}&type=activity`
+		});
 	};
 
 	// [方法] 跳转至完整留痕列表页
@@ -1480,6 +1538,63 @@
 
 	.viewer-module-card:active {
 		background-color: #fafafa;
+	}
+
+	.comment-preview-card {
+		background-color: #ffffff;
+		border-radius: 20rpx;
+		margin: 30rpx;
+		padding: 30rpx;
+		box-shadow: 0 10rpx 20rpx rgba(0, 0, 0, 0.05);
+		border: 1rpx solid #f0f0f0;
+	}
+
+	.preview-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 24rpx;
+	}
+
+	.preview-list {
+		background-color: #f9f9f9;
+		padding: 20rpx;
+		border-radius: 12rpx;
+	}
+
+	.preview-item {
+		font-size: 26rpx;
+		line-height: 1.6;
+		margin-bottom: 12rpx;
+		display: -webkit-box;
+		-webkit-box-orient: vertical;
+		-webkit-line-clamp: 2;
+		/* 超过2行省略 */
+		overflow: hidden;
+	}
+
+	.preview-item:last-child {
+		margin-bottom: 0;
+	}
+
+	.p-user {
+		color: #FF6B00;
+		font-weight: bold;
+		margin-right: 12rpx;
+	}
+
+	.p-content {
+		color: #555;
+	}
+
+	.preview-empty {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		padding: 40rpx 0;
+		color: #bbb;
+		font-size: 26rpx;
+		gap: 12rpx;
 	}
 
 	/* ==================================================================

@@ -601,6 +601,13 @@
 				{
 					"navigationBarTitleText" : "猩球信用"
 				}
+			},
+			{
+				"path" : "comment-page/comment-page",
+				"style" : 
+				{
+					"navigationBarTitleText" : "所有评论"
+				}
 			}
 			// 如果还有其他页面要放进这个分包，继续在这里加
 		]

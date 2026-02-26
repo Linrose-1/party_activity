@@ -13,6 +13,7 @@ const PointsFeedbackPopup = () => "../../components/PointsFeedbackPopup.js";
 const _sfc_main = {
   __name: "shop-detail",
   setup(__props) {
+    const storeId = common_vendor.ref(null);
     common_vendor.ref(common_vendor.index.getStorageSync("userId"));
     const viewerList = common_vendor.ref([]);
     const viewerTotal = common_vendor.ref(0);
@@ -61,7 +62,7 @@ const _sfc_main = {
           special
         };
       } catch (error) {
-        common_vendor.index.__f__("error", "at packages/shop-detail/shop-detail.vue:267", "解析营业时间失败:", error);
+        common_vendor.index.__f__("error", "at packages/shop-detail/shop-detail.vue:301", "解析营业时间失败:", error);
         return {
           regular: [{
             label: "营业时间",
@@ -72,7 +73,7 @@ const _sfc_main = {
       }
     });
     common_vendor.onLoad(async (options) => {
-      const storeId = options.id;
+      storeId.value = options.id;
       if (!storeId) {
         common_vendor.index.showToast({
           title: "无效的聚店ID",
@@ -87,12 +88,12 @@ const _sfc_main = {
       } = await utils_request.request("/app-api/member/store/findStore", {
         method: "GET",
         data: {
-          id: storeId
+          id: storeId.value
         }
       });
       isLoading.value = false;
       if (error) {
-        common_vendor.index.__f__("error", "at packages/shop-detail/shop-detail.vue:304", "获取聚店详情失败:", error);
+        common_vendor.index.__f__("error", "at packages/shop-detail/shop-detail.vue:338", "获取聚店详情失败:", error);
         common_vendor.index.showToast({
           title: error,
           icon: "none"
@@ -100,7 +101,7 @@ const _sfc_main = {
         return;
       }
       storeDetail.value = data;
-      common_vendor.index.__f__("log", "at packages/shop-detail/shop-detail.vue:313", "聚店详情数据:", storeDetail.value);
+      common_vendor.index.__f__("log", "at packages/shop-detail/shop-detail.vue:347", "聚店详情数据:", storeDetail.value);
       if (data.checkContribution === 1) {
         setTimeout(() => {
           if (pointsPopup.value) {
@@ -109,6 +110,7 @@ const _sfc_main = {
         }, 500);
       }
       getViewerList(storeId);
+      getCommentPreview();
     });
     const openMap = () => {
       if (!storeDetail.value)
@@ -158,13 +160,13 @@ const _sfc_main = {
         // 兼容旧的单图预览
       });
     };
-    const getViewerList = async (storeId) => {
+    const getViewerList = async (storeId2) => {
       const {
         data
       } = await utils_request.request("/app-api/member/target-view/page", {
         method: "GET",
         data: {
-          targetId: storeId,
+          targetId: storeId2,
           targetType: "store",
           // 【关键】设置为 store
           pageNo: 1,
@@ -179,6 +181,30 @@ const _sfc_main = {
     const goToTraceList = () => {
       common_vendor.index.navigateTo({
         url: `/packages/user-view-trace/user-view-trace?id=${storeDetail.value.id}&type=store`
+      });
+    };
+    const commentPreviewList = common_vendor.ref([]);
+    const commentTotal = common_vendor.ref(0);
+    const getCommentPreview = async () => {
+      const {
+        data
+      } = await utils_request.request("/app-api/member/comment/select-type-target-id", {
+        method: "GET",
+        data: {
+          targetId: storeId.value,
+          // 或者是 storeId
+          targetType: "store"
+          // 或者是 'store'
+        }
+      });
+      if (data && Array.isArray(data)) {
+        commentTotal.value = data.length;
+        commentPreviewList.value = data.slice(0, 2);
+      }
+    };
+    const goToCommentPage = () => {
+      common_vendor.index.navigateTo({
+        url: `/packages/comment-page/comment-page?id=${storeId.value}&type=store`
       });
     };
     common_vendor.onShareAppMessage(() => {
@@ -297,23 +323,52 @@ const _sfc_main = {
         G: common_vendor.t(viewerTotal.value),
         H: common_vendor.o(goToTraceList)
       }) : {}, {
-        I: common_vendor.p({
+        I: commentTotal.value > 0
+      }, commentTotal.value > 0 ? {
+        J: common_vendor.t(commentTotal.value)
+      } : {}, {
+        K: common_vendor.p({
+          type: "right",
+          size: "14",
+          color: "#999"
+        }),
+        L: common_vendor.o(goToCommentPage),
+        M: commentPreviewList.value.length > 0
+      }, commentPreviewList.value.length > 0 ? {
+        N: common_vendor.f(commentPreviewList.value, (c, k0, i0) => {
+          var _a;
+          return {
+            a: common_vendor.t(c.anonymous === 1 ? "匿名商友" : ((_a = c.memberUserBaseVO) == null ? void 0 : _a.nickname) || "商友"),
+            b: common_vendor.t(c.content),
+            c: c.id
+          };
+        }),
+        O: common_vendor.o(goToCommentPage)
+      } : {
+        P: common_vendor.p({
+          type: "chatbubble",
+          size: "18",
+          color: "#ccc"
+        }),
+        Q: common_vendor.o(goToCommentPage)
+      }, {
+        R: common_vendor.p({
           type: "map-filled",
           color: "#FF6B00",
           size: "20"
         }),
-        J: common_vendor.o((...args) => common_vendor.unref(openNavigation) && common_vendor.unref(openNavigation)(...args)),
-        K: common_vendor.p({
+        S: common_vendor.o((...args) => common_vendor.unref(openNavigation) && common_vendor.unref(openNavigation)(...args)),
+        T: common_vendor.p({
           type: "phone-filled",
           color: "#fff",
           size: "20"
         }),
-        L: common_vendor.o(callPhone),
-        M: common_vendor.sr(pointsPopup, "4c71c098-5", {
+        U: common_vendor.o(callPhone),
+        V: common_vendor.sr(pointsPopup, "4c71c098-7", {
           "k": "pointsPopup"
         })
       }) : {
-        N: common_vendor.p({
+        W: common_vendor.p({
           type: "spinner-cycle",
           size: "30",
           color: "#999"

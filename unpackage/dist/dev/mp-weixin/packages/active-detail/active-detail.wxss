@@ -459,6 +459,55 @@
 .viewer-module-card.data-v-9217aa1c:active {
   background-color: #fafafa;
 }
+.comment-preview-card.data-v-9217aa1c {
+  background-color: #ffffff;
+  border-radius: 20rpx;
+  margin: 30rpx;
+  padding: 30rpx;
+  box-shadow: 0 10rpx 20rpx rgba(0, 0, 0, 0.05);
+  border: 1rpx solid #f0f0f0;
+}
+.preview-header.data-v-9217aa1c {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24rpx;
+}
+.preview-list.data-v-9217aa1c {
+  background-color: #f9f9f9;
+  padding: 20rpx;
+  border-radius: 12rpx;
+}
+.preview-item.data-v-9217aa1c {
+  font-size: 26rpx;
+  line-height: 1.6;
+  margin-bottom: 12rpx;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  /* 超过2行省略 */
+  overflow: hidden;
+}
+.preview-item.data-v-9217aa1c:last-child {
+  margin-bottom: 0;
+}
+.p-user.data-v-9217aa1c {
+  color: #FF6B00;
+  font-weight: bold;
+  margin-right: 12rpx;
+}
+.p-content.data-v-9217aa1c {
+  color: #555;
+}
+.preview-empty.data-v-9217aa1c {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40rpx 0;
+  color: #bbb;
+  font-size: 26rpx;
+  gap: 12rpx;
+}
 
 /* ==================================================================
  * 浮动与弹窗元素 (最高层级)

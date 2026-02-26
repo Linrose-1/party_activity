@@ -121,38 +121,70 @@
 					<view class="map-overlay">点击查看地图位置</view>
 				</view>
 
-				<!-- ==================== 浏览留痕模块 ==================== -->
-				<view class="viewer-module-card" v-if="storeDetail && storeDetail.isReadTrace === 1 && viewerTotal > 0">
-					<view class="viewer-header" @click="goToTraceList">
-						<view class="left-title">
-							<view class="title-indicator"></view>
-							<text class="title-txt">最近浏览</text>
-							<text class="title-count">{{ viewerTotal }}</text>
-						</view>
-						<view class="right-more">
-							<text>浏览详情</text>
-							<uni-icons type="right" size="14" color="#999"></uni-icons>
-						</view>
-					</view>
 
-					<view class="viewer-content" @click="goToTraceList">
-						<view class="avatar-stack">
-							<view class="avatar-item" v-for="(item, index) in viewerList" :key="item.id">
-								<image :src="item.memberUser?.avatar || '/static/icon/default-avatar.png'"
-									class="v-avatar" mode="aspectFill"></image>
-							</view>
-							<view v-if="viewerTotal > 7" class="more-dots">
-								<text class="dot"></text>
-								<text class="dot"></text>
-								<text class="dot"></text>
-							</view>
-						</view>
-						<view class="viewer-tips">
-							已有 {{ viewerTotal }} 位商友进入了您的聚店
-						</view>
+
+			</view>
+
+			<!-- ==================== 浏览留痕模块 ==================== -->
+			<view class="viewer-module-card" v-if="storeDetail && storeDetail.isReadTrace === 1 && viewerTotal > 0">
+				<view class="viewer-header" @click="goToTraceList">
+					<view class="left-title">
+						<view class="title-indicator"></view>
+						<text class="title-txt">最近浏览</text>
+						<text class="title-count">{{ viewerTotal }}</text>
+					</view>
+					<view class="right-more">
+						<text>浏览详情</text>
+						<uni-icons type="right" size="14" color="#999"></uni-icons>
 					</view>
 				</view>
 
+				<view class="viewer-content" @click="goToTraceList">
+					<view class="avatar-stack">
+						<view class="avatar-item" v-for="(item, index) in viewerList" :key="item.id">
+							<image :src="item.memberUser?.avatar || '/static/icon/default-avatar.png'" class="v-avatar"
+								mode="aspectFill"></image>
+						</view>
+						<view v-if="viewerTotal > 7" class="more-dots">
+							<text class="dot"></text>
+							<text class="dot"></text>
+							<text class="dot"></text>
+						</view>
+					</view>
+					<view class="viewer-tips">
+						已有 {{ viewerTotal }} 位商友进入了您的聚店
+					</view>
+				</view>
+			</view>
+
+			<!-- 评论预览模块 -->
+			<view class="comment-preview-card">
+				<view class="preview-header" @click="goToCommentPage">
+					<view class="left-title">
+						<view class="title-indicator"></view>
+						<text class="title-txt">商友评论</text>
+						<text class="title-count" v-if="commentTotal > 0">{{ commentTotal }}</text>
+					</view>
+					<view class="right-more">
+						<text>查看全部</text>
+						<uni-icons type="right" size="14" color="#999"></uni-icons>
+					</view>
+				</view>
+
+				<!-- 简单评论列表 (展示最新2条) -->
+				<view class="preview-list" v-if="commentPreviewList.length > 0" @click="goToCommentPage">
+					<view class="preview-item" v-for="c in commentPreviewList" :key="c.id">
+						<text
+							class="p-user">{{ c.anonymous === 1 ? '匿名商友' : (c.memberUserBaseVO?.nickname || '商友') }}:</text>
+						<text class="p-content">{{ c.content }}</text>
+					</view>
+				</view>
+
+				<!-- 无评论时的占位 -->
+				<view v-else class="preview-empty" @click="goToCommentPage">
+					<uni-icons type="chatbubble" size="18" color="#ccc"></uni-icons>
+					<text>暂无评论，点击发表第一条评论</text>
+				</view>
 			</view>
 
 		</scroll-view>
@@ -195,6 +227,8 @@
 	} from '@dcloudio/uni-app';
 	import request from '../../utils/request.js';
 	import PointsFeedbackPopup from '@/components/PointsFeedbackPopup.vue';
+
+	const storeId = ref(null);
 
 	const loggedInUserId = ref(uni.getStorageSync('userId'));
 	const viewerList = ref([]);
@@ -277,7 +311,7 @@
 
 
 	onLoad(async (options) => {
-		const storeId = options.id;
+		storeId.value = options.id;
 
 		if (!storeId) {
 			uni.showToast({
@@ -294,7 +328,7 @@
 		} = await request('/app-api/member/store/findStore', {
 			method: 'GET',
 			data: {
-				id: storeId
+				id: storeId.value
 			}
 		});
 
@@ -321,6 +355,8 @@
 		}
 
 		getViewerList(storeId);
+
+		getCommentPreview();
 	});
 
 	const openMap = () => {
@@ -399,6 +435,32 @@
 	const goToTraceList = () => {
 		uni.navigateTo({
 			url: `/packages/user-view-trace/user-view-trace?id=${storeDetail.value.id}&type=store`
+		});
+	};
+
+	const commentPreviewList = ref([]);
+	const commentTotal = ref(0);
+
+	const getCommentPreview = async () => {
+		const {
+			data
+		} = await request('/app-api/member/comment/select-type-target-id', {
+			method: 'GET',
+			data: {
+				targetId: storeId.value, // 或者是 storeId
+				targetType: 'store' // 或者是 'store'
+			}
+		});
+		if (data && Array.isArray(data)) {
+			commentTotal.value = data.length;
+			// 只取前2条做预览
+			commentPreviewList.value = data.slice(0, 2);
+		}
+	};
+
+	const goToCommentPage = () => {
+		uni.navigateTo({
+			url: `/packages/comment-page/comment-page?id=${storeId.value}&type=store`
 		});
 	};
 
@@ -580,6 +642,17 @@
 		font-size: 30rpx;
 		color: var(--gray-text);
 		line-height: 1.7;
+	}
+
+	.detail-card,
+	.viewer-module-card,
+	.comment-preview-card {
+		background: white;
+		margin: 24rpx 30rpx;
+		/* 确保所有卡片外边距一致 */
+		padding: 30rpx;
+		border-radius: 20rpx;
+		box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.05);
 	}
 
 	.detail-card {
@@ -771,6 +844,63 @@
 
 	.viewer-module-card:active {
 		background-color: #fafafa;
+	}
+
+	.comment-preview-card {
+		background-color: #ffffff;
+		border-radius: 20rpx;
+		margin: 30rpx;
+		padding: 30rpx;
+		box-shadow: 0 10rpx 20rpx rgba(0, 0, 0, 0.05);
+		border: 1rpx solid #f0f0f0;
+	}
+
+	.preview-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 24rpx;
+	}
+
+	.preview-list {
+		background-color: #f9f9f9;
+		padding: 20rpx;
+		border-radius: 12rpx;
+	}
+
+	.preview-item {
+		font-size: 26rpx;
+		line-height: 1.6;
+		margin-bottom: 12rpx;
+		display: -webkit-box;
+		-webkit-box-orient: vertical;
+		-webkit-line-clamp: 2;
+		/* 超过2行省略 */
+		overflow: hidden;
+	}
+
+	.preview-item:last-child {
+		margin-bottom: 0;
+	}
+
+	.p-user {
+		color: #FF6B00;
+		font-weight: bold;
+		margin-right: 12rpx;
+	}
+
+	.p-content {
+		color: #555;
+	}
+
+	.preview-empty {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		padding: 40rpx 0;
+		color: #bbb;
+		font-size: 26rpx;
+		gap: 12rpx;
 	}
 
 

@@ -1,0 +1,232 @@
+
+	/* 页面基础布局 */
+.comment-page.data-v-3a461f42 {
+		height: 100vh;
+		background-color: #f8f8f8;
+		display: flex;
+		flex-direction: column;
+}
+.comment-scroll.data-v-3a461f42 {
+		flex: 1;
+}
+
+	/* 评论列表项 */
+.comment-item.data-v-3a461f42 {
+		background-color: #fff;
+		padding: 30rpx;
+		display: flex;
+		margin-bottom: 2rpx;
+}
+
+	/* 回复项缩进 */
+.comment-item.is-reply.data-v-3a461f42 {
+		padding-left: 110rpx;
+		background-color: #fafafa;
+}
+.c-avatar.data-v-3a461f42 {
+		width: 80rpx;
+		height: 80rpx;
+		border-radius: 10rpx;
+		margin-right: 20rpx;
+		background-color: #f0f0f0;
+}
+.c-body.data-v-3a461f42 {
+		flex: 1;
+}
+.c-header.data-v-3a461f42 {
+		display: flex;
+		justify-content: space-between;
+		margin-bottom: 10rpx;
+}
+.c-name.data-v-3a461f42 {
+		font-size: 28rpx;
+		font-weight: bold;
+		color: #333;
+}
+.c-time.data-v-3a461f42 {
+		font-size: 22rpx;
+		color: #bbb;
+}
+.c-text.data-v-3a461f42 {
+		font-size: 28rpx;
+		color: #444;
+		line-height: 1.6;
+		word-break: break-all;
+}
+.reply-to.data-v-3a461f42 {
+		color: #007AFF;
+		margin-right: 8rpx;
+}
+.c-actions.data-v-3a461f42 {
+		display: flex;
+		gap: 30rpx;
+		margin-top: 20rpx;
+}
+.action-btn.data-v-3a461f42 {
+		display: flex;
+		align-items: center;
+		gap: 6rpx;
+		font-size: 24rpx;
+		color: #666;
+}
+.action-btn.delete.data-v-3a461f42 {
+		color: #ff4d4f;
+}
+
+	/* =========================================
+	   底部悬浮评论栏 (同步商机详情页原生样式)
+	   ========================================= */
+.add-comment-bar.data-v-3a461f42 {
+		position: fixed;
+		bottom: 0;
+		left: 0;
+		width: 100%;
+		background: #fff;
+		padding: 20rpx 24rpx;
+		/* 适配底部安全区 */
+		padding-bottom: calc(20rpx + env(safe-area-inset-bottom));
+		box-shadow: 0 -2rpx 10rpx rgba(0, 0, 0, 0.05);
+		border-top: 1rpx solid #f0f0f0;
+		z-index: 999;
+		box-sizing: border-box;
+		display: flex;
+		align-items: flex-end;
+		/* 底部对齐，适应多行输入 */
+		gap: 20rpx;
+}
+
+	/* 输入框容器 (胶囊状) */
+.input-container.data-v-3a461f42 {
+		flex: 1;
+		background: #f5f7fa;
+		border-radius: 40rpx;
+		/* 大圆角 */
+		padding: 14rpx 20rpx;
+		display: flex;
+		align-items: center;
+		/* 垂直居中 */
+		min-height: 80rpx;
+		box-sizing: border-box;
+		transition: all 0.3s;
+		border: 2rpx solid transparent;
+}
+
+	/* 匿名开关 */
+.anon-switch.data-v-3a461f42 {
+		display: flex;
+		align-items: center;
+		padding: 0 10rpx;
+		transition: all 0.3s;
+		flex-shrink: 0;
+}
+.anon-switch uni-icons.data-v-3a461f42 {
+		margin-right: 6rpx;
+}
+.anon-switch text.data-v-3a461f42 {
+		font-size: 24rpx;
+		color: #666;
+		font-weight: 500;
+}
+.anon-switch.is-active text.data-v-3a461f42 {
+		color: #FF6A00;
+}
+
+	/* 垂直分割线 */
+.vertical-line.data-v-3a461f42 {
+		width: 2rpx;
+		height: 32rpx;
+		background-color: #e0e0e0;
+		margin: 0 16rpx;
+		flex-shrink: 0;
+}
+
+	/* 文本域 */
+.bar-textarea.data-v-3a461f42 {
+		flex: 1;
+		font-size: 28rpx;
+		color: #333;
+		width: 100%;
+		/* 移除默认内边距 */
+		padding: 0;
+		line-height: 1.5;
+		max-height: 200rpx;
+		/* 限制最大高度 */
+		min-height: 40rpx;
+}
+
+	/* 1. 确保发送按钮容器本身有正确的属性 */
+.send-btn.data-v-3a461f42 {
+		width: 80rpx !important;
+		height: 80rpx !important;
+		border-radius: 50% !important;
+		background-color: #e0e0e0;
+
+		/* 强制居中控制 */
+		display: flex !important;
+		align-items: center !important;
+		justify-content: center !important;
+
+		flex-shrink: 0 !important;
+		/* 绝对不允许被输入框挤压 */
+		margin-left: 20rpx !important;
+		margin-bottom: 5rpx !important;
+		/* 向上微调，视觉对齐 */
+
+		position: relative !important;
+		overflow: visible !important;
+}
+
+	/* 2. 激活后的背景：使用 !important 确保覆盖 */
+.send-btn.can-send.data-v-3a461f42 {
+		background: linear-gradient(135deg, #FF8C00, #FF6B00) !important;
+}
+
+	/* 3. 【核心修复】强制图标显示：穿透 scoped 限制 */
+.send-btn.data-v-3a461f42 .uni-icons,
+	.send-btn.data-v-3a461f42 .uni-icons.force-icon {
+		display: block !important;
+		width: auto !important;
+		height: auto !important;
+		color: #ffffff !important;
+		/* 强制白色 */
+		line-height: 1 !important;
+		font-size: 44rpx !important;
+		/* 强制大小 (22*2) */
+}
+
+	/* 4. 如果图标还是看不见，直接对标签选择器下手 */
+.data-v-3a461f42 uni-icons {
+		visibility: visible !important;
+		opacity: 1 !important;
+}
+
+	/* 复制菜单 */
+.copy-mask.data-v-3a461f42 {
+		position: fixed;
+		inset: 0;
+		background: rgba(0, 0, 0, 0.3);
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		z-index: 1000;
+}
+.copy-content.data-v-3a461f42 {
+		background: #fff;
+		padding: 30rpx 100rpx;
+		border-radius: 12rpx;
+		font-size: 32rpx;
+}
+.empty-holder.data-v-3a461f42 {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		padding-top: 200rpx;
+		color: #999;
+		font-size: 28rpx;
+}
+.empty-img.data-v-3a461f42 {
+		width: 240rpx;
+		height: 240rpx;
+		margin-bottom: 20rpx;
+}
