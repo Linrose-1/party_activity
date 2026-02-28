@@ -46,6 +46,7 @@
 		flex: 1;
 		overflow-y: auto;
 		-webkit-overflow-scrolling: touch;
+		margin-bottom: 20rpx;
 }
 .store-cover-container.data-v-4c71c098 {
 		aspect-ratio: 5 / 4;
@@ -360,6 +361,58 @@
 		font-size: 26rpx;
 		gap: 12rpx;
 }
+
+	/* 聚会详情赞踩互动区样式 */
+.interaction-capsule-section.data-v-4c71c098 {
+		display: flex;
+		justify-content: center;
+		margin: 40rpx 30rpx 10rpx;
+}
+.capsule-container.data-v-4c71c098 {
+		display: flex;
+		align-items: center;
+		background-color: #ffffff;
+		border-radius: 60rpx;
+		padding: 10rpx 40rpx;
+		box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.08);
+		border: 1rpx solid #f0f0f0;
+}
+.capsule-item.data-v-4c71c098 {
+		display: flex;
+		align-items: center;
+		padding: 16rpx 20rpx;
+		transition: all 0.2s ease;
+}
+.capsule-item .count.data-v-4c71c098 {
+		font-size: 32rpx;
+		font-weight: bold;
+		margin: 0 8rpx 0 12rpx;
+		color: #333;
+}
+.capsule-item .label.data-v-4c71c098 {
+		font-size: 24rpx;
+		color: #999;
+}
+
+	/* 激活状态 */
+.capsule-item.like.active .count.data-v-4c71c098,
+	.capsule-item.like.active .label.data-v-4c71c098 {
+		color: #FF6B00;
+}
+.capsule-item.dislike.active .count.data-v-4c71c098,
+	.capsule-item.dislike.active .label.data-v-4c71c098 {
+		color: #3498db;
+}
+.capsule-divider.data-v-4c71c098 {
+		width: 2rpx;
+		height: 40rpx;
+		background-color: #eee;
+		margin: 0 30rpx;
+}
+.capsule-item.data-v-4c71c098:active {
+		transform: scale(0.9);
+		opacity: 0.7;
+}
 .action-bar.data-v-4c71c098 {
 		background: white;
 		padding: 20rpx 30rpx;
@@ -445,4 +498,37 @@
 		border-radius: 6rpx;
 		display: inline-block;
 		margin-bottom: 16rpx;
+}
+.detail-interactions.data-v-4c71c098 {
+		display: flex;
+		justify-content: space-around;
+		align-items: center;
+		background-color: #ffffff;
+		border-radius: 20rpx;
+		margin: 0 30rpx 30rpx;
+		padding: 24rpx 0;
+		box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.05);
+		border: 1rpx solid #f0f0f0;
+}
+.interaction-item.data-v-4c71c098 {
+		display: flex;
+		align-items: center;
+		gap: 12rpx;
+		color: #666;
+		font-size: 28rpx;
+		padding: 10rpx 30rpx;
+		border-radius: 40rpx;
+		transition: all 0.2s;
+}
+.interaction-item text.data-v-4c71c098 {
+		font-weight: 500;
+}
+.interaction-item.data-v-4c71c098:active {
+		background-color: #f5f5f5;
+}
+
+	/* 激活状态下的微调 */
+.interaction-item.active text.data-v-4c71c098 {
+		color: inherit;
+		/* 颜色由图标决定，或者此处指定特定颜色 */
 }

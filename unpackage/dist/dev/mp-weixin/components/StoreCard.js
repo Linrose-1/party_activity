@@ -1,6 +1,14 @@
 "use strict";
 const common_vendor = require("../common/vendor.js");
 const utils_user = require("../utils/user.js");
+if (!Array) {
+  const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
+  _easycom_uni_icons2();
+}
+const _easycom_uni_icons = () => "../uni_modules/uni-icons/components/uni-icons/uni-icons.js";
+if (!Math) {
+  _easycom_uni_icons();
+}
 const _sfc_main = {
   __name: "StoreCard",
   props: {
@@ -9,10 +17,20 @@ const _sfc_main = {
       required: true
     }
   },
-  emits: ["click-card"],
+  emits: ["click-card", "update-like"],
   setup(__props, { emit: __emit }) {
     const props = __props;
     const emit = __emit;
+    const handleAction = async (clickedAction) => {
+      if (!await utils_user.checkLoginGuard())
+        return;
+      const apiAction = props.store.userLikeStr === clickedAction ? "cancel" : clickedAction;
+      emit("update-like", {
+        id: props.store.id,
+        action: apiAction,
+        clickedAction
+      });
+    };
     const coverImage = common_vendor.computed(() => {
       if (props.store.storeCoverImageUrls && props.store.storeCoverImageUrls.length > 0) {
         return props.store.storeCoverImageUrls[0];
@@ -52,12 +70,35 @@ const _sfc_main = {
         d: common_vendor.t(displayDistance.value)
       } : {}, {
         e: common_vendor.t(__props.store.storeDescription || "暂无介绍"),
-        f: __props.store.averageConsumptionRange
+        f: common_vendor.p({
+          type: __props.store.userLikeStr === "like" ? "hand-up-filled" : "hand-up",
+          size: "16",
+          color: __props.store.userLikeStr === "like" ? "#ff6b00" : "#999"
+        }),
+        g: common_vendor.t(__props.store.likesCount || 0),
+        h: __props.store.userLikeStr === "like" ? 1 : "",
+        i: common_vendor.o(($event) => handleAction("like")),
+        j: common_vendor.p({
+          type: __props.store.userLikeStr === "dislike" ? "hand-down-filled" : "hand-down",
+          size: "16",
+          color: __props.store.userLikeStr === "dislike" ? "#3498db" : "#999"
+        }),
+        k: common_vendor.t(__props.store.dislikesCount || 0),
+        l: __props.store.userLikeStr === "dislike" ? 1 : "",
+        m: common_vendor.o(($event) => handleAction("dislike")),
+        n: common_vendor.p({
+          type: "chatbubble",
+          size: "16",
+          color: "#999"
+        }),
+        o: common_vendor.t(__props.store.commonCount || 0),
+        p: __props.store.averageConsumptionRange
       }, __props.store.averageConsumptionRange ? {
-        g: common_vendor.t(__props.store.averageConsumptionRange)
+        q: common_vendor.t(__props.store.averageConsumptionRange)
       } : {}, {
-        h: common_vendor.o(handleInitiateParty),
-        i: common_vendor.o(handleCardClick)
+        r: common_vendor.o(handleCardClick),
+        s: common_vendor.o(handleInitiateParty),
+        t: common_vendor.o(handleCardClick)
       });
     };
   }

@@ -90,7 +90,7 @@
 		<!-- 聚会列表 -->
 		<view class="activity-list" scroll-y="true">
 			<ActivityCard v-for="(activity, index) in activitiesData" :key="activity.id" :activity="activity"
-				:is-login="isLogin" @updateFavoriteStatus="handleFavoriteChange" />
+				:is-login="isLogin" @updateFavoriteStatus="handleFavoriteChange" @updateLikeStatus="handleLikeChange" />
 		</view>
 
 		<!-- 根据新的状态变量来显示提示 -->
@@ -118,7 +118,8 @@
 		ref,
 		computed,
 		onMounted,
-		watch
+		watch,
+		onUnmounted
 	} from 'vue';
 	import {
 		onReachBottom,
@@ -167,7 +168,43 @@
 		return ['全部状态', ...labels];
 	});
 
+	// --- 核心逻辑：本地更新数据函数 ---
+	const updateLocalActivityData = (id, payload) => {
+		const index = activitiesData.value.findIndex(item => item.id === id);
+		if (index !== -1) {
+			// 使用 Object.assign 或直接修改属性，确保响应式更新
+			activitiesData.value[index] = {
+				...activitiesData.value[index],
+				...payload
+			};
+		}
+	};
+
 	// --- 生命周期函数 ---
+	onMounted(() => {
+		uni.$on('activityInteractionChanged', (data) => {
+			console.log('监听到详情页互动变更:', data);
+			if (data.type === 'action') {
+				updateLocalActivityData(data.id, {
+					userLikeStr: data.userLikeStr,
+					likesCount: data.likesCount,
+					dislikesCount: data.dislikesCount
+				});
+			} else if (data.type === 'save') {
+				updateLocalActivityData(data.id, {
+					followFlag: data.isSaved ? 1 : 0
+				});
+			} else if (data.type === 'comment') {
+				updateLocalActivityData(data.id, {
+					commonCount: data.totalCount
+				});
+			}
+		});
+	});
+
+	onUnmounted(() => {
+		uni.$off('activityInteractionChanged');
+	});
 
 	/**
 	 * 使用 onShow 刷新所有数据
@@ -199,6 +236,59 @@
 	});
 
 	// --- 核心逻辑方法 ---
+
+	// --- 处理卡片直接点击点赞的逻辑 ---
+	const handleLikeChange = async ({
+		id,
+		action,
+		clickedAction
+	}) => {
+		// 1. 找到本地数据
+		const activity = activitiesData.value.find(item => item.id === id);
+		if (!activity) return;
+
+		// 2. 乐观更新 UI 逻辑
+		const originalAction = activity.userLikeStr;
+		const originalLikes = activity.likesCount;
+		const originalDislikes = activity.dislikesCount;
+
+		if (action === 'cancel') {
+			activity.userLikeStr = null;
+			clickedAction === 'like' ? activity.likesCount-- : activity.dislikesCount--;
+		} else {
+			activity.userLikeStr = clickedAction;
+			if (clickedAction === 'like') {
+				activity.likesCount++;
+				if (originalAction === 'dislike') activity.dislikesCount--;
+			} else {
+				activity.dislikesCount++;
+				if (originalAction === 'like') activity.likesCount--;
+			}
+		}
+
+		// 3. 调用接口
+		const {
+			error
+		} = await request('/app-api/member/like-action/add', {
+			method: 'POST',
+			data: {
+				targetId: id,
+				targetType: 'activity',
+				action: action
+			}
+		});
+
+		if (error) {
+			// 失败回滚
+			activity.userLikeStr = originalAction;
+			activity.likesCount = originalLikes;
+			activity.dislikesCount = originalDislikes;
+			uni.showToast({
+				title: '操作失败',
+				icon: 'none'
+			});
+		}
+	};
 
 	/**
 	 * 页面初始化函数

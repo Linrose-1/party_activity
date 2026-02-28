@@ -72,8 +72,8 @@
 			<view class="store-list-container">
 				<!-- 卡片列表 -->
 				<!-- 之前这里缺少了 @click-card 事件来处理跳转 -->
-				<StoreCard v-for="store in filteredStores" :key="store.id" :store="store"
-					@click-card="goToStoreDetail" />
+				<StoreCard v-for="store in filteredStores" :key="store.id" :store="store" @click-card="goToStoreDetail"
+					@update-like="handleLikeChange" />
 
 				<!-- 加载状态提示 -->
 				<view v-if="loadingMore" class="load-more">
@@ -229,6 +229,67 @@
 				},
 			});
 		});
+	};
+
+	/**
+	 * 处理聚店卡片直接发出的点赞/点踩操作
+	 */
+	const handleLikeChange = async ({
+		id,
+		action,
+		clickedAction
+	}) => {
+		// 1. 找到本地列表中对应的店铺对象
+		const store = allStores.value.find(item => item.id === id);
+		if (!store) return;
+
+		// 2. 备份数据以便回滚
+		const originalAction = store.userLikeStr;
+		const originalLikes = store.likesCount || 0;
+		const originalDislikes = store.dislikesCount || 0;
+
+		// 3. 【乐观更新】立即操作本地数组
+		if (action === 'cancel') {
+			store.userLikeStr = null;
+			clickedAction === 'like' ? store.likesCount-- : store.dislikesCount--;
+		} else {
+			store.userLikeStr = clickedAction;
+			if (clickedAction === 'like') {
+				store.likesCount = (store.likesCount || 0) + 1;
+				if (originalAction === 'dislike') store.dislikesCount = Math.max(0, (store.dislikesCount || 0) -
+					1);
+			} else {
+				store.dislikesCount = (store.dislikesCount || 0) + 1;
+				if (originalAction === 'like') store.likesCount = Math.max(0, (store.likesCount || 0) - 1);
+			}
+		}
+
+		try {
+			// 4. 调用 API
+			const {
+				error
+			} = await request('/app-api/member/like-action/add', {
+				method: 'POST',
+				data: {
+					targetId: id,
+					targetType: 'store',
+					action: action
+				}
+			});
+
+			if (error) throw new Error(error);
+
+			// 列表页点击不需要 emit 事件，因为它本身就是“源头”，且已经修改了本地数据
+		} catch (e) {
+			// 5. 失败回滚
+			store.userLikeStr = originalAction;
+			store.likesCount = originalLikes;
+			store.dislikesCount = originalDislikes;
+			uni.showToast({
+				title: '操作失败',
+				icon: 'none'
+			});
+		}
 	};
 
 	/**
@@ -460,6 +521,26 @@
 		getShopType();
 		fetchBanners();
 		handleRefresh();
+
+		uni.$on('storeInteractionChanged', (data) => {
+			const index = allStores.value.findIndex(s => String(s.id) === String(data.id));
+			if (index !== -1) {
+				// 精准更新本地数据
+				if (data.type === 'action') {
+					allStores.value[index].userLikeStr = data.userLikeStr;
+					allStores.value[index].likesCount = data.likesCount;
+					allStores.value[index].dislikesCount = data.dislikesCount;
+				}
+				// 建议：也加上评论数同步（详情页发布评论后也会用到）
+				if (data.type === 'comment') {
+					allStores.value[index].commonCount = data.totalCount;
+				}
+			}
+		});
+	});
+
+	onUnmounted(() => {
+		uni.$off('storeInteractionChanged');
 	});
 
 	onShow(() => {

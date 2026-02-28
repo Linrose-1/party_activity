@@ -8,6 +8,20 @@
 					<view class="card-header">基础信息</view>
 
 					<view class="field-item">
+						<text class="field-label">聚店店主</text>
+						<view class="picker-wrapper" @click="openUserSearch">
+							<view class="owner-display" v-if="selectedOwner">
+								<image :src="selectedOwner.avatar || '/static/images/default-avatar.png'"
+									class="mini-avatar" />
+								<text class="owner-name">{{ selectedOwner.nickname }}</text>
+								<text class="owner-tip">(点击更换)</text>
+							</view>
+							<text class="picker-text is-placeholder" v-else>默认当前登录用户 (点击选择他人)</text>
+							<uni-icons type="search" size="18" color="#FF6B00"></uni-icons>
+						</view>
+					</view>
+
+					<view class="field-item">
 						<text class="field-label required">聚店名称</text>
 						<view class="input-wrapper">
 							<uni-easyinput v-model="form.storeName" placeholder="请输入聚店名称" :inputBorder="false"
@@ -204,6 +218,49 @@
 	<view v-else class="page-loading">
 		<uni-icons type="spinner-cycle" size="40" color="#ccc" class="spin-icon"></uni-icons>
 	</view>
+
+
+	<!-- 【新增】用户搜索弹窗 -->
+	<!-- 用户搜索弹窗 -->
+	<uni-popup ref="userSearchPopup" type="bottom" background-color="#fff">
+		<view class="user-search-modal">
+			<!-- 头部搜索区 -->
+			<view class="search-header-row">
+				<view class="search-input-box">
+					<uni-icons type="search" size="18" color="#999"></uni-icons>
+					<input class="search-bar-input" v-model="searchKeyword" placeholder="输入手机号/昵称/姓名"
+						confirm-type="search" @confirm="handleUserSearch" />
+					<uni-icons v-if="searchKeyword" type="clear" size="18" color="#ccc"
+						@click="searchKeyword = ''"></uni-icons>
+				</view>
+				<view class="search-confirm-btn" @click="handleUserSearch">搜索</view>
+			</view>
+
+			<!-- 结果列表 -->
+			<scroll-view scroll-y class="user-result-list">
+				<view v-for="user in userSearchResults" :key="user.id" class="user-item">
+					<image :src="user.avatar || '/static/images/default-avatar.png'" class="res-avatar"
+						mode="aspectFill" />
+
+					<view class="res-info">
+						<text class="res-name">{{ user.nickname || user.realName || '商友' }}</text>
+						<text class="res-mobile">{{ user.mobile || '手机号未公开' }}</text>
+					</view>
+
+					<view class="select-action-btn" @click="selectOwner(user)">选择</view>
+				</view>
+
+				<!-- 无结果占位 -->
+				<view v-if="userSearchResults.length === 0" class="search-empty-state">
+					<image src="/static/icon/empty.png" class="empty-icon-img" />
+					<text>{{ searchKeyword ? '未找到相关用户' : '请输入关键字搜索商友' }}</text>
+				</view>
+			</scroll-view>
+
+			<!-- 底部关闭 -->
+			<view class="modal-close-bar" @click="closeUserSearch">取消</view>
+		</view>
+	</uni-popup>
 </template>
 
 <script setup>
@@ -223,6 +280,11 @@
 
 	const isLoading = ref(true);
 	const isSubmitting = ref(false);
+
+	const userSearchPopup = ref(null);
+	const searchKeyword = ref('');
+	const userSearchResults = ref([]);
+	const selectedOwner = ref(null); // 用于 UI 展示已选中的店主对象
 
 	const form = ref({
 		id: null,
@@ -345,14 +407,46 @@
 			Object.assign(form.value, data);
 			parseOperatingHours(data.operatingHours);
 
+			if (data.memberUser) {
+				selectedOwner.value = data.memberUser;
+				form.value.userId = data.memberUser.id;
+			}
+
 			// 从新的 storeCoverImageUrls 字段解析图片
 			if (data.storeCoverImageUrls && Array.isArray(data.storeCoverImageUrls)) {
 				coverImages.value = data.storeCoverImageUrls;
 			}
 		}
 
-		// Object.assign(form.value, data);
-		// parseOperatingHours(data.operatingHours);
+	};
+
+	// --- 新增搜索逻辑 ---
+	const openUserSearch = () => userSearchPopup.value.open();
+	const closeUserSearch = () => userSearchPopup.value.close();
+
+	const handleUserSearch = async () => {
+		if (!searchKeyword.value.trim()) return;
+		const {
+			data
+		} = await request('/app-api/member/user/search', {
+			method: 'GET',
+			data: {
+				keyword: searchKeyword.value,
+				pageNo: 1,
+				pageSize: 20
+			}
+		});
+		if (data) userSearchResults.value = data.list || [];
+	};
+
+	const selectOwner = (user) => {
+		selectedOwner.value = user;
+		form.value.userId = user.id; // 将选中的 ID 赋给表单
+		closeUserSearch();
+		uni.showToast({
+			title: `已选择: ${user.nickname}`,
+			icon: 'none'
+		});
 	};
 
 	/**
@@ -1368,5 +1462,176 @@
 		to {
 			transform: rotate(360deg);
 		}
+	}
+
+	/* 已选店主展示 */
+	.owner-display {
+		display: flex;
+		align-items: center;
+		flex: 1;
+	}
+
+	.mini-avatar {
+		width: 48rpx;
+		height: 48rpx;
+		border-radius: 50%;
+		margin-right: 16rpx;
+	}
+
+	.owner-name {
+		font-size: 28rpx;
+		color: #333;
+		font-weight: bold;
+	}
+
+	.owner-tip {
+		font-size: 24rpx;
+		color: #999;
+		margin-left: 10rpx;
+	}
+
+	/* 搜索弹窗容器 */
+	.user-search-modal {
+		background-color: #ffffff;
+		border-top-left-radius: 40rpx;
+		border-top-right-radius: 40rpx;
+		height: 75vh;
+		display: flex;
+		flex-direction: column;
+		overflow: hidden;
+	}
+
+	/* 顶部搜索栏区域 */
+	.search-header-row {
+		display: flex;
+		align-items: center;
+		padding: 30rpx;
+		gap: 20rpx;
+		border-bottom: 1rpx solid #f8f8f8;
+	}
+
+	.search-input-box {
+		flex: 1;
+		height: 80rpx;
+		background-color: #f5f6f8;
+		border-radius: 40rpx;
+		display: flex;
+		align-items: center;
+		padding: 0 30rpx;
+		gap: 10rpx;
+	}
+
+	.search-bar-input {
+		flex: 1;
+		font-size: 28rpx;
+		color: #333;
+	}
+
+	.search-confirm-btn {
+		font-size: 30rpx;
+		color: #FF6B00;
+		font-weight: bold;
+		padding: 10rpx 20rpx;
+	}
+
+	/* 列表区域 */
+	.user-result-list {
+		flex: 1;
+		padding: 0 30rpx;
+		box-sizing: border-box;
+		/* 确保不溢出 */
+	}
+
+	.user-item {
+		display: flex;
+		align-items: center;
+		padding: 30rpx 0;
+		border-bottom: 1rpx solid #f9f9f9;
+		width: 100%;
+		box-sizing: border-box;
+	}
+
+	.res-avatar {
+		width: 96rpx;
+		height: 96rpx;
+		border-radius: 50%;
+		flex-shrink: 0;
+		/* 防止头像被挤压 */
+		background-color: #f0f0f0;
+	}
+
+	.res-info {
+		flex: 1;
+		margin-left: 24rpx;
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		min-width: 0;
+		/* 极其重要：允许内部文本缩写，防止挤开右侧按钮 */
+	}
+
+	.res-name {
+		font-size: 30rpx;
+		font-weight: bold;
+		color: #333;
+		margin-bottom: 6rpx;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+	.res-mobile {
+		font-size: 24rpx;
+		color: #999;
+	}
+
+	/* 选择按钮 - 增加固定宽度和防压缩 */
+	.select-action-btn {
+		width: 120rpx;
+		height: 56rpx;
+		line-height: 56rpx;
+		text-align: center;
+		background: linear-gradient(135deg, #FF8C00, #FF6B00);
+		color: #fff;
+		font-size: 24rpx;
+		font-weight: bold;
+		border-radius: 28rpx;
+		flex-shrink: 0;
+		/* 核心修复：绝对不会被挤压出屏幕 */
+		margin-left: 20rpx;
+		box-shadow: 0 4rpx 10rpx rgba(255, 107, 0, 0.2);
+	}
+
+	.select-action-btn:active {
+		opacity: 0.8;
+		transform: scale(0.95);
+	}
+
+	/* 空状态 */
+	.search-empty-state {
+		padding-top: 150rpx;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		color: #ccc;
+		font-size: 26rpx;
+	}
+
+	.empty-icon-img {
+		width: 160rpx;
+		height: 160rpx;
+		margin-bottom: 20rpx;
+		opacity: 0.6;
+	}
+
+	/* 底部关闭栏 */
+	.modal-close-bar {
+		padding: 30rpx;
+		padding-bottom: calc(30rpx + env(safe-area-inset-bottom));
+		text-align: center;
+		font-size: 30rpx;
+		color: #666;
+		background-color: #fafafa;
+		border-top: 1rpx solid #eee;
 	}
 </style>

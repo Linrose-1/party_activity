@@ -109,6 +109,28 @@
   align-items: center;
   justify-content: center;
 }
+.card-interaction-row.data-v-8cae2ec5 {
+  display: flex;
+  gap: 20rpx;
+  margin-top: 10rpx;
+}
+.mini-interaction.data-v-8cae2ec5 {
+  display: flex;
+  align-items: center;
+  gap: 4rpx;
+  font-size: 22rpx;
+  color: #999;
+}
+.mini-interaction.active.data-v-8cae2ec5 {
+  color: #ff6b00;
+}
+
+/* 详情按钮样式：浅橙色背景 */
+.btn-primary-light.data-v-8cae2ec5 {
+  background-color: #fff5ec;
+  color: #ff6b00;
+  border: 1rpx solid rgba(255, 107, 0, 0.2);
+}
 
 /* 空心按钮样式 (发起聚会) */
 .btn-outline.data-v-8cae2ec5 {

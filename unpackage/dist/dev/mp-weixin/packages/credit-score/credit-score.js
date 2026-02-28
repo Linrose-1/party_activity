@@ -3,15 +3,18 @@ const common_vendor = require("../../common/vendor.js");
 const utils_request = require("../../utils/request.js");
 if (!Array) {
   const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
-  _easycom_uni_icons2();
+  const _easycom_uni_popup2 = common_vendor.resolveComponent("uni-popup");
+  (_easycom_uni_icons2 + _easycom_uni_popup2)();
 }
 const _easycom_uni_icons = () => "../../uni_modules/uni-icons/components/uni-icons/uni-icons.js";
+const _easycom_uni_popup = () => "../../uni_modules/uni-popup/components/uni-popup/uni-popup.js";
 if (!Math) {
-  _easycom_uni_icons();
+  (_easycom_uni_icons + _easycom_uni_popup)();
 }
 const _sfc_main = {
   __name: "credit-score",
   setup(__props) {
+    const rulesPopup = common_vendor.ref(null);
     const scoreData = common_vendor.ref({
       totalScore: 0,
       contributionScore: 0,
@@ -54,6 +57,12 @@ const _sfc_main = {
         range: "<300"
       }
     ];
+    const showRules = () => {
+      rulesPopup.value.open();
+    };
+    const closeRules = () => {
+      rulesPopup.value.close();
+    };
     const getLevelIcon = (level) => {
       const rule = rules.find((r) => r.name === level);
       return rule ? rule.icon : "⭐";
@@ -79,51 +88,53 @@ const _sfc_main = {
     return (_ctx, _cache) => {
       return {
         a: common_vendor.t(scoreData.value.totalScore || 0),
-        b: common_vendor.t(getLevelIcon(scoreData.value.creditLevel)),
-        c: common_vendor.t(scoreData.value.creditLevel || "待提升"),
-        d: common_vendor.p({
+        b: common_vendor.o(showRules),
+        c: common_vendor.t(getLevelIcon(scoreData.value.creditLevel)),
+        d: common_vendor.t(scoreData.value.creditLevel || "待提升"),
+        e: common_vendor.o(showRules),
+        f: common_vendor.p({
           type: "medal-filled",
           size: "20",
           color: "#FF8300"
         }),
-        e: common_vendor.t(scoreData.value.contributionScore),
-        f: scoreData.value.contributionScore / 300 * 100 + "%",
-        g: common_vendor.p({
+        g: common_vendor.t(scoreData.value.contributionScore),
+        h: scoreData.value.contributionScore / 300 * 100 + "%",
+        i: common_vendor.p({
           type: "vip-filled",
           size: "20",
           color: "#FF8300"
         }),
-        h: common_vendor.t(scoreData.value.pointScore),
-        i: scoreData.value.pointScore / 200 * 100 + "%",
-        j: common_vendor.p({
+        j: common_vendor.t(scoreData.value.pointScore),
+        k: scoreData.value.pointScore / 200 * 100 + "%",
+        l: common_vendor.p({
           type: "chat-filled",
           size: "20",
           color: "#FF8300"
         }),
-        k: common_vendor.t(scoreData.value.interactionScore),
-        l: scoreData.value.interactionScore / 200 * 100 + "%",
-        m: common_vendor.p({
+        m: common_vendor.t(scoreData.value.interactionScore),
+        n: scoreData.value.interactionScore / 200 * 100 + "%",
+        o: common_vendor.p({
           type: "person-filled",
           size: "20",
           color: "#FF8300"
         }),
-        n: common_vendor.t(scoreData.value.digitalIdentityScore),
-        o: scoreData.value.digitalIdentityScore / 100 * 100 + "%",
-        p: common_vendor.p({
+        p: common_vendor.t(scoreData.value.digitalIdentityScore),
+        q: scoreData.value.digitalIdentityScore / 100 * 100 + "%",
+        r: common_vendor.p({
           type: "info-filled",
           size: "20",
           color: "#FF8400"
         }),
-        q: common_vendor.t(scoreData.value.basicInfoScore),
-        r: scoreData.value.basicInfoScore / 150 * 100 + "%",
-        s: common_vendor.p({
+        s: common_vendor.t(scoreData.value.basicInfoScore),
+        t: scoreData.value.basicInfoScore / 150 * 100 + "%",
+        v: common_vendor.p({
           type: "auth-filled",
           size: "20",
           color: "#FF8400"
         }),
-        t: common_vendor.t(scoreData.value.realNameAuthScore),
-        v: scoreData.value.realNameAuthScore / 50 * 100 + "%",
-        w: common_vendor.f(rules, (rule, index, i0) => {
+        w: common_vendor.t(scoreData.value.realNameAuthScore),
+        x: scoreData.value.realNameAuthScore / 50 * 100 + "%",
+        y: common_vendor.f(rules, (rule, index, i0) => {
           return {
             a: common_vendor.t(rule.icon),
             b: common_vendor.t(rule.name),
@@ -131,6 +142,20 @@ const _sfc_main = {
             d: index,
             e: scoreData.value.creditLevel === rule.name ? 1 : ""
           };
+        }),
+        z: common_vendor.o(closeRules),
+        A: common_vendor.p({
+          type: "closeempty",
+          size: "24",
+          color: "#999"
+        }),
+        B: common_vendor.o(closeRules),
+        C: common_vendor.sr(rulesPopup, "d495462d-6", {
+          "k": "rulesPopup"
+        }),
+        D: common_vendor.p({
+          type: "bottom",
+          ["background-color"]: "transparent"
         })
       };
     };

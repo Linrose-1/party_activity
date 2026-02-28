@@ -592,7 +592,7 @@
 				"path" : "my-comments/my-comments",
 				"style" : 
 				{
-					"navigationBarTitleText" : "我发出的评论"
+					"navigationBarTitleText" : "评论中心"
 				}
 			},
 			{
@@ -607,6 +607,13 @@
 				"style" : 
 				{
 					"navigationBarTitleText" : "所有评论"
+				}
+			},
+			{
+				"path" : "comment-center/comment-center",
+				"style" : 
+				{
+					"navigationBarTitleText" : "评论中心"
 				}
 			}
 			// 如果还有其他页面要放进这个分包，继续在这里加

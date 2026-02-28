@@ -84,6 +84,7 @@ if (!Math) {
   "./packages/my-comments/my-comments.js";
   "./packages/credit-score/credit-score.js";
   "./packages/comment-page/comment-page.js";
+  "./packages/comment-center/comment-center.js";
 }
 const _sfc_main = {
   data() {

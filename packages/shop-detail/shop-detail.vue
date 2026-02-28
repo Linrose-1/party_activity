@@ -189,6 +189,29 @@
 
 		</scroll-view>
 
+		<!-- 聚店赞踩互动胶囊 (同步聚会版 UI) -->
+		<view class="interaction-capsule-section">
+			<view class="capsule-container">
+				<view class="capsule-item like" :class="{ active: storeDetail.userLikeStr === 'like' }"
+					@click="toggleAction('like')">
+					<uni-icons :type="storeDetail.userLikeStr === 'like' ? 'hand-up-filled' : 'hand-up'" size="22"
+						:color="storeDetail.userLikeStr === 'like' ? '#FF6B00' : '#666'"></uni-icons>
+					<text class="count">{{ storeDetail.likesCount || 0 }}</text>
+					<text class="label">好评</text>
+				</view>
+
+				<view class="capsule-divider"></view>
+
+				<view class="capsule-item dislike" :class="{ active: storeDetail.userLikeStr === 'dislike' }"
+					@click="toggleAction('dislike')">
+					<uni-icons :type="storeDetail.userLikeStr === 'dislike' ? 'hand-down-filled' : 'hand-down'"
+						size="22" :color="storeDetail.userLikeStr === 'dislike' ? '#3498db' : '#666'"></uni-icons>
+					<text class="count">{{ storeDetail.dislikesCount || 0 }}</text>
+					<text class="label">踩踩</text>
+				</view>
+			</view>
+		</view>
+
 		<!-- 底部操作栏 -->
 		<view class="action-bar">
 			<button class="nav-btn" @click="openNavigation">
@@ -226,6 +249,10 @@
 		onLoad
 	} from '@dcloudio/uni-app';
 	import request from '../../utils/request.js';
+	import {
+		getInviteCode,
+		checkLoginGuard
+	} from '../../utils/user.js';
 	import PointsFeedbackPopup from '@/components/PointsFeedbackPopup.vue';
 
 	const storeId = ref(null);
@@ -485,6 +512,76 @@
 			imageUrl: coverImages.value[0] || ""
 		};
 	});
+
+
+	const isActionInProgress = ref(false);
+	
+	const toggleAction = async (clickedAction) => {
+		// 1. 登录校验
+		if (!await checkLoginGuard()) return;
+		
+		// 2. 防止连续点击
+		if (isActionInProgress.value) return;
+		isActionInProgress.value = true;
+	
+		// 3. 备份原始数据，用于请求失败时回滚
+		const originalAction = storeDetail.value.userLikeStr;
+		const originalLikes = storeDetail.value.likesCount || 0;
+		const originalDislikes = storeDetail.value.dislikesCount || 0;
+	
+		// 4. 确定要发送给后端的动作 (相同则取消，不同则切换)
+		const apiAction = originalAction === clickedAction ? 'cancel' : clickedAction;
+	
+		// 5. 【乐观更新】立即改变 UI 状态
+		if (apiAction === 'cancel') {
+			storeDetail.value.userLikeStr = null;
+			clickedAction === 'like' ? storeDetail.value.likesCount-- : storeDetail.value.dislikesCount--;
+		} else {
+			storeDetail.value.userLikeStr = clickedAction;
+			if (clickedAction === 'like') {
+				storeDetail.value.likesCount++;
+				// 如果之前是踩的状态，现在改赞，踩的数量要-1
+				if (originalAction === 'dislike') storeDetail.value.dislikesCount--;
+			} else {
+				storeDetail.value.dislikesCount++;
+				// 如果之前是赞的状态，现在改踩，赞的数量要-1
+				if (originalAction === 'like') storeDetail.value.likesCount--;
+			}
+		}
+	
+		try {
+			// 6. 发起后端请求
+			const { error } = await request('/app-api/member/like-action/add', {
+				method: 'POST',
+				data: {
+					targetId: storeId.value,
+					targetType: 'store', // 聚店业务标识
+					action: apiAction
+				}
+			});
+	
+			if (!error) {
+				// 7. 【关键】同步通知列表页更新内存数据，不刷新整页
+				uni.$emit('storeInteractionChanged', {
+					id: storeId.value,
+					type: 'action',
+					userLikeStr: storeDetail.value.userLikeStr,
+					likesCount: storeDetail.value.likesCount,
+					dislikesCount: storeDetail.value.dislikesCount
+				});
+			} else {
+				throw new Error(error);
+			}
+		} catch (e) {
+			// 8. 失败回滚：恢复到点击前的状态
+			storeDetail.value.userLikeStr = originalAction;
+			storeDetail.value.likesCount = originalLikes;
+			storeDetail.value.dislikesCount = originalDislikes;
+			uni.showToast({ title: '操作失败，请重试', icon: 'none' });
+		} finally {
+			isActionInProgress.value = false;
+		}
+	};
 </script>
 
 <style scoped>
@@ -541,6 +638,7 @@
 		flex: 1;
 		overflow-y: auto;
 		-webkit-overflow-scrolling: touch;
+		margin-bottom: 20rpx;
 	}
 
 	.store-cover-container {
@@ -903,6 +1001,65 @@
 		gap: 12rpx;
 	}
 
+	/* 聚会详情赞踩互动区样式 */
+	.interaction-capsule-section {
+		display: flex;
+		justify-content: center;
+		margin: 40rpx 30rpx 10rpx;
+	}
+
+	.capsule-container {
+		display: flex;
+		align-items: center;
+		background-color: #ffffff;
+		border-radius: 60rpx;
+		padding: 10rpx 40rpx;
+		box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.08);
+		border: 1rpx solid #f0f0f0;
+	}
+
+	.capsule-item {
+		display: flex;
+		align-items: center;
+		padding: 16rpx 20rpx;
+		transition: all 0.2s ease;
+	}
+
+	.capsule-item .count {
+		font-size: 32rpx;
+		font-weight: bold;
+		margin: 0 8rpx 0 12rpx;
+		color: #333;
+	}
+
+	.capsule-item .label {
+		font-size: 24rpx;
+		color: #999;
+	}
+
+	/* 激活状态 */
+	.capsule-item.like.active .count,
+	.capsule-item.like.active .label {
+		color: #FF6B00;
+	}
+
+	.capsule-item.dislike.active .count,
+	.capsule-item.dislike.active .label {
+		color: #3498db;
+	}
+
+	.capsule-divider {
+		width: 2rpx;
+		height: 40rpx;
+		background-color: #eee;
+		margin: 0 30rpx;
+	}
+
+	.capsule-item:active {
+		transform: scale(0.9);
+		opacity: 0.7;
+	}
+
 
 	.action-bar {
 		background: white;
@@ -1000,5 +1157,42 @@
 		border-radius: 6rpx;
 		display: inline-block;
 		margin-bottom: 16rpx;
+	}
+
+	.detail-interactions {
+		display: flex;
+		justify-content: space-around;
+		align-items: center;
+		background-color: #ffffff;
+		border-radius: 20rpx;
+		margin: 0 30rpx 30rpx;
+		padding: 24rpx 0;
+		box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.05);
+		border: 1rpx solid #f0f0f0;
+	}
+
+	.interaction-item {
+		display: flex;
+		align-items: center;
+		gap: 12rpx;
+		color: #666;
+		font-size: 28rpx;
+		padding: 10rpx 30rpx;
+		border-radius: 40rpx;
+		transition: all 0.2s;
+	}
+
+	.interaction-item text {
+		font-weight: 500;
+	}
+
+	.interaction-item:active {
+		background-color: #f5f5f5;
+	}
+
+	/* 激活状态下的微调 */
+	.interaction-item.active text {
+		color: inherit;
+		/* 颜色由图标决定，或者此处指定特定颜色 */
 	}
 </style>

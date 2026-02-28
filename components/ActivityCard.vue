@@ -47,6 +47,26 @@
 
 		</view>
 
+		<!-- 新增：互动统计行 -->
+		<view class="activity-interactions">
+			<view class="interaction-btn" :class="{ active: activity.userLikeStr === 'like' }"
+				@click.stop="handleAction('like')">
+				<uni-icons :type="activity.userLikeStr === 'like' ? 'hand-up-filled' : 'hand-up'" size="18"
+					:color="activity.userLikeStr === 'like' ? '#e74c3c' : '#666'" />
+				<text>{{ activity.likesCount || 0 }}</text>
+			</view>
+			<view class="interaction-btn" :class="{ active: activity.userLikeStr === 'dislike' }"
+				@click.stop="handleAction('dislike')">
+				<uni-icons :type="activity.userLikeStr === 'dislike' ? 'hand-down-filled' : 'hand-down'" size="18"
+					:color="activity.userLikeStr === 'dislike' ? '#3498db' : '#666'" />
+				<text>{{ activity.dislikesCount || 0 }}</text>
+			</view>
+			<view class="interaction-btn">
+				<uni-icons type="chatbubble" size="18" color="#666" />
+				<text>{{ activity.commonCount || 0 }}</text>
+			</view>
+		</view>
+
 		<view class="activity-footer">
 			<view class="organizer">
 				<uni-icons type="contact-filled" size="16" color="#FF6B00" />
@@ -88,7 +108,8 @@
 		}
 	});
 
-	const emit = defineEmits(['updateFavoriteStatus']);
+	const emit = defineEmits(['updateFavoriteStatus', 'updateLikeStatus']);
+
 	const isFavorite = ref(props.activity.followFlag === 1);
 
 	const loading = ref(false);
@@ -147,6 +168,20 @@
 				}
 			});
 		}
+	};
+
+	const handleAction = async (clickedAction) => {
+		if (!await checkLoginGuard()) return;
+
+		const originalAction = props.activity.userLikeStr;
+		const apiAction = originalAction === clickedAction ? 'cancel' : clickedAction;
+
+		// 向上通知列表页处理（列表页处理接口请求和内存更新）
+		emit('updateLikeStatus', {
+			id: props.activity.id,
+			action: apiAction,
+			clickedAction: clickedAction
+		});
 	};
 
 	// 卡片主体点击事件
@@ -254,8 +289,8 @@
 		border-radius: 16rpx;
 		margin-bottom: 30rpx;
 		box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.1);
-		
-		object-fit: cover; 
+
+		object-fit: cover;
 	}
 
 	.activity-header {
@@ -367,6 +402,25 @@
 		border-radius: 8rpx;
 		font-size: 24rpx;
 		border: 2rpx solid #ffdcc7;
+	}
+
+	.activity-interactions {
+		display: flex;
+		gap: 40rpx;
+		margin-bottom: 20rpx;
+		padding: 0 10rpx;
+	}
+
+	.interaction-btn {
+		display: flex;
+		align-items: center;
+		gap: 8rpx;
+		color: #666;
+		font-size: 26rpx;
+	}
+
+	.interaction-btn.active {
+		font-weight: bold;
 	}
 
 

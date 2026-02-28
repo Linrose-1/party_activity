@@ -7299,7 +7299,7 @@ function initOnError() {
 function initRuntimeSocketService() {
   const hosts = "192.168.110.17,127.0.0.1";
   const port = "8090";
-  const id = "mp-weixin_K_9JxX";
+  const id = "mp-weixin_uOecjZ";
   const lazy = typeof swan !== "undefined";
   let restoreError = lazy ? () => {
   } : initOnError();
@@ -8724,7 +8724,7 @@ const subPackages = [
       {
         path: "my-comments/my-comments",
         style: {
-          navigationBarTitleText: "我发出的评论"
+          navigationBarTitleText: "评论中心"
         }
       },
       {
@@ -8737,6 +8737,12 @@ const subPackages = [
         path: "comment-page/comment-page",
         style: {
           navigationBarTitleText: "所有评论"
+        }
+      },
+      {
+        path: "comment-center/comment-center",
+        style: {
+          navigationBarTitleText: "评论中心"
         }
       }
     ]

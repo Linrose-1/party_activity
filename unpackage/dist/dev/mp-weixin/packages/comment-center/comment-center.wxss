@@ -1,0 +1,197 @@
+/* 水平间距 */
+/* 水平间距 */
+.container.data-v-c078da3e {
+  min-height: 100vh;
+  background: #f5f7fa;
+}
+.page-header.data-v-c078da3e {
+  background: linear-gradient(135deg, #FF8700 0%, #FF6B00 100%);
+  padding: 60rpx 40rpx 100rpx;
+  color: #fff;
+}
+.page-header .header-title .title-text.data-v-c078da3e {
+  font-size: 44rpx;
+  font-weight: bold;
+  display: block;
+}
+.page-header .header-title .title-subtitle.data-v-c078da3e {
+  font-size: 24rpx;
+  opacity: 0.8;
+}
+.page-header .header-stats.data-v-c078da3e {
+  margin-top: 30rpx;
+}
+.page-header .header-stats .stat-number.data-v-c078da3e {
+  font-size: 50rpx;
+  font-weight: bold;
+}
+.filter-sticky-section.data-v-c078da3e {
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: #fff;
+  margin-top: -40rpx;
+  border-radius: 40rpx 40rpx 0 0;
+  padding: 20rpx 0;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.05);
+}
+.action-tabs.data-v-c078da3e {
+  display: flex;
+  justify-content: space-around;
+  padding: 10rpx 60rpx;
+}
+.action-tabs .action-tab.data-v-c078da3e {
+  font-size: 30rpx;
+  color: #999;
+  position: relative;
+  padding: 10rpx 0;
+}
+.action-tabs .action-tab.active.data-v-c078da3e {
+  color: #FF8700;
+  font-weight: bold;
+}
+.action-tabs .action-tab.active .tab-line.data-v-c078da3e {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40rpx;
+  height: 6rpx;
+  background: #FF8700;
+  border-radius: 3rpx;
+}
+.business-tabs.data-v-c078da3e {
+  display: flex;
+  justify-content: center;
+  gap: 20rpx;
+  margin-top: 20rpx;
+  padding: 0 30rpx;
+}
+.business-tabs .biz-tab.data-v-c078da3e {
+  padding: 10rpx 30rpx;
+  border-radius: 30rpx;
+  background: #f0f2f5;
+  font-size: 24rpx;
+  color: #666;
+}
+.business-tabs .biz-tab.active.data-v-c078da3e {
+  background: rgba(255, 135, 0, 0.1);
+  color: #FF8700;
+  border: 1rpx solid #FF8700;
+}
+.list-container.data-v-c078da3e {
+  padding: 30rpx;
+}
+.comment-card.data-v-c078da3e {
+  background: #fff;
+  border-radius: 24rpx;
+  padding: 30rpx;
+  margin-bottom: 30rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.03);
+}
+.comment-card .avatar.data-v-c078da3e {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 50%;
+  margin-right: 20rpx;
+}
+.comment-card .name.data-v-c078da3e {
+  font-size: 30rpx;
+  font-weight: bold;
+}
+.comment-card .owner-badge.data-v-c078da3e {
+  font-size: 18rpx;
+  background: #FF6B00;
+  color: #fff;
+  padding: 2rpx 10rpx;
+  border-radius: 6rpx;
+  margin-left: 10rpx;
+}
+.comment-card .time.data-v-c078da3e {
+  font-size: 22rpx;
+  color: #bbb;
+}
+.comment-card .unread-dot.data-v-c078da3e {
+  width: 12rpx;
+  height: 12rpx;
+  background: #ff4d4f;
+  border-radius: 50%;
+  margin-left: 10rpx;
+}
+.card-content.data-v-c078da3e {
+  font-size: 28rpx;
+  color: #333;
+  margin: 20rpx 0;
+  line-height: 1.6;
+}
+.target-section.data-v-c078da3e {
+  display: flex;
+  align-items: center;
+  background: #f9f9f9;
+  padding: 20rpx;
+  border-radius: 12rpx;
+}
+.target-section .target-content.data-v-c078da3e {
+  flex: 1;
+  margin-left: 16rpx;
+}
+.target-section .target-content .target-label.data-v-c078da3e {
+  font-size: 20rpx;
+  color: #999;
+}
+.target-section .target-content .target-title.data-v-c078da3e {
+  font-size: 26rpx;
+  color: #666;
+  font-weight: 500;
+}
+.children-section.data-v-c078da3e {
+  background: #fafafa;
+  padding: 20rpx;
+  border-radius: 12rpx;
+  margin-top: 20rpx;
+}
+.children-section .child-name.data-v-c078da3e {
+  font-size: 24rpx;
+  color: #FF8700;
+  font-weight: bold;
+}
+.children-section .child-text.data-v-c078da3e {
+  font-size: 24rpx;
+  color: #666;
+}
+.children-section .more-replies.data-v-c078da3e {
+  font-size: 22rpx;
+  color: #999;
+  margin-top: 10rpx;
+}
+.card-actions.data-v-c078da3e {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 20rpx;
+  padding-top: 20rpx;
+  border-top: 1rpx solid #f0f0f0;
+}
+.card-actions .reply-btn.data-v-c078da3e {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  font-size: 26rpx;
+  color: #FF8700;
+}
+.empty-state.data-v-c078da3e {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 100rpx;
+}
+.empty-state .empty-img.data-v-c078da3e {
+  width: 200rpx;
+  height: 200rpx;
+  opacity: 0.5;
+}
+.empty-state .empty-text.data-v-c078da3e {
+  font-size: 28rpx;
+  color: #999;
+  margin-top: 20rpx;
+}

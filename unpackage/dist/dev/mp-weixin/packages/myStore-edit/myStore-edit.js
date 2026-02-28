@@ -1,24 +1,31 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
+const common_assets = require("../../common/assets.js");
 const utils_request = require("../../utils/request.js");
 const utils_upload = require("../../utils/upload.js");
 if (!Array) {
-  const _easycom_uni_easyinput2 = common_vendor.resolveComponent("uni-easyinput");
   const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
+  const _easycom_uni_easyinput2 = common_vendor.resolveComponent("uni-easyinput");
   const _easycom_DragImageUploader2 = common_vendor.resolveComponent("DragImageUploader");
-  (_easycom_uni_easyinput2 + _easycom_uni_icons2 + _easycom_DragImageUploader2)();
+  const _easycom_uni_popup2 = common_vendor.resolveComponent("uni-popup");
+  (_easycom_uni_icons2 + _easycom_uni_easyinput2 + _easycom_DragImageUploader2 + _easycom_uni_popup2)();
 }
-const _easycom_uni_easyinput = () => "../../uni_modules/uni-easyinput/components/uni-easyinput/uni-easyinput.js";
 const _easycom_uni_icons = () => "../../uni_modules/uni-icons/components/uni-icons/uni-icons.js";
+const _easycom_uni_easyinput = () => "../../uni_modules/uni-easyinput/components/uni-easyinput/uni-easyinput.js";
 const _easycom_DragImageUploader = () => "../../components/DragImageUploader/DragImageUploader.js";
+const _easycom_uni_popup = () => "../../uni_modules/uni-popup/components/uni-popup/uni-popup.js";
 if (!Math) {
-  (_easycom_uni_easyinput + _easycom_uni_icons + _easycom_DragImageUploader)();
+  (_easycom_uni_icons + _easycom_uni_easyinput + _easycom_DragImageUploader + _easycom_uni_popup)();
 }
 const _sfc_main = {
   __name: "myStore-edit",
   setup(__props) {
     const isLoading = common_vendor.ref(true);
     const isSubmitting = common_vendor.ref(false);
+    const userSearchPopup = common_vendor.ref(null);
+    const searchKeyword = common_vendor.ref("");
+    const userSearchResults = common_vendor.ref([]);
+    const selectedOwner = common_vendor.ref(null);
     const form = common_vendor.ref({
       id: null,
       storeName: "",
@@ -95,7 +102,7 @@ const _sfc_main = {
       }
       if (data && Array.isArray(data)) {
         categoryList.value = data;
-        common_vendor.index.__f__("log", "at packages/myStore-edit/myStore-edit.vue:319", "成功获取聚店类别:", categoryList.value);
+        common_vendor.index.__f__("log", "at packages/myStore-edit/myStore-edit.vue:381", "成功获取聚店类别:", categoryList.value);
       }
     };
     const getStoreDetails = async (storeId) => {
@@ -120,10 +127,41 @@ const _sfc_main = {
       if (!error) {
         Object.assign(form.value, data);
         parseOperatingHours(data.operatingHours);
+        if (data.memberUser) {
+          selectedOwner.value = data.memberUser;
+          form.value.userId = data.memberUser.id;
+        }
         if (data.storeCoverImageUrls && Array.isArray(data.storeCoverImageUrls)) {
           coverImages.value = data.storeCoverImageUrls;
         }
       }
+    };
+    const openUserSearch = () => userSearchPopup.value.open();
+    const closeUserSearch = () => userSearchPopup.value.close();
+    const handleUserSearch = async () => {
+      if (!searchKeyword.value.trim())
+        return;
+      const {
+        data
+      } = await utils_request.request("/app-api/member/user/search", {
+        method: "GET",
+        data: {
+          keyword: searchKeyword.value,
+          pageNo: 1,
+          pageSize: 20
+        }
+      });
+      if (data)
+        userSearchResults.value = data.list || [];
+    };
+    const selectOwner = (user) => {
+      selectedOwner.value = user;
+      form.value.userId = user.id;
+      closeUserSearch();
+      common_vendor.index.showToast({
+        title: `已选择: ${user.nickname}`,
+        icon: "none"
+      });
     };
     const addTimeSegment = () => {
       editableHours.regular.push({
@@ -360,8 +398,19 @@ const _sfc_main = {
       return common_vendor.e({
         a: !isLoading.value
       }, !isLoading.value ? common_vendor.e({
-        b: common_vendor.o(($event) => form.value.storeName = $event),
-        c: common_vendor.p({
+        b: selectedOwner.value
+      }, selectedOwner.value ? {
+        c: selectedOwner.value.avatar || "/static/images/default-avatar.png",
+        d: common_vendor.t(selectedOwner.value.nickname)
+      } : {}, {
+        e: common_vendor.p({
+          type: "search",
+          size: "18",
+          color: "#FF6B00"
+        }),
+        f: common_vendor.o(openUserSearch),
+        g: common_vendor.o(($event) => form.value.storeName = $event),
+        h: common_vendor.p({
           placeholder: "请输入聚店名称",
           inputBorder: false,
           styles: {
@@ -370,42 +419,42 @@ const _sfc_main = {
           placeholderStyle: "color:#bbb;font-size:28rpx;",
           modelValue: form.value.storeName
         }),
-        d: common_vendor.t(categoryMap.value[form.value.category] || "请选择聚店类别"),
-        e: common_vendor.n(form.value.category ? "is-value" : "is-placeholder"),
-        f: common_vendor.p({
+        i: common_vendor.t(categoryMap.value[form.value.category] || "请选择聚店类别"),
+        j: common_vendor.n(form.value.category ? "is-value" : "is-placeholder"),
+        k: common_vendor.p({
           type: "right",
           size: "14",
           color: "#ccc"
         }),
-        g: categoryOptions.value,
-        h: categoryOptions.value.indexOf(categoryMap.value[form.value.category]),
-        i: common_vendor.o(handleCategoryChange),
-        j: common_vendor.o(handleCoverImageUpload),
-        k: common_vendor.o(($event) => coverImages.value = $event),
-        l: common_vendor.p({
+        l: categoryOptions.value,
+        m: categoryOptions.value.indexOf(categoryMap.value[form.value.category]),
+        n: common_vendor.o(handleCategoryChange),
+        o: common_vendor.o(handleCoverImageUpload),
+        p: common_vendor.o(($event) => coverImages.value = $event),
+        q: common_vendor.p({
           ["max-count"]: 9,
           modelValue: coverImages.value
         }),
-        m: common_vendor.p({
+        r: common_vendor.p({
           type: "info",
           size: "14",
           color: "#FF9800"
         }),
-        n: common_vendor.p({
+        s: common_vendor.p({
           type: "location-filled",
           size: "18",
           color: "#FF6B00"
         }),
-        o: common_vendor.t(form.value.fullAddress || "点击在地图上选择"),
-        p: common_vendor.n(form.value.fullAddress ? "is-value" : "is-placeholder"),
-        q: common_vendor.p({
+        t: common_vendor.t(form.value.fullAddress || "点击在地图上选择"),
+        v: common_vendor.n(form.value.fullAddress ? "is-value" : "is-placeholder"),
+        w: common_vendor.p({
           type: "right",
           size: "14",
           color: "#ccc"
         }),
-        r: common_vendor.o(openMapToChooseLocation),
-        s: common_vendor.o(($event) => form.value.storeDescription = $event),
-        t: common_vendor.p({
+        x: common_vendor.o(openMapToChooseLocation),
+        y: common_vendor.o(($event) => form.value.storeDescription = $event),
+        z: common_vendor.p({
           type: "textarea",
           placeholder: "请简要介绍您的店铺特色、服务内容等...",
           inputBorder: false,
@@ -415,16 +464,16 @@ const _sfc_main = {
           placeholderStyle: "color:#bbb;font-size:28rpx;",
           modelValue: form.value.storeDescription
         }),
-        v: editableHours.regular.length < 3
+        A: editableHours.regular.length < 3
       }, editableHours.regular.length < 3 ? {
-        w: common_vendor.p({
+        B: common_vendor.p({
           type: "plusempty",
           size: "12",
           color: "#FF6B00"
         }),
-        x: common_vendor.o(addTimeSegment)
+        C: common_vendor.o(addTimeSegment)
       } : {}, {
-        y: common_vendor.f(editableHours.regular, (item, index, i0) => {
+        D: common_vendor.f(editableHours.regular, (item, index, i0) => {
           return common_vendor.e({
             a: common_vendor.t(item.open),
             b: item.open,
@@ -435,7 +484,7 @@ const _sfc_main = {
             g: item.description,
             h: common_vendor.o(($event) => item.description = $event.detail.value, index)
           }, editableHours.regular.length > 1 ? {
-            i: "856a9ece-8-" + i0,
+            i: "856a9ece-9-" + i0,
             j: common_vendor.p({
               type: "trash",
               size: "18",
@@ -446,24 +495,24 @@ const _sfc_main = {
             l: index
           });
         }),
-        z: editableHours.regular.length > 1,
-        A: common_vendor.p({
+        E: editableHours.regular.length > 1,
+        F: common_vendor.p({
           type: "plusempty",
           size: "12",
           color: "#FF6B00"
         }),
-        B: common_vendor.o(addSpecialHour),
-        C: editableHours.special.length === 0
+        G: common_vendor.o(addSpecialHour),
+        H: editableHours.special.length === 0
       }, editableHours.special.length === 0 ? {} : {}, {
-        D: common_vendor.f(editableHours.special, (specialDay, index, i0) => {
+        I: common_vendor.f(editableHours.special, (specialDay, index, i0) => {
           return common_vendor.e({
-            a: "856a9ece-10-" + i0,
+            a: "856a9ece-11-" + i0,
             b: common_vendor.t(specialDay.date || "选择日期"),
             c: specialDay.date,
             d: common_vendor.o((e) => specialDay.date = e.detail.value, index),
             e: specialDay.is_open,
             f: common_vendor.o((e) => specialDay.is_open = e.detail.value, index),
-            g: "856a9ece-11-" + i0,
+            g: "856a9ece-12-" + i0,
             h: common_vendor.o(($event) => removeSpecialHour(index), index),
             i: specialDay.is_open
           }, specialDay.is_open ? {
@@ -479,18 +528,18 @@ const _sfc_main = {
             r: index
           });
         }),
-        E: common_vendor.p({
+        J: common_vendor.p({
           type: "calendar",
           size: "14",
           color: "#666"
         }),
-        F: common_vendor.p({
+        K: common_vendor.p({
           type: "trash",
           size: "16",
           color: "#999"
         }),
-        G: common_vendor.o(($event) => form.value.contactPhone = $event),
-        H: common_vendor.p({
+        L: common_vendor.o(($event) => form.value.contactPhone = $event),
+        M: common_vendor.p({
           type: "number",
           placeholder: "请输入电话",
           inputBorder: false,
@@ -499,8 +548,8 @@ const _sfc_main = {
           },
           modelValue: form.value.contactPhone
         }),
-        I: common_vendor.o(($event) => form.value.averageConsumptionRange = $event),
-        J: common_vendor.p({
+        N: common_vendor.o(($event) => form.value.averageConsumptionRange = $event),
+        O: common_vendor.p({
           type: "text",
           placeholder: "如: 100-200",
           inputBorder: false,
@@ -509,26 +558,67 @@ const _sfc_main = {
           },
           modelValue: form.value.averageConsumptionRange
         }),
-        K: form.value.contactWechatQrCodeUrl
+        P: form.value.contactWechatQrCodeUrl
       }, form.value.contactWechatQrCodeUrl ? {
-        L: form.value.contactWechatQrCodeUrl
+        Q: form.value.contactWechatQrCodeUrl
       } : {
-        M: common_vendor.p({
+        R: common_vendor.p({
           type: "scan",
           size: "30",
           color: "#ccc"
         })
       }, {
-        N: common_vendor.o(($event) => handleImageUpload("wechat")),
-        O: common_vendor.t(isSubmitting.value ? "正在提交..." : form.value.id ? "保存修改" : "自荐聚店"),
-        P: common_vendor.o(handleSubmit),
-        Q: isSubmitting.value,
-        R: isSubmitting.value
+        S: common_vendor.o(($event) => handleImageUpload("wechat")),
+        T: common_vendor.t(isSubmitting.value ? "正在提交..." : form.value.id ? "保存修改" : "自荐聚店"),
+        U: common_vendor.o(handleSubmit),
+        V: isSubmitting.value,
+        W: isSubmitting.value
       }) : {
-        S: common_vendor.p({
+        X: common_vendor.p({
           type: "spinner-cycle",
           size: "40",
           color: "#ccc"
+        })
+      }, {
+        Y: common_vendor.p({
+          type: "search",
+          size: "18",
+          color: "#999"
+        }),
+        Z: common_vendor.o(handleUserSearch),
+        aa: searchKeyword.value,
+        ab: common_vendor.o(($event) => searchKeyword.value = $event.detail.value),
+        ac: searchKeyword.value
+      }, searchKeyword.value ? {
+        ad: common_vendor.o(($event) => searchKeyword.value = ""),
+        ae: common_vendor.p({
+          type: "clear",
+          size: "18",
+          color: "#ccc"
+        })
+      } : {}, {
+        af: common_vendor.o(handleUserSearch),
+        ag: common_vendor.f(userSearchResults.value, (user, k0, i0) => {
+          return {
+            a: user.avatar || "/static/images/default-avatar.png",
+            b: common_vendor.t(user.nickname || user.realName || "商友"),
+            c: common_vendor.t(user.mobile || "手机号未公开"),
+            d: common_vendor.o(($event) => selectOwner(user), user.id),
+            e: user.id
+          };
+        }),
+        ah: userSearchResults.value.length === 0
+      }, userSearchResults.value.length === 0 ? {
+        ai: common_assets._imports_0$6,
+        aj: common_vendor.t(searchKeyword.value ? "未找到相关用户" : "请输入关键字搜索商友")
+      } : {}, {
+        ak: common_vendor.o(closeUserSearch),
+        al: common_vendor.sr(userSearchPopup, "856a9ece-17", {
+          "k": "userSearchPopup"
+        }),
+        am: common_vendor.p({
+          type: "bottom",
+          ["background-color"]: "#fff"
         })
       });
     };

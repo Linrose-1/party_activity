@@ -63,6 +63,7 @@
   font-size: 22rpx;
   color: rgba(255, 255, 255, 0.4);
   margin-top: 30rpx;
+  text-decoration: underline;
 }
 
 /* 标题样式 */
@@ -177,6 +178,110 @@
   font-size: 26rpx;
   color: #999;
   font-family: Arial;
+}
+
+/* =========================================
+   规则弹窗 UI 深度优化版
+   ========================================= */
+.rules-modal.data-v-d495462d {
+  height: 80vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #ffffff;
+  border-top-left-radius: 40rpx;
+  border-top-right-radius: 40rpx;
+  overflow: hidden;
+}
+.modal-header.data-v-d495462d {
+  flex-shrink: 0;
+  padding: 40rpx;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1rpx solid #f5f5f5;
+}
+.modal-header text.data-v-d495462d {
+  font-size: 34rpx;
+  font-weight: bold;
+  color: #333;
+}
+.rules-content.data-v-d495462d {
+  flex: 1;
+  height: 0;
+  /* 强制 flex 子元素重新计算高度以支持内部滚动 */
+  width: 100%;
+}
+.scroll-inner.data-v-d495462d {
+  padding: 30rpx 40rpx;
+}
+.formula-box.data-v-d495462d {
+  background-color: #FFF9F2;
+  padding: 30rpx;
+  border-radius: 20rpx;
+  margin-bottom: 40rpx;
+  border: 1rpx solid rgba(255, 131, 0, 0.1);
+}
+.formula-box .formula-title.data-v-d495462d {
+  display: block;
+  font-size: 28rpx;
+  color: #FF8300;
+  font-weight: bold;
+  margin-bottom: 12rpx;
+}
+.formula-box .formula-text.data-v-d495462d {
+  font-size: 26rpx;
+  color: #666;
+  line-height: 1.6;
+}
+.rule-detail-item.data-v-d495462d {
+  margin-bottom: 40rpx;
+}
+.rule-detail-item .detail-label.data-v-d495462d {
+  font-size: 30rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 16rpx;
+}
+.rule-detail-item .detail-desc.data-v-d495462d {
+  font-size: 26rpx;
+  color: #666;
+  line-height: 1.6;
+}
+.info-grid.data-v-d495462d {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16rpx;
+  background-color: #f9f9f9;
+  padding: 24rpx;
+  border-radius: 16rpx;
+}
+.info-grid .grid-item.data-v-d495462d {
+  font-size: 22rpx;
+  color: #777;
+  background: #fff;
+  padding: 12rpx 0;
+  text-align: center;
+  border-radius: 8rpx;
+  border: 1rpx solid #eee;
+}
+.modal-footer.data-v-d495462d {
+  flex-shrink: 0;
+  padding: 30rpx 40rpx;
+  padding-bottom: calc(30rpx + env(safe-area-inset-bottom));
+  background-color: #fff;
+  border-top: 1rpx solid #f5f5f5;
+}
+.modal-footer .know-btn.data-v-d495462d {
+  background: linear-gradient(135deg, #FFBD70, #FF8300);
+  color: #fff;
+  border-radius: 44rpx;
+  font-size: 30rpx;
+  height: 88rpx;
+  line-height: 88rpx;
+  font-weight: bold;
+}
+.modal-footer .know-btn.data-v-d495462d::after {
+  border: none;
 }
 .bottom-spacer.data-v-d495462d {
   height: 60rpx;

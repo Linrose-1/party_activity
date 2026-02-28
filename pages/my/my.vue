@@ -98,6 +98,7 @@
 					<!-- 中：图标 -->
 					<view class="icon-wrapper">
 						<image :src="item.icon" class="feature-icon" mode="aspectFit" />
+						<view class="red-dot-mini" v-if="item.name === '社交互动' && unreadData.total > 0"></view>
 					</view>
 					<!-- 下：描述 -->
 					<view class="grid-item-desc">{{ item.desc }}</view>
@@ -116,7 +117,13 @@
 					@tap="navigateToFeature(item)">
 					<!-- 增加一个 inner 容器 -->
 					<view class="feature-item-inner">
-						<img :src="item.icon" alt="" class="feature-icon" />
+						<view class="icon-rel-box">
+							<img :src="item.icon" alt="" class="feature-icon" />
+							<!-- 【新增红点】如果是评论中心且有未读消息 -->
+							<view class="red-dot-num" v-if="item.name === '评论中心' && unreadData.total > 0">
+								{{ unreadData.total > 99 ? '99+' : unreadData.total }}
+							</view>
+						</view>
 						<view class="feature-content">
 							<view class="feature-name">{{ item.name }}</view>
 							<view class="feature-desc">{{ item.desc }}</view>
@@ -161,6 +168,47 @@
 	const isLogin = ref(false);
 	const creditScore = ref(null); // 猩球信用分
 
+	const unreadData = ref({
+		total: 0,
+		post: 0,
+		activity: 0,
+		store: 0
+	});
+
+	// --- 新增获取未读数的方法 ---
+	const fetchUnreadCount = async () => {
+		if (!isLogin.value) return;
+		try {
+			const {
+				data,
+				error
+			} = await request('/app-api/member/comment/unread-count', {
+				method: 'GET'
+			});
+			if (!error && data) {
+				unreadData.value = {
+					total: data.totalUnreadCount || 0,
+					post: data.businessOpportunitiesUnreadCount || 0,
+					activity: data.activityUnreadCount || 0,
+					store: data.storeUnreadCount || 0
+				};
+
+				// 同步设置小程序底部 TabBar 的红点（可选，假设“我的”是第3个Tab）
+				if (data.totalUnreadCount > 0) {
+					uni.showTabBarRedDot({
+						index: 2
+					});
+				} else {
+					uni.hideTabBarRedDot({
+						index: 2
+					});
+				}
+			}
+		} catch (e) {
+			console.error('获取未读数失败', e);
+		}
+	};
+
 	// 【新增】一个整合的函数，用于检查登录状态并获取数据
 	const checkLoginStatusAndFetchData = () => {
 		const token = uni.getStorageSync('token'); // 或者检查 userId
@@ -168,10 +216,17 @@
 			isLogin.value = true;
 			// 只有登录了才去获取用户信息
 			getUserInfo();
+			fetchUnreadCount();
 		} else {
 			isLogin.value = false;
 			// 未登录时，清空旧的用户信息，防止显示上个用户的数据
 			userInfo.value = {};
+			unreadData.value = {
+				total: 0,
+				post: 0,
+				activity: 0,
+				store: 0
+			};
 		}
 	};
 
@@ -503,10 +558,10 @@
 			path: null
 		}, // 新增
 		{
-			name: '我的评论',
-			desc: '查看商机评论信息',
+			name: '评论中心',
+			desc: '查看评论信息 ',
 			icon: '../../static/icon/我的评论.png',
-			path: '/packages/my-comments/my-comments',
+			path: '/packages/comment-center/comment-center',
 			highlight: true
 		}, // 新增
 		// 第 5 行
@@ -1319,5 +1374,58 @@
 		font-size: 30rpx;
 		color: #ccc;
 		margin-left: auto;
+	}
+
+	/* 基础容器 */
+	.icon-rel-box {
+		position: relative;
+		width: 60rpx;
+		height: 60rpx;
+		margin-right: 20rpx;
+	}
+
+	.icon-rel-box .feature-icon {
+		width: 100%;
+		height: 100%;
+		margin-right: 0;
+		/* 覆盖原有的 margin */
+	}
+
+	/* 社交资产中的小红点 */
+	.icon-wrapper {
+		position: relative;
+		/* 确保红点相对于图标定位 */
+	}
+
+	.red-dot-mini {
+		position: absolute;
+		top: 0;
+		right: 0;
+		width: 18rpx;
+		height: 18rpx;
+		background-color: #ff4d4f;
+		border-radius: 50%;
+		border: 2rpx solid #fff;
+		z-index: 10;
+	}
+
+	/* 创享中心带数字的红点 */
+	.red-dot-num {
+		position: absolute;
+		top: -10rpx;
+		right: -10rpx;
+		background-color: #ff4d4f;
+		color: #fff;
+		font-size: 20rpx;
+		font-weight: bold;
+		min-width: 32rpx;
+		height: 32rpx;
+		line-height: 32rpx;
+		text-align: center;
+		border-radius: 16rpx;
+		padding: 0 6rpx;
+		border: 2rpx solid #fff;
+		box-shadow: 0 2rpx 8rpx rgba(255, 77, 79, 0.3);
+		z-index: 10;
 	}
 </style>

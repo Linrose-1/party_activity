@@ -17,29 +17,47 @@
 				</view>
 			</view>
 
-			<!-- 2. 中部：描述/简介 -->
+			<!-- 2. 中部：描述与互动数据 -->
 			<view class="card-body">
 				<text class="store-desc">{{ store.storeDescription || '暂无介绍' }}</text>
+
+				<!-- 新增：互动统计行 -->
+				<view class="card-interaction-row">
+					<view class="mini-interaction" :class="{ active: store.userLikeStr === 'like' }"
+						@click.stop="handleAction('like')">
+						<uni-icons :type="store.userLikeStr === 'like' ? 'hand-up-filled' : 'hand-up'" size="16"
+							:color="store.userLikeStr === 'like' ? '#ff6b00' : '#999'" />
+						<text>{{ store.likesCount || 0 }}</text>
+					</view>
+					<view class="mini-interaction" :class="{ active: store.userLikeStr === 'dislike' }"
+						@click.stop="handleAction('dislike')">
+						<uni-icons :type="store.userLikeStr === 'dislike' ? 'hand-down-filled' : 'hand-down'" size="16"
+							:color="store.userLikeStr === 'dislike' ? '#3498db' : '#999'" />
+						<text>{{ store.dislikesCount || 0 }}</text>
+					</view>
+					<view class="mini-interaction">
+						<uni-icons type="chatbubble" size="16" color="#999" />
+						<text>{{ store.commonCount || 0 }}</text>
+					</view>
+				</view>
 			</view>
 
-			<!-- 3. 底部：人均 + 按钮 -->
+			<!-- 3. 底部：人均 + 按钮组 -->
 			<view class="card-footer">
-				<!-- 左侧显示人均消费 (如果有) -->
 				<view class="price-info" v-if="store.averageConsumptionRange">
-					<text>人均 {{ store.averageConsumptionRange }}</text>
+					<text>¥{{ store.averageConsumptionRange }}</text>
 				</view>
-				<view class="price-info" v-else></view> <!-- 占位 -->
+				<view v-else></view>
 
 				<view class="action-buttons">
-					<!-- 发起聚会按钮 (次要操作，用空心或浅色) -->
+					<!-- 【新增】详情按钮 -->
+					<view class="btn btn-primary-light" @click.stop="handleCardClick">
+						<text>聚店详情</text>
+					</view>
+					<!-- 发起聚会按钮 -->
 					<view class="btn btn-outline" @click.stop="handleInitiateParty">
 						<text>发起聚会</text>
 					</view>
-
-					<!-- 详情按钮 (主要操作，虽然点击卡片也能进，但保留按钮引导性更强) -->
-					<!-- <view class="btn btn-primary" @click.stop="handleCardClick">
-						<text>详情</text>
-					</view> -->
 				</view>
 			</view>
 		</view>
@@ -52,7 +70,7 @@
 	} from 'vue';
 	import {
 		getInviteCode,
-		checkLoginGuard 
+		checkLoginGuard
 	} from '../utils/user.js';
 
 	const props = defineProps({
@@ -62,7 +80,18 @@
 		},
 	});
 
-	const emit = defineEmits(['click-card']);
+	const emit = defineEmits(['click-card', 'update-like']);
+	
+	const handleAction = async (clickedAction) => {
+	    if (!await checkLoginGuard()) return;
+	    const apiAction = props.store.userLikeStr === clickedAction ? 'cancel' : clickedAction;
+	    
+	    emit('update-like', {
+	        id: props.store.id,
+	        action: apiAction,
+	        clickedAction: clickedAction
+	    });
+	};
 
 	// 计算封面图：优先取列表的第一张，没有则取单张字段，再没有用默认图
 	const coverImage = computed(() => {
@@ -218,6 +247,31 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
+	}
+
+	.card-interaction-row {
+		display: flex;
+		gap: 20rpx;
+		margin-top: 10rpx;
+	}
+
+	.mini-interaction {
+		display: flex;
+		align-items: center;
+		gap: 4rpx;
+		font-size: 22rpx;
+		color: #999;
+	}
+
+	.mini-interaction.active {
+		color: #ff6b00;
+	}
+
+	/* 详情按钮样式：浅橙色背景 */
+	.btn-primary-light {
+		background-color: #fff5ec;
+		color: #ff6b00;
+		border: 1rpx solid rgba(255, 107, 0, 0.2);
 	}
 
 	/* 空心按钮样式 (发起聚会) */

@@ -1,6 +1,7 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
 const utils_request = require("../../utils/request.js");
+const utils_user = require("../../utils/user.js");
 if (!Array) {
   const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
   _easycom_uni_icons2();
@@ -62,7 +63,7 @@ const _sfc_main = {
           special
         };
       } catch (error) {
-        common_vendor.index.__f__("error", "at packages/shop-detail/shop-detail.vue:301", "解析营业时间失败:", error);
+        common_vendor.index.__f__("error", "at packages/shop-detail/shop-detail.vue:328", "解析营业时间失败:", error);
         return {
           regular: [{
             label: "营业时间",
@@ -93,7 +94,7 @@ const _sfc_main = {
       });
       isLoading.value = false;
       if (error) {
-        common_vendor.index.__f__("error", "at packages/shop-detail/shop-detail.vue:338", "获取聚店详情失败:", error);
+        common_vendor.index.__f__("error", "at packages/shop-detail/shop-detail.vue:365", "获取聚店详情失败:", error);
         common_vendor.index.showToast({
           title: error,
           icon: "none"
@@ -101,7 +102,7 @@ const _sfc_main = {
         return;
       }
       storeDetail.value = data;
-      common_vendor.index.__f__("log", "at packages/shop-detail/shop-detail.vue:347", "聚店详情数据:", storeDetail.value);
+      common_vendor.index.__f__("log", "at packages/shop-detail/shop-detail.vue:374", "聚店详情数据:", storeDetail.value);
       if (data.checkContribution === 1) {
         setTimeout(() => {
           if (pointsPopup.value) {
@@ -226,6 +227,62 @@ const _sfc_main = {
         imageUrl: coverImages.value[0] || ""
       };
     });
+    const isActionInProgress = common_vendor.ref(false);
+    const toggleAction = async (clickedAction) => {
+      if (!await utils_user.checkLoginGuard())
+        return;
+      if (isActionInProgress.value)
+        return;
+      isActionInProgress.value = true;
+      const originalAction = storeDetail.value.userLikeStr;
+      const originalLikes = storeDetail.value.likesCount || 0;
+      const originalDislikes = storeDetail.value.dislikesCount || 0;
+      const apiAction = originalAction === clickedAction ? "cancel" : clickedAction;
+      if (apiAction === "cancel") {
+        storeDetail.value.userLikeStr = null;
+        clickedAction === "like" ? storeDetail.value.likesCount-- : storeDetail.value.dislikesCount--;
+      } else {
+        storeDetail.value.userLikeStr = clickedAction;
+        if (clickedAction === "like") {
+          storeDetail.value.likesCount++;
+          if (originalAction === "dislike")
+            storeDetail.value.dislikesCount--;
+        } else {
+          storeDetail.value.dislikesCount++;
+          if (originalAction === "like")
+            storeDetail.value.likesCount--;
+        }
+      }
+      try {
+        const { error } = await utils_request.request("/app-api/member/like-action/add", {
+          method: "POST",
+          data: {
+            targetId: storeId.value,
+            targetType: "store",
+            // 聚店业务标识
+            action: apiAction
+          }
+        });
+        if (!error) {
+          common_vendor.index.$emit("storeInteractionChanged", {
+            id: storeId.value,
+            type: "action",
+            userLikeStr: storeDetail.value.userLikeStr,
+            likesCount: storeDetail.value.likesCount,
+            dislikesCount: storeDetail.value.dislikesCount
+          });
+        } else {
+          throw new Error(error);
+        }
+      } catch (e) {
+        storeDetail.value.userLikeStr = originalAction;
+        storeDetail.value.likesCount = originalLikes;
+        storeDetail.value.dislikesCount = originalDislikes;
+        common_vendor.index.showToast({ title: "操作失败，请重试", icon: "none" });
+      } finally {
+        isActionInProgress.value = false;
+      }
+    };
     return (_ctx, _cache) => {
       return common_vendor.e({
         a: storeDetail.value
@@ -353,22 +410,38 @@ const _sfc_main = {
         Q: common_vendor.o(goToCommentPage)
       }, {
         R: common_vendor.p({
+          type: storeDetail.value.userLikeStr === "like" ? "hand-up-filled" : "hand-up",
+          size: "22",
+          color: storeDetail.value.userLikeStr === "like" ? "#FF6B00" : "#666"
+        }),
+        S: common_vendor.t(storeDetail.value.likesCount || 0),
+        T: storeDetail.value.userLikeStr === "like" ? 1 : "",
+        U: common_vendor.o(($event) => toggleAction("like")),
+        V: common_vendor.p({
+          type: storeDetail.value.userLikeStr === "dislike" ? "hand-down-filled" : "hand-down",
+          size: "22",
+          color: storeDetail.value.userLikeStr === "dislike" ? "#3498db" : "#666"
+        }),
+        W: common_vendor.t(storeDetail.value.dislikesCount || 0),
+        X: storeDetail.value.userLikeStr === "dislike" ? 1 : "",
+        Y: common_vendor.o(($event) => toggleAction("dislike")),
+        Z: common_vendor.p({
           type: "map-filled",
           color: "#FF6B00",
           size: "20"
         }),
-        S: common_vendor.o((...args) => common_vendor.unref(openNavigation) && common_vendor.unref(openNavigation)(...args)),
-        T: common_vendor.p({
+        aa: common_vendor.o((...args) => common_vendor.unref(openNavigation) && common_vendor.unref(openNavigation)(...args)),
+        ab: common_vendor.p({
           type: "phone-filled",
           color: "#fff",
           size: "20"
         }),
-        U: common_vendor.o(callPhone),
-        V: common_vendor.sr(pointsPopup, "4c71c098-7", {
+        ac: common_vendor.o(callPhone),
+        ad: common_vendor.sr(pointsPopup, "4c71c098-9", {
           "k": "pointsPopup"
         })
       }) : {
-        W: common_vendor.p({
+        ae: common_vendor.p({
           type: "spinner-cycle",
           size: "30",
           color: "#999"

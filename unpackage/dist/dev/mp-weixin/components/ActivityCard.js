@@ -22,7 +22,7 @@ const _sfc_main = {
       default: false
     }
   },
-  emits: ["updateFavoriteStatus"],
+  emits: ["updateFavoriteStatus", "updateLikeStatus"],
   setup(__props, { emit: __emit }) {
     const props = __props;
     const emit = __emit;
@@ -57,6 +57,17 @@ const _sfc_main = {
         "待退款": "refund_pending"
       };
       return classMap[statusStr] || "";
+    };
+    const handleAction = async (clickedAction) => {
+      if (!await utils_user.checkLoginGuard())
+        return;
+      const originalAction = props.activity.userLikeStr;
+      const apiAction = originalAction === clickedAction ? "cancel" : clickedAction;
+      emit("updateLikeStatus", {
+        id: props.activity.id,
+        action: apiAction,
+        clickedAction
+      });
     };
     const handleCardClick = async () => {
       if (!await utils_user.checkLoginGuard("登录并绑定手机号后才能查看聚会详情，是否立即登录？"))
@@ -162,20 +173,42 @@ const _sfc_main = {
         }),
         p: common_vendor.o(handleCardClick),
         q: common_vendor.p({
+          type: __props.activity.userLikeStr === "like" ? "hand-up-filled" : "hand-up",
+          size: "18",
+          color: __props.activity.userLikeStr === "like" ? "#e74c3c" : "#666"
+        }),
+        r: common_vendor.t(__props.activity.likesCount || 0),
+        s: __props.activity.userLikeStr === "like" ? 1 : "",
+        t: common_vendor.o(($event) => handleAction("like")),
+        v: common_vendor.p({
+          type: __props.activity.userLikeStr === "dislike" ? "hand-down-filled" : "hand-down",
+          size: "18",
+          color: __props.activity.userLikeStr === "dislike" ? "#3498db" : "#666"
+        }),
+        w: common_vendor.t(__props.activity.dislikesCount || 0),
+        x: __props.activity.userLikeStr === "dislike" ? 1 : "",
+        y: common_vendor.o(($event) => handleAction("dislike")),
+        z: common_vendor.p({
+          type: "chatbubble",
+          size: "18",
+          color: "#666"
+        }),
+        A: common_vendor.t(__props.activity.commonCount || 0),
+        B: common_vendor.p({
           type: "contact-filled",
           size: "16",
           color: "#FF6B00"
         }),
-        r: common_vendor.t(__props.activity.memberUser.nickname || "主办方"),
-        s: common_vendor.p({
+        C: common_vendor.t(__props.activity.memberUser.nickname || "主办方"),
+        D: common_vendor.p({
           type: isFavorite.value ? "heart-filled" : "heart",
           size: "16",
           color: "#FF6B00"
         }),
-        t: common_vendor.t(isFavorite.value ? "已收藏" : "收藏"),
-        v: common_vendor.o(toggleFavorite),
-        w: loading.value,
-        x: common_vendor.o(handleRegisterClick)
+        E: common_vendor.t(isFavorite.value ? "已收藏" : "收藏"),
+        F: common_vendor.o(toggleFavorite),
+        G: loading.value,
+        H: common_vendor.o(handleRegisterClick)
       });
     };
   }

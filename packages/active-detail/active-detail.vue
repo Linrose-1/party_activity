@@ -228,13 +228,7 @@
 			</scroll-view>
 		</view>
 
-		<!-- 动态绑定报名截止时间 -->
-		<view style="margin: 20rpx auto; flex: 1; text-align: center;">
-			报名时间：
-			<span style="color: #ff1a3c;">
-				{{ formattedRegistrationTimes.start }} - {{ formattedRegistrationTimes.end }}
-			</span>
-		</view>
+
 
 		<!-- ==================== 浏览留痕模块 ==================== -->
 		<view class="viewer-module-card" v-if="activityDetail && activityDetail.isReadTrace === 1 && viewerTotal > 0">
@@ -297,6 +291,40 @@
 				<text>暂无评论，点击发表第一条评论</text>
 			</view>
 		</view>
+
+		<!-- 动态绑定报名截止时间 -->
+		<view style="margin: 20rpx auto; flex: 1; text-align: center;">
+			报名时间：
+			<span style="color: #ff1a3c;">
+				{{ formattedRegistrationTimes.start }} - {{ formattedRegistrationTimes.end }}
+			</span>
+		</view>
+
+		<!-- 新增：聚会赞踩互动区 (去掉了评论数，视觉更精简) -->
+		<view class="interaction-capsule-section">
+			<view class="capsule-container">
+				<!-- 点赞按钮 -->
+				<view class="capsule-item like" :class="{ active: activityDetail.userLikeStr === 'like' }"
+					@click="toggleAction('like')">
+					<uni-icons :type="activityDetail.userLikeStr === 'like' ? 'hand-up-filled' : 'hand-up'" size="22"
+						:color="activityDetail.userLikeStr === 'like' ? '#FF6B00' : '#666'"></uni-icons>
+					<text class="count">{{ activityDetail.likesCount || 0 }}</text>
+					<text class="label">靠谱</text>
+				</view>
+
+				<view class="capsule-divider"></view>
+
+				<!-- 点踩按钮 -->
+				<view class="capsule-item dislike" :class="{ active: activityDetail.userLikeStr === 'dislike' }"
+					@click="toggleAction('dislike')">
+					<uni-icons :type="activityDetail.userLikeStr === 'dislike' ? 'hand-down-filled' : 'hand-down'"
+						size="22" :color="activityDetail.userLikeStr === 'dislike' ? '#3498db' : '#666'"></uni-icons>
+					<text class="count">{{ activityDetail.dislikesCount || 0 }}</text>
+					<text class="label">无感</text>
+				</view>
+			</view>
+		</view>
+
 
 		<view style="width: 100%;height: 100rpx;"></view>
 
@@ -410,7 +438,7 @@
 			getActiveDetail();
 			// 在获取聚会详情后，接着获取报名用户列表
 			getParticipantList();
-			getCommentPreview(); 
+			getCommentPreview();
 		} else {
 			console.error('未接收到聚会ID！');
 			uni.showToast({
@@ -837,6 +865,62 @@
 			commentTotal.value = data.length;
 			// 只取前2条做预览
 			commentPreviewList.value = data.slice(0, 2);
+		}
+	};
+
+	const isActionInProgress = ref(false);
+
+	const toggleAction = async (clickedAction) => {
+		if (!await checkLoginGuard()) return;
+		if (isActionInProgress.value) return;
+		isActionInProgress.value = true;
+
+		// 1. 备份原始数据用于回滚
+		const originalAction = activityDetail.value.userLikeStr;
+		const originalLikes = activityDetail.value.likesCount;
+		const originalDislikes = activityDetail.value.dislikesCount;
+
+		// 2. 确定发给后端的 action
+		const apiAction = originalAction === clickedAction ? 'cancel' : clickedAction;
+
+		// 3. 乐观更新 UI
+		if (apiAction === 'cancel') {
+			activityDetail.value.userLikeStr = null;
+			clickedAction === 'like' ? activityDetail.value.likesCount-- : activityDetail.value.dislikesCount--;
+		} else {
+			activityDetail.value.userLikeStr = clickedAction;
+			if (clickedAction === 'like') {
+				activityDetail.value.likesCount++;
+				if (originalAction === 'dislike') activityDetail.value.dislikesCount--;
+			} else {
+				activityDetail.value.dislikesCount++;
+				if (originalAction === 'like') activityDetail.value.likesCount--;
+			}
+		}
+
+		try {
+			const {
+				error
+			} = await request('/app-api/member/like-action/add', {
+				method: 'POST',
+				data: {
+					targetId: activityId.value,
+					targetType: 'activity', // 聚会类型
+					action: apiAction
+				}
+			});
+			if (error) throw new Error(error);
+		} catch (e) {
+			// 出错回滚
+			activityDetail.value.userLikeStr = originalAction;
+			activityDetail.value.likesCount = originalLikes;
+			activityDetail.value.dislikesCount = originalDislikes;
+			uni.showToast({
+				title: '操作失败',
+				icon: 'none'
+			});
+		} finally {
+			isActionInProgress.value = false;
 		}
 	};
 
@@ -1437,6 +1521,65 @@
 		font-weight: bold;
 	}
 
+	/* 聚会详情赞踩互动区样式 */
+	.interaction-capsule-section {
+		display: flex;
+		justify-content: center;
+		margin: 40rpx 30rpx 10rpx;
+	}
+
+	.capsule-container {
+		display: flex;
+		align-items: center;
+		background-color: #ffffff;
+		border-radius: 60rpx;
+		padding: 10rpx 40rpx;
+		box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.08);
+		border: 1rpx solid #f0f0f0;
+	}
+
+	.capsule-item {
+		display: flex;
+		align-items: center;
+		padding: 16rpx 20rpx;
+		transition: all 0.2s ease;
+	}
+
+	.capsule-item .count {
+		font-size: 32rpx;
+		font-weight: bold;
+		margin: 0 8rpx 0 12rpx;
+		color: #333;
+	}
+
+	.capsule-item .label {
+		font-size: 24rpx;
+		color: #999;
+	}
+
+	/* 激活状态 */
+	.capsule-item.like.active .count,
+	.capsule-item.like.active .label {
+		color: #FF6B00;
+	}
+
+	.capsule-item.dislike.active .count,
+	.capsule-item.dislike.active .label {
+		color: #3498db;
+	}
+
+	.capsule-divider {
+		width: 2rpx;
+		height: 40rpx;
+		background-color: #eee;
+		margin: 0 30rpx;
+	}
+
+	.capsule-item:active {
+		transform: scale(0.9);
+		opacity: 0.7;
+	}
+
 	/* 浏览留痕模块样式 (聚会版) */
 	.viewer-module-card {
 		background-color: #ffffff;
@@ -1875,5 +2018,42 @@
 	.tag-icon {
 		font-size: 18rpx;
 		margin: 0 2rpx;
+	}
+
+	.detail-interactions {
+		display: flex;
+		justify-content: space-around;
+		align-items: center;
+		background-color: #ffffff;
+		border-radius: 20rpx;
+		margin: 0 30rpx 30rpx;
+		padding: 24rpx 0;
+		box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.05);
+		border: 1rpx solid #f0f0f0;
+	}
+
+	.interaction-item {
+		display: flex;
+		align-items: center;
+		gap: 12rpx;
+		color: #666;
+		font-size: 28rpx;
+		padding: 10rpx 30rpx;
+		border-radius: 40rpx;
+		transition: all 0.2s;
+	}
+
+	.interaction-item text {
+		font-weight: 500;
+	}
+
+	.interaction-item:active {
+		background-color: #f5f5f5;
+	}
+
+	/* 激活状态下的微调 */
+	.interaction-item.active text {
+		color: inherit;
+		/* 颜色由图标决定，或者此处指定特定颜色 */
 	}
 </style>

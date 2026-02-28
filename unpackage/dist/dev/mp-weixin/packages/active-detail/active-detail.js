@@ -33,7 +33,7 @@ const _sfc_main = {
     common_vendor.onLoad((options) => {
       if (options && options.inviteCode) {
         const inviteCode = options.inviteCode;
-        common_vendor.index.__f__("log", "at packages/active-detail/active-detail.vue:401", `✅ [活动详情页] 在 onLoad 中捕获到邀请码: ${inviteCode}`);
+        common_vendor.index.__f__("log", "at packages/active-detail/active-detail.vue:429", `✅ [活动详情页] 在 onLoad 中捕获到邀请码: ${inviteCode}`);
         common_vendor.index.setStorageSync("pendingInviteCode", inviteCode);
       }
       loggedInUserId.value = common_vendor.index.getStorageSync("userId");
@@ -43,7 +43,7 @@ const _sfc_main = {
         getParticipantList();
         getCommentPreview();
       } else {
-        common_vendor.index.__f__("error", "at packages/active-detail/active-detail.vue:415", "未接收到聚会ID！");
+        common_vendor.index.__f__("error", "at packages/active-detail/active-detail.vue:443", "未接收到聚会ID！");
         common_vendor.index.showToast({
           title: "加载聚会详情失败，缺少ID",
           icon: "none"
@@ -53,12 +53,12 @@ const _sfc_main = {
         const sharerId = options.sharerId;
         const bizId = options.id;
         if (sharerId && loggedInUserId.value && sharerId === loggedInUserId.value) {
-          common_vendor.index.__f__("log", "at packages/active-detail/active-detail.vue:429", "用户点击了自己的聚会分享链接，不计分。");
+          common_vendor.index.__f__("log", "at packages/active-detail/active-detail.vue:457", "用户点击了自己的聚会分享链接，不计分。");
         } else if (sharerId && loggedInUserId.value && bizId) {
-          common_vendor.index.__f__("log", "at packages/active-detail/active-detail.vue:433", "其他用户点击了聚会分享链接，且已登录，准备为分享者加分。");
+          common_vendor.index.__f__("log", "at packages/active-detail/active-detail.vue:461", "其他用户点击了聚会分享链接，且已登录，准备为分享者加分。");
           triggerShareHitApi(sharerId, bizId);
         } else if (sharerId && bizId) {
-          common_vendor.index.__f__("log", "at packages/active-detail/active-detail.vue:438", "用户点击了聚会分享链接，但尚未登录。暂存分享信息。");
+          common_vendor.index.__f__("log", "at packages/active-detail/active-detail.vue:466", "用户点击了聚会分享链接，但尚未登录。暂存分享信息。");
           common_vendor.index.setStorageSync("pendingShareReward", {
             sharerId,
             bizId,
@@ -193,10 +193,10 @@ const _sfc_main = {
             }
           }, 500);
         }
-        common_vendor.index.__f__("log", "at packages/active-detail/active-detail.vue:608", "getActiveDetail result:", activityDetail.value);
-        common_vendor.index.__f__("log", "at packages/active-detail/active-detail.vue:609", "解析到的赞助商列表:", sponsorList.value);
+        common_vendor.index.__f__("log", "at packages/active-detail/active-detail.vue:636", "getActiveDetail result:", activityDetail.value);
+        common_vendor.index.__f__("log", "at packages/active-detail/active-detail.vue:637", "解析到的赞助商列表:", sponsorList.value);
       } else {
-        common_vendor.index.__f__("log", "at packages/active-detail/active-detail.vue:611", "请求失败:", result ? result.error : "无返回结果");
+        common_vendor.index.__f__("log", "at packages/active-detail/active-detail.vue:639", "请求失败:", result ? result.error : "无返回结果");
       }
     };
     const getParticipantList = async () => {
@@ -215,14 +215,14 @@ const _sfc_main = {
         }
       });
       if (error) {
-        common_vendor.index.__f__("error", "at packages/active-detail/active-detail.vue:633", "获取报名用户列表失败:", error);
+        common_vendor.index.__f__("error", "at packages/active-detail/active-detail.vue:661", "获取报名用户列表失败:", error);
         return;
       }
       if (data && data.list) {
         participantList.value = data.list;
         participantTotal.value = data.total;
-        common_vendor.index.__f__("log", "at packages/active-detail/active-detail.vue:640", "获取到的报名用户列表:", participantList.value);
-        common_vendor.index.__f__("log", "at packages/active-detail/active-detail.vue:641", "总报名人数:", participantTotal.value);
+        common_vendor.index.__f__("log", "at packages/active-detail/active-detail.vue:668", "获取到的报名用户列表:", participantList.value);
+        common_vendor.index.__f__("log", "at packages/active-detail/active-detail.vue:669", "总报名人数:", participantTotal.value);
       }
     };
     common_vendor.computed(() => {
@@ -284,8 +284,8 @@ const _sfc_main = {
         }
         return resultLines;
       } catch (e) {
-        common_vendor.index.__f__("error", "at packages/active-detail/active-detail.vue:720", "解析营业时间JSON失败:", e);
-        common_vendor.index.__f__("error", "at packages/active-detail/active-detail.vue:721", "原始字符串:", operatingHoursStr);
+        common_vendor.index.__f__("error", "at packages/active-detail/active-detail.vue:748", "解析营业时间JSON失败:", e);
+        common_vendor.index.__f__("error", "at packages/active-detail/active-detail.vue:749", "原始字符串:", operatingHoursStr);
         return ["营业时间格式有误"];
       }
     });
@@ -308,7 +308,7 @@ const _sfc_main = {
     const triggerShareHitApi = async (sharerId, bizId) => {
       if (!sharerId || !bizId)
         return;
-      common_vendor.index.__f__("log", "at packages/active-detail/active-detail.vue:755", `准备为分享者 (ID: ${sharerId}) 增加贡分, 关联聚会ID: ${bizId}`);
+      common_vendor.index.__f__("log", "at packages/active-detail/active-detail.vue:783", `准备为分享者 (ID: ${sharerId}) 增加贡分, 关联聚会ID: ${bizId}`);
       const {
         error
       } = await utils_request.request("/app-api/member/experience-record/share-experience-hit", {
@@ -321,9 +321,9 @@ const _sfc_main = {
         }
       });
       if (error) {
-        common_vendor.index.__f__("error", "at packages/active-detail/active-detail.vue:769", "调用分享加分接口失败:", error);
+        common_vendor.index.__f__("error", "at packages/active-detail/active-detail.vue:797", "调用分享加分接口失败:", error);
       } else {
-        common_vendor.index.__f__("log", "at packages/active-detail/active-detail.vue:771", `成功为分享者 (ID: ${sharerId}) 触发贡分增加`);
+        common_vendor.index.__f__("log", "at packages/active-detail/active-detail.vue:799", `成功为分享者 (ID: ${sharerId}) 触发贡分增加`);
       }
     };
     const bannerImages = common_vendor.computed(() => {
@@ -382,6 +382,58 @@ const _sfc_main = {
         commentPreviewList.value = data.slice(0, 2);
       }
     };
+    const isActionInProgress = common_vendor.ref(false);
+    const toggleAction = async (clickedAction) => {
+      if (!await utils_user.checkLoginGuard())
+        return;
+      if (isActionInProgress.value)
+        return;
+      isActionInProgress.value = true;
+      const originalAction = activityDetail.value.userLikeStr;
+      const originalLikes = activityDetail.value.likesCount;
+      const originalDislikes = activityDetail.value.dislikesCount;
+      const apiAction = originalAction === clickedAction ? "cancel" : clickedAction;
+      if (apiAction === "cancel") {
+        activityDetail.value.userLikeStr = null;
+        clickedAction === "like" ? activityDetail.value.likesCount-- : activityDetail.value.dislikesCount--;
+      } else {
+        activityDetail.value.userLikeStr = clickedAction;
+        if (clickedAction === "like") {
+          activityDetail.value.likesCount++;
+          if (originalAction === "dislike")
+            activityDetail.value.dislikesCount--;
+        } else {
+          activityDetail.value.dislikesCount++;
+          if (originalAction === "like")
+            activityDetail.value.likesCount--;
+        }
+      }
+      try {
+        const {
+          error
+        } = await utils_request.request("/app-api/member/like-action/add", {
+          method: "POST",
+          data: {
+            targetId: activityId.value,
+            targetType: "activity",
+            // 聚会类型
+            action: apiAction
+          }
+        });
+        if (error)
+          throw new Error(error);
+      } catch (e) {
+        activityDetail.value.userLikeStr = originalAction;
+        activityDetail.value.likesCount = originalLikes;
+        activityDetail.value.dislikesCount = originalDislikes;
+        common_vendor.index.showToast({
+          title: "操作失败",
+          icon: "none"
+        });
+      } finally {
+        isActionInProgress.value = false;
+      }
+    };
     const goToCommentPage = () => {
       common_vendor.index.navigateTo({
         url: `/packages/comment-page/comment-page?id=${activityId.value}&type=activity`
@@ -393,7 +445,7 @@ const _sfc_main = {
       });
     };
     common_vendor.onShareAppMessage((res) => {
-      common_vendor.index.__f__("log", "at packages/active-detail/active-detail.vue:858", "触发分享给好友", res);
+      common_vendor.index.__f__("log", "at packages/active-detail/active-detail.vue:942", "触发分享给好友", res);
       closeSharePopup();
       const sharerId = common_vendor.index.getStorageSync("userId");
       const finalTitle = customShareTitle.value || activityDetail.value.activityTitle || "发现一个很棒的聚会，快来看看吧！";
@@ -413,7 +465,7 @@ const _sfc_main = {
       };
     });
     common_vendor.onShareTimeline(() => {
-      common_vendor.index.__f__("log", "at packages/active-detail/active-detail.vue:886", "触发分享到朋友圈");
+      common_vendor.index.__f__("log", "at packages/active-detail/active-detail.vue:970", "触发分享到朋友圈");
       const sharerId = common_vendor.index.getStorageSync("userId");
       const finalTitle = customShareTitle.value || activityDetail.value.activityTitle || "发现一个很棒的聚会，快来看看吧！";
       const inviteCode = utils_user.getInviteCode();
@@ -457,7 +509,7 @@ const _sfc_main = {
       if (isOrganizer.value) {
         url += "&isOrganizer=1";
       }
-      common_vendor.index.__f__("log", "at packages/active-detail/active-detail.vue:951", "跳转到报名列表页, URL:", url);
+      common_vendor.index.__f__("log", "at packages/active-detail/active-detail.vue:1035", "跳转到报名列表页, URL:", url);
       common_vendor.index.navigateTo({
         url
       });
@@ -476,9 +528,9 @@ const _sfc_main = {
       let url = `/packages/applicationBusinessCard/applicationBusinessCard?id=${user.id}&name=${encodeURIComponent(name)}&avatar=${encodeURIComponent(avatarUrl)}`;
       if (isFreeView) {
         url += "&fromShare=1";
-        common_vendor.index.__f__("log", "at packages/active-detail/active-detail.vue:993", `[免费查看] 跳转到名片申请页, UserID: ${user.id}`);
+        common_vendor.index.__f__("log", "at packages/active-detail/active-detail.vue:1077", `[免费查看] 跳转到名片申请页, UserID: ${user.id}`);
       } else {
-        common_vendor.index.__f__("log", "at packages/active-detail/active-detail.vue:995", `[标准流程] 跳转到名片申请页, UserID: ${user.id}`);
+        common_vendor.index.__f__("log", "at packages/active-detail/active-detail.vue:1079", `[标准流程] 跳转到名片申请页, UserID: ${user.id}`);
       }
       common_vendor.index.navigateTo({
         url
@@ -494,7 +546,7 @@ const _sfc_main = {
       }
       const targetPath = "/packages/shop-detail/shop-detail";
       const url = `${targetPath}?id=${store.id}`;
-      common_vendor.index.__f__("log", "at packages/active-detail/active-detail.vue:1022", "从聚会详情页跳转到聚店详情页, URL:", url);
+      common_vendor.index.__f__("log", "at packages/active-detail/active-detail.vue:1106", "从聚会详情页跳转到聚店详情页, URL:", url);
       common_vendor.index.navigateTo({
         url
       });
@@ -623,42 +675,40 @@ const _sfc_main = {
           });
         })
       } : {}, {
-        U: common_vendor.t(formattedRegistrationTimes.value.start),
-        V: common_vendor.t(formattedRegistrationTimes.value.end),
-        W: activityDetail.value && activityDetail.value.isReadTrace === 1 && viewerTotal.value > 0
+        U: activityDetail.value && activityDetail.value.isReadTrace === 1 && viewerTotal.value > 0
       }, activityDetail.value && activityDetail.value.isReadTrace === 1 && viewerTotal.value > 0 ? common_vendor.e({
-        X: common_vendor.t(viewerTotal.value),
-        Y: common_vendor.p({
+        V: common_vendor.t(viewerTotal.value),
+        W: common_vendor.p({
           type: "right",
           size: "14",
           color: "#999"
         }),
-        Z: common_vendor.o(goToTraceList),
-        aa: common_vendor.f(viewerList.value, (item, index, i0) => {
+        X: common_vendor.o(goToTraceList),
+        Y: common_vendor.f(viewerList.value, (item, index, i0) => {
           var _a;
           return {
             a: ((_a = item.memberUser) == null ? void 0 : _a.avatar) || "/static/icon/default-avatar.png",
             b: item.id
           };
         }),
-        ab: viewerTotal.value > 7
+        Z: viewerTotal.value > 7
       }, viewerTotal.value > 7 ? {} : {}, {
-        ac: common_vendor.t(viewerTotal.value),
-        ad: common_vendor.o(goToTraceList)
+        aa: common_vendor.t(viewerTotal.value),
+        ab: common_vendor.o(goToTraceList)
       }) : {}, {
-        ae: commentTotal.value > 0
+        ac: commentTotal.value > 0
       }, commentTotal.value > 0 ? {
-        af: common_vendor.t(commentTotal.value)
+        ad: common_vendor.t(commentTotal.value)
       } : {}, {
-        ag: common_vendor.p({
+        ae: common_vendor.p({
           type: "right",
           size: "14",
           color: "#999"
         }),
-        ah: common_vendor.o(goToCommentPage),
-        ai: commentPreviewList.value.length > 0
+        af: common_vendor.o(goToCommentPage),
+        ag: commentPreviewList.value.length > 0
       }, commentPreviewList.value.length > 0 ? {
-        aj: common_vendor.f(commentPreviewList.value, (c, k0, i0) => {
+        ah: common_vendor.f(commentPreviewList.value, (c, k0, i0) => {
           var _a;
           return {
             a: common_vendor.t(c.anonymous === 1 ? "匿名商友" : ((_a = c.memberUserBaseVO) == null ? void 0 : _a.nickname) || "商友"),
@@ -666,50 +716,68 @@ const _sfc_main = {
             c: c.id
           };
         }),
-        ak: common_vendor.o(goToCommentPage)
+        ai: common_vendor.o(goToCommentPage)
       } : {
-        al: common_vendor.p({
+        aj: common_vendor.p({
           type: "chatbubble",
           size: "18",
           color: "#ccc"
         }),
-        am: common_vendor.o(goToCommentPage)
+        ak: common_vendor.o(goToCommentPage)
       }, {
-        an: !isActionBarHidden.value
+        al: common_vendor.t(formattedRegistrationTimes.value.start),
+        am: common_vendor.t(formattedRegistrationTimes.value.end),
+        an: common_vendor.p({
+          type: activityDetail.value.userLikeStr === "like" ? "hand-up-filled" : "hand-up",
+          size: "22",
+          color: activityDetail.value.userLikeStr === "like" ? "#FF6B00" : "#666"
+        }),
+        ao: common_vendor.t(activityDetail.value.likesCount || 0),
+        ap: activityDetail.value.userLikeStr === "like" ? 1 : "",
+        aq: common_vendor.o(($event) => toggleAction("like")),
+        ar: common_vendor.p({
+          type: activityDetail.value.userLikeStr === "dislike" ? "hand-down-filled" : "hand-down",
+          size: "22",
+          color: activityDetail.value.userLikeStr === "dislike" ? "#3498db" : "#666"
+        }),
+        as: common_vendor.t(activityDetail.value.dislikesCount || 0),
+        at: activityDetail.value.userLikeStr === "dislike" ? 1 : "",
+        av: common_vendor.o(($event) => toggleAction("dislike")),
+        aw: !isActionBarHidden.value
       }, !isActionBarHidden.value ? {
-        ao: common_vendor.o(openSharePopup),
-        ap: !isRegistrationActive.value ? 1 : "",
-        aq: !isRegistrationActive.value,
-        ar: common_vendor.o(register)
+        ax: common_vendor.o(openSharePopup),
+        ay: !isRegistrationActive.value ? 1 : "",
+        az: !isRegistrationActive.value,
+        aA: common_vendor.o(register)
       } : {}, {
-        as: customShareTitle.value,
-        at: common_vendor.o(($event) => customShareTitle.value = $event.detail.value),
-        av: common_vendor.p({
+        aB: customShareTitle.value,
+        aC: common_vendor.o(($event) => customShareTitle.value = $event.detail.value),
+        aD: common_vendor.p({
           type: "weixin",
           size: "30",
           color: "#07c160"
         }),
-        aw: common_vendor.p({
+        aE: common_vendor.p({
           type: "pyq",
           size: "30",
           color: "#53a046"
         }),
-        ax: common_vendor.o(guideShareTimeline),
-        ay: common_vendor.o(closeSharePopup),
-        az: common_vendor.sr(sharePopup, "9217aa1c-8", {
+        aF: common_vendor.o(guideShareTimeline),
+        aG: common_vendor.o(closeSharePopup),
+        aH: common_vendor.sr(sharePopup, "9217aa1c-10", {
           "k": "sharePopup"
         }),
-        aA: common_vendor.o(onPopupChange),
-        aB: common_vendor.p({
+        aI: common_vendor.o(onPopupChange),
+        aJ: common_vendor.p({
           type: "bottom",
           ["background-color"]: "#fff"
         }),
-        aC: showTimelineGuide.value
+        aK: showTimelineGuide.value
       }, showTimelineGuide.value ? {
-        aD: common_assets._imports_0$3,
-        aE: common_vendor.o(hideTimelineGuide)
+        aL: common_assets._imports_0$3,
+        aM: common_vendor.o(hideTimelineGuide)
       } : {}, {
-        aF: common_vendor.sr(pointsPopup, "9217aa1c-11", {
+        aN: common_vendor.sr(pointsPopup, "9217aa1c-13", {
           "k": "pointsPopup"
         })
       }) : {});

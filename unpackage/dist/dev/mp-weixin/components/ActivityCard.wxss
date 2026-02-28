@@ -113,6 +113,22 @@
   font-size: 24rpx;
   border: 2rpx solid #ffdcc7;
 }
+.activity-interactions.data-v-f73ae0ce {
+  display: flex;
+  gap: 40rpx;
+  margin-bottom: 20rpx;
+  padding: 0 10rpx;
+}
+.interaction-btn.data-v-f73ae0ce {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  color: #666;
+  font-size: 26rpx;
+}
+.interaction-btn.active.data-v-f73ae0ce {
+  font-weight: bold;
+}
 
 /* 底部区域样式 */
 .activity-footer.data-v-f73ae0ce {

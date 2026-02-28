@@ -374,3 +374,160 @@ to {
     transform: rotate(360deg);
 }
 }
+/* 已选店主展示 */
+.owner-display.data-v-856a9ece {
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+.mini-avatar.data-v-856a9ece {
+  width: 48rpx;
+  height: 48rpx;
+  border-radius: 50%;
+  margin-right: 16rpx;
+}
+.owner-name.data-v-856a9ece {
+  font-size: 28rpx;
+  color: #333;
+  font-weight: bold;
+}
+.owner-tip.data-v-856a9ece {
+  font-size: 24rpx;
+  color: #999;
+  margin-left: 10rpx;
+}
+
+/* 搜索弹窗容器 */
+.user-search-modal.data-v-856a9ece {
+  background-color: #ffffff;
+  border-top-left-radius: 40rpx;
+  border-top-right-radius: 40rpx;
+  height: 75vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* 顶部搜索栏区域 */
+.search-header-row.data-v-856a9ece {
+  display: flex;
+  align-items: center;
+  padding: 30rpx;
+  gap: 20rpx;
+  border-bottom: 1rpx solid #f8f8f8;
+}
+.search-input-box.data-v-856a9ece {
+  flex: 1;
+  height: 80rpx;
+  background-color: #f5f6f8;
+  border-radius: 40rpx;
+  display: flex;
+  align-items: center;
+  padding: 0 30rpx;
+  gap: 10rpx;
+}
+.search-bar-input.data-v-856a9ece {
+  flex: 1;
+  font-size: 28rpx;
+  color: #333;
+}
+.search-confirm-btn.data-v-856a9ece {
+  font-size: 30rpx;
+  color: #FF6B00;
+  font-weight: bold;
+  padding: 10rpx 20rpx;
+}
+
+/* 列表区域 */
+.user-result-list.data-v-856a9ece {
+  flex: 1;
+  padding: 0 30rpx;
+  box-sizing: border-box;
+  /* 确保不溢出 */
+}
+.user-item.data-v-856a9ece {
+  display: flex;
+  align-items: center;
+  padding: 30rpx 0;
+  border-bottom: 1rpx solid #f9f9f9;
+  width: 100%;
+  box-sizing: border-box;
+}
+.res-avatar.data-v-856a9ece {
+  width: 96rpx;
+  height: 96rpx;
+  border-radius: 50%;
+  flex-shrink: 0;
+  /* 防止头像被挤压 */
+  background-color: #f0f0f0;
+}
+.res-info.data-v-856a9ece {
+  flex: 1;
+  margin-left: 24rpx;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+  /* 极其重要：允许内部文本缩写，防止挤开右侧按钮 */
+}
+.res-name.data-v-856a9ece {
+  font-size: 30rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 6rpx;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.res-mobile.data-v-856a9ece {
+  font-size: 24rpx;
+  color: #999;
+}
+
+/* 选择按钮 - 增加固定宽度和防压缩 */
+.select-action-btn.data-v-856a9ece {
+  width: 120rpx;
+  height: 56rpx;
+  line-height: 56rpx;
+  text-align: center;
+  background: linear-gradient(135deg, #FF8C00, #FF6B00);
+  color: #fff;
+  font-size: 24rpx;
+  font-weight: bold;
+  border-radius: 28rpx;
+  flex-shrink: 0;
+  /* 核心修复：绝对不会被挤压出屏幕 */
+  margin-left: 20rpx;
+  box-shadow: 0 4rpx 10rpx rgba(255, 107, 0, 0.2);
+}
+.select-action-btn.data-v-856a9ece:active {
+  opacity: 0.8;
+  transform: scale(0.95);
+}
+
+/* 空状态 */
+.search-empty-state.data-v-856a9ece {
+  padding-top: 150rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: #ccc;
+  font-size: 26rpx;
+}
+.empty-icon-img.data-v-856a9ece {
+  width: 160rpx;
+  height: 160rpx;
+  margin-bottom: 20rpx;
+  opacity: 0.6;
+}
+
+/* 底部关闭栏 */
+.modal-close-bar.data-v-856a9ece {
+  padding: 30rpx;
+  padding-bottom: calc(30rpx + env(safe-area-inset-bottom));
+  text-align: center;
+  font-size: 30rpx;
+  color: #666;
+  background-color: #fafafa;
+  border-top: 1rpx solid #eee;
+}

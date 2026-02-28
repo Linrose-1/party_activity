@@ -27,14 +27,58 @@ const _sfc_main = {
     const userInfo = common_vendor.ref({});
     const isLogin = common_vendor.ref(false);
     const creditScore = common_vendor.ref(null);
+    const unreadData = common_vendor.ref({
+      total: 0,
+      post: 0,
+      activity: 0,
+      store: 0
+    });
+    const fetchUnreadCount = async () => {
+      if (!isLogin.value)
+        return;
+      try {
+        const {
+          data,
+          error
+        } = await utils_request.request("/app-api/member/comment/unread-count", {
+          method: "GET"
+        });
+        if (!error && data) {
+          unreadData.value = {
+            total: data.totalUnreadCount || 0,
+            post: data.businessOpportunitiesUnreadCount || 0,
+            activity: data.activityUnreadCount || 0,
+            store: data.storeUnreadCount || 0
+          };
+          if (data.totalUnreadCount > 0) {
+            common_vendor.index.showTabBarRedDot({
+              index: 2
+            });
+          } else {
+            common_vendor.index.hideTabBarRedDot({
+              index: 2
+            });
+          }
+        }
+      } catch (e) {
+        common_vendor.index.__f__("error", "at pages/my/my.vue:208", "获取未读数失败", e);
+      }
+    };
     const checkLoginStatusAndFetchData = () => {
       const token = common_vendor.index.getStorageSync("token");
       if (token) {
         isLogin.value = true;
         getUserInfo();
+        fetchUnreadCount();
       } else {
         isLogin.value = false;
         userInfo.value = {};
+        unreadData.value = {
+          total: 0,
+          post: 0,
+          activity: 0,
+          store: 0
+        };
       }
     };
     const getUserInfo = async () => {
@@ -49,15 +93,15 @@ const _sfc_main = {
         });
         if (!error && data) {
           userInfo.value = data;
-          common_vendor.index.__f__("log", "at pages/my/my.vue:192", "getUserInfo userInfo:", userInfo.value);
+          common_vendor.index.__f__("log", "at pages/my/my.vue:247", "getUserInfo userInfo:", userInfo.value);
           getCreditScore();
         } else {
-          common_vendor.index.__f__("log", "at pages/my/my.vue:196", "获取用户信息失败:", error);
+          common_vendor.index.__f__("log", "at pages/my/my.vue:251", "获取用户信息失败:", error);
           isLogin.value = false;
           userInfo.value = {};
         }
       } catch (err) {
-        common_vendor.index.__f__("log", "at pages/my/my.vue:202", "请求异常:", err);
+        common_vendor.index.__f__("log", "at pages/my/my.vue:257", "请求异常:", err);
         isLogin.value = false;
         userInfo.value = {};
       }
@@ -72,10 +116,10 @@ const _sfc_main = {
         });
         if (!error && data) {
           creditScore.value = data.totalScore || null;
-          common_vendor.index.__f__("log", "at pages/my/my.vue:219", "getCreditScore:", creditScore.value);
+          common_vendor.index.__f__("log", "at pages/my/my.vue:274", "getCreditScore:", creditScore.value);
         }
       } catch (err) {
-        common_vendor.index.__f__("log", "at pages/my/my.vue:222", "获取信用分失败:", err);
+        common_vendor.index.__f__("log", "at pages/my/my.vue:277", "获取信用分失败:", err);
       }
     };
     const accountList = common_vendor.computed(() => {
@@ -300,10 +344,10 @@ const _sfc_main = {
       },
       // 新增
       {
-        name: "我的评论",
-        desc: "查看商机评论信息",
+        name: "评论中心",
+        desc: "查看评论信息 ",
         icon: "../../static/icon/我的评论.png",
-        path: "/packages/my-comments/my-comments",
+        path: "/packages/comment-center/comment-center",
         highlight: true
       },
       // 新增
@@ -376,10 +420,10 @@ const _sfc_main = {
         common_vendor.index.makePhoneCall({
           phoneNumber: item.phone,
           success: () => {
-            common_vendor.index.__f__("log", "at pages/my/my.vue:582", "拨打电话成功");
+            common_vendor.index.__f__("log", "at pages/my/my.vue:637", "拨打电话成功");
           },
           fail: (err) => {
-            common_vendor.index.__f__("log", "at pages/my/my.vue:585", "拨打电话失败:", err);
+            common_vendor.index.__f__("log", "at pages/my/my.vue:640", "拨打电话失败:", err);
           }
         });
         return;
@@ -494,24 +538,30 @@ const _sfc_main = {
         })
       } : {}, {
         z: common_vendor.f(coreFeatures.value, (item, k0, i0) => {
-          return {
+          return common_vendor.e({
             a: common_vendor.t(item.name),
             b: item.icon,
-            c: common_vendor.t(item.desc),
-            d: item.name,
-            e: common_vendor.o(($event) => navigateToCoreFeature(item), item.name)
-          };
+            c: item.name === "社交互动" && unreadData.value.total > 0
+          }, item.name === "社交互动" && unreadData.value.total > 0 ? {} : {}, {
+            d: common_vendor.t(item.desc),
+            e: item.name,
+            f: common_vendor.o(($event) => navigateToCoreFeature(item), item.name)
+          });
         }),
         A: common_vendor.f(featureList.value, (item, k0, i0) => {
-          return {
+          return common_vendor.e({
             a: item.icon,
-            b: common_vendor.t(item.name),
-            c: common_vendor.t(item.desc),
-            d: item.name,
-            e: item.fullWidth ? 1 : "",
-            f: item.highlight ? 1 : "",
-            g: common_vendor.o(($event) => navigateToFeature(item), item.name)
-          };
+            b: item.name === "评论中心" && unreadData.value.total > 0
+          }, item.name === "评论中心" && unreadData.value.total > 0 ? {
+            c: common_vendor.t(unreadData.value.total > 99 ? "99+" : unreadData.value.total)
+          } : {}, {
+            d: common_vendor.t(item.name),
+            e: common_vendor.t(item.desc),
+            f: item.name,
+            g: item.fullWidth ? 1 : "",
+            h: item.highlight ? 1 : "",
+            i: common_vendor.o(($event) => navigateToFeature(item), item.name)
+          });
         })
       });
     };

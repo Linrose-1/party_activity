@@ -2,7 +2,7 @@
 	<view class="credit-container">
 		<!-- 头部：总分展示区 -->
 		<view class="header-card">
-			<view class="score-circle">
+			<view class="score-circle" @click="showRules">
 				<text class="score-num">{{ scoreData.totalScore || 0 }}</text>
 				<text class="score-label">总信用分</text>
 			</view>
@@ -10,7 +10,7 @@
 				<text class="level-icon">{{ getLevelIcon(scoreData.creditLevel) }}</text>
 				<text class="level-name">{{ scoreData.creditLevel || '待提升' }}</text>
 			</view>
-			<text class="update-tip">分数根据您的商友互动及资料实时更新</text>
+			<text class="update-tip" @click="showRules">可点击总信用分查看分数计算规则</text>
 		</view>
 
 		<!-- 六大维度得分详情 -->
@@ -127,6 +127,73 @@
 			</view>
 		</view>
 
+		<!-- 规则弹窗 -->
+		<uni-popup ref="rulesPopup" type="bottom" background-color="transparent">
+			<view class="rules-modal">
+				<view class="modal-header">
+					<text>猩球信用评分规则</text>
+					<uni-icons type="closeempty" size="24" color="#999" @click="closeRules"></uni-icons>
+				</view>
+
+				<scroll-view scroll-y class="rules-content">
+					<view class="scroll-inner">
+						<view class="formula-box">
+							<text class="formula-title">总分计算公式</text>
+							<text class="formula-text">总信用分 = 贡分权重 + 智米权重 + 商友互动权重 + 数字身份权重 + 基础信息权重 + 实名认证权重</text>
+						</view>
+
+						<!-- 各维度细节 -->
+						<view class="rule-detail-item">
+							<view class="detail-label">1. 贡分权重（最高300分）</view>
+							<view class="detail-desc">1贡分 = 0.01信用分。达到3万贡分即得满分。</view>
+						</view>
+
+						<view class="rule-detail-item">
+							<view class="detail-label">2. 智米权重（最高200分）</view>
+							<view class="detail-desc">1智米 = 0.02信用分。达到1万智米即得满分。</view>
+						</view>
+
+						<view class="rule-detail-item">
+							<view class="detail-label">3. 商友互动（最高200分）</view>
+							<view class="detail-desc">获赞数 × 2分（上限200分）；被踩数 × -5分（不设下限）。</view>
+						</view>
+
+						<view class="rule-detail-item">
+							<view class="detail-label">4. 数字身份（最高100分）</view>
+							<view class="detail-desc">采用商友评分雷达图的综合评分映射。</view>
+						</view>
+
+						<view class="rule-detail-item">
+							<view class="detail-label">5. 基础信息（最高150分）</view>
+							<view class="info-grid">
+								<view class="grid-item">昵称(+20)</view>
+								<view class="grid-item">头像(+20)</view>
+								<view class="grid-item">性别(+10)</view>
+								<view class="grid-item">生日(+10)</view>
+								<view class="grid-item">联系邮箱(+20)</view>
+								<view class="grid-item">公司网站(+15)</view>
+								<view class="grid-item">微信码(+25)</view>
+								<view class="grid-item">商协会(+10)</view>
+								<view class="grid-item">职业状态(+20)</view>
+							</view>
+						</view>
+
+						<view class="rule-detail-item">
+							<view class="detail-label">6. 实名认证（最高50分）</view>
+							<view class="detail-desc">完成实名认证直接获得 50分。</view>
+						</view>
+
+						<!-- 底部间距 -->
+						<view style="height: 40rpx;"></view>
+					</view>
+				</scroll-view>
+
+				<view class="modal-footer">
+					<button class="know-btn" @click="closeRules">我知道了</button>
+				</view>
+			</view>
+		</uni-popup>
+
 		<view class="bottom-spacer"></view>
 	</view>
 </template>
@@ -137,6 +204,8 @@
 		onMounted
 	} from 'vue';
 	import request from '@/utils/request.js';
+
+	const rulesPopup = ref(null);
 
 	const scoreData = ref({
 		totalScore: 0,
@@ -181,6 +250,14 @@
 		}
 	];
 
+	const showRules = () => {
+		rulesPopup.value.open();
+	};
+
+	const closeRules = () => {
+		rulesPopup.value.close();
+	};
+
 	const getLevelIcon = (level) => {
 		const rule = rules.find(r => r.name === level);
 		return rule ? rule.icon : '⭐';
@@ -197,7 +274,6 @@
 			method: 'GET'
 		});
 		uni.hideLoading();
-
 		if (!error && data) {
 			scoreData.value = data;
 		}
@@ -280,6 +356,7 @@
 			font-size: 22rpx;
 			color: rgba(255, 255, 255, 0.4);
 			margin-top: 30rpx;
+			text-decoration: underline;
 		}
 	}
 
@@ -415,6 +492,125 @@
 					color: #999;
 					font-family: Arial;
 				}
+			}
+		}
+	}
+
+	/* =========================================
+	   规则弹窗 UI 深度优化版
+	   ========================================= */
+	.rules-modal {
+		height: 80vh;
+		display: flex;
+		flex-direction: column;
+		background-color: #ffffff;
+		border-top-left-radius: 40rpx;
+		border-top-right-radius: 40rpx;
+		overflow: hidden;
+	}
+
+	.modal-header {
+		flex-shrink: 0;
+		padding: 40rpx;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		border-bottom: 1rpx solid #f5f5f5;
+
+		text {
+			font-size: 34rpx;
+			font-weight: bold;
+			color: #333;
+		}
+	}
+
+	.rules-content {
+		flex: 1;
+		height: 0;
+		/* 强制 flex 子元素重新计算高度以支持内部滚动 */
+		width: 100%;
+	}
+
+	.scroll-inner {
+		padding: 30rpx 40rpx;
+	}
+
+	.formula-box {
+		background-color: #FFF9F2;
+		padding: 30rpx;
+		border-radius: 20rpx;
+		margin-bottom: 40rpx;
+		border: 1rpx solid rgba($theme-color, 0.1);
+
+		.formula-title {
+			display: block;
+			font-size: 28rpx;
+			color: $theme-color;
+			font-weight: bold;
+			margin-bottom: 12rpx;
+		}
+
+		.formula-text {
+			font-size: 26rpx;
+			color: #666;
+			line-height: 1.6;
+		}
+	}
+
+	.rule-detail-item {
+		margin-bottom: 40rpx;
+
+		.detail-label {
+			font-size: 30rpx;
+			font-weight: bold;
+			color: #333;
+			margin-bottom: 16rpx;
+		}
+
+		.detail-desc {
+			font-size: 26rpx;
+			color: #666;
+			line-height: 1.6;
+		}
+	}
+
+	.info-grid {
+		display: grid;
+		grid-template-columns: repeat(3, 1fr);
+		gap: 16rpx;
+		background-color: #f9f9f9;
+		padding: 24rpx;
+		border-radius: 16rpx;
+
+		.grid-item {
+			font-size: 22rpx;
+			color: #777;
+			background: #fff;
+			padding: 12rpx 0;
+			text-align: center;
+			border-radius: 8rpx;
+			border: 1rpx solid #eee;
+		}
+	}
+
+	.modal-footer {
+		flex-shrink: 0;
+		padding: 30rpx 40rpx;
+		padding-bottom: calc(30rpx + env(safe-area-inset-bottom));
+		background-color: #fff;
+		border-top: 1rpx solid #f5f5f5;
+
+		.know-btn {
+			background: linear-gradient(135deg, #FFBD70, $theme-color);
+			color: #fff;
+			border-radius: 44rpx;
+			font-size: 30rpx;
+			height: 88rpx;
+			line-height: 88rpx;
+			font-weight: bold;
+
+			&::after {
+				border: none;
 			}
 		}
 	}
