@@ -29,9 +29,8 @@ const _sfc_main = {
     const isFavorite = common_vendor.ref(props.activity.followFlag === 1);
     const loading = common_vendor.ref(false);
     const formattedDate = common_vendor.computed(() => {
-      if (!props.activity.startDatetime) {
+      if (!props.activity.startDatetime)
         return "时间待定";
-      }
       const date = new Date(props.activity.startDatetime);
       const Y = date.getFullYear();
       const M = (date.getMonth() + 1).toString().padStart(2, "0");
@@ -61,8 +60,7 @@ const _sfc_main = {
     const handleAction = async (clickedAction) => {
       if (!await utils_user.checkLoginGuard())
         return;
-      const originalAction = props.activity.userLikeStr;
-      const apiAction = originalAction === clickedAction ? "cancel" : clickedAction;
+      const apiAction = props.activity.userLikeStr === clickedAction ? "cancel" : clickedAction;
       emit("updateLikeStatus", {
         id: props.activity.id,
         action: apiAction,
@@ -84,28 +82,25 @@ const _sfc_main = {
       });
     };
     const toggleFavorite = async () => {
-      if (loading.value) {
+      if (loading.value)
         return;
-      }
       if (!await utils_user.checkLoginGuard("登录并绑定手机号后才能收藏聚会，是否立即登录？"))
         return;
       loading.value = true;
-      const userId = common_vendor.index.getStorageSync("userId");
       const originalFavoriteStatus = isFavorite.value;
       isFavorite.value = !isFavorite.value;
       const endpoint = isFavorite.value ? "/app-api/member/follow/add" : "/app-api/member/follow/del";
       const successMessage = isFavorite.value ? "收藏成功" : "已取消收藏";
-      const payload = {
-        userId,
-        targetId: props.activity.id,
-        targetType: "activity"
-      };
       try {
         const {
           error
         } = await utils_request.request(endpoint, {
           method: "POST",
-          data: payload
+          data: {
+            userId: common_vendor.index.getStorageSync("userId"),
+            targetId: props.activity.id,
+            targetType: "activity"
+          }
         });
         if (!error) {
           common_vendor.index.showToast({
@@ -171,29 +166,29 @@ const _sfc_main = {
             b: index
           };
         }),
-        p: common_vendor.o(handleCardClick),
-        q: common_vendor.p({
+        p: common_vendor.p({
           type: __props.activity.userLikeStr === "like" ? "hand-up-filled" : "hand-up",
           size: "18",
           color: __props.activity.userLikeStr === "like" ? "#e74c3c" : "#666"
         }),
-        r: common_vendor.t(__props.activity.likesCount || 0),
-        s: __props.activity.userLikeStr === "like" ? 1 : "",
-        t: common_vendor.o(($event) => handleAction("like")),
-        v: common_vendor.p({
+        q: common_vendor.t(__props.activity.likesCount || 0),
+        r: __props.activity.userLikeStr === "like" ? 1 : "",
+        s: common_vendor.o(($event) => handleAction("like")),
+        t: common_vendor.p({
           type: __props.activity.userLikeStr === "dislike" ? "hand-down-filled" : "hand-down",
           size: "18",
           color: __props.activity.userLikeStr === "dislike" ? "#3498db" : "#666"
         }),
-        w: common_vendor.t(__props.activity.dislikesCount || 0),
-        x: __props.activity.userLikeStr === "dislike" ? 1 : "",
-        y: common_vendor.o(($event) => handleAction("dislike")),
-        z: common_vendor.p({
+        v: common_vendor.t(__props.activity.dislikesCount || 0),
+        w: __props.activity.userLikeStr === "dislike" ? 1 : "",
+        x: common_vendor.o(($event) => handleAction("dislike")),
+        y: common_vendor.p({
           type: "chatbubble",
           size: "18",
           color: "#666"
         }),
-        A: common_vendor.t(__props.activity.commonCount || 0),
+        z: common_vendor.t(__props.activity.commonCount || 0),
+        A: common_vendor.o(handleCardClick),
         B: common_vendor.p({
           type: "contact-filled",
           size: "16",

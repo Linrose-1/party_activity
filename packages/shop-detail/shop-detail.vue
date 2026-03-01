@@ -138,31 +138,6 @@
 				</view>
 			</view>
 
-			<!-- 5. 赞踩胶囊（内容流，随页面滚动） -->
-			<view class="interaction-capsule-section">
-				<view class="capsule-container">
-					<view class="capsule-item capsule-like"
-						:class="{ 'capsule-like-active': storeDetail.userLikeStr === 'like' }"
-						@click="toggleAction('like')">
-						<uni-icons :type="storeDetail.userLikeStr === 'like' ? 'hand-up-filled' : 'hand-up'" size="22"
-							:color="storeDetail.userLikeStr === 'like' ? '#FF6B00' : '#666'"></uni-icons>
-						<text class="capsule-count">{{ storeDetail.likesCount || 0 }}</text>
-						<text class="capsule-label">好评</text>
-					</view>
-
-					<view class="capsule-divider"></view>
-
-					<view class="capsule-item capsule-dislike"
-						:class="{ 'capsule-dislike-active': storeDetail.userLikeStr === 'dislike' }"
-						@click="toggleAction('dislike')">
-						<uni-icons :type="storeDetail.userLikeStr === 'dislike' ? 'hand-down-filled' : 'hand-down'"
-							size="22" :color="storeDetail.userLikeStr === 'dislike' ? '#3498db' : '#666'"></uni-icons>
-						<text class="capsule-count">{{ storeDetail.dislikesCount || 0 }}</text>
-						<text class="capsule-label">踩踩</text>
-					</view>
-				</view>
-			</view>
-
 			<!-- 6. 评论预览卡片（整体可点击） -->
 			<view class="comment-preview-card" @click="goToCommentPage">
 				<view class="preview-header">
@@ -192,8 +167,33 @@
 				</view>
 			</view>
 
+			<!-- 5. 赞踩胶囊（内容流，随页面滚动） -->
+			<view class="interaction-capsule-section">
+				<view class="capsule-container">
+					<view class="capsule-item capsule-like"
+						:class="{ 'capsule-like-active': storeDetail.userLikeStr === 'like' }"
+						@click="toggleAction('like')">
+						<uni-icons :type="storeDetail.userLikeStr === 'like' ? 'hand-up-filled' : 'hand-up'" size="22"
+							:color="storeDetail.userLikeStr === 'like' ? '#FF6B00' : '#666'"></uni-icons>
+						<text class="capsule-count">{{ storeDetail.likesCount || 0 }}</text>
+						<text class="capsule-label">好评</text>
+					</view>
+
+					<view class="capsule-divider"></view>
+
+					<view class="capsule-item capsule-dislike"
+						:class="{ 'capsule-dislike-active': storeDetail.userLikeStr === 'dislike' }"
+						@click="toggleAction('dislike')">
+						<uni-icons :type="storeDetail.userLikeStr === 'dislike' ? 'hand-down-filled' : 'hand-down'"
+							size="22" :color="storeDetail.userLikeStr === 'dislike' ? '#3498db' : '#666'"></uni-icons>
+						<text class="capsule-count">{{ storeDetail.dislikesCount || 0 }}</text>
+						<text class="capsule-label">踩踩</text>
+					</view>
+				</view>
+			</view>
+
 			<!-- 底部留白，防止内容被 action-bar 遮挡 -->
-			<view style="height: 160rpx;"></view>
+			<view style="height: 16rpx;"></view>
 
 		</scroll-view>
 

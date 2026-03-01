@@ -5,35 +5,45 @@
 			<view class="search-box">
 				<uni-icons type="search" size="20" color="#999"></uni-icons>
 				<input class="search-input" type="text" placeholder="搜索我的聚店名称" v-model="searchTerm"
-					@input="onSearchInput" />
-				<button class="search-btn" @click="handleSearchClick">搜索</button>
+					@input="onSearchInput" @confirm="handleSearchClick" />
+				<view class="search-btn" @click="handleSearchClick">
+					<text>搜索</text>
+				</view>
 			</view>
 		</view>
 
 		<!-- 2. 店铺列表区域 -->
+		<!-- 修复3：handleRefresh 的 finally 里重置 isRefreshing，此处 @refresherrefresh 正确传参 -->
 		<scroll-view class="store-list" scroll-y="true" @scrolltolower="loadMore" refresher-enabled="true"
 			:refresher-triggered="isRefreshing" @refresherrefresh="onPullDownRefresh">
-			
 			<!-- 卡片列表 -->
-			<StoreCard v-for="store in stores" :key="store.id" :store="store" @click-card="goToEditPage" />
+			<!-- 修复1：传入 mode="mine"，绑定 @edit-store 事件 -->
+			<!-- 修复2：@update-like 绑定处理函数（mine 模式下不显示赞踩，但保持绑定以防万一） -->
+			<StoreCard v-for="store in stores" :key="store.id" :store="store" mode="mine" @click-card="goToStoreDetail"
+				@edit-store="goToEditPage" @update-like="handleLikeChange" />
 
-			<!-- 加载状态提示 -->
+			<!-- 加载中 -->
 			<view v-if="loadingMore" class="load-more">
 				<uni-icons type="spinner-cycle" size="20" color="#999"></uni-icons>
 				<text>加载中...</text>
 			</view>
+			<!-- 已加载全部 -->
 			<view v-if="!hasMore && stores.length > 0" class="load-more">
 				<uni-icons type="checkmarkempty" size="20" color="#999"></uni-icons>
 				<text>没有更多了</text>
 			</view>
 
-			<!-- 空状态提示 -->
+			<!-- 空状态 -->
 			<view v-if="stores.length === 0 && !loadingMore && !isRefreshing" class="empty-state">
-			    <uni-icons type="shop" size="60" color="#ffd8c1"></uni-icons>
-			    <text class="empty-text">您还没有自己的聚店</text>
-			    <text class="empty-subtext">立即申请，让更多人发现您的店铺</text>
-			    <button class="apply-button" @click="goToApplyPage">申请入驻</button>
+				<uni-icons type="shop" size="60" color="#ffd8c1"></uni-icons>
+				<text class="empty-text">您还没有自己的聚店</text>
+				<text class="empty-subtext">立即申请，让更多人发现您的店铺</text>
+				<view class="apply-button" @click="goToApplyPage">
+					<text>申请入驻</text>
+				</view>
 			</view>
+
+			<view style="height: 40rpx;"></view>
 		</scroll-view>
 	</view>
 </template>
@@ -45,10 +55,10 @@
 	import {
 		onMounted
 	} from 'vue';
-	import StoreCard from '../../components/StoreCard.vue'; // 确保路径正确
-	import request from '../../utils/request.js'; // 确保路径正确
+	import StoreCard from '../../components/StoreCard.vue';
+	import request from '../../utils/request.js';
 
-	// --- 状态变量 ---
+	// ─── 状态变量 ───
 	const searchTerm = ref('');
 	const stores = ref([]);
 	const pageNo = ref(1);
@@ -56,83 +66,86 @@
 	const hasMore = ref(true);
 	const loadingMore = ref(false);
 	const isRefreshing = ref(false);
+	const isLoading = ref(false);
+
+	// ─── 数据请求 ───
 
 	/**
-	 * 核心函数：获取我的聚店列表
+	 * 获取我的聚店列表（分页）
+	 * 第1页时重置列表，后续页追加
 	 */
 	const getMyStores = async () => {
-		// 防止重复加载
-		if (loadingMore.value || !hasMore.value) {
-			return;
-		}
+		if (loadingMore.value || (pageNo.value > 1 && !hasMore.value)) return;
 
 		loadingMore.value = true;
-
-		const params = {
-			pageNo: pageNo.value,
-			pageSize: pageSize,
-			storeName: searchTerm.value.trim()
-		};
 
 		const {
 			data: result,
 			error
 		} = await request('/app-api/member/store/my-list', {
 			method: 'GET',
-			data: params
+			data: {
+				pageNo: pageNo.value,
+				pageSize,
+				storeName: searchTerm.value.trim()
+			}
 		});
 
-		// 结束加载状态
 		loadingMore.value = false;
-		if (isRefreshing.value) {
-			isRefreshing.value = false;
-		}
 
 		if (error) {
-			console.error('获取我的聚店列表失败:', error);
+			console.error('[我的聚店] 获取失败:', error);
 			uni.showToast({
 				title: error,
 				icon: 'none'
 			});
 			return;
 		}
-		
-		const newList = result ? result.list : [];
-		const total = result ? result.total : 0;
 
-		if (newList && newList.length > 0) {
-			// 如果是第一页，直接替换；否则，追加到列表末尾
-			stores.value = pageNo.value === 1 ? newList : [...stores.value, ...newList];
-			// 页码自增
+		const newList = result?.list ?? [];
+		const total = result?.total ?? 0;
+
+		if (pageNo.value === 1) {
+			stores.value = newList;
+		} else {
+			stores.value = [...stores.value, ...newList];
+		}
+
+		if (newList.length > 0) {
 			pageNo.value++;
-			// 判断是否还有更多数据
 			hasMore.value = stores.value.length < total;
 		} else {
-			// 如果是第一页就没有数据，则清空列表
-			if (pageNo.value === 1) {
-				stores.value = [];
-			}
 			hasMore.value = false;
 		}
 	};
-	
+
 	/**
-	 * 统一的刷新/搜索处理函数
+	 * 统一刷新函数：重置分页后重新拉取第1页
+	 * 修复3：finally 里统一重置 isRefreshing，防止下拉永久卡住
 	 */
-	const handleRefresh = () => {
-		pageNo.value = 1;
-		stores.value = [];
-		hasMore.value = true;
-		getMyStores();
+	const handleRefresh = async () => {
+		if (isLoading.value) return;
+		isLoading.value = true;
+
+		try {
+			pageNo.value = 1;
+			hasMore.value = true;
+			stores.value = [];
+			await getMyStores();
+		} catch (e) {
+			console.error('[我的聚店] 刷新异常:', e);
+		} finally {
+			isLoading.value = false;
+			// 修复3：无论成功失败，都重置下拉刷新状态
+			isRefreshing.value = false;
+		}
 	};
 
 	/**
 	 * 上拉加载更多
 	 */
 	const loadMore = () => {
-		if (hasMore.value) {
-			getMyStores();
-		}
+		if (hasMore.value) getMyStores();
 	};
 
 	/**
@@ -142,172 +155,133 @@
 		isRefreshing.value = true;
 		handleRefresh();
 	};
-	
-	/**
-	 * 搜索输入处理（防抖）
-	 */
+
+
+	// ─── 搜索 ───
+
 	let searchTimer = null;
+
+	/**
+	 * 输入框防抖搜索：停止输入 500ms 后自动触发
+	 */
 	const onSearchInput = () => {
 		clearTimeout(searchTimer);
 		searchTimer = setTimeout(() => {
 			handleRefresh();
-		}, 500); // 延迟500毫秒触发搜索
+		}, 500);
 	};
-	
+
 	/**
-	 * 点击搜索按钮
+	 * 点击搜索按钮或键盘确认，立即触发
 	 */
 	const handleSearchClick = () => {
 		clearTimeout(searchTimer);
 		handleRefresh();
 	};
-	
+
+
+	// ─── 页面跳转 ───
+
 	/**
-	 * 【新增】跳转到申请上榜页面的方法
+	 * 点击"聚店详情"按钮，跳转到详情页
+	 * 修复1：此函数只负责详情跳转，不再是编辑页
+	 * @param {object} store - 店铺数据
 	 */
-	const goToApplyPage = () => {
-	    uni.navigateTo({
-	        // 目标是新建/编辑页面
-	        url: `/packages/myStore-edit/myStore-edit` 
-	    });
+	const goToStoreDetail = (store) => {
+		uni.navigateTo({
+			url: `/packages/shop-detail/shop-detail?id=${store.id}`
+		});
 	};
 
 	/**
-	 * 【修改】将原来的跳转函数修改为跳转到编辑页
-	 * @param {object} store - 从子组件事件中接收到的店铺对象
+	 * 点击"编辑聚店"按钮，跳转到编辑页
+	 * @param {object} store - 店铺数据
 	 */
 	const goToEditPage = (store) => {
 		uni.navigateTo({
-			// 目标是修改页面
-			url: `/packages/myStore-edit/myStore-edit?id=${store.id}` 
+			url: `/packages/myStore-edit/myStore-edit?id=${store.id}`
 		});
 	};
-	
+
 	/**
-	 * 页面加载时，获取初始数据
+	 * 空状态"申请入驻"按钮，跳转到新建店铺页
 	 */
+	const goToApplyPage = () => {
+		uni.navigateTo({
+			url: '/packages/myStore-edit/myStore-edit'
+		});
+	};
+
+	/**
+	 * 处理赞踩操作（mine 模式下不展示赞踩，此函数作为兜底防止报错）
+	 */
+	const handleLikeChange = () => {};
+
+
+	// ─── 生命周期 ───
+
 	onMounted(() => {
 		handleRefresh();
 	});
 </script>
 
 <style lang="scss">
-	// 样式与聚店列表页保持高度一致，确保UI统一
 	.my-stores-page {
 		display: flex;
 		flex-direction: column;
 		height: 100vh;
-		background-color: #ededed;
+		background-color: #f5f5f5;
 	}
 
+	/* ── 搜索区域 ── */
 	.search-container {
-		background: white;
-		padding: 15rpx;
+		background: #fff;
+		padding: 20rpx;
 		z-index: 90;
 		border-bottom: 1rpx solid #eee;
-		margin-bottom: 10rpx;
 	}
 
 	.search-box {
 		display: flex;
 		align-items: center;
 		background: #f7f7f7;
-		border-radius: 20rpx;
-		padding: 10rpx 10rpx 10rpx 15rpx;
+		border-radius: 40rpx;
+		padding: 14rpx 20rpx;
 		border: 1rpx solid #ffe8d9;
 	}
 
 	.search-input {
 		flex: 1;
-		border: none;
 		background: transparent;
-		font-size: 24rpx;
-		outline: none;
+		font-size: 26rpx;
 		color: #333;
 		margin-left: 10rpx;
 	}
 
+	/* 修复4：搜索按钮改用 view，避免 button 的 WXSS &::after 编译报错 */
 	.search-btn {
 		background: #FF6B00;
-		color: white;
-		border: none;
 		padding: 10rpx 28rpx;
-		border-radius: 16rpx;
-		font-size: 24rpx;
-		cursor: pointer;
+		border-radius: 30rpx;
 		margin-left: 10rpx;
-		line-height: 1.2;
-		height: auto;
-		display: inline-flex;
-		align-items: center;
-		&::after {
-			border: none;
-		}
-	}
-
-	.store-list {
-		flex: 1;
-		padding: 0 15rpx;
-		box-sizing: border-box;
-		overflow-y: hidden;
-	}
-
-	.empty-state {
-		text-align: center;
-		padding-top: 150rpx;
-		color: #999;
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: center;
-		
-		.uni-icons {
-			margin-bottom: 20rpx;
-		}
 
 		text {
-			font-size: 28rpx;
-			margin-top: 10rpx;
-			line-height: 1.5;
+			font-size: 26rpx;
+			color: #fff;
+			line-height: 1;
 		}
-		
-		
-		.empty-text {
-				font-size: 32rpx;
-				font-weight: 600;
-				color: #333;
-				margin-top: 10rpx;
-			}
-		
-			.empty-subtext {
-				font-size: 26rpx;
-				color: #999;
-				margin-top: 10rpx;
-				margin-bottom: 40rpx;
-			}
-		
-			.apply-button {
-				background: #FF6B00;
-				color: white;
-				border: none;
-				padding: 18rpx 80rpx;
-				border-radius: 40rpx;
-				font-size: 28rpx;
-				font-weight: bold;
-				box-shadow: 0 4rpx 12rpx rgba(255, 107, 0, 0.3);
-				transition: all 0.2s ease;
-			}
-		
-			.apply-button::after {
-				border: none;
-			}
-		
-			.apply-button:active {
-				background: #e05a00;
-				transform: scale(0.98);
-			}
 	}
 
+	/* ── 列表区域 ── */
+	.store-list {
+		flex: 1;
+		height: 0;
+		/* 配合 flex:1 使内部可独立滚动 */
+		padding: 20rpx;
+		box-sizing: border-box;
+	}
+
+	/* ── 加载更多 ── */
 	.load-more {
 		text-align: center;
 		padding: 20rpx;
@@ -316,9 +290,48 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
+		gap: 8rpx;
+	}
 
-		.uni-icons {
-			margin-right: 10rpx;
+	/* ── 空状态 ── */
+	.empty-state {
+		text-align: center;
+		padding-top: 150rpx;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.empty-text {
+		font-size: 32rpx;
+		font-weight: 600;
+		color: #333;
+		margin-top: 20rpx;
+	}
+
+	.empty-subtext {
+		font-size: 26rpx;
+		color: #999;
+		margin-top: 10rpx;
+		margin-bottom: 40rpx;
+	}
+
+	/* 申请入驻按钮：改用 view 避免 button 编译问题 */
+	.apply-button {
+		background: #FF6B00;
+		padding: 18rpx 80rpx;
+		border-radius: 40rpx;
+		box-shadow: 0 4rpx 12rpx rgba(255, 107, 0, 0.3);
+
+		text {
+			font-size: 28rpx;
+			color: #fff;
+			font-weight: bold;
+		}
+
+		&:active {
+			opacity: 0.85;
 		}
 	}
 </style>

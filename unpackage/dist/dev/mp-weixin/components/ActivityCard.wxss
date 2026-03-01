@@ -12,7 +12,6 @@
 .activity-image.data-v-f73ae0ce {
   width: 100%;
   aspect-ratio: 5/4;
-  /* ⭐ 设置为 5:4 比例 */
   border-radius: 16rpx;
   margin-bottom: 30rpx;
   box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.1);
@@ -30,20 +29,12 @@
   font-weight: 600;
   color: #1c1e21;
   flex: 1;
-  /* 占据剩余空间，防止标题过长时状态标签被挤下去 */
 }
-
-/* 【核心修改】状态标签样式 */
 .status-tag.data-v-f73ae0ce {
   font-size: 24rpx;
   padding: 6rpx 16rpx;
   border-radius: 8rpx;
   white-space: nowrap;
-  /* 报名中/进行中 (绿色 - 活力) */
-  /* 未开始/即将开始 (橙色 - 提醒, 使用App主题色) */
-  /* 已结束 (灰色 - 失效) */
-  /* 待退款 (蓝色 - 信息) */
-  /* 已取消 (红色 - 警告) */
 }
 .status-tag.enrolled.data-v-f73ae0ce, .status-tag.ongoing.data-v-f73ae0ce {
   background-color: #e8f5e9;
@@ -91,19 +82,28 @@
   display: flex;
   align-items: center;
   color: #FF6B00;
-  /* 覆盖父级的灰色 */
   font-weight: 500;
-  margin-bottom: -150rpx;
 }
 .activity-distance text.data-v-f73ae0ce {
   margin-left: 8rpx;
-  /* 图标和文字间距 */
 }
+
+/* ── Tags + 赞踩同一行 ── */
+.activity-tags-row.data-v-f73ae0ce {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30rpx;
+  gap: 16rpx;
+}
+
+/* 左侧标签组：可换行，不挤占右侧 */
 .activity-tags.data-v-f73ae0ce {
   display: flex;
   gap: 16rpx;
-  margin-bottom: 30rpx;
   flex-wrap: wrap;
+  flex: 1;
+  min-width: 0;
 }
 .tag.data-v-f73ae0ce {
   background: #fff0e5;
@@ -112,35 +112,33 @@
   border-radius: 8rpx;
   font-size: 24rpx;
   border: 2rpx solid #ffdcc7;
+  white-space: nowrap;
 }
+
+/* 右侧互动数：不被压缩 */
 .activity-interactions.data-v-f73ae0ce {
   display: flex;
-  gap: 40rpx;
-  margin-bottom: 20rpx;
-  padding: 0 10rpx;
+  align-items: center;
+  gap: 24rpx;
+  flex-shrink: 0;
 }
 .interaction-btn.data-v-f73ae0ce {
   display: flex;
   align-items: center;
-  gap: 8rpx;
+  gap: 6rpx;
   color: #666;
   font-size: 26rpx;
 }
 .interaction-btn.active.data-v-f73ae0ce {
   font-weight: bold;
 }
-
-/* 底部区域样式 */
 .activity-footer.data-v-f73ae0ce {
   display: flex;
   justify-content: space-between;
-  /* 左右两端对齐 */
   align-items: center;
-  /* 垂直居中 */
   margin-top: 30rpx;
   padding-top: 24rpx;
   border-top: 2rpx solid #f0f2f5;
-  /* 添加分割线 */
 }
 .organizer.data-v-f73ae0ce {
   display: flex;
@@ -151,15 +149,10 @@
 .organizer text.data-v-f73ae0ce {
   margin-left: 10rpx;
 }
-
-/* 按钮区域样式 */
 .action-buttons.data-v-f73ae0ce {
   display: flex;
   gap: 24rpx;
-  /* 恢复按钮间距 */
 }
-
-/* 基础按钮样式 */
 .btn.data-v-f73ae0ce {
   padding: 4rpx 24rpx;
   border-radius: 12rpx;
@@ -174,8 +167,6 @@
 .btn text.data-v-f73ae0ce {
   margin-left: 10rpx;
 }
-
-/* 主要按钮样式 (报名按钮) */
 .btn-primary.data-v-f73ae0ce {
   background: linear-gradient(135deg, #FF6B00 0%, #FF8C00 100%);
   color: white;
@@ -184,8 +175,6 @@
   opacity: 0.9;
   transform: translateY(-4rpx);
 }
-
-/* 收藏按钮样式 */
 .btn-favorite.data-v-f73ae0ce {
   background: #ffe7d8;
   color: #FF6B00;

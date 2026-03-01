@@ -4,102 +4,55 @@
   display: flex;
   flex-direction: column;
   height: 100vh;
-  background-color: #ededed;
+  background-color: #f5f5f5;
 }
+
+/* ── 搜索区域 ── */
 .search-container {
-  background: white;
-  padding: 15rpx;
+  background: #fff;
+  padding: 20rpx;
   z-index: 90;
   border-bottom: 1rpx solid #eee;
-  margin-bottom: 10rpx;
 }
 .search-box {
   display: flex;
   align-items: center;
   background: #f7f7f7;
-  border-radius: 20rpx;
-  padding: 10rpx 10rpx 10rpx 15rpx;
+  border-radius: 40rpx;
+  padding: 14rpx 20rpx;
   border: 1rpx solid #ffe8d9;
 }
 .search-input {
   flex: 1;
-  border: none;
   background: transparent;
-  font-size: 24rpx;
-  outline: none;
+  font-size: 26rpx;
   color: #333;
   margin-left: 10rpx;
 }
+
+/* 修复4：搜索按钮改用 view，避免 button 的 WXSS &::after 编译报错 */
 .search-btn {
   background: #FF6B00;
-  color: white;
-  border: none;
   padding: 10rpx 28rpx;
-  border-radius: 16rpx;
-  font-size: 24rpx;
-  cursor: pointer;
+  border-radius: 30rpx;
   margin-left: 10rpx;
-  line-height: 1.2;
-  height: auto;
-  display: inline-flex;
-  align-items: center;
 }
-.search-btn::after {
-  border: none;
+.search-btn text {
+  font-size: 26rpx;
+  color: #fff;
+  line-height: 1;
 }
+
+/* ── 列表区域 ── */
 .store-list {
   flex: 1;
-  padding: 0 15rpx;
+  height: 0;
+  /* 配合 flex:1 使内部可独立滚动 */
+  padding: 20rpx;
   box-sizing: border-box;
-  overflow-y: hidden;
 }
-.empty-state {
-  text-align: center;
-  padding-top: 150rpx;
-  color: #999;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-.empty-state .uni-icons {
-  margin-bottom: 20rpx;
-}
-.empty-state text {
-  font-size: 28rpx;
-  margin-top: 10rpx;
-  line-height: 1.5;
-}
-.empty-state .empty-text {
-  font-size: 32rpx;
-  font-weight: 600;
-  color: #333;
-  margin-top: 10rpx;
-}
-.empty-state .empty-subtext {
-  font-size: 26rpx;
-  color: #999;
-  margin-top: 10rpx;
-  margin-bottom: 40rpx;
-}
-.empty-state .apply-button {
-  background: #FF6B00;
-  color: white;
-  border: none;
-  padding: 18rpx 80rpx;
-  border-radius: 40rpx;
-  font-size: 28rpx;
-  font-weight: bold;
-  box-shadow: 0 4rpx 12rpx rgba(255, 107, 0, 0.3);
-  transition: all 0.2s ease;
-}
-.empty-state .apply-button::after {
-  border: none;
-}
-.empty-state .apply-button:active {
-  background: #e05a00;
-  transform: scale(0.98);
-}
+
+/* ── 加载更多 ── */
 .load-more {
   text-align: center;
   padding: 20rpx;
@@ -108,7 +61,43 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 8rpx;
 }
-.load-more .uni-icons {
-  margin-right: 10rpx;
+
+/* ── 空状态 ── */
+.empty-state {
+  text-align: center;
+  padding-top: 150rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.empty-text {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #333;
+  margin-top: 20rpx;
+}
+.empty-subtext {
+  font-size: 26rpx;
+  color: #999;
+  margin-top: 10rpx;
+  margin-bottom: 40rpx;
+}
+
+/* 申请入驻按钮：改用 view 避免 button 编译问题 */
+.apply-button {
+  background: #FF6B00;
+  padding: 18rpx 80rpx;
+  border-radius: 40rpx;
+  box-shadow: 0 4rpx 12rpx rgba(255, 107, 0, 0.3);
+}
+.apply-button text {
+  font-size: 28rpx;
+  color: #fff;
+  font-weight: bold;
+}
+.apply-button:active {
+  opacity: 0.85;
 }

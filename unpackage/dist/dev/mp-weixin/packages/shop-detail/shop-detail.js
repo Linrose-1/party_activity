@@ -397,34 +397,18 @@ const _sfc_main = {
         K: common_vendor.t(viewerTotal.value),
         L: common_vendor.o(goToTraceList)
       }) : {}, {
-        M: common_vendor.p({
-          type: storeDetail.value.userLikeStr === "like" ? "hand-up-filled" : "hand-up",
-          size: "22",
-          color: storeDetail.value.userLikeStr === "like" ? "#FF6B00" : "#666"
-        }),
-        N: common_vendor.t(storeDetail.value.likesCount || 0),
-        O: storeDetail.value.userLikeStr === "like" ? 1 : "",
-        P: common_vendor.o(($event) => toggleAction("like")),
-        Q: common_vendor.p({
-          type: storeDetail.value.userLikeStr === "dislike" ? "hand-down-filled" : "hand-down",
-          size: "22",
-          color: storeDetail.value.userLikeStr === "dislike" ? "#3498db" : "#666"
-        }),
-        R: common_vendor.t(storeDetail.value.dislikesCount || 0),
-        S: storeDetail.value.userLikeStr === "dislike" ? 1 : "",
-        T: common_vendor.o(($event) => toggleAction("dislike")),
-        U: commentTotal.value > 0
+        M: commentTotal.value > 0
       }, commentTotal.value > 0 ? {
-        V: common_vendor.t(commentTotal.value)
+        N: common_vendor.t(commentTotal.value)
       } : {}, {
-        W: common_vendor.p({
+        O: common_vendor.p({
           type: "right",
           size: "14",
           color: "#999"
         }),
-        X: commentPreviewList.value.length > 0
+        P: commentPreviewList.value.length > 0
       }, commentPreviewList.value.length > 0 ? {
-        Y: common_vendor.f(commentPreviewList.value, (c, k0, i0) => {
+        Q: common_vendor.f(commentPreviewList.value, (c, k0, i0) => {
           return {
             a: common_vendor.t(c.anonymous === 1 ? "匿名商友" : c.memberUserBaseVO && c.memberUserBaseVO.nickname ? c.memberUserBaseVO.nickname : "商友"),
             b: common_vendor.t(c.content),
@@ -432,13 +416,29 @@ const _sfc_main = {
           };
         })
       } : {
-        Z: common_vendor.p({
+        R: common_vendor.p({
           type: "chatbubble",
           size: "18",
           color: "#ccc"
         })
       }, {
-        aa: common_vendor.o(goToCommentPage),
+        S: common_vendor.o(goToCommentPage),
+        T: common_vendor.p({
+          type: storeDetail.value.userLikeStr === "like" ? "hand-up-filled" : "hand-up",
+          size: "22",
+          color: storeDetail.value.userLikeStr === "like" ? "#FF6B00" : "#666"
+        }),
+        U: common_vendor.t(storeDetail.value.likesCount || 0),
+        V: storeDetail.value.userLikeStr === "like" ? 1 : "",
+        W: common_vendor.o(($event) => toggleAction("like")),
+        X: common_vendor.p({
+          type: storeDetail.value.userLikeStr === "dislike" ? "hand-down-filled" : "hand-down",
+          size: "22",
+          color: storeDetail.value.userLikeStr === "dislike" ? "#3498db" : "#666"
+        }),
+        Y: common_vendor.t(storeDetail.value.dislikesCount || 0),
+        Z: storeDetail.value.userLikeStr === "dislike" ? 1 : "",
+        aa: common_vendor.o(($event) => toggleAction("dislike")),
         ab: common_vendor.p({
           type: "map-filled",
           color: "#FF6B00",

@@ -20,58 +20,64 @@ const _sfc_main = {
     const hasMore = common_vendor.ref(true);
     const loadingMore = common_vendor.ref(false);
     const isRefreshing = common_vendor.ref(false);
+    const isLoading = common_vendor.ref(false);
     const getMyStores = async () => {
-      if (loadingMore.value || !hasMore.value) {
+      if (loadingMore.value || pageNo.value > 1 && !hasMore.value)
         return;
-      }
       loadingMore.value = true;
-      const params = {
-        pageNo: pageNo.value,
-        pageSize,
-        storeName: searchTerm.value.trim()
-      };
       const {
         data: result,
         error
       } = await utils_request.request("/app-api/member/store/my-list", {
         method: "GET",
-        data: params
+        data: {
+          pageNo: pageNo.value,
+          pageSize,
+          storeName: searchTerm.value.trim()
+        }
       });
       loadingMore.value = false;
-      if (isRefreshing.value) {
-        isRefreshing.value = false;
-      }
       if (error) {
-        common_vendor.index.__f__("error", "at pages/my-shop/my-shop.vue:92", "获取我的聚店列表失败:", error);
+        common_vendor.index.__f__("error", "at pages/my-shop/my-shop.vue:97", "[我的聚店] 获取失败:", error);
         common_vendor.index.showToast({
           title: error,
           icon: "none"
         });
         return;
       }
-      const newList = result ? result.list : [];
-      const total = result ? result.total : 0;
-      if (newList && newList.length > 0) {
-        stores.value = pageNo.value === 1 ? newList : [...stores.value, ...newList];
+      const newList = (result == null ? void 0 : result.list) ?? [];
+      const total = (result == null ? void 0 : result.total) ?? 0;
+      if (pageNo.value === 1) {
+        stores.value = newList;
+      } else {
+        stores.value = [...stores.value, ...newList];
+      }
+      if (newList.length > 0) {
         pageNo.value++;
         hasMore.value = stores.value.length < total;
       } else {
-        if (pageNo.value === 1) {
-          stores.value = [];
-        }
         hasMore.value = false;
       }
     };
-    const handleRefresh = () => {
-      pageNo.value = 1;
-      stores.value = [];
-      hasMore.value = true;
-      getMyStores();
+    const handleRefresh = async () => {
+      if (isLoading.value)
+        return;
+      isLoading.value = true;
+      try {
+        pageNo.value = 1;
+        hasMore.value = true;
+        stores.value = [];
+        await getMyStores();
+      } catch (e) {
+        common_vendor.index.__f__("error", "at pages/my-shop/my-shop.vue:136", "[我的聚店] 刷新异常:", e);
+      } finally {
+        isLoading.value = false;
+        isRefreshing.value = false;
+      }
     };
     const loadMore = () => {
-      if (hasMore.value) {
+      if (hasMore.value)
         getMyStores();
-      }
     };
     const onPullDownRefresh = () => {
       isRefreshing.value = true;
@@ -88,17 +94,22 @@ const _sfc_main = {
       clearTimeout(searchTimer);
       handleRefresh();
     };
-    const goToApplyPage = () => {
+    const goToStoreDetail = (store) => {
       common_vendor.index.navigateTo({
-        // 目标是新建/编辑页面
-        url: `/packages/myStore-edit/myStore-edit`
+        url: `/packages/shop-detail/shop-detail?id=${store.id}`
       });
     };
     const goToEditPage = (store) => {
       common_vendor.index.navigateTo({
-        // 目标是修改页面
         url: `/packages/myStore-edit/myStore-edit?id=${store.id}`
       });
+    };
+    const goToApplyPage = () => {
+      common_vendor.index.navigateTo({
+        url: "/packages/myStore-edit/myStore-edit"
+      });
+    };
+    const handleLikeChange = () => {
     };
     common_vendor.onMounted(() => {
       handleRefresh();
@@ -111,46 +122,50 @@ const _sfc_main = {
           color: "#999"
         }),
         b: common_vendor.o([($event) => searchTerm.value = $event.detail.value, onSearchInput]),
-        c: searchTerm.value,
-        d: common_vendor.o(handleSearchClick),
-        e: common_vendor.f(stores.value, (store, k0, i0) => {
+        c: common_vendor.o(handleSearchClick),
+        d: searchTerm.value,
+        e: common_vendor.o(handleSearchClick),
+        f: common_vendor.f(stores.value, (store, k0, i0) => {
           return {
             a: store.id,
-            b: common_vendor.o(goToEditPage, store.id),
-            c: "b712bf36-1-" + i0,
-            d: common_vendor.p({
-              store
+            b: common_vendor.o(goToStoreDetail, store.id),
+            c: common_vendor.o(goToEditPage, store.id),
+            d: common_vendor.o(handleLikeChange, store.id),
+            e: "b712bf36-1-" + i0,
+            f: common_vendor.p({
+              store,
+              mode: "mine"
             })
           };
         }),
-        f: loadingMore.value
+        g: loadingMore.value
       }, loadingMore.value ? {
-        g: common_vendor.p({
+        h: common_vendor.p({
           type: "spinner-cycle",
           size: "20",
           color: "#999"
         })
       } : {}, {
-        h: !hasMore.value && stores.value.length > 0
+        i: !hasMore.value && stores.value.length > 0
       }, !hasMore.value && stores.value.length > 0 ? {
-        i: common_vendor.p({
+        j: common_vendor.p({
           type: "checkmarkempty",
           size: "20",
           color: "#999"
         })
       } : {}, {
-        j: stores.value.length === 0 && !loadingMore.value && !isRefreshing.value
+        k: stores.value.length === 0 && !loadingMore.value && !isRefreshing.value
       }, stores.value.length === 0 && !loadingMore.value && !isRefreshing.value ? {
-        k: common_vendor.p({
+        l: common_vendor.p({
           type: "shop",
           size: "60",
           color: "#ffd8c1"
         }),
-        l: common_vendor.o(goToApplyPage)
+        m: common_vendor.o(goToApplyPage)
       } : {}, {
-        m: common_vendor.o(loadMore),
-        n: isRefreshing.value,
-        o: common_vendor.o(onPullDownRefresh)
+        n: common_vendor.o(loadMore),
+        o: isRefreshing.value,
+        p: common_vendor.o(onPullDownRefresh)
       });
     };
   }
