@@ -23,7 +23,9 @@ const _sfc_main = {
     const replyToId = common_vendor.ref(0);
     const replyToName = common_vendor.ref("");
     const keyboardHeight = common_vendor.ref(0);
-    const placeholderText = common_vendor.computed(() => replyToName.value ? `回复 @${replyToName.value}` : "友善评论，文明互动...");
+    const placeholderText = common_vendor.computed(
+      () => replyToName.value ? `回复 @${replyToName.value}` : "友善评论，文明互动..."
+    );
     common_vendor.onLoad((options) => {
       targetId.value = options.id;
       targetType.value = options.type;
@@ -80,6 +82,13 @@ const _sfc_main = {
       });
       return list;
     };
+    const emitCommentChanged = () => {
+      common_vendor.index.$emit("commentChanged", {
+        targetId: targetId.value,
+        targetType: targetType.value,
+        totalCount: comments.value.length
+      });
+    };
     const startReply = (comment) => {
       replyToId.value = comment.id;
       replyToName.value = comment.user;
@@ -109,6 +118,7 @@ const _sfc_main = {
           anonymous: isAnonymous.value ? 1 : 0
         }
       });
+      common_vendor.index.hideLoading();
       if (!error) {
         common_vendor.index.showToast({
           title: "发布成功"
@@ -117,9 +127,9 @@ const _sfc_main = {
         replyToId.value = 0;
         replyToName.value = "";
         isAnonymous.value = false;
-        fetchComments();
+        await fetchComments();
+        emitCommentChanged();
       }
-      common_vendor.index.hideLoading();
     };
     const deleteComment = (id) => {
       common_vendor.index.showModal({
@@ -132,8 +142,10 @@ const _sfc_main = {
             } = await utils_request.request(`/app-api/member/comment/delete?id=${id}`, {
               method: "DELETE"
             });
-            if (!error)
-              fetchComments();
+            if (!error) {
+              await fetchComments();
+              emitCommentChanged();
+            }
           }
         }
       });

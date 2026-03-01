@@ -373,12 +373,25 @@ const _sfc_main = {
         handleRefresh();
       }
       getCurrentLocation().then((newLoc) => {
-        if (newLoc) {
-          common_vendor.index.__f__("log", "at pages/shop/shop.vue:616", "[onShow] 重新定位成功，刷新列表");
-          handleRefresh();
+        if (!newLoc)
+          return;
+        const oldLoc = userLocation.value;
+        if (oldLoc && isSameLocation(oldLoc, newLoc, 500)) {
+          common_vendor.index.__f__("log", "at pages/shop/shop.vue:624", "[onShow] 位置未明显变化，跳过刷新");
+          return;
         }
+        common_vendor.index.__f__("log", "at pages/shop/shop.vue:629", "[onShow] 位置变化超过 500m，刷新列表");
+        handleRefresh();
       });
     });
+    const isSameLocation = (loc1, loc2, threshold) => {
+      const R = 6371e3;
+      const dLat = (loc2.latitude - loc1.latitude) * Math.PI / 180;
+      const dLon = (loc2.longitude - loc1.longitude) * Math.PI / 180;
+      const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(loc1.latitude * Math.PI / 180) * Math.cos(loc2.latitude * Math.PI / 180) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+      const distance = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      return distance < threshold;
+    };
     common_vendor.onShareAppMessage(() => {
       const inviteCode = utils_user.getInviteCode();
       let sharePath = "/pages/shop/shop";

@@ -593,31 +593,63 @@
 	});
 
 	/**
-	 * 修复2：每次进入页面都重新定位
-	 * 策略：先用缓存快速渲染（即时反馈），同时后台静默重新定位
-	 * 定位成功后刷新列表（获取附近最新数据）
+	 * 每次进入页面时的处理逻辑
+	 *
+	 * 策略说明：
+	 * - 列表为空（首次进入）：读缓存 → 加载列表 → 后台静默定位，位置变化时刷新
+	 * - 列表有数据（从详情页返回等）：不整体刷新，避免回顶
+	 *   详情页的互动数据变更通过 uni.$emit('storeInteractionChanged') 精准同步
+	 *   只在位置发生明显变化时（超过 500 米）才整体刷新列表
 	 */
 	onShow(async () => {
-		// 1. 先读缓存，让用户立即看到上次的地址，不显示"定位中"
+		// 1. 先读缓存，让用户立即看到上次的地址
 		const storedLocation = uni.getStorageSync('userLocation');
 		const storedAddress = uni.getStorageSync('displayAddress');
 		if (storedLocation) userLocation.value = storedLocation;
 		if (storedAddress) displayAddress.value = storedAddress;
 
-		// 2. 列表为空时先用缓存位置加载一次（首次进入或被清空后）
+		// 2. 列表为空时才整体加载（首次进入 / 被清空后）
 		if (allStores.value.length === 0) {
 			handleRefresh();
 		}
 
-		// 3. 后台静默重新定位，拿到新位置后再刷新一次列表
-		// 这样即使用户换了地方，数据也会自动更新，无感知
+		// 3. 后台静默重新定位
+		// 只有位置发生明显变化（超过 500 米）才整体刷新，避免从详情页返回时回顶
 		getCurrentLocation().then(newLoc => {
-			if (newLoc) {
-				console.log('[onShow] 重新定位成功，刷新列表');
-				handleRefresh();
+			if (!newLoc) return;
+
+			const oldLoc = userLocation.value;
+			if (oldLoc && isSameLocation(oldLoc, newLoc, 500)) {
+				// 位置没有明显变化，不刷新列表，保持当前滚动位置
+				console.log('[onShow] 位置未明显变化，跳过刷新');
+				return;
 			}
+
+			// 位置发生明显变化（如用户换了城市），才整体刷新
+			console.log('[onShow] 位置变化超过 500m，刷新列表');
+			handleRefresh();
 		});
 	});
+
+	/**
+	 * 计算两个坐标之间的距离（米），使用 Haversine 公式
+	 * @param {{latitude, longitude}} loc1
+	 * @param {{latitude, longitude}} loc2
+	 * @param {number} threshold - 距离阈值（米）
+	 * @returns {boolean} true = 距离在阈值内（位置没有明显变化）
+	 */
+	const isSameLocation = (loc1, loc2, threshold) => {
+		const R = 6371000; // 地球半径（米）
+		const dLat = (loc2.latitude - loc1.latitude) * Math.PI / 180;
+		const dLon = (loc2.longitude - loc1.longitude) * Math.PI / 180;
+		const a =
+			Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+			Math.cos(loc1.latitude * Math.PI / 180) *
+			Math.cos(loc2.latitude * Math.PI / 180) *
+			Math.sin(dLon / 2) * Math.sin(dLon / 2);
+		const distance = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+		return distance < threshold;
+	};
 
 
 	// ─── 分享 ───
