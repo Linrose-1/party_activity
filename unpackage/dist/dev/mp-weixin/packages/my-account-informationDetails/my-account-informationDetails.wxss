@@ -1,6 +1,5 @@
 /* 水平间距 */
 /* 水平间距 */
-/* --- 全局与基础 --- */
 .page-container.data-v-991800d7 {
   background-color: #f9f9fa;
   padding: 24rpx;
@@ -8,285 +7,248 @@
 }
 .info-section.data-v-991800d7 {
   background-color: #fff;
-  border-radius: 20rpx;
+  border-radius: 24rpx;
   padding: 30rpx;
   margin-bottom: 24rpx;
-  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.04);
 }
 .section-header.data-v-991800d7 {
   display: flex;
   align-items: center;
-  /* 【修改】两端对齐 */
   padding-bottom: 24rpx;
   margin-bottom: 24rpx;
   border-bottom: 1rpx solid #f0f2f5;
 }
-
-/* 【新增】左侧标题容器 */
-.header-left.data-v-991800d7 {
+.section-header .header-left.data-v-991800d7 {
   display: flex;
   align-items: center;
 }
-.section-title.data-v-991800d7 {
+.section-header .section-title.data-v-991800d7 {
   font-size: 32rpx;
-  font-weight: 600;
-  color: #303133;
+  font-weight: 700;
+  color: #333;
   margin-left: 16rpx;
 }
-
-/* 【新增】右侧编辑按钮样式 */
-.header-right.data-v-991800d7 {
+.section-header .header-right.data-v-991800d7 {
   margin-left: auto;
   display: flex;
   align-items: center;
-  padding: 8rpx 16rpx;
+  padding: 10rpx 20rpx;
   background-color: #f5f7fa;
   border-radius: 30rpx;
-  cursor: pointer;
 }
-.header-right.data-v-991800d7:active {
+.section-header .header-right.data-v-991800d7:active {
   opacity: 0.7;
+  transform: scale(0.95);
 }
-.edit-text.data-v-991800d7 {
+.section-header .edit-text.data-v-991800d7 {
   font-size: 26rpx;
   color: #666;
   margin-left: 6rpx;
 }
-.section-title.data-v-991800d7 {
-  font-size: 32rpx;
-  font-weight: 600;
-  color: #303133;
-  margin-left: 16rpx;
-}
 .label.data-v-991800d7 {
-  font-size: 26rpx;
-  color: #909399;
-  margin-bottom: 12rpx;
+  font-size: 24rpx;
+  color: #999;
+  margin-bottom: 10rpx;
   display: block;
 }
 .value.data-v-991800d7 {
   font-size: 28rpx;
-  color: #303133;
+  color: #333;
   font-weight: 500;
   word-break: break-all;
 }
 .value-placeholder.data-v-991800d7 {
-  font-size: 28rpx;
-  color: #c0c4cc;
+  font-size: 26rpx;
+  color: #ccc;
 }
 
-/* --- 1. 基本资料 (Grid 布局) --- */
+/* 基本资料网格 */
 .info-grid.data-v-991800d7 {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 30rpx;
+  gap: 24rpx;
 }
-.info-item.data-v-991800d7 {
+.info-grid .info-item.data-v-991800d7 {
+  background-color: #f8fafc;
+  padding: 24rpx;
+  border-radius: 16rpx;
+}
+.info-grid .info-item.avatar-box.data-v-991800d7 {
+  grid-column: span 1;
   display: flex;
   flex-direction: column;
-  background-color: #f5f7fa;
-  padding: 20rpx;
-  border-radius: 12rpx;
+  align-items: flex-start;
 }
-.avatar-value.data-v-991800d7 {
-  width: 100rpx;
-  height: 100rpx;
+.info-grid .avatar-value.data-v-991800d7 {
+  width: 90rpx;
+  height: 90rpx;
   border-radius: 50%;
+  border: 4rpx solid #fff;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.1);
+}
+.info-grid .credit-badge.data-v-991800d7 {
+  display: flex;
+  align-items: center;
+  background: rgba(255, 125, 0, 0.1);
+  padding: 4rpx 12rpx;
+  border-radius: 8rpx;
+  width: -webkit-fit-content;
+  width: fit-content;
+}
+.info-grid .credit-badge .credit-text.data-v-991800d7 {
+  font-size: 24rpx;
+  color: #FF7D00;
+  font-weight: bold;
+  margin-right: 4rpx;
 }
 
-/* --- 2. 职业与社交 (全新 List 布局) --- */
+/* 列表容器 */
 .list-container.data-v-991800d7 {
   display: flex;
   flex-direction: column;
-  gap: 30rpx;
+  gap: 24rpx;
 }
 .list-item.data-v-991800d7 {
-  background-color: #f5f7fa;
-  padding: 20rpx;
-  border-radius: 12rpx;
+  background-color: #f8fafc;
+  padding: 24rpx;
+  border-radius: 16rpx;
 }
-.tag-group.data-v-991800d7 {
+.list-item .tag-group.data-v-991800d7 {
   display: flex;
   flex-wrap: wrap;
-  gap: 16rpx;
+  gap: 12rpx;
 }
-.tag.data-v-991800d7 {
-  background-color: #e8f3ff;
-  color: #409eff;
-  padding: 8rpx 20rpx;
+.list-item .tag.data-v-991800d7 {
+  padding: 6rpx 20rpx;
   border-radius: 8rpx;
-  font-size: 26rpx;
+  font-size: 24rpx;
 }
-.tag.school.data-v-991800d7 {
-  background-color: #f0f9eb;
-  color: #67c23a;
+.list-item .tag.school.data-v-991800d7 {
+  background-color: #eef9f0;
+  color: #4caf50;
 }
-.tag.hobby.data-v-991800d7 {
-  background-color: #fdf6ec;
-  color: #e6a23c;
+.list-item .tag.hobby.data-v-991800d7 {
+  background-color: #fff7e6;
+  color: #fa8c16;
 }
-.association-group.data-v-991800d7 {
-  display: flex;
-  flex-direction: column;
-  gap: 16rpx;
-}
+
+/* 商协会卡片 */
 .association-card.data-v-991800d7 {
-  background-color: #fff;
+  background: linear-gradient(135deg, #ffffff 0%, #fffcf5 100%);
   border: 1rpx solid #fdf5e6;
   padding: 20rpx;
-  border-radius: 12rpx;
-  background: linear-gradient(to right, #ffffff, #fffcf5);
+  border-radius: 16rpx;
+  margin-bottom: 16rpx;
 }
-.association-name.data-v-991800d7 {
+.association-card .association-name.data-v-991800d7 {
   display: flex;
   align-items: center;
   margin-bottom: 8rpx;
 }
-.association-name .name-text.data-v-991800d7 {
+.association-card .association-name .name-text.data-v-991800d7 {
   font-size: 28rpx;
   font-weight: bold;
-  color: #303133;
+  color: #333;
   margin-left: 10rpx;
 }
-.association-title.data-v-991800d7 {
+.association-card .association-title.data-v-991800d7 {
   font-size: 26rpx;
   padding-left: 48rpx;
 }
-.association-title .title-label.data-v-991800d7 {
-  color: #909399;
+.association-card .association-title .title-label.data-v-991800d7 {
+  color: #999;
 }
-.association-title .title-value.data-v-991800d7 {
+.association-card .association-title .title-value.data-v-991800d7 {
   color: #C9A063;
-  font-weight: 500;
-}
-.company-group.data-v-991800d7 {
-  display: flex;
-  flex-direction: column;
-  gap: 20rpx;
-}
-.company-card.data-v-991800d7 {
-  background-color: #fff;
-  border: 1rpx solid #eef;
-  padding: 24rpx;
-  border-radius: 12rpx;
-}
-.company-name.data-v-991800d7 {
-  font-size: 30rpx;
   font-weight: bold;
-  color: #303133;
-  margin-bottom: 12rpx;
-}
-.company-details.data-v-991800d7 {
-  display: flex;
-  align-items: center;
-  font-size: 26rpx;
-  color: #606266;
-}
-.detail-separator.data-v-991800d7 {
-  margin: 0 16rpx;
-  color: #dcdfe6;
-}
-.qrcode-value.data-v-991800d7 {
-  width: 120rpx;
-  height: 120rpx;
-  border-radius: 12rpx;
-  border: 1rpx solid #e6e6e6;
 }
 
-/* --- 3. 简介与资源 --- */
-.signature-item.data-v-991800d7 {
-  background-color: #fafafa;
-  text-align: center;
-  font-style: italic;
-  color: #606266;
-  padding: 30rpx;
+/* 公司卡片 */
+.company-card.data-v-991800d7 {
+  background-color: #fff;
+  border: 1rpx solid #edf2f7;
+  padding: 24rpx;
+  border-radius: 16rpx;
+}
+.company-card .company-name.data-v-991800d7 {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 12rpx;
+}
+.company-card .company-details.data-v-991800d7 {
   display: flex;
   align-items: center;
-  justify-content: center;
+  font-size: 24rpx;
+  color: #666;
 }
-.signature-text.data-v-991800d7 {
-  margin: 0 20rpx;
+.company-card .company-details .detail-separator.data-v-991800d7 {
+  margin: 0 16rpx;
+  color: #e2e8f0;
+}
+.qrcode-value.data-v-991800d7 {
+  width: 140rpx;
+  height: 140rpx;
+  border-radius: 12rpx;
+  background: #fff;
+  padding: 6rpx;
+  border: 1rpx solid #eee;
+}
+
+/* 签名与简介 */
+.signature-item.data-v-991800d7 {
+  background: #fffcf8;
+  border: 1rpx dashed #ffe8cc;
+  padding: 30rpx;
+  border-radius: 16rpx;
+}
+.signature-item .signature-text.data-v-991800d7 {
   font-size: 28rpx;
+  color: #844200;
+  font-style: italic;
+  margin-left: 12rpx;
 }
-.bio.data-v-991800d7 {
-  line-height: 1.6;
-}
-.resource-item .label.data-v-991800d7 {
-  font-weight: bold;
-  font-size: 28rpx;
-}
-.resource-item .label.have-resource.data-v-991800d7 {
-  color: #67c23a;
-}
-.resource-item .label.need-resource.data-v-991800d7 {
-  color: #e6a23c;
+.bio-text.data-v-991800d7 {
+  line-height: 1.8;
+  color: #555;
 }
 .resource-content.data-v-991800d7 {
   font-size: 28rpx;
-  color: #303133;
+  color: #333;
   line-height: 1.7;
-  /* 增加行高，让多行文本更易读 */
   white-space: pre-wrap;
-  /* 核心属性：保留空格和换行符，并允许自动换行 */
   word-break: break-all;
-  /* 防止超长单词溢出 */
+  margin-top: 8rpx;
 }
 .match-button-wrapper.data-v-991800d7 {
-  margin-top: 20rpx;
+  margin-top: 10rpx;
 }
 .match-button.data-v-991800d7 {
-  background: linear-gradient(135deg, #FF8C00, #FF6B00);
+  background: linear-gradient(135deg, #FF8C00 0%, #FF6B00 100%);
   color: #fff;
-  border: none;
-  border-radius: 40rpx;
+  border-radius: 50rpx;
   font-size: 30rpx;
+  font-weight: bold;
+  height: 90rpx;
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 80rpx;
-  line-height: 80rpx;
+  box-shadow: 0 6rpx 20rpx rgba(255, 107, 0, 0.2);
+}
+.match-button.data-v-991800d7:active {
+  transform: translateY(2rpx);
+  opacity: 0.9;
 }
 .match-button.data-v-991800d7::after {
   border: none;
 }
-
-/* --- 4. 雷达图 (样式不变) --- */
-.chart-wrapper.data-v-991800d7 {
-  position: relative;
-  width: 100%;
-  height: 600rpx;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
 .chart-loading.data-v-991800d7 {
-  color: #999;
-  font-size: 28rpx;
+  padding: 60rpx;
+  text-align: center;
+  color: #ccc;
+  font-size: 26rpx;
 }
-.chart-legend.data-v-991800d7 {
-  display: grid;
-  /* 核心：两列等宽，中间间距 20rpx */
-  grid-template-columns: 1fr 1fr;
-  gap: 20rpx;
-  margin-top: 20rpx;
-  padding-top: 20rpx;
-  border-top: 1rpx solid #f0f2f5;
-  /* 让整体内容在容器内居中（如果容器有 padding） */
-  padding-left: 20rpx;
-  padding-right: 20rpx;
-}
-.legend-item.data-v-991800d7 {
-  display: flex;
-  align-items: center;
-  /* 让内容在各自的格子内居中显示，或者 justify-self: center */
-  justify-content: left;
-  font-size: 24rpx;
-  color: #666;
-}
-.dot.data-v-991800d7 {
-  width: 16rpx;
-  height: 16rpx;
-  border-radius: 50%;
-  margin-right: 12rpx;
-  flex-shrink: 0;
+.bottom-spacer.data-v-991800d7 {
+  height: 60rpx;
 }
