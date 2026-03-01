@@ -1,16 +1,6 @@
 /* 水平间距 */
 /* 水平间距 */
-:root {
-  --primary: #FF6B00;
-  --primary-light: #FF8A33;
-  --light-bg: #f8f8f8;
-  --dark-text: #333;
-  --gray-text: #666;
-  --light-text: #999;
-  --border: #eee;
-  --weui-BG-0: #ededed;
-  --weui-BG-1: #f7f7f7;
-}
+/* ── 页面容器 ── */
 .app {
   display: flex;
   flex-direction: column;
@@ -18,12 +8,11 @@
   background-color: #f5f5f5;
 }
 
-/* 1. 顶部固定区域 */
+/* ── 顶部固定区域 ── */
 .fixed-header {
   background: #fff;
   padding: 20rpx;
   z-index: 100;
-  /* 保持固定在顶部 */
 }
 .search-location-bar {
   display: flex;
@@ -37,7 +26,6 @@
   font-weight: bold;
   color: #333;
   max-width: 160rpx;
-  /* 限制宽度 */
 }
 .city-text {
   margin-right: 6rpx;
@@ -64,26 +52,52 @@
   font-weight: 500;
 }
 
-/* 2. 主滚动区域 */
+/* ── 主滚动区域 ── */
 .main-scroll {
   flex: 1;
-  /* 占据剩余所有空间 */
   height: 0;
-  /* 配合 flex: 1 使用 */
+  /* 配合 flex:1 使内部可独立滚动 */
 }
 
-/* 轮播图 */
+/* ── 轮播图 ── */
 .swiper-section {
   margin: 20rpx;
   border-radius: 16rpx;
   overflow: hidden;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.05);
+}
+.swiper {
+  height: 250rpx;
+}
+.swiper-item {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+.swiper-image {
+  width: 100%;
+  height: 100%;
+}
+.swiper-title {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 36rpx;
+  font-weight: bold;
+  text-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.5);
+  pointer-events: none;
 }
 
-/* 功能金刚区 */
+/* ── 功能金刚区 ── */
 .function-grid {
   display: flex;
   justify-content: space-around;
-  /* 两个按钮分散居中 */
   padding: 20rpx 40rpx;
   background: #fff;
   margin: 0 20rpx 20rpx;
@@ -113,129 +127,14 @@
   background: linear-gradient(135deg, #FF8C00, #FF6B00);
 }
 
-/* 吸顶筛选栏 */
+/* ── 吸顶筛选栏 ── */
 .sticky-tabs {
   position: -webkit-sticky;
   position: sticky;
   top: 0;
-  /* 滚动到顶部时吸附 */
   z-index: 99;
   background: #f5f5f5;
-  /* 与背景同色，或者用 #fff */
   padding: 10rpx 0;
-}
-
-/* 列表容器 */
-.store-list-container {
-  padding: 0 20rpx;
-}
-.app {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-  background-color: #ededed;
-  color: #333;
-  font-size: 16px;
-}
-.search-container {
-  background: white;
-  padding: 15rpx;
-  z-index: 90;
-  border-bottom: 1rpx solid #eee;
-  margin-bottom: 10rpx;
-}
-.search-box {
-  display: flex;
-  align-items: center;
-  background: #f7f7f7;
-  border-radius: 20rpx;
-  padding: 10rpx 10rpx 10rpx 15rpx;
-  border: 1rpx solid #ffe8d9;
-}
-.location-selector {
-  display: flex;
-  align-items: center;
-  padding: 20rpx;
-  background-color: #f7f7f7;
-  border-radius: 16rpx;
-  margin-top: 20rpx;
-  border: 1rpx solid #f0f0f0;
-}
-.location-text {
-  flex: 1;
-  font-size: 28rpx;
-  color: #333;
-  margin: 0 16rpx;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.search-input {
-  flex: 1;
-  border: none;
-  background: transparent;
-  font-size: 24rpx;
-  outline: none;
-  color: #333;
-  margin-left: 10rpx;
-}
-
-/* 新增：搜索按钮的样式 */
-.search-btn {
-  background: #FF6B00;
-  color: white;
-  border: none;
-  padding: 10rpx 28rpx;
-  border-radius: 16rpx;
-  font-size: 24rpx;
-  cursor: pointer;
-  margin-left: 10rpx;
-  /* 与输入框隔开一些距离 */
-  line-height: 1.2;
-  /* 修正按钮文字垂直居中 */
-  height: auto;
-  display: inline-flex;
-  align-items: center;
-}
-
-/* 新增：去除uni-app按钮默认边框 */
-.search-btn::after {
-  border: none;
-}
-
-/* 【新增】轮播图样式，与聚会页保持一致 */
-.swiper-section {
-  margin-top: 20rpx;
-  border-radius: 16rpx;
-  overflow: hidden;
-  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.05);
-}
-.swiper {
-  height: 250rpx;
-}
-.swiper-item {
-  position: relative;
-  width: 100%;
-  height: 100%;
-}
-.swiper-image {
-  width: 100%;
-  height: 100%;
-}
-.swiper-title {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-size: 36rpx;
-  font-weight: bold;
-  text-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.5);
-  pointer-events: none;
 }
 .filters-scroll {
   white-space: nowrap;
@@ -248,13 +147,11 @@
 }
 .filter-btn {
   background: #f1f1f1;
-  color: var(--gray-text);
+  color: #666;
   border: none;
   padding: 16rpx 28rpx;
   border-radius: 16rpx;
   font-size: 28rpx;
-  cursor: pointer;
-  transition: all 0.2s;
   white-space: nowrap;
   flex-shrink: 0;
   line-height: 1;
@@ -265,15 +162,28 @@
 }
 .filter-btn.active {
   background: #FF6B00;
-  color: white;
+  color: #fff;
   font-weight: 500;
 }
-.store-list {
-  flex: 1;
-  padding: 0 15rpx;
-  box-sizing: border-box;
-  overflow-y: hidden;
+
+/* ── 列表容器 ── */
+.store-list-container {
+  padding: 0 20rpx;
 }
+
+/* ── 加载更多 ── */
+.load-more {
+  text-align: center;
+  padding: 15rpx;
+  color: #999;
+  font-size: 28rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8rpx;
+}
+
+/* ── 空状态 ── */
 .empty-state {
   text-align: center;
   padding-top: 100rpx;
@@ -283,54 +193,8 @@
   align-items: center;
   justify-content: center;
 }
-.empty-state .uni-icons {
-  margin-bottom: 20rpx;
-}
 .empty-state text {
   font-size: 28rpx;
   margin-top: 10rpx;
   line-height: 1.5;
-}
-.load-more {
-  text-align: center;
-  padding: 15rpx;
-  color: #999;
-  font-size: 28rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.load-more .uni-icons {
-  margin-right: 5rpx;
-}
-.action-bar {
-  background: white;
-  display: flex;
-  padding: 20rpx;
-  box-shadow: 0 -2rpx 10rpx rgba(0, 0, 0, 0.1);
-  z-index: 100;
-}
-.action-btn {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20rpx;
-  border-radius: 8rpx;
-  font-weight: 500;
-  cursor: pointer;
-  line-height: 1;
-  font-size: 28rpx;
-}
-.action-btn .uni-icons {
-  margin-right: 5rpx;
-}
-.share-btn {
-  background: linear-gradient(to right, #007bff, #0056b3);
-  color: #fff;
-  margin-right: 10rpx;
-}
-.register-btn {
-  background: linear-gradient(to right, #FF8C00, #FF6B00);
-  color: white;
 }
