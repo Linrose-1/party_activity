@@ -64,34 +64,34 @@ const _sfc_main = {
     return (_ctx, _cache) => {
       return common_vendor.e({
         a: coverImage.value,
-        b: common_vendor.t(__props.store.storeName),
-        c: displayDistance.value
-      }, displayDistance.value ? {
-        d: common_vendor.t(displayDistance.value)
-      } : {}, {
-        e: common_vendor.t(__props.store.storeDescription || "暂无介绍"),
-        f: common_vendor.p({
+        b: common_vendor.p({
           type: __props.store.userLikeStr === "like" ? "hand-up-filled" : "hand-up",
-          size: "16",
+          size: "14",
           color: __props.store.userLikeStr === "like" ? "#ff6b00" : "#999"
         }),
-        g: common_vendor.t(__props.store.likesCount || 0),
-        h: __props.store.userLikeStr === "like" ? 1 : "",
-        i: common_vendor.o(($event) => handleAction("like")),
-        j: common_vendor.p({
+        c: common_vendor.t(__props.store.likesCount || 0),
+        d: __props.store.userLikeStr === "like" ? 1 : "",
+        e: common_vendor.o(($event) => handleAction("like")),
+        f: common_vendor.p({
           type: __props.store.userLikeStr === "dislike" ? "hand-down-filled" : "hand-down",
-          size: "16",
+          size: "14",
           color: __props.store.userLikeStr === "dislike" ? "#3498db" : "#999"
         }),
-        k: common_vendor.t(__props.store.dislikesCount || 0),
-        l: __props.store.userLikeStr === "dislike" ? 1 : "",
-        m: common_vendor.o(($event) => handleAction("dislike")),
-        n: common_vendor.p({
+        g: common_vendor.t(__props.store.dislikesCount || 0),
+        h: __props.store.userLikeStr === "dislike" ? 1 : "",
+        i: common_vendor.o(($event) => handleAction("dislike")),
+        j: common_vendor.p({
           type: "chatbubble",
-          size: "16",
+          size: "14",
           color: "#999"
         }),
-        o: common_vendor.t(__props.store.commonCount || 0),
+        k: common_vendor.t(__props.store.commonCount || 0),
+        l: common_vendor.t(__props.store.storeName),
+        m: displayDistance.value
+      }, displayDistance.value ? {
+        n: common_vendor.t(displayDistance.value)
+      } : {}, {
+        o: common_vendor.t(__props.store.storeDescription || "暂无介绍"),
         p: __props.store.averageConsumptionRange
       }, __props.store.averageConsumptionRange ? {
         q: common_vendor.t(__props.store.averageConsumptionRange)

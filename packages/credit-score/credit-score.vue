@@ -31,7 +31,7 @@
 						<text class="value">{{ scoreData.contributionScore }}<text class="max">/300</text></text>
 					</view>
 					<view class="progress-bg">
-						<view class="progress-bar" :style="{ width: (scoreData.contributionScore/300*100) + '%' }">
+						<view class="progress-bar" :style="{ width: (scoreData.contributionScore / 300 * 100) + '%' }">
 						</view>
 					</view>
 				</view>
@@ -46,11 +46,11 @@
 						<text class="value">{{ scoreData.pointScore }}<text class="max">/200</text></text>
 					</view>
 					<view class="progress-bg">
-						<view class="progress-bar" :style="{ width: (scoreData.pointScore/200*100) + '%' }"></view>
+						<view class="progress-bar" :style="{ width: (scoreData.pointScore / 200 * 100) + '%' }"></view>
 					</view>
 				</view>
 
-				<!-- 3. 商友互动 -->
+				<!-- 3. 商友点评 -->
 				<view class="dimension-item">
 					<view class="item-top">
 						<view class="label-group">
@@ -60,7 +60,7 @@
 						<text class="value">{{ scoreData.interactionScore }}<text class="max">/200</text></text>
 					</view>
 					<view class="progress-bg">
-						<view class="progress-bar" :style="{ width: (scoreData.interactionScore/200*100) + '%' }">
+						<view class="progress-bar" :style="{ width: (scoreData.interactionScore / 200 * 100) + '%' }">
 						</view>
 					</view>
 				</view>
@@ -75,8 +75,8 @@
 						<text class="value">{{ scoreData.digitalIdentityScore }}<text class="max">/100</text></text>
 					</view>
 					<view class="progress-bg">
-						<view class="progress-bar" :style="{ width: (scoreData.digitalIdentityScore/100*100) + '%' }">
-						</view>
+						<view class="progress-bar"
+							:style="{ width: (scoreData.digitalIdentityScore / 100 * 100) + '%' }"></view>
 					</view>
 				</view>
 
@@ -90,7 +90,8 @@
 						<text class="value">{{ scoreData.basicInfoScore }}<text class="max">/150</text></text>
 					</view>
 					<view class="progress-bg">
-						<view class="progress-bar" :style="{ width: (scoreData.basicInfoScore/150*100) + '%' }"></view>
+						<view class="progress-bar" :style="{ width: (scoreData.basicInfoScore / 150 * 100) + '%' }">
+						</view>
 					</view>
 				</view>
 
@@ -104,7 +105,7 @@
 						<text class="value">{{ scoreData.realNameAuthScore }}<text class="max">/50</text></text>
 					</view>
 					<view class="progress-bg">
-						<view class="progress-bar" :style="{ width: (scoreData.realNameAuthScore/50*100) + '%' }">
+						<view class="progress-bar" :style="{ width: (scoreData.realNameAuthScore / 50 * 100) + '%' }">
 						</view>
 					</view>
 				</view>
@@ -119,7 +120,7 @@
 			</view>
 			<view class="rule-list">
 				<view class="rule-item" v-for="(rule, index) in rules" :key="index"
-					:class="{active: scoreData.creditLevel === rule.name}">
+					:class="{ active: scoreData.creditLevel === rule.name }">
 					<text class="rule-icon">{{ rule.icon }}</text>
 					<text class="rule-name">{{ rule.name }}</text>
 					<text class="rule-range">{{ rule.range }}分</text>
@@ -127,42 +128,49 @@
 			</view>
 		</view>
 
-		<!-- 规则弹窗 -->
-		<uni-popup ref="rulesPopup" type="bottom" background-color="transparent">
+		<!-- 规则弹窗：background-color 设为 #ffffff 解决底部镂空问题 -->
+		<uni-popup ref="rulesPopup" type="bottom" background-color="#ffffff">
 			<view class="rules-modal">
+				<!-- 弹窗头部 -->
 				<view class="modal-header">
 					<text>猩球信用评分规则</text>
 					<uni-icons type="closeempty" size="24" color="#999" @click="closeRules"></uni-icons>
 				</view>
 
+				<!-- 弹窗可滚动内容区 -->
 				<scroll-view scroll-y class="rules-content">
 					<view class="scroll-inner">
+						<!-- 总分公式 -->
 						<view class="formula-box">
 							<text class="formula-title">总分计算公式</text>
 							<text class="formula-text">总信用分 = 贡分权重 + 智米权重 + 商友互动权重 + 数字身份权重 + 基础信息权重 + 实名认证权重</text>
 						</view>
 
-						<!-- 各维度细节 -->
+						<!-- 1. 贡分权重 -->
 						<view class="rule-detail-item">
 							<view class="detail-label">1. 贡分权重（最高300分）</view>
 							<view class="detail-desc">1贡分 = 0.01信用分。达到3万贡分即得满分。</view>
 						</view>
 
+						<!-- 2. 智米权重 -->
 						<view class="rule-detail-item">
 							<view class="detail-label">2. 智米权重（最高200分）</view>
 							<view class="detail-desc">1智米 = 0.02信用分。达到1万智米即得满分。</view>
 						</view>
 
+						<!-- 3. 商友互动 -->
 						<view class="rule-detail-item">
 							<view class="detail-label">3. 商友互动（最高200分）</view>
 							<view class="detail-desc">获赞数 × 2分（上限200分）；被踩数 × -5分（不设下限）。</view>
 						</view>
 
+						<!-- 4. 数字身份 -->
 						<view class="rule-detail-item">
 							<view class="detail-label">4. 数字身份（最高100分）</view>
 							<view class="detail-desc">采用商友评分雷达图的综合评分映射。</view>
 						</view>
 
+						<!-- 5. 基础信息 -->
 						<view class="rule-detail-item">
 							<view class="detail-label">5. 基础信息（最高150分）</view>
 							<view class="info-grid">
@@ -178,16 +186,17 @@
 							</view>
 						</view>
 
+						<!-- 6. 实名认证 -->
 						<view class="rule-detail-item">
 							<view class="detail-label">6. 实名认证（最高50分）</view>
 							<view class="detail-desc">完成实名认证直接获得 50分。</view>
 						</view>
 
-						<!-- 底部间距 -->
 						<view style="height: 40rpx;"></view>
 					</view>
 				</scroll-view>
 
+				<!-- 弹窗底部按钮，padding-bottom 兼容 iPhone 底部安全区 -->
 				<view class="modal-footer">
 					<button class="know-btn" @click="closeRules">我知道了</button>
 				</view>
@@ -205,8 +214,10 @@
 	} from 'vue';
 	import request from '@/utils/request.js';
 
+	// ───── Refs ─────
 	const rulesPopup = ref(null);
 
+	/** 信用分数据，由接口填充 */
 	const scoreData = ref({
 		totalScore: 0,
 		contributionScore: 0,
@@ -218,6 +229,7 @@
 		creditLevel: ''
 	});
 
+	/** 等级划分配置表 */
 	const rules = [{
 			name: '钻级猩友',
 			icon: '💎',
@@ -250,19 +262,36 @@
 		}
 	];
 
+	// ───── 方法 ─────
+
+	/**
+	 * 打开评分规则弹窗
+	 */
 	const showRules = () => {
 		rulesPopup.value.open();
 	};
 
+	/**
+	 * 关闭评分规则弹窗
+	 */
 	const closeRules = () => {
 		rulesPopup.value.close();
 	};
 
+	/**
+	 * 根据信用等级名称获取对应的 emoji 图标
+	 * @param {string} level - 信用等级名称，如"金级猩友"
+	 * @returns {string} 对应的 emoji，找不到时返回 ⭐
+	 */
 	const getLevelIcon = (level) => {
 		const rule = rules.find(r => r.name === level);
 		return rule ? rule.icon : '⭐';
 	};
 
+	/**
+	 * 请求信用分接口，将结果写入 scoreData
+	 * 请求期间显示 loading，请求结束后隐藏
+	 */
 	const fetchCreditScore = async () => {
 		uni.showLoading({
 			title: '计算中...'
@@ -279,6 +308,7 @@
 		}
 	};
 
+	// ───── 生命周期 ─────
 	onMounted(() => {
 		fetchCreditScore();
 	});
@@ -287,13 +317,14 @@
 <style lang="scss" scoped>
 	$theme-color: #FF8300;
 
+	/* ── 页面容器 ── */
 	.credit-container {
 		background-color: #F8F9FB;
 		min-height: 100vh;
 		padding-bottom: 40rpx;
 	}
 
-	/* 头部样式 */
+	/* ── 头部卡片 ── */
 	.header-card {
 		background: linear-gradient(135deg, #2D2D2D 0%, #1A1A1A 100%);
 		height: 520rpx;
@@ -305,6 +336,7 @@
 		border-radius: 0 0 80rpx 80rpx;
 		box-shadow: 0 10rpx 30rpx rgba(0, 0, 0, 0.2);
 
+		/* 总分圆形区域 */
 		.score-circle {
 			width: 240rpx;
 			height: 240rpx;
@@ -331,6 +363,7 @@
 			}
 		}
 
+		/* 等级徽标 */
 		.level-badge {
 			margin-top: 40rpx;
 			background: rgba(255, 255, 255, 0.1);
@@ -352,6 +385,7 @@
 			}
 		}
 
+		/* 底部提示文字 */
 		.update-tip {
 			font-size: 22rpx;
 			color: rgba(255, 255, 255, 0.4);
@@ -360,7 +394,7 @@
 		}
 	}
 
-	/* 标题样式 */
+	/* ── 公共标题 ── */
 	.section-title {
 		display: flex;
 		align-items: center;
@@ -381,7 +415,7 @@
 		}
 	}
 
-	/* 维度列表样式 */
+	/* ── 维度分析卡片 ── */
 	.dimension-section {
 		margin: -40rpx 30rpx 30rpx;
 		background: #FFF;
@@ -428,6 +462,7 @@
 					}
 				}
 
+				/* 进度条 */
 				.progress-bg {
 					height: 12rpx;
 					background: #F0F0F0;
@@ -445,7 +480,7 @@
 		}
 	}
 
-	/* 规则卡片样式 */
+	/* ── 等级划分卡片 ── */
 	.rule-card {
 		margin: 0 30rpx;
 		background: #FFF;
@@ -464,6 +499,7 @@
 					border-bottom: none;
 				}
 
+				/* 当前等级高亮 */
 				&.active {
 					background: rgba($theme-color, 0.05);
 					border-radius: 12rpx;
@@ -496,10 +532,14 @@
 		}
 	}
 
-	/* =========================================
-	   规则弹窗 UI 深度优化版
-	   ========================================= */
+	/* ══════════════════════════════════════════
+	   规则弹窗
+	   关键修复：uni-popup background-color="#ffffff"
+	   + rules-modal 不设透明背景，底部不再镂空
+	   ══════════════════════════════════════════ */
+
 	.rules-modal {
+		/* 弹窗高度占屏幕 80%，内部使用 flex 布局分区 */
 		height: 80vh;
 		display: flex;
 		flex-direction: column;
@@ -509,6 +549,7 @@
 		overflow: hidden;
 	}
 
+	/* 弹窗头部：标题 + 关闭按钮 */
 	.modal-header {
 		flex-shrink: 0;
 		padding: 40rpx;
@@ -524,10 +565,11 @@
 		}
 	}
 
+	/* 弹窗可滚动内容区，flex: 1 撑满剩余空间 */
 	.rules-content {
 		flex: 1;
 		height: 0;
-		/* 强制 flex 子元素重新计算高度以支持内部滚动 */
+		/* 配合 flex 使内部可独立滚动 */
 		width: 100%;
 	}
 
@@ -535,6 +577,7 @@
 		padding: 30rpx 40rpx;
 	}
 
+	/* 总分公式高亮框 */
 	.formula-box {
 		background-color: #FFF9F2;
 		padding: 30rpx;
@@ -557,6 +600,7 @@
 		}
 	}
 
+	/* 各维度规则条目 */
 	.rule-detail-item {
 		margin-bottom: 40rpx;
 
@@ -574,6 +618,7 @@
 		}
 	}
 
+	/* 基础信息得分网格 */
 	.info-grid {
 		display: grid;
 		grid-template-columns: repeat(3, 1fr);
@@ -593,6 +638,7 @@
 		}
 	}
 
+	/* 弹窗底部按钮区，padding-bottom 兼容 iPhone 底部安全区域 */
 	.modal-footer {
 		flex-shrink: 0;
 		padding: 30rpx 40rpx;

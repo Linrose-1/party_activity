@@ -1,10 +1,30 @@
 <template>
 	<view class="store-card" @click="handleCardClick">
-		<!-- 左侧：封面图 -->
-		<view class="card-image-wrapper">
-			<image :src="coverImage" mode="aspectFill" class="card-image" lazy-load></image>
-			<!-- 可选：左上角标签 (如分类) -->
-			<!-- <view class="category-tag" v-if="store.categoryStr">{{ store.categoryStr }}</view> -->
+		<!-- 左侧：封面图 + 互动统计 -->
+		<view class="card-left">
+			<view class="card-image-wrapper">
+				<image :src="coverImage" mode="aspectFill" class="card-image" lazy-load></image>
+			</view>
+
+			<!-- 赞踩评论：放在图片正下方 -->
+			<view class="card-interaction-row">
+				<view class="mini-interaction" :class="{ active: store.userLikeStr === 'like' }"
+					@click.stop="handleAction('like')">
+					<uni-icons :type="store.userLikeStr === 'like' ? 'hand-up-filled' : 'hand-up'" size="14"
+						:color="store.userLikeStr === 'like' ? '#ff6b00' : '#999'" />
+					<text>{{ store.likesCount || 0 }}</text>
+				</view>
+				<view class="mini-interaction" :class="{ active: store.userLikeStr === 'dislike' }"
+					@click.stop="handleAction('dislike')">
+					<uni-icons :type="store.userLikeStr === 'dislike' ? 'hand-down-filled' : 'hand-down'" size="14"
+						:color="store.userLikeStr === 'dislike' ? '#3498db' : '#999'" />
+					<text>{{ store.dislikesCount || 0 }}</text>
+				</view>
+				<view class="mini-interaction">
+					<uni-icons type="chatbubble" size="14" color="#999" />
+					<text>{{ store.commonCount || 0 }}</text>
+				</view>
+			</view>
 		</view>
 
 		<!-- 右侧：内容区 -->
@@ -17,40 +37,21 @@
 				</view>
 			</view>
 
-			<!-- 2. 中部：描述与互动数据 -->
+			<!-- 2. 中部：描述 + 均价 -->
 			<view class="card-body">
 				<text class="store-desc">{{ store.storeDescription || '暂无介绍' }}</text>
 
-				<!-- 新增：互动统计行 -->
-				<view class="card-interaction-row">
-					<view class="mini-interaction" :class="{ active: store.userLikeStr === 'like' }"
-						@click.stop="handleAction('like')">
-						<uni-icons :type="store.userLikeStr === 'like' ? 'hand-up-filled' : 'hand-up'" size="16"
-							:color="store.userLikeStr === 'like' ? '#ff6b00' : '#999'" />
-						<text>{{ store.likesCount || 0 }}</text>
-					</view>
-					<view class="mini-interaction" :class="{ active: store.userLikeStr === 'dislike' }"
-						@click.stop="handleAction('dislike')">
-						<uni-icons :type="store.userLikeStr === 'dislike' ? 'hand-down-filled' : 'hand-down'" size="16"
-							:color="store.userLikeStr === 'dislike' ? '#3498db' : '#999'" />
-						<text>{{ store.dislikesCount || 0 }}</text>
-					</view>
-					<view class="mini-interaction">
-						<uni-icons type="chatbubble" size="16" color="#999" />
-						<text>{{ store.commonCount || 0 }}</text>
-					</view>
+				<!-- 均价：独占一行，不与按钮争空间，再长也不变形 -->
+				<view class="price-info" v-if="store.averageConsumptionRange">
+					<!-- <text class="price-label">人均</text> -->
+					<text class="price-value">¥{{ store.averageConsumptionRange }}</text>
 				</view>
 			</view>
 
-			<!-- 3. 底部：人均 + 按钮组 -->
+			<!-- 3. 底部：按钮组 -->
 			<view class="card-footer">
-				<view class="price-info" v-if="store.averageConsumptionRange">
-					<text>¥{{ store.averageConsumptionRange }}</text>
-				</view>
-				<view v-else></view>
-
 				<view class="action-buttons">
-					<!-- 【新增】详情按钮 -->
+					<!-- 聚店详情按钮 -->
 					<view class="btn btn-primary-light" @click.stop="handleCardClick">
 						<text>聚店详情</text>
 					</view>
@@ -69,7 +70,6 @@
 		computed
 	} from 'vue';
 	import {
-		getInviteCode,
 		checkLoginGuard
 	} from '../utils/user.js';
 
@@ -81,19 +81,27 @@
 	});
 
 	const emit = defineEmits(['click-card', 'update-like']);
-	
+
+	/**
+	 * 处理点赞 / 踩操作
+	 * 先校验登录状态；若已是该操作则取消，否则执行对应操作
+	 * @param {'like'|'dislike'} clickedAction - 用户点击的操作类型
+	 */
 	const handleAction = async (clickedAction) => {
-	    if (!await checkLoginGuard()) return;
-	    const apiAction = props.store.userLikeStr === clickedAction ? 'cancel' : clickedAction;
-	    
-	    emit('update-like', {
-	        id: props.store.id,
-	        action: apiAction,
-	        clickedAction: clickedAction
-	    });
+		if (!await checkLoginGuard()) return;
+		// 若当前状态与点击操作相同，则视为取消；否则执行新操作
+		const apiAction = props.store.userLikeStr === clickedAction ? 'cancel' : clickedAction;
+		emit('update-like', {
+			id: props.store.id,
+			action: apiAction,
+			clickedAction: clickedAction
+		});
 	};
 
-	// 计算封面图：优先取列表的第一张，没有则取单张字段，再没有用默认图
+	/**
+	 * 计算封面图地址
+	 * 优先取列表第一张 → 单张字段 → 默认占位图
+	 */
 	const coverImage = computed(() => {
 		if (props.store.storeCoverImageUrls && props.store.storeCoverImageUrls.length > 0) {
 			return props.store.storeCoverImageUrls[0];
@@ -101,10 +109,13 @@
 		if (props.store.storeCoverImageUrl) {
 			return props.store.storeCoverImageUrl;
 		}
-		return '/static/images/default-store.png'; // 请替换为您的默认图路径
+		return '/static/images/default-store.png';
 	});
 
-	// 计算距离显示
+	/**
+	 * 计算距离展示文本
+	 * 优先使用后端返回的格式化字符串，其次将数字格式化为 x.xkm
+	 */
 	const displayDistance = computed(() => {
 		if (props.store.distanceKm) return props.store.distanceKm;
 		if (typeof props.store.distance === 'number') {
@@ -113,10 +124,17 @@
 		return '';
 	});
 
+	/**
+	 * 点击卡片主体，向父组件抛出店铺数据
+	 */
 	const handleCardClick = () => {
 		emit('click-card', props.store);
 	};
 
+	/**
+	 * 点击"发起聚会"按钮
+	 * 先校验登录状态，通过后携带店铺参数跳转到活动发布页
+	 */
 	const handleInitiateParty = async () => {
 		if (!await checkLoginGuard()) return;
 		if (!props.store || !props.store.id) return;
@@ -129,15 +147,16 @@
 </script>
 
 <style lang="scss" scoped>
+	$primary: #ff6b00;
+
+	/* ── 卡片容器 ── */
 	.store-card {
 		background-color: #fff;
 		border-radius: 16rpx;
 		padding: 24rpx;
 		margin-bottom: 20rpx;
 		display: flex;
-		/* Flex 布局实现左图右文 */
 		gap: 24rpx;
-		/* 图片和内容的间距 */
 		box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.04);
 
 		&:active {
@@ -145,15 +164,21 @@
 		}
 	}
 
-	/* 左侧图片 */
+	/* ── 左侧：图片 + 互动统计 ── */
+	.card-left {
+		flex-shrink: 0;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 12rpx;
+		width: 180rpx;
+	}
+
 	.card-image-wrapper {
 		width: 180rpx;
 		height: 180rpx;
-		flex-shrink: 0;
-		/* 防止被压缩 */
 		border-radius: 12rpx;
 		overflow: hidden;
-		position: relative;
 		background-color: #f5f5f5;
 	}
 
@@ -162,17 +187,37 @@
 		height: 100%;
 	}
 
-	/* 右侧内容 */
+	/* 赞踩评论行：图片正下方，三项均分宽度 */
+	.card-interaction-row {
+		width: 100%;
+		display: flex;
+		justify-content: space-around;
+		align-items: center;
+	}
+
+	.mini-interaction {
+		display: flex;
+		align-items: center;
+		gap: 4rpx;
+		font-size: 20rpx;
+		color: #999;
+
+		&.active {
+			color: $primary;
+		}
+	}
+
+	/* ── 右侧内容区 ── */
 	.card-content {
 		flex: 1;
 		min-width: 0;
-		/* 关键：允许子元素在 flex 容器中收缩 */
+		/* 允许 flex 子元素正常收缩 */
 		display: flex;
 		flex-direction: column;
 		justify-content: space-between;
 	}
 
-	/* 1. 头部 */
+	/* ── 1. 头部：店名 + 距离 ── */
 	.card-header {
 		display: flex;
 		justify-content: space-between;
@@ -185,8 +230,6 @@
 		font-weight: bold;
 		color: #333;
 		line-height: 1.4;
-
-		/* 限制店名最多显示1行，超出省略 (美团风格通常是单行) */
 		white-space: nowrap;
 		overflow: hidden;
 		text-overflow: ellipsis;
@@ -199,10 +242,9 @@
 		color: #666;
 		flex-shrink: 0;
 		padding-top: 4rpx;
-		/* 微调对齐 */
 	}
 
-	/* 2. 描述 */
+	/* ── 2. 中部：描述 + 均价 ── */
 	.card-body {
 		flex: 1;
 		margin-bottom: 12rpx;
@@ -212,8 +254,6 @@
 		font-size: 24rpx;
 		color: #999;
 		line-height: 1.5;
-
-		/* 限制显示两行，超出省略 */
 		display: -webkit-box;
 		-webkit-box-orient: vertical;
 		-webkit-line-clamp: 2;
@@ -221,70 +261,61 @@
 		text-overflow: ellipsis;
 	}
 
-	/* 3. 底部 */
-	.card-footer {
+	/* 均价：独占一行，文字再长也不变形，极端长度时自动换行兜底 */
+	.price-info {
 		display: flex;
-		justify-content: space-between;
-		align-items: center;
+		align-items: baseline;
+		gap: 6rpx;
+		margin-top: 10rpx;
+		flex-wrap: wrap;
+
+		.price-label {
+			font-size: 22rpx;
+			color: #999;
+		}
+
+		.price-value {
+			font-size: 26rpx;
+			color: $primary;
+			font-weight: 600;
+		}
 	}
 
-	.price-info {
-		font-size: 24rpx;
-		color: #ff6b00;
-		font-weight: 500;
+	/* ── 3. 底部：按钮组 ── */
+	.card-footer {
+		display: flex;
+		justify-content: flex-end;
+		align-items: center;
 	}
 
 	.action-buttons {
 		display: flex;
-		gap: 16rpx;
+		gap: 12rpx;
 	}
 
+	/* 按钮基础样式 */
 	.btn {
-		font-size: 24rpx;
-		padding: 8rpx 20rpx;
+		font-size: 26rpx;
+		padding: 12rpx 24rpx;
 		border-radius: 30rpx;
+		min-width: 120rpx;
 		line-height: 1;
 		display: flex;
 		align-items: center;
 		justify-content: center;
 	}
 
-	.card-interaction-row {
-		display: flex;
-		gap: 20rpx;
-		margin-top: 10rpx;
-	}
-
-	.mini-interaction {
-		display: flex;
-		align-items: center;
-		gap: 4rpx;
-		font-size: 22rpx;
-		color: #999;
-	}
-
-	.mini-interaction.active {
-		color: #ff6b00;
-	}
-
-	/* 详情按钮样式：浅橙色背景 */
+	/* 详情按钮：浅橙色背景 */
 	.btn-primary-light {
 		background-color: #fff5ec;
-		color: #ff6b00;
-		border: 1rpx solid rgba(255, 107, 0, 0.2);
+		color: $primary;
+		border: 1rpx solid rgba($primary, 0.25);
 	}
 
-	/* 空心按钮样式 (发起聚会) */
+	/* 发起聚会按钮：空心橙边框 */
 	.btn-outline {
-		border: 1rpx solid #ff6b00;
-		color: #ff6b00;
+		border: 1rpx solid $primary;
+		color: $primary;
 		background-color: transparent;
 	}
-
-	/* 实心按钮样式 (详情) */
-	/* .btn-primary {
-		background: linear-gradient(to right, #ff8c00, #ff6b00);
-		color: #fff;
-		border: none;
-	} */
 </style>

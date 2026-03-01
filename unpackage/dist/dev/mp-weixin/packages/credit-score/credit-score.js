@@ -155,7 +155,7 @@ const _sfc_main = {
         }),
         D: common_vendor.p({
           type: "bottom",
-          ["background-color"]: "transparent"
+          ["background-color"]: "#ffffff"
         })
       };
     };

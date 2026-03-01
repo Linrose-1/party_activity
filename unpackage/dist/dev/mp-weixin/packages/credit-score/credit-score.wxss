@@ -1,12 +1,13 @@
 /* 水平间距 */
 /* 水平间距 */
+/* ── 页面容器 ── */
 .credit-container.data-v-d495462d {
   background-color: #F8F9FB;
   min-height: 100vh;
   padding-bottom: 40rpx;
 }
 
-/* 头部样式 */
+/* ── 头部卡片 ── */
 .header-card.data-v-d495462d {
   background: linear-gradient(135deg, #2D2D2D 0%, #1A1A1A 100%);
   height: 520rpx;
@@ -17,6 +18,9 @@
   color: #FFF;
   border-radius: 0 0 80rpx 80rpx;
   box-shadow: 0 10rpx 30rpx rgba(0, 0, 0, 0.2);
+  /* 总分圆形区域 */
+  /* 等级徽标 */
+  /* 底部提示文字 */
 }
 .header-card .score-circle.data-v-d495462d {
   width: 240rpx;
@@ -66,7 +70,7 @@
   text-decoration: underline;
 }
 
-/* 标题样式 */
+/* ── 公共标题 ── */
 .section-title.data-v-d495462d {
   display: flex;
   align-items: center;
@@ -85,7 +89,7 @@
   color: #333;
 }
 
-/* 维度列表样式 */
+/* ── 维度分析卡片 ── */
 .dimension-section.data-v-d495462d {
   margin: -40rpx 30rpx 30rpx;
   background: #FFF;
@@ -95,6 +99,7 @@
 }
 .dimension-section .dimension-list .dimension-item.data-v-d495462d {
   margin-bottom: 36rpx;
+  /* 进度条 */
 }
 .dimension-section .dimension-list .dimension-item.data-v-d495462d:last-child {
   margin-bottom: 0;
@@ -138,7 +143,7 @@
   transition: width 0.6s ease;
 }
 
-/* 规则卡片样式 */
+/* ── 等级划分卡片 ── */
 .rule-card.data-v-d495462d {
   margin: 0 30rpx;
   background: #FFF;
@@ -151,6 +156,7 @@
   align-items: center;
   padding: 24rpx 0;
   border-bottom: 1rpx solid #F5F5F5;
+  /* 当前等级高亮 */
 }
 .rule-card .rule-list .rule-item.data-v-d495462d:last-child {
   border-bottom: none;
@@ -180,10 +186,13 @@
   font-family: Arial;
 }
 
-/* =========================================
-   规则弹窗 UI 深度优化版
-   ========================================= */
+/* ══════════════════════════════════════════
+   规则弹窗
+   关键修复：uni-popup background-color="#ffffff"
+   + rules-modal 不设透明背景，底部不再镂空
+   ══════════════════════════════════════════ */
 .rules-modal.data-v-d495462d {
+  /* 弹窗高度占屏幕 80%，内部使用 flex 布局分区 */
   height: 80vh;
   display: flex;
   flex-direction: column;
@@ -192,6 +201,8 @@
   border-top-right-radius: 40rpx;
   overflow: hidden;
 }
+
+/* 弹窗头部：标题 + 关闭按钮 */
 .modal-header.data-v-d495462d {
   flex-shrink: 0;
   padding: 40rpx;
@@ -205,15 +216,19 @@
   font-weight: bold;
   color: #333;
 }
+
+/* 弹窗可滚动内容区，flex: 1 撑满剩余空间 */
 .rules-content.data-v-d495462d {
   flex: 1;
   height: 0;
-  /* 强制 flex 子元素重新计算高度以支持内部滚动 */
+  /* 配合 flex 使内部可独立滚动 */
   width: 100%;
 }
 .scroll-inner.data-v-d495462d {
   padding: 30rpx 40rpx;
 }
+
+/* 总分公式高亮框 */
 .formula-box.data-v-d495462d {
   background-color: #FFF9F2;
   padding: 30rpx;
@@ -233,6 +248,8 @@
   color: #666;
   line-height: 1.6;
 }
+
+/* 各维度规则条目 */
 .rule-detail-item.data-v-d495462d {
   margin-bottom: 40rpx;
 }
@@ -247,6 +264,8 @@
   color: #666;
   line-height: 1.6;
 }
+
+/* 基础信息得分网格 */
 .info-grid.data-v-d495462d {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -264,6 +283,8 @@
   border-radius: 8rpx;
   border: 1rpx solid #eee;
 }
+
+/* 弹窗底部按钮区，padding-bottom 兼容 iPhone 底部安全区域 */
 .modal-footer.data-v-d495462d {
   flex-shrink: 0;
   padding: 30rpx 40rpx;

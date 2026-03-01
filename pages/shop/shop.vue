@@ -109,7 +109,8 @@
 		ref,
 		computed,
 		onMounted,
-		watch
+		watch,
+		onUnmounted
 	} from 'vue';
 	import {
 		onShow,
