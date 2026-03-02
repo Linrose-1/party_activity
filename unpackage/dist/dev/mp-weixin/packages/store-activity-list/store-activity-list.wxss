@@ -1,0 +1,45 @@
+/* 水平间距 */
+/* 水平间距 */
+.container.data-v-07459c0c {
+  background-color: #f8f9fa;
+  min-height: 100vh;
+  padding-bottom: 40rpx;
+}
+.activity-list.data-v-07459c0c {
+  padding: 24rpx 32rpx 0;
+}
+
+/* ── 无更多 ── */
+.no-more.data-v-07459c0c {
+  text-align: center;
+  color: #bbb;
+  font-size: 26rpx;
+  padding: 30rpx 0 20rpx;
+}
+
+/* ── 加载中 ── */
+.loading-tip.data-v-07459c0c {
+  text-align: center;
+  color: #999;
+  font-size: 26rpx;
+  padding: 30rpx 0;
+}
+
+/* ── 空状态 ── */
+.empty-state.data-v-07459c0c {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding-top: 200rpx;
+}
+.empty-state .empty-img.data-v-07459c0c {
+  width: 240rpx;
+  height: 240rpx;
+  margin-bottom: 24rpx;
+  opacity: 0.5;
+}
+.empty-state .empty-text.data-v-07459c0c {
+  font-size: 28rpx;
+  color: #999;
+}

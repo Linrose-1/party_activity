@@ -479,3 +479,69 @@
 .loading-state text.data-v-4c71c098 {
 		margin-top: 10rpx;
 }
+
+	/* ── 本店历史聚会模块 ── */
+.history-activity-card.data-v-4c71c098 {
+		background: #fff;
+		margin: 0 30rpx 24rpx;
+		padding: 30rpx;
+		border-radius: 20rpx;
+		box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.05);
+		border: 1rpx solid #f0f0f0;
+}
+.history-activity-card.data-v-4c71c098:active {
+		background-color: #fafafa;
+}
+.activity-preview-list.data-v-4c71c098 {
+		display: flex;
+		flex-direction: column;
+		gap: 20rpx;
+}
+.activity-preview-item.data-v-4c71c098 {
+		display: flex;
+		align-items: center;
+		gap: 20rpx;
+		padding: 16rpx;
+		background-color: #f9f9f9;
+		border-radius: 12rpx;
+}
+.activity-preview-cover.data-v-4c71c098 {
+		width: 120rpx;
+		height: 90rpx;
+		border-radius: 10rpx;
+		background-color: #eee;
+		flex-shrink: 0;
+}
+.activity-preview-right.data-v-4c71c098 {
+		flex: 1;
+		min-width: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 8rpx;
+}
+.activity-preview-title.data-v-4c71c098 {
+		font-size: 28rpx;
+		font-weight: 600;
+		color: #333;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		display: block;
+}
+.activity-preview-meta.data-v-4c71c098 {
+		font-size: 22rpx;
+		color: #999;
+		display: block;
+}
+.activity-preview-status.data-v-4c71c098 {
+		display: inline-flex;
+		align-items: center;
+		padding: 4rpx 14rpx;
+		border-radius: 20rpx;
+		align-self: flex-start;
+}
+.activity-preview-status text.data-v-4c71c098 {
+		font-size: 20rpx;
+		color: #fff;
+		font-weight: 500;
+}

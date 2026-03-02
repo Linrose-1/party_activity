@@ -85,7 +85,8 @@
         "my-comments/my-comments",
         "credit-score/credit-score",
         "comment-page/comment-page",
-        "comment-center/comment-center"
+        "comment-center/comment-center",
+        "store-activity-list/store-activity-list"
       ]
     }
   ],

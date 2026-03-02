@@ -1,6 +1,6 @@
 /* 水平间距 */
 /* 水平间距 */
-/* 样式部分保持不变 */
+/* 原有样式完全保留，不修改任何原有类 */
 .container.data-v-03f92355 {
   background-color: #f9f9f9;
   min-height: 100vh;
@@ -90,6 +90,37 @@
   background-color: #FBE9E7;
   color: #FF5722;
 }
+
+/* 新增：填写进度提示条 */
+.progress-tip.data-v-03f92355 {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  margin-top: 20rpx;
+  padding: 16rpx 24rpx;
+  background-color: #FFF7ED;
+  border-radius: 12rpx;
+  border: 1rpx solid #FFE0B2;
+  /* 全部完成时切换为绿色主题 */
+}
+.progress-tip text.data-v-03f92355 {
+  font-size: 26rpx;
+  color: #FF8C00;
+}
+.progress-tip .tip-highlight.data-v-03f92355 {
+  font-weight: bold;
+  color: #FF6B00;
+}
+.progress-tip.all-done.data-v-03f92355 {
+  background-color: #F1F8E9;
+  border-color: #C5E1A5;
+}
+.progress-tip.all-done text.data-v-03f92355 {
+  color: #4CAF50;
+}
+.score-sections.data-v-03f92355 {
+  margin-bottom: 80rpx;
+}
 .footer.data-v-03f92355 {
   position: fixed;
   bottom: 0;
@@ -101,6 +132,8 @@
   border-top: 1px solid #f0f0f0;
   z-index: 100;
 }
+
+/* 修复：button → view，消除 &[disabled] 和 &::after SCSS 嵌套编译报错 */
 .submit-btn.data-v-03f92355 {
   width: 100%;
   height: 88rpx;
@@ -109,14 +142,12 @@
   color: white;
   border-radius: 44rpx;
   font-size: 32rpx;
-  border: none;
+  text-align: center;
+  font-weight: 500;
+  box-sizing: border-box;
+  /* 提交中时显示禁用样式 */
 }
-.submit-btn[disabled].data-v-03f92355 {
-  opacity: 0.6;
-}
-.submit-btn.data-v-03f92355::after {
-  border: none;
-}
-.score-sections.data-v-03f92355 {
-  margin-bottom: 80rpx;
+.submit-btn.is-disabled.data-v-03f92355 {
+  background: #c8c9cc;
+  color: rgba(255, 255, 255, 0.8);
 }

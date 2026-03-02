@@ -11,15 +11,20 @@ if (!Math) {
 const _sfc_main = {
   __name: "ScoreForm",
   props: {
-    // 分数对象，用于双向绑定
+    // 分数对象，用于双向绑定（原有，未修改）
     modelValue: {
       type: Object,
       default: () => ({})
     },
-    // 是否只读模式（用于查看他人评分时）
+    // 是否只读模式（原有，未修改）
     readonly: {
       type: Boolean,
       default: false
+    },
+    // 新增：校验失败时需要高亮的 key 列表，由父页面传入
+    invalidKeys: {
+      type: Array,
+      default: () => []
     }
   },
   emits: ["update:modelValue"],
@@ -134,11 +139,13 @@ const _sfc_main = {
           return {
             a: common_vendor.t(category.title),
             b: common_vendor.f(category.items, (item, k1, i1) => {
-              return {
+              return common_vendor.e({
                 a: common_vendor.t(item.label),
-                b: common_vendor.o((e) => onRateChange(item.key, e), item.key),
-                c: "8704d7b3-0-" + i0 + "-" + i1,
-                d: common_vendor.p({
+                b: __props.invalidKeys.includes(item.key)
+              }, __props.invalidKeys.includes(item.key) ? {} : {}, {
+                c: common_vendor.o((e) => onRateChange(item.key, e), item.key),
+                d: "8704d7b3-0-" + i0 + "-" + i1,
+                e: common_vendor.p({
                   value: scores.value[item.key],
                   max: 10,
                   size: 18,
@@ -147,9 +154,11 @@ const _sfc_main = {
                   ["allow-half"]: false,
                   readonly: __props.readonly
                 }),
-                e: common_vendor.t(scores.value[item.key]),
-                f: item.key
-              };
+                f: common_vendor.t(scores.value[item.key] === 0 ? "-" : scores.value[item.key] + "分"),
+                g: scores.value[item.key] === 0 ? 1 : "",
+                h: item.key,
+                i: __props.invalidKeys.includes(item.key) ? 1 : ""
+              });
             }),
             c: category.title
           };

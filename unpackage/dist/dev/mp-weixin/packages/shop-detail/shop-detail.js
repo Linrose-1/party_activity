@@ -23,6 +23,8 @@ const _sfc_main = {
     const viewerTotal = common_vendor.ref(0);
     const commentPreviewList = common_vendor.ref([]);
     const commentTotal = common_vendor.ref(0);
+    const storeActivityPreviewList = common_vendor.ref([]);
+    const storeActivityTotal = common_vendor.ref(0);
     const pointsPopup = common_vendor.ref(null);
     const coverImages = common_vendor.computed(() => {
       if (storeDetail.value && Array.isArray(storeDetail.value.storeCoverImageUrls)) {
@@ -75,7 +77,7 @@ const _sfc_main = {
           special
         };
       } catch (error) {
-        common_vendor.index.__f__("error", "at packages/shop-detail/shop-detail.vue:321", "[营业时间] 解析失败:", error);
+        common_vendor.index.__f__("error", "at packages/shop-detail/shop-detail.vue:360", "[营业时间] 解析失败:", error);
         return {
           regular: [{
             label: "营业时间",
@@ -106,7 +108,7 @@ const _sfc_main = {
       });
       isLoading.value = false;
       if (error) {
-        common_vendor.index.__f__("error", "at packages/shop-detail/shop-detail.vue:365", "[详情] 获取失败:", error);
+        common_vendor.index.__f__("error", "at packages/shop-detail/shop-detail.vue:404", "[详情] 获取失败:", error);
         common_vendor.index.showToast({
           title: error,
           icon: "none"
@@ -114,7 +116,7 @@ const _sfc_main = {
         return;
       }
       storeDetail.value = data;
-      common_vendor.index.__f__("log", "at packages/shop-detail/shop-detail.vue:374", "[详情] 数据:", storeDetail.value);
+      common_vendor.index.__f__("log", "at packages/shop-detail/shop-detail.vue:413", "[详情] 数据:", storeDetail.value);
       if (data.checkContribution === 1) {
         setTimeout(() => {
           if (pointsPopup.value) {
@@ -124,6 +126,7 @@ const _sfc_main = {
       }
       getViewerList(storeId.value);
       getCommentPreview();
+      getStoreActivityPreview();
     });
     const getViewerList = async (id) => {
       const {
@@ -156,6 +159,64 @@ const _sfc_main = {
         commentTotal.value = data.length;
         commentPreviewList.value = data.slice(0, 2);
       }
+    };
+    const getStoreActivityPreview = async () => {
+      if (!storeId.value)
+        return;
+      const {
+        data
+      } = await utils_request.request("/app-api/member/activity/store-list", {
+        method: "GET",
+        data: {
+          storeId: storeId.value,
+          pageNo: 1,
+          pageSize: 2
+        }
+      });
+      if (data) {
+        storeActivityTotal.value = data.total || 0;
+        storeActivityPreviewList.value = data.list || [];
+      }
+    };
+    const formatActivityTime = (timestamp) => {
+      if (!timestamp)
+        return "时间待定";
+      const d = new Date(timestamp);
+      const Y = d.getFullYear();
+      const M = (d.getMonth() + 1).toString().padStart(2, "0");
+      const D = d.getDate().toString().padStart(2, "0");
+      const h = d.getHours().toString().padStart(2, "0");
+      const m = d.getMinutes().toString().padStart(2, "0");
+      return Y + "-" + M + "-" + D + " " + h + ":" + m;
+    };
+    const getStatusText = (status) => {
+      const map = {
+        0: "已取消",
+        1: "未开始",
+        2: "报名中",
+        3: "即将开始",
+        4: "进行中",
+        5: "已结束",
+        6: "待退款"
+      };
+      return map[status] || "未知";
+    };
+    const getStatusColor = (status) => {
+      const map = {
+        0: "#909399",
+        1: "#f9ae3d",
+        2: "#4cd964",
+        3: "#007aff",
+        4: "#dd524d",
+        5: "#8f8f94",
+        6: "#e6a23c"
+      };
+      return map[status] || "#909399";
+    };
+    const goToStoreActivityList = () => {
+      common_vendor.index.navigateTo({
+        url: "/packages/store-activity-list/store-activity-list?storeId=" + storeId.value + "&storeName=" + encodeURIComponent(storeDetail.value ? storeDetail.value.storeName : "")
+      });
     };
     common_vendor.onShow(() => {
       if (storeId.value) {
@@ -423,39 +484,59 @@ const _sfc_main = {
         })
       }, {
         S: common_vendor.o(goToCommentPage),
-        T: common_vendor.p({
+        T: storeActivityTotal.value > 0
+      }, storeActivityTotal.value > 0 ? {
+        U: common_vendor.t(storeActivityTotal.value),
+        V: common_vendor.p({
+          type: "right",
+          size: "14",
+          color: "#999"
+        }),
+        W: common_vendor.f(storeActivityPreviewList.value, (item, k0, i0) => {
+          return {
+            a: item.coverImageUrl || item.activityCoverImageUrl || "/static/icon/default-activity.png",
+            b: common_vendor.t(item.activityTitle),
+            c: common_vendor.t(formatActivityTime(item.startDatetime)),
+            d: common_vendor.t(item.statusStr || getStatusText(item.status)),
+            e: getStatusColor(item.status),
+            f: item.id
+          };
+        }),
+        X: common_vendor.o(goToStoreActivityList)
+      } : {}, {
+        Y: common_vendor.p({
           type: storeDetail.value.userLikeStr === "like" ? "hand-up-filled" : "hand-up",
           size: "22",
           color: storeDetail.value.userLikeStr === "like" ? "#FF6B00" : "#666"
         }),
-        U: common_vendor.t(storeDetail.value.likesCount || 0),
-        V: storeDetail.value.userLikeStr === "like" ? 1 : "",
-        W: common_vendor.o(($event) => toggleAction("like")),
-        X: common_vendor.p({
+        Z: common_vendor.t(storeDetail.value.likesCount || 0),
+        aa: storeDetail.value.userLikeStr === "like" ? 1 : "",
+        ab: common_vendor.o(($event) => toggleAction("like")),
+        ac: common_vendor.p({
           type: storeDetail.value.userLikeStr === "dislike" ? "hand-down-filled" : "hand-down",
           size: "22",
           color: storeDetail.value.userLikeStr === "dislike" ? "#3498db" : "#666"
         }),
-        Y: common_vendor.t(storeDetail.value.dislikesCount || 0),
-        Z: storeDetail.value.userLikeStr === "dislike" ? 1 : "",
-        aa: common_vendor.o(($event) => toggleAction("dislike")),
-        ab: common_vendor.p({
+        ad: common_vendor.t(storeDetail.value.dislikesCount || 0),
+        ae: storeDetail.value.userLikeStr === "dislike" ? 1 : "",
+        af: common_vendor.o(($event) => toggleAction("dislike")),
+        ag: common_vendor.p({
           type: "map-filled",
           color: "#FF6B00",
           size: "20"
         }),
-        ac: common_vendor.o((...args) => common_vendor.unref(openNavigation) && common_vendor.unref(openNavigation)(...args)),
-        ad: common_vendor.p({
+        ah: common_vendor.o((...args) => common_vendor.unref(openNavigation) && common_vendor.unref(openNavigation)(...args)),
+        ai: common_vendor.p({
           type: "phone-filled",
           color: "#fff",
           size: "20"
         }),
-        ae: common_vendor.o(callPhone),
-        af: common_vendor.sr(pointsPopup, "4c71c098-10", {
+        aj: common_vendor.o(callPhone),
+        ak: common_vendor.sr(pointsPopup, "4c71c098-11", {
           "k": "pointsPopup"
         })
       }) : {
-        ag: common_vendor.p({
+        al: common_vendor.p({
           type: "spinner-cycle",
           size: "30",
           color: "#999"

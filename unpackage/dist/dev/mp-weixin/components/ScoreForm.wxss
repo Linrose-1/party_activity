@@ -21,13 +21,32 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16rpx 0;
+  padding: 16rpx 12rpx;
+  border-radius: 10rpx;
+  transition: background-color 0.2s;
+  /* 新增：校验失败时高亮该行 */
+}
+.score-item.is-invalid.data-v-8704d7b3 {
+  background-color: #FFF5F0;
+  border: 1rpx solid #FFCCB0;
+}
+
+/* 新增：左侧标签和提示文字竖排 */
+.item-left.data-v-8704d7b3 {
+  display: flex;
+  flex-direction: column;
+  width: 100rpx;
 }
 .item-label.data-v-8704d7b3 {
   font-size: 28rpx;
   color: #555;
-  width: 100rpx;
-  /* 固定宽度对齐 */
+}
+
+/* 新增：未填提示文字，红色小字 */
+.invalid-tip.data-v-8704d7b3 {
+  font-size: 20rpx;
+  color: #FF5722;
+  margin-top: 4rpx;
 }
 .score-text.data-v-8704d7b3 {
   font-size: 24rpx;
@@ -35,4 +54,8 @@
   width: 60rpx;
   text-align: right;
   margin-left: 10rpx;
+  /* 新增：0分（未填）时显示灰色占位 */
+}
+.score-text.empty-score.data-v-8704d7b3 {
+  color: #ccc;
 }

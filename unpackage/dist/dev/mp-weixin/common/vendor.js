@@ -8744,6 +8744,12 @@ const subPackages = [
         style: {
           navigationBarTitleText: "评论中心"
         }
+      },
+      {
+        path: "store-activity-list/store-activity-list",
+        style: {
+          navigationBarTitleText: "聚店历史聚会列表"
+        }
       }
     ]
   }

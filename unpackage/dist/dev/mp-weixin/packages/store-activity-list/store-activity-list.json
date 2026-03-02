@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "聚店历史聚会列表",
+  "usingComponents": {
+    "activity-card": "../../components/ActivityCard"
+  }
+}

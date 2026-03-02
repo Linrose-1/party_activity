@@ -87,8 +87,8 @@
 						:key="item.id">
 						<view class="timeline-line-col">
 							<view class="dot"></view>
-							<view class="line"
-								v-if="index !== activityDetail.memberActivitySessionList.length - 1"></view>
+							<view class="line" v-if="index !== activityDetail.memberActivitySessionList.length - 1">
+							</view>
 						</view>
 						<view class="timeline-content-col">
 							<view class="session-name">{{ item.sessionTitle }}</view>
@@ -199,8 +199,7 @@
 		</view>
 
 		<!-- 浏览留痕模块 -->
-		<view class="viewer-module-card"
-			v-if="activityDetail && activityDetail.isReadTrace === 1 && viewerTotal > 0">
+		<view class="viewer-module-card" v-if="activityDetail && activityDetail.isReadTrace === 1 && viewerTotal > 0">
 			<view class="viewer-header" @click="goToTraceList">
 				<view class="left-title">
 					<view class="title-indicator"></view>
@@ -232,30 +231,7 @@
 			</view>
 		</view>
 
-		<!-- 赞踩互动胶囊 -->
-		<view class="interaction-capsule-section">
-			<view class="capsule-container">
-				<!-- 修复：激活类名改为独立平铺类，避免 WXSS &嵌套报错 -->
-				<view class="capsule-item"
-					:class="activityDetail.userLikeStr === 'like' ? 'capsule-like-active' : ''"
-					@click="toggleAction('like')">
-					<uni-icons :type="activityDetail.userLikeStr === 'like' ? 'hand-up-filled' : 'hand-up'" size="22"
-						:color="activityDetail.userLikeStr === 'like' ? '#FF6B00' : '#666'"></uni-icons>
-					<text class="count">{{ activityDetail.likesCount || 0 }}</text>
-					<text class="label">靠谱</text>
-				</view>
-				<view class="capsule-divider"></view>
-				<view class="capsule-item"
-					:class="activityDetail.userLikeStr === 'dislike' ? 'capsule-dislike-active' : ''"
-					@click="toggleAction('dislike')">
-					<uni-icons :type="activityDetail.userLikeStr === 'dislike' ? 'hand-down-filled' : 'hand-down'"
-						size="22"
-						:color="activityDetail.userLikeStr === 'dislike' ? '#3498db' : '#666'"></uni-icons>
-					<text class="count">{{ activityDetail.dislikesCount || 0 }}</text>
-					<text class="label">无感</text>
-				</view>
-			</view>
-		</view>
+
 
 		<!-- 评论预览：整体可点击，回到详情页时 onShow 自动刷新 -->
 		<view class="comment-preview-card" @click="goToCommentPage">
@@ -273,7 +249,8 @@
 			<view class="preview-list" v-if="commentPreviewList.length > 0">
 				<view class="preview-item" v-for="c in commentPreviewList" :key="c.id">
 					<!-- 修复：可选链兼容写法 -->
-					<text class="p-user">{{ c.anonymous === 1 ? '匿名商友' : (c.memberUserBaseVO && c.memberUserBaseVO.nickname ? c.memberUserBaseVO.nickname : '商友') }}:</text>
+					<text
+						class="p-user">{{ c.anonymous === 1 ? '匿名商友' : (c.memberUserBaseVO && c.memberUserBaseVO.nickname ? c.memberUserBaseVO.nickname : '商友') }}:</text>
 					<text class="p-content">{{ c.content }}</text>
 				</view>
 			</view>
@@ -290,6 +267,29 @@
 			<text style="color: #ff1a3c;">
 				{{ formattedRegistrationTimes.start }} - {{ formattedRegistrationTimes.end }}
 			</text>
+		</view>
+
+		<!-- 赞踩互动胶囊 -->
+		<view class="interaction-capsule-section">
+			<view class="capsule-container">
+				<!-- 修复：激活类名改为独立平铺类，避免 WXSS &嵌套报错 -->
+				<view class="capsule-item" :class="activityDetail.userLikeStr === 'like' ? 'capsule-like-active' : ''"
+					@click="toggleAction('like')">
+					<uni-icons :type="activityDetail.userLikeStr === 'like' ? 'hand-up-filled' : 'hand-up'" size="22"
+						:color="activityDetail.userLikeStr === 'like' ? '#FF6B00' : '#666'"></uni-icons>
+					<text class="count">{{ activityDetail.likesCount || 0 }}</text>
+					<text class="label">靠谱</text>
+				</view>
+				<view class="capsule-divider"></view>
+				<view class="capsule-item"
+					:class="activityDetail.userLikeStr === 'dislike' ? 'capsule-dislike-active' : ''"
+					@click="toggleAction('dislike')">
+					<uni-icons :type="activityDetail.userLikeStr === 'dislike' ? 'hand-down-filled' : 'hand-down'"
+						size="22" :color="activityDetail.userLikeStr === 'dislike' ? '#3498db' : '#666'"></uni-icons>
+					<text class="count">{{ activityDetail.dislikesCount || 0 }}</text>
+					<text class="label">无感</text>
+				</view>
+			</view>
 		</view>
 
 		<view style="width: 100%; height: 100rpx;"></view>
@@ -341,10 +341,21 @@
 </template>
 
 <script setup>
-	import { ref, computed } from 'vue';
-	import { onLoad, onShow, onShareAppMessage, onShareTimeline } from '@dcloudio/uni-app';
+	import {
+		ref,
+		computed
+	} from 'vue';
+	import {
+		onLoad,
+		onShow,
+		onShareAppMessage,
+		onShareTimeline
+	} from '@dcloudio/uni-app';
 	import request from '../../utils/request.js';
-	import { getInviteCode, checkLoginGuard } from '../../utils/user.js';
+	import {
+		getInviteCode,
+		checkLoginGuard
+	} from '../../utils/user.js';
 	import PointsFeedbackPopup from '@/components/PointsFeedbackPopup.vue';
 
 	// ─── 核心数据 ───
@@ -390,7 +401,10 @@
 
 		if (!options.id) {
 			console.error('[聚会详情] 缺少聚会ID');
-			uni.showToast({ title: '加载聚会详情失败，缺少ID', icon: 'none' });
+			uni.showToast({
+				title: '加载聚会详情失败，缺少ID',
+				icon: 'none'
+			});
 			return;
 		}
 
@@ -412,12 +426,18 @@
 				triggerShareHitApi(sharerId, bizId);
 			} else if (bizId) {
 				// 未登录，暂存等登录后处理
-				uni.setStorageSync('pendingShareReward', { sharerId, bizId, type: 31 });
+				uni.setStorageSync('pendingShareReward', {
+					sharerId,
+					bizId,
+					type: 31
+				});
 			}
 		}
 
 		// 允许右上角菜单发起分享
-		uni.showShareMenu({ menus: ['shareAppMessage', 'shareTimeline'] });
+		uni.showShareMenu({
+			menus: ['shareAppMessage', 'shareTimeline']
+		});
 	});
 
 	/**
@@ -457,14 +477,18 @@
 	 */
 	const formattedActivityTime = computed(() => {
 		if (!activityDetail.value) return '';
-		return formatDateTime(activityDetail.value.startDatetime) + ' 至 ' + formatDateTime(activityDetail.value.endDatetime);
+		return formatDateTime(activityDetail.value.startDatetime) + ' 至 ' + formatDateTime(activityDetail.value
+			.endDatetime);
 	});
 
 	/**
 	 * 格式化报名开始和截止时间，返回 { start, end }
 	 */
 	const formattedRegistrationTimes = computed(() => {
-		if (!activityDetail.value) return { start: '', end: '' };
+		if (!activityDetail.value) return {
+			start: '',
+			end: ''
+		};
 		return {
 			start: formatDateTime(activityDetail.value.registrationStartDatetime),
 			end: formatDateTime(activityDetail.value.registrationEndDatetime)
@@ -476,17 +500,44 @@
 	 * 用于顶部状态横幅的动态样式绑定
 	 */
 	const statusInfo = computed(() => {
-		if (!activityDetail.value) return { text: '', color: '' };
-		const map = {
-			0: { text: '聚会已取消', color: '#909399' },
-			1: { text: '聚会未开始', color: '#f9ae3d' },
-			2: { text: '正在报名中', color: '#4cd964' },
-			3: { text: '聚会即将开始', color: '#007aff' },
-			4: { text: '聚会进行中', color: '#dd524d' },
-			5: { text: '聚会已结束', color: '#8f8f94' },
-			6: { text: '聚会待退款', color: '#e6a23c' }
+		if (!activityDetail.value) return {
+			text: '',
+			color: ''
 		};
-		return map[activityDetail.value.status] || { text: '状态未知', color: '#909399' };
+		const map = {
+			0: {
+				text: '聚会已取消',
+				color: '#909399'
+			},
+			1: {
+				text: '聚会未开始',
+				color: '#f9ae3d'
+			},
+			2: {
+				text: '正在报名中',
+				color: '#4cd964'
+			},
+			3: {
+				text: '聚会即将开始',
+				color: '#007aff'
+			},
+			4: {
+				text: '聚会进行中',
+				color: '#dd524d'
+			},
+			5: {
+				text: '聚会已结束',
+				color: '#8f8f94'
+			},
+			6: {
+				text: '聚会待退款',
+				color: '#e6a23c'
+			}
+		};
+		return map[activityDetail.value.status] || {
+			text: '状态未知',
+			color: '#909399'
+		};
 	});
 
 	/**
@@ -506,7 +557,8 @@
 	 */
 	const bannerImages = computed(() => {
 		if (!activityDetail.value) return [];
-		if (activityDetail.value.activityCoverImageUrls && activityDetail.value.activityCoverImageUrls.length > 0) {
+		if (activityDetail.value.activityCoverImageUrls && activityDetail.value.activityCoverImageUrls.length >
+			0) {
 			return activityDetail.value.activityCoverImageUrls;
 		}
 		if (activityDetail.value.coverImageUrl) {
@@ -547,7 +599,9 @@
 
 		const result = await request('/app-api/member/activity/get', {
 			method: 'GET',
-			data: { id: activityId.value }
+			data: {
+				id: activityId.value
+			}
 		});
 
 		if (result && !result.error) {
@@ -556,9 +610,9 @@
 			// 修复：传 activityId.value（字符串/数字），原来传的是 Ref 对象导致接口参数错误
 			getViewerList(activityId.value);
 
-			sponsorList.value = (result.data.memberSponsorList && Array.isArray(result.data.memberSponsorList))
-				? result.data.memberSponsorList
-				: [];
+			sponsorList.value = (result.data.memberSponsorList && Array.isArray(result.data.memberSponsorList)) ?
+				result.data.memberSponsorList :
+				[];
 
 			// 后端标记需要触发贡分弹窗时，延迟 500ms 弹出（等页面渲染完成）
 			if (result.data.checkContribution === 1) {
@@ -577,9 +631,16 @@
 	const getParticipantList = async () => {
 		if (!activityId.value) return;
 
-		const { data, error } = await request('/app-api/member/activity-join/list', {
+		const {
+			data,
+			error
+		} = await request('/app-api/member/activity-join/list', {
 			method: 'GET',
-			data: { activityId: activityId.value, pageNo: 1, pageSize: 8 }
+			data: {
+				activityId: activityId.value,
+				pageNo: 1,
+				pageSize: 8
+			}
 		});
 
 		if (error) {
@@ -597,9 +658,16 @@
 	 * @param {string|number} id - 聚会 ID（注意：传值而非 Ref）
 	 */
 	const getViewerList = async (id) => {
-		const { data } = await request('/app-api/member/target-view/page', {
+		const {
+			data
+		} = await request('/app-api/member/target-view/page', {
 			method: 'GET',
-			data: { targetId: id, targetType: 'activity', pageNo: 1, pageSize: 7 }
+			data: {
+				targetId: id,
+				targetType: 'activity',
+				pageNo: 1,
+				pageSize: 7
+			}
 		});
 
 		if (data) {
@@ -616,9 +684,14 @@
 	const getCommentPreview = async () => {
 		if (!activityId.value) return;
 
-		const { data } = await request('/app-api/member/comment/select-type-target-id', {
+		const {
+			data
+		} = await request('/app-api/member/comment/select-type-target-id', {
 			method: 'GET',
-			data: { targetId: activityId.value, targetType: 'activity' }
+			data: {
+				targetId: activityId.value,
+				targetType: 'activity'
+			}
 		});
 
 		if (data && Array.isArray(data)) {
@@ -666,9 +739,15 @@
 		}
 
 		try {
-			const { error } = await request('/app-api/member/like-action/add', {
+			const {
+				error
+			} = await request('/app-api/member/like-action/add', {
 				method: 'POST',
-				data: { targetId: activityId.value, targetType: 'activity', action: apiAction }
+				data: {
+					targetId: activityId.value,
+					targetType: 'activity',
+					action: apiAction
+				}
 			});
 
 			if (error) throw new Error(error);
@@ -686,7 +765,10 @@
 			activityDetail.value.userLikeStr = originalAction;
 			activityDetail.value.likesCount = originalLikes;
 			activityDetail.value.dislikesCount = originalDislikes;
-			uni.showToast({ title: '操作失败，请重试', icon: 'none' });
+			uni.showToast({
+				title: '操作失败，请重试',
+				icon: 'none'
+			});
 		} finally {
 			isActionInProgress.value = false;
 		}
@@ -701,7 +783,8 @@
 	 */
 	const openSharePopup = async () => {
 		if (!await checkLoginGuard()) return;
-		customShareTitle.value = (activityDetail.value && activityDetail.value.activityTitle) || '发现一个很棒的聚会，快来看看吧！';
+		customShareTitle.value = (activityDetail.value && activityDetail.value.activityTitle) ||
+		'发现一个很棒的聚会，快来看看吧！';
 		sharePopup.value.open();
 	};
 
@@ -742,7 +825,10 @@
 	 * @param {number} index - 当前点击图片的索引
 	 */
 	const previewBanner = (index) => {
-		uni.previewImage({ urls: bannerImages.value, current: index });
+		uni.previewImage({
+			urls: bannerImages.value,
+			current: index
+		});
 	};
 
 	/**
@@ -751,12 +837,17 @@
 	 */
 	const viewAllUsers = () => {
 		if (participantTotal.value === 0) {
-			uni.showToast({ title: '暂无用户报名', icon: 'none' });
+			uni.showToast({
+				title: '暂无用户报名',
+				icon: 'none'
+			});
 			return;
 		}
 		let url = '/pages/activity-participants/activity-participants?id=' + activityId.value;
 		if (isOrganizer.value) url += '&isOrganizer=1';
-		uni.navigateTo({ url });
+		uni.navigateTo({
+			url
+		});
 	};
 
 	/**
@@ -784,10 +875,15 @@
 	const register = async () => {
 		if (!await checkLoginGuard()) return;
 		if (!isRegistrationActive.value) {
-			uni.showToast({ title: '当前非报名时间', icon: 'none' });
+			uni.showToast({
+				title: '当前非报名时间',
+				icon: 'none'
+			});
 			return;
 		}
-		uni.navigateTo({ url: '/packages/active-enroll/active-enroll?id=' + activityId.value });
+		uni.navigateTo({
+			url: '/packages/active-enroll/active-enroll?id=' + activityId.value
+		});
 	};
 
 	/**
@@ -797,7 +893,8 @@
 	const navigateToSponsorDetail = (item) => {
 		if (!item.id) return;
 		uni.navigateTo({
-			url: '/pages/sponsor-detail/sponsor-detail?sponsorId=' + item.id + '&activityId=' + activityId.value
+			url: '/pages/sponsor-detail/sponsor-detail?sponsorId=' + item.id + '&activityId=' + activityId
+				.value
 		});
 	};
 
@@ -813,7 +910,9 @@
 			'&name=' + encodeURIComponent(name) +
 			'&avatar=' + encodeURIComponent(avatarUrl);
 		if (isFreeView) url += '&fromShare=1';
-		uni.navigateTo({ url });
+		uni.navigateTo({
+			url
+		});
 	};
 
 	/**
@@ -822,10 +921,15 @@
 	 */
 	const navigateToStoreDetail = (store) => {
 		if (!store || !store.id) {
-			uni.showToast({ title: '无法查看聚店详情', icon: 'none' });
+			uni.showToast({
+				title: '无法查看聚店详情',
+				icon: 'none'
+			});
 			return;
 		}
-		uni.navigateTo({ url: '/packages/shop-detail/shop-detail?id=' + store.id });
+		uni.navigateTo({
+			url: '/packages/shop-detail/shop-detail?id=' + store.id
+		});
 	};
 
 
@@ -839,9 +943,15 @@
 	 */
 	const triggerShareHitApi = async (sharerId, bizId) => {
 		if (!sharerId || !bizId) return;
-		const { error } = await request('/app-api/member/experience-record/share-experience-hit', {
+		const {
+			error
+		} = await request('/app-api/member/experience-record/share-experience-hit', {
 			method: 'POST',
-			data: { type: 31, shareUserId: sharerId, bizId }
+			data: {
+				type: 31,
+				shareUserId: sharerId,
+				bizId
+			}
 		});
 		if (error) {
 			console.error('[分享加分] 接口失败:', error);
@@ -861,18 +971,20 @@
 		closeSharePopup();
 		const sharerId = uni.getStorageSync('userId');
 		const inviteCode = getInviteCode();
-		const finalTitle = customShareTitle.value
-			|| (activityDetail.value && activityDetail.value.activityTitle)
-			|| '发现一个很棒的聚会，快来看看吧！';
+		const finalTitle = customShareTitle.value ||
+			(activityDetail.value && activityDetail.value.activityTitle) ||
+			'发现一个很棒的聚会，快来看看吧！';
 
-		let sharePath = '/packages/active-detail/active-detail?id=' + (activityDetail.value && activityDetail.value.id);
+		let sharePath = '/packages/active-detail/active-detail?id=' + (activityDetail.value && activityDetail.value
+			.id);
 		if (sharerId) sharePath += '&sharerId=' + sharerId;
 		if (inviteCode) sharePath += '&inviteCode=' + inviteCode;
 
 		return {
 			title: finalTitle,
 			path: sharePath,
-			imageUrl: (activityDetail.value && activityDetail.value.coverImageUrl) || '/static/default-share-image.png'
+			imageUrl: (activityDetail.value && activityDetail.value.coverImageUrl) ||
+				'/static/default-share-image.png'
 		};
 	});
 
@@ -883,9 +995,9 @@
 	onShareTimeline(() => {
 		const sharerId = uni.getStorageSync('userId');
 		const inviteCode = getInviteCode();
-		const finalTitle = customShareTitle.value
-			|| (activityDetail.value && activityDetail.value.activityTitle)
-			|| '发现一个很棒的聚会，快来看看吧！';
+		const finalTitle = customShareTitle.value ||
+			(activityDetail.value && activityDetail.value.activityTitle) ||
+			'发现一个很棒的聚会，快来看看吧！';
 
 		let queryString = 'id=' + (activityDetail.value && activityDetail.value.id) + '&from=timeline';
 		if (sharerId) queryString += '&sharerId=' + sharerId;
@@ -894,7 +1006,8 @@
 		return {
 			title: finalTitle,
 			query: queryString,
-			imageUrl: (activityDetail.value && activityDetail.value.coverImageUrl) || '/static/default-share-image.png'
+			imageUrl: (activityDetail.value && activityDetail.value.coverImageUrl) ||
+				'/static/default-share-image.png'
 		};
 	});
 </script>

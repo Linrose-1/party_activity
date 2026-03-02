@@ -138,6 +138,8 @@
 				</view>
 			</view>
 
+
+
 			<!-- 6. 评论预览卡片（整体可点击） -->
 			<view class="comment-preview-card" @click="goToCommentPage">
 				<view class="preview-header">
@@ -164,6 +166,40 @@
 				<view v-else class="preview-empty">
 					<uni-icons type="chatbubble" size="18" color="#ccc"></uni-icons>
 					<text>暂无评论，点击发表第一条评论</text>
+				</view>
+			</view>
+
+			<!-- 7. 本店历史聚会模块：聚会数 > 0 才显示 -->
+			<view class="history-activity-card" v-if="storeActivityTotal > 0" @click="goToStoreActivityList">
+				<view class="preview-header">
+					<view class="left-title">
+						<view class="title-indicator"></view>
+						<text class="title-txt">本店历史聚会</text>
+						<text class="title-count">{{ storeActivityTotal }}</text>
+					</view>
+					<view class="right-more">
+						<text>查看全部</text>
+						<uni-icons type="right" size="14" color="#999"></uni-icons>
+					</view>
+				</view>
+
+				<!-- 最近聚会简要预览（最多2条） -->
+				<view class="activity-preview-list">
+					<view class="activity-preview-item" v-for="item in storeActivityPreviewList" :key="item.id">
+						<view class="activity-preview-left">
+							<image class="activity-preview-cover"
+								:src="item.coverImageUrl || item.activityCoverImageUrl || '/static/icon/default-activity.png'"
+								mode="aspectFill" />
+						</view>
+						<view class="activity-preview-right">
+							<text class="activity-preview-title">{{ item.activityTitle }}</text>
+							<text class="activity-preview-meta">{{ formatActivityTime(item.startDatetime) }}</text>
+							<view class="activity-preview-status"
+								:style="{ backgroundColor: getStatusColor(item.status) }">
+								<text>{{ item.statusStr || getStatusText(item.status) }}</text>
+							</view>
+						</view>
+					</view>
 				</view>
 			</view>
 
@@ -248,6 +284,9 @@
 	const viewerTotal = ref(0);
 	const commentPreviewList = ref([]);
 	const commentTotal = ref(0);
+	// 本店历史聚会
+	const storeActivityPreviewList = ref([]); // 预览最多2条
+	const storeActivityTotal = ref(0); // 聚会总数，0时不显示模块
 	const pointsPopup = ref(null);
 
 	// ─── 计算属性 ───
@@ -383,6 +422,7 @@
 
 		getViewerList(storeId.value);
 		getCommentPreview();
+		getStoreActivityPreview();
 	});
 
 
@@ -427,6 +467,90 @@
 			commentTotal.value = data.length;
 			commentPreviewList.value = data.slice(0, 2);
 		}
+	};
+
+	/**
+	 * 获取本店历史聚会预览数据
+	 * 调用 store-list 接口，传入 storeId 筛选
+	 * 只取前2条用于预览，total 用于判断是否显示模块
+	 */
+	const getStoreActivityPreview = async () => {
+		if (!storeId.value) return;
+		const {
+			data
+		} = await request('/app-api/member/activity/store-list', {
+			method: 'GET',
+			data: {
+				storeId: storeId.value,
+				pageNo: 1,
+				pageSize: 2
+			}
+		});
+		if (data) {
+			storeActivityTotal.value = data.total || 0;
+			storeActivityPreviewList.value = data.list || [];
+		}
+	};
+
+	/**
+	 * 格式化聚会开始时间，用于预览卡片显示
+	 * @param {number} timestamp - 毫秒时间戳
+	 * @returns {string} YYYY-MM-DD HH:mm
+	 */
+	const formatActivityTime = (timestamp) => {
+		if (!timestamp) return '时间待定';
+		const d = new Date(timestamp);
+		const Y = d.getFullYear();
+		const M = (d.getMonth() + 1).toString().padStart(2, '0');
+		const D = d.getDate().toString().padStart(2, '0');
+		const h = d.getHours().toString().padStart(2, '0');
+		const m = d.getMinutes().toString().padStart(2, '0');
+		return Y + '-' + M + '-' + D + ' ' + h + ':' + m;
+	};
+
+	/**
+	 * 根据 status 返回状态文字（兜底，接口通常已返回 statusStr）
+	 * @param {number} status
+	 */
+	const getStatusText = (status) => {
+		const map = {
+			0: '已取消',
+			1: '未开始',
+			2: '报名中',
+			3: '即将开始',
+			4: '进行中',
+			5: '已结束',
+			6: '待退款'
+		};
+		return map[status] || '未知';
+	};
+
+	/**
+	 * 根据 status 返回状态背景色（与 active-detail.vue 保持一致）
+	 * @param {number} status
+	 */
+	const getStatusColor = (status) => {
+		const map = {
+			0: '#909399',
+			1: '#f9ae3d',
+			2: '#4cd964',
+			3: '#007aff',
+			4: '#dd524d',
+			5: '#8f8f94',
+			6: '#e6a23c'
+		};
+		return map[status] || '#909399';
+	};
+
+	/**
+	 * 跳转到"聚店历史聚会列表"页
+	 * 携带 storeId 和 storeName 供列表页展示标题
+	 */
+	const goToStoreActivityList = () => {
+		uni.navigateTo({
+			url: '/packages/store-activity-list/store-activity-list?storeId=' + storeId.value +
+				'&storeName=' + encodeURIComponent(storeDetail.value ? storeDetail.value.storeName : '')
+		});
 	};
 
 
@@ -1149,5 +1273,80 @@
 
 	.loading-state text {
 		margin-top: 10rpx;
+	}
+
+	/* ── 本店历史聚会模块 ── */
+	.history-activity-card {
+		background: #fff;
+		margin: 0 30rpx 24rpx;
+		padding: 30rpx;
+		border-radius: 20rpx;
+		box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.05);
+		border: 1rpx solid #f0f0f0;
+	}
+
+	.history-activity-card:active {
+		background-color: #fafafa;
+	}
+
+	.activity-preview-list {
+		display: flex;
+		flex-direction: column;
+		gap: 20rpx;
+	}
+
+	.activity-preview-item {
+		display: flex;
+		align-items: center;
+		gap: 20rpx;
+		padding: 16rpx;
+		background-color: #f9f9f9;
+		border-radius: 12rpx;
+	}
+
+	.activity-preview-cover {
+		width: 120rpx;
+		height: 90rpx;
+		border-radius: 10rpx;
+		background-color: #eee;
+		flex-shrink: 0;
+	}
+
+	.activity-preview-right {
+		flex: 1;
+		min-width: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 8rpx;
+	}
+
+	.activity-preview-title {
+		font-size: 28rpx;
+		font-weight: 600;
+		color: #333;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		display: block;
+	}
+
+	.activity-preview-meta {
+		font-size: 22rpx;
+		color: #999;
+		display: block;
+	}
+
+	.activity-preview-status {
+		display: inline-flex;
+		align-items: center;
+		padding: 4rpx 14rpx;
+		border-radius: 20rpx;
+		align-self: flex-start;
+	}
+
+	.activity-preview-status text {
+		font-size: 20rpx;
+		color: #fff;
+		font-weight: 500;
 	}
 </style>

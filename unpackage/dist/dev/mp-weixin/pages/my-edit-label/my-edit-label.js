@@ -60,6 +60,14 @@ const _sfc_main = {
       mission: 0
     });
     const scores = common_vendor.ref(getInitialScores());
+    const invalidKeys = common_vendor.ref([]);
+    const totalCount = common_vendor.computed(() => Object.keys(scores.value).length);
+    const filledCount = common_vendor.computed(
+      () => Object.values(scores.value).filter((v) => v > 0).length
+    );
+    const isAllFilled = common_vendor.computed(
+      () => Object.values(scores.value).every((v) => v > 0)
+    );
     common_vendor.onLoad((options) => {
       const myId = common_vendor.index.getStorageSync("userId");
       if (options.id) {
@@ -89,7 +97,7 @@ const _sfc_main = {
           error
         } = await ScoreApi.getInfo(targetUserId.value);
         if (!error && data) {
-          common_vendor.index.__f__("log", "at pages/my-edit-label/my-edit-label.vue:183", "✅ 获取评分成功:", data);
+          common_vendor.index.__f__("log", "at pages/my-edit-label/my-edit-label.vue:212", "✅ 获取评分成功:", data);
           scoreRecordId.value = data.id;
           Object.keys(scores.value).forEach((key) => {
             if (data[key] !== void 0 && data[key] !== null) {
@@ -98,7 +106,7 @@ const _sfc_main = {
           });
         }
       } catch (e) {
-        common_vendor.index.__f__("error", "at pages/my-edit-label/my-edit-label.vue:193", "[Fetch Error]", e);
+        common_vendor.index.__f__("error", "at pages/my-edit-label/my-edit-label.vue:222", "[Fetch Error]", e);
       } finally {
         common_vendor.index.hideLoading();
       }
@@ -114,7 +122,7 @@ const _sfc_main = {
         ...scores.value,
         id: scoreRecordId.value,
         scorerId: targetUserId.value,
-        //被评分人
+        // 被评分人
         userId: targetUserId.value
         // 评分人（这个加不加都没事，后端重新赋值了)
       };
@@ -151,8 +159,26 @@ const _sfc_main = {
         common_vendor.index.hideLoading();
       }
     };
+    const handleSubmit = () => {
+      const emptyKeys = Object.keys(scores.value).filter((k) => scores.value[k] === 0);
+      if (emptyKeys.length > 0) {
+        invalidKeys.value = emptyKeys;
+        common_vendor.index.showToast({
+          title: `还有 ${emptyKeys.length} 个维度未评分`,
+          icon: "none",
+          duration: 2e3
+        });
+        common_vendor.index.pageScrollTo({
+          scrollTop: 0,
+          duration: 300
+        });
+        return;
+      }
+      invalidKeys.value = [];
+      submitScores();
+    };
     return (_ctx, _cache) => {
-      return {
+      return common_vendor.e({
         a: common_vendor.t(isSelf.value ? "数字标签（自我评分）" : "给商友评分"),
         b: common_vendor.t(isSelf.value ? "请对自己以下维度的表现进行1-10分评估" : "请对TA以下维度的表现进行1-10分评估"),
         c: common_vendor.p({
@@ -160,14 +186,25 @@ const _sfc_main = {
           size: "16",
           color: "#FF8C00"
         }),
-        d: common_vendor.o(($event) => scores.value = $event),
-        e: common_vendor.p({
+        d: common_vendor.p({
+          type: isAllFilled.value ? "checkmarkempty" : "info",
+          size: "14",
+          color: isAllFilled.value ? "#4CAF50" : "#FF8C00"
+        }),
+        e: isAllFilled.value
+      }, isAllFilled.value ? {} : {
+        f: common_vendor.t(totalCount.value - filledCount.value)
+      }, {
+        g: isAllFilled.value ? 1 : "",
+        h: common_vendor.o(($event) => scores.value = $event),
+        i: common_vendor.p({
+          ["invalid-keys"]: invalidKeys.value,
           modelValue: scores.value
         }),
-        f: common_vendor.t(isSubmitting.value ? "保存中..." : "保存评分"),
-        g: isSubmitting.value,
-        h: common_vendor.o(submitScores)
-      };
+        j: common_vendor.t(isSubmitting.value ? "保存中..." : "保存评分"),
+        k: isSubmitting.value ? 1 : "",
+        l: common_vendor.o(handleSubmit)
+      });
     };
   }
 };
