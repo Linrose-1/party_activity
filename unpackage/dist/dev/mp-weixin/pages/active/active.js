@@ -33,26 +33,10 @@ const _sfc_main = {
     const statusIndex = common_vendor.ref(0);
     const selectedLocationInfo = common_vendor.ref(null);
     let filterDebounceTimer = null;
-    const typePickerRange = common_vendor.computed(() => {
-      const labels = typeList.value.map((item) => item.label);
-      return ["全部类型", ...labels];
-    });
-    const statusPickerRange = common_vendor.computed(() => {
-      const labels = statusList.value.map((item) => item.label);
-      return ["全部状态", ...labels];
-    });
-    const updateLocalActivityData = (id, payload) => {
-      const index = activitiesData.value.findIndex((item) => item.id === id);
-      if (index !== -1) {
-        activitiesData.value[index] = {
-          ...activitiesData.value[index],
-          ...payload
-        };
-      }
-    };
+    const typePickerRange = common_vendor.computed(() => ["全部类型", ...typeList.value.map((item) => item.label)]);
+    const statusPickerRange = common_vendor.computed(() => ["全部状态", ...statusList.value.map((item) => item.label)]);
     common_vendor.onMounted(() => {
       common_vendor.index.$on("activityInteractionChanged", (data) => {
-        common_vendor.index.__f__("log", "at pages/active/active.vue:186", "监听到详情页互动变更:", data);
         if (data.type === "action") {
           updateLocalActivityData(data.id, {
             userLikeStr: data.userLikeStr,
@@ -60,13 +44,9 @@ const _sfc_main = {
             dislikesCount: data.dislikesCount
           });
         } else if (data.type === "save") {
-          updateLocalActivityData(data.id, {
-            followFlag: data.isSaved ? 1 : 0
-          });
+          updateLocalActivityData(data.id, { followFlag: data.isSaved ? 1 : 0 });
         } else if (data.type === "comment") {
-          updateLocalActivityData(data.id, {
-            commonCount: data.totalCount
-          });
+          updateLocalActivityData(data.id, { commonCount: data.totalCount });
         }
       });
     });
@@ -76,26 +56,27 @@ const _sfc_main = {
     common_vendor.onShow(() => {
       const token = common_vendor.index.getStorageSync("token");
       isLogin.value = !!token;
-      common_vendor.index.__f__("log", "at pages/active/active.vue:217", "页面显示，当前登录状态:", isLogin.value);
-      initializePage();
+      if (activitiesData.value.length === 0) {
+        initializePage();
+      }
     });
     common_vendor.onPullDownRefresh(async () => {
-      common_vendor.index.__f__("log", "at pages/active/active.vue:225", "用户触发了下拉刷新");
       await initializePage();
       common_vendor.index.stopPullDownRefresh();
     });
     common_vendor.onReachBottom(() => {
-      common_vendor.index.__f__("log", "at pages/active/active.vue:232", "滑动到底部，触发加载更多");
       if (hasMore.value && !loading.value) {
         getActiveList(true);
       }
     });
-    const handleLikeChange = async ({
-      id,
-      action,
-      clickedAction
-    }) => {
-      const activity = activitiesData.value.find((item) => item.id === id);
+    const updateLocalActivityData = (id, payload) => {
+      const index = activitiesData.value.findIndex((item) => item.id == id);
+      if (index !== -1) {
+        activitiesData.value[index] = { ...activitiesData.value[index], ...payload };
+      }
+    };
+    const handleLikeChange = async ({ id, action, clickedAction }) => {
+      const activity = activitiesData.value.find((item) => item.id == id);
       if (!activity)
         return;
       const originalAction = activity.userLikeStr;
@@ -116,30 +97,19 @@ const _sfc_main = {
             activity.likesCount--;
         }
       }
-      const {
-        error
-      } = await utils_request.request("/app-api/member/like-action/add", {
+      const { error } = await utils_request.request("/app-api/member/like-action/add", {
         method: "POST",
-        data: {
-          targetId: id,
-          targetType: "activity",
-          action
-        }
+        data: { targetId: id, targetType: "activity", action }
       });
       if (error) {
         activity.userLikeStr = originalAction;
         activity.likesCount = originalLikes;
         activity.dislikesCount = originalDislikes;
-        common_vendor.index.showToast({
-          title: "操作失败",
-          icon: "none"
-        });
+        common_vendor.index.showToast({ title: "操作失败", icon: "none" });
       }
     };
     const initializePage = async () => {
-      common_vendor.index.showLoading({
-        title: "加载中..."
-      });
+      common_vendor.index.showLoading({ title: "加载中..." });
       try {
         pageNo.value = 1;
         hasMore.value = true;
@@ -151,67 +121,41 @@ const _sfc_main = {
         ]);
         await getActiveList(false);
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/active/active.vue:320", "页面初始化失败:", error);
-        common_vendor.index.showToast({
-          title: "数据加载失败",
-          icon: "none"
-        });
+        common_vendor.index.__f__("error", "at pages/active/active.vue:270", "[聚会列表] 初始化失败:", error);
+        common_vendor.index.showToast({ title: "数据加载失败", icon: "none" });
       } finally {
         common_vendor.index.hideLoading();
       }
     };
     const fetchBanners = async () => {
-      const {
-        data,
-        error
-      } = await utils_request.request("/app-api/member/banner-rec/list", {
+      const { data, error } = await utils_request.request("/app-api/member/banner-rec/list", {
         method: "GET",
-        data: {
-          positionCode: "0",
-          // 固定参数
-          pageNo: 1,
-          pageSize: 50
-        }
+        data: { positionCode: "0", pageNo: 1, pageSize: 50 }
       });
       if (error) {
-        common_vendor.index.__f__("error", "at pages/active/active.vue:347", "获取轮播图失败:", error);
+        common_vendor.index.__f__("error", "at pages/active/active.vue:286", "[轮播图] 获取失败:", error);
         bannerList.value = [];
         return;
       }
-      if (data && data.list) {
-        bannerList.value = data.list.sort((a, b) => a.sort - b.sort);
-        common_vendor.index.__f__("log", "at pages/active/active.vue:355", "轮播图数据获取成功:", bannerList.value);
-      } else {
-        bannerList.value = [];
-      }
+      bannerList.value = data && data.list ? data.list.sort((a, b) => a.sort - b.sort) : [];
     };
     const fetchActivityTypeList = async () => {
-      const {
-        data,
-        error
-      } = await utils_request.request("/app-api/system/dict-data/type", {
-        data: {
-          type: "member_activity_category"
-        }
+      const { data, error } = await utils_request.request("/app-api/system/dict-data/type", {
+        data: { type: "member_activity_category" }
       });
       if (error) {
-        common_vendor.index.__f__("error", "at pages/active/active.vue:374", "获取聚会类型列表失败:", error);
+        common_vendor.index.__f__("error", "at pages/active/active.vue:303", "[类型列表] 获取失败:", error);
         throw new Error("获取类型失败");
       }
       typeList.value = data || [];
-      common_vendor.index.__f__("log", "at pages/active/active.vue:379", "动态聚会类型列表获取成功:", typeList.value);
     };
     const fetchActivityStatusList = async () => {
-      const {
-        data,
-        error
-      } = await utils_request.request("/app-api/member/activity/status-list");
+      const { data, error } = await utils_request.request("/app-api/member/activity/status-list");
       if (error) {
-        common_vendor.index.__f__("error", "at pages/active/active.vue:388", "获取聚会状态列表失败:", error);
+        common_vendor.index.__f__("error", "at pages/active/active.vue:315", "[状态列表] 获取失败:", error);
         throw new Error("获取状态失败");
       }
       statusList.value = data || [];
-      common_vendor.index.__f__("log", "at pages/active/active.vue:392", "动态聚会状态列表获取成功:", statusList.value);
     };
     const getActiveList = async (isLoadMore = false) => {
       if (loading.value)
@@ -219,84 +163,57 @@ const _sfc_main = {
       if (isLoadMore && !hasMore.value)
         return;
       loading.value = true;
-      if (!isLoadMore) {
+      if (!isLoadMore)
         pageNo.value = 1;
-      }
       const selectedStatusItem = statusIndex.value > 0 ? statusList.value[statusIndex.value - 1] : null;
       const params = {
         pageNo: pageNo.value,
         pageSize,
         name: searchKeyword.value,
         category: selectedCategory.value,
-        // 使用动态选择的类型值
         status: selectedStatusItem ? selectedStatusItem.value : "",
-        // 使用动态选择的状态值
         longitude: selectedLocationInfo.value ? selectedLocationInfo.value.longitude : "",
         latitude: selectedLocationInfo.value ? selectedLocationInfo.value.latitude : ""
       };
       try {
-        common_vendor.index.__f__("log", "at pages/active/active.vue:424", "发起聚会列表请求, 参数:", params);
-        const result = await utils_request.request("/app-api/member/activity/list", {
-          method: "GET",
-          data: params
-        });
+        const result = await utils_request.request("/app-api/member/activity/list", { method: "GET", data: params });
         if (result.error) {
           if (result.error.includes("信息绑定")) {
-            common_vendor.index.__f__("warn", "at pages/active/active.vue:433", "捕获到业务限制：需绑定信息才能查看更多聚会");
             await utils_user.checkLoginGuard();
             loading.value = false;
             return;
           }
-          common_vendor.index.showToast({
-            title: result.error,
-            icon: "none"
-          });
+          common_vendor.index.showToast({ title: result.error, icon: "none" });
           hasMore.value = false;
           return;
         }
-        if (result && !result.error && result.data) {
-          const {
-            list = [],
-            total = 0
-          } = result.data;
-          if (isLoadMore) {
-            activitiesData.value.push(...list);
-          } else {
-            activitiesData.value = list;
-          }
+        if (result && result.data) {
+          const { list = [], total = 0 } = result.data;
+          isLoadMore ? activitiesData.value.push(...list) : activitiesData.value = list;
           hasMore.value = activitiesData.value.length < total;
           pageNo.value++;
         } else {
-          common_vendor.index.__f__("error", "at pages/active/active.vue:466", "获取聚会列表失败:", result ? result.error : "无有效返回");
           hasMore.value = false;
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/active/active.vue:470", "请求异常:", error);
+        common_vendor.index.__f__("error", "at pages/active/active.vue:369", "[聚会列表] 请求异常:", error);
         hasMore.value = false;
       } finally {
         loading.value = false;
       }
     };
     const resetFilters = () => {
-      common_vendor.index.__f__("log", "at pages/active/active.vue:480", "--- 重置所有筛选条件 ---");
       searchKeyword.value = "";
       typeIndex.value = 0;
       selectedCategory.value = "";
       statusIndex.value = 0;
       selectedLocationInfo.value = null;
-      common_vendor.index.showToast({
-        title: "筛选已重置",
-        icon: "none"
-      });
+      common_vendor.index.showToast({ title: "筛选已重置", icon: "none" });
     };
     const bindTypePickerChange = (e) => {
       const newIndex = Number(e.detail.value);
       typeIndex.value = newIndex;
-      if (newIndex === 0) {
-        selectedCategory.value = "";
-      } else {
-        selectedCategory.value = typeList.value[newIndex - 1].value;
-      }
+      selectedCategory.value = newIndex === 0 ? "" : typeList.value[newIndex - 1].value;
     };
     const bindStatusPickerChange = (e) => {
       statusIndex.value = e.detail.value;
@@ -312,15 +229,13 @@ const _sfc_main = {
           };
         },
         fail: (err) => {
-          common_vendor.index.__f__("log", "at pages/active/active.vue:530", "选择位置失败:", err);
           if (err.errMsg.includes("auth deny") || err.errMsg.includes("auth denied")) {
             common_vendor.index.showModal({
               title: "定位权限未开启",
               content: "需要您的位置权限来筛选附近的聚会，是否前往设置开启？",
               success: (res) => {
-                if (res.confirm) {
+                if (res.confirm)
                   common_vendor.index.openSetting();
-                }
               }
             });
           }
@@ -328,84 +243,51 @@ const _sfc_main = {
       });
     };
     const handleFavoriteChange = (event) => {
-      const activityToUpdate = activitiesData.value.find((activity) => activity.id === event.id);
-      if (activityToUpdate) {
-        activityToUpdate.followFlag = event.newFollowFlag;
-      }
+      const activity = activitiesData.value.find((a) => a.id == event.id);
+      if (activity)
+        activity.followFlag = event.newFollowFlag;
     };
     const publishActivity = async () => {
       if (!await utils_user.checkLoginGuard())
         return;
-      common_vendor.index.navigateTo({
-        url: "/packages/active-publish/active-publish"
-      });
+      common_vendor.index.navigateTo({ url: "/packages/active-publish/active-publish" });
     };
     const handleBannerClick = async (banner) => {
       if (!await utils_user.checkLoginGuard())
         return;
-      if (!banner || !banner.targetUrl) {
-        common_vendor.index.__f__("log", "at pages/active/active.vue:571", "该轮播图没有配置跳转链接，不执行任何操作。");
+      if (!banner || !banner.targetUrl)
         return;
-      }
-      const activityId = banner.targetUrl;
-      common_vendor.index.__f__("log", "at pages/active/active.vue:577", `用户点击了轮播图，准备跳转到聚会详情页，ID: ${activityId}`);
-      common_vendor.index.navigateTo({
-        url: `/packages/active-detail/active-detail?id=${activityId}`
-      });
+      common_vendor.index.navigateTo({ url: "/packages/active-detail/active-detail?id=" + banner.targetUrl });
     };
     common_vendor.watch(
       [searchKeyword, selectedCategory, statusIndex, selectedLocationInfo],
       () => {
         clearTimeout(filterDebounceTimer);
         filterDebounceTimer = setTimeout(() => {
-          common_vendor.index.__f__("log", "at pages/active/active.vue:611", "筛选条件变化（已防抖），重新搜索...");
-          common_vendor.index.showLoading({
-            title: "正在筛选..."
-          });
-          getActiveList(false).finally(() => {
-            common_vendor.index.hideLoading();
-          });
+          common_vendor.index.showLoading({ title: "正在筛选..." });
+          getActiveList(false).finally(() => common_vendor.index.hideLoading());
         }, 300);
       },
-      {
-        deep: true
-      }
+      { deep: true }
     );
     common_vendor.onShareAppMessage(() => {
       const inviteCode = utils_user.getInviteCode();
-      common_vendor.index.__f__("log", "at pages/active/active.vue:634", `[分享] 准备分享给好友，获取到邀请码: ${inviteCode}`);
       let sharePath = "/pages/active/active";
-      if (inviteCode) {
-        sharePath += `?inviteCode=${inviteCode}`;
-      }
-      const shareContent = {
+      if (inviteCode)
+        sharePath += "?inviteCode=" + inviteCode;
+      return {
         title: "发现一个超棒的商友聚会平台，快来看看吧！",
-        // 自定义分享标题
         path: sharePath,
-        // 用户点击后进入的页面路径及参数
         imageUrl: "https://img.gofor.club/logo.png"
-        // 自定义分享封面图，建议使用一个有代表性的图片URL
       };
-      common_vendor.index.__f__("log", "at pages/active/active.vue:651", "[分享] 分享给好友的内容:", JSON.stringify(shareContent));
-      return shareContent;
     });
     common_vendor.onShareTimeline(() => {
       const inviteCode = utils_user.getInviteCode();
-      common_vendor.index.__f__("log", "at pages/active/active.vue:663", `[分享] 准备分享到朋友圈，获取到邀请码: ${inviteCode}`);
-      let queryString = "";
-      if (inviteCode) {
-        queryString = `inviteCode=${inviteCode}`;
-      }
-      const shareContent = {
+      return {
         title: "发现一个超棒的商友聚会平台，快来看看吧！",
-        // 朋友圈分享的标题
-        query: queryString,
-        // 传递的参数
+        query: inviteCode ? "inviteCode=" + inviteCode : "",
         imageUrl: "https://img.gofor.club/logo.png"
-        // 朋友圈分享的封面图
       };
-      common_vendor.index.__f__("log", "at pages/active/active.vue:679", "[分享] 分享到朋友圈的内容:", JSON.stringify(shareContent));
-      return shareContent;
     });
     return (_ctx, _cache) => {
       return common_vendor.e({

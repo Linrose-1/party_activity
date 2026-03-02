@@ -1,30 +1,14 @@
 /* 水平间距 */
 /* 水平间距 */
-/* ==================================================================
- * 页面主体与全局样式
- * ================================================================== */
 .page.data-v-9217aa1c {
   padding-bottom: 120rpx;
   background-color: #f8f8f8;
 }
-.section-title.data-v-9217aa1c {
-  font-size: 32rpx;
-  font-weight: bold;
-  margin: 30rpx 0 20rpx;
-  border-left: 10rpx solid #FF6B00;
-  padding-left: 20rpx;
-}
 
-/* ==================================================================
- * 页面内容模块
- * ================================================================== */
-/* --- 聚会封面 --- */
-/* 轮播图容器 */
+/* ── 封面轮播 ── */
 .banner-section.data-v-9217aa1c {
   position: relative;
   width: 100%;
-  /* 保持 5:4 比例，或者固定高度，根据设计稿来 */
-  /* 100vw * 0.8 = 750rpx * 0.8 = 600rpx */
   height: 600rpx;
   background-color: #f0f0f0;
 }
@@ -45,8 +29,6 @@
   justify-content: center;
   background-color: #eee;
 }
-
-/* 标签浮层 (复用之前的文字样式，调整定位) */
 .tags-overlay.data-v-9217aa1c {
   position: absolute;
   bottom: 20rpx;
@@ -54,7 +36,6 @@
   z-index: 10;
 }
 .event-cover-text.data-v-9217aa1c {
-  /* 保持原有的文字样式 */
   color: white;
   font-size: 26rpx;
   font-weight: bold;
@@ -62,53 +43,8 @@
   background-color: rgba(0, 0, 0, 0.4);
   border-radius: 8rpx;
 }
-.event-cover.data-v-9217aa1c {
-  width: 100%;
-  aspect-ratio: 5/4;
-  background: linear-gradient(45deg, #ff9a9e, #fad0c4);
-  display: flex;
-  /* 垂直对齐方式: 从 center 改为 flex-end (底部对齐) */
-  align-items: flex-end;
-  /* 水平对齐方式: 从 center 改为 flex-start (左侧对齐) */
-  justify-content: flex-start;
-  padding: 20rpx;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  position: relative;
-  /* 添加相对定位，为遮罩层提供定位上下文 */
-  box-sizing: border-box;
-  /* 确保 padding 不会撑大容器 */
-}
 
-/* 新增一个伪元素作为渐变遮罩，确保文字在任何背景下都清晰可见 */
-.event-cover.data-v-9217aa1c::after {
-  content: "";
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 50%;
-  /* 遮罩层高度为封面的一半 */
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.6), transparent);
-  z-index: 1;
-}
-.event-cover-text.data-v-9217aa1c {
-  color: white;
-  font-size: 32rpx;
-  /* 稍微缩小一点字体以适应角落 */
-  font-weight: bold;
-  text-align: left;
-  padding: 10rpx 20rpx;
-  background-color: rgba(0, 0, 0, 0.3);
-  /* 给文字一个半透明背景，进一步提升可读性 */
-  border-radius: 10rpx;
-  position: relative;
-  /* 确保文字在遮罩层之上 */
-  z-index: 2;
-}
-
-/* --- 状态与提示横幅 --- */
+/* ── 状态横幅 & 提示 ── */
 .status-banner.data-v-9217aa1c {
   color: #fff;
   padding: 10rpx 30rpx;
@@ -125,7 +61,7 @@
   align-items: center;
 }
 
-/* --- 通用内容卡片样式 --- */
+/* ── 通用卡片 ── */
 .event-header.data-v-9217aa1c,
 .event-content.data-v-9217aa1c,
 .organizer-section.data-v-9217aa1c,
@@ -139,18 +75,19 @@
   box-shadow: 0 10rpx 20rpx rgba(0, 0, 0, 0.05);
 }
 
-/* --- 聚会头部信息 (Header Card) --- */
+/* ── 聚会基础信息 ── */
 .event-title.data-v-9217aa1c {
   font-size: 36rpx;
   font-weight: bold;
   margin-bottom: 20rpx;
+  display: block;
 }
 .event-meta.data-v-9217aa1c {
   display: flex;
   align-items: center;
   font-size: 26rpx;
   color: #666;
-  margin: 10rpx;
+  margin: 10rpx 0;
   gap: 10rpx;
 }
 .event-stats.data-v-9217aa1c {
@@ -172,7 +109,7 @@
   color: #888;
 }
 
-/* --- 内容区域容器 --- */
+/* ── 内容区 ── */
 .event-content.data-v-9217aa1c {
   background: #fff;
   margin: 24rpx;
@@ -197,29 +134,21 @@
   font-weight: 700;
   color: #333;
 }
-
-/* --- 聚会介绍文本优化 --- */
 .event-description-text.data-v-9217aa1c {
   font-size: 28rpx;
   color: #555;
   line-height: 1.8;
-  /* 增加行高，提升阅读体验 */
   text-align: justify;
-  /* 两端对齐 */
   white-space: pre-wrap;
-  /* 【关键】保留换行符和空格 */
   word-break: break-all;
-  /* 防止长单词溢出 */
 }
 
-/* --- 时间轴样式 (Timeline) --- */
+/* ── 时间轴 ── */
 .timeline-box.data-v-9217aa1c {
   padding-left: 10rpx;
-  /* 稍微缩进 */
 }
 .timeline-item.data-v-9217aa1c {
   display: flex;
-  /* 不需要 margin-bottom，靠内容撑开 */
 }
 .timeline-line-col.data-v-9217aa1c {
   display: flex;
@@ -236,22 +165,18 @@
   background-color: #fff;
   border: 6rpx solid #FF6B00;
   margin-top: 8rpx;
-  /* 微调对齐标题 */
   box-sizing: border-box;
 }
 .line.data-v-9217aa1c {
   width: 2rpx;
   background-color: #e0e0e0;
   flex: 1;
-  /* 自动填满高度 */
   margin-top: 8rpx;
   min-height: 40rpx;
-  /* 保证最小高度 */
 }
 .timeline-content-col.data-v-9217aa1c {
   flex: 1;
   padding-bottom: 40rpx;
-  /* 每个环节的下间距 */
 }
 .session-name.data-v-9217aa1c {
   font-size: 30rpx;
@@ -265,84 +190,102 @@
   color: #666;
   line-height: 1.6;
   background-color: #f9f9f9;
-  /* 给描述加个浅底色 */
   padding: 20rpx;
   border-radius: 12rpx;
   white-space: pre-wrap;
-  /* 描述也支持换行 */
 }
 
-/* --- 组织者、商圈、赞助商通用样式 --- */
+/* ── 组织者 ── */
 .organizer-title.data-v-9217aa1c,
 .business-title.data-v-9217aa1c,
-.participants-title.data-v-9217aa1c,
-.sponsor-title.data-v-9217aa1c {
+.participants-title.data-v-9217aa1c {
   font-weight: bold;
+  font-size: 30rpx;
   margin-bottom: 20rpx;
+  display: block;
 }
-.organizer-info.data-v-9217aa1c,
-.business-info.data-v-9217aa1c,
-.sponsor-info.data-v-9217aa1c {
+.organizer-info.data-v-9217aa1c {
   display: flex;
   align-items: center;
   gap: 20rpx;
 }
-.organizer-avatar.data-v-9217aa1c,
-.business-logo.data-v-9217aa1c {
+.organizer-avatar-wrap.data-v-9217aa1c {
   width: 100rpx;
   height: 100rpx;
-  background: linear-gradient(45deg, #ffb347, #ffcc33);
   border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: linear-gradient(45deg, #ffb347, #ffcc33);
 }
-.store-logo-image.data-v-9217aa1c {
+.organizer-avatar-img.data-v-9217aa1c {
   width: 100%;
   height: 100%;
-  border-radius: 50%;
 }
-.sponsor-logo.data-v-9217aa1c {
-  width: 120rpx;
-  height: 120rpx;
-  border-radius: 10rpx;
-  object-fit: contain;
-  background-color: #f0f0f0;
-  border: 1rpx solid #eee;
-}
-.organizer-name.data-v-9217aa1c,
-.business-name.data-v-9217aa1c,
-.sponsor-name.data-v-9217aa1c {
+.organizer-name.data-v-9217aa1c {
   font-weight: bold;
   font-size: 28rpx;
+  display: block;
+  margin-bottom: 6rpx;
 }
-.organizer-company.data-v-9217aa1c,
-.business-meta text.data-v-9217aa1c,
-.sponsor-description.data-v-9217aa1c {
+.organizer-company.data-v-9217aa1c {
   font-size: 24rpx;
   color: #666;
 }
 
-/* --- 参与用户 --- */
-.participants-header.data-v-9217aa1c {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 10rpx;
+/* ── 关联聚店 ── */
+.business-section.data-v-9217aa1c:active {
+  background-color: #fafafa;
 }
-.participants-body.data-v-9217aa1c {
+.business-info.data-v-9217aa1c {
   display: flex;
   align-items: center;
   gap: 20rpx;
+}
+.business-logo.data-v-9217aa1c {
+  width: 100rpx;
+  height: 100rpx;
+  border-radius: 50%;
+  overflow: hidden;
+  background: linear-gradient(45deg, #ffb347, #ffcc33);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.store-logo-image.data-v-9217aa1c {
+  width: 100%;
+  height: 100%;
+}
+.business-details.data-v-9217aa1c {
+  flex: 1;
+  min-width: 0;
+}
+.business-name.data-v-9217aa1c {
+  font-weight: bold;
+  font-size: 28rpx;
+  display: block;
+  margin-bottom: 6rpx;
+}
+
+/* ── 参与用户 ── */
+.participants-header.data-v-9217aa1c {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20rpx;
+}
+.participants-body.data-v-9217aa1c {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0;
   margin-left: 10rpx;
 }
 .view-all-link.data-v-9217aa1c {
   font-size: 24rpx;
   color: #3a7bd5;
-  cursor: pointer;
 }
 .avatar-group.data-v-9217aa1c {
   display: flex;
-  position: relative;
 }
 .avatar-item.data-v-9217aa1c {
   width: 60rpx;
@@ -350,9 +293,11 @@
   border-radius: 50%;
   border: 4rpx solid #fff;
   box-shadow: 0 2rpx 5rpx rgba(0, 0, 0, 0.1);
-  object-fit: cover;
   margin-left: -20rpx;
   background: #f0f0f0;
+}
+.avatar-item.data-v-9217aa1c:first-child {
+  margin-left: 0;
 }
 .more-avatars.data-v-9217aa1c {
   background: #FF6B00;
@@ -361,69 +306,114 @@
   align-items: center;
   justify-content: center;
   font-weight: bold;
+  font-size: 24rpx;
 }
 .total-registered-info.data-v-9217aa1c {
   font-size: 26rpx;
   color: #666;
+  margin-top: 16rpx;
 }
 .registered-count.data-v-9217aa1c {
   color: #FF6B00;
   font-weight: bold;
 }
+.no-participants.data-v-9217aa1c {
+  padding: 20rpx 0;
+  text-align: center;
+  color: #999;
+  font-size: 26rpx;
+}
 
-/* 聚会详情赞踩互动区样式 */
-.interaction-capsule-section.data-v-9217aa1c {
+/* ── 赞助商 ── */
+.sponsor-scroll.data-v-9217aa1c {
+  display: flex;
+  white-space: nowrap;
+  width: 100%;
+  padding: 10rpx 0;
+}
+.sponsor-item-card.data-v-9217aa1c {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  width: 200rpx;
+  margin-right: 24rpx;
+  background: #fff;
+  border: 1rpx solid #f0f0f0;
+  border-radius: 16rpx;
+  padding: 24rpx 16rpx;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.03);
+}
+.sp-logo.data-v-9217aa1c {
+  width: 100rpx;
+  height: 100rpx;
+  border-radius: 50%;
+  background: #fff;
+  margin-bottom: 16rpx;
+  border: 1rpx solid #f5f5f5;
+}
+.sp-logo-placeholder.data-v-9217aa1c {
+  width: 100rpx;
+  height: 100rpx;
+  border-radius: 50%;
+  background: #f0f0f0;
+  margin-bottom: 16rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ccc;
+  font-size: 20rpx;
+  font-weight: bold;
+}
+.sp-name.data-v-9217aa1c {
+  font-size: 26rpx;
+  font-weight: bold;
+  color: #333;
+  width: 100%;
+  text-align: center;
+  margin-bottom: 12rpx;
+}
+.text-ellipsis.data-v-9217aa1c {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.sp-tag-row.data-v-9217aa1c {
   display: flex;
   justify-content: center;
-  margin: 40rpx 30rpx 10rpx;
+  margin-top: 8rpx;
 }
-.capsule-container.data-v-9217aa1c {
-  display: flex;
-  align-items: center;
-  background-color: #ffffff;
-  border-radius: 60rpx;
-  padding: 10rpx 40rpx;
-  box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.08);
-  border: 1rpx solid #f0f0f0;
-}
-.capsule-item.data-v-9217aa1c {
-  display: flex;
-  align-items: center;
-  padding: 16rpx 20rpx;
-  transition: all 0.2s ease;
-}
-.capsule-item .count.data-v-9217aa1c {
-  font-size: 32rpx;
+.sp-tag.data-v-9217aa1c {
+  font-size: 20rpx;
+  padding: 4rpx 12rpx;
+  border-radius: 8rpx;
   font-weight: bold;
-  margin: 0 8rpx 0 12rpx;
-  color: #333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
-.capsule-item .label.data-v-9217aa1c {
-  font-size: 24rpx;
-  color: #999;
+.sp-tag.money.data-v-9217aa1c {
+  color: #FF6F00;
+  background: #FFF0E0;
+  border: 1rpx solid rgba(255, 111, 0, 0.2);
 }
-
-/* 激活状态 */
-.capsule-item.like.active .count.data-v-9217aa1c,
-.capsule-item.like.active .label.data-v-9217aa1c {
-  color: #FF6B00;
+.sp-tag.goods.data-v-9217aa1c {
+  color: #19be6b;
+  background: #e1f3d8;
+  border: 1rpx solid rgba(25, 190, 107, 0.2);
 }
-.capsule-item.dislike.active .count.data-v-9217aa1c,
-.capsule-item.dislike.active .label.data-v-9217aa1c {
-  color: #3498db;
+.sp-tag.mixed.data-v-9217aa1c {
+  color: #722ed1;
+  background: #f9f0ff;
+  border: 1rpx solid rgba(114, 46, 209, 0.2);
 }
-.capsule-divider.data-v-9217aa1c {
-  width: 2rpx;
-  height: 40rpx;
-  background-color: #eee;
-  margin: 0 30rpx;
-}
-.capsule-item.data-v-9217aa1c:active {
-  transform: scale(0.9);
-  opacity: 0.7;
+.tag-icon.data-v-9217aa1c {
+  font-size: 18rpx;
+  margin: 0 2rpx;
 }
 
-/* 浏览留痕模块样式 (聚会版) */
+/* ── 浏览留痕 ── */
 .viewer-module-card.data-v-9217aa1c {
   background-color: #ffffff;
   border-radius: 20rpx;
@@ -431,6 +421,9 @@
   padding: 30rpx;
   box-shadow: 0 10rpx 20rpx rgba(0, 0, 0, 0.05);
   border: 1rpx solid #f0f0f0;
+}
+.viewer-module-card.data-v-9217aa1c:active {
+  background-color: #fafafa;
 }
 .viewer-header.data-v-9217aa1c {
   display: flex;
@@ -477,7 +470,7 @@
   flex-wrap: wrap;
   margin-bottom: 16rpx;
 }
-.avatar-item.data-v-9217aa1c {
+.avatar-stack-item.data-v-9217aa1c {
   margin-right: 16rpx;
 }
 .v-avatar.data-v-9217aa1c {
@@ -497,20 +490,73 @@
   align-items: center;
   justify-content: center;
 }
-.dot.data-v-9217aa1c {
+
+/* 修复：留痕省略点改为 .mdot，避免与时间轴 .dot 冲突 */
+.mdot.data-v-9217aa1c {
   width: 6rpx;
   height: 6rpx;
   background-color: #ccc;
   border-radius: 50%;
   margin: 0 2rpx;
+  display: inline-block;
 }
 .viewer-tips.data-v-9217aa1c {
   font-size: 24rpx;
   color: #bbb;
 }
-.viewer-module-card.data-v-9217aa1c:active {
-  background-color: #fafafa;
+
+/* ── 赞踩胶囊 ── */
+.interaction-capsule-section.data-v-9217aa1c {
+  display: flex;
+  justify-content: center;
+  margin: 40rpx 30rpx 10rpx;
 }
+.capsule-container.data-v-9217aa1c {
+  display: flex;
+  align-items: center;
+  background-color: #ffffff;
+  border-radius: 60rpx;
+  padding: 10rpx 40rpx;
+  box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.08);
+  border: 1rpx solid #f0f0f0;
+}
+.capsule-item.data-v-9217aa1c {
+  display: flex;
+  align-items: center;
+  padding: 16rpx 20rpx;
+}
+.capsule-item.data-v-9217aa1c:active {
+  transform: scale(0.9);
+  opacity: 0.7;
+}
+.capsule-item .count.data-v-9217aa1c {
+  font-size: 32rpx;
+  font-weight: bold;
+  margin: 0 8rpx 0 12rpx;
+  color: #333;
+}
+.capsule-item .label.data-v-9217aa1c {
+  font-size: 24rpx;
+  color: #999;
+}
+
+/* 修复：激活样式用独立类名，避免 WXSS 不支持 & 嵌套报错 */
+.capsule-like-active .count.data-v-9217aa1c,
+.capsule-like-active .label.data-v-9217aa1c {
+  color: #FF6B00;
+}
+.capsule-dislike-active .count.data-v-9217aa1c,
+.capsule-dislike-active .label.data-v-9217aa1c {
+  color: #3498db;
+}
+.capsule-divider.data-v-9217aa1c {
+  width: 2rpx;
+  height: 40rpx;
+  background-color: #eee;
+  margin: 0 30rpx;
+}
+
+/* ── 评论预览 ── */
 .comment-preview-card.data-v-9217aa1c {
   background-color: #ffffff;
   border-radius: 20rpx;
@@ -518,6 +564,9 @@
   padding: 30rpx;
   box-shadow: 0 10rpx 20rpx rgba(0, 0, 0, 0.05);
   border: 1rpx solid #f0f0f0;
+}
+.comment-preview-card.data-v-9217aa1c:active {
+  background-color: #fafafa;
 }
 .preview-header.data-v-9217aa1c {
   display: flex;
@@ -537,7 +586,6 @@
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
-  /* 超过2行省略 */
   overflow: hidden;
 }
 .preview-item.data-v-9217aa1c:last-child {
@@ -561,10 +609,7 @@
   gap: 12rpx;
 }
 
-/* ==================================================================
- * 浮动与弹窗元素 (最高层级)
- * ================================================================== */
-/* --- 底部固定操作栏 --- */
+/* ── 底部操作栏 ── */
 .action-bar.data-v-9217aa1c {
   position: fixed;
   bottom: 0;
@@ -590,9 +635,7 @@
   justify-content: center;
 }
 .action-btn.share-btn.data-v-9217aa1c {
-  /* 将原来的灰色背景替换为绿色渐变 */
   background: linear-gradient(to right, #4cd964, #34a853);
-  /* 文字颜色改为白色以适应深色背景 */
   color: #fff;
 }
 .action-btn.register-btn.data-v-9217aa1c {
@@ -605,7 +648,7 @@
   pointer-events: none;
 }
 
-/* --- 自定义分享弹窗 --- */
+/* ── 分享弹窗 ── */
 .share-popup-content.data-v-9217aa1c {
   padding: 30rpx;
   padding-bottom: calc(30rpx + env(safe-area-inset-bottom));
@@ -654,17 +697,13 @@
   border: none;
   line-height: 1.5;
 }
-.share-channel-btn.data-v-9217aa1c::after {
-  border: none;
-}
-.channel-icon-image.data-v-9217aa1c {
-  width: 60rpx;
-  height: 60rpx;
-}
 .share-channel-btn text.data-v-9217aa1c {
   font-size: 24rpx;
   color: #666;
   margin-top: 10rpx;
+}
+.share-channel-btn.data-v-9217aa1c::after {
+  border: none;
 }
 .share-popup-cancel.data-v-9217aa1c {
   width: 100%;
@@ -677,7 +716,7 @@
   color: #333;
 }
 
-/* --- 朋友圈引导蒙层 --- */
+/* ── 朋友圈引导遮罩 ── */
 .timeline-guide-mask.data-v-9217aa1c {
   position: fixed;
   top: 0;
@@ -708,138 +747,4 @@
 .guide-text text.data-v-9217aa1c {
   display: block;
   margin-bottom: 10rpx;
-}
-
-/* --- 参与用户 --- */
-.no-participants.data-v-9217aa1c {
-  padding: 20rpx 0;
-  text-align: center;
-  color: #999;
-  font-size: 26rpx;
-}
-
-/* 赞助商横向滚动容器 */
-.sponsor-scroll.data-v-9217aa1c {
-  display: flex;
-  white-space: nowrap;
-  width: 100%;
-  padding: 10rpx 0;
-}
-.sponsor-item-card.data-v-9217aa1c {
-  display: inline-flex;
-  flex-direction: column;
-  align-items: center;
-  width: 200rpx;
-  /* 卡片宽度 */
-  margin-right: 24rpx;
-  background: #fff;
-  border: 1rpx solid #f0f0f0;
-  border-radius: 16rpx;
-  padding: 24rpx 16rpx;
-  box-sizing: border-box;
-  flex-shrink: 0;
-  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.03);
-}
-.sp-logo.data-v-9217aa1c {
-  width: 100rpx;
-  height: 100rpx;
-  border-radius: 50%;
-  /* 圆形Logo */
-  background: #fff;
-  margin-bottom: 16rpx;
-  border: 1rpx solid #f5f5f5;
-}
-.sp-logo-placeholder.data-v-9217aa1c {
-  width: 100rpx;
-  height: 100rpx;
-  border-radius: 50%;
-  background: #f0f0f0;
-  margin-bottom: 16rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #ccc;
-  font-size: 20rpx;
-  font-weight: bold;
-}
-.sp-name.data-v-9217aa1c {
-  font-size: 26rpx;
-  font-weight: bold;
-  color: #333;
-  width: 100%;
-  text-align: center;
-  margin-bottom: 12rpx;
-}
-
-/* 单行省略 */
-.text-ellipsis.data-v-9217aa1c {
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-}
-.sp-tag-row.data-v-9217aa1c {
-  display: flex;
-  justify-content: center;
-  margin-top: 8rpx;
-}
-.sp-tag.data-v-9217aa1c {
-  font-size: 20rpx;
-  padding: 4rpx 12rpx;
-  border-radius: 8rpx;
-  font-weight: bold;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.sp-tag.money.data-v-9217aa1c {
-  color: #FF6F00;
-  background: #FFF0E0;
-  border: 1rpx solid rgba(255, 111, 0, 0.2);
-}
-.sp-tag.goods.data-v-9217aa1c {
-  color: #19be6b;
-  background: #e1f3d8;
-  border: 1rpx solid rgba(25, 190, 107, 0.2);
-}
-.sp-tag.mixed.data-v-9217aa1c {
-  color: #722ed1;
-  background: #f9f0ff;
-  border: 1rpx solid rgba(114, 46, 209, 0.2);
-}
-.tag-icon.data-v-9217aa1c {
-  font-size: 18rpx;
-  margin: 0 2rpx;
-}
-.detail-interactions.data-v-9217aa1c {
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  background-color: #ffffff;
-  border-radius: 20rpx;
-  margin: 0 30rpx 30rpx;
-  padding: 24rpx 0;
-  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.05);
-  border: 1rpx solid #f0f0f0;
-}
-.interaction-item.data-v-9217aa1c {
-  display: flex;
-  align-items: center;
-  gap: 12rpx;
-  color: #666;
-  font-size: 28rpx;
-  padding: 10rpx 30rpx;
-  border-radius: 40rpx;
-  transition: all 0.2s;
-}
-.interaction-item text.data-v-9217aa1c {
-  font-weight: 500;
-}
-.interaction-item.data-v-9217aa1c:active {
-  background-color: #f5f5f5;
-}
-
-/* 激活状态下的微调 */
-.interaction-item.active text.data-v-9217aa1c {
-  color: inherit;
-  /* 颜色由图标决定，或者此处指定特定颜色 */
 }

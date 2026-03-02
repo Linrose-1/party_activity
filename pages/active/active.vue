@@ -1,6 +1,6 @@
 <template>
 	<view class="container">
-		<!-- 顶部标题和搜索 -->
+		<!-- 顶部搜索栏 -->
 		<view class="header">
 			<view class="search-bar">
 				<uni-icons type="search" size="18" color="rgba(255, 255, 255, 0.7)" />
@@ -9,14 +9,12 @@
 			</view>
 		</view>
 
-		<!-- 轮播图区域 -->
+		<!-- 轮播图 -->
 		<view v-if="bannerList.length > 0" class="swiper-section">
 			<swiper class="swiper" circular :indicator-dots="true" :autoplay="true" :interval="3000" :duration="500">
 				<swiper-item v-for="banner in bannerList" :key="banner.id" @click="handleBannerClick(banner)">
 					<view class="swiper-item">
-						<!-- 轮播图图片 -->
 						<image :src="banner.imageUrl" mode="aspectFill" class="swiper-image"></image>
-						<!-- 轮播图标题 -->
 						<view v-if="banner.title" class="swiper-title">{{ banner.title }}</view>
 					</view>
 				</swiper-item>
@@ -28,20 +26,15 @@
 			<uni-collapse-item title="聚会筛选" :open="true" class="collapse-title">
 				<view class="filters">
 					<view class="filter-header">
-						<button class="reset-btn register-btn" size="mini" @click="resetFilters">
-							<!-- <uni-icons type="refresh" size="14" color="#666"></uni-icons> -->
-							重置筛选
-						</button>
+						<!-- 修复：<button> → <view>，避免 WXSS &::after 编译报错 -->
+						<view class="reset-btn register-btn" @click="resetFilters">重置筛选</view>
 					</view>
 
 					<!-- 选择类型 -->
 					<view class="uni-list">
 						<view class="uni-list-cell">
-							<view class="uni-list-cell-left register-btn">
-								选择类型
-							</view>
+							<view class="uni-list-cell-left register-btn">选择类型</view>
 							<view class="uni-list-cell-db">
-								<!-- 修改这里的绑定 -->
 								<picker @change="bindTypePickerChange" :value="typeIndex" :range="typePickerRange">
 									<view class="uni-input">{{ typePickerRange[typeIndex] }}</view>
 								</picker>
@@ -52,11 +45,8 @@
 					<!-- 选择状态 -->
 					<view class="uni-list">
 						<view class="uni-list-cell">
-							<view class="uni-list-cell-left register-btn">
-								选择状态
-							</view>
+							<view class="uni-list-cell-left register-btn">选择状态</view>
 							<view class="uni-list-cell-db">
-								<!-- 绑定到新的动态数据 statusPickerRange -->
 								<picker @change="bindStatusPickerChange" :value="statusIndex"
 									:range="statusPickerRange">
 									<view class="uni-input">{{ statusPickerRange[statusIndex] }}</view>
@@ -65,18 +55,13 @@
 						</view>
 					</view>
 
-
 					<!-- 选择位置 -->
 					<view class="uni-list">
 						<view class="uni-list-cell">
-							<view class="uni-list-cell-left register-btn">
-								选择位置
-							</view>
+							<view class="uni-list-cell-left register-btn">选择位置</view>
 							<view class="uni-list-cell-db">
 								<view @click="openMapToChooseLocation" class="uni-input">
-									<!-- 显示选择结果 -->
-									<text
-										v-if="selectedLocationInfo">{{ selectedLocationInfo.address || selectedLocationInfo.name }}</text>
+									<text v-if="selectedLocationInfo">{{ selectedLocationInfo.address || selectedLocationInfo.name }}</text>
 									<text v-else class="placeholder">点击选择位置</text>
 									<text class="arrow">></text>
 								</view>
@@ -88,20 +73,14 @@
 		</uni-collapse>
 
 		<!-- 聚会列表 -->
-		<view class="activity-list" scroll-y="true">
+		<view class="activity-list">
 			<ActivityCard v-for="(activity, index) in activitiesData" :key="activity.id" :activity="activity"
-				:is-login="isLogin" @updateFavoriteStatus="handleFavoriteChange" @updateLikeStatus="handleLikeChange" />
+				:is-login="isLogin" @updateFavoriteStatus="handleFavoriteChange"
+				@updateLikeStatus="handleLikeChange" />
 		</view>
 
-		<!-- 根据新的状态变量来显示提示 -->
-		<view v-if="!hasMore && activitiesData.length > 0" class="no-more-content">
-			暂无更多聚会
-		</view>
-
-		<!-- 如果希望在列表为空时也显示提示，可以添加一个空状态 -->
-		<view v-if="!loading && activitiesData.length === 0" class="no-more-content">
-			暂无聚会，快去发布一个吧！
-		</view>
+		<view v-if="!hasMore && activitiesData.length > 0" class="no-more-content">暂无更多聚会</view>
+		<view v-if="!loading && activitiesData.length === 0" class="no-more-content">暂无聚会，快去发布一个吧！</view>
 
 		<!-- 底部操作栏 -->
 		<view class="action-bar">
@@ -114,76 +93,44 @@
 </template>
 
 <script setup>
-	import {
-		ref,
-		computed,
-		onMounted,
-		watch,
-		onUnmounted
-	} from 'vue';
-	import {
-		onReachBottom,
-		onPullDownRefresh,
-		onShow,
-		onShareAppMessage,
-		onShareTimeline
-	} from '@dcloudio/uni-app';
+	import { ref, computed, onMounted, watch, onUnmounted } from 'vue';
+	import { onReachBottom, onPullDownRefresh, onShow, onShareAppMessage, onShareTimeline } from '@dcloudio/uni-app';
 	import ActivityCard from '@/components/ActivityCard.vue';
 	import request from '../../utils/request.js';
-	import {
-		getInviteCode,
-		checkLoginGuard
-	} from '../../utils/user.js';
+	import { getInviteCode, checkLoginGuard } from '../../utils/user.js';
 
-	// --- 核心状态 ---
-	const loading = ref(false); // 是否正在加载中
-	const hasMore = ref(true); // 是否还有更多数据
-	const pageNo = ref(1); // 当前页码
-	const pageSize = 10; // 每页加载10条
+	// ─── 核心状态 ───
+	const loading = ref(false);
+	const hasMore = ref(true);
+	const pageNo = ref(1);
+	const pageSize = 10;
 	const activitiesData = ref([]);
 	const isLogin = ref(false);
 	const bannerList = ref([]);
 
-	// --- 筛选条件状态 ---
+	// ─── 筛选条件 ───
 	const searchKeyword = ref('');
-	// 聚会类型
-	const typeList = ref([]); // 从后端获取的类型列表
-	const typeIndex = ref(0); // Picker 使用的索引
-	const selectedCategory = ref(''); // 发送给后端的类型值
-	// 聚会状态
-	const statusList = ref([]); // 从后端获取的状态列表
-	const statusIndex = ref(0); // Picker 使用的索引
-	// 位置信息
+	const typeList = ref([]);
+	const typeIndex = ref(0);
+	const selectedCategory = ref('');
+	const statusList = ref([]);
+	const statusIndex = ref(0);
 	const selectedLocationInfo = ref(null);
 	let filterDebounceTimer = null;
 
-	// --- 计算属性 (用于 Picker 的显示) ---
-	const typePickerRange = computed(() => {
-		const labels = typeList.value.map(item => item.label);
-		return ['全部类型', ...labels];
-	});
+	// ─── 计算属性：Picker 显示范围 ───
+	const typePickerRange = computed(() => ['全部类型', ...typeList.value.map(item => item.label)]);
+	const statusPickerRange = computed(() => ['全部状态', ...statusList.value.map(item => item.label)]);
 
-	const statusPickerRange = computed(() => {
-		const labels = statusList.value.map(item => item.label);
-		return ['全部状态', ...labels];
-	});
 
-	// --- 核心逻辑：本地更新数据函数 ---
-	const updateLocalActivityData = (id, payload) => {
-		const index = activitiesData.value.findIndex(item => item.id === id);
-		if (index !== -1) {
-			// 使用 Object.assign 或直接修改属性，确保响应式更新
-			activitiesData.value[index] = {
-				...activitiesData.value[index],
-				...payload
-			};
-		}
-	};
+	// ─── 事件监听：来自详情页的精准互动同步 ───
 
-	// --- 生命周期函数 ---
 	onMounted(() => {
+		/**
+		 * 监听详情页赞踩/收藏/评论变更事件
+		 * 收到后精准更新对应卡片字段，无需整体刷新列表
+		 */
 		uni.$on('activityInteractionChanged', (data) => {
-			console.log('监听到详情页互动变更:', data);
 			if (data.type === 'action') {
 				updateLocalActivityData(data.id, {
 					userLikeStr: data.userLikeStr,
@@ -191,13 +138,9 @@
 					dislikesCount: data.dislikesCount
 				});
 			} else if (data.type === 'save') {
-				updateLocalActivityData(data.id, {
-					followFlag: data.isSaved ? 1 : 0
-				});
+				updateLocalActivityData(data.id, { followFlag: data.isSaved ? 1 : 0 });
 			} else if (data.type === 'comment') {
-				updateLocalActivityData(data.id, {
-					commonCount: data.totalCount
-				});
+				updateLocalActivityData(data.id, { commonCount: data.totalCount });
 			}
 		});
 	});
@@ -206,52 +149,76 @@
 		uni.$off('activityInteractionChanged');
 	});
 
+
+	// ─── 生命周期 ───
+
 	/**
-	 * 使用 onShow 刷新所有数据
-	 * 每次进入页面时都会触发，确保数据是最新的
+	 * onShow：每次页面显示时触发
+	 *
+	 * 防回顶策略（与聚店列表页一致）：
+	 * - 列表为空（首次进入 / 下拉刷新清空后）→ 完整初始化
+	 * - 列表有数据（从详情页返回）→ 只更新登录状态，不重置列表
+	 *   详情页的赞踩变更已通过 uni.$emit('activityInteractionChanged') 精准同步
+	 *   无需整体刷新，保持当前滚动位置
 	 */
 	onShow(() => {
-		// 1. 检查登录状态
+		// 始终更新登录状态
 		const token = uni.getStorageSync('token');
 		isLogin.value = !!token;
-		console.log('页面显示，当前登录状态:', isLogin.value);
 
-		// 2. 初始化页面数据
-		initializePage();
-	});
-
-	// 下拉刷新
-	onPullDownRefresh(async () => {
-		console.log('用户触发了下拉刷新');
-		await initializePage(); // 下拉刷新也调用完整初始化流程
-		uni.stopPullDownRefresh();
-	});
-
-	// 上拉加载更多
-	onReachBottom(() => {
-		console.log('滑动到底部，触发加载更多');
-		if (hasMore.value && !loading.value) {
-			getActiveList(true); // 加载更多
+		// 仅在列表为空时才做完整初始化（首次进入 / 被清空后）
+		if (activitiesData.value.length === 0) {
+			initializePage();
 		}
 	});
 
-	// --- 核心逻辑方法 ---
+	/**
+	 * 下拉刷新：强制完整重新加载
+	 */
+	onPullDownRefresh(async () => {
+		await initializePage();
+		uni.stopPullDownRefresh();
+	});
 
-	// --- 处理卡片直接点击点赞的逻辑 ---
-	const handleLikeChange = async ({
-		id,
-		action,
-		clickedAction
-	}) => {
-		// 1. 找到本地数据
-		const activity = activitiesData.value.find(item => item.id === id);
+	/**
+	 * 上拉到底部：加载更多
+	 */
+	onReachBottom(() => {
+		if (hasMore.value && !loading.value) {
+			getActiveList(true);
+		}
+	});
+
+
+	// ─── 核心数据方法 ───
+
+	/**
+	 * 精准更新本地列表中指定 ID 的聚会字段
+	 * 用于详情页返回时的增量同步，避免整体刷新
+	 * @param {string|number} id - 聚会 ID
+	 * @param {object} payload - 要更新的字段
+	 */
+	const updateLocalActivityData = (id, payload) => {
+		const index = activitiesData.value.findIndex(item => item.id == id);
+		if (index !== -1) {
+			activitiesData.value[index] = { ...activitiesData.value[index], ...payload };
+		}
+	};
+
+	/**
+	 * 处理卡片直接点赞/踩操作
+	 * 乐观更新本地 UI，接口失败后回滚
+	 * @param {{ id, action, clickedAction }} param
+	 */
+	const handleLikeChange = async ({ id, action, clickedAction }) => {
+		const activity = activitiesData.value.find(item => item.id == id);
 		if (!activity) return;
 
-		// 2. 乐观更新 UI 逻辑
 		const originalAction = activity.userLikeStr;
 		const originalLikes = activity.likesCount;
 		const originalDislikes = activity.dislikesCount;
 
+		// 乐观更新
 		if (action === 'cancel') {
 			activity.userLikeStr = null;
 			clickedAction === 'like' ? activity.likesCount-- : activity.dislikesCount--;
@@ -266,256 +233,184 @@
 			}
 		}
 
-		// 3. 调用接口
-		const {
-			error
-		} = await request('/app-api/member/like-action/add', {
+		const { error } = await request('/app-api/member/like-action/add', {
 			method: 'POST',
-			data: {
-				targetId: id,
-				targetType: 'activity',
-				action: action
-			}
+			data: { targetId: id, targetType: 'activity', action }
 		});
 
 		if (error) {
-			// 失败回滚
+			// 接口失败，回滚
 			activity.userLikeStr = originalAction;
 			activity.likesCount = originalLikes;
 			activity.dislikesCount = originalDislikes;
-			uni.showToast({
-				title: '操作失败',
-				icon: 'none'
-			});
+			uni.showToast({ title: '操作失败', icon: 'none' });
 		}
 	};
 
 	/**
-	 * 页面初始化函数
-	 * - 重置状态
-	 * - 并行获取所有筛选条件
-	 * - 获取第一页聚会列表
+	 * 页面完整初始化
+	 * 清空列表，并行拉取 banner + 类型 + 状态列表，再加载第一页聚会
+	 * 仅在首次进入或下拉刷新时调用，从详情页返回时不调用（防回顶）
 	 */
 	const initializePage = async () => {
-		uni.showLoading({
-			title: '加载中...'
-		});
+		uni.showLoading({ title: '加载中...' });
 		try {
-			// 重置列表状态，但不重置筛选条件
 			pageNo.value = 1;
 			hasMore.value = true;
 			activitiesData.value = [];
 
-			// 并行获取类型和状态列表，提高效率
 			await Promise.all([
 				fetchBanners(),
 				fetchActivityTypeList(),
 				fetchActivityStatusList()
 			]);
 
-			// 筛选条件加载完毕后，获取第一页的聚会列表
 			await getActiveList(false);
-
 		} catch (error) {
-			console.error("页面初始化失败:", error);
-			uni.showToast({
-				title: '数据加载失败',
-				icon: 'none'
-			});
+			console.error('[聚会列表] 初始化失败:', error);
+			uni.showToast({ title: '数据加载失败', icon: 'none' });
 		} finally {
 			uni.hideLoading();
 		}
 	};
 
 	/**
-	 * 获取轮播图数据
+	 * 获取轮播图数据，失败时不中断整体流程
 	 */
 	const fetchBanners = async () => {
-		const {
-			data,
-			error
-		} = await request('/app-api/member/banner-rec/list', {
+		const { data, error } = await request('/app-api/member/banner-rec/list', {
 			method: 'GET',
-			data: {
-				positionCode: '0', // 固定参数
-				pageNo: 1,
-				pageSize: 50
-			}
+			data: { positionCode: '0', pageNo: 1, pageSize: 50 }
 		});
-
 		if (error) {
-			console.error('获取轮播图失败:', error);
-			bannerList.value = []; // 即使失败也保证页面能继续加载
-			return; // 不抛出错误，避免中断 Promise.all
-		}
-
-		if (data && data.list) {
-			// 根据 sort 字段排序，确保显示顺序正确
-			bannerList.value = data.list.sort((a, b) => a.sort - b.sort);
-			console.log('轮播图数据获取成功:', bannerList.value);
-		} else {
+			console.error('[轮播图] 获取失败:', error);
 			bannerList.value = [];
+			return; // 不抛出，避免中断 Promise.all
 		}
+		bannerList.value = (data && data.list)
+			? data.list.sort((a, b) => a.sort - b.sort)
+			: [];
 	};
 
 	/**
-	 * 获取聚会类型列表
+	 * 获取聚会类型字典列表（用于筛选 Picker）
 	 */
 	const fetchActivityTypeList = async () => {
-		const {
-			data,
-			error
-		} = await request('/app-api/system/dict-data/type', {
-			data: {
-				type: "member_activity_category"
-			}
+		const { data, error } = await request('/app-api/system/dict-data/type', {
+			data: { type: 'member_activity_category' }
 		});
 		if (error) {
-			console.error('获取聚会类型列表失败:', error);
-			throw new Error('获取类型失败'); // 抛出错误，让 Promise.all 捕获
+			console.error('[类型列表] 获取失败:', error);
+			throw new Error('获取类型失败');
 		}
-		// 将获取到的数据赋值给我们定义的 ref
 		typeList.value = data || [];
-		console.log('动态聚会类型列表获取成功:', typeList.value);
 	};
 
+	/**
+	 * 获取聚会状态列表（用于筛选 Picker）
+	 */
 	const fetchActivityStatusList = async () => {
-		const {
-			data,
-			error
-		} = await request('/app-api/member/activity/status-list');
+		const { data, error } = await request('/app-api/member/activity/status-list');
 		if (error) {
-			console.error('获取聚会状态列表失败:', error);
+			console.error('[状态列表] 获取失败:', error);
 			throw new Error('获取状态失败');
 		}
 		statusList.value = data || [];
-		console.log('动态聚会状态列表获取成功:', statusList.value);
 	};
 
 	/**
-	 * 获取聚会列表的核心方法
-	 * @param {boolean} isLoadMore - 是否为加载更多
+	 * 获取聚会列表（支持首次加载和加载更多）
+	 * @param {boolean} isLoadMore - true 为追加数据，false 为重置列表
 	 */
 	const getActiveList = async (isLoadMore = false) => {
 		if (loading.value) return;
 		if (isLoadMore && !hasMore.value) return;
 
 		loading.value = true;
+		if (!isLoadMore) pageNo.value = 1;
 
-		// 如果是刷新，确保页码是1
-		if (!isLoadMore) {
-			pageNo.value = 1;
-		}
-
-		// 处理状态参数
 		const selectedStatusItem = statusIndex.value > 0 ? statusList.value[statusIndex.value - 1] : null;
-
 		const params = {
 			pageNo: pageNo.value,
-			pageSize: pageSize,
+			pageSize,
 			name: searchKeyword.value,
-			category: selectedCategory.value, // 使用动态选择的类型值
-			status: selectedStatusItem ? selectedStatusItem.value : '', // 使用动态选择的状态值
+			category: selectedCategory.value,
+			status: selectedStatusItem ? selectedStatusItem.value : '',
 			longitude: selectedLocationInfo.value ? selectedLocationInfo.value.longitude : '',
 			latitude: selectedLocationInfo.value ? selectedLocationInfo.value.latitude : ''
 		};
 
 		try {
-			console.log('发起聚会列表请求, 参数:', params);
-			const result = await request('/app-api/member/activity/list', {
-				method: 'GET',
-				data: params
-			});
+			const result = await request('/app-api/member/activity/list', { method: 'GET', data: params });
 
 			if (result.error) {
-				// 如果后端返回了需要绑定的信息（报错文本包含“绑定”）
 				if (result.error.includes('信息绑定')) {
-					console.warn('捕获到业务限制：需绑定信息才能查看更多聚会');
-					// 触发登录守卫弹窗
 					await checkLoginGuard();
 					loading.value = false;
 					return;
 				}
-
-				// 其他普通错误
-				uni.showToast({
-					title: result.error,
-					icon: 'none'
-				});
+				uni.showToast({ title: result.error, icon: 'none' });
 				hasMore.value = false;
 				return;
 			}
 
-			if (result && !result.error && result.data) {
-				const {
-					list = [], total = 0
-				} = result.data;
+			if (result && result.data) {
+				const { list = [], total = 0 } = result.data;
+				isLoadMore
+					? activitiesData.value.push(...list)
+					: activitiesData.value = list;
 
-				if (isLoadMore) {
-					activitiesData.value.push(...list);
-				} else {
-					activitiesData.value = list;
-				}
-
-				// 更新分页状态
 				hasMore.value = activitiesData.value.length < total;
-				// 成功后页码+1
 				pageNo.value++;
-
 			} else {
-				console.error('获取聚会列表失败:', result ? result.error : '无有效返回');
 				hasMore.value = false;
 			}
 		} catch (error) {
-			console.error('请求异常:', error);
+			console.error('[聚会列表] 请求异常:', error);
 			hasMore.value = false;
 		} finally {
 			loading.value = false;
 		}
 	};
 
-	// --- 事件处理器 ---
 
+	// ─── 事件处理器 ───
+
+	/**
+	 * 重置所有筛选条件
+	 * watch 会自动捕获状态变化并触发列表刷新，无需手动调用 getActiveList
+	 */
 	const resetFilters = () => {
-		console.log('--- 重置所有筛选条件 ---');
-
-		// 1. 重置所有筛选相关的状态变量
-		searchKeyword.value = ''; // 清空搜索框
-		typeIndex.value = 0; // 类型重置为“全部类型”
-		selectedCategory.value = ''; // 类型值重置为空
-		statusIndex.value = 0; // 状态重置为“全部状态”
-		selectedLocationInfo.value = null; // 位置信息重置为 null
-
-		// 2. 给出用户反馈
-		uni.showToast({
-			title: '筛选已重置',
-			icon: 'none'
-		});
-
-		// 3. 【重要】不需要手动调用 getActiveList()
-		// 因为上面的状态变量变化会被 watch 监听器捕捉到，
-		// watch 会自动触发 getActiveList(false) 来刷新列表。
-		// 这也是您现有代码设计的优点！
+		searchKeyword.value = '';
+		typeIndex.value = 0;
+		selectedCategory.value = '';
+		statusIndex.value = 0;
+		selectedLocationInfo.value = null;
+		uni.showToast({ title: '筛选已重置', icon: 'none' });
 	};
 
-	// 类型选择器改变
+	/**
+	 * 聚会类型 Picker 选择变更
+	 * @param {Event} e
+	 */
 	const bindTypePickerChange = (e) => {
 		const newIndex = Number(e.detail.value);
 		typeIndex.value = newIndex;
-		if (newIndex === 0) {
-			selectedCategory.value = ''; // "全部类型"
-		} else {
-			// newIndex-1 对应 typeList 里的索引
-			selectedCategory.value = typeList.value[newIndex - 1].value;
-		}
+		selectedCategory.value = newIndex === 0 ? '' : typeList.value[newIndex - 1].value;
 	};
 
-	// 状态选择器改变
+	/**
+	 * 聚会状态 Picker 选择变更
+	 * @param {Event} e
+	 */
 	const bindStatusPickerChange = (e) => {
 		statusIndex.value = e.detail.value;
 	};
 
-	// 位置选择
+	/**
+	 * 打开地图选择位置（用于按距离筛选）
+	 * 用户拒绝定位权限时引导去设置页开启
+	 */
 	const openMapToChooseLocation = () => {
 		uni.chooseLocation({
 			success: (res) => {
@@ -527,16 +422,12 @@
 				};
 			},
 			fail: (err) => {
-				console.log('选择位置失败:', err);
-
 				if (err.errMsg.includes('auth deny') || err.errMsg.includes('auth denied')) {
 					uni.showModal({
 						title: '定位权限未开启',
 						content: '需要您的位置权限来筛选附近的聚会，是否前往设置开启？',
 						success: (res) => {
-							if (res.confirm) {
-								uni.openSetting(); // 打开系统设置界面
-							}
+							if (res.confirm) uni.openSetting();
 						}
 					});
 				}
@@ -544,141 +435,75 @@
 		});
 	};
 
-	// 子组件收藏状态变更
+	/**
+	 * 子组件收藏状态变更回调
+	 * @param {{ id, newFollowFlag }} event
+	 */
 	const handleFavoriteChange = (event) => {
-		const activityToUpdate = activitiesData.value.find(activity => activity.id === event.id);
-		if (activityToUpdate) {
-			activityToUpdate.followFlag = event.newFollowFlag;
-		}
-	};
-
-	// 发布聚会
-	const publishActivity = async () => {
-		if (!await checkLoginGuard()) return;
-		uni.navigateTo({
-			url: '/packages/active-publish/active-publish'
-		});
+		const activity = activitiesData.value.find(a => a.id == event.id);
+		if (activity) activity.followFlag = event.newFollowFlag;
 	};
 
 	/**
-	 * 处理轮播图点击事件的函数
-	 * @param {object} banner - 被点击的轮播图数据对象
+	 * 点击"发起聚会"，校验登录后跳转发布页
+	 */
+	const publishActivity = async () => {
+		if (!await checkLoginGuard()) return;
+		uni.navigateTo({ url: '/packages/active-publish/active-publish' });
+	};
+
+	/**
+	 * 点击轮播图，跳转到对应聚会详情页
+	 * @param {object} banner - 轮播图数据，targetUrl 为聚会 ID
 	 */
 	const handleBannerClick = async (banner) => {
 		if (!await checkLoginGuard()) return;
-		// 1. 检查 banner 对象和 targetUrl 是否存在
-		if (!banner || !banner.targetUrl) {
-			console.log('该轮播图没有配置跳转链接，不执行任何操作。');
-			return; // 如果没有 targetUrl，则不执行任何操作
-		}
-
-		// 2. 从 targetUrl 中获取聚会ID
-		const activityId = banner.targetUrl;
-		console.log(`用户点击了轮播图，准备跳转到聚会详情页，ID: ${activityId}`);
-
-		// 3. 执行页面跳转
-		uni.navigateTo({
-			url: `/packages/active-detail/active-detail?id=${activityId}`
-		});
+		if (!banner || !banner.targetUrl) return;
+		uni.navigateTo({ url: '/packages/active-detail/active-detail?id=' + banner.targetUrl });
 	};
 
 
-	// --- 监听器 ---
-
-	// 监听所有筛选条件的变化，自动重新搜索
-	// watch(
-	// 	[searchKeyword, selectedCategory, statusIndex, selectedLocationInfo],
-	// 	(newValue, oldValue) => {
-	// 		console.log('筛选条件变化，重新搜索...');
-	// 		uni.showLoading({
-	// 			title: '正在筛选...'
-	// 		});
-	// 		// 调用 getActiveList(false) 来刷新列表，而不是追加
-	// 		getActiveList(false).finally(() => {
-	// 			//无论成功失败，都在请求结束后隐藏加载
-	// 			uni.hideLoading();
-	// 		});
-	// 	}, {
-	// 		deep: true // deep: true 对监听 selectedLocationInfo 对象变化是必需的
-	// 	}
-	// );
+	// ─── 监听器：筛选条件变化自动防抖刷新 ───
 
 	watch(
 		[searchKeyword, selectedCategory, statusIndex, selectedLocationInfo],
-		() => { // 不再需要 newValue, oldValue
+		() => {
 			clearTimeout(filterDebounceTimer);
 			filterDebounceTimer = setTimeout(() => {
-				console.log('筛选条件变化（已防抖），重新搜索...');
-				uni.showLoading({
-					title: '正在筛选...'
-				});
-				getActiveList(false).finally(() => {
-					uni.hideLoading();
-				});
-			}, 300); // 延迟300毫秒执行，可以有效合并快速的连续操作
-		}, {
-			deep: true
-		}
+				uni.showLoading({ title: '正在筛选...' });
+				getActiveList(false).finally(() => uni.hideLoading());
+			}, 300);
+		},
+		{ deep: true }
 	);
 
-	// ==========================================================
-	// --- 分享功能逻辑 ---
-	// ==========================================================
+
+	// ─── 分享配置 ───
 
 	/**
-	 * @description 监听用户点击右上角“分享给好友”
+	 * 分享给好友：携带邀请码
 	 */
 	onShareAppMessage(() => {
-		// 1. 获取当前用户的邀请码
-		const inviteCode = getInviteCode(); // 使用我们封装好的工具函数
-		console.log(`[分享] 准备分享给好友，获取到邀请码: ${inviteCode}`);
-
-		// 2. 构建分享路径
-		// 基础路径是当前页面
+		const inviteCode = getInviteCode();
 		let sharePath = '/pages/active/active';
-		// 如果邀请码存在，就拼接到路径参数中
-		if (inviteCode) {
-			sharePath += `?inviteCode=${inviteCode}`;
-		}
-
-		// 3. 返回分享对象
-		const shareContent = {
-			title: '发现一个超棒的商友聚会平台，快来看看吧！', // 自定义分享标题
-			path: sharePath, // 用户点击后进入的页面路径及参数
-			imageUrl: 'https://img.gofor.club/logo.png' // 自定义分享封面图，建议使用一个有代表性的图片URL
+		if (inviteCode) sharePath += '?inviteCode=' + inviteCode;
+		return {
+			title: '发现一个超棒的商友聚会平台，快来看看吧！',
+			path: sharePath,
+			imageUrl: 'https://img.gofor.club/logo.png'
 		};
-
-		console.log('[分享] 分享给好友的内容:', JSON.stringify(shareContent));
-
-		return shareContent;
 	});
 
-
 	/**
-	 * @description 监听用户点击右上角“分享到朋友圈”
+	 * 分享到朋友圈：携带邀请码（朋友圈只支持 query）
 	 */
 	onShareTimeline(() => {
-		// 1. 获取当前用户的邀请码
 		const inviteCode = getInviteCode();
-		console.log(`[分享] 准备分享到朋友圈，获取到邀请码: ${inviteCode}`);
-
-		// 2. 构建朋友圈分享的 query 字符串
-		// 朋友圈分享不接受 path，只能用 query
-		let queryString = '';
-		if (inviteCode) {
-			queryString = `inviteCode=${inviteCode}`;
-		}
-
-		// 3. 返回分享对象
-		const shareContent = {
-			title: '发现一个超棒的商友聚会平台，快来看看吧！', // 朋友圈分享的标题
-			query: queryString, // 传递的参数
-			imageUrl: 'https://img.gofor.club/logo.png' // 朋友圈分享的封面图
+		return {
+			title: '发现一个超棒的商友聚会平台，快来看看吧！',
+			query: inviteCode ? 'inviteCode=' + inviteCode : '',
+			imageUrl: 'https://img.gofor.club/logo.png'
 		};
-
-		console.log('[分享] 分享到朋友圈的内容:', JSON.stringify(shareContent));
-
-		return shareContent;
 	});
 </script>
 
@@ -689,7 +514,7 @@
 		min-height: 100vh;
 	}
 
-	/* 顶部导航 */
+	/* ── 顶部搜索栏 ── */
 	.header {
 		position: sticky;
 		top: 0;
@@ -700,34 +525,16 @@
 		z-index: 100;
 	}
 
-	.header-top {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		width: 100%;
-		margin-bottom: 30rpx;
-	}
-
-	.title {
-		font-size: 40rpx;
-		font-weight: 600;
-	}
-
 	.search-bar {
 		display: flex;
 		background: rgba(255, 255, 255, 0.2);
 		border-radius: 40rpx;
 		padding: 10rpx 30rpx;
 		align-items: center;
-
 		border: 1rpx solid rgba(255, 255, 255, 0.3);
-		/* 1. 添加一个半透明的白色边框 */
 		box-shadow: inset 0 2rpx 6rpx rgba(0, 0, 0, 0.1);
-		/* 2. 添加一个轻微的内阴影，增加凹陷感 */
 		transition: background 0.3s, box-shadow 0.3s;
-		/* 3. 添加过渡效果 */
 
-		/* (可选) 用户聚焦输入框时，给一点反馈 */
 		&:focus-within {
 			background: rgba(255, 255, 255, 0.3);
 			box-shadow: inset 0 2rpx 8rpx rgba(0, 0, 0, 0.15);
@@ -742,27 +549,22 @@
 			margin-left: 16rpx;
 			height: 50rpx;
 		}
-
-		.placeholder {
-			// color: rgba(255, 255, 255, 0.7);
-			color: white !important;
-		}
 	}
 
-	/* 轮播图样式 */
+	/* ── 轮播图 ── */
 	.swiper-section {
 		margin: 20rpx 32rpx;
 		border-radius: 16rpx;
-		overflow: hidden; // 确保圆角对内部图片生效
+		overflow: hidden;
 		box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.05);
 	}
 
 	.swiper {
-		height: 300rpx; // 您可以根据需要调整高度
+		height: 300rpx;
 	}
 
 	.swiper-item {
-		position: relative; // 作为标题定位的父容器
+		position: relative;
 		width: 100%;
 		height: 100%;
 	}
@@ -784,11 +586,11 @@
 		color: white;
 		font-size: 36rpx;
 		font-weight: bold;
-		text-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.5); // 增加文字描边，提高可读性
-		pointer-events: none; // 让点击事件可以穿透标题
+		text-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.5);
+		pointer-events: none;
 	}
 
-	/* 筛选区域 */
+	/* ── 筛选区域 ── */
 	.collapse-title {
 		color: #FF6B00;
 	}
@@ -802,11 +604,10 @@
 	.filter-header {
 		display: flex;
 		justify-content: flex-end;
-		/* 让内部元素靠右对齐 */
 		margin-bottom: 20rpx;
-		/* 与下方的筛选器拉开一点距离 */
 	}
 
+	/* 修复：改为 view，消除 button 默认样式和 &::after 编译问题 */
 	.reset-btn {
 		background-color: #f0f0f0;
 		color: #666;
@@ -816,19 +617,8 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		line-height: 1; // 确保文字和图标垂直居中
-		margin: 0;
+		border-radius: 8rpx;
 		margin-right: 40rpx;
-
-		// 消除按钮默认边框
-		&::after {
-			border: none;
-		}
-
-		// 给图标和文字之间一点间距
-		.uni-icons {
-			margin-right: 8rpx;
-		}
 	}
 
 	.uni-list {
@@ -849,8 +639,8 @@
 			margin-left: 10rpx;
 			padding: 10rpx;
 			background-color: #FFF0E5;
-			flex: 1; // (1) 让这个容器占据所有剩余空间
-			min-width: 0; // (2) 允许它被压缩，这是防止溢出的关键！
+			flex: 1;
+			min-width: 0;
 
 			.uni-input {
 				margin-left: 10rpx;
@@ -858,10 +648,8 @@
 				align-items: center;
 				width: 100%;
 
-				// 文本或占位符的样式
 				text,
 				.placeholder {
-					// (1) 不再需要 flex 相关的属性，只做文本截断
 					white-space: nowrap;
 					overflow: hidden;
 					text-overflow: ellipsis;
@@ -870,21 +658,18 @@
 				.arrow {
 					color: #999;
 					font-size: 32rpx;
-					// (2) 关键：使用 margin-left: auto 将箭头推到最右边
 					margin-left: auto;
-					padding: 0 10rpx; // (3) 给箭头左侧一点空间，避免紧贴文字
+					padding: 0 10rpx;
 				}
 			}
 		}
 	}
 
-
-	/* 聚会列表 */
+	/* ── 聚会列表 ── */
 	.activity-list {
 		padding: 0 32rpx;
 	}
 
-	/* 暂无更多内容提示 */
 	.no-more-content {
 		text-align: center;
 		color: #999;
@@ -893,7 +678,7 @@
 		margin-top: 20rpx;
 	}
 
-	/* 底部操作栏 */
+	/* ── 底部操作栏 ── */
 	.action-bar {
 		position: fixed;
 		bottom: 0;
