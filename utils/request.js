@@ -1,5 +1,5 @@
-// const baseURL = 'https://jyj.gofor.club';
-const baseURL = 'https://test-api.gofor.club';
+const baseURL = 'https://jyj.gofor.club';
+// const baseURL = 'https://test-api.gofor.club';
 // const baseURL = 'https://test-api.gofor.club/local';
 const timeout = 10000;
 
