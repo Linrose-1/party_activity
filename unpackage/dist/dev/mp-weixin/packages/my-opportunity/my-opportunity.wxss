@@ -5,7 +5,7 @@
   min-height: 100vh;
 }
 
-/* 1. 筛选栏样式 */
+/* 1. 筛选栏 */
 .segmented-wrapper.data-v-b7876dfc {
   background-color: #fff;
   padding: 20rpx 40rpx;
@@ -35,7 +35,7 @@
   font-weight: bold;
 }
 
-/* 2. 帖子卡片布局 */
+/* 2. 帖子卡片 */
 .post-list.data-v-b7876dfc {
   padding-top: 20rpx;
 }
@@ -88,7 +88,7 @@
   margin-top: 4rpx;
 }
 
-/* 状态标签样式 */
+/* 状态标签 */
 .status-tag.data-v-b7876dfc {
   font-size: 20rpx;
   padding: 6rpx 16rpx;
@@ -111,6 +111,59 @@
   background: #f5f5f5;
   color: #999;
 }
+
+/* ===== 猎伙元信息标签行 ===== */
+.liehuo-meta-row.data-v-b7876dfc {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10rpx;
+  margin-bottom: 16rpx;
+}
+
+/* 紧急程度小标签 */
+.urgency-mini.data-v-b7876dfc {
+  font-size: 20rpx;
+  padding: 4rpx 14rpx;
+  border-radius: 20rpx;
+  font-weight: bold;
+}
+.urgency-normal.data-v-b7876dfc {
+  background: #f5f5f5;
+  color: #888;
+}
+.urgency-urgent.data-v-b7876dfc {
+  background: #FF8C00;
+  color: #fff;
+}
+.urgency-super.data-v-b7876dfc {
+  background: #FF3B30;
+  color: #fff;
+}
+
+/* 猎伙类型小标签 */
+.partner-mini.data-v-b7876dfc {
+  font-size: 20rpx;
+  color: #1890FF;
+  background: #E6F7FF;
+  border: 1rpx solid rgba(24, 144, 255, 0.3);
+  padding: 4rpx 14rpx;
+  border-radius: 20rpx;
+}
+
+/* 感兴趣人数气泡 */
+.interest-bubble.data-v-b7876dfc {
+  font-size: 20rpx;
+  color: #52c41a;
+  background: #f6ffed;
+  border: 1rpx solid #b7eb8f;
+  padding: 4rpx 14rpx;
+  border-radius: 20rpx;
+  margin-left: auto;
+  /* 靠右 */
+}
+
+/* 帖子内容 */
 .post-title.data-v-b7876dfc {
   font-size: 30rpx;
   font-weight: bold;
@@ -124,7 +177,7 @@
   margin-bottom: 20rpx;
 }
 
-/* 3. 媒体展示样式 */
+/* 3. 媒体 */
 .post-images.data-v-b7876dfc {
   display: grid;
   gap: 8rpx;
@@ -170,14 +223,19 @@
 .card-actions.data-v-b7876dfc {
   display: flex;
   justify-content: flex-end;
-  gap: 20rpx;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16rpx;
   border-top: 1rpx solid #F8F8F8;
   padding-top: 24rpx;
+  /* 感兴趣商友按钮 */
+  /* 红点数字徽章 */
 }
 .card-actions .action-btn.data-v-b7876dfc {
   display: flex;
   align-items: center;
-  padding: 12rpx 28rpx;
+  gap: 6rpx;
+  padding: 12rpx 24rpx;
   font-size: 24rpx;
   border-radius: 40rpx;
   background: #F5F5F5;
@@ -197,6 +255,28 @@
 }
 .card-actions .appeal-btn.disabled.data-v-b7876dfc {
   opacity: 0.4;
+}
+.card-actions .interest-btn.data-v-b7876dfc {
+  background: #EAF4FF;
+  color: #1890FF;
+  border: 1rpx solid rgba(24, 144, 255, 0.25);
+  margin-right: auto;
+  /* 靠左，与编辑/删除分开 */
+}
+.card-actions .interest-btn.data-v-b7876dfc:active {
+  background: #d6eaff;
+}
+.card-actions .interest-count-badge.data-v-b7876dfc {
+  background: #ff4d4f;
+  color: #fff;
+  font-size: 18rpx;
+  min-width: 28rpx;
+  height: 28rpx;
+  border-radius: 14rpx;
+  text-align: center;
+  line-height: 28rpx;
+  padding: 0 6rpx;
+  margin-left: 4rpx;
 }
 
 /* 5. 空状态 */

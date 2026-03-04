@@ -28,8 +28,8 @@
 						</uni-forms-item>
 
 						<uni-forms-item label="品牌简介">
-							<uni-easyinput type="textarea" v-model="form.introduction" placeholder="请输入200字以内的简介"
-								maxlength="200" class="standard-textarea" />
+							<uni-easyinput type="textarea" v-model="form.introduction" placeholder="请输入800字以内的简介"
+								maxlength="800" class="standard-textarea" />
 						</uni-forms-item>
 
 						<uni-forms-item label="赞助商位置">

@@ -26,17 +26,7 @@
 					</view>
 				</swiper-item>
 			</swiper>
-			<!-- <swiper class="header-swiper" :indicator-dots="false" :autoplay="false" :circular="true" :vertical="false"
-				interval="4000" duration="500" indicator-color="rgba(255,255,255,0.4)" indicator-active-color="#FFFFFF"
-				@click="goToCustomizationPage">
-				<swiper-item v-for="(item, index) in swiperList" :key="index">
-					<view class="header-content" @click="handleSwiperItemClick(item, index)">
-						<view class="app-title">{{ item.homeTitle || '猩聚社' }}</view>
-						<view class="app-subtitle">{{ item.homeSlogan || '商友连接·商机分享' }}</view>
-						<view class="app-description">{{ getPageDescription(item) }}</view>
-					</view>
-				</swiper-item>
-			</swiper> -->
+
 
 
 			<view class="search-section">
@@ -732,32 +722,6 @@
 	 * @param {Object} item - 对应的数据项
 	 * @param {Number} index - 数组索引
 	 */
-	// const handleSwiperItemClick = (item, index) => {
-	// 	// 按照需求：第一个(index 0)表示自己
-	// 	if (index === 0) {
-	// 		// 跳转到：我的首页定制页面
-	// 		goToCustomizationPage();
-	// 	} else {
-	// 		// 跳转到：该圈主的圈友列表页
-	// 		// 优先取实名，其次取昵称，再次取企业标题
-	// 		const displayName = item.realName || item.nickname || item.homeTitle || '商友圈';
-
-	// 		// 组装路径并传递 ID 和 姓名
-	// 		const url =
-	// 			`/packages/my-friendList/my-friendList?userId=${item.id}&userName=${encodeURIComponent(displayName)}`;
-
-	// 		console.log(`🚀 准备进入 [${displayName}] 的圈子:`, url);
-
-	// 		uni.navigateTo({
-	// 			url
-	// 		});
-	// 	}
-	// };
-	/**
-	 * [方法] 处理轮播图点击跳转
-	 * @param {Object} item - 对应的数据项
-	 * @param {Number} index - 数组索引
-	 */
 	const handleSwiperItemClick = (item, index) => {
 		// --- 【核心优化点】 ---
 		// 1. 判断是否为最后一项（平台官方展示）
@@ -767,6 +731,7 @@
 		if (item.id === 0 || isLastItem) {
 			console.log('💡 点击了平台官方展示项，跳转到平台介绍页');
 			goToPlatformIntro()
+			return;
 		}
 		// ---------------------
 

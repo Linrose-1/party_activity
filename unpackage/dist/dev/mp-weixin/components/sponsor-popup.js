@@ -229,8 +229,8 @@ const _sfc_main = {
         l: common_vendor.o(($event) => form.value.introduction = $event),
         m: common_vendor.p({
           type: "textarea",
-          placeholder: "请输入200字以内的简介",
-          maxlength: "200",
+          placeholder: "请输入800字以内的简介",
+          maxlength: "800",
           modelValue: form.value.introduction
         }),
         n: common_vendor.p({

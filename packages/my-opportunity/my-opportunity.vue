@@ -20,12 +20,10 @@
 				<!-- 卡片头部：用户信息与状态 -->
 				<view class="post-header">
 					<view class="user-info">
-						<!-- 头像分流：企业Logo 或 个人头像 -->
 						<view class="avatar-wrap">
 							<image
 								:src="post.isEnterprise === 1 ? (post.enterpriseInfo?.logoUrl || defaultAvatar) : post.memberUser.avatar"
 								mode="aspectFill" class="avatar" />
-							<!-- 企业蓝V标识 -->
 							<image v-if="post.isEnterprise === 1" src="/static/icon/企业认证.png" class="blue-v-tag" />
 						</view>
 
@@ -47,11 +45,30 @@
 					</view>
 				</view>
 
+				<!-- 猎伙类型 + 紧急程度标签行（仅猎伙商机展示） -->
+				<view v-if="post.postType == 1 || post.postType === '1'" class="liehuo-meta-row">
+					<view v-if="post.urgentLevel" class="urgency-mini" :class="{
+							'urgency-normal': post.urgentLevel == 1,
+							'urgency-urgent': post.urgentLevel == 2,
+							'urgency-super':  post.urgentLevel == 3
+						}">{{ urgentText(post.urgentLevel) }}</view>
+
+					<template v-if="post.partnerTypes">
+						<view v-for="(typeVal, idx) in post.partnerTypes.split(',').filter(v => v).slice(0, 2)"
+							:key="idx" class="partner-mini">{{ partnerTypeMap[typeVal] || typeVal }}</view>
+					</template>
+
+					<!-- 感兴趣人数气泡 -->
+					<view v-if="post.interestCount > 0" class="interest-bubble">
+						🤝 {{ post.interestCount }} 人感兴趣
+					</view>
+				</view>
+
 				<!-- 帖子标题与文字内容 -->
 				<view class="post-title" v-if="post.postTitle">{{ post.postTitle }}</view>
 				<view class="post-content">{{ post.postContent }}</view>
 
-				<!-- 媒体展示区：视频优先，图片次之 -->
+				<!-- 媒体展示区 -->
 				<view v-if="post.video" class="post-video-container">
 					<video :id="'video-' + post.id" :src="post.video" class="post-video" :show-center-play-btn="true"
 						@click.stop object-fit="cover"></video>
@@ -67,19 +84,27 @@
 
 				<!-- 底部操作按钮区域 -->
 				<view class="card-actions">
-					<!-- 编辑功能：跳转回发布页 -->
+					<!-- 【猎伙专属】感兴趣商友入口 -->
+					<button v-if="post.postType == 1 || post.postType === '1'" class="action-btn interest-btn"
+						@click.stop="goToInterests(post.id)">
+						<uni-icons type="person-filled" size="16" color="#1890FF"></uni-icons>
+						感兴趣商友
+						<text v-if="post.interestCount > 0" class="interest-count-badge">{{ post.interestCount }}</text>
+					</button>
+
+					<!-- 编辑 -->
 					<button class="action-btn edit-btn" @click.stop="handleEdit(post.id)">
 						<uni-icons type="compose" size="16" color="#FF6B00"></uni-icons>
 						编辑
 					</button>
-					<!-- 申诉功能：仅在 hidden 状态开启 -->
+					<!-- 申诉 -->
 					<button class="action-btn appeal-btn" :class="{ 'disabled': post.status !== 'hidden' }"
 						:disabled="post.status !== 'hidden'" @click.stop="openAppealModal(post)">
 						<uni-icons type="chat-filled" size="16"
 							:color="post.status === 'hidden' ? '#3498db' : '#ccc'"></uni-icons>
 						申诉
 					</button>
-					<!-- 删除功能：带二次确认 -->
+					<!-- 删除 -->
 					<button class="action-btn delete-btn" @click.stop="deleteOpportunity(post.id)">
 						<uni-icons type="trash" size="16" color="#e74c3c"></uni-icons>
 						删除
@@ -87,10 +112,8 @@
 				</view>
 			</view>
 
-			<!-- 加载状态提示 -->
 			<uni-load-more v-if="postList.length > 0" :status="loadStatus"></uni-load-more>
 
-			<!-- 列表为空时的空状态引导 -->
 			<view v-if="postList.length === 0 && loadStatus === 'noMore'" class="empty-state-container">
 				<uni-icons type="paperplane-filled" size="60" color="#e0e0e0"></uni-icons>
 				<text class="empty-text">暂时没有符合条件的记录</text>
@@ -99,7 +122,7 @@
 			</view>
 		</view>
 
-		<!-- 申诉内容输入弹窗 -->
+		<!-- 申诉弹窗 -->
 		<uni-popup ref="appealPopup" type="dialog">
 			<uni-popup-dialog mode="input" title="提交申诉" placeholder="请输入申诉详细理由..."
 				@confirm="confirmAppeal"></uni-popup-dialog>
@@ -119,27 +142,44 @@
 	import request from '@/utils/request.js';
 
 	// ==========================================
-	// 1. 响应式变量定义
+	// 1. 响应式变量
 	// ==========================================
-	const postList = ref([]); // 帖子列表数据
-	const pageNo = ref(1); // 当前页码
-	const pageSize = ref(10); // 每页条数
-	const total = ref(0); // 总数
-	const loadStatus = ref('more'); // 加载状态: more | loading | noMore
+	const postList = ref([]);
+	const pageNo = ref(1);
+	const pageSize = ref(10);
+	const total = ref(0);
+	const loadStatus = ref('more');
 
-	const currentTab = ref(0); // 0: 普通商机, 1: 创业猎伙
+	const currentTab = ref(0);
 	const tabs = ref(['普通商机', '创业猎伙']);
-	const isEnterpriseFilter = ref(0); // 0: 个人发布, 1: 企业发布筛选
+	const isEnterpriseFilter = ref(0);
 
-	const appealPopup = ref(null); // 申诉弹窗引用
-	const currentAppealPost = ref(null); // 正在处理的申诉对象
+	const appealPopup = ref(null);
+	const currentAppealPost = ref(null);
 	const defaultAvatar = '/static/icon/default-avatar.png';
 
+	// 猎伙类型映射
+	const partnerTypeMap = {
+		'1': '求贤',
+		'2': '找合伙人',
+		'3': '寻资源',
+		'4': '其他',
+	};
+
+	// 紧急程度文字
+	const urgentText = (level) => {
+		const map = {
+			1: '普通',
+			2: '紧急',
+			3: '特急'
+		};
+		return map[level] || '';
+	};
+
 	// ==========================================
-	// 2. 页面生命周期
+	// 2. 生命周期
 	// ==========================================
 	onShow(() => {
-		// 每次回到页面时执行刷新，保证编辑/发布后的数据同步
 		fetchMyOpportunities(true);
 	});
 
@@ -155,10 +195,6 @@
 	// 3. 核心业务方法
 	// ==========================================
 
-	/**
-	 * [方法] 获取我的商机分页列表
-	 * @param {Boolean} isRefresh - 是否为下拉刷新操作
-	 */
 	const fetchMyOpportunities = async (isRefresh = false) => {
 		if (loadStatus.value === 'loading' && !isRefresh) return;
 
@@ -172,8 +208,8 @@
 		const params = {
 			pageNo: pageNo.value,
 			pageSize: pageSize.value,
-			postType: currentTab.value, // 一级筛选：0-普通, 1-猎伙
-			isEnterprise: isEnterpriseFilter.value // 二级筛选：0-个人, 1-企业
+			postType: currentTab.value,
+			isEnterprise: isEnterpriseFilter.value
 		};
 
 		try {
@@ -193,7 +229,6 @@
 			}
 
 			if (data && data.list) {
-				// 数据加工：处理图片和视频字段
 				const mappedList = data.list.map(item => ({
 					...item,
 					video: item.postVideo || '',
@@ -204,7 +239,6 @@
 				postList.value = isRefresh ? mappedList : [...postList.value, ...mappedList];
 				total.value = data.total || 0;
 
-				// 更新分页状态
 				if (postList.value.length >= total.value) {
 					loadStatus.value = 'noMore';
 				} else {
@@ -221,25 +255,16 @@
 		}
 	};
 
-	/**
-	 * [方法] 切换一级 Tab (商机分类)
-	 */
 	const switchTab = (e) => {
 		currentTab.value = e.currentIndex;
 		fetchMyOpportunities(true);
 	};
 
-	/**
-	 * [方法] 切换二级筛选 (身份类型)
-	 */
 	const switchIdentity = (val) => {
 		isEnterpriseFilter.value = val;
 		fetchMyOpportunities(true);
 	};
 
-	/**
-	 * [方法] 跳转编辑：携带商机 ID 跳转到发布页面
-	 */
 	const handleEdit = (id) => {
 		uni.navigateTo({
 			url: `/packages/home-opportunitiesPublish/home-opportunitiesPublish?id=${id}`
@@ -247,8 +272,15 @@
 	};
 
 	/**
-	 * [方法] 删除商机：包含二次确认逻辑
+	 * 【新增】跳转到猎伙互动信息页
+	 * @param {number|string} id - 商机 ID
 	 */
+	const goToInterests = (id) => {
+		uni.navigateTo({
+			url: `/packages/liehuo-interests/liehuo-interests?id=${id}`
+		});
+	};
+
 	const deleteOpportunity = (id) => {
 		uni.showModal({
 			title: '确认删除',
@@ -280,17 +312,11 @@
 		});
 	};
 
-	/**
-	 * [方法] 申诉操作：打开弹窗
-	 */
 	const openAppealModal = (post) => {
 		currentAppealPost.value = post;
 		appealPopup.value.open();
 	};
 
-	/**
-	 * [方法] 提交申诉：调用申诉接口
-	 */
 	const confirmAppeal = async (content) => {
 		if (!content || !content.trim()) return uni.showToast({
 			title: '请输入申诉内容',
@@ -321,12 +347,9 @@
 	};
 
 	// ==========================================
-	// 4. 辅助工具函数
+	// 4. 工具函数
 	// ==========================================
 
-	/**
-	 * [工具] 状态码转换：返回对应的文字和 CSS 类名
-	 */
 	const getStatusInfo = (post) => {
 		const statusMap = {
 			'active': {
@@ -360,18 +383,12 @@
 		};
 	};
 
-	/**
-	 * [工具] 时间戳格式化
-	 */
 	const formatTimestamp = (ts) => {
 		if (!ts) return '';
 		const date = new Date(ts);
 		return `${date.getFullYear()}.${date.getMonth() + 1}.${date.getDate()} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
 	};
 
-	/**
-	 * [工具] 图片预览
-	 */
 	const previewImage = (urls, current) => {
 		uni.previewImage({
 			urls,
@@ -379,18 +396,12 @@
 		});
 	};
 
-	/**
-	 * [跳转] 前往详情
-	 */
 	const skipCommercialDetail = (id) => {
 		uni.navigateTo({
 			url: `/packages/home-commercialDetail/home-commercialDetail?id=${id}`
 		});
 	};
 
-	/**
-	 * [跳转] 前往发布页
-	 */
 	const goToPublishPage = () => {
 		uni.navigateTo({
 			url: '/packages/home-opportunitiesPublish/home-opportunitiesPublish'
@@ -406,7 +417,7 @@
 		min-height: 100vh;
 	}
 
-	/* 1. 筛选栏样式 */
+	/* 1. 筛选栏 */
 	.segmented-wrapper {
 		background-color: #fff;
 		padding: 20rpx 40rpx;
@@ -438,7 +449,7 @@
 		}
 	}
 
-	/* 2. 帖子卡片布局 */
+	/* 2. 帖子卡片 */
 	.post-list {
 		padding-top: 20rpx;
 	}
@@ -499,7 +510,7 @@
 		}
 	}
 
-	/* 状态标签样式 */
+	/* 状态标签 */
 	.status-tag {
 		font-size: 20rpx;
 		padding: 6rpx 16rpx;
@@ -527,6 +538,61 @@
 		color: #999;
 	}
 
+	/* ===== 猎伙元信息标签行 ===== */
+	.liehuo-meta-row {
+		display: flex;
+		align-items: center;
+		flex-wrap: wrap;
+		gap: 10rpx;
+		margin-bottom: 16rpx;
+	}
+
+	/* 紧急程度小标签 */
+	.urgency-mini {
+		font-size: 20rpx;
+		padding: 4rpx 14rpx;
+		border-radius: 20rpx;
+		font-weight: bold;
+	}
+
+	.urgency-normal {
+		background: #f5f5f5;
+		color: #888;
+	}
+
+	.urgency-urgent {
+		background: #FF8C00;
+		color: #fff;
+	}
+
+	.urgency-super {
+		background: #FF3B30;
+		color: #fff;
+	}
+
+	/* 猎伙类型小标签 */
+	.partner-mini {
+		font-size: 20rpx;
+		color: #1890FF;
+		background: #E6F7FF;
+		border: 1rpx solid rgba(24, 144, 255, 0.3);
+		padding: 4rpx 14rpx;
+		border-radius: 20rpx;
+	}
+
+	/* 感兴趣人数气泡 */
+	.interest-bubble {
+		font-size: 20rpx;
+		color: #52c41a;
+		background: #f6ffed;
+		border: 1rpx solid #b7eb8f;
+		padding: 4rpx 14rpx;
+		border-radius: 20rpx;
+		margin-left: auto;
+		/* 靠右 */
+	}
+
+	/* 帖子内容 */
 	.post-title {
 		font-size: 30rpx;
 		font-weight: bold;
@@ -541,7 +607,7 @@
 		margin-bottom: 20rpx;
 	}
 
-	/* 3. 媒体展示样式 */
+	/* 3. 媒体 */
 	.post-images {
 		display: grid;
 		gap: 8rpx;
@@ -595,14 +661,17 @@
 	.card-actions {
 		display: flex;
 		justify-content: flex-end;
-		gap: 20rpx;
+		align-items: center;
+		flex-wrap: wrap;
+		gap: 16rpx;
 		border-top: 1rpx solid #F8F8F8;
 		padding-top: 24rpx;
 
 		.action-btn {
 			display: flex;
 			align-items: center;
-			padding: 12rpx 28rpx;
+			gap: 6rpx;
+			padding: 12rpx 24rpx;
 			font-size: 24rpx;
 			border-radius: 40rpx;
 			background: #F5F5F5;
@@ -626,6 +695,33 @@
 
 		.appeal-btn.disabled {
 			opacity: 0.4;
+		}
+
+		/* 感兴趣商友按钮 */
+		.interest-btn {
+			background: #EAF4FF;
+			color: #1890FF;
+			border: 1rpx solid rgba(24, 144, 255, 0.25);
+			margin-right: auto;
+			/* 靠左，与编辑/删除分开 */
+		}
+
+		.interest-btn:active {
+			background: #d6eaff;
+		}
+
+		/* 红点数字徽章 */
+		.interest-count-badge {
+			background: #ff4d4f;
+			color: #fff;
+			font-size: 18rpx;
+			min-width: 28rpx;
+			height: 28rpx;
+			border-radius: 14rpx;
+			text-align: center;
+			line-height: 28rpx;
+			padding: 0 6rpx;
+			margin-left: 4rpx;
 		}
 	}
 

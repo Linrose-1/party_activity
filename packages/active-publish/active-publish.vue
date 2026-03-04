@@ -176,7 +176,7 @@
 
 				<uni-forms :label-width="80" label-position="top">
 					<uni-forms-item label="聚会介绍" required>
-						<uni-easyinput type="textarea" autoHeight v-model="form.activityDescription"
+						<uni-easyinput type="textarea" autoHeight v-model="form.activityDescription" maxlength="2000"
 							placeholder="请输入聚会详细介绍，让大家更了解活动内容~" :inputBorder="true" :styles="inputStyles" />
 					</uni-forms-item>
 				</uni-forms>
@@ -195,13 +195,13 @@
 						<!-- 【修改】改用原生 input，手动加样式 -->
 						<view class="native-input-wrapper mb-20">
 							<input v-model="item.sessionTitle" placeholder="请输入环节标题" class="native-input"
-								placeholder-class="input-placeholder" />
+								placeholder-class="input-placeholder" maxlength="200"/>
 						</view>
 
 						<!-- 【修改】改用原生 textarea -->
 						<view class="native-input-wrapper">
 							<textarea v-model="item.sessionDescription" placeholder="请输入环节描述" class="native-textarea"
-								placeholder-class="input-placeholder" auto-height />
+								placeholder-class="input-placeholder" auto-height maxlength="800"/>
 						</view>
 					</view>
 				</view>

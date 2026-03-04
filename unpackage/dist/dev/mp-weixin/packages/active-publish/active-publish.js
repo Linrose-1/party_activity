@@ -851,6 +851,7 @@ const _sfc_main = {
         ap: common_vendor.p({
           type: "textarea",
           autoHeight: true,
+          maxlength: "2000",
           placeholder: "请输入聚会详细介绍，让大家更了解活动内容~",
           inputBorder: true,
           styles: inputStyles.value,

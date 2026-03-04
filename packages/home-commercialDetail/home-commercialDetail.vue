@@ -95,7 +95,7 @@
 					</view>
 
 					<!-- 感兴趣人数 -->
-					<view class="liehuo-interest-count" v-if="postDetail.interestCount > 0" @click="goToInterests">
+					<view class="liehuo-interest-count" v-if="postDetail.interestCount > 0">
 						<uni-icons type="person-filled" size="14" color="#1890FF"></uni-icons>
 						<text>{{ postDetail.interestCount }} 人感兴趣</text>
 					</view>
@@ -631,7 +631,8 @@
 
 					// partnerTypes 为逗号分隔字符串，转为标签数组
 					postDetail.partnerTypeLabels = item.partnerTypes ?
-						item.partnerTypes.split(',').filter(v => v).map(v => partnerTypeMap[v] || v) : [];
+						item.partnerTypes.split(',').filter(v => v).map(v => partnerTypeMap[v] || v) :
+						[];
 
 					// expectedInvestment 为 JSON 字符串，解析为对象
 					if (item.expectedInvestment) {
@@ -646,7 +647,8 @@
 
 					// 感兴趣相关
 					postDetail.interestCount = item.interestCount || 0;
-					postDetail.isInterested = item.isInterested === true || item.isInterested === 1;
+					// userInterested: 0-未感兴趣 1-已感兴趣
+					postDetail.isInterested = item.userInterested === 1;
 				}
 				// ===== 猎伙字段还原结束 =====
 
@@ -1212,13 +1214,6 @@
 			`&avatar=${encodeURIComponent(user.avatar)}`;
 		uni.navigateTo({
 			url
-		});
-	};
-
-	// 跳转到对猎伙感兴趣商友页
-	const goToInterests = () => {
-		uni.navigateTo({
-			url: `/packages/liehuo-interests/liehuo-interests?id=${postDetail.id}`
 		});
 	};
 

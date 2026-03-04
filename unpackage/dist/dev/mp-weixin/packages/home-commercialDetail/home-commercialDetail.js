@@ -282,7 +282,7 @@ const _sfc_main = {
               postDetail.expectedInvestmentObj = null;
             }
             postDetail.interestCount = item.interestCount || 0;
-            postDetail.isInterested = item.isInterested === true || item.isInterested === 1;
+            postDetail.isInterested = item.userInterested === 1;
           }
           if (loggedInUserId.value && item.userId && loggedInUserId.value != item.userId) {
             showFollowButton.value = true;
@@ -304,7 +304,7 @@ const _sfc_main = {
           });
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at packages/home-commercialDetail/home-commercialDetail.vue:675", "获取商机详情失败:", error);
+        common_vendor.index.__f__("error", "at packages/home-commercialDetail/home-commercialDetail.vue:677", "获取商机详情失败:", error);
         common_vendor.index.showToast({
           title: "网络请求异常",
           icon: "none"
@@ -471,7 +471,7 @@ const _sfc_main = {
           comments.value = [];
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at packages/home-commercialDetail/home-commercialDetail.vue:869", "请求评论列表异常:", error);
+        common_vendor.index.__f__("error", "at packages/home-commercialDetail/home-commercialDetail.vue:871", "请求评论列表异常:", error);
       }
     };
     const replyComment = async (comment) => {
@@ -537,7 +537,7 @@ const _sfc_main = {
           });
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at packages/home-commercialDetail/home-commercialDetail.vue:935", "创建评论异常:", error);
+        common_vendor.index.__f__("error", "at packages/home-commercialDetail/home-commercialDetail.vue:937", "创建评论异常:", error);
         common_vendor.index.showToast({
           title: "评论失败，请稍后重试",
           icon: "none"
@@ -806,11 +806,6 @@ const _sfc_main = {
         url
       });
     };
-    const goToInterests = () => {
-      common_vendor.index.navigateTo({
-        url: `/packages/liehuo-interests/liehuo-interests?id=${postDetail.id}`
-      });
-    };
     const scrollToCommentsSection = () => {
       setTimeout(() => {
         const query = common_vendor.index.createSelectorQuery();
@@ -870,7 +865,7 @@ const _sfc_main = {
           icon: "none"
         }),
         fail: (err) => {
-          common_vendor.index.__f__("error", "at packages/home-commercialDetail/home-commercialDetail.vue:1289", "setClipboardData failed:", err);
+          common_vendor.index.__f__("error", "at packages/home-commercialDetail/home-commercialDetail.vue:1284", "setClipboardData failed:", err);
           common_vendor.index.showToast({
             title: "复制失败",
             icon: "none"
@@ -966,104 +961,103 @@ const _sfc_main = {
           size: "14",
           color: "#1890FF"
         }),
-        L: common_vendor.t(postDetail.interestCount),
-        M: common_vendor.o(goToInterests)
+        L: common_vendor.t(postDetail.interestCount)
       } : {}) : {}, {
-        N: postDetail.video
+        M: postDetail.video
       }, postDetail.video ? {
-        O: postDetail.video
+        N: postDetail.video
       } : postDetail.images && postDetail.images.length ? {
-        Q: common_vendor.f(postDetail.images, (image, imgIndex, i0) => {
+        P: common_vendor.f(postDetail.images, (image, imgIndex, i0) => {
           return {
             a: image,
             b: imgIndex,
             c: common_vendor.o(($event) => previewImage(postDetail.images, imgIndex), imgIndex)
           };
         }),
-        R: common_vendor.n("images-count-" + postDetail.images.length)
+        Q: common_vendor.n("images-count-" + postDetail.images.length)
       } : {}, {
-        P: postDetail.images && postDetail.images.length,
-        S: common_vendor.f(postDetail.tags, (tag, index, i0) => {
+        O: postDetail.images && postDetail.images.length,
+        R: common_vendor.f(postDetail.tags, (tag, index, i0) => {
           return {
             a: common_vendor.t(tag),
             b: index
           };
         }),
-        T: common_vendor.p({
+        S: common_vendor.p({
           type: postDetail.userAction === "like" ? "hand-up-filled" : "hand-up",
           size: "18",
           color: postDetail.userAction === "like" ? "#e74c3c" : "#666"
         }),
-        U: common_vendor.t(postDetail.likes),
-        V: postDetail.userAction === "like" ? 1 : "",
-        W: common_vendor.o(($event) => toggleAction(postDetail, "like")),
-        X: common_vendor.p({
+        T: common_vendor.t(postDetail.likes),
+        U: postDetail.userAction === "like" ? 1 : "",
+        V: common_vendor.o(($event) => toggleAction(postDetail, "like")),
+        W: common_vendor.p({
           type: postDetail.userAction === "dislike" ? "hand-down-filled" : "hand-down",
           size: "18",
           color: postDetail.userAction === "dislike" ? "#3498db" : "#666"
         }),
-        Y: common_vendor.t(postDetail.dislikes),
-        Z: postDetail.userAction === "dislike" ? 1 : "",
-        aa: common_vendor.o(($event) => toggleAction(postDetail, "dislike")),
-        ab: common_vendor.p({
+        X: common_vendor.t(postDetail.dislikes),
+        Y: postDetail.userAction === "dislike" ? 1 : "",
+        Z: common_vendor.o(($event) => toggleAction(postDetail, "dislike")),
+        aa: common_vendor.p({
           type: "redo",
           size: "18",
           color: "#666"
         }),
-        ac: common_vendor.o(openSharePopup),
-        ad: common_vendor.p({
+        ab: common_vendor.o(openSharePopup),
+        ac: common_vendor.p({
           type: postDetail.saved ? "star-filled" : "star",
           size: "18",
           color: postDetail.saved ? "#FF6A00" : "#666"
         }),
-        ae: common_vendor.t(postDetail.saved ? "已收藏" : "收藏"),
-        af: postDetail.saved ? 1 : "",
-        ag: common_vendor.o(($event) => toggleBookmark(postDetail)),
-        ah: loggedInUserId.value && loggedInUserId.value === postDetail.userId
+        ad: common_vendor.t(postDetail.saved ? "已收藏" : "收藏"),
+        ae: postDetail.saved ? 1 : "",
+        af: common_vendor.o(($event) => toggleBookmark(postDetail)),
+        ag: loggedInUserId.value && loggedInUserId.value === postDetail.userId
       }, loggedInUserId.value && loggedInUserId.value === postDetail.userId ? {
-        ai: common_vendor.p({
+        ah: common_vendor.p({
           type: "trash",
           size: "20",
           color: "#e74c3c"
         }),
-        aj: common_vendor.o(deletePost)
+        ai: common_vendor.o(deletePost)
       } : {}, {
-        ak: postDetail.postType == 1 && loggedInUserId.value && loggedInUserId.value !== postDetail.userId
+        aj: postDetail.postType == 1 && loggedInUserId.value && loggedInUserId.value !== postDetail.userId
       }, postDetail.postType == 1 && loggedInUserId.value && loggedInUserId.value !== postDetail.userId ? {
-        al: common_vendor.t(postDetail.isInterested ? "✅" : "🤝"),
-        am: common_vendor.t(postDetail.isInterested ? "已表达兴趣" : "感兴趣"),
-        an: postDetail.isInterested ? 1 : "",
-        ao: common_vendor.o(toggleInterest)
+        ak: common_vendor.t(postDetail.isInterested ? "✅" : "🤝"),
+        al: common_vendor.t(postDetail.isInterested ? "已表达兴趣" : "感兴趣"),
+        am: postDetail.isInterested ? 1 : "",
+        an: common_vendor.o(toggleInterest)
       } : {}, {
-        ap: postDetail && postDetail.isReadTrace === 1 && viewerTotal.value > 0
+        ao: postDetail && postDetail.isReadTrace === 1 && viewerTotal.value > 0
       }, postDetail && postDetail.isReadTrace === 1 && viewerTotal.value > 0 ? common_vendor.e({
-        aq: common_vendor.t(viewerTotal.value),
-        ar: common_vendor.p({
+        ap: common_vendor.t(viewerTotal.value),
+        aq: common_vendor.p({
           type: "right",
           size: "14",
           color: "#999"
         }),
-        as: common_vendor.o(goToTraceList),
-        at: common_vendor.f(viewerList.value, (item, index, i0) => {
+        ar: common_vendor.o(goToTraceList),
+        as: common_vendor.f(viewerList.value, (item, index, i0) => {
           return {
             a: item.memberUser.avatar,
             b: item.id
           };
         }),
-        av: viewerTotal.value > 7
+        at: viewerTotal.value > 7
       }, viewerTotal.value > 7 ? {} : {}, {
-        aw: common_vendor.t(viewerTotal.value),
-        ax: common_vendor.o(goToTraceList)
+        av: common_vendor.t(viewerTotal.value),
+        aw: common_vendor.o(goToTraceList)
       }) : {}, {
-        ay: postDetail.commentFlag
+        ax: postDetail.commentFlag
       }, postDetail.commentFlag ? common_vendor.e({
-        az: common_vendor.p({
+        ay: common_vendor.p({
           type: "chatbubble-filled",
           size: "20",
           color: "#FF6A00"
         }),
-        aA: common_vendor.t(comments.value.length),
-        aB: common_vendor.f(comments.value, (comment, k0, i0) => {
+        az: common_vendor.t(comments.value.length),
+        aA: common_vendor.f(comments.value, (comment, k0, i0) => {
           return common_vendor.e({
             a: comment.avatar,
             b: common_vendor.o(($event) => !comment.anonymous && navigateToBusinessCard({
@@ -1091,81 +1085,81 @@ const _sfc_main = {
             n: comment.id
           });
         }),
-        aC: common_vendor.p({
+        aB: common_vendor.p({
           type: "chatbubble",
           size: "16",
           color: "#666"
         }),
-        aD: comments.value.length === 0
+        aC: comments.value.length === 0
       }, comments.value.length === 0 ? {} : {}, {
-        aE: common_vendor.p({
+        aD: common_vendor.p({
           type: isAnonymous.value ? "eye-slash-filled" : "eye-filled",
           size: "18",
           color: isAnonymous.value ? "#FF6A00" : "#999"
         }),
-        aF: common_vendor.t(isAnonymous.value ? "匿名" : "显名"),
-        aG: isAnonymous.value ? 1 : "",
-        aH: common_vendor.o(($event) => isAnonymous.value = !isAnonymous.value),
-        aI: commentInputPlaceholder.value,
-        aJ: newCommentText.value,
-        aK: common_vendor.o(($event) => newCommentText.value = $event.detail.value),
-        aL: common_vendor.p({
+        aE: common_vendor.t(isAnonymous.value ? "匿名" : "显名"),
+        aF: isAnonymous.value ? 1 : "",
+        aG: common_vendor.o(($event) => isAnonymous.value = !isAnonymous.value),
+        aH: commentInputPlaceholder.value,
+        aI: newCommentText.value,
+        aJ: common_vendor.o(($event) => newCommentText.value = $event.detail.value),
+        aK: common_vendor.p({
           type: "paperplane-filled",
           size: "20",
           color: "#fff"
         }),
-        aM: newCommentText.value.trim().length > 0 ? 1 : "",
-        aN: common_vendor.o(addComment),
-        aO: keyboardHeight.value + "px"
+        aL: newCommentText.value.trim().length > 0 ? 1 : "",
+        aM: common_vendor.o(addComment),
+        aN: keyboardHeight.value + "px"
       }) : {
-        aP: common_vendor.p({
+        aO: common_vendor.p({
           type: "info-filled",
           size: "20",
           color: "#999"
         })
       }, {
-        aQ: customShareTitle.value,
-        aR: common_vendor.o(($event) => customShareTitle.value = $event.detail.value),
-        aS: common_vendor.p({
+        aP: customShareTitle.value,
+        aQ: common_vendor.o(($event) => customShareTitle.value = $event.detail.value),
+        aR: common_vendor.p({
           type: "weixin",
           size: "30",
           color: "#07c160"
         }),
-        aT: common_vendor.p({
+        aS: common_vendor.p({
           type: "pyq",
           size: "30",
           color: "#53a046"
         }),
-        aU: common_vendor.o(guideShareTimeline),
-        aV: common_vendor.o(closeSharePopup),
-        aW: common_vendor.sr(sharePopup, "8303b14f-16", {
+        aT: common_vendor.o(guideShareTimeline),
+        aU: common_vendor.o(closeSharePopup),
+        aV: common_vendor.sr(sharePopup, "8303b14f-16", {
           "k": "sharePopup"
         }),
-        aX: common_vendor.p({
+        aW: common_vendor.p({
           type: "bottom",
           ["background-color"]: "#fff"
         }),
-        aY: showTimelineGuide.value
+        aX: showTimelineGuide.value
       }, showTimelineGuide.value ? {
-        aZ: common_assets._imports_0$3,
-        ba: common_vendor.o(hideTimelineGuide)
+        aY: common_assets._imports_0$3,
+        aZ: common_vendor.o(hideTimelineGuide)
       } : {}, {
-        bb: copyMenu.show
+        ba: copyMenu.show
       }, copyMenu.show ? {
-        bc: common_vendor.o(executeCopy),
-        bd: common_vendor.o(() => {
+        bb: common_vendor.o(executeCopy),
+        bc: common_vendor.o(() => {
         }),
-        be: common_vendor.o(hideCopyMenu)
+        bd: common_vendor.o(hideCopyMenu)
       } : {}, {
-        bf: showInterestSuccessModal.value
+        be: showInterestSuccessModal.value
       }, showInterestSuccessModal.value ? {
-        bg: common_vendor.o(closeInterestModal),
-        bh: common_vendor.o(goToMoreLiehuo),
-        bi: common_vendor.o(() => {
+        bf: common_vendor.o(closeInterestModal),
+        bg: common_vendor.o(goToMoreLiehuo),
+        bh: common_vendor.o(() => {
         }),
-        bj: common_vendor.o(closeInterestModal)
+        bi: common_vendor.o(closeInterestModal)
       } : {}, {
-        bk: common_vendor.sr(pointsPopup, "8303b14f-19", {
+        bj: common_vendor.sr(pointsPopup, "8303b14f-19", {
           "k": "pointsPopup"
         })
       });

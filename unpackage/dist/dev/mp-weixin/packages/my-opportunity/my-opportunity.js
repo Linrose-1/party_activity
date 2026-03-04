@@ -32,6 +32,20 @@ const _sfc_main = {
     const isEnterpriseFilter = common_vendor.ref(0);
     const appealPopup = common_vendor.ref(null);
     const currentAppealPost = common_vendor.ref(null);
+    const partnerTypeMap = {
+      "1": "求贤",
+      "2": "找合伙人",
+      "3": "寻资源",
+      "4": "其他"
+    };
+    const urgentText = (level) => {
+      const map = {
+        1: "普通",
+        2: "紧急",
+        3: "特急"
+      };
+      return map[level] || "";
+    };
     common_vendor.onShow(() => {
       fetchMyOpportunities(true);
     });
@@ -54,9 +68,7 @@ const _sfc_main = {
         pageNo: pageNo.value,
         pageSize: pageSize.value,
         postType: currentTab.value,
-        // 一级筛选：0-普通, 1-猎伙
         isEnterprise: isEnterpriseFilter.value
-        // 二级筛选：0-个人, 1-企业
       };
       try {
         const {
@@ -93,7 +105,7 @@ const _sfc_main = {
         }
       } catch (e) {
         loadStatus.value = "more";
-        common_vendor.index.__f__("error", "at packages/my-opportunity/my-opportunity.vue:220", "数据加载异常:", e);
+        common_vendor.index.__f__("error", "at packages/my-opportunity/my-opportunity.vue:254", "数据加载异常:", e);
       }
     };
     const switchTab = (e) => {
@@ -107,6 +119,11 @@ const _sfc_main = {
     const handleEdit = (id) => {
       common_vendor.index.navigateTo({
         url: `/packages/home-opportunitiesPublish/home-opportunitiesPublish?id=${id}`
+      });
+    };
+    const goToInterests = (id) => {
+      common_vendor.index.navigateTo({
+        url: `/packages/liehuo-interests/liehuo-interests?id=${id}`
       });
     };
     const deleteOpportunity = (id) => {
@@ -250,43 +267,79 @@ const _sfc_main = {
             f: common_vendor.t(formatTimestamp(post.createTime)),
             g: common_vendor.t(getStatusInfo(post).text),
             h: common_vendor.n(getStatusInfo(post).class),
-            i: post.postTitle
-          }, post.postTitle ? {
-            j: common_vendor.t(post.postTitle)
+            i: post.postType == 1 || post.postType === "1"
+          }, post.postType == 1 || post.postType === "1" ? common_vendor.e({
+            j: post.urgentLevel
+          }, post.urgentLevel ? {
+            k: common_vendor.t(urgentText(post.urgentLevel)),
+            l: post.urgentLevel == 1 ? 1 : "",
+            m: post.urgentLevel == 2 ? 1 : "",
+            n: post.urgentLevel == 3 ? 1 : ""
           } : {}, {
-            k: common_vendor.t(post.postContent),
-            l: post.video
+            o: post.partnerTypes
+          }, post.partnerTypes ? {
+            p: common_vendor.f(post.partnerTypes.split(",").filter((v) => v).slice(0, 2), (typeVal, idx, i1) => {
+              return {
+                a: common_vendor.t(partnerTypeMap[typeVal] || typeVal),
+                b: idx
+              };
+            })
+          } : {}, {
+            q: post.interestCount > 0
+          }, post.interestCount > 0 ? {
+            r: common_vendor.t(post.interestCount)
+          } : {}) : {}, {
+            s: post.postTitle
+          }, post.postTitle ? {
+            t: common_vendor.t(post.postTitle)
+          } : {}, {
+            v: common_vendor.t(post.postContent),
+            w: post.video
           }, post.video ? {
-            m: "video-" + post.id,
-            n: post.video,
-            o: common_vendor.o(() => {
+            x: "video-" + post.id,
+            y: post.video,
+            z: common_vendor.o(() => {
             }, post.id)
           } : post.images && post.images.length > 0 ? {
-            q: common_vendor.f(post.images, (image, imgIndex, i1) => {
+            B: common_vendor.f(post.images, (image, imgIndex, i1) => {
               return {
                 a: image,
                 b: common_vendor.o(($event) => previewImage(post.images, imgIndex), imgIndex),
                 c: imgIndex
               };
             }),
-            r: common_vendor.n("images-count-" + post.images.length)
+            C: common_vendor.n("images-count-" + post.images.length)
           } : {}, {
-            p: post.images && post.images.length > 0,
-            s: "b7876dfc-2-" + i0,
-            t: common_vendor.o(($event) => handleEdit(post.id), post.id),
-            v: "b7876dfc-3-" + i0,
-            w: common_vendor.p({
+            A: post.images && post.images.length > 0,
+            D: post.postType == 1 || post.postType === "1"
+          }, post.postType == 1 || post.postType === "1" ? common_vendor.e({
+            E: "b7876dfc-2-" + i0,
+            F: common_vendor.p({
+              type: "person-filled",
+              size: "16",
+              color: "#1890FF"
+            }),
+            G: post.interestCount > 0
+          }, post.interestCount > 0 ? {
+            H: common_vendor.t(post.interestCount)
+          } : {}, {
+            I: common_vendor.o(($event) => goToInterests(post.id), post.id)
+          }) : {}, {
+            J: "b7876dfc-3-" + i0,
+            K: common_vendor.o(($event) => handleEdit(post.id), post.id),
+            L: "b7876dfc-4-" + i0,
+            M: common_vendor.p({
               type: "chat-filled",
               size: "16",
               color: post.status === "hidden" ? "#3498db" : "#ccc"
             }),
-            x: post.status !== "hidden" ? 1 : "",
-            y: post.status !== "hidden",
-            z: common_vendor.o(($event) => openAppealModal(post), post.id),
-            A: "b7876dfc-4-" + i0,
-            B: common_vendor.o(($event) => deleteOpportunity(post.id), post.id),
-            C: post.id,
-            D: common_vendor.o(($event) => skipCommercialDetail(post.id), post.id)
+            N: post.status !== "hidden" ? 1 : "",
+            O: post.status !== "hidden",
+            P: common_vendor.o(($event) => openAppealModal(post), post.id),
+            Q: "b7876dfc-5-" + i0,
+            R: common_vendor.o(($event) => deleteOpportunity(post.id), post.id),
+            S: post.id,
+            T: common_vendor.o(($event) => skipCommercialDetail(post.id), post.id)
           });
         }),
         h: common_vendor.p({
@@ -325,7 +378,7 @@ const _sfc_main = {
           title: "提交申诉",
           placeholder: "请输入申诉详细理由..."
         }),
-        r: common_vendor.sr(appealPopup, "b7876dfc-7", {
+        r: common_vendor.sr(appealPopup, "b7876dfc-8", {
           "k": "appealPopup"
         }),
         s: common_vendor.p({
