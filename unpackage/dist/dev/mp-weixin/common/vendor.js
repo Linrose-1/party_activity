@@ -7299,7 +7299,7 @@ function initOnError() {
 function initRuntimeSocketService() {
   const hosts = "192.168.110.17,127.0.0.1";
   const port = "8090";
-  const id = "mp-weixin_1eFl2j";
+  const id = "mp-weixin_0K2ODo";
   const lazy = typeof swan !== "undefined";
   let restoreError = lazy ? () => {
   } : initOnError();
@@ -8749,6 +8749,12 @@ const subPackages = [
         path: "store-activity-list/store-activity-list",
         style: {
           navigationBarTitleText: "聚店历史聚会列表"
+        }
+      },
+      {
+        path: "liehuo-interests/liehuo-interests",
+        style: {
+          navigationBarTitleText: "感兴趣商友列表"
         }
       }
     ]

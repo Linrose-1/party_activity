@@ -622,6 +622,13 @@
 				{
 					"navigationBarTitleText" : "聚店历史聚会列表"
 				}
+			},
+			{
+				"path" : "liehuo-interests/liehuo-interests",
+				"style" : 
+				{
+					"navigationBarTitleText" : "感兴趣商友列表"
+				}
 			}
 			// 如果还有其他页面要放进这个分包，继续在这里加
 		]

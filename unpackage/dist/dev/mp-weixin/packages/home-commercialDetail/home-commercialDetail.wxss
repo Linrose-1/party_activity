@@ -13,7 +13,6 @@
 		flex-direction: column;
 }
 .container.data-v-8303b14f {
-		/* 为了让页面内容不被底部评论框遮挡，可以根据 add-comment 的高度动态调整 */
 		padding-bottom: 140rpx;
 }
 .comments-disabled-message.data-v-8303b14f {
@@ -25,7 +24,7 @@
 }
 
 	/* ==================================================================
-	 * 商机卡片 (.opportunity-card)
+	 * 商机卡片
 	 * ================================================================== */
 .opportunity-card.data-v-8303b14f {
 		background: white;
@@ -55,8 +54,6 @@
 		align-items: center;
 		margin-bottom: 36rpx;
 }
-
-	/* 详情页作者区域加固 */
 .name-and-badge.data-v-8303b14f {
 		display: flex;
 		align-items: center;
@@ -69,13 +66,9 @@
 		width: 112rpx;
 		height: 112rpx;
 }
-
-	/* 详情页头像圆角控制 */
 .author-avatar.is-ent.data-v-8303b14f {
 		border-radius: 24rpx !important;
 }
-
-	/* 右下角蓝V详情版 */
 .blue-v-badge-detail.data-v-8303b14f {
 		position: absolute;
 		bottom: -2rpx;
@@ -87,8 +80,6 @@
 		border: 4rpx solid #fff;
 		z-index: 5;
 }
-
-	/* 认证勋章设计 (详情版) */
 .badge-premium-detail.data-v-8303b14f {
 		display: flex;
 		align-items: center;
@@ -125,54 +116,27 @@
 		box-shadow: 0 6rpx 16rpx rgba(255, 106, 0, 0.3);
 		transition: transform 0.3s;
 }
-.author-avatar.data-v-8303b14f:active {
-		transform: scale(1.05);
-}
-.avatar-tooltip.data-v-8303b14f {
-		position: absolute;
-		bottom: -56rpx;
-		left: 50%;
-		transform: translateX(-50%);
-		color: #888;
-		font-size: 22rpx;
-		padding: 8rpx 20rpx;
-		border-radius: 30rpx;
-		white-space: nowrap;
-		opacity: 0;
-		transition: opacity 0.3s;
-		pointer-events: none;
-}
 .author-details.data-v-8303b14f {
 		margin-left: 30rpx;
 		flex: 1;
 		min-width: 0;
 		overflow: hidden;
-		/* 让内部元素垂直排列 */
 		display: flex;
 		flex-direction: column;
 		justify-content: center;
-		/* 垂直居中 */
 }
 .author-name.data-v-8303b14f {
 		font-weight: 700;
 		font-size: 36rpx;
 		color: #333;
 		margin-bottom: 6rpx;
-
-		/* 移除单行省略样式，允许换行 */
 		white-space: normal;
-		/* 允许正常换行 */
 		word-break: break-all;
-		/* 允许在任意字符处换行，防止长英文单词溢出 */
-		/* 移除 overflow: hidden 和 text-overflow: ellipsis */
 }
-
-	/* 时间和按钮的容器样式 */
 .time-and-actions.data-v-8303b14f {
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		/* 让时间和按钮分别靠两边 */
 }
 .post-time.data-v-8303b14f {
 		font-size: 26rpx;
@@ -184,15 +148,36 @@
 		margin-right: 10rpx;
 }
 
-	/* 按钮组容器 */
-.owner-action-group.data-v-8303b14f {
+	/* --- 关注/编辑按钮 --- */
+.follow-button.data-v-8303b14f {
+		background-color: #FF6A00;
+		color: white;
+		border: none;
+		border-radius: 40rpx;
+		padding: 10rpx 28rpx;
+		font-size: 26rpx;
+		font-weight: 500;
+		white-space: nowrap;
+		line-height: 1.5;
+		height: auto;
 		display: flex;
 		align-items: center;
-		gap: 16rpx;
-		/* 两个按钮之间的间距 */
+		justify-content: center;
+		box-shadow: 0 2rpx 8rpx rgba(255, 106, 0, 0.2);
+		flex-shrink: 0;
 }
-
-	/* 编辑按钮样式 - 参考首页风格 */
+.follow-button.mini-style.data-v-8303b14f {
+		padding: 6rpx 20rpx;
+		font-size: 24rpx;
+}
+.follow-button.data-v-8303b14f::after {
+		border: none;
+}
+.follow-button.followed.data-v-8303b14f {
+		background: #e0e0e0;
+		color: #666;
+		box-shadow: none;
+}
 .edit-button-detail.data-v-8303b14f {
 		display: flex;
 		align-items: center;
@@ -200,7 +185,6 @@
 		gap: 6rpx;
 		padding: 8rpx 24rpx;
 		background-color: #FFF5EE;
-		/* 浅橙色背景 */
 		border: 1rpx solid rgba(255, 106, 0, 0.3);
 		border-radius: 40rpx;
 		height: auto;
@@ -212,102 +196,14 @@
 		color: #FF6A00;
 		font-weight: bold;
 }
+.edit-button-detail.data-v-8303b14f::after {
+		border: none;
+}
 .edit-button-detail.data-v-8303b14f:active {
 		background-color: #FFE8D9;
 }
 
-	/* 删除按钮样式 - 增强视觉区分 */
-.delete-post-button-detail.data-v-8303b14f {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		gap: 4rpx;
-		padding: 6rpx 20rpx;
-		background-color: #FFF5F5;
-		border: 1rpx solid rgba(231, 76, 60, 0.2);
-		border-radius: 40rpx;
-		color: #e74c3c;
-		font-size: 24rpx;
-		font-weight: bold;
-		line-height: 1.4;
-}
-.interaction-btn.delete-action.data-v-8303b14f {
-		margin-left: auto;
-		/* 如果想让删除图标靠最右侧，可以开启这行 */
-		padding: 10rpx;
-}
-.interaction-btn.delete-action.data-v-8303b14f:active {
-		background: rgba(231, 76, 60, 0.1);
-		/* 点击时浅红色反馈 */
-		border-radius: 50%;
-}
-
-	/* 统一取消原生按钮边框 */
-.edit-button-detail.data-v-8303b14f::after,
-	.delete-post-button-detail.data-v-8303b14f::after {
-		border: none;
-}
-.edit-button-detail.data-v-8303b14f:active,
-	.delete-post-button-detail.data-v-8303b14f:active {
-		opacity: 0.7;
-}
-.follow-button.data-v-8303b14f {
-		background-color: #FF6A00;
-		color: white;
-		border: none;
-		border-radius: 40rpx;
-		padding: 10rpx 28rpx;
-		font-size: 26rpx;
-		font-weight: 500;
-		/* margin-left: 20rpx; */
-		white-space: nowrap;
-		-webkit-appearance: none;
-		line-height: 1.5;
-		height: auto;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		transition: all 0.2s ease;
-		box-shadow: 0 2rpx 8rpx rgba(255, 106, 0, 0.2);
-		flex-shrink: 0;
-}
-.follow-button.mini-style.data-v-8303b14f {
-		padding: 6rpx 20rpx;
-		/* 减小内边距 */
-		font-size: 24rpx;
-		/* 减小字体大小 */
-		height: auto;
-		/* 高度自适应 */
-		line-height: 1.4;
-		/* 调整行高 */
-		/* 减小删除按钮的图标大小 */
-}
-.follow-button.data-v-8303b14f::after {
-		border: none;
-}
-.follow-button.data-v-8303b14f:active {
-		opacity: 0.8;
-		transform: translateY(1rpx);
-}
-.follow-button.followed.data-v-8303b14f {
-		background: #e0e0e0;
-		color: #666;
-		box-shadow: none;
-}
-.delete-post-button.data-v-8303b14f {
-		background-color: #f5f5f5;
-		/* 使用一个中性的灰色背景 */
-		color: #e74c3c;
-		/* 文本和图标使用危险红色 */
-		box-shadow: none;
-		/* 移除阴影，使其不那么突出 */
-}
-.delete-post-button.data-v-8303b14f:active {
-		background-color: #e0e0e0;
-		/* 点击时颜色变深一点 */
-}
-
-	/* 详情页标签样式 */
+	/* --- 类型标签 --- */
 .detail-type-tag.data-v-8303b14f {
 		font-size: 22rpx;
 		padding: 4rpx 10rpx;
@@ -332,7 +228,7 @@
 		border: 1rpx solid rgba(114, 46, 209, 0.3);
 }
 
-	/* --- 商机内容、图片、标签 --- */
+	/* --- 商机内容 --- */
 .opportunity-content.data-v-8303b14f {
 		white-space: pre-line;
 		margin: 20rpx 0;
@@ -341,73 +237,253 @@
 		line-height: 1.7;
 		padding: 0 10rpx;
 }
+
+	/* ==================== 猎伙专属信息卡片 ==================== */
+.liehuo-info-card.data-v-8303b14f {
+		background: #f0f7ff;
+		border: 1rpx solid #cce3ff;
+		border-radius: 16rpx;
+		padding: 24rpx 28rpx;
+		margin: 24rpx 0;
+}
+.liehuo-row.data-v-8303b14f {
+		display: flex;
+		align-items: center;
+		margin-bottom: 16rpx;
+		flex-wrap: wrap;
+		gap: 10rpx;
+}
+.liehuo-row.data-v-8303b14f:last-child {
+		margin-bottom: 0;
+}
+.liehuo-key.data-v-8303b14f {
+		font-size: 26rpx;
+		color: #555;
+		width: 120rpx;
+		flex-shrink: 0;
+}
+
+	/* 紧急程度徽章 */
+.urgency-badge.data-v-8303b14f {
+		font-size: 24rpx;
+		padding: 4rpx 20rpx;
+		border-radius: 30rpx;
+		font-weight: bold;
+}
+.urgency-normal.data-v-8303b14f {
+		background: #f5f5f5;
+		color: #666;
+		border: 1rpx solid #e0e0e0;
+}
+.urgency-urgent.data-v-8303b14f {
+		background: #FF8C00;
+		color: #fff;
+}
+.urgency-super.data-v-8303b14f {
+		background: #FF3B30;
+		color: #fff;
+}
+
+	/* 猎伙类型标签 */
+.partner-types-wrap.data-v-8303b14f {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 12rpx;
+}
+.partner-type-tag.data-v-8303b14f {
+		font-size: 24rpx;
+		color: #1890FF;
+		background: #E6F7FF;
+		border: 1rpx solid rgba(24, 144, 255, 0.3);
+		padding: 4rpx 16rpx;
+		border-radius: 20rpx;
+}
+
+	/* 预期投入 */
+.liehuo-divider.data-v-8303b14f {
+		height: 1rpx;
+		background: #d6eaff;
+		margin: 12rpx 0;
+}
+.liehuo-invest-title.data-v-8303b14f {
+		margin-bottom: 12rpx;
+}
+.liehuo-invest-row.data-v-8303b14f {
+		display: flex;
+		align-items: center;
+		padding: 10rpx 0;
+		border-bottom: 1rpx solid #e8f2ff;
+}
+.liehuo-invest-row.data-v-8303b14f:last-child {
+		border-bottom: none;
+}
+.invest-key.data-v-8303b14f {
+		width: 140rpx;
+		font-size: 26rpx;
+		color: #888;
+		flex-shrink: 0;
+}
+.invest-val.data-v-8303b14f {
+		flex: 1;
+		font-size: 26rpx;
+		color: #333;
+}
+
+	/* 感兴趣人数 */
+.liehuo-interest-count.data-v-8303b14f {
+		display: flex;
+		align-items: center;
+		gap: 6rpx;
+		margin-top: 16rpx;
+		padding-top: 12rpx;
+		border-top: 1rpx solid #d6eaff;
+}
+.liehuo-interest-count text.data-v-8303b14f {
+		font-size: 24rpx;
+		color: #1890FF;
+}
+
+	/* ==================== 感兴趣按钮 ==================== */
+.interest-btn-wrap.data-v-8303b14f {
+		margin-top: 30rpx;
+		padding-top: 24rpx;
+		border-top: 2rpx solid #f0f0f0;
+		display: flex;
+		justify-content: center;
+}
+.interest-btn.data-v-8303b14f {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 10rpx;
+		padding: 20rpx 80rpx;
+		border-radius: 50rpx;
+		font-size: 30rpx;
+		font-weight: bold;
+		background: linear-gradient(to right, #1890FF, #40a9ff);
+		color: #fff;
+		box-shadow: 0 6rpx 16rpx rgba(24, 144, 255, 0.3);
+		transition: all 0.2s;
+}
+.interest-btn.interested.data-v-8303b14f {
+		background: #fff;
+		color: #52c41a;
+		border: 2rpx solid #52c41a;
+		box-shadow: none;
+}
+.interest-btn.data-v-8303b14f:active {
+		opacity: 0.8;
+		transform: scale(0.97);
+}
+.interest-icon.data-v-8303b14f {
+		font-size: 32rpx;
+}
+
+	/* ==================== 感兴趣成功弹窗 ==================== */
+.interest-modal-mask.data-v-8303b14f {
+		position: fixed;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		background: rgba(0, 0, 0, 0.45);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		z-index: 1000;
+}
+.interest-modal-box.data-v-8303b14f {
+		background: #fff;
+		border-radius: 28rpx;
+		width: 580rpx;
+		overflow: hidden;
+		box-shadow: 0 20rpx 60rpx rgba(0, 0, 0, 0.15);
+}
+.interest-modal-title.data-v-8303b14f {
+		font-size: 34rpx;
+		font-weight: bold;
+		color: #333;
+		text-align: center;
+		padding: 40rpx 40rpx 20rpx;
+}
+.interest-modal-divider.data-v-8303b14f {
+		height: 1rpx;
+		background: #f0f0f0;
+		margin: 0 40rpx;
+}
+.interest-modal-body.data-v-8303b14f {
+		padding: 30rpx 40rpx;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 10rpx;
+}
+.interest-modal-text.data-v-8303b14f {
+		font-size: 28rpx;
+		color: #666;
+		line-height: 1.6;
+}
+.interest-modal-actions.data-v-8303b14f {
+		display: flex;
+		border-top: 1rpx solid #f0f0f0;
+}
+.interest-modal-btn.data-v-8303b14f {
+		flex: 1;
+		text-align: center;
+		padding: 30rpx;
+		font-size: 30rpx;
+		font-weight: 500;
+}
+.interest-modal-btn.confirm.data-v-8303b14f {
+		color: #1890FF;
+		border-right: 1rpx solid #f0f0f0;
+}
+.interest-modal-btn.secondary.data-v-8303b14f {
+		color: #666;
+}
+.interest-modal-btn.data-v-8303b14f:active {
+		background: #f9f9f9;
+}
+
+	/* ==================== 视频/图片 ==================== */
 .post-images.data-v-8303b14f {
 		display: grid;
 		gap: 10rpx;
-		/* 网格间距 */
 		margin: 30rpx 0;
+		grid-template-columns: repeat(3, 1fr);
 }
 .image-wrapper.data-v-8303b14f {
 		width: 100%;
 		border-radius: 12rpx;
 		overflow: hidden;
 		box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.08);
+		aspect-ratio: 1 / 1;
 }
 .post-image.data-v-8303b14f {
 		width: 100%;
 		height: 100%;
 		display: block;
-		/* 消除 image 标签底部空隙 */
 }
-
-	/* ==================== 视频容器和播放器样式 ==================== */
+.images-count-1.data-v-8303b14f {
+		grid-template-columns: minmax(0, 2fr) 1fr;
+}
+.images-count-2.data-v-8303b14f,
+	.images-count-4.data-v-8303b14f {
+		grid-template-columns: repeat(2, 1fr);
+}
 .post-video-container.data-v-8303b14f {
 		width: 100%;
 		border-radius: 12rpx;
 		overflow: hidden;
 		margin: 30rpx 0;
 		background-color: #000;
-		/* 视频加载时的背景色 */
 }
 .post-video.data-v-8303b14f {
 		width: 100%;
 		display: block;
-		/* 移除 video 标签底部可能存在的空隙 */
 }
 
-	/* ===================================================================== */
-
-	/* --- 核心：根据图片数量调整网格布局 --- */
-
-	/* 默认（3张及3张以上）: 3列网格 */
-.post-images.data-v-8303b14f {
-		grid-template-columns: repeat(3, 1fr);
-}
-.image-wrapper.data-v-8303b14f {
-		aspect-ratio: 1 / 1;
-		/* 多图时，保持1:1的正方形比例 */
-}
-.images-count-1.data-v-8303b14f {
-		/* 让单张图的网格容器宽度不是100%，比如 70%，使其不会显得过大 */
-		/* 注意：这里是修改父容器的样式，而不是 .image-wrapper */
-		grid-template-columns: minmax(0, 2fr) 1fr;
-		/* 让第一列占据 2/3 宽度 */
-}
-
-	/* Case 1: 只有 1 张图片 */
-.images-count-1 .image-wrapper.data-v-8303b14f {
-		/* grid-column: 1 / -1; */
-		/* 占据整行 */
-		/* aspect-ratio: unset; */
-		/* 移除正方形限制，让图片以原始比例显示 */
-}
-
-	/* Case 2: 有 2 张或 4 张图片 */
-.images-count-2.data-v-8303b14f,
-	.images-count-4.data-v-8303b14f {
-		grid-template-columns: repeat(2, 1fr);
-		/* 2列网格，布局更美观 */
-}
+	/* ==================== 标签 ==================== */
 .tags.data-v-8303b14f {
 		display: flex;
 		flex-wrap: wrap;
@@ -424,7 +500,7 @@
 		border: 2rpx solid rgba(255, 106, 0, 0.2);
 }
 
-	/* --- 交互按钮区 --- */
+	/* ==================== 互动按钮区 ==================== */
 .interactions.data-v-8303b14f {
 		display: flex;
 		justify-content: space-around;
@@ -450,53 +526,15 @@
 .interaction-btn.active.data-v-8303b14f {
 		color: #FF6A00;
 }
-.viewer-section.data-v-8303b14f {
-		margin-top: 30rpx;
-		padding-top: 20rpx;
-		border-top: 2rpx solid #f5f5f5;
+.interaction-btn.delete-action.data-v-8303b14f {
+		padding: 10rpx;
 }
-.viewer-header.data-v-8303b14f {
-		display: flex;
-		justify-content: space-between;
-		margin-bottom: 20rpx;
-}
-.viewer-title.data-v-8303b14f {
-		font-size: 26rpx;
-		color: #666;
-		font-weight: bold;
-}
-.viewer-title .count.data-v-8303b14f {
-		color: #FF6A00;
-		margin-left: 8rpx;
-}
-.more-link.data-v-8303b14f {
-		font-size: 24rpx;
-		color: #999;
-}
-.avatar-row.data-v-8303b14f {
-		display: flex;
-		align-items: center;
-		gap: 12rpx;
-}
-.viewer-avatar.data-v-8303b14f {
-		width: 64rpx;
-		height: 64rpx;
+.interaction-btn.delete-action.data-v-8303b14f:active {
+		background: rgba(231, 76, 60, 0.1);
 		border-radius: 50%;
-		border: 2rpx solid #fff;
-}
-.avatar-more.data-v-8303b14f {
-		width: 64rpx;
-		height: 64rpx;
-		background: #f0f0f0;
-		border-radius: 50%;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		color: #999;
-		font-size: 24rpx;
 }
 
-	/* 浏览留痕模块卡片容器 */
+	/* ==================== 浏览留痕模块 ==================== */
 .viewer-module-card.data-v-8303b14f {
 		background-color: #ffffff;
 		border-radius: 24rpx;
@@ -590,10 +628,7 @@
 		background-color: #fafafa;
 }
 
-
-	/* ==================================================================
-	 * 评论区 (.comments-section)
-	 * ================================================================== */
+	/* ==================== 评论区 ==================== */
 .comments-section.data-v-8303b14f {
 		background: white;
 		border-radius: 36rpx;
@@ -637,8 +672,6 @@
 		margin-bottom: 0;
 		padding-bottom: 0;
 }
-
-	/* 子评论的缩进样式 */
 .comment.is-reply.data-v-8303b14f {
 		margin-left: 20rpx;
 		width: calc(100% - 20rpx);
@@ -658,9 +691,6 @@
 		border: 4rpx solid white;
 		box-shadow: 0 6rpx 16rpx rgba(255, 106, 0, 0.2);
 		transition: transform 0.3s;
-}
-.comment-avatar.data-v-8303b14f:active {
-		transform: scale(1.05);
 }
 .comment-content.data-v-8303b14f {
 		margin-left: 30rpx;
@@ -713,13 +743,7 @@
 		font-size: 28rpx;
 }
 
-	/* ==================================================================
-	 * 浮动与弹窗元素 (底部评论框, 分享弹窗, 引导蒙层)
-	 * ================================================================== */
-
-	/* =========================================
-	   底部悬浮评论栏 (新设计)
-	   ========================================= */
+	/* ==================== 底部评论栏 ==================== */
 .add-comment-bar.data-v-8303b14f {
 		position: fixed;
 		bottom: 0;
@@ -727,7 +751,6 @@
 		width: 100%;
 		background: #fff;
 		padding: 20rpx 24rpx;
-		/* 适配底部安全区 */
 		padding-bottom: calc(20rpx + env(safe-area-inset-bottom));
 		box-shadow: 0 -2rpx 10rpx rgba(0, 0, 0, 0.05);
 		border-top: 1rpx solid #f0f0f0;
@@ -735,20 +758,15 @@
 		box-sizing: border-box;
 		display: flex;
 		align-items: flex-end;
-		/* 底部对齐，适应多行输入 */
 		gap: 20rpx;
 }
-
-	/* 输入框容器 (胶囊状) */
 .input-container.data-v-8303b14f {
 		flex: 1;
 		background: #f5f7fa;
 		border-radius: 40rpx;
-		/* 大圆角 */
 		padding: 14rpx 20rpx;
 		display: flex;
 		align-items: center;
-		/* 垂直居中 */
 		min-height: 80rpx;
 		box-sizing: border-box;
 		transition: all 0.3s;
@@ -759,13 +777,10 @@
 		border-color: #FF6A00;
 		box-shadow: 0 0 0 4rpx rgba(255, 106, 0, 0.1);
 }
-
-	/* 匿名开关 */
 .anon-switch.data-v-8303b14f {
 		display: flex;
 		align-items: center;
 		padding: 0 10rpx;
-		transition: all 0.3s;
 		flex-shrink: 0;
 }
 .anon-switch uni-icons.data-v-8303b14f {
@@ -779,8 +794,6 @@
 .anon-switch.is-active text.data-v-8303b14f {
 		color: #FF6A00;
 }
-
-	/* 垂直分割线 */
 .vertical-line.data-v-8303b14f {
 		width: 2rpx;
 		height: 32rpx;
@@ -788,38 +801,28 @@
 		margin: 0 16rpx;
 		flex-shrink: 0;
 }
-
-	/* 文本域 */
 .bar-textarea.data-v-8303b14f {
 		flex: 1;
 		font-size: 28rpx;
 		color: #333;
 		width: 100%;
-		/* 移除默认内边距 */
 		padding: 0;
 		line-height: 1.5;
 		max-height: 200rpx;
-		/* 限制最大高度 */
 		min-height: 40rpx;
 }
-
-	/* 发送按钮 (圆形) */
 .send-btn.data-v-8303b14f {
 		width: 80rpx;
 		height: 80rpx;
 		border-radius: 50%;
 		background: #e0e0e0;
-		/* 默认禁用色 */
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		transition: all 0.3s;
 		flex-shrink: 0;
 		margin-bottom: 2rpx;
-		/* 微调对齐 */
 }
-
-	/* 可发送状态 */
 .send-btn.can-send.data-v-8303b14f {
 		background: linear-gradient(135deg, #FF8C00, #FF6A00);
 		box-shadow: 0 4rpx 12rpx rgba(255, 106, 0, 0.3);
@@ -828,30 +831,8 @@
 .send-btn.data-v-8303b14f:active {
 		transform: scale(0.95);
 }
-.comment-textarea.data-v-8303b14f {
-		flex-grow: 1;
-		background: #f5f5f5;
-		border: 2rpx solid #e0e0e0;
-		border-radius: 40rpx;
-		/* 保持圆角 */
-		padding: 18rpx 40rpx;
-		/* 调整内边距使其垂直居中 */
-		font-size: 30rpx;
-		outline: none;
-		transition: all 0.3s;
-		margin-right: 24rpx;
-		line-height: 1.5;
-		/* 设置合适的行高 */
-		box-sizing: border-box;
-		min-height: 80rpx;
-		/* 与按钮高度保持一致 */
-}
-.comment-textarea.data-v-8303b14f:focus {
-		border-color: #FF6A00;
-		box-shadow: 0 0 0 4rpx rgba(255, 106, 0, 0.2);
-}
 
-	/* --- 自定义分享弹窗 --- */
+	/* ==================== 分享弹窗 ==================== */
 .share-popup-content.data-v-8303b14f {
 		padding: 30rpx;
 		padding-bottom: calc(30rpx + env(safe-area-inset-bottom));
@@ -903,10 +884,6 @@
 .share-channel-btn.data-v-8303b14f::after {
 		border: none;
 }
-.channel-icon-image.data-v-8303b14f {
-		width: 60rpx;
-		height: 60rpx;
-}
 .share-channel-btn text.data-v-8303b14f {
 		font-size: 24rpx;
 		color: #666;
@@ -923,7 +900,7 @@
 		color: #333;
 }
 
-	/* --- 朋友圈引导蒙层 --- */
+	/* ==================== 朋友圈引导遮罩 ==================== */
 .timeline-guide-mask.data-v-8303b14f {
 		position: fixed;
 		top: 0;
@@ -956,9 +933,7 @@
 		margin-bottom: 10rpx;
 }
 
-	/* =========================
-	 * 9. 居中长按复制菜单样式
-	 * ========================= */
+	/* ==================== 长按复制菜单 ==================== */
 .copy-menu-mask.data-v-8303b14f {
 		position: fixed;
 		top: 0;
@@ -966,12 +941,10 @@
 		right: 0;
 		bottom: 0;
 		background: rgba(0, 0, 0, 0.3);
-		/* 半透明遮罩 */
 		display: flex;
 		justify-content: center;
 		align-items: center;
 		z-index: 999;
-		/* 确保在最上层 */
 }
 .copy-menu-content.data-v-8303b14f {
 		background-color: white;
@@ -989,8 +962,6 @@
 .copy-menu-item.data-v-8303b14f:last-child {
 		border-bottom: none;
 }
-
-	/* 增加一个点击效果 */
 .copy-menu-item.data-v-8303b14f:active {
 		background-color: #f7f7f7;
 }

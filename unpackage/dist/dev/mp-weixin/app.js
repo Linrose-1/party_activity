@@ -86,6 +86,7 @@ if (!Math) {
   "./packages/comment-page/comment-page.js";
   "./packages/comment-center/comment-center.js";
   "./packages/store-activity-list/store-activity-list.js";
+  "./packages/liehuo-interests/liehuo-interests.js";
 }
 const _sfc_main = {
   data() {

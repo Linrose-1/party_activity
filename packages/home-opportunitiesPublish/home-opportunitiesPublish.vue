@@ -21,13 +21,11 @@
 						<view class="form-label">发布身份</view>
 						<radio-group @change="handleIdentityChange" class="radio-group-container">
 							<label class="radio-item">
-								<!-- 禁用 radio -->
 								<radio value="0" :checked="form.isEnterprise === 0" :disabled="isEditMode"
 									color="#FF6A00" />
 								<text :style="{color: isEditMode ? '#999' : '#333'}">个人身份</text>
 							</label>
 							<label class="radio-item">
-								<!-- 禁用 radio -->
 								<radio value="1" :checked="form.isEnterprise === 1" :disabled="isEditMode"
 									color="#FF6A00" />
 								<text :style="{color: isEditMode ? '#999' : '#333'}">企业/品牌身份</text>
@@ -42,7 +40,7 @@
 							<uni-data-select v-model="form.userEnterpriseId" :localdata="myEnterprises"
 								:disabled="isEditMode" placeholder="请选择名下的企业"></uni-data-select>
 						</view>
-						<!-- 编辑模式下隐藏“去创建”的提示，防止干扰 -->
+						<!-- 编辑模式下隐藏"去创建"的提示，防止干扰 -->
 						<view class="no-enterprise-tip" v-if="myEnterprises.length === 0 && !isEditMode"
 							@click="goToCreateEnterprise">
 							<text>检测到您尚未创建已发布的企业，点击去创建 ></text>
@@ -54,13 +52,11 @@
 					<view class="form-label">选择分类</view>
 					<radio-group @change="topicChange" class="radio-group-container">
 						<label class="radio-item">
-							<!-- 禁用商机分享单选框 -->
 							<radio value="商机分享" :checked="form.topic === '商机分享'" :disabled="isEditMode"
 								color="#FF6A00" />
 							<text :style="{color: isEditMode ? '#999' : '#333'}">商机分享</text>
 						</label>
 						<label class="radio-item">
-							<!-- 禁用创业猎伙单选框 -->
 							<radio value="创业猎伙" :checked="form.topic === '创业猎伙'" :disabled="isEditMode"
 								color="#FF6A00" />
 							<text :style="{color: isEditMode ? '#999' : '#333'}">创业猎伙🔥</text>
@@ -71,6 +67,68 @@
 						注：商机发布后不可更改分类
 					</view>
 				</view>
+
+				<!-- ===== 猎伙专属字段（仅在选择"创业猎伙"时显示）===== -->
+				<view v-if="form.topic === '创业猎伙'" class="liehuoFields-card">
+
+					<!-- 猎伙类型（多选） -->
+					<view class="form-group">
+						<view class="form-label">猎伙类型 <text class="required-star">*</text></view>
+						<view class="checkbox-group-container">
+							<label v-for="item in partnerTypeOptions" :key="item.value" class="checkbox-item"
+								@click="togglePartnerType(item.value)">
+								<view class="custom-checkbox"
+									:class="{ 'checked': form.partnerTypes.includes(item.value) }">
+									<text v-if="form.partnerTypes.includes(item.value)" class="check-icon">✓</text>
+								</view>
+								<text class="checkbox-label">{{ item.label }}</text>
+							</label>
+						</view>
+					</view>
+
+					<!-- 紧急程度（单选） -->
+					<view class="form-group">
+						<view class="form-label">紧急程度 <text class="required-star">*</text></view>
+						<view class="urgency-group">
+							<view v-for="item in urgentLevelOptions" :key="item.value" class="urgency-tag"
+								:class="['urgency-' + item.colorKey, { 'urgency-selected': form.urgentLevel === item.value }]"
+								@click="form.urgentLevel = item.value">
+								{{ item.label }}
+							</view>
+						</view>
+					</view>
+
+					<!-- 预期投入（选填） -->
+					<view class="form-group">
+						<view class="form-label">预期投入 <text class="hint-inline">（选填）</text></view>
+						<view class="investment-fields">
+							<view class="investment-row">
+								<text class="investment-key">资金范围</text>
+								<input v-model="form.investmentFund" class="investment-input" placeholder="如：10w~50w" />
+							</view>
+							<view class="investment-row">
+								<text class="investment-key">资源类型</text>
+								<input v-model="form.investmentResource" class="investment-input"
+									placeholder="如：供应链/渠道资源" />
+							</view>
+							<view class="investment-row">
+								<text class="investment-key">股权比例</text>
+								<input v-model="form.investmentEquity" class="investment-input"
+									placeholder="如：10%~30%" />
+							</view>
+						</view>
+					</view>
+
+					<!-- 是否使用智米发布（仅在非编辑模式下、且通过智米渠道时展示） -->
+					<view class="form-group" v-if="!isEditMode && usePointForPublish">
+						<view class="point-publish-tip">
+							<text class="point-tip-icon">💡</text>
+							<text class="point-tip-text">本次将消耗 20 智米发布猎伙</text>
+						</view>
+					</view>
+
+				</view>
+				<!-- ===== 猎伙专属字段 结束 ===== -->
 
 				<view class="form-group">
 					<view class="form-label">添加标签</view>
@@ -118,7 +176,6 @@
 
 					<!-- Case 3: 已经选择了视频 -->
 					<view v-if="form.mediaType === 'video' && form.postVideo" class="video-section">
-
 						<!-- 视频预览 -->
 						<view class="video-preview-wrapper">
 							<video :src="form.postVideo" class="preview-video" controls object-fit="contain"></video>
@@ -136,7 +193,6 @@
 							</view>
 							<view class="cover-tag">视频封面</view>
 						</view>
-
 					</view>
 
 					<!-- 提示文案 -->
@@ -149,7 +205,6 @@
 				<text class="section-title">其他设置</text>
 				<view class="setting-item">
 					<text class="setting-label">允许他人查看我的名片</text>
-					<!-- :checked 绑定 form.showProfile -->
 					<switch :checked="form.showProfile" @change="e => form.showProfile = e.detail.value"
 						color="#FF6A00" />
 				</view>
@@ -191,7 +246,8 @@
 	import request from '../../utils/request.js';
 	import uploadFile from '../../utils/upload.js';
 	import {
-		getInviteCode
+		getInviteCode,
+		getCachedUserInfo
 	} from '../../utils/user.js';
 
 	// --- 统一使用 reactive 管理所有表单状态 ---
@@ -209,22 +265,69 @@
 		showProfile: true,
 		isReadTrace: 1,
 		isEnterprise: 0, // 0-个人, 1-企业
-		userEnterpriseId: null // 企业主键ID
+		userEnterpriseId: null, // 企业主键ID
+		// ===== 猎伙专属字段 =====
+		partnerTypes: [], // 猎伙类型（多选），提交时转为逗号分隔字符串
+		urgentLevel: 1, // 紧急程度：1-普通 2-紧急 3-特急
+		investmentFund: '', // 预期投入-资金范围
+		investmentResource: '', // 预期投入-资源类型
+		investmentEquity: '', // 预期投入-股权比例
 	});
 
 	const isEditMode = ref(false); // 标记是否为编辑模式
 	let hasCheckedDraft = false; // 草稿检查锁
 
 	const myEnterprises = ref([]); // 存储我的企业列表
-
 	const tagSuggestions = ref([]); // 用于存储从API获取的标签建议
 	let tagSearchTimer = null; // 用于输入防抖
 
-	const quotaBusiness = ref(0); // 商机剩余
-	const quotaPartner = ref(0); // 猎伙剩余
+	const quotaBusiness = ref(0); // 商机剩余次数
+	const quotaPartner = ref(0); // 猎伙剩余次数
 	const isQuotaLoaded = ref(false);
 
+	// 是否使用智米发布（由权限弹窗流程设置）
+	const usePointForPublish = ref(false);
+
+	// ===== 猎伙类型选项配置 =====
+	const partnerTypeOptions = [{
+			value: '1',
+			label: '求贤'
+		},
+		{
+			value: '2',
+			label: '找合伙人'
+		},
+		{
+			value: '3',
+			label: '寻资源'
+		},
+		{
+			value: '4',
+			label: '其他'
+		},
+	];
+
+	// ===== 紧急程度选项配置 =====
+	const urgentLevelOptions = [{
+			value: 1,
+			label: '普通',
+			colorKey: 'normal'
+		},
+		{
+			value: 2,
+			label: '紧急',
+			colorKey: 'urgent'
+		},
+		{
+			value: 3,
+			label: '特急',
+			colorKey: 'super'
+		},
+	];
+
 	// --- 计算属性 ---
+
+	/** 根据当前分类返回 textarea 的 placeholder */
 	const contentPlaceholder = computed(() => {
 		if (form.topic === '创业猎伙') {
 			return '发布寻找创业项目合伙人需求。';
@@ -232,12 +335,12 @@
 		return '描述您的项目/商机、需求/经验分享。';
 	});
 
+	/** 根据当前选中的 topic 返回对应的剩余发布额度 */
 	const currentRemainingQuota = computed(() => {
-		// 根据当前选中的 topic 返回对应的余额
 		if (form.topic === '创业猎伙') {
 			return quotaPartner.value;
 		}
-		return quotaBusiness.value; // 默认为商机分享
+		return quotaBusiness.value;
 	});
 
 	// --- 生命周期钩子 ---
@@ -265,14 +368,11 @@
 		if (options.id) {
 			isEditMode.value = true;
 			form.id = options.id;
-			// 设置导航栏标题
 			uni.setNavigationBarTitle({
 				title: '编辑商机'
 			});
-			// 获取详情数据进行反显
 			fetchOpportunityDetail(options.id);
 		} else {
-			// 创建模式才检查本地草稿
 			checkDraft();
 		}
 
@@ -280,16 +380,17 @@
 			checkPublishQuota();
 			fetchMyEnterprises();
 		}
+
 		uni.showShareMenu({
-			// withShareTicket: true,
 			menus: ["shareAppMessage", "shareTimeline"]
 		});
 	});
 
-	// --- 草稿功能 (逻辑不变，已适配 reactive) ---
-	const DRAFT_KEY = 'post_draft_v2'; // 建议更新key，避免旧格式草稿的干扰
+	// --- 草稿功能 ---
+	const DRAFT_KEY = 'post_draft_v2';
 	let debounceTimer = null;
 
+	/** 监听表单变化，自动保存草稿（防抖1.5s） */
 	watch(form, (newValue) => {
 		clearTimeout(debounceTimer);
 		debounceTimer = setTimeout(() => {
@@ -299,6 +400,7 @@
 		deep: true
 	});
 
+	/** 保存草稿到本地缓存 */
 	const saveDraft = (data) => {
 		if (data.title || data.content || data.tags.length > 0 || data.images.length > 0) {
 			uni.setStorageSync(DRAFT_KEY, JSON.stringify(data));
@@ -306,6 +408,7 @@
 		}
 	};
 
+	/** 检查是否有本地草稿，有则弹窗询问是否恢复 */
 	const checkDraft = () => {
 		const draft = uni.getStorageSync(DRAFT_KEY);
 		if (draft) {
@@ -327,13 +430,15 @@
 		}
 	};
 
+	/** 清除本地草稿 */
 	const clearDraft = () => {
 		uni.removeStorageSync(DRAFT_KEY);
 		console.log('🧹 草稿已清除');
 	};
 
 	/**
-	 * [新增方法] 获取详情并还原到表单
+	 * 获取商机详情并还原到表单（编辑模式使用）
+	 * @param {string|number} id - 商机ID
 	 */
 	const fetchOpportunityDetail = async (id) => {
 		uni.showLoading({
@@ -351,7 +456,6 @@
 		uni.hideLoading();
 
 		if (!error && data) {
-			// 数据映射还原
 			form.title = data.postTitle;
 			form.content = data.postContent;
 			form.topic = data.postType == 1 ? '创业猎伙' : '商机分享';
@@ -361,7 +465,27 @@
 			form.isEnterprise = data.isEnterprise;
 			form.userEnterpriseId = data.userEnterpriseId;
 
-			// 媒体还原
+			// 还原猎伙专属字段
+			if (data.postType == 1) {
+				// partnerTypes 接口返回逗号字符串，还原为数组
+				form.partnerTypes = data.partnerTypes ?
+					data.partnerTypes.split(',').filter(v => v) :
+					[];
+				form.urgentLevel = data.urgentLevel || 1;
+				// expectedInvestment 为 JSON 字符串，还原各子字段
+				if (data.expectedInvestment) {
+					try {
+						const inv = JSON.parse(data.expectedInvestment);
+						form.investmentFund = inv['资金范围'] || '';
+						form.investmentResource = inv['资源类型'] || '';
+						form.investmentEquity = inv['股权比例'] || '';
+					} catch (e) {
+						console.error('解析 expectedInvestment 失败:', e);
+					}
+				}
+			}
+
+			// 还原媒体
 			if (data.postVideo) {
 				form.mediaType = 'video';
 				form.postVideo = data.postVideo;
@@ -373,8 +497,10 @@
 		}
 	};
 
-	// 获取商机发布剩余次数
-	// 获取商机/猎伙发布剩余次数
+	/**
+	 * 获取商机/猎伙发布剩余次数
+	 * rightsType: 1-商机, 2-猎伙
+	 */
 	const checkPublishQuota = async () => {
 		try {
 			const [res1, res2] = await Promise.all([
@@ -391,22 +517,156 @@
 					}
 				})
 			]);
-
-			// 只看 data，null 转为 0
 			quotaBusiness.value = (typeof res1.data === 'number') ? res1.data : 0;
 			quotaPartner.value = (typeof res2.data === 'number') ? res2.data : 0;
-
 			isQuotaLoaded.value = true;
 			console.log(`权益加载完成: 商机=${quotaBusiness.value}, 猎伙=${quotaPartner.value}`);
-
 		} catch (e) {
 			console.error('获取权益失败', e);
 		}
 	};
 
-	// --- 表单交互函数 (现在都操作 form 对象) ---
+	// ===== 猎伙权限 & 智米流程 =====
+
+	/**
+	 * 检查用户是否有发布猎伙的权限（白银会员及以上，topUpLevelId >= 3）
+	 * @returns {boolean}
+	 */
+	const hasLiehuoPermission = () => {
+		const userInfo = getCachedUserInfo();
+		return userInfo && (userInfo.topUpLevelId >= 3);
+	};
+
+	/**
+	 * 获取当前用户智米余额
+	 * @returns {Promise<number>} 智米余额
+	 */
+	const fetchPointBalance = async () => {
+		const {
+			data,
+			error
+		} = await request('/app-api/member/point-record/get-balance', {
+			method: 'GET'
+		});
+		if (!error && typeof data === 'number') return data;
+		return 0;
+	};
+
+	/**
+	 * 弹出升级会员引导弹窗（无权限时使用）
+	 * 提供「消耗智米发布」和「立即升级」两个选项
+	 */
+	const showUpgradeModal = () => {
+		uni.showModal({
+			title: '🚀 解锁高级招募功能',
+			content: '升级为「白银会员」，即可发布猎伙，精准招募：核心合伙人、关键人才、稀缺资源',
+			cancelText: '消耗智米发布',
+			confirmText: '立即升级',
+			confirmColor: '#FF6A00',
+			success: async (res) => {
+				if (res.confirm) {
+					// 跳转到会员升级页
+					uni.navigateTo({
+						url: '/packages/recharge/recharge?type=membership'
+					});
+				} else {
+					// 用户选择消耗智米发布，进入智米支付流程
+					await handlePointPublishFlow();
+				}
+			}
+		});
+	};
+
+	/**
+	 * 智米支付流程：
+	 * 余额 >= 20 → 二次确认后继续发布
+	 * 余额 < 20  → 弹出充值引导
+	 */
+	const handlePointPublishFlow = async () => {
+		uni.showLoading({
+			title: '查询智米余额...',
+			mask: true
+		});
+		const balance = await fetchPointBalance();
+		uni.hideLoading();
+
+		const REQUIRED_POINTS = 20;
+
+		if (balance >= REQUIRED_POINTS) {
+			// 余额充足，二次确认
+			uni.showModal({
+				title: '确认消耗智米',
+				content: `发布猎伙需要消耗 ${REQUIRED_POINTS} 智米，当前余额：${balance} 智米。是否继续？`,
+				cancelText: '取消',
+				confirmText: '确认发布',
+				confirmColor: '#FF6A00',
+				success: (res) => {
+					if (res.confirm) {
+						// 标记使用智米发布，进入正常发布流程
+						usePointForPublish.value = true;
+						submitPost();
+					}
+				}
+			});
+		} else {
+			// 余额不足，引导充值
+			uni.showModal({
+				title: '💰 智米不足',
+				content: `发布猎伙需要消耗 ${REQUIRED_POINTS} 智米。\n当前余额：${balance} 智米\n\n请充值后再发布，让优质机会不被错过。`,
+				cancelText: '取消',
+				confirmText: '立即充值',
+				confirmColor: '#FF6A00',
+				success: (res) => {
+					if (res.confirm) {
+						uni.navigateTo({
+							url: '/packages/recharge/recharge?type=point'
+						});
+					}
+				}
+			});
+		}
+	};
+
+	// ===== 表单交互函数 =====
+
+	/**
+	 * 切换商机分类，并在切换到猎伙时做权限检查（非编辑模式）
+	 */
 	function topicChange(e) {
-		form.topic = e.detail.value;
+		const newTopic = e.detail.value;
+
+		// 编辑模式不允许切换，直接返回
+		if (isEditMode.value) return;
+
+		// 如果切换到商机分享，直接设置并重置智米标记
+		if (newTopic !== '创业猎伙') {
+			form.topic = newTopic;
+			usePointForPublish.value = false;
+			return;
+		}
+
+		// 切换到"创业猎伙"时检查权限
+		if (hasLiehuoPermission()) {
+			// 有权限，直接切换
+			form.topic = newTopic;
+		} else {
+			// 无权限，先切换 UI（让用户看到选中效果），再弹引导弹窗
+			form.topic = newTopic;
+			showUpgradeModal();
+		}
+	}
+
+	/**
+	 * 切换猎伙类型（多选）
+	 * @param {string} value - 选项值
+	 */
+	function togglePartnerType(value) {
+		const idx = form.partnerTypes.indexOf(value);
+		if (idx === -1) {
+			form.partnerTypes.push(value);
+		} else {
+			form.partnerTypes.splice(idx, 1);
+		}
 	}
 
 	/**
@@ -415,12 +675,9 @@
 	 */
 	function selectSuggestion(tagName) {
 		if (!tagName) return;
-
-		// 1. 格式化标签名 (确保带 '#')
 		let val = tagName.trim();
 		if (!val.startsWith('#')) val = '#' + val;
 
-		// 2. 校验是否已存在或超出数量
 		if (form.tags.length >= 5) return uni.showToast({
 			title: '最多添加5个标签',
 			icon: 'none'
@@ -430,25 +687,20 @@
 			icon: 'none'
 		});
 
-		// 3. 将建议添加到表单的 tags 数组中
 		form.tags.push(val);
-
-		// 4. 清空输入框和建议列表
 		form.tagInput = '';
 		tagSuggestions.value = [];
 	}
 
+	/** 手动添加标签 */
 	function handleAddTagManually() {
 		let val = form.tagInput.trim();
 		if (!val) return uni.showToast({
 			title: '请输入标签',
 			icon: 'none'
 		});
-
-		// 1. 格式化标签名
 		if (!val.startsWith('#')) val = '#' + val;
 
-		// 2. 校验
 		if (form.tags.length >= 5) return uni.showToast({
 			title: '最多添加5个标签',
 			icon: 'none'
@@ -458,28 +710,19 @@
 			icon: 'none'
 		});
 
-		// 3. 添加到表单
 		form.tags.push(val);
-
-		// 4. 只有在手动添加时，才记录到历史
-		logTagSearch(val, 1); // type: 1 代表商机
-
-		// 5. 清空输入框和建议
+		logTagSearch(val, 1);
 		form.tagInput = '';
 		tagSuggestions.value = [];
 	}
 
-
-
 	/**
 	 * 静默记录标签搜索历史
 	 * @param {string} name - 标签名
-	 * @param {number} type - 类型 (1: 商机)
+	 * @param {number} type - 类型（1: 商机）
 	 */
 	async function logTagSearch(name, type) {
-		// 移除 '#' 前缀再记录
 		const tagName = name.startsWith('#') ? name.substring(1) : name;
-
 		try {
 			await request('/app-api/member/tags-search-history/create', {
 				method: 'POST',
@@ -495,18 +738,14 @@
 		}
 	}
 
-	/**
-	 * 监听标签输入框的变化，触发模糊搜索
-	 */
+	/** 监听标签输入框的变化，触发防抖模糊搜索 */
 	watch(() => form.tagInput, (newValue) => {
 		clearTimeout(tagSearchTimer);
 		if (newValue && newValue.trim()) {
-			// 使用防抖，延迟300ms触发搜索
 			tagSearchTimer = setTimeout(() => {
 				fetchTagSuggestions(newValue.trim());
 			}, 300);
 		} else {
-			// 如果输入框为空，清空建议
 			tagSuggestions.value = [];
 		}
 	});
@@ -526,62 +765,30 @@
 					pageNo: 1,
 					pageSize: 20,
 					name: keyword,
-					type: 1 // 只搜索商机相关的历史标签
+					type: 1
 				}
 			});
-
 			if (error || !data || !data.list) {
 				tagSuggestions.value = [];
 				return;
 			}
-
-			// 将返回的列表处理成字符串数组，并去重
 			const suggestions = data.list.map(item => item.name);
 			tagSuggestions.value = [...new Set(suggestions)];
-
 		} catch (e) {
 			console.error('获取标签建议失败:', e);
 			tagSuggestions.value = [];
 		}
 	}
 
+	/** 删除指定标签 */
 	function removeTag(index) {
 		form.tags.splice(index, 1);
 	}
 
-	/**
-	 * 选择媒体类型
-	 * @param {string} type - 'image' 或 'video'
-	 */
-	function selectMediaType(type) {
-		// 如果已经有内容，提示清空
-		if ((type === 'image' && form.postVideo) || (type === 'video' && form.images.length > 0)) {
-			uni.showModal({
-				title: '提示',
-				content: '切换类型将清空当前内容，是否继续？',
-				success: (res) => {
-					if (res.confirm) {
-						form.mediaType = type;
-						form.images = [];
-						form.postVideo = '';
-						form.businessCoverImageUrl = '';
-
-						if (type === 'image') handleChooseImage();
-						if (type === 'video') handleChooseVideo();
-					}
-				}
-			});
-		} else {
-			// 无冲突，直接开始
-			form.mediaType = type;
-			if (type === 'image') handleChooseImage();
-			if (type === 'video') handleChooseVideo();
-		}
-	}
-
 	// --- 图片处理函数 ---
+
+	/** 选择并上传图片（最多9张，单张限5MB） */
 	async function handleChooseImage() {
-		// 确保模式正确
 		if (form.mediaType !== 'image') form.mediaType = 'image';
 
 		uni.chooseImage({
@@ -601,7 +808,6 @@
 					title: `正在上传...`,
 					mask: true
 				});
-
 				const uploadPromises = validFiles.map(file => uploadFile(file, {
 					directory: 'post'
 				}));
@@ -614,7 +820,6 @@
 					else console.error('上传失败:', result.error);
 				});
 
-				// 将新图片追加到数组，DragImageUploader 会自动响应
 				form.images.push(...successfulUrls);
 
 				if (successfulUrls.length < validFiles.length) {
@@ -627,19 +832,18 @@
 		});
 	}
 
-
-	// 预览图片
+	/** 预览指定索引的图片 */
 	const previewImage = (index) => {
 		console.log('当前点击的图片:', form.images[index]);
 		if (!form.images || form.images.length === 0) return;
-
 		uni.previewImage({
-			urls: form.images, // 预览所有图片
-			current: index, // 当前显示的图片索引
-			loop: true // 是否循环预览
+			urls: form.images,
+			current: index,
+			loop: true
 		});
 	};
 
+	/** 替换指定位置的图片 */
 	function replaceImage(index) {
 		uni.chooseImage({
 			count: 1,
@@ -676,30 +880,24 @@
 	}
 
 	// --- 视频处理函数 ---
-	async function handleChooseVideo() {
-		// 1. 清理可能存在的图片
-		if (form.images.length > 0) {
-			// 这里可以直接清空，或者询问用户。为了体验流畅，直接清空并切换模式。
-			form.images = [];
-		}
 
-		// 2. 调用系统选择视频
+	/** 选择并上传视频（限60秒，限50MB） */
+	async function handleChooseVideo() {
+		if (form.images.length > 0) form.images = [];
+
 		uni.chooseVideo({
 			sourceType: ['album', 'camera'],
 			maxDuration: 60,
 			compressed: true,
 			success: async (res) => {
-				// 选到了视频，设置模式
 				form.mediaType = 'video';
-
 				const videoFile = {
 					path: res.tempFilePath,
 					size: res.size
 				};
 
-				// 校验大小
 				if (videoFile.size > 50 * 1024 * 1024) {
-					form.mediaType = ''; // 恢复初始状态
+					form.mediaType = '';
 					return uni.showToast({
 						title: '视频超过50MB',
 						icon: 'none'
@@ -710,11 +908,9 @@
 					title: '视频上传中...',
 					mask: true
 				});
-
 				const result = await uploadFile(videoFile, {
 					directory: 'post_videos'
 				});
-
 				uni.hideLoading();
 
 				if (result.data) {
@@ -724,7 +920,6 @@
 						icon: 'success'
 					});
 				} else {
-					// 失败了恢复状态
 					form.mediaType = '';
 					uni.showToast({
 						title: '上传失败',
@@ -733,12 +928,12 @@
 				}
 			},
 			fail: (err) => {
-				// 用户取消了，不做任何改变，保持显示大按钮的状态
 				console.log('取消选择视频');
 			}
 		});
 	}
 
+	/** 删除已选视频（需二次确认） */
 	function deleteVideo() {
 		uni.showModal({
 			title: '提示',
@@ -747,16 +942,13 @@
 				if (res.confirm) {
 					form.postVideo = '';
 					form.businessCoverImageUrl = '';
-					// 如果删除了视频，且没有图片，重置状态以显示大按钮
-					if (form.images.length === 0) {
-						form.mediaType = '';
-					}
+					if (form.images.length === 0) form.mediaType = '';
 				}
 			}
 		});
 	}
 
-	// 上传视频封面
+	/** 选择视频封面图片并裁剪上传 */
 	const handleChooseVideoCover = async () => {
 		uni.chooseMedia({
 			count: 1,
@@ -766,44 +958,39 @@
 				const tempFilePath = res.tempFiles[0].tempFilePath;
 
 				// #ifdef MP-WEIXIN
-				// 微信小程序端：调用原生裁剪
 				wx.cropImage({
 					src: tempFilePath,
-					cropScale: '4:3', // 【关键】强制 4:3 比例
+					cropScale: '4:3',
 					success: (cropRes) => {
 						console.log('裁剪成功:', cropRes.tempFilePath);
 						uploadCoverToCloud(cropRes.tempFilePath);
 					},
 					fail: (err) => {
 						console.log('用户取消裁剪或失败:', err);
-						// 即使取消裁剪，是否允许直接使用原图？
-						// 如果强制要求 4:3，这里就 return; 
-						// 如果允许降级，则调用 uploadCoverToCloud(tempFilePath);
 					}
 				});
 				// #endif
 
 				// #ifndef MP-WEIXIN
-				// 非小程序端直接上传（或引入裁剪插件）
 				uploadCoverToCloud(tempFilePath);
 				// #endif
 			}
 		});
 	};
 
-	// 抽离上传逻辑
+	/**
+	 * 上传视频封面到云存储
+	 * @param {string} filePath - 本地文件路径
+	 */
 	const uploadCoverToCloud = async (filePath) => {
 		uni.showLoading({
 			title: '上传中...'
 		});
-
-		// 构造 file 对象 (适配你的 uploadFile 工具)
 		const result = await uploadFile({
 			path: filePath
 		}, {
 			directory: 'post_covers'
 		});
-
 		uni.hideLoading();
 
 		if (result.data) {
@@ -820,6 +1007,7 @@
 		}
 	};
 
+	/** 弹出发布额度不足弹窗，并引导升级会员 */
 	const showQuotaExceededModal = () => {
 		const typeName = form.topic === '创业猎伙' ? '创业猎伙' : '商机发布';
 		uni.showModal({
@@ -830,7 +1018,6 @@
 			confirmColor: '#FF6A00',
 			success: (res) => {
 				if (res.confirm) {
-					// 跳转到会员充值页
 					uni.navigateTo({
 						url: '/packages/recharge/recharge?type=membership'
 					});
@@ -839,17 +1026,31 @@
 		});
 	};
 
+	/**
+	 * 点击发布按钮的入口
+	 * 先检查额度，再做猎伙权限校验，最后进入表单校验与提交
+	 */
 	const handleSubmitClick = () => {
-		// 使用计算属性判断当前类别的额度
+		// 1. 额度检查
 		if (isQuotaLoaded.value && currentRemainingQuota.value == 0) {
 			showQuotaExceededModal();
 			return;
 		}
+
+		// 2. 猎伙权限检查（非编辑模式、非已通过智米授权）
+		if (form.topic === '创业猎伙' && !isEditMode.value && !usePointForPublish.value) {
+			if (!hasLiehuoPermission()) {
+				showUpgradeModal();
+				return;
+			}
+		}
+
+		// 3. 进入表单校验与提交
 		submitPost();
 	};
 
 	/**
-	 * [方法] 获取我名下的企业列表 (对接 /my-list 接口)
+	 * 获取我名下的企业列表（过滤草稿状态）
 	 */
 	const fetchMyEnterprises = async () => {
 		const {
@@ -859,51 +1060,48 @@
 			method: 'GET'
 		});
 		if (!error && data && data.list) {
-			// 过滤出只有“已发布”和“已认证”的企业，防止草稿误用
 			myEnterprises.value = data.list
 				.filter(item => item.status !== 0)
 				.map(item => ({
 					text: item.enterpriseName,
 					value: item.id
 				}));
-
 			console.log('✅ 可用发布身份企业数:', myEnterprises.value.length);
 		}
 	};
 
 	/**
-	 * [方法] 切换发布身份
+	 * 切换发布身份（个人/企业）
 	 */
 	const handleIdentityChange = (e) => {
 		const val = Number(e.detail.value);
 		form.isEnterprise = val;
-
-		// 如果切回个人，清空企业ID
 		if (val === 0) {
 			form.userEnterpriseId = null;
 		} else if (myEnterprises.value.length === 1) {
-			// 如果只有一家企业，自动选中
+			// 只有一家企业时自动选中
 			form.userEnterpriseId = myEnterprises.value[0].value;
 		}
 	};
 
-	/**
-	 * [跳转] 如果没企业，引导去创建
-	 */
+	/** 跳转到企业创建页 */
 	const goToCreateEnterprise = () => {
 		uni.navigateTo({
 			url: '/packages/enterprise-list/enterprise-list'
 		});
 	};
 
-
-	// --- 提交表单 ---
+	/**
+	 * 表单校验 & 提交（创建/编辑均通过此入口）
+	 */
 	function submitPost() {
-		// 额度检查拦截
+		// 额度二次校验
 		if (isQuotaLoaded.value && currentRemainingQuota.value == 0) {
 			showQuotaExceededModal();
 			return;
 		}
+
+		// 基础字段校验
 		if (!form.title.trim() || form.title.length > 100) return uni.showToast({
 			title: '标题不能为空且不能超过100字',
 			icon: 'none'
@@ -916,16 +1114,36 @@
 			title: '请选择一个专题',
 			icon: 'none'
 		});
-		if (form.isEnterprise === 1 && !form.userEnterpriseId) {
-			return uni.showToast({
-				title: '请选择要发布的身份企业',
+		if (form.isEnterprise === 1 && !form.userEnterpriseId) return uni.showToast({
+			title: '请选择要发布的身份企业',
+			icon: 'none'
+		});
+
+		// 猎伙专属字段校验
+		if (form.topic === '创业猎伙') {
+			if (form.partnerTypes.length === 0) return uni.showToast({
+				title: '请选择至少一个猎伙类型',
+				icon: 'none'
+			});
+			if (!form.urgentLevel) return uni.showToast({
+				title: '请选择紧急程度',
 				icon: 'none'
 			});
 		}
 
+		// 构建预期投入 JSON（仅在有内容时拼入）
+		let expectedInvestment = '';
+		if (form.topic === '创业猎伙') {
+			const inv = {};
+			if (form.investmentFund.trim()) inv['资金范围'] = form.investmentFund.trim();
+			if (form.investmentResource.trim()) inv['资源类型'] = form.investmentResource.trim();
+			if (form.investmentEquity.trim()) inv['股权比例'] = form.investmentEquity.trim();
+			if (Object.keys(inv).length > 0) expectedInvestment = JSON.stringify(inv);
+		}
+
 		const postData = {
 			id: form.id,
-			userId: uni.getStorageSync('userId') || 0, // 从缓存获取 userId
+			userId: uni.getStorageSync('userId') || 0,
 			postTitle: form.title,
 			postType: form.topic === '商机分享' ? '0' : '1',
 			postContent: form.content,
@@ -939,7 +1157,14 @@
 			isEnterprise: form.isEnterprise,
 			userEnterpriseId: form.userEnterpriseId || 0,
 			tags: form.tags,
-			status: 'active'
+			status: 'active',
+			// ===== 猎伙专属字段（非猎伙时不传或传空）=====
+			...(form.topic === '创业猎伙' && {
+				partnerTypes: form.partnerTypes.join(','),
+				urgentLevel: form.urgentLevel,
+				expectedInvestment: expectedInvestment,
+				usePointForPublish: usePointForPublish.value,
+			})
 		};
 
 		uni.showModal({
@@ -947,18 +1172,20 @@
 			content: '请确认您填写的内容无误。',
 			success: (res) => {
 				if (res.confirm) {
-					// 根据模式执行不同的接口
 					if (isEditMode.value) {
-						performUpdate(postData); // 调用更新方法
+						performUpdate(postData);
 					} else {
-						createOpportunities(postData); // 调用原有的创建方法
+						createOpportunities(postData);
 					}
 				}
 			}
 		});
 	}
 
-
+	/**
+	 * 调用创建接口发布商机/猎伙
+	 * @param {object} postData - 请求体数据
+	 */
 	const createOpportunities = async (postData) => {
 		uni.showLoading({
 			title: '正在发布...',
@@ -972,15 +1199,14 @@
 
 		if (result.data !== null) {
 			clearDraft();
+			usePointForPublish.value = false; // 重置智米标记
 			uni.showModal({
 				title: '发布成功',
 				content: '可在【我的】-【我的商机】中查看您发布的商机。',
 				showCancel: false,
 				confirmText: '知道了',
 				success: (res) => {
-					if (res.confirm) {
-						uni.navigateBack();
-					}
+					if (res.confirm) uni.navigateBack();
 				}
 			});
 		} else {
@@ -992,7 +1218,8 @@
 	};
 
 	/**
-	 * [方法] 执行更新接口
+	 * 调用更新接口修改商机/猎伙
+	 * @param {object} postData - 请求体数据
 	 */
 	const performUpdate = async (postData) => {
 		uni.showLoading({
@@ -1000,20 +1227,17 @@
 			mask: true
 		});
 		const result = await request('/app-api/member/business-opportunities/update', {
-			method: 'PUT', // 注意这里是 PUT
+			method: 'PUT',
 			data: postData
 		});
 		uni.hideLoading();
 
 		if (!result.error) {
-
 			clearDraft();
-
 			uni.showToast({
 				title: '修改成功',
 				icon: 'success'
 			});
-			// 修改成功后延迟返回
 			setTimeout(() => uni.navigateBack(), 1500);
 		} else {
 			uni.showToast({
@@ -1023,212 +1247,27 @@
 		}
 	};
 
-	/**
-	 * @description 监听用户点击“分享给好友”
-	 */
+	/** 分享给好友 */
 	onShareAppMessage(() => {
-		// 1. 获取当前用户的邀请码
 		const inviteCode = getInviteCode();
-		console.log(`[商机发布页] 分享给好友，获取到邀请码: ${inviteCode}`);
-
-		// 2. 构建分享路径，并附带邀请码参数
 		let sharePath = '/packages/home-opportunitiesPublish/home-opportunitiesPublish';
-		if (inviteCode) {
-			sharePath += `?inviteCode=${inviteCode}`;
-		}
-
-		// 3. 定义分享内容
-		const shareContent = {
+		if (inviteCode) sharePath += `?inviteCode=${inviteCode}`;
+		return {
 			title: '发现一个好商机，快来发布你的商业需求！',
 			path: sharePath,
-			// 建议使用一个固定的、吸引人的分享图片
 			imageUrl: 'https://img.gofor.club/logo_share.jpg'
 		};
-
-		console.log('[商机发布页] 分享给好友的内容:', JSON.stringify(shareContent));
-		return shareContent;
 	});
 
-	/**
-	 * @description 监听用户点击“分享到朋友圈”
-	 */
+	/** 分享到朋友圈 */
 	onShareTimeline(() => {
-		// 1. 获取当前用户的邀请码
 		const inviteCode = getInviteCode();
-		console.log(`[商机发布页] 分享到朋友圈，获取到邀请码: ${inviteCode}`);
-
-		// 2. 构建 query 字符串
-		let queryString = '';
-		if (inviteCode) {
-			queryString = `inviteCode=${inviteCode}`;
-		}
-
-		// 3. 定义分享内容
-		const shareContent = {
+		return {
 			title: '发现一个好商机，快来发布你的商业需求！',
-			query: queryString,
+			query: inviteCode ? `inviteCode=${inviteCode}` : '',
 			imageUrl: 'https://img.gofor.club/logo_share.jpg'
 		};
-
-		console.log('[商机发布页] 分享到朋友圈的内容:', JSON.stringify(shareContent));
-		return shareContent;
 	});
-
-	/* ========================================  图片拖拽移动编辑 ======================================== */
-
-	// 删除逻辑
-	// const deleteImage = (index) => {
-	// 	uni.showModal({
-	// 		title: '提示',
-	// 		content: '确定删除？',
-	// 		success: (res) => {
-	// 			if (res.confirm) {
-	// 				form.images.splice(index, 1);
-	// 				initDragList(form.images);
-
-	// 				// 如果删光了，重置回初始状态
-	// 				if (form.images.length === 0) {
-	// 					form.mediaType = '';
-	// 				}
-	// 			}
-	// 		}
-	// 	});
-	// };
-
-	// --- 拖拽排序相关状态 ---
-	// const dragDisplayList = ref([]);
-	// const dragItemWidth = ref(0);
-	// const dragItemHeight = ref(0);
-	// const dragAreaHeight = ref(0);
-	// const isDragging = ref(false);
-	// const dragIndex = ref(-1);
-	// const dragColumns = 3;
-	// const dragItemHeightRpx = 230;
-
-	// 1. 初始化尺寸
-	// const initDragLayout = () => {
-	// 	const sys = uni.getSystemInfoSync();
-
-	// 	// 假设页面左右 padding 各 20rpx，总共 40rpx
-	// 	// 【关键】这里多减一点，比如减 60rpx 或 70rpx，确保宽度绝对不会溢出
-	// 	// 如果你的 .page padding 是 20rpx，那这里减 40rpx 是不够的，因为还有 item 之间的间隙
-	// 	// 建议减去 (20rpx * 2) + 稍微多一点的冗余
-	// 	const containerWidth = sys.windowWidth - uni.upx2px(100);
-
-	// 	// 计算单格宽度
-	// 	dragItemWidth.value = containerWidth / dragColumns;
-	// 	dragItemHeight.value = uni.upx2px(dragItemHeightRpx);
-	// };
-
-	// // 2. 初始化列表 (监听 form.images)
-	// watch(() => form.images, (newVal) => {
-	// 	if (!isDragging.value) {
-	// 		initDragList(newVal);
-	// 	}
-	// }, {
-	// 	deep: true
-	// }); // 移除 immediate，手动调一次即可
-
-	// // 在 onLoad 或 onMounted 里初始化一次
-	// onMounted(() => {
-	// 	initDragLayout();
-	// 	// 如果有草稿恢复的数据
-	// 	if (form.images.length > 0) initDragList(form.images);
-	// });
-
-	// const initDragList = (originList) => {
-	// 	if (!originList) return;
-	// 	// 确保尺寸已计算
-	// 	if (dragItemWidth.value === 0) initDragLayout();
-
-	// 	dragDisplayList.value = originList.map((url, index) => {
-	// 		const {
-	// 			x,
-	// 			y
-	// 		} = getPos(index);
-	// 		return {
-	// 			id: `img_${index}_${Math.random()}`, // 唯一KEY
-	// 			data: url,
-	// 			x,
-	// 			y,
-	// 			zIndex: 1,
-	// 			realIndex: index
-	// 		};
-	// 	});
-	// 	updateDragHeight();
-	// };
-
-	// const getPos = (index) => {
-	// 	const row = Math.floor(index / dragColumns);
-	// 	const col = index % dragColumns;
-	// 	return {
-	// 		x: col * dragItemWidth.value,
-	// 		y: row * dragItemHeight.value
-	// 	};
-	// };
-
-	// const updateDragHeight = () => {
-	// 	const count = dragDisplayList.value.length;
-	// 	const rows = Math.ceil(count / dragColumns);
-	// 	dragAreaHeight.value = (rows || 1) * dragItemHeight.value;
-	// };
-
-	// // --- 拖拽事件 ---
-	// const onMovableStart = (index) => {
-	// 	isDragging.value = true;
-	// 	dragIndex.value = index;
-	// 	dragDisplayList.value[index].zIndex = 99;
-	// };
-
-	// const onMovableChange = (e, index) => {
-	// 	if (!isDragging.value || index !== dragIndex.value) return;
-	// 	const x = e.detail.x;
-	// 	const y = e.detail.y;
-
-	// 	const centerX = x + dragItemWidth.value / 2;
-	// 	const centerY = y + dragItemHeight.value / 2;
-	// 	const col = Math.floor(centerX / dragItemWidth.value);
-	// 	const row = Math.floor(centerY / dragItemHeight.value);
-	// 	let targetIndex = row * dragColumns + col;
-
-	// 	if (targetIndex < 0) targetIndex = 0;
-	// 	if (targetIndex >= dragDisplayList.value.length) targetIndex = dragDisplayList.value.length - 1;
-
-	// 	if (targetIndex !== dragIndex.value) {
-	// 		const mover = dragDisplayList.value[dragIndex.value];
-	// 		dragDisplayList.value.splice(dragIndex.value, 1);
-	// 		dragDisplayList.value.splice(targetIndex, 0, mover);
-
-	// 		dragDisplayList.value.forEach((item, idx) => {
-	// 			if (idx !== targetIndex) {
-	// 				const pos = getPos(idx);
-	// 				item.x = pos.x;
-	// 				item.y = pos.y;
-	// 			}
-	// 		});
-	// 		dragIndex.value = targetIndex;
-	// 	}
-	// };
-
-	// const onMovableEnd = () => {
-	// 	isDragging.value = false;
-	// 	if (dragIndex.value !== -1) {
-	// 		const item = dragDisplayList.value[dragIndex.value];
-	// 		item.zIndex = 1;
-	// 		const pos = getPos(dragIndex.value);
-	// 		nextTick(() => {
-	// 			item.x = pos.x;
-	// 			item.y = pos.y;
-	// 		});
-
-	// 		// 同步回 form.images
-	// 		const sortedUrls = dragDisplayList.value.map(wrapper => wrapper.data);
-	// 		form.images = sortedUrls;
-	// 	}
-	// 	dragIndex.value = -1;
-	// };
-
-	/* ========================================  图片拖拽移动编辑 ======================================== */
 </script>
 
 <style scoped>
@@ -1264,9 +1303,7 @@
 		text-align: center;
 	}
 
-	.form-container {
-		/* margin-top: 20rpx; */
-	}
+	.form-container {}
 
 	.form-card {
 		background: white;
@@ -1287,7 +1324,6 @@
 		display: block;
 		color: #666;
 		margin-bottom: 10rpx;
-		/* 为label增加一点下边距 */
 	}
 
 	.form-input,
@@ -1309,13 +1345,24 @@
 		color: #999;
 	}
 
-	/* 新增：单选框组样式 */
+	.hint-inline {
+		font-size: 24rpx;
+		color: #999;
+		font-weight: normal;
+	}
+
+	.required-star {
+		color: #FF6A00;
+		font-size: 28rpx;
+		margin-left: 4rpx;
+	}
+
+	/* ==================== 单选框组 ==================== */
 	.radio-group-container {
 		display: flex;
 		flex-wrap: wrap;
 		align-items: center;
 		gap: 40rpx;
-		/* 选项之间的间距 */
 		margin-top: 10rpx;
 	}
 
@@ -1330,6 +1377,170 @@
 		margin-left: 10rpx;
 	}
 
+	/* ==================== 猎伙专属字段卡片 ==================== */
+	.liehuoFields-card {
+		background: #fff8f3;
+		border: 1rpx solid #ffe0c8;
+		border-radius: 16rpx;
+		padding: 24rpx;
+		margin-bottom: 30rpx;
+	}
+
+	/* ===== 猎伙类型多选框 ===== */
+	.checkbox-group-container {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 20rpx;
+		margin-top: 10rpx;
+	}
+
+	.checkbox-item {
+		display: flex;
+		align-items: center;
+		gap: 10rpx;
+	}
+
+	.custom-checkbox {
+		width: 36rpx;
+		height: 36rpx;
+		border: 2rpx solid #ccc;
+		border-radius: 8rpx;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		background: #fff;
+		transition: all 0.2s;
+	}
+
+	.custom-checkbox.checked {
+		background: #FF6A00;
+		border-color: #FF6A00;
+	}
+
+	.check-icon {
+		color: #fff;
+		font-size: 22rpx;
+		font-weight: bold;
+	}
+
+	.checkbox-label {
+		font-size: 28rpx;
+		color: #333;
+	}
+
+	/* ===== 紧急程度标签 ===== */
+	.urgency-group {
+		display: flex;
+		gap: 20rpx;
+		margin-top: 10rpx;
+		flex-wrap: wrap;
+	}
+
+	.urgency-tag {
+		padding: 10rpx 32rpx;
+		border-radius: 30rpx;
+		font-size: 26rpx;
+		border: 2rpx solid transparent;
+		transition: all 0.2s;
+	}
+
+	/* 普通 - 灰色 */
+	.urgency-normal {
+		background: #f5f5f5;
+		color: #666;
+		border-color: #e0e0e0;
+	}
+
+	.urgency-normal.urgency-selected {
+		background: #ececec;
+		border-color: #999;
+		color: #333;
+		font-weight: bold;
+	}
+
+	/* 紧急 - 橙色 */
+	.urgency-urgent {
+		background: #fff3e0;
+		color: #FF8C00;
+		border-color: #ffd180;
+	}
+
+	.urgency-urgent.urgency-selected {
+		background: #FF8C00;
+		color: #fff;
+		border-color: #FF8C00;
+		font-weight: bold;
+	}
+
+	/* 特急 - 红色 */
+	.urgency-super {
+		background: #fff0f0;
+		color: #FF3B30;
+		border-color: #ffb3b0;
+	}
+
+	.urgency-super.urgency-selected {
+		background: #FF3B30;
+		color: #fff;
+		border-color: #FF3B30;
+		font-weight: bold;
+	}
+
+	/* ===== 预期投入 ===== */
+	.investment-fields {
+		background: #fff;
+		border-radius: 12rpx;
+		border: 1rpx solid #ffe0c8;
+		overflow: hidden;
+		margin-top: 10rpx;
+	}
+
+	.investment-row {
+		display: flex;
+		align-items: center;
+		padding: 18rpx 20rpx;
+		border-bottom: 1rpx solid #f5f0eb;
+	}
+
+	.investment-row:last-child {
+		border-bottom: none;
+	}
+
+	.investment-key {
+		width: 140rpx;
+		font-size: 26rpx;
+		color: #555;
+		flex-shrink: 0;
+	}
+
+	.investment-input {
+		flex: 1;
+		font-size: 26rpx;
+		color: #333;
+		border: none;
+		background: transparent;
+	}
+
+	/* ===== 智米发布提示条 ===== */
+	.point-publish-tip {
+		display: flex;
+		align-items: center;
+		background: #fff3cd;
+		border-radius: 10rpx;
+		padding: 14rpx 20rpx;
+		gap: 10rpx;
+	}
+
+	.point-tip-icon {
+		font-size: 28rpx;
+	}
+
+	.point-tip-text {
+		font-size: 26rpx;
+		color: #856404;
+	}
+
+	/* ==================== 标签区域 ==================== */
 	.tags-container {
 		display: flex;
 		flex-wrap: wrap;
@@ -1374,6 +1585,38 @@
 		font-size: 26rpx;
 	}
 
+	.tag-suggestions-scroll {
+		white-space: nowrap;
+		padding: 10rpx 0;
+		margin-bottom: 10rpx;
+		width: 100%;
+	}
+
+	.tag-suggestions-scroll ::-webkit-scrollbar {
+		display: none;
+		width: 0 !important;
+		height: 0 !important;
+		-webkit-appearance: none;
+		background: transparent;
+	}
+
+	.suggestion-tag {
+		display: inline-block;
+		background-color: #f0f0f0;
+		color: #555;
+		padding: 8rpx 20rpx;
+		border-radius: 20rpx;
+		font-size: 26rpx;
+		margin-right: 16rpx;
+		cursor: pointer;
+		transition: background-color 0.2s;
+	}
+
+	.suggestion-tag:active {
+		background-color: #e0e0e0;
+	}
+
+	/* ==================== 企业选择 ==================== */
 	.identity-hint {
 		margin-top: 16rpx;
 		font-size: 22rpx;
@@ -1396,77 +1639,18 @@
 		text-align: center;
 	}
 
-	.animate-fade {
-		animation: fadeIn 0.3s ease;
-	}
-
-	@keyframes fadeIn {
-		from {
-			opacity: 0;
-			transform: translateY(-10rpx);
-		}
-
-		to {
-			opacity: 1;
-			transform: translateY(0);
-		}
-	}
-
-	/* ==================== 标签建议区域样式 ==================== */
-	.tag-suggestions-scroll {
-		white-space: nowrap;
-		/* 关键：让内部元素不换行，从而可以横向滚动 */
-		padding: 10rpx 0;
-		margin-bottom: 10rpx;
-		width: 100%;
-	}
-
-	/* 隐藏滚动条 */
-	.tag-suggestions-scroll ::-webkit-scrollbar {
-		display: none;
-		width: 0 !important;
-		height: 0 !important;
-		-webkit-appearance: none;
-		background: transparent;
-	}
-
-	.suggestion-tag {
-		display: inline-block;
-		/* 关键：让标签在同一行排列 */
-		background-color: #f0f0f0;
-		color: #555;
-		padding: 8rpx 20rpx;
-		border-radius: 20rpx;
-		font-size: 26rpx;
-		margin-right: 16rpx;
-		cursor: pointer;
-		transition: background-color 0.2s;
-	}
-
-	.suggestion-tag:active {
-		background-color: #e0e0e0;
-	}
-
-	/* ============================================================ */
-
+	/* ==================== 图片预览 ==================== */
 	.image-preview {
 		display: grid;
-		/* 1. 声明为 grid 布局 */
 		grid-template-columns: repeat(3, 1fr);
-		/* 2. 创建一个三列的网格，每列宽度平分剩余空间 */
 		gap: 16rpx;
-		/* 3. 设置网格项之间的间距 */
 		margin-top: 10rpx;
 	}
 
 	.image-wrapper {
 		position: relative;
-		/* 移除固定的宽高，让它自适应 grid 容器分配的空间 */
-		/* width: 150rpx; */
-		/* height: 150rpx; */
 		border-radius: 12rpx;
 		overflow: hidden;
-		/* 【新增】强制设置宽高比为1:1，确保是正方形 */
 		aspect-ratio: 1 / 1;
 	}
 
@@ -1498,13 +1682,7 @@
 	}
 
 	.add-img-placeholder {
-		/* 移除固定的宽高，让它自适应 grid 容器 */
-		/* width: 150rpx; */
-		/* height: 150rpx; */
-		/* 【新增】确保它也是一个正方形 */
 		aspect-ratio: 1 / 1;
-
-		/* 其他样式保持不变 */
 		border: 2rpx dashed #ccc;
 		border-radius: 12rpx;
 		display: flex;
@@ -1530,6 +1708,7 @@
 		color: #FF6A00;
 	}
 
+	/* ==================== 其他设置 ==================== */
 	.section-title {
 		font-size: 30rpx;
 		font-weight: bold;
@@ -1564,6 +1743,7 @@
 		margin-top: 4rpx;
 	}
 
+	/* ==================== 提交按钮 ==================== */
 	.submit-btn {
 		background: linear-gradient(to right, #FF6A00, #FF8C37);
 		color: white;
@@ -1579,13 +1759,11 @@
 
 	.submit-btn.disabled-btn {
 		background: #ccc;
-		/* 灰色背景 */
 		color: #fff;
 		box-shadow: none;
-		/* pointer-events: none;  <--如果不希望用户点击出弹窗，就加上这行；如果希望点击后弹窗提示升级，就不要加这行 */
 	}
 
-	/* ==================== 媒体选择器和视频预览样式 ==================== */
+	/* ==================== 媒体选择器和视频预览 ==================== */
 	.media-selector {
 		display: flex;
 		gap: 30rpx;
@@ -1615,20 +1793,16 @@
 		margin-top: 10rpx;
 	}
 
-
 	.video-section {
 		display: flex;
 		gap: 20rpx;
 		margin-top: 10rpx;
 	}
 
-	/* 视频预览框 (左侧) */
 	.video-preview-wrapper {
 		position: relative;
 		flex: 2;
-		/* 占据较大宽度 */
 		height: 240rpx;
-		/* 固定高度 */
 		border-radius: 12rpx;
 		overflow: hidden;
 		background-color: #000;
@@ -1640,13 +1814,10 @@
 		display: block;
 	}
 
-	/* 封面上传框 (右侧) */
 	.video-cover-wrapper {
 		position: relative;
 		flex: 1;
-		/* 占据较小宽度 */
 		height: 240rpx;
-		/* 高度与视频一致 */
 		border: 2rpx dashed #ccc;
 		border-radius: 12rpx;
 		overflow: hidden;
@@ -1691,7 +1862,6 @@
 	}
 
 	.delete-video-btn {
-		/* 复用删除图片的按钮样式 */
 		position: absolute;
 		top: 0rpx;
 		right: 0rpx;
@@ -1710,5 +1880,21 @@
 
 	.delete-video-btn:active {
 		background-color: rgba(0, 0, 0, 0.7);
+	}
+
+	.animate-fade {
+		animation: fadeIn 0.3s ease;
+	}
+
+	@keyframes fadeIn {
+		from {
+			opacity: 0;
+			transform: translateY(-10rpx);
+		}
+
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
 	}
 </style>

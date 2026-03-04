@@ -86,7 +86,8 @@
         "credit-score/credit-score",
         "comment-page/comment-page",
         "comment-center/comment-center",
-        "store-activity-list/store-activity-list"
+        "store-activity-list/store-activity-list",
+        "liehuo-interests/liehuo-interests"
       ]
     }
   ],

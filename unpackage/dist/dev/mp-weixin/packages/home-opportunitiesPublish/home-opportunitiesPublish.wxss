@@ -27,9 +27,7 @@
 		color: white;
 		text-align: center;
 }
-.form-container.data-v-4f014bb0 {
-		/* margin-top: 20rpx; */
-}
+.form-container.data-v-4f014bb0 {}
 .form-card.data-v-4f014bb0 {
 		background: white;
 		border-radius: 20rpx;
@@ -47,7 +45,6 @@
 		display: block;
 		color: #666;
 		margin-bottom: 10rpx;
-		/* 为label增加一点下边距 */
 }
 .form-input.data-v-4f014bb0,
 	.form-textarea.data-v-4f014bb0 {
@@ -65,14 +62,23 @@
 		font-size: 24rpx;
 		color: #999;
 }
+.hint-inline.data-v-4f014bb0 {
+		font-size: 24rpx;
+		color: #999;
+		font-weight: normal;
+}
+.required-star.data-v-4f014bb0 {
+		color: #FF6A00;
+		font-size: 28rpx;
+		margin-left: 4rpx;
+}
 
-	/* 新增：单选框组样式 */
+	/* ==================== 单选框组 ==================== */
 .radio-group-container.data-v-4f014bb0 {
 		display: flex;
 		flex-wrap: wrap;
 		align-items: center;
 		gap: 40rpx;
-		/* 选项之间的间距 */
 		margin-top: 10rpx;
 }
 .radio-item.data-v-4f014bb0 {
@@ -84,6 +90,156 @@
 .radio-item text.data-v-4f014bb0 {
 		margin-left: 10rpx;
 }
+
+	/* ==================== 猎伙专属字段卡片 ==================== */
+.liehuoFields-card.data-v-4f014bb0 {
+		background: #fff8f3;
+		border: 1rpx solid #ffe0c8;
+		border-radius: 16rpx;
+		padding: 24rpx;
+		margin-bottom: 30rpx;
+}
+
+	/* ===== 猎伙类型多选框 ===== */
+.checkbox-group-container.data-v-4f014bb0 {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 20rpx;
+		margin-top: 10rpx;
+}
+.checkbox-item.data-v-4f014bb0 {
+		display: flex;
+		align-items: center;
+		gap: 10rpx;
+}
+.custom-checkbox.data-v-4f014bb0 {
+		width: 36rpx;
+		height: 36rpx;
+		border: 2rpx solid #ccc;
+		border-radius: 8rpx;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		background: #fff;
+		transition: all 0.2s;
+}
+.custom-checkbox.checked.data-v-4f014bb0 {
+		background: #FF6A00;
+		border-color: #FF6A00;
+}
+.check-icon.data-v-4f014bb0 {
+		color: #fff;
+		font-size: 22rpx;
+		font-weight: bold;
+}
+.checkbox-label.data-v-4f014bb0 {
+		font-size: 28rpx;
+		color: #333;
+}
+
+	/* ===== 紧急程度标签 ===== */
+.urgency-group.data-v-4f014bb0 {
+		display: flex;
+		gap: 20rpx;
+		margin-top: 10rpx;
+		flex-wrap: wrap;
+}
+.urgency-tag.data-v-4f014bb0 {
+		padding: 10rpx 32rpx;
+		border-radius: 30rpx;
+		font-size: 26rpx;
+		border: 2rpx solid transparent;
+		transition: all 0.2s;
+}
+
+	/* 普通 - 灰色 */
+.urgency-normal.data-v-4f014bb0 {
+		background: #f5f5f5;
+		color: #666;
+		border-color: #e0e0e0;
+}
+.urgency-normal.urgency-selected.data-v-4f014bb0 {
+		background: #ececec;
+		border-color: #999;
+		color: #333;
+		font-weight: bold;
+}
+
+	/* 紧急 - 橙色 */
+.urgency-urgent.data-v-4f014bb0 {
+		background: #fff3e0;
+		color: #FF8C00;
+		border-color: #ffd180;
+}
+.urgency-urgent.urgency-selected.data-v-4f014bb0 {
+		background: #FF8C00;
+		color: #fff;
+		border-color: #FF8C00;
+		font-weight: bold;
+}
+
+	/* 特急 - 红色 */
+.urgency-super.data-v-4f014bb0 {
+		background: #fff0f0;
+		color: #FF3B30;
+		border-color: #ffb3b0;
+}
+.urgency-super.urgency-selected.data-v-4f014bb0 {
+		background: #FF3B30;
+		color: #fff;
+		border-color: #FF3B30;
+		font-weight: bold;
+}
+
+	/* ===== 预期投入 ===== */
+.investment-fields.data-v-4f014bb0 {
+		background: #fff;
+		border-radius: 12rpx;
+		border: 1rpx solid #ffe0c8;
+		overflow: hidden;
+		margin-top: 10rpx;
+}
+.investment-row.data-v-4f014bb0 {
+		display: flex;
+		align-items: center;
+		padding: 18rpx 20rpx;
+		border-bottom: 1rpx solid #f5f0eb;
+}
+.investment-row.data-v-4f014bb0:last-child {
+		border-bottom: none;
+}
+.investment-key.data-v-4f014bb0 {
+		width: 140rpx;
+		font-size: 26rpx;
+		color: #555;
+		flex-shrink: 0;
+}
+.investment-input.data-v-4f014bb0 {
+		flex: 1;
+		font-size: 26rpx;
+		color: #333;
+		border: none;
+		background: transparent;
+}
+
+	/* ===== 智米发布提示条 ===== */
+.point-publish-tip.data-v-4f014bb0 {
+		display: flex;
+		align-items: center;
+		background: #fff3cd;
+		border-radius: 10rpx;
+		padding: 14rpx 20rpx;
+		gap: 10rpx;
+}
+.point-tip-icon.data-v-4f014bb0 {
+		font-size: 28rpx;
+}
+.point-tip-text.data-v-4f014bb0 {
+		font-size: 26rpx;
+		color: #856404;
+}
+
+	/* ==================== 标签区域 ==================== */
 .tags-container.data-v-4f014bb0 {
 		display: flex;
 		flex-wrap: wrap;
@@ -122,6 +278,35 @@
 		border-bottom-right-radius: 20rpx;
 		font-size: 26rpx;
 }
+.tag-suggestions-scroll.data-v-4f014bb0 {
+		white-space: nowrap;
+		padding: 10rpx 0;
+		margin-bottom: 10rpx;
+		width: 100%;
+}
+.tag-suggestions-scroll.data-v-4f014bb0 ::-webkit-scrollbar {
+		display: none;
+		width: 0 !important;
+		height: 0 !important;
+		-webkit-appearance: none;
+		background: transparent;
+}
+.suggestion-tag.data-v-4f014bb0 {
+		display: inline-block;
+		background-color: #f0f0f0;
+		color: #555;
+		padding: 8rpx 20rpx;
+		border-radius: 20rpx;
+		font-size: 26rpx;
+		margin-right: 16rpx;
+		cursor: pointer;
+		transition: background-color 0.2s;
+}
+.suggestion-tag.data-v-4f014bb0:active {
+		background-color: #e0e0e0;
+}
+
+	/* ==================== 企业选择 ==================== */
 .identity-hint.data-v-4f014bb0 {
 		margin-top: 16rpx;
 		font-size: 22rpx;
@@ -141,71 +326,18 @@
 		text-decoration: underline;
 		text-align: center;
 }
-.animate-fade.data-v-4f014bb0 {
-		animation: fadeIn-4f014bb0 0.3s ease;
-}
-@keyframes fadeIn-4f014bb0 {
-from {
-			opacity: 0;
-			transform: translateY(-10rpx);
-}
-to {
-			opacity: 1;
-			transform: translateY(0);
-}
-}
 
-	/* ==================== 标签建议区域样式 ==================== */
-.tag-suggestions-scroll.data-v-4f014bb0 {
-		white-space: nowrap;
-		/* 关键：让内部元素不换行，从而可以横向滚动 */
-		padding: 10rpx 0;
-		margin-bottom: 10rpx;
-		width: 100%;
-}
-
-	/* 隐藏滚动条 */
-.tag-suggestions-scroll.data-v-4f014bb0 ::-webkit-scrollbar {
-		display: none;
-		width: 0 !important;
-		height: 0 !important;
-		-webkit-appearance: none;
-		background: transparent;
-}
-.suggestion-tag.data-v-4f014bb0 {
-		display: inline-block;
-		/* 关键：让标签在同一行排列 */
-		background-color: #f0f0f0;
-		color: #555;
-		padding: 8rpx 20rpx;
-		border-radius: 20rpx;
-		font-size: 26rpx;
-		margin-right: 16rpx;
-		cursor: pointer;
-		transition: background-color 0.2s;
-}
-.suggestion-tag.data-v-4f014bb0:active {
-		background-color: #e0e0e0;
-}
-
-	/* ============================================================ */
+	/* ==================== 图片预览 ==================== */
 .image-preview.data-v-4f014bb0 {
 		display: grid;
-		/* 1. 声明为 grid 布局 */
 		grid-template-columns: repeat(3, 1fr);
-		/* 2. 创建一个三列的网格，每列宽度平分剩余空间 */
 		gap: 16rpx;
-		/* 3. 设置网格项之间的间距 */
 		margin-top: 10rpx;
 }
 .image-wrapper.data-v-4f014bb0 {
 		position: relative;
-		/* 移除固定的宽高，让它自适应 grid 容器分配的空间 */
-		/* width: 150rpx; */
-		/* height: 150rpx; */
 		border-radius: 12rpx;
 		overflow: hidden;
-		/* 【新增】强制设置宽高比为1:1，确保是正方形 */
 		aspect-ratio: 1 / 1;
 }
 .preview-img.data-v-4f014bb0 {
@@ -233,13 +365,7 @@ to {
 		background-color: rgba(0, 0, 0, 0.7);
 }
 .add-img-placeholder.data-v-4f014bb0 {
-		/* 移除固定的宽高，让它自适应 grid 容器 */
-		/* width: 150rpx; */
-		/* height: 150rpx; */
-		/* 【新增】确保它也是一个正方形 */
 		aspect-ratio: 1 / 1;
-
-		/* 其他样式保持不变 */
 		border: 2rpx dashed #ccc;
 		border-radius: 12rpx;
 		display: flex;
@@ -261,6 +387,8 @@ to {
 		border-color: #FF6A00;
 		color: #FF6A00;
 }
+
+	/* ==================== 其他设置 ==================== */
 .section-title.data-v-4f014bb0 {
 		font-size: 30rpx;
 		font-weight: bold;
@@ -290,6 +418,8 @@ to {
 		line-height: 1.4;
 		margin-top: 4rpx;
 }
+
+	/* ==================== 提交按钮 ==================== */
 .submit-btn.data-v-4f014bb0 {
 		background: linear-gradient(to right, #FF6A00, #FF8C37);
 		color: white;
@@ -304,13 +434,11 @@ to {
 }
 .submit-btn.disabled-btn.data-v-4f014bb0 {
 		background: #ccc;
-		/* 灰色背景 */
 		color: #fff;
 		box-shadow: none;
-		/* pointer-events: none;  <--如果不希望用户点击出弹窗，就加上这行；如果希望点击后弹窗提示升级，就不要加这行 */
 }
 
-	/* ==================== 媒体选择器和视频预览样式 ==================== */
+	/* ==================== 媒体选择器和视频预览 ==================== */
 .media-selector.data-v-4f014bb0 {
 		display: flex;
 		gap: 30rpx;
@@ -341,14 +469,10 @@ to {
 		gap: 20rpx;
 		margin-top: 10rpx;
 }
-
-	/* 视频预览框 (左侧) */
 .video-preview-wrapper.data-v-4f014bb0 {
 		position: relative;
 		flex: 2;
-		/* 占据较大宽度 */
 		height: 240rpx;
-		/* 固定高度 */
 		border-radius: 12rpx;
 		overflow: hidden;
 		background-color: #000;
@@ -358,14 +482,10 @@ to {
 		height: 100%;
 		display: block;
 }
-
-	/* 封面上传框 (右侧) */
 .video-cover-wrapper.data-v-4f014bb0 {
 		position: relative;
 		flex: 1;
-		/* 占据较小宽度 */
 		height: 240rpx;
-		/* 高度与视频一致 */
 		border: 2rpx dashed #ccc;
 		border-radius: 12rpx;
 		overflow: hidden;
@@ -405,7 +525,6 @@ to {
 		z-index: 10;
 }
 .delete-video-btn.data-v-4f014bb0 {
-		/* 复用删除图片的按钮样式 */
 		position: absolute;
 		top: 0rpx;
 		right: 0rpx;
@@ -423,4 +542,17 @@ to {
 }
 .delete-video-btn.data-v-4f014bb0:active {
 		background-color: rgba(0, 0, 0, 0.7);
+}
+.animate-fade.data-v-4f014bb0 {
+		animation: fadeIn-4f014bb0 0.3s ease;
+}
+@keyframes fadeIn-4f014bb0 {
+from {
+			opacity: 0;
+			transform: translateY(-10rpx);
+}
+to {
+			opacity: 1;
+			transform: translateY(0);
+}
 }

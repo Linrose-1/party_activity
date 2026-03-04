@@ -1,0 +1,293 @@
+
+.page.data-v-12158089 {
+		min-height: 100vh;
+		background: #f5f7fa;
+}
+
+	/* ==================== 顶部标题区 ==================== */
+.page-header.data-v-12158089 {
+		background: linear-gradient(135deg, #1890FF, #40a9ff);
+		padding: 40rpx 40rpx 50rpx;
+		display: flex;
+		justify-content: space-between;
+		align-items: flex-end;
+		border-radius: 0 0 40rpx 40rpx;
+		box-shadow: 0 8rpx 24rpx rgba(24, 144, 255, 0.25);
+}
+.header-title-row.data-v-12158089 {
+		display: flex;
+		flex-direction: column;
+		gap: 8rpx;
+}
+.header-title.data-v-12158089 {
+		font-size: 44rpx;
+		font-weight: 800;
+		color: #fff;
+		letter-spacing: 2rpx;
+}
+.header-subtitle.data-v-12158089 {
+		font-size: 24rpx;
+		color: rgba(255, 255, 255, 0.8);
+		max-width: 420rpx;
+		overflow: hidden;
+		white-space: nowrap;
+		text-overflow: ellipsis;
+}
+.header-count.data-v-12158089 {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		background: rgba(255, 255, 255, 0.2);
+		border-radius: 20rpx;
+		padding: 12rpx 24rpx;
+		-webkit-backdrop-filter: blur(10px);
+		        backdrop-filter: blur(10px);
+}
+.count-num.data-v-12158089 {
+		font-size: 48rpx;
+		font-weight: 900;
+		color: #fff;
+		line-height: 1;
+}
+.count-label.data-v-12158089 {
+		font-size: 20rpx;
+		color: rgba(255, 255, 255, 0.85);
+		margin-top: 4rpx;
+}
+
+	/* ==================== 筛选 Tab ==================== */
+.filter-bar.data-v-12158089 {
+		display: flex;
+		margin: 24rpx 30rpx 0;
+		background: #fff;
+		border-radius: 24rpx;
+		padding: 8rpx;
+		box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.04);
+}
+.filter-tab.data-v-12158089 {
+		flex: 1;
+		text-align: center;
+		padding: 16rpx 0;
+		font-size: 28rpx;
+		color: #999;
+		border-radius: 18rpx;
+		transition: all 0.2s;
+		position: relative;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 6rpx;
+}
+.filter-tab.active.data-v-12158089 {
+		background: linear-gradient(135deg, #1890FF, #40a9ff);
+		color: #fff;
+		font-weight: 600;
+		box-shadow: 0 4rpx 12rpx rgba(24, 144, 255, 0.3);
+}
+.tab-badge.data-v-12158089 {
+		background: #ff4d4f;
+		color: #fff;
+		font-size: 18rpx;
+		min-width: 32rpx;
+		height: 32rpx;
+		border-radius: 16rpx;
+		text-align: center;
+		line-height: 32rpx;
+		padding: 0 6rpx;
+}
+
+	/* ==================== 列表区域 ==================== */
+.list-container.data-v-12158089 {
+		padding: 20rpx 30rpx 40rpx;
+}
+
+	/* 加载状态 */
+.loading-wrap.data-v-12158089 {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		padding: 120rpx 0;
+		gap: 20rpx;
+}
+.spin-icon.data-v-12158089 {
+		animation: spin-12158089 1s linear infinite;
+}
+@keyframes spin-12158089 {
+from {
+			transform: rotate(0deg);
+}
+to {
+			transform: rotate(360deg);
+}
+}
+.loading-text.data-v-12158089 {
+		font-size: 28rpx;
+		color: #999;
+}
+
+	/* 空状态 */
+.empty-wrap.data-v-12158089 {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		padding: 100rpx 0;
+		gap: 16rpx;
+}
+.empty-icon.data-v-12158089 {
+		font-size: 80rpx;
+}
+.empty-title.data-v-12158089 {
+		font-size: 32rpx;
+		font-weight: 600;
+		color: #333;
+}
+.empty-desc.data-v-12158089 {
+		font-size: 26rpx;
+		color: #bbb;
+}
+
+	/* ==================== 感兴趣卡片 ==================== */
+.interest-card.data-v-12158089 {
+		background: #fff;
+		border-radius: 24rpx;
+		padding: 28rpx 28rpx 28rpx 36rpx;
+		margin-bottom: 20rpx;
+		display: flex;
+		align-items: center;
+		gap: 24rpx;
+		box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.04);
+		position: relative;
+		overflow: hidden;
+		transition: transform 0.15s;
+}
+.interest-card.data-v-12158089:active {
+		transform: scale(0.985);
+}
+
+	/* 未读卡片左侧蓝色竖条 */
+.interest-card.unread.data-v-12158089::before {
+		content: '';
+		position: absolute;
+		left: 0;
+		top: 0;
+		width: 8rpx;
+		height: 100%;
+		background: linear-gradient(to bottom, #1890FF, #40a9ff);
+		border-radius: 4rpx 0 0 4rpx;
+}
+
+	/* 未读红点 */
+.unread-dot.data-v-12158089 {
+		position: absolute;
+		top: 20rpx;
+		right: 20rpx;
+		width: 16rpx;
+		height: 16rpx;
+		background: #ff4d4f;
+		border-radius: 50%;
+		border: 3rpx solid #fff;
+}
+
+	/* 头像 */
+.card-avatar-wrap.data-v-12158089 {
+		flex-shrink: 0;
+}
+.card-avatar.data-v-12158089 {
+		width: 96rpx;
+		height: 96rpx;
+		border-radius: 50%;
+		border: 4rpx solid #f0f0f0;
+		background: #f5f5f5;
+}
+
+	/* 用户信息 */
+.card-info.data-v-12158089 {
+		flex: 1;
+		min-width: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 10rpx;
+}
+.card-name-row.data-v-12158089 {
+		display: flex;
+		align-items: center;
+		gap: 12rpx;
+}
+.card-name.data-v-12158089 {
+		font-size: 30rpx;
+		font-weight: 700;
+		color: #222;
+		overflow: hidden;
+		white-space: nowrap;
+		text-overflow: ellipsis;
+		max-width: 240rpx;
+}
+.unread-tag.data-v-12158089 {
+		font-size: 20rpx;
+		color: #1890FF;
+		background: rgba(24, 144, 255, 0.1);
+		border: 1rpx solid rgba(24, 144, 255, 0.3);
+		padding: 2rpx 10rpx;
+		border-radius: 8rpx;
+		flex-shrink: 0;
+}
+.read-tag.data-v-12158089 {
+		font-size: 20rpx;
+		color: #bbb;
+		background: #f5f5f5;
+		padding: 2rpx 10rpx;
+		border-radius: 8rpx;
+		flex-shrink: 0;
+}
+.card-time.data-v-12158089 {
+		font-size: 24rpx;
+		color: #bbb;
+		display: flex;
+		align-items: center;
+		gap: 6rpx;
+}
+
+	/* 操作按钮组 */
+.card-actions.data-v-12158089 {
+		display: flex;
+		flex-direction: column;
+		gap: 12rpx;
+		flex-shrink: 0;
+}
+.action-btn.data-v-12158089 {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 6rpx;
+		padding: 10rpx 20rpx;
+		border-radius: 30rpx;
+		font-size: 24rpx;
+		font-weight: 500;
+}
+
+	/* 查看名片按钮 */
+.card-btn.data-v-12158089 {
+		background: #FFF5EE;
+		color: #FF6A00;
+		border: 1rpx solid rgba(255, 106, 0, 0.25);
+}
+.card-btn.data-v-12158089:active {
+		background: #FFE8D9;
+}
+
+	/* 复制联系方式按钮 */
+.contact-btn.data-v-12158089 {
+		background: linear-gradient(135deg, #1890FF, #40a9ff);
+		color: #fff;
+		box-shadow: 0 4rpx 10rpx rgba(24, 144, 255, 0.25);
+}
+.contact-btn.data-v-12158089:active {
+		opacity: 0.85;
+}
+
+	/* 无联系方式时禁用样式 */
+.contact-btn.no-contact.data-v-12158089 {
+		background: #f0f0f0;
+		color: #ccc;
+		box-shadow: none;
+}
