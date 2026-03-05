@@ -1,14 +1,22 @@
 <template>
 	<view class="page">
 		<!-- ================== 顶部提示区 ================== -->
-		<view v-if="!isUserVerified" class="auth-reminder" @click="goToAuthPage">
+		<!-- 未实名时显示：有免实名次数提示剩余机会，无次数时变红警告 -->
+		<view v-if="!isUserVerified" class="auth-reminder"
+			:class="{ 'auth-reminder--warn': isQuotaLoaded && remainingQuota <= 0 }" @click="goToAuthPage">
 			<view class="reminder-content">
-				<uni-icons type="info-filled" size="18" color="#FF6F00"></uni-icons>
-				<text class="reminder-text">为保障活动用户安全，请先进行实名认证</text>
+				<uni-icons type="info-filled" size="18"
+					:color="isQuotaLoaded && remainingQuota <= 0 ? '#D32F2F' : '#FF6F00'"></uni-icons>
+				<text class="reminder-text" :class="{ 'reminder-text--warn': isQuotaLoaded && remainingQuota <= 0 }">
+					{{ isQuotaLoaded && remainingQuota <= 0
+						? '免实名次数已用完，继续发布请先完成实名认证'
+						: '尚未实名认证，建议完成认证保障活动安全' }}
+				</text>
 			</view>
 			<view class="reminder-action">
 				<text>去认证</text>
-				<uni-icons type="right" size="12" color="#FF6F00"></uni-icons>
+				<uni-icons type="right" size="12"
+					:color="isQuotaLoaded && remainingQuota <= 0 ? '#D32F2F' : '#FF6F00'"></uni-icons>
 			</view>
 		</view>
 
@@ -56,18 +64,19 @@
 						</view>
 					</uni-forms-item>
 
+					<!-- 【优化1】聚会时间：监听用户主动修改 -->
 					<uni-forms-item label="聚会时间" required>
-						<!-- 点击外层打开 -->
 						<view class="picker-trigger-box" @click="openPicker">
 							<uni-datetime-picker type="datetimerange" v-model="timeRange" rangeSeparator=" 至 "
-								@maskClick="closePicker" @change="closePicker" />
+								@maskClick="closePicker" @change="onTimeRangeChange" />
 						</view>
 					</uni-forms-item>
 
+					<!-- 【优化1】报名时间：监听用户主动修改 -->
 					<uni-forms-item label="报名时间" required>
 						<view class="picker-trigger-box" @click="openPicker">
 							<uni-datetime-picker type="datetimerange" v-model="enrollTimeRange" rangeSeparator=" 至 "
-								@maskClick="closePicker" @change="closePicker" />
+								@maskClick="closePicker" @change="onEnrollTimeRangeChange" />
 						</view>
 					</uni-forms-item>
 
@@ -181,7 +190,6 @@
 					</uni-forms-item>
 				</uni-forms>
 
-				<!-- 聚会环节 Label -->
 				<view class="subsection-title">聚会环节</view>
 
 				<view v-for="(item, index) in form.activitySessions" :key="item._id || index" class="session-card">
@@ -192,16 +200,13 @@
 						</view>
 					</view>
 					<view class="session-inputs">
-						<!-- 【修改】改用原生 input，手动加样式 -->
 						<view class="native-input-wrapper mb-20">
 							<input v-model="item.sessionTitle" placeholder="请输入环节标题" class="native-input"
-								placeholder-class="input-placeholder" maxlength="200"/>
+								placeholder-class="input-placeholder" maxlength="200" />
 						</view>
-
-						<!-- 【修改】改用原生 textarea -->
 						<view class="native-input-wrapper">
 							<textarea v-model="item.sessionDescription" placeholder="请输入环节描述" class="native-textarea"
-								placeholder-class="input-placeholder" auto-height maxlength="800"/>
+								placeholder-class="input-placeholder" auto-height maxlength="800" />
 						</view>
 					</view>
 				</view>
@@ -255,17 +260,9 @@
 			<view class="action-btn publish-btn" :class="{ 
 			        'disabled': isPublishing || (mode === 'create' && isQuotaLoaded && remainingQuota <= 0) 
 			    }" @click="handlePublishClick">
-				<!-- 按钮文案逻辑：
-			         1. 处理中 -> 处理中...
-			         2. 编辑模式 -> 保存修改
-			         3. 创建模式且次数不足 -> 发起聚会 (灰色)
-			         4. 创建模式且次数充足 -> 发起聚会 (余X次)
-			    -->
 				<text v-if="isPublishing">处理中...</text>
 				<text v-else-if="mode === 'edit'">保存修改</text>
-				<text v-else>
-					发起聚会
-				</text>
+				<text v-else>发起聚会</text>
 			</view>
 		</view>
 
@@ -305,22 +302,19 @@
 	// 2. 状态定义 (State Definitions)
 	// ==============================================================================
 
-	// --- 基础配置与UI状态 ---
-	const DRAFT_STORAGE_KEY = 'activity_draft'; // 草稿箱Key
-	const isUserVerified = ref(true); // 实名认证状态
-	const isPublishing = ref(false); // 发布按钮防抖/加载状态
-	const mode = ref('create'); // 页面模式: 'create' | 'edit'
-	const editActivityId = ref(null); // 编辑模式下的ID
-	const remainingQuota = ref(0); // 剩余聚会发布次数
-	const isQuotaLoaded = ref(false); // 标记是否已检查额度
+	const DRAFT_STORAGE_KEY = 'activity_draft';
+	const isUserVerified = ref(true);
+	const isPublishing = ref(false);
+	const mode = ref('create');
+	const editActivityId = ref(null);
+	const remainingQuota = ref(0);
+	const isQuotaLoaded = ref(false);
 
-	// --- 表单数据模型 ---
-	const timeRange = ref([]); // 聚会时间范围 [开始, 结束]
-	const enrollTimeRange = ref([]); // 报名时间范围 [开始, 结束]
-	const associatedStoreName = ref(''); // 选中的店铺名称(用于展示)
-	const tagOptions = ref([]); // 聚会类型字典
-	const enrollmentOptions = ref([ // 报名类型选项
-		{
+	const timeRange = ref([]);
+	const enrollTimeRange = ref([]);
+	const associatedStoreName = ref('');
+	const tagOptions = ref([]);
+	const enrollmentOptions = ref([{
 			text: 'AA/付费',
 			value: 1
 		},
@@ -330,12 +324,16 @@
 		}
 	]);
 
+	// 【优化1】标记用户是否手动选择过时间，初始化默认时间不算"已选"
+	const isTimeRangeUserSelected = ref(false);
+	const isEnrollTimeRangeUserSelected = ref(false);
+
 	const form = ref({
 		activityTitle: '',
 		activityDescription: '',
 		totalSlots: null,
 		limitSlots: null,
-		activityFunds: 1, // 1: AA, 2: 赞助
+		activityFunds: 1,
 		registrationFee: null,
 		locationAddress: '',
 		latitude: null,
@@ -354,13 +352,12 @@
 		}]
 	});
 
-	// --- 赞助商模块状态 ---
-	const isSponsorExpanded = ref(false); // 折叠面板展开状态
-	const showSponsorPopup = ref(false); // 弹窗显示状态
-	const sponsorsList = ref([]); // 赞助商列表数据
-	const deletedSponsorIds = ref([]); // 待删除的赞助商ID集合
-	const currentSponsorIndex = ref(-1); // 当前正在编辑的索引
-	const currentSponsorData = ref(null); // 传递给弹窗的编辑数据
+	const isSponsorExpanded = ref(false);
+	const showSponsorPopup = ref(false);
+	const sponsorsList = ref([]);
+	const deletedSponsorIds = ref([]);
+	const currentSponsorIndex = ref(-1);
+	const currentSponsorData = ref(null);
 
 	const isPickerOpen = ref(false);
 	const inputStyles = ref({
@@ -368,17 +365,23 @@
 		borderColor: '#dcdfe6'
 	});
 
-	// 处理打开
 	const openPicker = () => {
 		isPickerOpen.value = true;
 	};
-
-	// 处理关闭 (无论是选完还是取消)
 	const closePicker = () => {
-		// 加个微小的延时，防止闪烁
 		setTimeout(() => {
 			isPickerOpen.value = false;
 		}, 100);
+	};
+
+	// 【优化1】用户主动选择时间后，标记为已选，并关闭 picker
+	const onTimeRangeChange = () => {
+		isTimeRangeUserSelected.value = true;
+		closePicker();
+	};
+	const onEnrollTimeRangeChange = () => {
+		isEnrollTimeRangeUserSelected.value = true;
+		closePicker();
 	};
 
 	// ==============================================================================
@@ -387,7 +390,6 @@
 	onMounted(() => {
 		checkUserVerificationStatus();
 		getActiveType();
-		// initDragLayout();
 	});
 
 	onShow(() => {
@@ -397,7 +399,6 @@
 	});
 
 	onLoad(async (options) => {
-		// 1. 判断模式 (编辑 vs 创建)
 		if (options && options.mode === 'edit' && options.id) {
 			mode.value = 'edit';
 			editActivityId.value = options.id;
@@ -410,18 +411,15 @@
 			uni.setNavigationBarTitle({
 				title: '发起聚会'
 			});
-			// 尝试加载草稿，没有草稿则初始化默认时间
 			const hasDraft = loadDraft();
 			if (!hasDraft) initDefaultTimes();
 		}
 
-		// 2. 处理店铺选择回调参数
 		if (options && options.storeId && options.storeName) {
 			form.value.associatedStoreId = options.storeId;
 			associatedStoreName.value = decodeURIComponent(options.storeName);
 		}
 
-		// 3. 监听全局事件
 		uni.$on('shopSelected', (shop) => {
 			form.value.associatedStoreId = shop.id;
 			associatedStoreName.value = shop.storeName;
@@ -432,7 +430,6 @@
 		uni.$off('shopSelected');
 	});
 
-	// 监听时间变化，选完了就恢复层级
 	watch([timeRange, enrollTimeRange], () => {
 		isPickerOpen.value = false;
 	});
@@ -441,7 +438,6 @@
 	// 4. 工具与辅助方法 (Utils & Helpers)
 	// ==============================================================================
 
-	// 时间戳格式化
 	const formatTimestamp = (ts) => {
 		if (!ts) return '';
 		const d = new Date(Number(ts));
@@ -449,21 +445,61 @@
 		return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
 	};
 
-	// 初始化默认时间 (今天)
 	const initDefaultTimes = () => {
 		const now = new Date();
 		const day =
 			`${now.getFullYear()}-${(now.getMonth()+1).toString().padStart(2,'0')}-${now.getDate().toString().padStart(2,'0')}`;
 		enrollTimeRange.value = [`${day} 09:00:00`, `${day} 18:00:00`];
 		timeRange.value = [`${day} 19:00:00`, `${day} 21:00:00`];
+		// 默认时间不算用户手动选择
+		isTimeRangeUserSelected.value = false;
+		isEnrollTimeRangeUserSelected.value = false;
 	};
 
-	// 检查实名认证 (占位)
+	/**
+	 * 检查实名认证状态
+	 * 调用 /app-api/member/user/get 获取最新数据，避免缓存过期问题
+	 * 同时顺手更新本地缓存，保持数据一致
+	 * idCert: 1 = 已实名，0 = 未认证
+	 */
 	const checkUserVerificationStatus = async () => {
-		/*...*/
+		try {
+			const {
+				data,
+				error
+			} = await request('/app-api/member/user/get', {
+				method: 'GET'
+			});
+			if (!error && data) {
+				// 更新本地缓存，保持数据最新
+				uni.setStorageSync('userInfo', JSON.stringify(data));
+				isUserVerified.value = data.idCert === 1;
+			} else {
+				// 接口失败时降级读缓存
+				const cached = uni.getStorageSync('userInfo');
+				if (cached) {
+					try {
+						isUserVerified.value = JSON.parse(cached).idCert === 1;
+					} catch (e) {
+						isUserVerified.value = true;
+					}
+				} else {
+					isUserVerified.value = true; // 完全无数据时不拦截
+				}
+			}
+		} catch (e) {
+			console.error('获取用户实名状态失败:', e);
+			isUserVerified.value = true; // 网络异常时不拦截，让后端兜底
+		}
 	};
 
-	// 获取聚会类型字典
+	// 【Bug1】跳转实名认证页
+	const goToAuthPage = () => {
+		uni.navigateTo({
+			url: '/packages/my-auth/my-auth'
+		});
+	};
+
 	const getActiveType = async () => {
 		const res = await request('/app-api/system/dict-data/type', {
 			method: 'GET',
@@ -481,7 +517,6 @@
 	// 5. 交互事件处理 (UI Handlers)
 	// ==============================================================================
 
-	// --- 5.1 地图与店铺 ---
 	const openMapToChooseLocation = () => {
 		uni.chooseLocation({
 			success: (res) => {
@@ -496,7 +531,6 @@
 		url: '/pages/shop-list/shop-list'
 	});
 
-	// --- 5.2 图片上传与处理 ---
 	const uploadCover = () => {
 		uni.chooseImage({
 			count: 1,
@@ -504,52 +538,35 @@
 			sourceType: ['album', 'camera'],
 			success: (res) => {
 				const tempFilePath = res.tempFilePaths[0];
-
 				// #ifdef MP-WEIXIN
-				// 微信小程序端：调用原生裁剪接口
 				wx.cropImage({
-					src: tempFilePath, // 图片路径
-					cropScale: '4:3', // 【关键】设置裁剪比例为 4:3
+					src: tempFilePath,
+					cropScale: '4:3',
 					success: (cropRes) => {
-						console.log('裁剪成功:', cropRes.tempFilePath);
-						// 将裁剪后的图片上传到服务器
 						processUpload(cropRes.tempFilePath);
 					},
 					fail: (err) => {
 						console.log('用户取消裁剪或失败:', err);
-						// 可选：如果用户取消裁剪，是否允许直接上传原图？
-						// 如果强制要求，这里什么都不做。
-						// 如果允许降级，可以调用 processUpload(tempFilePath);
 					}
 				});
 				// #endif
-
 				// #ifndef MP-WEIXIN
-				// 非微信小程序端（如H5/App）：直接上传，或需要引入第三方裁剪插件
-				// 暂时直接上传原图
 				processUpload(tempFilePath);
 				// #endif
 			}
 		});
 	};
 
-	// 抽离上传逻辑，方便复用
 	const processUpload = async (filePath) => {
 		uni.showLoading({
 			title: '上传中...'
 		});
-
-		// 调用你项目封装好的 uploadFile 工具
-		// 注意：根据你的 upload.js 实现，入参可能是一个文件对象或路径
-		// 这里假设 uploadFile 需要的是 { path: ... } 格式的对象
 		const result = await uploadFile({
 			path: filePath
 		}, {
-			directory: 'cover' // 上传目录
+			directory: 'cover'
 		});
-
 		uni.hideLoading();
-
 		if (result.data) {
 			form.value.coverImageUrl = result.data;
 			uni.showToast({
@@ -567,37 +584,24 @@
 	const handleActivityImagesUpload = () => {
 		uni.chooseImage({
 			count: 9 - form.value.activityCoverImageUrls.length,
-			sizeType: ['original', 'compressed'], // 建议加上这个
-			sourceType: ['album', 'camera'], // 建议加上这个
+			sizeType: ['original', 'compressed'],
+			sourceType: ['album', 'camera'],
 			success: async (res) => {
-				// 1. 显示加载提示，mask=true 防止用户在上传时误触其他按钮
 				uni.showLoading({
 					title: '正在上传...',
 					mask: true
 				});
-
 				try {
-					// 2. 并发上传所有选中的图片
-					// 注意：这里我们假设 res.tempFiles 是正确的文件数组
 					const uploadPromises = res.tempFiles.map(file => uploadFile({
-						path: file.path // 适配你的 uploadFile 接口参数格式
+						path: file.path
 					}, {
 						directory: 'gallery'
 					}));
-
 					const results = await Promise.all(uploadPromises);
-
-					// 3. 提取成功的 URL
-					const successfulUrls = results
-						.filter(res => res.data) // 过滤掉失败的
-						.map(res => res.data); // 提取 URL
-
-					// 4. 将新图片追加到表单数据中
+					const successfulUrls = results.filter(res => res.data).map(res => res.data);
 					if (successfulUrls.length > 0) {
 						form.value.activityCoverImageUrls.push(...successfulUrls);
 					}
-
-					// 可选：如果部分失败，提示一下
 					if (successfulUrls.length < res.tempFiles.length) {
 						uni.showToast({
 							title: '部分图片上传失败',
@@ -605,18 +609,15 @@
 						});
 					}
 				} catch (error) {
-					console.error('上传异常:', error);
 					uni.showToast({
 						title: '上传出错',
 						icon: 'none'
 					});
 				} finally {
-					// 5. 无论成功失败，一定要隐藏 Loading
 					uni.hideLoading();
 				}
 			},
 			fail: (err) => {
-				// 用户取消选择通常不需要提示错误
 				if (err.errMsg.indexOf('cancel') === -1) {
 					uni.showToast({
 						title: '选择图片失败',
@@ -640,10 +641,9 @@
 		});
 	};
 
-	// --- 5.3 环节管理 ---
 	const addAgenda = () => {
 		form.value.activitySessions.push({
-			_id: Date.now() + Math.random(), // 生成唯一标识
+			_id: Date.now() + Math.random(),
 			sessionTitle: '',
 			sessionDescription: ''
 		});
@@ -654,21 +654,18 @@
 	// 6. 赞助商管理逻辑 (Sponsor Logic)
 	// ==============================================================================
 
-	// 打开添加弹窗
 	const handleAddSponsor = () => {
 		currentSponsorIndex.value = -1;
 		currentSponsorData.value = null;
 		showSponsorPopup.value = true;
 	};
 
-	// 打开编辑弹窗
 	const handleEditSponsor = (index) => {
 		currentSponsorIndex.value = index;
 		currentSponsorData.value = sponsorsList.value[index];
 		showSponsorPopup.value = true;
 	};
 
-	// 删除赞助商
 	const handleDeleteSponsor = (index) => {
 		uni.showModal({
 			title: '提示',
@@ -676,41 +673,30 @@
 			success: (res) => {
 				if (res.confirm) {
 					const item = sponsorsList.value[index];
-					// 如果该赞助商有ID (说明是后端已存的)，记录到删除队列以便提交时删除
-					if (item.id) {
-						deletedSponsorIds.value.push(item.id);
-					}
+					if (item.id) deletedSponsorIds.value.push(item.id);
 					sponsorsList.value.splice(index, 1);
 				}
 			}
 		});
 	};
 
-	// 弹窗确认回调
 	const handleSponsorSave = (data) => {
 		if (currentSponsorIndex.value === -1) {
-			sponsorsList.value.push(data); // 新增
+			sponsorsList.value.push(data);
 		} else {
-			sponsorsList.value.splice(currentSponsorIndex.value, 1, data); // 更新
+			sponsorsList.value.splice(currentSponsorIndex.value, 1, data);
 		}
 		showSponsorPopup.value = false;
 	};
 
-	// 后端同步逻辑 (在发布/保存时调用)
 	const syncSponsorsInline = async (activityId) => {
-		console.log('开始同步赞助商:', activityId);
 		const userId = uni.getStorageSync('userId');
-
-		// A. 执行删除
 		for (const id of deletedSponsorIds.value) {
 			await request(`/app-api/member/sponsor/delete?id=${id}`, {
 				method: 'DELETE'
 			});
 		}
-
-		// B. 执行新增或更新
-		sponsorsList.value.forEach((item, index) => item.displaySort = index); // 更新排序
-
+		sponsorsList.value.forEach((item, index) => item.displaySort = index);
 		for (const item of sponsorsList.value) {
 			const sponsorPayload = {
 				...item,
@@ -718,7 +704,6 @@
 				activityId: activityId,
 				galleryImageUrls: JSON.stringify(item.galleryImageUrls || [])
 			};
-
 			if (item.id) {
 				await request('/app-api/member/sponsor-activity-record/update-in-activity', {
 					method: 'PUT',
@@ -737,7 +722,6 @@
 	// 7. 核心业务逻辑 (Core Business Logic)
 	// ==============================================================================
 
-	// --- 7.1 草稿箱 ---
 	const loadDraft = () => {
 		try {
 			const str = uni.getStorageSync(DRAFT_STORAGE_KEY);
@@ -748,8 +732,10 @@
 				timeRange.value = d.timeRange || [];
 				enrollTimeRange.value = d.enrollTimeRange || [];
 				associatedStoreName.value = d.associatedStoreName || '';
-				// 恢复赞助商
 				if (d.sponsorsList) sponsorsList.value = d.sponsorsList;
+				// 草稿恢复的时间视为已选（用户之前填过）
+				isTimeRangeUserSelected.value = !!(d.timeRange && d.timeRange.length);
+				isEnrollTimeRangeUserSelected.value = !!(d.enrollTimeRange && d.enrollTimeRange.length);
 				uni.showToast({
 					title: '已恢复草稿',
 					icon: 'none'
@@ -775,13 +761,10 @@
 		});
 	};
 
-	// --- 7.2 编辑模式回显 ---
 	const loadActivityDetailForEdit = async (id) => {
 		uni.showLoading({
 			title: '加载中...'
 		});
-
-		// 并发请求：详情 + 字典
 		const [detailRes, dictRes] = await Promise.all([
 			request('/app-api/member/activity/get', {
 				method: 'GET',
@@ -798,10 +781,8 @@
 			}) :
 			Promise.resolve(null)
 		]);
-
 		uni.hideLoading();
 
-		// 1. 处理字典
 		if (dictRes && !dictRes.error && dictRes.data) {
 			tagOptions.value = dictRes.data.map(item => ({
 				value: item.value,
@@ -809,7 +790,6 @@
 			}));
 		}
 
-		// 2. 处理详情
 		if (detailRes.error || !detailRes.data) {
 			uni.showToast({
 				title: '加载活动详情失败',
@@ -820,9 +800,6 @@
 		}
 
 		const data = detailRes.data;
-		console.log('获取详情用于编辑:', data);
-
-		// 回显基础字段
 		form.value.activityTitle = data.activityTitle;
 		form.value.activityDescription = data.activityDescription;
 		form.value.totalSlots = data.totalSlots;
@@ -836,13 +813,10 @@
 		form.value.organizerUnitName = data.organizerUnitName;
 		form.value.organizerContactPhone = data.organizerContactPhone;
 		form.value.organizerPaymentQrCodeUrl = data.organizerPaymentQrCodeUrl;
-
-		// 回显图集
 		form.value.activityCoverImageUrls = (data.activityCoverImageUrls && data.activityCoverImageUrls.length >
-				0) ?
+			0) ?
 			data.activityCoverImageUrls : [];
 
-		// 回显Tag
 		let matchedValue = '';
 		if (data.category) {
 			const targetVal = String(data.category);
@@ -856,7 +830,6 @@
 		}
 		form.value.tag = matchedValue;
 
-		// 回显时间
 		if (data.startDatetime && data.endDatetime) {
 			timeRange.value = [formatTimestamp(data.startDatetime), formatTimestamp(data.endDatetime)];
 		}
@@ -864,14 +837,15 @@
 			enrollTimeRange.value = [formatTimestamp(data.registrationStartDatetime), formatTimestamp(data
 				.registrationEndDatetime)];
 		}
+		// 编辑模式回显的时间视为已选
+		isTimeRangeUserSelected.value = true;
+		isEnrollTimeRangeUserSelected.value = true;
 
-		// 回显店铺
 		if (data.memberStoreRespVO) {
 			form.value.associatedStoreId = data.memberStoreRespVO.id;
 			associatedStoreName.value = data.memberStoreRespVO.storeName;
 		}
 
-		// 回显环节
 		if (data.memberActivitySessionList && data.memberActivitySessionList.length > 0) {
 			form.value.activitySessions = data.memberActivitySessionList.map(item => ({
 				_id: item.id,
@@ -880,7 +854,6 @@
 			}));
 		}
 
-		// 回显赞助商
 		if (data.memberSponsorList && data.memberSponsorList.length > 0) {
 			sponsorsList.value = data.memberSponsorList.map(item => {
 				let gallery = [];
@@ -891,7 +864,6 @@
 						gallery = item.galleryImageUrls;
 					}
 				} catch (e) {
-					console.error('解析赞助商图集失败:', e);
 					gallery = [];
 				}
 				return {
@@ -899,13 +871,11 @@
 					galleryImageUrls: gallery
 				};
 			});
-			console.log('赞助商回显完成:', sponsorsList.value);
 		} else {
 			sponsorsList.value = [];
 		}
 	};
 
-	// 获取聚会发布剩余次数 (rightsType = 3)
 	const checkPublishQuota = async () => {
 		try {
 			const {
@@ -916,24 +886,10 @@
 					rightsType: 3
 				}
 			});
-
-			// 【核心修改】只看 data，不管 error
-			// 1. 如果 data 是数字 (比如 15，或者 0)，直接赋值
-			if (typeof data === 'number') {
-				remainingQuota.value = data;
-			}
-			// 2. 如果 data 是 null (接口500报错)，或者 undefined，强制设为 0
-			else {
-				console.log('接口返回 null，视为次数已用完');
-				remainingQuota.value = 0;
-			}
-
-			// 【关键】标记为已加载，这样 template 里的 :class 判断才会生效 (按钮变灰)
+			remainingQuota.value = typeof data === 'number' ? data : 0;
 			isQuotaLoaded.value = true;
-
 		} catch (e) {
 			console.error('获取权益网络异常', e);
-			// 网络异常时不标记 loaded，保持按钮原样，或者提示网络错误
 		}
 	};
 
@@ -955,14 +911,10 @@
 	};
 
 	const handlePublishClick = () => {
-		// 1. 额度检查拦截
-		// 如果是编辑模式(mode='edit')，通常不扣次数（视业务而定），如果是创建模式才检查
 		if (mode.value === 'create' && isQuotaLoaded.value && remainingQuota.value == 0) {
 			showQuotaExceededModal();
 			return;
 		}
-
-		// 2. 额度充足或编辑模式，走原有逻辑
 		publish();
 	};
 
@@ -970,7 +922,6 @@
 	const publish = async () => {
 		if (isPublishing.value) return;
 
-		// 简单校验
 		if (!form.value.activityTitle) return uni.showToast({
 			title: '标题必填',
 			icon: 'none'
@@ -979,14 +930,36 @@
 			title: '类型必选',
 			icon: 'none'
 		});
-		if (!timeRange.value.length || !enrollTimeRange.value.length) return uni.showToast({
-			title: '时间必填',
-			icon: 'none'
-		});
 		if (!form.value.locationAddress) return uni.showToast({
 			title: '地点必填',
 			icon: 'none'
 		});
+
+		// 【优化1】判断用户是否手动选择过时间
+		if (!isTimeRangeUserSelected.value) {
+			uni.showModal({
+				title: '请确认聚会时间',
+				content: '检测到您使用的是系统默认时间，请先手动选择实际的聚会时间后再发布。',
+				showCancel: false,
+				confirmText: '去选择'
+			});
+			return;
+		}
+		if (!isEnrollTimeRangeUserSelected.value) {
+			uni.showModal({
+				title: '请确认报名时间',
+				content: '检测到您使用的是系统默认时间，请先手动选择实际的报名时间后再发布。',
+				showCancel: false,
+				confirmText: '去选择'
+			});
+			return;
+		}
+		if (!timeRange.value.length || !enrollTimeRange.value.length) {
+			return uni.showToast({
+				title: '时间必填',
+				icon: 'none'
+			});
+		}
 
 		uni.showModal({
 			title: '确认发布',
@@ -1005,7 +978,6 @@
 		});
 
 		try {
-			// 1. 准备数据
 			const payload = JSON.parse(JSON.stringify(form.value));
 			payload.startDatetime = new Date(timeRange.value[0]).getTime();
 			payload.endDatetime = new Date(timeRange.value[1]).getTime();
@@ -1021,38 +993,39 @@
 				...s,
 				sessionOrder: i + 1
 			}));
-
-			// 清理旧字段
 			delete payload.companyName;
 			delete payload.companyLogo;
 			if (payload.activityFunds === 2) delete payload.registrationFee;
 
 			let finalActivityId = null;
 
-			// 2. 提交主活动信息
 			if (mode.value === 'edit') {
 				payload.id = editActivityId.value;
 				const res = await request('/app-api/member/activity/edit', {
 					method: 'POST',
 					data: payload
 				});
-				if (res.error) throw new Error(res.error.msg || '修改失败');
+				if (res.error) throw new Error(
+					typeof res.error === 'object' ? (res.error.msg || res.error.message || JSON.stringify(
+						res.error)) : res.error
+				);
 				finalActivityId = editActivityId.value;
 			} else {
 				const res = await request('/app-api/member/activity/create', {
 					method: 'POST',
 					data: payload
 				});
-				if (res.error) throw new Error(res.error.msg || '创建失败');
+				if (res.error) throw new Error(
+					typeof res.error === 'object' ? (res.error.msg || res.error.message || JSON.stringify(
+						res.error)) : res.error
+				);
 				finalActivityId = res.data;
 			}
 
-			// 3. 同步赞助商
 			if (finalActivityId) {
 				await syncSponsorsInline(finalActivityId);
 			}
 
-			// 4. 完成
 			if (mode.value === 'create') uni.removeStorageSync(DRAFT_STORAGE_KEY);
 			uni.showModal({
 				title: '成功',
@@ -1064,10 +1037,27 @@
 			});
 
 		} catch (e) {
-			console.error(e);
-			uni.showToast({
-				title: e.message || '系统异常',
-				icon: 'none'
+			console.error('发布失败:', e);
+
+			const errMsg = e.message || String(e) || '系统异常，请稍后重试';
+
+			// 所有后端错误统一用 showModal 完整展示，不截断、不做关键词分流
+			// 如果是实名相关错误，增加"去认证"按钮；否则只有"我知道了"
+			const isAuthError = errMsg.includes('实名') || errMsg.includes('认证') || errMsg.includes('idCert');
+			uni.showModal({
+				title: isAuthError ? '需要实名认证' : '发布失败',
+				content: errMsg,
+				confirmText: isAuthError ? '去认证' : '我知道了',
+				showCancel: isAuthError,
+				cancelText: '稍后再说',
+				confirmColor: '#FF6F00',
+				success: (res) => {
+					if (isAuthError && res.confirm) {
+						uni.navigateTo({
+							url: '/packages/my-auth/my-auth'
+						});
+					}
+				}
 			});
 		} finally {
 			isPublishing.value = false;
@@ -1077,7 +1067,6 @@
 </script>
 
 <style lang="scss" scoped>
-	/* 定义主题变量 */
 	$theme-color: #FF6F00;
 	$bg-color: #f5f7fa;
 	$card-bg: #ffffff;
@@ -1087,26 +1076,16 @@
 	$input-border: #dcdfe6;
 
 	.page {
-		/* 【修改】允许页面滚动 */
 		min-height: 100vh;
 		background-color: $bg-color;
-		/* display: flex;  <-- 删除 flex 布局，回归文档流 */
-		/* flex-direction: column; */
 		padding-bottom: constant(safe-area-inset-bottom);
 		padding-bottom: env(safe-area-inset-bottom);
 	}
 
 	.main-content {
 		padding-bottom: 120rpx;
-		/* 给底部栏留位置 */
 	}
 
-	// .main-scroll {
-	// 	flex: 1;
-	// 	height: 0;
-	// }
-
-	/* 卡片通用样式 */
 	.form-card {
 		background: $card-bg;
 		margin: 24rpx;
@@ -1135,17 +1114,21 @@
 		color: $text-main;
 	}
 
-	/* 顶部实名认证提示 */
 	.auth-reminder {
 		margin: 24rpx 24rpx 0;
 		padding: 20rpx 24rpx;
 		background: #FFF8E1;
-		/* 浅橙色背景 */
 		border-radius: 16rpx;
 		border: 1px solid #FFE0B2;
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
+
+		// 次数用完时变红色警告样式
+		&--warn {
+			background: #FFF1F0;
+			border-color: #FFCCC7;
+		}
 
 		.reminder-content {
 			display: flex;
@@ -1156,6 +1139,10 @@
 		.reminder-text {
 			font-size: 26rpx;
 			color: #FF8F00;
+
+			&--warn {
+				color: #D32F2F;
+			}
 		}
 
 		.reminder-action {
@@ -1167,7 +1154,6 @@
 		}
 	}
 
-	/* 表单样式优化 */
 	:deep(.uni-forms-item__label) {
 		font-size: 28rpx;
 		color: #333;
@@ -1181,11 +1167,9 @@
 		color: $theme-color !important;
 	}
 
-	/* 封面上传框 (4:3 比例) */
 	.cover-upload-box {
 		width: 100%;
 		aspect-ratio: 5 / 4;
-		/* 核心比例 */
 		background-color: #fafafa;
 		border: 2rpx dashed $input-border;
 		border-radius: 16rpx;
@@ -1241,21 +1225,15 @@
 	.uploader-wrapper {
 		width: 100%;
 		min-height: 200rpx;
-		/* 给一个最小高度，防止未加载时完全坍塌 */
 		overflow: hidden;
-		/* 触发 BFC，清除浮动，防止子元素外溢 */
 		display: block;
-		/* 确保是块级元素 */
-		/* 如果 DragImageUploader 内部有 transform 动画，可能需要加这个 */
 		position: relative;
 		z-index: 1;
 	}
 
-	/* 自定义选择框 (模仿输入框外观) */
 	.custom-picker-box {
 		width: 100%;
 		height: 72rpx;
-		/* 与 uni-easyinput 高度对齐 */
 		border: 1px solid $input-border;
 		border-radius: 8rpx;
 		padding: 0 20rpx;
@@ -1284,15 +1262,12 @@
 		.placeholder {
 			font-size: 28rpx;
 			color: #999;
-			/* 占位符颜色 */
 		}
 	}
 
-	/* 时间选择器触发框 */
 	.picker-trigger-box {
 		position: relative;
 
-		/* 让 uni-datetime-picker 撑开容器，并通过 deep 样式美化 */
 		:deep(.uni-date-x--border) {
 			border: 1px solid $input-border !important;
 			border-radius: 8rpx !important;
@@ -1300,7 +1275,6 @@
 			box-sizing: border-box;
 		}
 
-		/* 隐藏原组件图标，使用自定义图标定位 */
 		:deep(.uni-date__icon-clear) {
 			right: 50rpx;
 		}
@@ -1314,14 +1288,12 @@
 		}
 	}
 
-	/* 布局辅助 */
 	.row-inputs {
 		display: flex;
 		gap: 24rpx;
 
 		.half-item {
 			flex: 1;
-			/* 解决 flex 子元素宽度溢出 */
 			min-width: 0;
 		}
 	}
@@ -1330,7 +1302,6 @@
 		margin-bottom: 20rpx;
 	}
 
-	/* 赞助商模块 */
 	.section-header {
 		display: flex;
 		justify-content: space-between;
@@ -1430,7 +1401,6 @@
 		}
 	}
 
-	/* 虚线添加按钮 */
 	.add-dashed-btn {
 		width: 100%;
 		height: 88rpx;
@@ -1451,7 +1421,6 @@
 		}
 	}
 
-	/* 聚会环节 */
 	.subsection-title {
 		font-size: 30rpx;
 		font-weight: bold;
@@ -1461,7 +1430,6 @@
 		border-left: 6rpx solid $theme-color;
 	}
 
-	/* 原生输入框样式适配 */
 	.native-input-wrapper {
 		border: 1px solid #dcdfe6;
 		border-radius: 4px;
@@ -1471,7 +1439,6 @@
 
 	.native-input {
 		height: 36px;
-		/* 对应 uni-easyinput 的默认高度 */
 		font-size: 14px;
 		color: #333;
 		width: 100%;
@@ -1486,7 +1453,6 @@
 		line-height: 1.5;
 	}
 
-	/* 占位符样式 */
 	::v-deep .input-placeholder {
 		color: #999;
 		font-size: 14px;
@@ -1521,7 +1487,6 @@
 		}
 	}
 
-	/* 二维码上传 */
 	.qrcode-upload-box {
 		width: 200rpx;
 		height: 200rpx;
@@ -1558,7 +1523,6 @@
 		font-size: 24rpx;
 	}
 
-	/* 底部操作栏 */
 	.action-bar {
 		position: fixed;
 		bottom: 0;
@@ -1575,7 +1539,6 @@
 
 		&.hidden {
 			transform: translateY(100%);
-			/* 移出屏幕 */
 		}
 
 		.action-btn {
@@ -1612,15 +1575,12 @@
 
 			&.disabled {
 				background: #e0e0e0;
-				/* 灰色背景 */
 				color: #999;
 				box-shadow: none;
-				/* pointer-events: none; <--- 同样建议去掉这行，允许点击出弹窗提示 */
 			}
 		}
 	}
 
-	/* 强制提升 Picker 弹窗层级，无视父级限制 */
 	:deep(.uni-datetime-picker--popup),
 	:deep(.uni-date-range-popup) {
 		z-index: 99999 !important;
@@ -1630,13 +1590,11 @@
 		transform: translate(-50%, -50%) !important;
 	}
 
-	/* 强制提升遮罩层级 */
 	:deep(.uni-mask),
 	:deep(.uni-date-mask) {
 		z-index: 99998 !important;
 	}
 
-	/* 确保底部栏层级正常，不要太高 */
 	.action-bar {
 		z-index: 99;
 	}

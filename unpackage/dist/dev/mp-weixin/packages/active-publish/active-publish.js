@@ -40,7 +40,6 @@ const _sfc_main = {
     const associatedStoreName = common_vendor.ref("");
     const tagOptions = common_vendor.ref([]);
     const enrollmentOptions = common_vendor.ref([
-      // 报名类型选项
       {
         text: "AA/付费",
         value: 1
@@ -50,13 +49,14 @@ const _sfc_main = {
         value: 2
       }
     ]);
+    const isTimeRangeUserSelected = common_vendor.ref(false);
+    const isEnrollTimeRangeUserSelected = common_vendor.ref(false);
     const form = common_vendor.ref({
       activityTitle: "",
       activityDescription: "",
       totalSlots: null,
       limitSlots: null,
       activityFunds: 1,
-      // 1: AA, 2: 赞助
       registrationFee: null,
       locationAddress: "",
       latitude: null,
@@ -92,6 +92,14 @@ const _sfc_main = {
       setTimeout(() => {
         isPickerOpen.value = false;
       }, 100);
+    };
+    const onTimeRangeChange = () => {
+      isTimeRangeUserSelected.value = true;
+      closePicker();
+    };
+    const onEnrollTimeRangeChange = () => {
+      isEnrollTimeRangeUserSelected.value = true;
+      closePicker();
     };
     common_vendor.onMounted(() => {
       checkUserVerificationStatus();
@@ -146,8 +154,41 @@ const _sfc_main = {
       const day = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, "0")}-${now.getDate().toString().padStart(2, "0")}`;
       enrollTimeRange.value = [`${day} 09:00:00`, `${day} 18:00:00`];
       timeRange.value = [`${day} 19:00:00`, `${day} 21:00:00`];
+      isTimeRangeUserSelected.value = false;
+      isEnrollTimeRangeUserSelected.value = false;
     };
     const checkUserVerificationStatus = async () => {
+      try {
+        const {
+          data,
+          error
+        } = await utils_request.request("/app-api/member/user/get", {
+          method: "GET"
+        });
+        if (!error && data) {
+          common_vendor.index.setStorageSync("userInfo", JSON.stringify(data));
+          isUserVerified.value = data.idCert === 1;
+        } else {
+          const cached = common_vendor.index.getStorageSync("userInfo");
+          if (cached) {
+            try {
+              isUserVerified.value = JSON.parse(cached).idCert === 1;
+            } catch (e) {
+              isUserVerified.value = true;
+            }
+          } else {
+            isUserVerified.value = true;
+          }
+        }
+      } catch (e) {
+        common_vendor.index.__f__("error", "at packages/active-publish/active-publish.vue:491", "获取用户实名状态失败:", e);
+        isUserVerified.value = true;
+      }
+    };
+    const goToAuthPage = () => {
+      common_vendor.index.navigateTo({
+        url: "/packages/my-auth/my-auth"
+      });
     };
     const getActiveType = async () => {
       const res = await utils_request.request("/app-api/system/dict-data/type", {
@@ -183,15 +224,12 @@ const _sfc_main = {
           const tempFilePath = res.tempFilePaths[0];
           common_vendor.wx$1.cropImage({
             src: tempFilePath,
-            // 图片路径
             cropScale: "4:3",
-            // 【关键】设置裁剪比例为 4:3
             success: (cropRes) => {
-              common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:514", "裁剪成功:", cropRes.tempFilePath);
               processUpload(cropRes.tempFilePath);
             },
             fail: (err) => {
-              common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:519", "用户取消裁剪或失败:", err);
+              common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:549", "用户取消裁剪或失败:", err);
             }
           });
         }
@@ -205,7 +243,6 @@ const _sfc_main = {
         path: filePath
       }, {
         directory: "cover"
-        // 上传目录
       });
       common_vendor.index.hideLoading();
       if (result.data) {
@@ -225,9 +262,7 @@ const _sfc_main = {
       common_vendor.index.chooseImage({
         count: 9 - form.value.activityCoverImageUrls.length,
         sizeType: ["original", "compressed"],
-        // 建议加上这个
         sourceType: ["album", "camera"],
-        // 建议加上这个
         success: async (res) => {
           common_vendor.index.showLoading({
             title: "正在上传...",
@@ -236,7 +271,6 @@ const _sfc_main = {
           try {
             const uploadPromises = res.tempFiles.map((file) => utils_upload.uploadFile({
               path: file.path
-              // 适配你的 uploadFile 接口参数格式
             }, {
               directory: "gallery"
             }));
@@ -252,7 +286,6 @@ const _sfc_main = {
               });
             }
           } catch (error) {
-            common_vendor.index.__f__("error", "at packages/active-publish/active-publish.vue:608", "上传异常:", error);
             common_vendor.index.showToast({
               title: "上传出错",
               icon: "none"
@@ -287,7 +320,6 @@ const _sfc_main = {
     const addAgenda = () => {
       form.value.activitySessions.push({
         _id: Date.now() + Math.random(),
-        // 生成唯一标识
         sessionTitle: "",
         sessionDescription: ""
       });
@@ -310,9 +342,8 @@ const _sfc_main = {
         success: (res) => {
           if (res.confirm) {
             const item = sponsorsList.value[index];
-            if (item.id) {
+            if (item.id)
               deletedSponsorIds.value.push(item.id);
-            }
             sponsorsList.value.splice(index, 1);
           }
         }
@@ -327,7 +358,6 @@ const _sfc_main = {
       showSponsorPopup.value = false;
     };
     const syncSponsorsInline = async (activityId) => {
-      common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:701", "开始同步赞助商:", activityId);
       const userId = common_vendor.index.getStorageSync("userId");
       for (const id of deletedSponsorIds.value) {
         await utils_request.request(`/app-api/member/sponsor/delete?id=${id}`, {
@@ -368,6 +398,8 @@ const _sfc_main = {
           associatedStoreName.value = d.associatedStoreName || "";
           if (d.sponsorsList)
             sponsorsList.value = d.sponsorsList;
+          isTimeRangeUserSelected.value = !!(d.timeRange && d.timeRange.length);
+          isEnrollTimeRangeUserSelected.value = !!(d.enrollTimeRange && d.enrollTimeRange.length);
           common_vendor.index.showToast({
             title: "已恢复草稿",
             icon: "none"
@@ -426,7 +458,6 @@ const _sfc_main = {
         return;
       }
       const data = detailRes.data;
-      common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:823", "获取详情用于编辑:", data);
       form.value.activityTitle = data.activityTitle;
       form.value.activityDescription = data.activityDescription;
       form.value.totalSlots = data.totalSlots;
@@ -461,6 +492,8 @@ const _sfc_main = {
       if (data.registrationStartDatetime && data.registrationEndDatetime) {
         enrollTimeRange.value = [formatTimestamp(data.registrationStartDatetime), formatTimestamp(data.registrationEndDatetime)];
       }
+      isTimeRangeUserSelected.value = true;
+      isEnrollTimeRangeUserSelected.value = true;
       if (data.memberStoreRespVO) {
         form.value.associatedStoreId = data.memberStoreRespVO.id;
         associatedStoreName.value = data.memberStoreRespVO.storeName;
@@ -482,7 +515,6 @@ const _sfc_main = {
               gallery = item.galleryImageUrls;
             }
           } catch (e) {
-            common_vendor.index.__f__("error", "at packages/active-publish/active-publish.vue:894", "解析赞助商图集失败:", e);
             gallery = [];
           }
           return {
@@ -490,7 +522,6 @@ const _sfc_main = {
             galleryImageUrls: gallery
           };
         });
-        common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:902", "赞助商回显完成:", sponsorsList.value);
       } else {
         sponsorsList.value = [];
       }
@@ -505,15 +536,10 @@ const _sfc_main = {
             rightsType: 3
           }
         });
-        if (typeof data === "number") {
-          remainingQuota.value = data;
-        } else {
-          common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:927", "接口返回 null，视为次数已用完");
-          remainingQuota.value = 0;
-        }
+        remainingQuota.value = typeof data === "number" ? data : 0;
         isQuotaLoaded.value = true;
       } catch (e) {
-        common_vendor.index.__f__("error", "at packages/active-publish/active-publish.vue:935", "获取权益网络异常", e);
+        common_vendor.index.__f__("error", "at packages/active-publish/active-publish.vue:892", "获取权益网络异常", e);
       }
     };
     const showQuotaExceededModal = () => {
@@ -552,16 +578,35 @@ const _sfc_main = {
           title: "类型必选",
           icon: "none"
         });
-      if (!timeRange.value.length || !enrollTimeRange.value.length)
-        return common_vendor.index.showToast({
-          title: "时间必填",
-          icon: "none"
-        });
       if (!form.value.locationAddress)
         return common_vendor.index.showToast({
           title: "地点必填",
           icon: "none"
         });
+      if (!isTimeRangeUserSelected.value) {
+        common_vendor.index.showModal({
+          title: "请确认聚会时间",
+          content: "检测到您使用的是系统默认时间，请先手动选择实际的聚会时间后再发布。",
+          showCancel: false,
+          confirmText: "去选择"
+        });
+        return;
+      }
+      if (!isEnrollTimeRangeUserSelected.value) {
+        common_vendor.index.showModal({
+          title: "请确认报名时间",
+          content: "检测到您使用的是系统默认时间，请先手动选择实际的报名时间后再发布。",
+          showCancel: false,
+          confirmText: "去选择"
+        });
+        return;
+      }
+      if (!timeRange.value.length || !enrollTimeRange.value.length) {
+        return common_vendor.index.showToast({
+          title: "时间必填",
+          icon: "none"
+        });
+      }
       common_vendor.index.showModal({
         title: "确认发布",
         content: "确认内容无误？",
@@ -603,7 +648,11 @@ const _sfc_main = {
             data: payload
           });
           if (res.error)
-            throw new Error(res.error.msg || "修改失败");
+            throw new Error(
+              typeof res.error === "object" ? res.error.msg || res.error.message || JSON.stringify(
+                res.error
+              ) : res.error
+            );
           finalActivityId = editActivityId.value;
         } else {
           const res = await utils_request.request("/app-api/member/activity/create", {
@@ -611,7 +660,11 @@ const _sfc_main = {
             data: payload
           });
           if (res.error)
-            throw new Error(res.error.msg || "创建失败");
+            throw new Error(
+              typeof res.error === "object" ? res.error.msg || res.error.message || JSON.stringify(
+                res.error
+              ) : res.error
+            );
           finalActivityId = res.data;
         }
         if (finalActivityId) {
@@ -628,10 +681,23 @@ const _sfc_main = {
           })
         });
       } catch (e) {
-        common_vendor.index.__f__("error", "at packages/active-publish/active-publish.vue:1067", e);
-        common_vendor.index.showToast({
-          title: e.message || "系统异常",
-          icon: "none"
+        common_vendor.index.__f__("error", "at packages/active-publish/active-publish.vue:1040", "发布失败:", e);
+        const errMsg = e.message || String(e) || "系统异常，请稍后重试";
+        const isAuthError = errMsg.includes("实名") || errMsg.includes("认证") || errMsg.includes("idCert");
+        common_vendor.index.showModal({
+          title: isAuthError ? "需要实名认证" : "发布失败",
+          content: errMsg,
+          confirmText: isAuthError ? "去认证" : "我知道了",
+          showCancel: isAuthError,
+          cancelText: "稍后再说",
+          confirmColor: "#FF6F00",
+          success: (res) => {
+            if (isAuthError && res.confirm) {
+              common_vendor.index.navigateTo({
+                url: "/packages/my-auth/my-auth"
+              });
+            }
+          }
         });
       } finally {
         isPublishing.value = false;
@@ -645,179 +711,182 @@ const _sfc_main = {
         b: common_vendor.p({
           type: "info-filled",
           size: "18",
-          color: "#FF6F00"
+          color: isQuotaLoaded.value && remainingQuota.value <= 0 ? "#D32F2F" : "#FF6F00"
         }),
-        c: common_vendor.p({
+        c: common_vendor.t(isQuotaLoaded.value && remainingQuota.value <= 0 ? "免实名次数已用完，继续发布请先完成实名认证" : "尚未实名认证，建议完成认证保障活动安全"),
+        d: isQuotaLoaded.value && remainingQuota.value <= 0 ? 1 : "",
+        e: common_vendor.p({
           type: "right",
           size: "12",
-          color: "#FF6F00"
+          color: isQuotaLoaded.value && remainingQuota.value <= 0 ? "#D32F2F" : "#FF6F00"
         }),
-        d: common_vendor.o((...args) => _ctx.goToAuthPage && _ctx.goToAuthPage(...args))
+        f: isQuotaLoaded.value && remainingQuota.value <= 0 ? 1 : "",
+        g: common_vendor.o(goToAuthPage)
       } : {}, {
-        e: common_vendor.o(($event) => form.value.activityTitle = $event),
-        f: common_vendor.p({
+        h: common_vendor.o(($event) => form.value.activityTitle = $event),
+        i: common_vendor.p({
           placeholder: "请输入聚会名称",
           inputBorder: true,
           primaryColor: "#FF6F00",
           styles: inputStyles.value,
           modelValue: form.value.activityTitle
         }),
-        g: common_vendor.p({
+        j: common_vendor.p({
           label: "聚会名称",
           required: true
         }),
-        h: common_vendor.o(($event) => form.value.tag = $event),
-        i: common_vendor.p({
+        k: common_vendor.o(($event) => form.value.tag = $event),
+        l: common_vendor.p({
           localdata: tagOptions.value,
           placeholder: "请选择类型",
           clear: false,
           modelValue: form.value.tag
         }),
-        j: common_vendor.p({
+        m: common_vendor.p({
           label: "聚会类型",
           required: true
         }),
-        k: form.value.coverImageUrl
+        n: form.value.coverImageUrl
       }, form.value.coverImageUrl ? {
-        l: form.value.coverImageUrl
+        o: form.value.coverImageUrl
       } : {
-        m: common_vendor.p({
+        p: common_vendor.p({
           type: "camera-filled",
           size: "32",
           color: "#FF6F00"
         })
       }, {
-        n: common_vendor.o(uploadCover),
-        o: common_vendor.p({
+        q: common_vendor.o(uploadCover),
+        r: common_vendor.p({
           label: "聚会封面"
         }),
-        p: common_vendor.o(handleActivityImagesUpload),
-        q: common_vendor.o(($event) => form.value.activityCoverImageUrls = $event),
-        r: common_vendor.p({
+        s: common_vendor.o(handleActivityImagesUpload),
+        t: common_vendor.o(($event) => form.value.activityCoverImageUrls = $event),
+        v: common_vendor.p({
           ["max-count"]: 9,
           modelValue: form.value.activityCoverImageUrls
         }),
-        s: common_vendor.p({
+        w: common_vendor.p({
           label: "聚会图集"
         }),
-        t: common_vendor.o(closePicker),
-        v: common_vendor.o(closePicker),
-        w: common_vendor.o(($event) => timeRange.value = $event),
-        x: common_vendor.p({
+        x: common_vendor.o(closePicker),
+        y: common_vendor.o(onTimeRangeChange),
+        z: common_vendor.o(($event) => timeRange.value = $event),
+        A: common_vendor.p({
           type: "datetimerange",
           rangeSeparator: " 至 ",
           modelValue: timeRange.value
         }),
-        y: common_vendor.o(openPicker),
-        z: common_vendor.p({
+        B: common_vendor.o(openPicker),
+        C: common_vendor.p({
           label: "聚会时间",
           required: true
         }),
-        A: common_vendor.o(closePicker),
-        B: common_vendor.o(closePicker),
-        C: common_vendor.o(($event) => enrollTimeRange.value = $event),
-        D: common_vendor.p({
+        D: common_vendor.o(closePicker),
+        E: common_vendor.o(onEnrollTimeRangeChange),
+        F: common_vendor.o(($event) => enrollTimeRange.value = $event),
+        G: common_vendor.p({
           type: "datetimerange",
           rangeSeparator: " 至 ",
           modelValue: enrollTimeRange.value
         }),
-        E: common_vendor.o(openPicker),
-        F: common_vendor.p({
+        H: common_vendor.o(openPicker),
+        I: common_vendor.p({
           label: "报名时间",
           required: true
         }),
-        G: form.value.locationAddress
+        J: form.value.locationAddress
       }, form.value.locationAddress ? {
-        H: common_vendor.t(form.value.locationAddress)
+        K: common_vendor.t(form.value.locationAddress)
       } : {}, {
-        I: common_vendor.p({
+        L: common_vendor.p({
           type: "location",
           size: "20",
           color: "#FF6F00"
         }),
-        J: common_vendor.o(openMapToChooseLocation),
-        K: common_vendor.p({
+        M: common_vendor.o(openMapToChooseLocation),
+        N: common_vendor.p({
           label: "聚会地点",
           required: true
         }),
-        L: associatedStoreName.value
+        O: associatedStoreName.value
       }, associatedStoreName.value ? {
-        M: common_vendor.t(associatedStoreName.value)
+        P: common_vendor.t(associatedStoreName.value)
       } : {}, {
-        N: common_vendor.p({
+        Q: common_vendor.p({
           type: "right",
           size: "16",
           color: "#ccc"
         }),
-        O: common_vendor.o(goToSelectShop),
-        P: common_vendor.p({
+        R: common_vendor.o(goToSelectShop),
+        S: common_vendor.p({
           label: "合作聚店"
         }),
-        Q: common_vendor.o(($event) => form.value.totalSlots = $event),
-        R: common_vendor.p({
+        T: common_vendor.o(($event) => form.value.totalSlots = $event),
+        U: common_vendor.p({
           type: "number",
           placeholder: "0",
           inputBorder: true,
           styles: inputStyles.value,
           modelValue: form.value.totalSlots
         }),
-        S: common_vendor.p({
+        V: common_vendor.p({
           label: "人数上限"
         }),
-        T: common_vendor.o(($event) => form.value.limitSlots = $event),
-        U: common_vendor.p({
+        W: common_vendor.o(($event) => form.value.limitSlots = $event),
+        X: common_vendor.p({
           type: "number",
           placeholder: "0",
           inputBorder: true,
           styles: inputStyles.value,
           modelValue: form.value.limitSlots
         }),
-        V: common_vendor.p({
+        Y: common_vendor.p({
           label: "起聚人数"
         }),
-        W: common_vendor.o(($event) => form.value.activityFunds = $event),
-        X: common_vendor.p({
+        Z: common_vendor.o(($event) => form.value.activityFunds = $event),
+        aa: common_vendor.p({
           localdata: enrollmentOptions.value,
           mode: "tag",
           selectedColor: "#FF6F00",
           selectedTextColor: "#FF6F00",
           modelValue: form.value.activityFunds
         }),
-        Y: common_vendor.p({
+        ab: common_vendor.p({
           label: "报名类型",
           required: true
         }),
-        Z: form.value.activityFunds === 1
+        ac: form.value.activityFunds === 1
       }, form.value.activityFunds === 1 ? {
-        aa: common_vendor.o(($event) => form.value.registrationFee = $event),
-        ab: common_vendor.p({
+        ad: common_vendor.o(($event) => form.value.registrationFee = $event),
+        ae: common_vendor.p({
           type: "digit",
           placeholder: "请输入聚会费用(元)",
           inputBorder: true,
           styles: inputStyles.value,
           modelValue: form.value.registrationFee
         }),
-        ac: common_vendor.p({
+        af: common_vendor.p({
           label: "单人费用",
           required: true
         })
       } : {}, {
-        ad: common_vendor.p({
+        ag: common_vendor.p({
           ["label-width"]: 80,
           ["label-position"]: "top"
         }),
-        ae: form.value.activityFunds !== 1
+        ah: form.value.activityFunds !== 1
       }, form.value.activityFunds !== 1 ? common_vendor.e({
-        af: common_vendor.t(sponsorsList.value.length > 0 ? `已添加 ${sponsorsList.value.length} 位` : "暂无赞助商"),
-        ag: common_vendor.p({
+        ai: common_vendor.t(sponsorsList.value.length > 0 ? `已添加 ${sponsorsList.value.length} 位` : "暂无赞助商"),
+        aj: common_vendor.p({
           type: isSponsorExpanded.value ? "top" : "bottom",
           size: "14",
           color: "#999"
         }),
-        ah: common_vendor.o(($event) => isSponsorExpanded.value = !isSponsorExpanded.value),
-        ai: isSponsorExpanded.value
+        ak: common_vendor.o(($event) => isSponsorExpanded.value = !isSponsorExpanded.value),
+        al: isSponsorExpanded.value
       }, isSponsorExpanded.value ? {
-        aj: common_vendor.f(sponsorsList.value, (item, index, i0) => {
+        am: common_vendor.f(sponsorsList.value, (item, index, i0) => {
           return {
             a: item.logoUrl,
             b: common_vendor.t(item.sponsorName),
@@ -830,25 +899,25 @@ const _sfc_main = {
             i: index
           };
         }),
-        ak: common_vendor.p({
+        an: common_vendor.p({
           type: "compose",
           size: "18",
           color: "#FF6F00"
         }),
-        al: common_vendor.p({
+        ao: common_vendor.p({
           type: "trash",
           size: "18",
           color: "#ff4d4f"
         }),
-        am: common_vendor.p({
+        ap: common_vendor.p({
           type: "plusempty",
           size: "16",
           color: "#FF6F00"
         }),
-        an: common_vendor.o(handleAddSponsor)
+        aq: common_vendor.o(handleAddSponsor)
       } : {}) : {}, {
-        ao: common_vendor.o(($event) => form.value.activityDescription = $event),
-        ap: common_vendor.p({
+        ar: common_vendor.o(($event) => form.value.activityDescription = $event),
+        as: common_vendor.p({
           type: "textarea",
           autoHeight: true,
           maxlength: "2000",
@@ -857,15 +926,15 @@ const _sfc_main = {
           styles: inputStyles.value,
           modelValue: form.value.activityDescription
         }),
-        aq: common_vendor.p({
+        at: common_vendor.p({
           label: "聚会介绍",
           required: true
         }),
-        ar: common_vendor.p({
+        av: common_vendor.p({
           ["label-width"]: 80,
           ["label-position"]: "top"
         }),
-        as: common_vendor.f(form.value.activitySessions, (item, index, i0) => {
+        aw: common_vendor.f(form.value.activitySessions, (item, index, i0) => {
           return {
             a: common_vendor.t(index + 1),
             b: "5d3444db-34-" + i0,
@@ -877,82 +946,82 @@ const _sfc_main = {
             h: item._id || index
           };
         }),
-        at: common_vendor.p({
+        ax: common_vendor.p({
           type: "trash",
           size: "16",
           color: "#999"
         }),
-        av: common_vendor.p({
+        ay: common_vendor.p({
           type: "plusempty",
           size: "16",
           color: "#FF6F00"
         }),
-        aw: common_vendor.o(addAgenda),
-        ax: common_vendor.o(($event) => form.value.organizerUnitName = $event),
-        ay: common_vendor.p({
+        az: common_vendor.o(addAgenda),
+        aA: common_vendor.o(($event) => form.value.organizerUnitName = $event),
+        aB: common_vendor.p({
           placeholder: "请输入组织者名称",
           inputBorder: true,
           styles: inputStyles.value,
           modelValue: form.value.organizerUnitName
         }),
-        az: common_vendor.p({
+        aC: common_vendor.p({
           label: "组织者",
           required: true
         }),
-        aA: common_vendor.o(($event) => form.value.organizerContactPhone = $event),
-        aB: common_vendor.p({
+        aD: common_vendor.o(($event) => form.value.organizerContactPhone = $event),
+        aE: common_vendor.p({
           type: "number",
           placeholder: "请输入联系电话",
           inputBorder: true,
           styles: inputStyles.value,
           modelValue: form.value.organizerContactPhone
         }),
-        aC: common_vendor.p({
+        aF: common_vendor.p({
           label: "联系电话",
           required: true
         }),
-        aD: form.value.activityFunds === 1
+        aG: form.value.activityFunds === 1
       }, form.value.activityFunds === 1 ? common_vendor.e({
-        aE: form.value.organizerPaymentQrCodeUrl
+        aH: form.value.organizerPaymentQrCodeUrl
       }, form.value.organizerPaymentQrCodeUrl ? {
-        aF: form.value.organizerPaymentQrCodeUrl
+        aI: form.value.organizerPaymentQrCodeUrl
       } : {
-        aG: common_vendor.p({
+        aJ: common_vendor.p({
           type: "scan",
           size: "28",
           color: "#ccc"
         })
       }, {
-        aH: common_vendor.o(uploadCode),
-        aI: common_vendor.p({
+        aK: common_vendor.o(uploadCode),
+        aL: common_vendor.p({
           label: "收款码",
           required: true
         })
       }) : {}, {
-        aJ: common_vendor.p({
+        aM: common_vendor.p({
           ["label-width"]: 80,
           ["label-position"]: "top"
         }),
-        aK: mode.value === "create"
+        aN: mode.value === "create"
       }, mode.value === "create" ? {
-        aL: common_vendor.p({
+        aO: common_vendor.p({
           type: "download",
           size: "16",
           color: "#666"
         }),
-        aM: common_vendor.o(saveDraft)
+        aP: common_vendor.o(saveDraft)
       } : {}, {
-        aN: isPublishing.value
+        aQ: isPublishing.value
       }, isPublishing.value ? {} : mode.value === "edit" ? {} : {}, {
-        aO: mode.value === "edit",
-        aP: isPublishing.value || mode.value === "create" && isQuotaLoaded.value && remainingQuota.value <= 0 ? 1 : "",
-        aQ: common_vendor.o(handlePublishClick),
-        aR: isPickerOpen.value ? 1 : "",
-        aS: showSponsorPopup.value
+        aR: mode.value === "edit",
+        aS: isPublishing.value || mode.value === "create" && isQuotaLoaded.value && remainingQuota.value <= 0 ? 1 : "",
+        aT: common_vendor.o(handlePublishClick),
+        aU: isPickerOpen.value ? 1 : "",
+        aV: showSponsorPopup.value
       }, showSponsorPopup.value ? {
-        aT: common_vendor.o(($event) => showSponsorPopup.value = false),
-        aU: common_vendor.o(handleSponsorSave),
-        aV: common_vendor.p({
+        aW: common_vendor.o(($event) => showSponsorPopup.value = false),
+        aX: common_vendor.o(handleSponsorSave),
+        aY: common_vendor.p({
           visible: showSponsorPopup.value,
           data: currentSponsorData.value
         })

@@ -188,14 +188,21 @@
 			]
 		},
 		{
-			title: '消费与特殊奖励',
+			title: '特色贡献',
 			icon: 'money-filled',
-			tasks: [{
+			tasks: [
+				{
+					name: '推荐商友获得加友连接',
+					points: 10,
+					dailyLimit: '50次/天',
+					path: null
+				}, 
+				{
 					name: '支付名片获得贡分',
 					points: 20,
 					dailyLimit: '5次/天',
 					path: null
-				}, // 假设这个没有直接跳转入口
+				}, 
 				{
 					name: '用户参加活动让利',
 					points: 80,
