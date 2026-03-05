@@ -162,36 +162,7 @@
 									更多
 								</button>
 							</view>
-							<!-- <view class="action-buttons">
-								<button v-if="item.paddingReturnCount > 0" class="btn btn-gradient-primary icon-btn"
-									@click.stop="manageRefunds(item, 'individual')">
-									处理申请 <view class="badge-dot">{{ item.paddingReturnCount }}</view>
-								</button>
-
-								<button class="btn btn-outline-primary"
-									@click.stop="navigateToParticipantList(item.id)">
-									参会名单
-								</button>
-
-								<button v-if="['未开始', '报名中', '活动即将开始', '进行中'].includes(item.statusStr)"
-									class="btn btn-outline-danger" @click.stop="cancelActivity(item.id)">
-									取消聚会
-								</button>
-
-								<button v-if="item.statusStr === '活动取消' || item.statusStr === '聚会取消'"
-									class="btn btn-gradient-danger" @click.stop="manageRefunds(item, 'all')">
-									处理退款
-								</button>
-
-								<button v-if="item.statusStr !== '活动取消' && item.statusStr !== '聚会取消'"
-									class="btn btn-light" @click.stop="navigateToRegisteredUsers(item)">
-									报名商友
-								</button>
-
-								<button class="btn btn-light" @click.stop="navigateToEdit(item.id)">
-									修改编辑
-								</button>
-							</view> -->
+							
 						</view>
 					</view>
 				</view>

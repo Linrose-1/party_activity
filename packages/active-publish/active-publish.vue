@@ -267,7 +267,7 @@
 		</view>
 
 		<!-- ============ 弹窗组件：赞助商编辑 ============ -->
-		<sponsor-popup v-if="showSponsorPopup" :visible="showSponsorPopup" :data="currentSponsorData"
+		<sponsor-popup v-show="showSponsorPopup" :visible="showSponsorPopup" :data="currentSponsorData"
 			@close="showSponsorPopup = false" @confirm="handleSponsorSave">
 		</sponsor-popup>
 
@@ -663,7 +663,9 @@
 	const handleEditSponsor = (index) => {
 		currentSponsorIndex.value = index;
 		currentSponsorData.value = sponsorsList.value[index];
-		showSponsorPopup.value = true;
+		nextTick(() => {
+		    showSponsorPopup.value = true;
+		});
 	};
 
 	const handleDeleteSponsor = (index) => {

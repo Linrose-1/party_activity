@@ -145,14 +145,6 @@
 .goods-row .goods-del.data-v-4df7dc31 {
   padding: 10rpx;
 }
-.empty-goods-tip.data-v-4df7dc31 {
-  text-align: center;
-  color: #ccc;
-  font-size: 24rpx;
-  padding: 20rpx;
-  background: #f9f9f9;
-  border-radius: 8rpx;
-}
 .upload-box.data-v-4df7dc31 {
   width: 200rpx;
   height: 200rpx;
@@ -222,14 +214,10 @@
 }
 .uploader-wrap.data-v-4df7dc31 {
   width: 100%;
-  /* 关键：触发 BFC，清除子元素浮动造成的塌陷 */
   overflow: hidden;
-  /* 关键：给一个最小高度，防止没图片时完全缩在一起 */
   min-height: 200rpx;
-  /* 确保它是块级元素 */
   display: block;
   position: relative;
-  /* 稍微给点下边距，防止贴得太紧 */
   margin-bottom: 20rpx;
 }
 .section-divider.data-v-4df7dc31 {

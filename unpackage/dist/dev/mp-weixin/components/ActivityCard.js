@@ -28,16 +28,17 @@ const _sfc_main = {
     const emit = __emit;
     const isFavorite = common_vendor.ref(props.activity.followFlag === 1);
     const loading = common_vendor.ref(false);
+    const isOwner = common_vendor.computed(() => {
+      var _a;
+      const userId = common_vendor.index.getStorageSync("userId");
+      return !!userId && ((_a = props.activity.memberUser) == null ? void 0 : _a.id) == userId;
+    });
     const formattedDate = common_vendor.computed(() => {
       if (!props.activity.startDatetime)
         return "时间待定";
       const date = new Date(props.activity.startDatetime);
-      const Y = date.getFullYear();
-      const M = (date.getMonth() + 1).toString().padStart(2, "0");
-      const D = date.getDate().toString().padStart(2, "0");
-      const h = date.getHours().toString().padStart(2, "0");
-      const m = date.getMinutes().toString().padStart(2, "0");
-      return `${Y}-${M}-${D} ${h}:${m}`;
+      const pad = (n) => n.toString().padStart(2, "0");
+      return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
     });
     const formattedDistance = common_vendor.computed(() => {
       if (typeof props.activity.distance === "number") {
@@ -87,10 +88,9 @@ const _sfc_main = {
       if (!await utils_user.checkLoginGuard("登录并绑定手机号后才能收藏聚会，是否立即登录？"))
         return;
       loading.value = true;
-      const originalFavoriteStatus = isFavorite.value;
+      const original = isFavorite.value;
       isFavorite.value = !isFavorite.value;
       const endpoint = isFavorite.value ? "/app-api/member/follow/add" : "/app-api/member/follow/del";
-      const successMessage = isFavorite.value ? "收藏成功" : "已取消收藏";
       try {
         const {
           error
@@ -104,7 +104,7 @@ const _sfc_main = {
         });
         if (!error) {
           common_vendor.index.showToast({
-            title: successMessage,
+            title: isFavorite.value ? "收藏成功" : "已取消收藏",
             icon: "success"
           });
           emit("updateFavoriteStatus", {
@@ -112,14 +112,14 @@ const _sfc_main = {
             newFollowFlag: isFavorite.value ? 1 : 0
           });
         } else {
-          isFavorite.value = originalFavoriteStatus;
+          isFavorite.value = original;
           common_vendor.index.showToast({
             title: error || "操作失败",
             icon: "none"
           });
         }
-      } catch (err) {
-        isFavorite.value = originalFavoriteStatus;
+      } catch {
+        isFavorite.value = original;
         common_vendor.index.showToast({
           title: "网络错误",
           icon: "none"
@@ -128,83 +128,200 @@ const _sfc_main = {
         loading.value = false;
       }
     };
+    const goToRegisteredUsers = () => {
+      common_vendor.index.navigateTo({
+        url: `/pages/my-active-registeredUser/my-active-registeredUser?item=${encodeURIComponent(JSON.stringify(props.activity))}`
+      });
+    };
+    const handleManageRefunds = (mode) => {
+      common_vendor.index.navigateTo({
+        url: `/pages/my-active-manage/my-active-manage?item=${encodeURIComponent(JSON.stringify(props.activity))}&mode=${mode}`
+      });
+    };
+    const showOwnerMoreActions = () => {
+      const itemList = [];
+      const availableActions = {};
+      itemList.push("参会名单");
+      availableActions["参会名单"] = () => common_vendor.index.navigateTo({
+        url: `/packages/participant-detail/participant-detail?id=${props.activity.id}`
+      });
+      if (["未开始", "报名中", "活动即将开始", "进行中"].includes(props.activity.statusStr)) {
+        itemList.push("取消聚会");
+        availableActions["取消聚会"] = confirmCancelActivity;
+      }
+      itemList.push("修改编辑");
+      availableActions["修改编辑"] = () => common_vendor.index.navigateTo({
+        url: `/packages/active-publish/active-publish?mode=edit&id=${props.activity.id}`
+      });
+      common_vendor.index.showActionSheet({
+        itemList,
+        success: (res) => {
+          const tappedItem = itemList[res.tapIndex];
+          if (availableActions[tappedItem])
+            availableActions[tappedItem]();
+        },
+        fail: (res) => {
+          common_vendor.index.__f__("log", "at components/ActivityCard.vue:306", res.errMsg);
+        }
+      });
+    };
+    const confirmCancelActivity = () => {
+      common_vendor.index.showModal({
+        title: "警告",
+        content: "确定要取消此聚会吗？此操作不可逆。",
+        confirmColor: "#f44336",
+        success: async (res) => {
+          if (!res.confirm)
+            return;
+          common_vendor.index.showLoading({
+            title: "正在取消..."
+          });
+          const result = await utils_request.request("/app-api/member/activity/delete", {
+            method: "POST",
+            data: {
+              id: props.activity.id
+            }
+          });
+          common_vendor.index.hideLoading();
+          if (result && !result.error) {
+            common_vendor.index.showToast({
+              title: "聚会已取消",
+              icon: "success"
+            });
+            common_vendor.index.$emit("activityCanceled", {
+              id: props.activity.id
+            });
+          } else {
+            const msg = typeof result.error === "object" ? result.error.msg || JSON.stringify(result.error) : result.error || "操作失败";
+            common_vendor.index.showToast({
+              title: msg,
+              icon: "none"
+            });
+          }
+        }
+      });
+    };
     return (_ctx, _cache) => {
       return common_vendor.e({
-        a: __props.activity.coverImageUrl,
-        b: common_vendor.t(__props.activity.activityTitle),
-        c: __props.activity.statusStr
-      }, __props.activity.statusStr ? {
-        d: common_vendor.t(__props.activity.statusStr),
-        e: common_vendor.n(getStatusClass(__props.activity.statusStr))
+        a: isOwner.value
+      }, isOwner.value ? common_vendor.e({
+        b: common_vendor.p({
+          type: "more-filled",
+          size: "14",
+          color: "#FF6B00"
+        }),
+        c: common_vendor.o(showOwnerMoreActions),
+        d: __props.activity.statusStr === "活动取消" || __props.activity.statusStr === "聚会取消"
+      }, __props.activity.statusStr === "活动取消" || __props.activity.statusStr === "聚会取消" ? {
+        e: common_vendor.p({
+          type: "wallet",
+          size: "14",
+          color: "#f56c6c"
+        }),
+        f: common_vendor.o(($event) => handleManageRefunds("all"))
       } : {}, {
-        f: common_vendor.p({
+        g: __props.activity.statusStr === "活动取消" || __props.activity.statusStr === "聚会取消"
+      }, __props.activity.statusStr === "活动取消" || __props.activity.statusStr === "聚会取消" ? {} : {}, {
+        h: common_vendor.p({
+          type: "person-filled",
+          size: "14",
+          color: "#FF6B00"
+        }),
+        i: __props.activity.pendingConfirmCount > 0
+      }, __props.activity.pendingConfirmCount > 0 ? {
+        j: common_vendor.t(__props.activity.pendingConfirmCount)
+      } : {}, {
+        k: common_vendor.o(goToRegisteredUsers),
+        l: __props.activity.paddingReturnCount > 0
+      }, __props.activity.paddingReturnCount > 0 ? {
+        m: common_vendor.p({
+          type: "notification-filled",
+          size: "14",
+          color: "#fff"
+        }),
+        n: common_vendor.t(__props.activity.paddingReturnCount),
+        o: common_vendor.o(($event) => handleManageRefunds("individual"))
+      } : {}, {
+        p: common_vendor.o(() => {
+        })
+      }) : {}, {
+        q: __props.activity.coverImageUrl,
+        r: __props.activity.statusStr
+      }, __props.activity.statusStr ? {
+        s: common_vendor.t(__props.activity.statusStr),
+        t: common_vendor.n(getStatusClass(__props.activity.statusStr))
+      } : {}, {
+        v: common_vendor.t(__props.activity.activityTitle),
+        w: common_vendor.p({
           type: "calendar",
           size: "16",
           color: "#FF6B00"
         }),
-        g: common_vendor.t(formattedDate.value),
-        h: common_vendor.p({
+        x: common_vendor.t(formattedDate.value),
+        y: common_vendor.p({
           type: "location",
           size: "16",
           color: "#FF6B00"
         }),
-        i: common_vendor.t(__props.activity.locationAddress || "线上聚会"),
-        j: common_vendor.t(__props.activity.joinCount || 0),
-        k: common_vendor.t(__props.activity.totalSlots || "不限"),
-        l: formattedDistance.value
+        z: common_vendor.t(__props.activity.locationAddress || "线上聚会"),
+        A: common_vendor.t(__props.activity.joinCount || 0),
+        B: common_vendor.t(__props.activity.totalSlots || "不限"),
+        C: formattedDistance.value
       }, formattedDistance.value ? {
-        m: common_vendor.p({
+        D: common_vendor.p({
           type: "paperplane-filled",
           size: "16",
           color: "#FF6B00"
         }),
-        n: common_vendor.t(formattedDistance.value)
+        E: common_vendor.t(formattedDistance.value)
       } : {}, {
-        o: common_vendor.f(__props.activity.tags, (tag, index, i0) => {
+        F: common_vendor.f(__props.activity.tags, (tag, index, i0) => {
           return {
             a: common_vendor.t(tag),
             b: index
           };
         }),
-        p: common_vendor.p({
+        G: common_vendor.p({
           type: __props.activity.userLikeStr === "like" ? "hand-up-filled" : "hand-up",
           size: "18",
           color: __props.activity.userLikeStr === "like" ? "#e74c3c" : "#666"
         }),
-        q: common_vendor.t(__props.activity.likesCount || 0),
-        r: __props.activity.userLikeStr === "like" ? 1 : "",
-        s: common_vendor.o(($event) => handleAction("like")),
-        t: common_vendor.p({
+        H: common_vendor.t(__props.activity.likesCount || 0),
+        I: __props.activity.userLikeStr === "like" ? 1 : "",
+        J: common_vendor.o(($event) => handleAction("like")),
+        K: common_vendor.p({
           type: __props.activity.userLikeStr === "dislike" ? "hand-down-filled" : "hand-down",
           size: "18",
           color: __props.activity.userLikeStr === "dislike" ? "#3498db" : "#666"
         }),
-        v: common_vendor.t(__props.activity.dislikesCount || 0),
-        w: __props.activity.userLikeStr === "dislike" ? 1 : "",
-        x: common_vendor.o(($event) => handleAction("dislike")),
-        y: common_vendor.p({
+        L: common_vendor.t(__props.activity.dislikesCount || 0),
+        M: __props.activity.userLikeStr === "dislike" ? 1 : "",
+        N: common_vendor.o(($event) => handleAction("dislike")),
+        O: common_vendor.p({
           type: "chatbubble",
           size: "18",
           color: "#666"
         }),
-        z: common_vendor.t(__props.activity.commonCount || 0),
-        A: common_vendor.o(handleCardClick),
-        B: common_vendor.p({
+        P: common_vendor.t(__props.activity.commonCount || 0),
+        Q: common_vendor.o(handleCardClick),
+        R: common_vendor.p({
           type: "contact-filled",
           size: "16",
           color: "#FF6B00"
         }),
-        C: common_vendor.t(__props.activity.memberUser.nickname || "主办方"),
-        D: common_vendor.p({
+        S: common_vendor.t(__props.activity.memberUser.nickname || "主办方"),
+        T: common_vendor.p({
           type: isFavorite.value ? "heart-filled" : "heart",
           size: "16",
           color: "#FF6B00"
         }),
-        E: common_vendor.t(isFavorite.value ? "已收藏" : "收藏"),
-        F: common_vendor.o(toggleFavorite),
-        G: loading.value,
-        H: common_vendor.o(handleRegisterClick)
-      });
+        U: common_vendor.t(isFavorite.value ? "已收藏" : "收藏"),
+        V: common_vendor.o(toggleFavorite),
+        W: loading.value,
+        X: !isOwner.value
+      }, !isOwner.value ? {
+        Y: common_vendor.o(handleRegisterClick)
+      } : {});
     };
   }
 };

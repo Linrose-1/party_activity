@@ -333,7 +333,9 @@ const _sfc_main = {
     const handleEditSponsor = (index) => {
       currentSponsorIndex.value = index;
       currentSponsorData.value = sponsorsList.value[index];
-      showSponsorPopup.value = true;
+      common_vendor.nextTick$1(() => {
+        showSponsorPopup.value = true;
+      });
     };
     const handleDeleteSponsor = (index) => {
       common_vendor.index.showModal({
@@ -539,7 +541,7 @@ const _sfc_main = {
         remainingQuota.value = typeof data === "number" ? data : 0;
         isQuotaLoaded.value = true;
       } catch (e) {
-        common_vendor.index.__f__("error", "at packages/active-publish/active-publish.vue:892", "获取权益网络异常", e);
+        common_vendor.index.__f__("error", "at packages/active-publish/active-publish.vue:894", "获取权益网络异常", e);
       }
     };
     const showQuotaExceededModal = () => {
@@ -681,7 +683,7 @@ const _sfc_main = {
           })
         });
       } catch (e) {
-        common_vendor.index.__f__("error", "at packages/active-publish/active-publish.vue:1040", "发布失败:", e);
+        common_vendor.index.__f__("error", "at packages/active-publish/active-publish.vue:1042", "发布失败:", e);
         const errMsg = e.message || String(e) || "系统异常，请稍后重试";
         const isAuthError = errMsg.includes("实名") || errMsg.includes("认证") || errMsg.includes("idCert");
         common_vendor.index.showModal({
@@ -1017,15 +1019,14 @@ const _sfc_main = {
         aS: isPublishing.value || mode.value === "create" && isQuotaLoaded.value && remainingQuota.value <= 0 ? 1 : "",
         aT: common_vendor.o(handlePublishClick),
         aU: isPickerOpen.value ? 1 : "",
-        aV: showSponsorPopup.value
-      }, showSponsorPopup.value ? {
+        aV: showSponsorPopup.value,
         aW: common_vendor.o(($event) => showSponsorPopup.value = false),
         aX: common_vendor.o(handleSponsorSave),
         aY: common_vendor.p({
           visible: showSponsorPopup.value,
           data: currentSponsorData.value
         })
-      } : {});
+      });
     };
   }
 };

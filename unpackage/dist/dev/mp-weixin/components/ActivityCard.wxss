@@ -9,13 +9,114 @@
   position: relative;
   overflow: hidden;
 }
+.owner-action-bar.data-v-f73ae0ce {
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: center;
+  background: #fff8f3;
+  border: 1rpx solid #ffe0c8;
+  border-radius: 16rpx;
+  padding: 0 8rpx;
+  margin-bottom: 20rpx;
+  height: 68rpx;
+}
+.owner-btn.data-v-f73ae0ce {
+  display: flex;
+  align-items: center;
+  gap: 6rpx;
+  padding: 10rpx 18rpx;
+  border-radius: 12rpx;
+  position: relative;
+  flex-shrink: 0;
+}
+.owner-btn.data-v-f73ae0ce:active {
+  background: rgba(255, 107, 0, 0.1);
+}
+.owner-btn text.data-v-f73ae0ce {
+  font-size: 24rpx;
+  color: #FF6B00;
+  font-weight: 500;
+}
+.owner-btn--alert.data-v-f73ae0ce {
+  background: linear-gradient(135deg, #FF6B00, #FF8C00);
+  border-radius: 14rpx;
+  margin-left: 4rpx;
+}
+.owner-btn--alert text.data-v-f73ae0ce {
+  color: #fff;
+}
+.owner-btn--alert.data-v-f73ae0ce:active {
+  opacity: 0.88;
+}
+.danger-text.data-v-f73ae0ce {
+  color: #f56c6c !important;
+}
+.owner-divider.data-v-f73ae0ce {
+  width: 1rpx;
+  height: 28rpx;
+  background: #f0d4c0;
+  flex-shrink: 0;
+}
+.owner-badge.data-v-f73ae0ce {
+  position: absolute;
+  top: 4rpx;
+  right: 4rpx;
+  background: #f56c6c;
+  color: #fff;
+  font-size: 18rpx;
+  height: 26rpx;
+  min-width: 26rpx;
+  line-height: 26rpx;
+  text-align: center;
+  border-radius: 13rpx;
+  padding: 0 5rpx;
+  border: 2rpx solid #fff8f3;
+}
+.owner-badge--orange.data-v-f73ae0ce {
+  background: #FF6B00;
+}
+.owner-badge--white.data-v-f73ae0ce {
+  background: #fff;
+  color: #FF6B00;
+  border-color: #FF6B00;
+}
+.card-cover-wrapper.data-v-f73ae0ce {
+  position: relative;
+  margin-bottom: 30rpx;
+}
 .activity-image.data-v-f73ae0ce {
   width: 100%;
   aspect-ratio: 5/4;
   border-radius: 16rpx;
-  margin-bottom: 30rpx;
   box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.1);
-  object-fit: cover;
+  display: block;
+}
+.status-tag.data-v-f73ae0ce {
+  position: absolute;
+  top: 16rpx;
+  right: 16rpx;
+  font-size: 22rpx;
+  padding: 6rpx 18rpx;
+  border-radius: 20rpx;
+  font-weight: 600;
+  color: #fff;
+  -webkit-backdrop-filter: blur(4px);
+          backdrop-filter: blur(4px);
+}
+.status-tag.enrolled.data-v-f73ae0ce, .status-tag.ongoing.data-v-f73ae0ce {
+  background: rgba(39, 174, 96, 0.85);
+}
+.status-tag.upcoming.data-v-f73ae0ce {
+  background: rgba(250, 140, 22, 0.85);
+}
+.status-tag.ended.data-v-f73ae0ce {
+  background: rgba(144, 147, 153, 0.85);
+}
+.status-tag.refund_pending.data-v-f73ae0ce {
+  background: rgba(64, 158, 255, 0.85);
+}
+.status-tag.canceled.data-v-f73ae0ce {
+  background: rgba(245, 108, 108, 0.85);
 }
 .activity-header.data-v-f73ae0ce {
   display: flex;
@@ -29,32 +130,6 @@
   font-weight: 600;
   color: #1c1e21;
   flex: 1;
-}
-.status-tag.data-v-f73ae0ce {
-  font-size: 24rpx;
-  padding: 6rpx 16rpx;
-  border-radius: 8rpx;
-  white-space: nowrap;
-}
-.status-tag.enrolled.data-v-f73ae0ce, .status-tag.ongoing.data-v-f73ae0ce {
-  background-color: #e8f5e9;
-  color: #27ae60;
-}
-.status-tag.upcoming.data-v-f73ae0ce {
-  background-color: #fff0e5;
-  color: #fa8c16;
-}
-.status-tag.ended.data-v-f73ae0ce {
-  background-color: #f0f2f5;
-  color: #909399;
-}
-.status-tag.refund_pending.data-v-f73ae0ce {
-  background-color: #ecf5ff;
-  color: #409eff;
-}
-.status-tag.canceled.data-v-f73ae0ce {
-  background-color: #fef0f0;
-  color: #f56c6c;
 }
 .activity-info.data-v-f73ae0ce {
   display: flex;
@@ -87,8 +162,6 @@
 .activity-distance text.data-v-f73ae0ce {
   margin-left: 8rpx;
 }
-
-/* ── Tags + 赞踩同一行 ── */
 .activity-tags-row.data-v-f73ae0ce {
   display: flex;
   justify-content: space-between;
@@ -96,8 +169,6 @@
   margin-bottom: 30rpx;
   gap: 16rpx;
 }
-
-/* 左侧标签组：可换行，不挤占右侧 */
 .activity-tags.data-v-f73ae0ce {
   display: flex;
   gap: 16rpx;
@@ -114,8 +185,6 @@
   border: 2rpx solid #ffdcc7;
   white-space: nowrap;
 }
-
-/* 右侧互动数：不被压缩 */
 .activity-interactions.data-v-f73ae0ce {
   display: flex;
   align-items: center;
@@ -159,10 +228,8 @@
   font-weight: 500;
   font-size: 28rpx;
   border: none;
-  cursor: pointer;
   display: flex;
   align-items: center;
-  transition: all 0.3s;
 }
 .btn text.data-v-f73ae0ce {
   margin-left: 10rpx;
@@ -173,7 +240,6 @@
 }
 .btn-primary.data-v-f73ae0ce:active {
   opacity: 0.9;
-  transform: translateY(-4rpx);
 }
 .btn-favorite.data-v-f73ae0ce {
   background: #ffe7d8;
@@ -181,5 +247,4 @@
 }
 .btn-favorite.data-v-f73ae0ce:active {
   opacity: 0.9;
-  transform: translateY(-4rpx);
 }

@@ -1,81 +1,127 @@
 <template>
 	<view class="page" v-if="detail">
-		<!-- 1. 顶部头图 (取赞助商图集第一张，或者默认图) -->
-		<view class="header-banner">
-			<image :src="headerImage" mode="aspectFill" class="bg-img" />
-			<view class="header-mask">
-				<image :src="detail.logoUrl" mode="aspectFill" class="sponsor-logo" />
-				<view class="header-info">
-					<text class="sp-name">{{ detail.sponsorName }}</text>
-					<text class="sp-loc" v-if="detail.location">📍 {{ detail.location }}</text>
+
+		<!-- ========== 顶部沉浸式头图区 ========== -->
+		<view class="hero-section">
+			<!-- 背景大图 -->
+			<image :src="headerImage" mode="aspectFill" class="hero-bg" />
+			<!-- 渐变遮罩 -->
+			<view class="hero-gradient" />
+
+			<!-- 赞助商类型徽章 -->
+			<view class="type-badge">
+				<text>{{ sponsorTypeLabel }}</text>
+			</view>
+
+			<!-- 主体内容：Logo + 名称 -->
+			<view class="hero-content">
+				<view class="logo-ring">
+					<image :src="detail.logoUrl || '/static/default-logo.png'" mode="aspectFill" class="logo-img" />
+				</view>
+				<text class="hero-name">{{ detail.sponsorName }}</text>
+				<view class="hero-location" v-if="detail.location">
+					<text class="loc-dot">●</text>
+					<text class="loc-text">{{ detail.location }}</text>
 				</view>
 			</view>
 		</view>
 
-		<!-- 2. 赞助核心信息 -->
-		<view class="card-section">
-			<view class="section-title">本次赞助</view>
-
-			<view class="sponsor-highlight-box">
-				<!-- A. 现金赞助部分 (当类型为1或3时显示) -->
-				<view v-if="detail.sponsorType === 1 || detail.sponsorType === 3" class="highlight-row">
-					<view class="h-item">
-						<text class="label">赞助总额</text>
-						<text class="value money">¥{{ detail.cashAmount }}</text>
-					</view>
-					<view class="v-line"></view>
-					<view class="h-item">
-						<text class="label">人均赞助</text>
-						<text class="value">¥{{ detail.perCapitalAmount }}</text>
-					</view>
-				</view>
-
-				<!-- 分割线 (仅在混合模式下显示) -->
-				<view v-if="detail.sponsorType === 3" class="row-divider"></view>
-
-				<!-- B. 物品赞助部分 (当类型为2或3时显示) -->
-				<view v-if="detail.sponsorType === 2 || detail.sponsorType === 3" class="highlight-goods-col">
-					<text class="label mb-10">赞助物品清单</text>
-
-					<!-- 循环展示物品列表 -->
-					<view v-if="parsedGoodsList.length > 0" class="goods-list">
-						<view v-for="(item, index) in parsedGoodsList" :key="index" class="goods-item-tag">
-							<uni-icons type="gift-filled" size="14" color="#19be6b"
-								style="margin-right: 6rpx;"></uni-icons>
-							<text>{{ item }}</text>
-						</view>
-					</view>
-
-					<!-- 兜底显示 -->
-					<view v-else class="empty-goods">暂无详细描述</view>
-				</view>
+		<!-- ========== 核心赞助数据卡片 ========== -->
+		<view class="stats-float-card" v-if="detail.sponsorType === 1 || detail.sponsorType === 3">
+			<view class="stat-item">
+				<text class="stat-label">赞助总额</text>
+				<text class="stat-value orange">¥{{ detail.cashAmount }}</text>
+			</view>
+			<view class="stat-divider" />
+			<view class="stat-item">
+				<text class="stat-label">人均赞助</text>
+				<text class="stat-value">¥{{ detail.perCapitalAmount }}</text>
+			</view>
+			<view class="stat-divider" />
+			<view class="stat-item">
+				<text class="stat-label">赞助方式</text>
+				<text class="stat-value small">{{ sponsorTypeLabel }}</text>
 			</view>
 		</view>
 
-		<!-- 3. 简介 -->
-		<view class="card-section">
-			<view class="section-title">品牌简介</view>
-			<text class="intro-text">{{ detail.introduction }}</text>
+		<!-- 纯物品赞助时的小标签 -->
+		<view class="goods-only-badge" v-if="detail.sponsorType === 2">
+			<text class="badge-icon">🎁</text>
+			<text class="badge-text">实物赞助</text>
 		</view>
 
-		<!-- 4. 品牌风采 (Swiper) -->
-		<view class="card-section" v-if="galleryImages.length > 0">
-			<view class="section-title">品牌风采</view>
-			<swiper class="gallery-swiper" circular indicator-dots autoplay>
-				<swiper-item v-for="(img, idx) in galleryImages" :key="idx">
-					<image :src="img" mode="aspectFill" class="gallery-img" @click="previewGallery(idx)" />
-				</swiper-item>
-			</swiper>
-		</view>
+		<view class="content-body">
 
-		<!-- 5. 负责人 -->
-		<view class="card-section contact-card" v-if="detail.contactName">
-			<view class="section-title">负责人</view>
-			<view class="contact-row">
-				<image :src="detail.contactAvatar || '/static/default-avatar.png'" class="contact-avatar" />
-				<text class="contact-name">{{ detail.contactName }}</text>
+			<!-- ========== 物品赞助清单 ========== -->
+			<view class="section-card"
+				v-if="(detail.sponsorType === 2 || detail.sponsorType === 3) && parsedGoodsList.length > 0">
+				<view class="section-header">
+					<view class="header-accent" />
+					<text class="section-title">赞助物品清单</text>
+				</view>
+				<view class="goods-grid">
+					<view v-for="(item, index) in parsedGoodsList" :key="index" class="goods-tag">
+						<text class="goods-icon">🎁</text>
+						<text class="goods-text">{{ item }}</text>
+					</view>
+				</view>
 			</view>
+
+			<!-- ========== 品牌简介 ========== -->
+			<view class="section-card" v-if="detail.introduction">
+				<view class="section-header">
+					<view class="header-accent" />
+					<text class="section-title">品牌简介</text>
+				</view>
+				<text class="intro-text">{{ detail.introduction }}</text>
+			</view>
+
+			<!-- ========== 品牌图集 ========== -->
+			<view class="section-card no-pad" v-if="galleryImages.length > 0">
+				<view class="section-header pad-header">
+					<view class="header-accent" />
+					<text class="section-title">品牌风采</text>
+				</view>
+				<swiper class="gallery-swiper" :circular="true" :indicator-dots="galleryImages.length > 1"
+					indicator-color="rgba(255,255,255,0.5)" indicator-active-color="#FF6F00" :autoplay="true"
+					interval="3500" duration="400">
+					<swiper-item v-for="(img, idx) in galleryImages" :key="idx">
+						<image :src="img" mode="aspectFill" class="gallery-img" @click="previewGallery(idx)" />
+					</swiper-item>
+				</swiper>
+				<view class="gallery-count-badge">
+					<text>{{ galleryImages.length }} 张</text>
+				</view>
+			</view>
+
+			<!-- ========== 负责人 ========== -->
+			<view class="section-card contact-card" v-if="detail.contactName">
+				<view class="section-header">
+					<view class="header-accent" />
+					<text class="section-title">负责人</text>
+				</view>
+				<view class="contact-row">
+					<image :src="detail.contactAvatar || '/static/default-avatar.png'" mode="aspectFill"
+						class="contact-avatar" />
+					<view class="contact-info">
+						<text class="contact-name">{{ detail.contactName }}</text>
+						<text class="contact-sub">赞助负责人</text>
+					</view>
+					<view class="contact-tag">联系人</view>
+				</view>
+			</view>
+
 		</view>
+
+		<!-- 底部安全区占位 -->
+		<view style="height: 60rpx;" />
+	</view>
+
+	<!-- 加载态骨架 -->
+	<view class="skeleton-page" v-else>
+		<view class="sk-hero" />
+		<view class="sk-card" />
+		<view class="sk-card short" />
 	</view>
 </template>
 
@@ -114,37 +160,42 @@
 		}
 	};
 
-	// 头图逻辑：优先用图集第一张，没有则用默认背景
-	const headerImage = computed(() => {
-		if (galleryImages.value.length > 0) return galleryImages.value[0];
-		return 'https://img.gofor.club/default_sponsor_bg.jpg'; // 建议替换为本地默认背景
+	// 赞助类型文案
+	const sponsorTypeLabel = computed(() => {
+		const map = {
+			1: '💰 现金赞助',
+			2: '📦 实物赞助',
+			3: '💰+📦 混合赞助'
+		};
+		return detail.value ? (map[detail.value.sponsorType] || '赞助商') : '';
 	});
 
-	// 解析图集 JSON
+	// 头图：优先图集第一张
+	const headerImage = computed(() => {
+		if (galleryImages.value.length > 0) return galleryImages.value[0];
+		return 'https://img.gofor.club/default_sponsor_bg.jpg';
+	});
+
+	// 解析图集
 	const galleryImages = computed(() => {
-		if (!detail.value || !detail.value.galleryImageUrls) return [];
+		if (!detail.value?.galleryImageUrls) return [];
 		try {
-			return JSON.parse(detail.value.galleryImageUrls);
+			const raw = detail.value.galleryImageUrls;
+			if (Array.isArray(raw)) return raw;
+			return JSON.parse(raw);
 		} catch (e) {
 			return [];
 		}
 	});
 
-	// 解析物品描述 (JSON String -> Array)
+	// 解析物品清单
 	const parsedGoodsList = computed(() => {
-		if (!detail.value || !detail.value.goodsDescription) return [];
-
+		if (!detail.value?.goodsDescription) return [];
 		try {
 			const raw = detail.value.goodsDescription;
-			// 如果已经是数组，直接返回
 			if (Array.isArray(raw)) return raw;
-
-			// 尝试解析 JSON 字符串
 			const parsed = JSON.parse(raw);
-
-			// 兼容处理：如果解析出来是数组，返回数组
 			if (Array.isArray(parsed)) {
-				// 处理一下可能存在的对象结构 [{"name": "水"}] -> ["水"]
 				return parsed.map(item => {
 					if (typeof item === 'object' && item !== null) {
 						return item.desc || item.name || JSON.stringify(item);
@@ -152,12 +203,8 @@
 					return String(item);
 				});
 			}
-
-			// 如果解析出来是纯字符串，放入数组返回
 			return [String(parsed)];
-
 		} catch (e) {
-			// 如果解析失败（比如只是普通字符串），直接返回数组包裹
 			return [detail.value.goodsDescription];
 		}
 	});
@@ -171,179 +218,323 @@
 </script>
 
 <style lang="scss" scoped>
+	// ── 主题变量 ──────────────────────────────
+	$orange: #FF6F00;
+	$orange-light: #FFF3E0;
+	$orange-deep: #E65100;
+	$text-main: #1a1a1a;
+	$text-sub: #888;
+	$bg: #F5F5F7;
+	$card-bg: #FFFFFF;
+	$radius-lg: 28rpx;
+	$radius-md: 18rpx;
+
+	// ── 页面基础 ──────────────────────────────
 	.page {
 		min-height: 100vh;
-		background-color: #f8f8f8;
-		padding-bottom: 40rpx;
+		background-color: $bg;
 	}
 
-	/* 头部 */
-	.header-banner {
-		height: 400rpx;
-		position: relative;
+	// ── 骨架屏 ──────────────────────────────
+	.skeleton-page {
+		.sk-hero {
+			width: 100%;
+			height: 560rpx;
+			background: linear-gradient(90deg, #eee 25%, #f5f5f5 50%, #eee 75%);
+			background-size: 200% 100%;
+			animation: shimmer 1.4s infinite;
+		}
 
-		.bg-img {
+		.sk-card {
+			margin: 24rpx;
+			height: 200rpx;
+			border-radius: $radius-lg;
+			background: linear-gradient(90deg, #eee 25%, #f5f5f5 50%, #eee 75%);
+			background-size: 200% 100%;
+			animation: shimmer 1.4s infinite 0.2s;
+
+			&.short {
+				height: 120rpx;
+			}
+		}
+	}
+
+	@keyframes shimmer {
+		0% {
+			background-position: 200% 0;
+		}
+
+		100% {
+			background-position: -200% 0;
+		}
+	}
+
+	// ── 沉浸式头图 ──────────────────────────────
+	.hero-section {
+		position: relative;
+		height: 560rpx;
+		overflow: hidden;
+
+		.hero-bg {
 			width: 100%;
 			height: 100%;
 		}
 
-		.header-mask {
+		.hero-gradient {
 			position: absolute;
-			top: 0;
+			inset: 0;
+			background: linear-gradient(to bottom,
+					rgba(0, 0, 0, 0.15) 0%,
+					rgba(0, 0, 0, 0.1) 30%,
+					rgba(0, 0, 0, 0.65) 100%);
+		}
+
+		.back-btn {
+			position: absolute;
+			top: 88rpx;
+			left: 32rpx;
+			width: 68rpx;
+			height: 68rpx;
+			background: rgba(255, 255, 255, 0.2);
+			backdrop-filter: blur(10px);
+			border-radius: 50%;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+
+			.back-icon {
+				font-size: 48rpx;
+				color: #fff;
+				line-height: 1;
+				margin-top: -4rpx;
+			}
+		}
+
+		.type-badge {
+			position: absolute;
+			top: 96rpx;
+			right: 32rpx;
+			background: rgba(255, 111, 0, 0.9);
+			backdrop-filter: blur(8px);
+			padding: 8rpx 22rpx;
+			border-radius: 30rpx;
+			font-size: 22rpx;
+			color: #fff;
+			font-weight: 600;
+		}
+
+		.hero-content {
+			position: absolute;
+			bottom: 48rpx;
 			left: 0;
 			right: 0;
-			bottom: 0;
-			background: rgba(0, 0, 0, 0.4);
 			display: flex;
 			flex-direction: column;
 			align-items: center;
-			justify-content: center;
-			color: #fff;
 
-			.sponsor-logo {
-				width: 140rpx;
-				height: 140rpx;
-				border-radius: 12rpx;
+			.logo-ring {
+				width: 136rpx;
+				height: 136rpx;
+				border-radius: 24rpx;
+				border: 4rpx solid rgba(255, 255, 255, 0.6);
+				overflow: hidden;
 				background: #fff;
 				margin-bottom: 20rpx;
+				box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.3);
+
+				.logo-img {
+					width: 100%;
+					height: 100%;
+				}
 			}
 
-			.sp-name {
-				font-size: 36rpx;
-				font-weight: bold;
-				margin-bottom: 10rpx;
+			.hero-name {
+				font-size: 44rpx;
+				font-weight: 700;
+				color: #fff;
+				letter-spacing: 2rpx;
+				text-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.4);
+				margin-bottom: 12rpx;
 			}
 
-			.sp-loc {
-				font-size: 24rpx;
-				opacity: 0.9;
+			.hero-location {
+				display: flex;
+				align-items: center;
+				gap: 8rpx;
+
+				.loc-dot {
+					font-size: 14rpx;
+					color: $orange;
+				}
+
+				.loc-text {
+					font-size: 24rpx;
+					color: rgba(255, 255, 255, 0.85);
+				}
 			}
 		}
 	}
 
-	/* 卡片通用 */
-	.card-section {
-		background: #fff;
-		margin: 24rpx;
-		padding: 30rpx;
-		border-radius: 20rpx;
-
-		.section-title {
-			font-size: 30rpx;
-			font-weight: bold;
-			margin-bottom: 20rpx;
-			padding-left: 16rpx;
-			border-left: 8rpx solid #FF6F00;
-			color: #333;
-		}
-	}
-
-	/* 核心高亮数据 */
-	.sponsor-highlight-box {
-		background: #fff9f0;
-		border-radius: 16rpx;
-		padding: 24rpx;
-		border: 1rpx solid #ffe4ba;
-	}
-
-	.highlight-row {
+	// ── 悬浮数据卡片 ──────────────────────────────
+	.stats-float-card {
+		margin: -40rpx 32rpx 0;
+		background: $card-bg;
+		border-radius: $radius-lg;
+		padding: 36rpx 24rpx;
 		display: flex;
 		align-items: center;
-		padding-bottom: 10rpx;
+		box-shadow: 0 8rpx 40rpx rgba(0, 0, 0, 0.10);
+		position: relative;
+		z-index: 10;
 
-		.h-item {
+		.stat-item {
 			flex: 1;
 			display: flex;
 			flex-direction: column;
 			align-items: center;
+			gap: 8rpx;
 
-			.label {
-				font-size: 24rpx;
-				color: #999;
-				margin-bottom: 6rpx;
+			.stat-label {
+				font-size: 22rpx;
+				color: $text-sub;
 			}
 
-			.value {
-				font-size: 32rpx;
-				font-weight: bold;
-				color: #333;
+			.stat-value {
+				font-size: 38rpx;
+				font-weight: 800;
+				color: $text-main;
+				line-height: 1.1;
 
-				&.money {
-					color: #FF6F00;
-					font-size: 40rpx;
-					font-family: DINAlternate-Bold, sans-serif;
-					/* 如果有数字字体 */
+				&.orange {
+					color: $orange;
+				}
+
+				&.small {
+					font-size: 26rpx;
+					font-weight: 600;
+					text-align: center;
 				}
 			}
 		}
 
-		.v-line {
+		.stat-divider {
 			width: 2rpx;
-			height: 50rpx;
-			background: #e0e0e0;
-			margin: 0 20rpx;
+			height: 56rpx;
+			background: #f0f0f0;
+			flex-shrink: 0;
 		}
 	}
 
-	.row-divider {
-		height: 2rpx;
-		background: #eee;
-		/* 或者 dashed */
-		margin: 20rpx 0;
-		width: 100%;
+	// 纯物品赞助标签
+	.goods-only-badge {
+		margin: -20rpx 32rpx 0;
+		background: $card-bg;
+		border-radius: $radius-lg;
+		padding: 24rpx 32rpx;
+		display: flex;
+		align-items: center;
+		gap: 16rpx;
+		box-shadow: 0 8rpx 40rpx rgba(0, 0, 0, 0.08);
+		position: relative;
+		z-index: 10;
+
+		.badge-icon {
+			font-size: 36rpx;
+		}
+
+		.badge-text {
+			font-size: 30rpx;
+			font-weight: 700;
+			color: $text-main;
+		}
 	}
 
-	.highlight-goods-col {
+	// ── 内容区 ──────────────────────────────
+	.content-body {
+		margin-top: 32rpx;
+		padding: 0 24rpx;
 		display: flex;
 		flex-direction: column;
+		gap: 24rpx;
+	}
 
-		.label {
-			font-size: 24rpx;
-			color: #999;
-			display: block;
+	// ── 通用 section 卡片 ──────────────────────────────
+	.section-card {
+		background: $card-bg;
+		border-radius: $radius-lg;
+		padding: 32rpx;
+		box-shadow: 0 2rpx 16rpx rgba(0, 0, 0, 0.04);
 
-			&.mb-10 {
-				margin-bottom: 16rpx;
-			}
+		&.no-pad {
+			padding: 0;
+			overflow: hidden;
 		}
 
-		.goods-list {
-			display: flex;
-			flex-wrap: wrap;
-			gap: 16rpx;
+		.pad-header {
+			padding: 32rpx 32rpx 0;
 		}
 
-		.goods-item-tag {
-			background: #fff;
-			padding: 10rpx 24rpx;
-			border-radius: 30rpx;
-			font-size: 28rpx;
-			color: #333;
+		.section-header {
 			display: flex;
 			align-items: center;
-			box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.03);
-			border: 1rpx solid #e1f3d8;
-			/* 淡淡的绿色边框 */
-		}
+			gap: 16rpx;
+			margin-bottom: 28rpx;
 
-		.empty-goods {
-			font-size: 26rpx;
-			color: #ccc;
-			font-style: italic;
+			.header-accent {
+				width: 8rpx;
+				height: 32rpx;
+				background: linear-gradient(to bottom, $orange, $orange-deep);
+				border-radius: 4rpx;
+			}
+
+			.section-title {
+				font-size: 30rpx;
+				font-weight: 700;
+				color: $text-main;
+			}
 		}
 	}
 
+	// ── 物品清单 ──────────────────────────────
+	.goods-grid {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 16rpx;
+
+		.goods-tag {
+			display: flex;
+			align-items: center;
+			gap: 8rpx;
+			background: $orange-light;
+			border: 1rpx solid #FFD180;
+			border-radius: 30rpx;
+			padding: 12rpx 24rpx;
+
+			.goods-icon {
+				font-size: 28rpx;
+			}
+
+			.goods-text {
+				font-size: 26rpx;
+				color: #BF360C;
+				font-weight: 500;
+			}
+		}
+	}
+
+	// ── 简介文字 ──────────────────────────────
 	.intro-text {
 		font-size: 28rpx;
 		color: #555;
-		line-height: 1.6;
+		line-height: 1.8;
+		letter-spacing: 0.5rpx;
 	}
 
+	// ── 图集 ──────────────────────────────
 	.gallery-swiper {
 		width: 100%;
-		height: 360rpx;
-		border-radius: 12rpx;
-		overflow: hidden;
+		height: 380rpx;
+		display: block;
 
 		.gallery-img {
 			width: 100%;
@@ -351,22 +542,66 @@
 		}
 	}
 
-	.contact-row {
-		display: flex;
-		align-items: center;
-		gap: 20rpx;
+	.gallery-count-badge {
+		position: absolute;
+		bottom: 20rpx;
+		right: 24rpx;
+		background: rgba(0, 0, 0, 0.45);
+		backdrop-filter: blur(6px);
+		border-radius: 20rpx;
+		padding: 6rpx 18rpx;
+		font-size: 22rpx;
+		color: #fff;
+	}
 
-		.contact-avatar {
-			width: 80rpx;
-			height: 80rpx;
-			border-radius: 50%;
-			background: #eee;
-		}
+	// section-card.no-pad 内部需要 relative 才能让 badge 定位
+	.section-card.no-pad {
+		position: relative;
+	}
 
-		.contact-name {
-			font-size: 30rpx;
-			font-weight: bold;
-			color: #333;
+	// ── 负责人 ──────────────────────────────
+	.contact-card {
+		.contact-row {
+			display: flex;
+			align-items: center;
+			gap: 24rpx;
+
+			.contact-avatar {
+				width: 96rpx;
+				height: 96rpx;
+				border-radius: 50%;
+				background: #eee;
+				flex-shrink: 0;
+				border: 3rpx solid $orange-light;
+			}
+
+			.contact-info {
+				flex: 1;
+				display: flex;
+				flex-direction: column;
+				gap: 6rpx;
+
+				.contact-name {
+					font-size: 30rpx;
+					font-weight: 700;
+					color: $text-main;
+				}
+
+				.contact-sub {
+					font-size: 22rpx;
+					color: $text-sub;
+				}
+			}
+
+			.contact-tag {
+				font-size: 22rpx;
+				color: $orange;
+				background: $orange-light;
+				border: 1rpx solid #FFD180;
+				padding: 6rpx 18rpx;
+				border-radius: 20rpx;
+				font-weight: 600;
+			}
 		}
 	}
 </style>

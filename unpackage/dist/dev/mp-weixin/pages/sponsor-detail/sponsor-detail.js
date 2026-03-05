@@ -1,14 +1,6 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
 const utils_request = require("../../utils/request.js");
-if (!Array) {
-  const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
-  _easycom_uni_icons2();
-}
-const _easycom_uni_icons = () => "../../uni_modules/uni-icons/components/uni-icons/uni-icons.js";
-if (!Math) {
-  _easycom_uni_icons();
-}
 const _sfc_main = {
   __name: "sponsor-detail",
   setup(__props) {
@@ -34,22 +26,35 @@ const _sfc_main = {
         detail.value = res.data;
       }
     };
+    const sponsorTypeLabel = common_vendor.computed(() => {
+      const map = {
+        1: "💰 现金赞助",
+        2: "📦 实物赞助",
+        3: "💰+📦 混合赞助"
+      };
+      return detail.value ? map[detail.value.sponsorType] || "赞助商" : "";
+    });
     const headerImage = common_vendor.computed(() => {
       if (galleryImages.value.length > 0)
         return galleryImages.value[0];
       return "https://img.gofor.club/default_sponsor_bg.jpg";
     });
     const galleryImages = common_vendor.computed(() => {
-      if (!detail.value || !detail.value.galleryImageUrls)
+      var _a;
+      if (!((_a = detail.value) == null ? void 0 : _a.galleryImageUrls))
         return [];
       try {
-        return JSON.parse(detail.value.galleryImageUrls);
+        const raw = detail.value.galleryImageUrls;
+        if (Array.isArray(raw))
+          return raw;
+        return JSON.parse(raw);
       } catch (e) {
         return [];
       }
     });
     const parsedGoodsList = common_vendor.computed(() => {
-      if (!detail.value || !detail.value.goodsDescription)
+      var _a;
+      if (!((_a = detail.value) == null ? void 0 : _a.goodsDescription))
         return [];
       try {
         const raw = detail.value.goodsDescription;
@@ -80,51 +85,50 @@ const _sfc_main = {
         a: detail.value
       }, detail.value ? common_vendor.e({
         b: headerImage.value,
-        c: detail.value.logoUrl,
-        d: common_vendor.t(detail.value.sponsorName),
-        e: detail.value.location
+        c: common_vendor.t(sponsorTypeLabel.value),
+        d: detail.value.logoUrl || "/static/default-logo.png",
+        e: common_vendor.t(detail.value.sponsorName),
+        f: detail.value.location
       }, detail.value.location ? {
-        f: common_vendor.t(detail.value.location)
+        g: common_vendor.t(detail.value.location)
       } : {}, {
-        g: detail.value.sponsorType === 1 || detail.value.sponsorType === 3
+        h: detail.value.sponsorType === 1 || detail.value.sponsorType === 3
       }, detail.value.sponsorType === 1 || detail.value.sponsorType === 3 ? {
-        h: common_vendor.t(detail.value.cashAmount),
-        i: common_vendor.t(detail.value.perCapitalAmount)
+        i: common_vendor.t(detail.value.cashAmount),
+        j: common_vendor.t(detail.value.perCapitalAmount),
+        k: common_vendor.t(sponsorTypeLabel.value)
       } : {}, {
-        j: detail.value.sponsorType === 3
-      }, detail.value.sponsorType === 3 ? {} : {}, {
-        k: detail.value.sponsorType === 2 || detail.value.sponsorType === 3
-      }, detail.value.sponsorType === 2 || detail.value.sponsorType === 3 ? common_vendor.e({
-        l: parsedGoodsList.value.length > 0
-      }, parsedGoodsList.value.length > 0 ? {
-        m: common_vendor.f(parsedGoodsList.value, (item, index, i0) => {
+        l: detail.value.sponsorType === 2
+      }, detail.value.sponsorType === 2 ? {} : {}, {
+        m: (detail.value.sponsorType === 2 || detail.value.sponsorType === 3) && parsedGoodsList.value.length > 0
+      }, (detail.value.sponsorType === 2 || detail.value.sponsorType === 3) && parsedGoodsList.value.length > 0 ? {
+        n: common_vendor.f(parsedGoodsList.value, (item, index, i0) => {
           return {
-            a: "5a2ebc52-0-" + i0,
-            b: common_vendor.t(item),
-            c: index
+            a: common_vendor.t(item),
+            b: index
           };
-        }),
-        n: common_vendor.p({
-          type: "gift-filled",
-          size: "14",
-          color: "#19be6b"
         })
-      } : {}) : {}, {
-        o: common_vendor.t(detail.value.introduction),
-        p: galleryImages.value.length > 0
+      } : {}, {
+        o: detail.value.introduction
+      }, detail.value.introduction ? {
+        p: common_vendor.t(detail.value.introduction)
+      } : {}, {
+        q: galleryImages.value.length > 0
       }, galleryImages.value.length > 0 ? {
-        q: common_vendor.f(galleryImages.value, (img, idx, i0) => {
+        r: common_vendor.f(galleryImages.value, (img, idx, i0) => {
           return {
             a: img,
             b: common_vendor.o(($event) => previewGallery(idx), idx),
             c: idx
           };
-        })
+        }),
+        s: galleryImages.value.length > 1,
+        t: common_vendor.t(galleryImages.value.length)
       } : {}, {
-        r: detail.value.contactName
+        v: detail.value.contactName
       }, detail.value.contactName ? {
-        s: detail.value.contactAvatar || "/static/default-avatar.png",
-        t: common_vendor.t(detail.value.contactName)
+        w: detail.value.contactAvatar || "/static/default-avatar.png",
+        x: common_vendor.t(detail.value.contactName)
       } : {}) : {});
     };
   }

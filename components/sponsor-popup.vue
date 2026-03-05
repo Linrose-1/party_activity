@@ -44,11 +44,11 @@
 						<uni-forms-item label="赞助类型" required>
 							<view class="type-selector">
 								<view class="type-item" :class="{ active: form.sponsorType === 1 }"
-									@click="form.sponsorType = 1"><text>💰 现金</text></view>
+									@click="onSponsorTypeChange(1)"><text>💰 现金</text></view>
 								<view class="type-item" :class="{ active: form.sponsorType === 2 }"
-									@click="form.sponsorType = 2"><text>📦 物品</text></view>
+									@click="onSponsorTypeChange(2)"><text>📦 物品</text></view>
 								<view class="type-item" :class="{ active: form.sponsorType === 3 }"
-									@click="form.sponsorType = 3"><text>💰+📦 混合</text></view>
+									@click="onSponsorTypeChange(3)"><text>💰+📦 混合</text></view>
 							</view>
 						</uni-forms-item>
 
@@ -84,7 +84,7 @@
 									<uni-icons type="trash" size="18" color="#ff4d4f"></uni-icons>
 								</view>
 							</view>
-							<view v-if="goodsList.length === 0" class="empty-goods-tip">暂无物品，请点击添加</view>
+							<!-- 列表为空时不再显示提示文案，因为切换类型时已自动补一条空行 -->
 						</template>
 
 						<uni-forms-item label="品牌图集">
@@ -124,10 +124,8 @@
 	import {
 		ref,
 		watch,
-		nextTick,
 		defineProps,
 		defineEmits,
-		computed
 	} from 'vue';
 	import uploadFile from '@/utils/upload.js';
 
@@ -157,64 +155,102 @@
 	const form = ref(getDefaultForm());
 	const goodsList = ref([]);
 
+	// ==============================================================================
+	// 【Bug2 优化】赞助类型切换：切到含物品的类型时，自动补一条空行，无需手动点添加
+	// ==============================================================================
+	const onSponsorTypeChange = (type) => {
+		form.value.sponsorType = type;
+		// 切换到需要填物品的类型时（物品/混合），如果 goodsList 为空自动补一条
+		if ((type === 2 || type === 3) && goodsList.value.length === 0) {
+			goodsList.value = [{
+				desc: ''
+			}];
+		}
+	};
+
+	// ==============================================================================
+	// 【Bug1 修复】反显逻辑重写
+	// 原问题：
+	//   1. galleryImageUrls 处理完后被 form.value = newData 覆盖（newData 里还是原始字符串）
+	//   2. goodsList 解析完后，form.value = newData 把 goodsDescription 字符串又赋进去了
+	// 修复方案：
+	//   先赋值 form，再单独对 galleryImageUrls 和 goodsList 做二次修正，保证顺序正确
+	// ==============================================================================
 	watch(() => props.visible, (val) => {
-		if (val) {
-			if (props.data) {
-				isEdit.value = true;
-				const newData = JSON.parse(JSON.stringify(props.data));
+		if (!val) return;
+		
+		console.log('赞助商弹窗收到的 data:', JSON.stringify(props.data));
 
-				if (typeof newData.galleryImageUrls === 'string') {
-					try {
-						newData.galleryImageUrls = JSON.parse(newData.galleryImageUrls);
-					} catch (e) {
-						newData.galleryImageUrls = [];
-					}
-				} else if (!Array.isArray(newData.galleryImageUrls)) {
-					newData.galleryImageUrls = [];
+		if (props.data) {
+			// ---- 编辑模式 ----
+			isEdit.value = true;
+			const newData = JSON.parse(JSON.stringify(props.data));
+
+			// 1. 先整体赋值到 form（此时 galleryImageUrls 可能是字符串，goodsDescription 可能是 JSON 字符串）
+			form.value = newData;
+
+			// 2. 修正 galleryImageUrls：确保是数组
+			if (typeof form.value.galleryImageUrls === 'string') {
+				try {
+					const parsed = JSON.parse(form.value.galleryImageUrls);
+					form.value.galleryImageUrls = Array.isArray(parsed) ? parsed : [];
+				} catch (e) {
+					form.value.galleryImageUrls = [];
 				}
+			} else if (!Array.isArray(form.value.galleryImageUrls)) {
+				form.value.galleryImageUrls = [];
+			}
 
-				if (newData.goodsDescription) {
-					try {
-						const parsed = JSON.parse(newData.goodsDescription);
-						if (Array.isArray(parsed)) {
-							goodsList.value = parsed.map(i => {
-								if (typeof i === 'string') return {
-									desc: i
-								};
-								if (i.name) return {
-									desc: i.name + (i.count ? ` ${i.count}` : '')
-								};
-								return {
-									desc: i.desc || ''
-								};
-							});
-						} else {
-							goodsList.value = [{
-								desc: newData.goodsDescription
-							}];
-						}
-					} catch (e) {
+			// 3. 修正 goodsList：从 goodsDescription 解析物品清单
+			const desc = newData.goodsDescription;
+			if (desc) {
+				try {
+					const parsed = JSON.parse(desc);
+					if (Array.isArray(parsed)) {
+						goodsList.value = parsed.map(i => {
+							if (typeof i === 'string') return {
+								desc: i
+							};
+							if (i.name) return {
+								desc: i.name + (i.count ? ` ${i.count}` : '')
+							};
+							return {
+								desc: i.desc || ''
+							};
+						});
+					} else {
+						// 非数组（纯字符串）：作为单条数据
 						goodsList.value = [{
-							desc: newData.goodsDescription
+							desc: String(desc)
 						}];
 					}
-				} else {
+				} catch (e) {
+					// JSON 解析失败：直接当字符串用
 					goodsList.value = [{
-						desc: ''
+						desc: String(desc)
 					}];
 				}
-				form.value = newData;
 			} else {
-				isEdit.value = false;
-				form.value = getDefaultForm();
-				goodsList.value = [{
-					desc: ''
-				}];
+				// 无物品数据：根据赞助类型决定是否补一条空行
+				goodsList.value = (newData.sponsorType === 2 || newData.sponsorType === 3) ?
+					[{
+						desc: ''
+					}] :
+					[];
 			}
-			// nextTick(() => initDragList(form.value.galleryImageUrls));
+
+		} else {
+			// ---- 新增模式 ----
+			isEdit.value = false;
+			form.value = getDefaultForm();
+			// 新增默认类型是现金(1)，物品清单初始化为空，切到物品类型时由 onSponsorTypeChange 补行
+			goodsList.value = [];
 		}
 	});
 
+	// ==============================================================================
+	// 地点 & 物品清单操作
+	// ==============================================================================
 	const chooseLocation = () => {
 		uni.chooseLocation({
 			success: (res) => {
@@ -228,45 +264,48 @@
 			desc: ''
 		});
 	};
+
 	const removeGoodsItem = (index) => {
 		goodsList.value.splice(index, 1);
 	};
 
+	// ==============================================================================
+	// 弹窗操作
+	// ==============================================================================
 	const close = () => {
 		emit('close');
 	};
 
 	const confirm = () => {
 		const f = form.value;
+
 		if (!f.sponsorName) return uni.showToast({
 			title: '请输入名称',
 			icon: 'none'
 		});
-		// if (!f.logoUrl) return uni.showToast({
-		// 	title: '请上传Logo',
-		// 	icon: 'none'
-		// });
-		// if (!f.introduction) return uni.showToast({
-		// 	title: '请输入简介',
-		// 	icon: 'none'
-		// });
 
 		if (f.sponsorType === 1 || f.sponsorType === 3) {
-			if (!f.cashAmount || !f.perCapitalAmount) return uni.showToast({
-				title: '请完善现金信息',
-				icon: 'none'
-			});
+			if (!f.cashAmount || !f.perCapitalAmount) {
+				return uni.showToast({
+					title: '请完善现金信息',
+					icon: 'none'
+				});
+			}
 		} else {
 			f.cashAmount = null;
 			f.perCapitalAmount = null;
 		}
 
 		if (f.sponsorType === 2 || f.sponsorType === 3) {
-			const validGoods = goodsList.value.filter(g => g.desc && g.desc.trim() !== '').map(g => g.desc);
-			if (validGoods.length === 0) return uni.showToast({
-				title: '请填写赞助物品',
-				icon: 'none'
-			});
+			const validGoods = goodsList.value
+				.filter(g => g.desc && g.desc.trim() !== '')
+				.map(g => g.desc.trim());
+			if (validGoods.length === 0) {
+				return uni.showToast({
+					title: '请填写赞助物品',
+					icon: 'none'
+				});
+			}
 			f.goodsDescription = JSON.stringify(validGoods);
 		} else {
 			f.goodsDescription = '';
@@ -275,6 +314,9 @@
 		emit('confirm', JSON.parse(JSON.stringify(f)));
 	};
 
+	// ==============================================================================
+	// 图片上传
+	// ==============================================================================
 	const uploadLogo = async () => {
 		uni.chooseImage({
 			count: 1,
@@ -288,6 +330,7 @@
 			}
 		});
 	};
+
 	const uploadAvatar = async () => {
 		uni.chooseImage({
 			count: 1,
@@ -301,134 +344,27 @@
 			}
 		});
 	};
-	const uploadGallery = () => {
-		// 确保数组存在
-		if (!form.value.galleryImageUrls) form.value.galleryImageUrls = [];
 
+	const uploadGallery = () => {
+		if (!form.value.galleryImageUrls) form.value.galleryImageUrls = [];
 		uni.chooseImage({
 			count: 9 - form.value.galleryImageUrls.length,
 			success: async (res) => {
 				uni.showLoading({
 					title: '上传中...'
 				});
-
 				const ps = res.tempFiles.map(f => uploadFile({
 					path: f.path
 				}, {
 					directory: 'sponsor-gallery'
 				}));
 				const rs = await Promise.all(ps);
-
 				uni.hideLoading();
-
 				const successUrls = rs.filter(r => r.data).map(r => r.data);
 				form.value.galleryImageUrls.push(...successUrls);
 			}
 		});
 	};
-	// const deleteImage = (i) => {
-	// 	if (form.value.galleryImageUrls) form.value.galleryImageUrls.splice(i, 1);
-	// };
-
-	// const dragDisplayList = ref([]);
-	// const dragItemWidth = ref(0);
-	// const dragItemHeight = ref(0);
-	// const dragAreaHeight = ref(0);
-	// const isDragging = ref(false);
-	// const dragIndex = ref(-1);
-	// const addBtnPos = computed(() => {
-	// 	const c = (form.value.galleryImageUrls || []).length;
-	// 	if (c >= 9) return {
-	// 		left: 0,
-	// 		top: 0
-	// 	};
-	// 	const r = Math.floor(c / 3),
-	// 		col = c % 3;
-	// 	return {
-	// 		left: col * dragItemWidth.value,
-	// 		top: r * dragItemHeight.value
-	// 	};
-	// });
-	// watch(() => form.value.galleryImageUrls, (v) => {
-	// 	if (!isDragging.value && props.visible) initDragList(v || []);
-	// }, {
-	// 	deep: true
-	// });
-	// const initDragList = (l) => {
-	// 	const sys = uni.getSystemInfoSync();
-	// 	const w = sys.windowWidth - uni.upx2px(60);
-	// 	dragItemWidth.value = w / 3;
-	// 	dragItemHeight.value = dragItemWidth.value;
-	// 	dragDisplayList.value = (l || []).map((u, i) => {
-	// 		const {
-	// 			x,
-	// 			y
-	// 		} = getPos(i);
-	// 		return {
-	// 			id: `sp_${i}_${Math.random()}`,
-	// 			data: u,
-	// 			x,
-	// 			y,
-	// 			zIndex: 1,
-	// 			realIndex: i
-	// 		}
-	// 	});
-	// 	updateDragHeight(l ? l.length : 0);
-	// };
-	// const getPos = (i) => {
-	// 	const r = Math.floor(i / 3),
-	// 		c = i % 3;
-	// 	return {
-	// 		x: c * dragItemWidth.value,
-	// 		y: r * dragItemHeight.value
-	// 	};
-	// };
-	// const updateDragHeight = (c) => {
-	// 	const t = c < 9 ? c + 1 : c;
-	// 	dragAreaHeight.value = Math.ceil(t / 3) * dragItemHeight.value;
-	// };
-	// const onMovableStart = (i) => {
-	// 	isDragging.value = true;
-	// 	dragIndex.value = i;
-	// 	dragDisplayList.value[i].zIndex = 99;
-	// };
-	// const onMovableChange = (e, i) => {
-	// 	if (!isDragging.value || i !== dragIndex.value) return;
-	// 	const x = e.detail.x,
-	// 		y = e.detail.y,
-	// 		c = Math.floor((x + dragItemWidth.value / 2) / dragItemWidth.value),
-	// 		r = Math.floor((y + dragItemHeight.value / 2) / dragItemHeight.value);
-	// 	let t = r * 3 + c;
-	// 	if (t < 0) t = 0;
-	// 	if (t >= dragDisplayList.value.length) t = dragDisplayList.value.length - 1;
-	// 	if (t !== dragIndex.value) {
-	// 		const m = dragDisplayList.value[dragIndex.value];
-	// 		dragDisplayList.value.splice(dragIndex.value, 1);
-	// 		dragDisplayList.value.splice(t, 0, m);
-	// 		dragDisplayList.value.forEach((o, k) => {
-	// 			if (k !== t) {
-	// 				const p = getPos(k);
-	// 				o.x = p.x;
-	// 				o.y = p.y;
-	// 			}
-	// 		});
-	// 		dragIndex.value = t;
-	// 	}
-	// };
-	// const onMovableEnd = () => {
-	// 	isDragging.value = false;
-	// 	if (dragIndex.value !== -1) {
-	// 		const o = dragDisplayList.value[dragIndex.value];
-	// 		o.zIndex = 1;
-	// 		const p = getPos(dragIndex.value);
-	// 		nextTick(() => {
-	// 			o.x = p.x;
-	// 			o.y = p.y;
-	// 		});
-	// 		form.value.galleryImageUrls = dragDisplayList.value.map(x => x.data);
-	// 	}
-	// 	dragIndex.value = -1;
-	// };
 </script>
 
 <style lang="scss" scoped>
@@ -606,15 +542,6 @@
 		}
 	}
 
-	.empty-goods-tip {
-		text-align: center;
-		color: #ccc;
-		font-size: 24rpx;
-		padding: 20rpx;
-		background: #f9f9f9;
-		border-radius: 8rpx;
-	}
-
 	.upload-box {
 		width: 200rpx;
 		height: 200rpx;
@@ -694,14 +621,10 @@
 
 	.uploader-wrap {
 		width: 100%;
-		/* 关键：触发 BFC，清除子元素浮动造成的塌陷 */
 		overflow: hidden;
-		/* 关键：给一个最小高度，防止没图片时完全缩在一起 */
 		min-height: 200rpx;
-		/* 确保它是块级元素 */
 		display: block;
 		position: relative;
-		/* 稍微给点下边距，防止贴得太紧 */
 		margin-bottom: 20rpx;
 	}
 
@@ -710,75 +633,4 @@
 		background-color: #F0F0F0;
 		margin: 30rpx 0;
 	}
-
-	// .gallery-container {
-	// 	position: relative;
-	// 	width: 100%;
-	// }
-
-	// .drag-area {
-	// 	width: 100%;
-	// }
-
-	// .drag-item {
-	// 	z-index: 10;
-	// }
-
-	// .item-inner {
-	// 	width: 100%;
-	// 	height: 100%;
-	// 	padding: 10rpx;
-	// 	box-sizing: border-box;
-	// }
-
-	// .img-wrap {
-	// 	width: 100%;
-	// 	height: 100%;
-	// 	position: relative;
-	// 	border-radius: 8rpx;
-	// 	overflow: hidden;
-	// 	background: #eee;
-
-	// 	image {
-	// 		width: 100%;
-	// 		height: 100%;
-	// 	}
-	// }
-
-	// .del-tag {
-	// 	position: absolute;
-	// 	top: 0;
-	// 	right: 0;
-	// 	width: 40rpx;
-	// 	height: 40rpx;
-	// 	background: rgba(0, 0, 0, 0.5);
-	// 	color: #fff;
-	// 	display: flex;
-	// 	align-items: center;
-	// 	justify-content: center;
-	// 	border-bottom-left-radius: 8rpx;
-	// 	z-index: 20;
-	// }
-
-	// .add-btn-slot {
-	// 	position: absolute;
-	// 	z-index: 5;
-	// }
-
-	// .upload-placeholder.small {
-	// 	width: 100%;
-	// 	height: 100%;
-	// 	background: #FAFAFA;
-	// 	border: 1px dashed #DCDFE6;
-	// 	border-radius: 8rpx;
-	// 	display: flex;
-	// 	align-items: center;
-	// 	justify-content: center;
-	// }
-
-	// :deep(.uni-forms-item__label) {
-	// 	font-weight: bold;
-	// 	color: #333;
-	// 	padding-bottom: 10rpx;
-	// }
 </style>

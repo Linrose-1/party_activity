@@ -1,13 +1,59 @@
 <template>
 	<view class="activity-card">
 		<view @click="handleCardClick">
-			<image :src="activity.coverImageUrl" class="activity-image" mode="aspectFill" />
 
-			<view class="activity-header">
-				<text class="activity-title">{{ activity.activityTitle }}</text>
+			<!-- ========== 【新增】发布者操作栏：封面正上方，仅本人发布的聚会显示 ========== -->
+			<!-- 完全对齐「我的聚会」原始按钮组逻辑，从右向左排布 -->
+			<view v-if="isOwner" class="owner-action-bar" @click.stop>
+
+				<!-- 更多（最左）：内含 参会名单 / 取消聚会（限状态） / 修改编辑 -->
+				<view class="owner-btn" @click.stop="showOwnerMoreActions">
+					<uni-icons type="more-filled" size="14" color="#FF6B00" />
+					<text>更多</text>
+				</view>
+
+				<view class="owner-divider" />
+
+				<!-- 处理退款（取消状态才显示） -->
+				<view v-if="activity.statusStr === '活动取消' || activity.statusStr === '聚会取消'"
+					class="owner-btn owner-btn--danger" @click.stop="handleManageRefunds('all')">
+					<uni-icons type="wallet" size="14" color="#f56c6c" />
+					<text class="danger-text">处理退款</text>
+				</view>
+				<view v-if="activity.statusStr === '活动取消' || activity.statusStr === '聚会取消'" class="owner-divider" />
+
+				<!-- 报名商友（始终显示）：带待确认红点 -->
+				<view class="owner-btn" @click.stop="goToRegisteredUsers">
+					<uni-icons type="person-filled" size="14" color="#FF6B00" />
+					<text>报名商友</text>
+					<view v-if="activity.pendingConfirmCount > 0" class="owner-badge">
+						{{ activity.pendingConfirmCount }}
+					</view>
+				</view>
+
+				<!-- 处理申请（最右，最醒目，有待处理才显示） -->
+				<template v-if="activity.paddingReturnCount > 0">
+					<view class="owner-divider" />
+					<view class="owner-btn owner-btn--alert" @click.stop="handleManageRefunds('individual')">
+						<uni-icons type="notification-filled" size="14" color="#fff" />
+						<text>处理申请</text>
+						<view class="owner-badge owner-badge--white">{{ activity.paddingReturnCount }}</view>
+					</view>
+				</template>
+
+			</view>
+
+			<!-- ========== 封面图 ========== -->
+			<view class="card-cover-wrapper">
+				<image :src="activity.coverImageUrl" class="activity-image" mode="aspectFill" />
 				<view v-if="activity.statusStr" :class="['status-tag', getStatusClass(activity.statusStr)]">
 					{{ activity.statusStr }}
 				</view>
+			</view>
+
+			<!-- ========== 卡片内容 ========== -->
+			<view class="activity-header">
+				<text class="activity-title">{{ activity.activityTitle }}</text>
 			</view>
 
 			<view class="activity-info">
@@ -30,16 +76,11 @@
 				</view>
 			</view>
 
-			<!-- Tags + 赞踩评论数：同一行，左右分布 -->
+			<!-- 标签 + 互动数 -->
 			<view class="activity-tags-row">
-				<!-- 左侧：标签组 -->
 				<view class="activity-tags">
-					<view v-for="(tag, index) in activity.tags" :key="index" class="tag">
-						{{ tag }}
-					</view>
+					<view v-for="(tag, index) in activity.tags" :key="index" class="tag">{{ tag }}</view>
 				</view>
-
-				<!-- 右侧：赞踩评论数，flex-shrink:0 保证不被 tags 挤压 -->
 				<view class="activity-interactions">
 					<view class="interaction-btn" :class="{ active: activity.userLikeStr === 'like' }"
 						@click.stop="handleAction('like')">
@@ -62,6 +103,7 @@
 
 		</view>
 
+		<!-- ========== 底部：组织者 + 收藏/报名 ========== -->
 		<view class="activity-footer">
 			<view class="organizer">
 				<uni-icons type="contact-filled" size="16" color="#FF6B00" />
@@ -72,7 +114,8 @@
 					<uni-icons :type="isFavorite ? 'heart-filled' : 'heart'" size="16" color="#FF6B00" />
 					<text>{{ isFavorite ? '已收藏' : '收藏' }}</text>
 				</button>
-				<button class="btn btn-primary" @click.stop="handleRegisterClick">报名</button>
+				<!-- 本人发布的聚会不显示报名按钮 -->
+				<button v-if="!isOwner" class="btn btn-primary" @click.stop="handleRegisterClick">报名</button>
 			</view>
 		</view>
 	</view>
@@ -106,15 +149,19 @@
 	const isFavorite = ref(props.activity.followFlag === 1);
 	const loading = ref(false);
 
+	// ── 判断是否本人发布 ──
+	// memberUser.id 与本地存储的 userId 对比，用 == 兼容类型不一致
+	const isOwner = computed(() => {
+		const userId = uni.getStorageSync('userId');
+		return !!userId && props.activity.memberUser?.id == userId;
+	});
+
+	// ── 格式化 ──
 	const formattedDate = computed(() => {
 		if (!props.activity.startDatetime) return '时间待定';
 		const date = new Date(props.activity.startDatetime);
-		const Y = date.getFullYear();
-		const M = (date.getMonth() + 1).toString().padStart(2, '0');
-		const D = date.getDate().toString().padStart(2, '0');
-		const h = date.getHours().toString().padStart(2, '0');
-		const m = date.getMinutes().toString().padStart(2, '0');
-		return `${Y}-${M}-${D} ${h}:${m}`;
+		const pad = n => n.toString().padStart(2, '0');
+		return `${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
 	});
 
 	const formattedDistance = computed(() => {
@@ -137,13 +184,14 @@
 		return classMap[statusStr] || '';
 	};
 
+	// ── 普通互动 ──
 	const handleAction = async (clickedAction) => {
 		if (!await checkLoginGuard()) return;
 		const apiAction = props.activity.userLikeStr === clickedAction ? 'cancel' : clickedAction;
 		emit('updateLikeStatus', {
 			id: props.activity.id,
 			action: apiAction,
-			clickedAction: clickedAction
+			clickedAction
 		});
 	};
 
@@ -164,14 +212,10 @@
 	const toggleFavorite = async () => {
 		if (loading.value) return;
 		if (!await checkLoginGuard('登录并绑定手机号后才能收藏聚会，是否立即登录？')) return;
-
 		loading.value = true;
-		const originalFavoriteStatus = isFavorite.value;
+		const original = isFavorite.value;
 		isFavorite.value = !isFavorite.value;
-
 		const endpoint = isFavorite.value ? '/app-api/member/follow/add' : '/app-api/member/follow/del';
-		const successMessage = isFavorite.value ? '收藏成功' : '已取消收藏';
-
 		try {
 			const {
 				error
@@ -185,7 +229,7 @@
 			});
 			if (!error) {
 				uni.showToast({
-					title: successMessage,
+					title: isFavorite.value ? '收藏成功' : '已取消收藏',
 					icon: 'success'
 				});
 				emit('updateFavoriteStatus', {
@@ -193,14 +237,14 @@
 					newFollowFlag: isFavorite.value ? 1 : 0
 				});
 			} else {
-				isFavorite.value = originalFavoriteStatus;
+				isFavorite.value = original;
 				uni.showToast({
 					title: error || '操作失败',
 					icon: 'none'
 				});
 			}
-		} catch (err) {
-			isFavorite.value = originalFavoriteStatus;
+		} catch {
+			isFavorite.value = original;
 			uni.showToast({
 				title: '网络错误',
 				icon: 'none'
@@ -209,9 +253,103 @@
 			loading.value = false;
 		}
 	};
+
+	// ── 发布者专属操作 ──
+
+	const goToRegisteredUsers = () => {
+		uni.navigateTo({
+			url: `/pages/my-active-registeredUser/my-active-registeredUser?item=${encodeURIComponent(JSON.stringify(props.activity))}`
+		});
+	};
+
+	const goToEdit = () => {
+		uni.navigateTo({
+			url: `/packages/active-publish/active-publish?mode=edit&id=${props.activity.id}`
+		});
+	};
+
+	const handleManageRefunds = (mode) => {
+		uni.navigateTo({
+			url: `/pages/my-active-manage/my-active-manage?item=${encodeURIComponent(JSON.stringify(props.activity))}&mode=${mode}`
+		});
+	};
+
+	const showOwnerMoreActions = () => {
+		const itemList = [];
+		const availableActions = {};
+
+		// 参会名单（始终显示）
+		itemList.push('参会名单');
+		availableActions['参会名单'] = () => uni.navigateTo({
+			url: `/packages/participant-detail/participant-detail?id=${props.activity.id}`
+		});
+
+		// 取消聚会（限状态）
+		if (['未开始', '报名中', '活动即将开始', '进行中'].includes(props.activity.statusStr)) {
+			itemList.push('取消聚会');
+			availableActions['取消聚会'] = confirmCancelActivity;
+		}
+
+		// 修改编辑（始终显示）
+		itemList.push('修改编辑');
+		availableActions['修改编辑'] = () => uni.navigateTo({
+			url: `/packages/active-publish/active-publish?mode=edit&id=${props.activity.id}`
+		});
+
+		uni.showActionSheet({
+			itemList,
+			success: (res) => {
+				const tappedItem = itemList[res.tapIndex];
+				if (availableActions[tappedItem]) availableActions[tappedItem]();
+			},
+			fail: (res) => {
+				console.log(res.errMsg);
+			}
+		});
+	};
+
+	const confirmCancelActivity = () => {
+		uni.showModal({
+			title: '警告',
+			content: '确定要取消此聚会吗？此操作不可逆。',
+			confirmColor: '#f44336',
+			success: async (res) => {
+				if (!res.confirm) return;
+				uni.showLoading({
+					title: '正在取消...'
+				});
+				const result = await request('/app-api/member/activity/delete', {
+					method: 'POST',
+					data: {
+						id: props.activity.id
+					}
+				});
+				uni.hideLoading();
+				if (result && !result.error) {
+					uni.showToast({
+						title: '聚会已取消',
+						icon: 'success'
+					});
+					uni.$emit('activityCanceled', {
+						id: props.activity.id
+					});
+				} else {
+					const msg = typeof result.error === 'object' ?
+						(result.error.msg || JSON.stringify(result.error)) :
+						(result.error || '操作失败');
+					uni.showToast({
+						title: msg,
+						icon: 'none'
+					});
+				}
+			}
+		});
+	};
 </script>
 
 <style lang="scss" scoped>
+	$primary: #FF6B00;
+
 	.activity-card {
 		background: white;
 		border-radius: 24rpx;
@@ -222,15 +360,141 @@
 		overflow: hidden;
 	}
 
+	// ── 【核心】发布者操作栏：封面正上方，从右向左排布 ──
+	.owner-action-bar {
+		display: flex;
+		flex-direction: row-reverse; // 从右向左
+		align-items: center;
+		background: #fff8f3;
+		border: 1rpx solid #ffe0c8;
+		border-radius: 16rpx;
+		padding: 0 8rpx;
+		margin-bottom: 20rpx;
+		height: 68rpx;
+	}
+
+	.owner-btn {
+		display: flex;
+		align-items: center;
+		gap: 6rpx;
+		padding: 10rpx 18rpx;
+		border-radius: 12rpx;
+		position: relative;
+		flex-shrink: 0;
+
+		&:active {
+			background: rgba(255, 107, 0, 0.1);
+		}
+
+		text {
+			font-size: 24rpx;
+			color: $primary;
+			font-weight: 500;
+		}
+
+		// 橙色高亮变体（处理申请）
+		&--alert {
+			background: linear-gradient(135deg, #FF6B00, #FF8C00);
+			border-radius: 14rpx;
+			margin-left: 4rpx;
+
+			text {
+				color: #fff;
+			}
+
+			&:active {
+				opacity: 0.88;
+			}
+		}
+	}
+
+	.danger-text {
+		color: #f56c6c !important;
+	}
+
+	.owner-divider {
+		width: 1rpx;
+		height: 28rpx;
+		background: #f0d4c0;
+		flex-shrink: 0;
+	}
+
+	// 红点徽标
+	.owner-badge {
+		position: absolute;
+		top: 4rpx;
+		right: 4rpx;
+		background: #f56c6c;
+		color: #fff;
+		font-size: 18rpx;
+		height: 26rpx;
+		min-width: 26rpx;
+		line-height: 26rpx;
+		text-align: center;
+		border-radius: 13rpx;
+		padding: 0 5rpx;
+		border: 2rpx solid #fff8f3;
+
+		&--orange {
+			background: $primary;
+		}
+
+		// 白色版（用于深色按钮上）
+		&--white {
+			background: #fff;
+			color: $primary;
+			border-color: $primary;
+		}
+	}
+
+	// ── 封面图 ──
+	.card-cover-wrapper {
+		position: relative;
+		margin-bottom: 30rpx;
+	}
+
 	.activity-image {
 		width: 100%;
 		aspect-ratio: 5 / 4;
 		border-radius: 16rpx;
-		margin-bottom: 30rpx;
 		box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.1);
-		object-fit: cover;
+		display: block;
 	}
 
+	.status-tag {
+		position: absolute;
+		top: 16rpx;
+		right: 16rpx;
+		font-size: 22rpx;
+		padding: 6rpx 18rpx;
+		border-radius: 20rpx;
+		font-weight: 600;
+		color: #fff;
+		backdrop-filter: blur(4px);
+
+		&.enrolled,
+		&.ongoing {
+			background: rgba(39, 174, 96, 0.85);
+		}
+
+		&.upcoming {
+			background: rgba(250, 140, 22, 0.85);
+		}
+
+		&.ended {
+			background: rgba(144, 147, 153, 0.85);
+		}
+
+		&.refund_pending {
+			background: rgba(64, 158, 255, 0.85);
+		}
+
+		&.canceled {
+			background: rgba(245, 108, 108, 0.85);
+		}
+	}
+
+	// ── 内容区 ──
 	.activity-header {
 		display: flex;
 		justify-content: space-between;
@@ -244,39 +508,6 @@
 		font-weight: 600;
 		color: #1c1e21;
 		flex: 1;
-	}
-
-	.status-tag {
-		font-size: 24rpx;
-		padding: 6rpx 16rpx;
-		border-radius: 8rpx;
-		white-space: nowrap;
-
-		&.enrolled,
-		&.ongoing {
-			background-color: #e8f5e9;
-			color: #27ae60;
-		}
-
-		&.upcoming {
-			background-color: #fff0e5;
-			color: #fa8c16;
-		}
-
-		&.ended {
-			background-color: #f0f2f5;
-			color: #909399;
-		}
-
-		&.refund_pending {
-			background-color: #ecf5ff;
-			color: #409eff;
-		}
-
-		&.canceled {
-			background-color: #fef0f0;
-			color: #f56c6c;
-		}
 	}
 
 	.activity-info {
@@ -308,7 +539,7 @@
 	.activity-distance {
 		display: flex;
 		align-items: center;
-		color: #FF6B00;
+		color: $primary;
 		font-weight: 500;
 
 		text {
@@ -316,7 +547,6 @@
 		}
 	}
 
-	/* ── Tags + 赞踩同一行 ── */
 	.activity-tags-row {
 		display: flex;
 		justify-content: space-between;
@@ -325,7 +555,6 @@
 		gap: 16rpx;
 	}
 
-	/* 左侧标签组：可换行，不挤占右侧 */
 	.activity-tags {
 		display: flex;
 		gap: 16rpx;
@@ -336,7 +565,7 @@
 
 	.tag {
 		background: #fff0e5;
-		color: #FF6B00;
+		color: $primary;
 		padding: 8rpx 20rpx;
 		border-radius: 8rpx;
 		font-size: 24rpx;
@@ -344,7 +573,6 @@
 		white-space: nowrap;
 	}
 
-	/* 右侧互动数：不被压缩 */
 	.activity-interactions {
 		display: flex;
 		align-items: center;
@@ -364,6 +592,7 @@
 		}
 	}
 
+	// ── 底部 ──
 	.activity-footer {
 		display: flex;
 		justify-content: space-between;
@@ -395,10 +624,8 @@
 		font-weight: 500;
 		font-size: 28rpx;
 		border: none;
-		cursor: pointer;
 		display: flex;
 		align-items: center;
-		transition: all 0.3s;
 
 		text {
 			margin-left: 10rpx;
@@ -411,17 +638,15 @@
 
 		&:active {
 			opacity: 0.9;
-			transform: translateY(-4rpx);
 		}
 	}
 
 	.btn-favorite {
 		background: #ffe7d8;
-		color: #FF6B00;
+		color: $primary;
 
 		&:active {
 			opacity: 0.9;
-			transform: translateY(-4rpx);
 		}
 	}
 </style>

@@ -30,7 +30,7 @@ const _sfc_main = {
       }
     });
     common_vendor.onShow(() => {
-      common_vendor.index.__f__("log", "at packages/my-active/my-active.vue:252", "页面显示，刷新当前 Tab 数据");
+      common_vendor.index.__f__("log", "at packages/my-active/my-active.vue:223", "页面显示，刷新当前 Tab 数据");
       handleRefresh();
     });
     const getMyActivitiesList = async (isLoadMore = false) => {
@@ -52,7 +52,7 @@ const _sfc_main = {
           method: "GET",
           data: params
         });
-        common_vendor.index.__f__("log", "at packages/my-active/my-active.vue:283", `获取Tab ${currentTab.value} 的聚会`, result);
+        common_vendor.index.__f__("log", "at packages/my-active/my-active.vue:254", `获取Tab ${currentTab.value} 的聚会`, result);
         if (result && !result.error && result.data) {
           const list = result.data.list || [];
           const total = result.data.total || 0;
@@ -67,7 +67,7 @@ const _sfc_main = {
           }
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at packages/my-active/my-active.vue:302", "请求我的聚会列表失败:", error);
+        common_vendor.index.__f__("error", "at packages/my-active/my-active.vue:273", "请求我的聚会列表失败:", error);
       } finally {
         loading.value = false;
         refreshing.value = false;
@@ -121,7 +121,7 @@ const _sfc_main = {
           }
         },
         fail: (res) => {
-          common_vendor.index.__f__("log", "at packages/my-active/my-active.vue:387", res.errMsg);
+          common_vendor.index.__f__("log", "at packages/my-active/my-active.vue:358", res.errMsg);
         }
       });
     };
@@ -210,7 +210,7 @@ const _sfc_main = {
       });
     };
     const cancelActivity = (activityId) => {
-      common_vendor.index.__f__("log", "at packages/my-active/my-active.vue:490", "一进来就调用");
+      common_vendor.index.__f__("log", "at packages/my-active/my-active.vue:461", "一进来就调用");
       common_vendor.index.showModal({
         title: "警告",
         content: "确定要取消您发布的此聚会吗？此操作不可逆。",

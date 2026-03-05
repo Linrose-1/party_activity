@@ -45,60 +45,69 @@ const _sfc_main = {
     const isEdit = common_vendor.ref(false);
     const form = common_vendor.ref(getDefaultForm());
     const goodsList = common_vendor.ref([]);
+    const onSponsorTypeChange = (type) => {
+      form.value.sponsorType = type;
+      if ((type === 2 || type === 3) && goodsList.value.length === 0) {
+        goodsList.value = [{
+          desc: ""
+        }];
+      }
+    };
     common_vendor.watch(() => props.visible, (val) => {
-      if (val) {
-        if (props.data) {
-          isEdit.value = true;
-          const newData = JSON.parse(JSON.stringify(props.data));
-          if (typeof newData.galleryImageUrls === "string") {
-            try {
-              newData.galleryImageUrls = JSON.parse(newData.galleryImageUrls);
-            } catch (e) {
-              newData.galleryImageUrls = [];
-            }
-          } else if (!Array.isArray(newData.galleryImageUrls)) {
-            newData.galleryImageUrls = [];
+      if (!val)
+        return;
+      common_vendor.index.__f__("log", "at components/sponsor-popup.vue:182", "赞助商弹窗收到的 data:", JSON.stringify(props.data));
+      if (props.data) {
+        isEdit.value = true;
+        const newData = JSON.parse(JSON.stringify(props.data));
+        form.value = newData;
+        if (typeof form.value.galleryImageUrls === "string") {
+          try {
+            const parsed = JSON.parse(form.value.galleryImageUrls);
+            form.value.galleryImageUrls = Array.isArray(parsed) ? parsed : [];
+          } catch (e) {
+            form.value.galleryImageUrls = [];
           }
-          if (newData.goodsDescription) {
-            try {
-              const parsed = JSON.parse(newData.goodsDescription);
-              if (Array.isArray(parsed)) {
-                goodsList.value = parsed.map((i) => {
-                  if (typeof i === "string")
-                    return {
-                      desc: i
-                    };
-                  if (i.name)
-                    return {
-                      desc: i.name + (i.count ? ` ${i.count}` : "")
-                    };
+        } else if (!Array.isArray(form.value.galleryImageUrls)) {
+          form.value.galleryImageUrls = [];
+        }
+        const desc = newData.goodsDescription;
+        if (desc) {
+          try {
+            const parsed = JSON.parse(desc);
+            if (Array.isArray(parsed)) {
+              goodsList.value = parsed.map((i) => {
+                if (typeof i === "string")
                   return {
-                    desc: i.desc || ""
+                    desc: i
                   };
-                });
-              } else {
-                goodsList.value = [{
-                  desc: newData.goodsDescription
-                }];
-              }
-            } catch (e) {
+                if (i.name)
+                  return {
+                    desc: i.name + (i.count ? ` ${i.count}` : "")
+                  };
+                return {
+                  desc: i.desc || ""
+                };
+              });
+            } else {
               goodsList.value = [{
-                desc: newData.goodsDescription
+                desc: String(desc)
               }];
             }
-          } else {
+          } catch (e) {
             goodsList.value = [{
-              desc: ""
+              desc: String(desc)
             }];
           }
-          form.value = newData;
         } else {
-          isEdit.value = false;
-          form.value = getDefaultForm();
-          goodsList.value = [{
+          goodsList.value = newData.sponsorType === 2 || newData.sponsorType === 3 ? [{
             desc: ""
-          }];
+          }] : [];
         }
+      } else {
+        isEdit.value = false;
+        form.value = getDefaultForm();
+        goodsList.value = [];
       }
     });
     const chooseLocation = () => {
@@ -127,22 +136,24 @@ const _sfc_main = {
           icon: "none"
         });
       if (f.sponsorType === 1 || f.sponsorType === 3) {
-        if (!f.cashAmount || !f.perCapitalAmount)
+        if (!f.cashAmount || !f.perCapitalAmount) {
           return common_vendor.index.showToast({
             title: "请完善现金信息",
             icon: "none"
           });
+        }
       } else {
         f.cashAmount = null;
         f.perCapitalAmount = null;
       }
       if (f.sponsorType === 2 || f.sponsorType === 3) {
-        const validGoods = goodsList.value.filter((g) => g.desc && g.desc.trim() !== "").map((g) => g.desc);
-        if (validGoods.length === 0)
+        const validGoods = goodsList.value.filter((g) => g.desc && g.desc.trim() !== "").map((g) => g.desc.trim());
+        if (validGoods.length === 0) {
           return common_vendor.index.showToast({
             title: "请填写赞助物品",
             icon: "none"
           });
+        }
         f.goodsDescription = JSON.stringify(validGoods);
       } else {
         f.goodsDescription = "";
@@ -248,11 +259,11 @@ const _sfc_main = {
           label: "赞助商位置"
         }),
         t: form.value.sponsorType === 1 ? 1 : "",
-        v: common_vendor.o(($event) => form.value.sponsorType = 1),
+        v: common_vendor.o(($event) => onSponsorTypeChange(1)),
         w: form.value.sponsorType === 2 ? 1 : "",
-        x: common_vendor.o(($event) => form.value.sponsorType = 2),
+        x: common_vendor.o(($event) => onSponsorTypeChange(2)),
         y: form.value.sponsorType === 3 ? 1 : "",
-        z: common_vendor.o(($event) => form.value.sponsorType = 3),
+        z: common_vendor.o(($event) => onSponsorTypeChange(3)),
         A: common_vendor.p({
           label: "赞助类型",
           required: true
@@ -281,7 +292,7 @@ const _sfc_main = {
         })
       } : {}, {
         I: form.value.sponsorType === 2 || form.value.sponsorType === 3
-      }, form.value.sponsorType === 2 || form.value.sponsorType === 3 ? common_vendor.e({
+      }, form.value.sponsorType === 2 || form.value.sponsorType === 3 ? {
         J: common_vendor.p({
           type: "plusempty",
           size: "12",
@@ -305,47 +316,46 @@ const _sfc_main = {
           type: "trash",
           size: "18",
           color: "#ff4d4f"
-        }),
-        N: goodsList.value.length === 0
-      }, goodsList.value.length === 0 ? {} : {}) : {}, {
-        O: common_vendor.o(uploadGallery),
-        P: common_vendor.o(($event) => form.value.galleryImageUrls = $event),
-        Q: common_vendor.p({
+        })
+      } : {}, {
+        N: common_vendor.o(uploadGallery),
+        O: common_vendor.o(($event) => form.value.galleryImageUrls = $event),
+        P: common_vendor.p({
           ["max-count"]: 9,
           modelValue: form.value.galleryImageUrls
         }),
-        R: common_vendor.p({
+        Q: common_vendor.p({
           label: "品牌图集"
         }),
-        S: form.value.contactAvatar
+        R: form.value.contactAvatar
       }, form.value.contactAvatar ? {
-        T: form.value.contactAvatar
+        S: form.value.contactAvatar
       } : {
-        U: common_vendor.p({
+        T: common_vendor.p({
           type: "camera-filled",
           size: "20",
           color: "#999"
         })
       }, {
-        V: common_vendor.o(uploadAvatar),
-        W: common_vendor.o(($event) => form.value.contactName = $event),
-        X: common_vendor.p({
+        U: common_vendor.o(uploadAvatar),
+        V: common_vendor.o(($event) => form.value.contactName = $event),
+        W: common_vendor.p({
           placeholder: "请输入负责人姓名",
           modelValue: form.value.contactName
         }),
-        Y: common_vendor.p({
+        X: common_vendor.p({
           label: "负责人信息 (选填)"
         }),
-        Z: common_vendor.p({
+        Y: common_vendor.p({
           model: form.value,
           ["label-position"]: "top",
           ["label-width"]: "100%"
         }),
-        aa: __props.visible ? 1 : "",
-        ab: common_vendor.o(() => {
+        Z: __props.visible ? 1 : "",
+        aa: common_vendor.o(() => {
         }),
-        ac: __props.visible ? 1 : "",
-        ad: common_vendor.o(close)
+        ab: __props.visible ? 1 : "",
+        ac: common_vendor.o(close)
       });
     };
   }
