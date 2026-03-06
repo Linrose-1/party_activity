@@ -579,6 +579,18 @@
 		color: #666;
 		box-shadow: none;
 }
+	
+	/* ============ 文本选择支持 ============ */
+.post-selectable.data-v-07e72d3c {
+	  /* 允许文本被选择 */
+	  user-select: text;
+	  -webkit-user-select: text;
+	  -moz-user-select: text;
+	  -ms-user-select: text;
+	  
+	  /* 确保长按时显示系统菜单 */
+	  -webkit-touch-callout: auto;
+}
 
 	/* 3.2 卡片内容 */
 .post-content-title.data-v-07e72d3c {
@@ -804,42 +816,3 @@
 		font-size: 32rpx;
 }
 
-
-	/* =========================
-	 * 9. 长按复制菜单样式
-	 * ========================= */
-.copy-menu-mask.data-v-07e72d3c {
-		position: fixed;
-		top: 0;
-		left: 0;
-		right: 0;
-		bottom: 0;
-		background: rgba(0, 0, 0, 0.3);
-		/* 半透明遮罩 */
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		z-index: 999;
-		/* 确保在最上层 */
-}
-.copy-menu-content.data-v-07e72d3c {
-		background-color: white;
-		border-radius: 20rpx;
-		overflow: hidden;
-		box-shadow: 0 5rpx 20rpx rgba(0, 0, 0, 0.1);
-}
-.copy-menu-item.data-v-07e72d3c {
-		padding: 24rpx 80rpx;
-		font-size: 32rpx;
-		color: #333;
-		text-align: center;
-		border-bottom: 1rpx solid #f0f0f0;
-}
-.copy-menu-item.data-v-07e72d3c:last-child {
-		border-bottom: none;
-}
-
-	/* 增加一个点击效果 */
-.copy-menu-item.data-v-07e72d3c:active {
-		background-color: #f7f7f7;
-}

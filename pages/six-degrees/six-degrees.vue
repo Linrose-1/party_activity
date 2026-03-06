@@ -20,7 +20,6 @@
 				</view>
 			</view>
 
-			<!-- 搜索框：确保在 premium-header 内部但不受 overflow 影响 -->
 			<view class="search-wrapper">
 				<view class="search-float-box">
 					<view class="search-left">
@@ -44,7 +43,7 @@
 						<view class="card-icon-wrap"><text class="icon-emboss">🎯</text></view>
 						<view class="card-info">
 							<text class="c-title">摇一摇 附近友聚</text>
-							<text class="c-desc">精准定位即时商机</text>
+							<text class="c-desc">精准定位 即时商机</text>
 						</view>
 					</view>
 
@@ -54,7 +53,6 @@
 							<text class="c-title">自定义 访友搜索</text>
 							<text class="c-desc">跨城出差 提前布局</text>
 						</view>
-						<!-- <view class="cost-tag">需消耗 2 智米</view> -->
 					</view>
 				</view>
 			</view>
@@ -64,10 +62,7 @@
 				<view class="section-header">
 					<view class="left">
 						<text class="title">智能推荐</text>
-						<!-- <text class="subtitle">AI Matchmaking</text> -->
 					</view>
-					<!-- 换一批功能 -->
-					<!-- <text class="refresh-btn" @click="fetchRecommendUsers">换一批</text> -->
 				</view>
 
 				<!-- 列表渲染 -->

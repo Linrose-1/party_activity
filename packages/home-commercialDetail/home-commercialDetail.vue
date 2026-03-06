@@ -44,8 +44,7 @@
 				</view>
 
 				<!-- 标题 -->
-				<view style="font-weight: 700;font-size: 36rpx;"
-					@longpress.stop="handleLongPress(postDetail.postTitle)">
+				<view style="font-weight: 700;font-size: 36rpx;" class="post-selectable">
 					<text v-if="postDetail.postType == 1" class="detail-type-tag hunter">创业猎伙</text>
 					<text v-else-if="postDetail.postType == 3" class="detail-type-tag connection">商友连接</text>
 					<text v-else class="detail-type-tag business">商机分享</text>
@@ -53,7 +52,7 @@
 				</view>
 
 				<!-- 内容 -->
-				<view class="opportunity-content" @longpress.stop="handleLongPress(postDetail.content)">
+				<view class="opportunity-content post-selectable">
 					{{ postDetail.content }}
 				</view>
 
@@ -282,14 +281,7 @@
 				<text>分享到朋友圈</text>
 			</view>
 		</view>
-
-		<!-- 长按复制菜单 -->
-		<view v-if="copyMenu.show" class="copy-menu-mask" @click="hideCopyMenu">
-			<view class="copy-menu-content" @click.stop>
-				<view class="copy-menu-item" @click="executeCopy">复制</view>
-			</view>
-		</view>
-
+		
 		<!-- ===== 感兴趣成功反馈弹窗 ===== -->
 		<view v-if="showInterestSuccessModal" class="interest-modal-mask" @click="closeInterestModal">
 			<view class="interest-modal-box" @click.stop>
@@ -631,8 +623,7 @@
 
 					// partnerTypes 为逗号分隔字符串，转为标签数组
 					postDetail.partnerTypeLabels = item.partnerTypes ?
-						item.partnerTypes.split(',').filter(v => v).map(v => partnerTypeMap[v] || v) :
-						[];
+						item.partnerTypes.split(',').filter(v => v).map(v => partnerTypeMap[v] || v) : [];
 
 					// expectedInvestment 为 JSON 字符串，解析为对象
 					if (item.expectedInvestment) {
@@ -1259,42 +1250,7 @@
 		}, 300);
 	};
 
-	// ===== 长按复制 =====
 
-	const copyMenu = reactive({
-		show: false,
-		text: ''
-	});
-
-	const handleLongPress = (textToCopy) => {
-		if (!textToCopy) return;
-		copyMenu.text = textToCopy;
-		copyMenu.show = true;
-	};
-
-	const executeCopy = () => {
-		if (!copyMenu.text) return;
-		uni.setClipboardData({
-			data: copyMenu.text,
-			success: () => uni.showToast({
-				title: '已复制',
-				icon: 'none'
-			}),
-			fail: (err) => {
-				console.error('setClipboardData failed:', err);
-				uni.showToast({
-					title: '复制失败',
-					icon: 'none'
-				});
-			},
-			complete: () => hideCopyMenu()
-		});
-	};
-
-	const hideCopyMenu = () => {
-		copyMenu.show = false;
-		copyMenu.text = '';
-	};
 </script>
 
 <style scoped>
@@ -2351,41 +2307,17 @@
 		display: block;
 		margin-bottom: 10rpx;
 	}
-
-	/* ==================== 长按复制菜单 ==================== */
-	.copy-menu-mask {
-		position: fixed;
-		top: 0;
-		left: 0;
-		right: 0;
-		bottom: 0;
-		background: rgba(0, 0, 0, 0.3);
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		z-index: 999;
+	
+	/* ============ 文本选择支持 ============ */
+	.post-selectable {
+	  /* 允许文本被选择 */
+	  user-select: text;
+	  -webkit-user-select: text;
+	  -moz-user-select: text;
+	  -ms-user-select: text;
+	  
+	  /* 确保长按时显示系统菜单 */
+	  -webkit-touch-callout: auto;
 	}
 
-	.copy-menu-content {
-		background-color: white;
-		border-radius: 20rpx;
-		overflow: hidden;
-		box-shadow: 0 5rpx 20rpx rgba(0, 0, 0, 0.1);
-	}
-
-	.copy-menu-item {
-		padding: 24rpx 80rpx;
-		font-size: 32rpx;
-		color: #333;
-		text-align: center;
-		border-bottom: 1rpx solid #f0f0f0;
-	}
-
-	.copy-menu-item:last-child {
-		border-bottom: none;
-	}
-
-	.copy-menu-item:active {
-		background-color: #f7f7f7;
-	}
 </style>

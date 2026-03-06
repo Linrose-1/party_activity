@@ -932,36 +932,16 @@
 		display: block;
 		margin-bottom: 10rpx;
 }
+	
+	/* ============ 文本选择支持 ============ */
+.post-selectable.data-v-8303b14f {
+	  /* 允许文本被选择 */
+	  user-select: text;
+	  -webkit-user-select: text;
+	  -moz-user-select: text;
+	  -ms-user-select: text;
+	  
+	  /* 确保长按时显示系统菜单 */
+	  -webkit-touch-callout: auto;
+}
 
-	/* ==================== 长按复制菜单 ==================== */
-.copy-menu-mask.data-v-8303b14f {
-		position: fixed;
-		top: 0;
-		left: 0;
-		right: 0;
-		bottom: 0;
-		background: rgba(0, 0, 0, 0.3);
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		z-index: 999;
-}
-.copy-menu-content.data-v-8303b14f {
-		background-color: white;
-		border-radius: 20rpx;
-		overflow: hidden;
-		box-shadow: 0 5rpx 20rpx rgba(0, 0, 0, 0.1);
-}
-.copy-menu-item.data-v-8303b14f {
-		padding: 24rpx 80rpx;
-		font-size: 32rpx;
-		color: #333;
-		text-align: center;
-		border-bottom: 1rpx solid #f0f0f0;
-}
-.copy-menu-item.data-v-8303b14f:last-child {
-		border-bottom: none;
-}
-.copy-menu-item.data-v-8303b14f:active {
-		background-color: #f7f7f7;
-}

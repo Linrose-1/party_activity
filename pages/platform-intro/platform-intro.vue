@@ -1,7 +1,7 @@
 <template>
 	<view class="container">
 		<!-- 1. 平台介绍富文本 -->
-		<view class="rich-text-area">
+		<view class="rich-text-area post-selectable">
 			<rich-text :nodes="content"></rich-text>
 		</view>
 
@@ -75,5 +75,17 @@
 			font-size: 24rpx;
 			color: #ccc;
 		}
+	}
+	
+	/* ============ 文本选择支持 ============ */
+	.post-selectable {
+	  /* 允许文本被选择 */
+	  user-select: text;
+	  -webkit-user-select: text;
+	  -moz-user-select: text;
+	  -ms-user-select: text;
+	  
+	  /* 确保长按时显示系统菜单 */
+	  -webkit-touch-callout: auto;
 	}
 </style>

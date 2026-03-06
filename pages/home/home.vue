@@ -4,10 +4,6 @@
 			<uni-icons type="spinner-cycle" size="40" color="#FF6A00" class="loading-icon"></uni-icons>
 			<text class="loading-text">正在加载商友圈...</text>
 		</view>
-		<!-- <view class="custom-fab" @click="goToCustomizationPage">
-			<uni-icons type="gear-filled" size="20" color="#FFFFFF"></uni-icons>
-			<text>定制</text>
-		</view> -->
 		<!-- ==================== 1. 顶部区域 ==================== -->
 		<view class="header wechat-style">
 
@@ -123,7 +119,7 @@
 
 				<!-- 3.2 卡片内容-->
 				<!-- 为标题添加新的 longpress 事件 -->
-				<view class="post-content-title" @longpress.stop="handleLongPress(post.title)">
+				<view class="post-content-title post-selectable">
 					<text v-if="post.postType == 1" class="type-tag hunter">创业猎伙</text>
 					<text v-else-if="post.postType == 3" class="type-tag connection">商友连接</text>
 					<text v-else class="type-tag business">商机分享</text>
@@ -131,8 +127,7 @@
 				</view>
 
 				<!-- 为内容预览区域添加新的 longpress 事件 -->
-				<view v-if="post.displayContent" class="post-content-preview"
-					@longpress.stop="handleLongPress(post.fullContent)">
+				<view v-if="post.displayContent" class="post-content-preview post-selectable">
 					{{ post.displayContent }}<span v-if="post.isTruncated">...
 						<span class="expand-link" @click.stop="handlePostClick(post)">展开</span>
 					</span>
@@ -236,18 +231,10 @@
 				</view>
 			</view>
 		</view>
-
-		<!-- ==================== 9. 长按复制菜单 ==================== -->
-		<view v-if="copyMenu.show" class="copy-menu-mask" @click="hideCopyMenu">
-			<view class="copy-menu-content" @click.stop>
-				<view class="copy-menu-item" @click="executeCopy">复制</view>
-			</view>
-		</view>
 	</view>
 
 	<GuidePopup ref="guidePopupRef" />
 
-	<!-- <AvatarLongPressMenu ref="avatarMenuRef" @action="handleMenuAction" /> -->
 	<AvatarLongPressMenu ref="avatarMenuRef" />
 
 	<AddCircleConfirmPopup ref="addCirclePopup" />
@@ -1622,48 +1609,6 @@
 		} else {
 			// 如果未支付，弹出确认支付弹窗
 			payPopup.value.open();
-			// uni.showModal({
-			// 	title: '开启定制功能',
-			// 	content: '定制功能需要支付10智米，请问是否同意支付开启该功能？',
-			// 	confirmText: '立即支付',
-			// 	cancelText: '再想想',
-			// 	success: async (res) => {
-			// 		if (res.confirm) {
-			// 			// 用户确认支付，调用支付接口
-			// 			uni.showLoading({
-			// 				title: '正在开通...'
-			// 			});
-			// 			const {
-			// 				data,
-			// 				error
-			// 			} = await request('/app-api/member/user/pay-business-friend-auth', {
-			// 				method: 'POST'
-			// 			});
-			// 			uni.hideLoading();
-
-			// 			if (error) {
-			// 				uni.showToast({
-			// 					title: error,
-			// 					icon: 'none',
-			// 					duration: 3000
-			// 				});
-			// 			} else {
-			// 				uni.showToast({
-			// 					title: '开通成功！',
-			// 					icon: 'success'
-			// 				});
-			// 				// 支付成功后，重新获取用户信息以更新状态
-			// 				await fetchCurrentUserInfo();
-			// 				// 然后再跳转到定制页
-			// 				setTimeout(() => {
-			// 					uni.navigateTo({
-			// 						url: `/packages/home-customization/home-customization`
-			// 					});
-			// 				}, 800);
-			// 			}
-			// 		}
-			// 	}
-			// });
 		}
 	};
 
@@ -1701,13 +1646,6 @@
 	};
 
 	const navigateToBusinessCard = (user) => {
-		// if (!user || !user.id) {
-		// 	uni.showToast({
-		// 		title: '无法查看该用户主页',
-		// 		icon: 'none'
-		// 	});
-		// 	return;
-		// }
 		const avatarUrl = user.avatar || defaultAvatarUrl;
 		const url = `/packages/applicationBusinessCard/applicationBusinessCard?id=${user.id}` +
 			`&name=${encodeURIComponent(user.name)}` +
@@ -1781,51 +1719,6 @@
 		return `${Y}-${M}-${D} ${h}:${m}`;
 	};
 
-	// 长按复制文本的方法
-	// 用于长按复制菜单的状态
-	const copyMenu = reactive({
-		show: false,
-		text: '', // 准备要复制的文本
-	});
-
-	// 长按处理函数，现在它只负责显示菜单
-	const handleLongPress = (textToCopy) => {
-		if (!textToCopy) return;
-		copyMenu.text = textToCopy;
-		copyMenu.show = true;
-	};
-
-	// 点击“复制”按钮后真正执行复制操作的函数
-	const executeCopy = () => {
-		if (!copyMenu.text) return;
-		uni.setClipboardData({
-			data: copyMenu.text,
-			success: () => {
-				uni.showToast({
-					title: '已复制',
-					icon: 'none'
-				});
-			},
-			fail: (err) => {
-				// 在真机上，如果这里还失败，可以加一些调试信息
-				console.error('setClipboardData failed:', err);
-				uni.showToast({
-					title: '复制失败',
-					icon: 'none'
-				});
-			},
-			complete: () => {
-				// 复制完成后隐藏菜单
-				copyMenu.show = false;
-				copyMenu.text = '';
-			}
-		});
-	};
-
-	// 点击遮罩层隐藏菜单
-	const hideCopyMenu = () => {
-		copyMenu.show = false;
-	};
 </script>
 
 <style scoped>
@@ -2459,6 +2352,18 @@
 		color: #666;
 		box-shadow: none;
 	}
+	
+	/* ============ 文本选择支持 ============ */
+	.post-selectable {
+	  /* 允许文本被选择 */
+	  user-select: text;
+	  -webkit-user-select: text;
+	  -moz-user-select: text;
+	  -ms-user-select: text;
+	  
+	  /* 确保长按时显示系统菜单 */
+	  -webkit-touch-callout: auto;
+	}
 
 	/* 3.2 卡片内容 */
 	.post-content-title {
@@ -2704,46 +2609,4 @@
 		font-size: 32rpx;
 	}
 
-
-	/* =========================
-	 * 9. 长按复制菜单样式
-	 * ========================= */
-	.copy-menu-mask {
-		position: fixed;
-		top: 0;
-		left: 0;
-		right: 0;
-		bottom: 0;
-		background: rgba(0, 0, 0, 0.3);
-		/* 半透明遮罩 */
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		z-index: 999;
-		/* 确保在最上层 */
-	}
-
-	.copy-menu-content {
-		background-color: white;
-		border-radius: 20rpx;
-		overflow: hidden;
-		box-shadow: 0 5rpx 20rpx rgba(0, 0, 0, 0.1);
-	}
-
-	.copy-menu-item {
-		padding: 24rpx 80rpx;
-		font-size: 32rpx;
-		color: #333;
-		text-align: center;
-		border-bottom: 1rpx solid #f0f0f0;
-	}
-
-	.copy-menu-item:last-child {
-		border-bottom: none;
-	}
-
-	/* 增加一个点击效果 */
-	.copy-menu-item:active {
-		background-color: #f7f7f7;
-	}
 </style>
