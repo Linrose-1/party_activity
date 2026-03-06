@@ -84,6 +84,11 @@
 								<text class="checkbox-label">{{ item.label }}</text>
 							</label>
 						</view>
+						<!-- 选中「其他」时显示自定义输入框 -->
+						<view v-if="form.partnerTypes.includes('4')" class="other-type-input-wrap">
+							<input v-model="form.partnerTypeOther" class="other-type-input"
+								placeholder="请输入自定义类型（最多20字）" maxlength="20" />
+						</view>
 					</view>
 
 					<!-- 紧急程度（单选） -->
@@ -268,6 +273,7 @@
 		userEnterpriseId: null, // 企业主键ID
 		// ===== 猎伙专属字段 =====
 		partnerTypes: [], // 猎伙类型（多选），提交时转为逗号分隔字符串
+		partnerTypeOther: '', // 「其他」类型的自定义文本
 		urgentLevel: 1, // 紧急程度：1-普通 2-紧急 3-特急
 		investmentFund: '', // 预期投入-资金范围
 		investmentResource: '', // 预期投入-资源类型
@@ -468,9 +474,20 @@
 			// 还原猎伙专属字段
 			if (data.postType == 1) {
 				// partnerTypes 接口返回逗号字符串，还原为数组
-				form.partnerTypes = data.partnerTypes ?
-					data.partnerTypes.split(',').filter(v => v) :
-					[];
+				// 预设值：'1'求贤 '2'找合伙人 '3'寻资源 '4'其他；其余视为自定义文本
+				const PRESET_TYPES = ['1', '2', '3', '4'];
+				if (data.partnerTypes) {
+					const allTypes = data.partnerTypes.split(',').filter(v => v);
+					const customTypes = allTypes.filter(v => !PRESET_TYPES.includes(v));
+					const presetTypes = allTypes.filter(v => PRESET_TYPES.includes(v));
+					if (customTypes.length > 0) {
+						if (!presetTypes.includes('4')) presetTypes.push('4');
+						form.partnerTypeOther = customTypes.join('、');
+					}
+					form.partnerTypes = presetTypes;
+				} else {
+					form.partnerTypes = [];
+				}
 				form.urgentLevel = data.urgentLevel || 1;
 				// expectedInvestment 为 JSON 字符串，还原各子字段
 				if (data.expectedInvestment) {
@@ -666,6 +683,7 @@
 			form.partnerTypes.push(value);
 		} else {
 			form.partnerTypes.splice(idx, 1);
+			if (value === '4') form.partnerTypeOther = '';
 		}
 	}
 
@@ -1125,6 +1143,10 @@
 				title: '请选择至少一个猎伙类型',
 				icon: 'none'
 			});
+			if (form.partnerTypes.includes('4') && !form.partnerTypeOther.trim()) return uni.showToast({
+				title: '请填写「其他」类型的具体内容',
+				icon: 'none'
+			});
 			if (!form.urgentLevel) return uni.showToast({
 				title: '请选择紧急程度',
 				icon: 'none'
@@ -1160,7 +1182,10 @@
 			status: 'active',
 			// ===== 猎伙专属字段（非猎伙时不传或传空）=====
 			...(form.topic === '创业猎伙' && {
-				partnerTypes: form.partnerTypes.join(','),
+				// 「其他」(value='4') 替换为用户自定义文本
+				partnerTypes: form.partnerTypes
+					.map(v => (v === '4' && form.partnerTypeOther.trim()) ? form.partnerTypeOther.trim() : v)
+					.join(','),
 				urgentLevel: form.urgentLevel,
 				expectedInvestment: expectedInvestment,
 				usePointForPublish: usePointForPublish.value,
@@ -1426,6 +1451,23 @@
 	.checkbox-label {
 		font-size: 28rpx;
 		color: #333;
+	}
+
+	/* ===== 「其他」自定义输入框 ===== */
+	.other-type-input-wrap {
+		margin-top: 16rpx;
+		background: #fff;
+		border: 1rpx solid #ffd0a8;
+		border-radius: 12rpx;
+		padding: 4rpx 16rpx;
+	}
+
+	.other-type-input {
+		width: 100%;
+		height: 72rpx;
+		font-size: 28rpx;
+		color: #333;
+		background: transparent;
 	}
 
 	/* ===== 紧急程度标签 ===== */
