@@ -74,13 +74,22 @@ const _sfc_main = {
             tags.push("同圈");
           if (tags.length === 0)
             tags.push("深度契合");
+          const org = getFirstItem(user.professionalTitle);
+          const pos = getFirstItem(user.positionTitle);
+          let combinedTitle = "暂未设置社会职务";
+          if (org && pos) {
+            combinedTitle = `${org} | ${pos}`;
+          } else if (org || pos) {
+            combinedTitle = org || pos;
+          }
           return {
             ...user,
             matchTags: tags,
             companyName: getFirstItem(user.companyName) || "暂未设置公司",
             school: getFirstItem(user.school) || "暂未设置学校",
             positionTitle: getFirstItem(user.positionTitle) || "",
-            professionalTitle: getFirstItem(user.professionalTitle) || "暂未设置社会职务"
+            professionalTitle: getFirstItem(user.professionalTitle) || "暂未设置社会职务",
+            combinedTitle
           };
         });
       }
@@ -173,18 +182,12 @@ const _sfc_main = {
             b: common_vendor.t(user.nickname),
             c: user.idCert === 1
           }, user.idCert === 1 ? {} : {}, {
-            d: common_vendor.t(user.professionalTitle || "暂未设置社会职务"),
+            d: common_vendor.t(user.combinedTitle),
             e: common_vendor.t(user.companyName || "暂未设置公司"),
             f: common_vendor.t(user.school || "暂未设置学校"),
-            g: common_vendor.f(user.matchTags, (tag, idx, i1) => {
-              return {
-                a: common_vendor.t(tag),
-                b: idx
-              };
-            }),
-            h: common_vendor.t(user.locationAddressStr || "暂未设置商务/办公地"),
-            i: user.id,
-            j: common_vendor.o(($event) => viewUserDetail(user), user.id)
+            g: common_vendor.t(user.locationAddressStr || "暂未设置商务/办公地"),
+            h: user.id,
+            i: common_vendor.o(($event) => viewUserDetail(user), user.id)
           });
         }),
         i: recommendUsers.value.length === 0

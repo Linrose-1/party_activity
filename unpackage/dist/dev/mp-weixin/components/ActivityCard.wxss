@@ -238,8 +238,13 @@
   background: linear-gradient(135deg, #FF6B00 0%, #FF8C00 100%);
   color: white;
 }
-.btn-primary.data-v-f73ae0ce:active {
-  opacity: 0.9;
+.btn-primary.btn-disabled.data-v-f73ae0ce {
+  background: #DCDFE6 !important;
+  color: #FFFFFF !important;
+  border: none;
+}
+.btn-primary.btn-disabled.data-v-f73ae0ce:active {
+  opacity: 1;
 }
 .btn-favorite.data-v-f73ae0ce {
   background: #ffe7d8;

@@ -33,6 +33,10 @@ const _sfc_main = {
       const userId = common_vendor.index.getStorageSync("userId");
       return !!userId && ((_a = props.activity.memberUser) == null ? void 0 : _a.id) == userId;
     });
+    const isRegistrationDisabled = common_vendor.computed(() => {
+      const disabledStatuses = ["已结束", "活动取消", "聚会取消", "已取消"];
+      return disabledStatuses.includes(props.activity.statusStr);
+    });
     const formattedDate = common_vendor.computed(() => {
       if (!props.activity.startDatetime)
         return "时间待定";
@@ -77,6 +81,8 @@ const _sfc_main = {
     };
     const handleRegisterClick = async () => {
       if (!await utils_user.checkLoginGuard("登录并绑定手机号后才能报名聚会，是否立即登录？"))
+        return;
+      if (isRegistrationDisabled.value)
         return;
       common_vendor.index.navigateTo({
         url: `/packages/active-enroll/active-enroll?id=${props.activity.id}`
@@ -161,7 +167,7 @@ const _sfc_main = {
             availableActions[tappedItem]();
         },
         fail: (res) => {
-          common_vendor.index.__f__("log", "at components/ActivityCard.vue:306", res.errMsg);
+          common_vendor.index.__f__("log", "at components/ActivityCard.vue:314", res.errMsg);
         }
       });
     };
@@ -320,7 +326,8 @@ const _sfc_main = {
         W: loading.value,
         X: !isOwner.value
       }, !isOwner.value ? {
-        Y: common_vendor.o(handleRegisterClick)
+        Y: isRegistrationDisabled.value ? 1 : "",
+        Z: common_vendor.o(handleRegisterClick)
       } : {});
     };
   }

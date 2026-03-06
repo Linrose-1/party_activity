@@ -76,11 +76,11 @@
 								<text class="u-name">{{ user.nickname }}</text>
 								<text class="u-verify" v-if="user.idCert === 1">已实名</text>
 							</view>
-							<text class="u-title">{{ user.professionalTitle || '暂未设置社会职务' }}</text>
+							<text class="u-title">{{ user.combinedTitle }}</text>
 						</view>
-						<view class="connection-tag">
+						<!-- <view class="connection-tag">
 							<text class="dot"></text> 深度匹配
-						</view>
+						</view> -->
 					</view>
 
 					<view class="card-body">
@@ -92,19 +92,23 @@
 							<text class="label">教育背景</text>
 							<text class="val">{{ user.school || '暂未设置学校' }}</text>
 						</view>
-					</view>
-
-					<!-- 动态推荐理由 -->
-					<view class="reason-box">
-						<view class="reason-tag" v-for="(tag, idx) in user.matchTags" :key="idx">
-							{{ tag }}
+						<view class="info-item">
+							<text class="label">商务区域</text>
+							<text class="val">{{ user.locationAddressStr || '暂未设置商务/办公地' }}</text>
 						</view>
 					</view>
 
+					<!-- 动态推荐理由 -->
+					<!-- <view class="reason-box">
+						<view class="reason-tag" v-for="(tag, idx) in user.matchTags" :key="idx">
+							{{ tag }}
+						</view>
+					</view> -->
+
 					<view class="card-footer">
-						<text class="location">
-							{{ user.locationAddressStr || '暂未设置商务/办公地' }}
-						</text>
+						<view class="status-info">
+							<text style="font-size: 22rpx; color: #FF6F00;">深度匹配</text>
+						</view>
 						<view class="connect-btn">查看数字名片</view>
 					</view>
 				</view>
@@ -213,13 +217,24 @@
 				// if (user.matchTagCount > 0) tags.push(`${user.matchTagCount}项资源匹配`);
 				if (tags.length === 0) tags.push('深度契合');
 
+				const org = getFirstItem(user.professionalTitle); // 组织机构
+				const pos = getFirstItem(user.positionTitle); // 职务
+				let combinedTitle = '暂未设置社会职务';
+
+				if (org && pos) {
+					combinedTitle = `${org} | ${pos}`;
+				} else if (org || pos) {
+					combinedTitle = org || pos;
+				}
+
 				return {
 					...user,
 					matchTags: tags,
 					companyName: getFirstItem(user.companyName) || '暂未设置公司',
 					school: getFirstItem(user.school) || '暂未设置学校',
 					positionTitle: getFirstItem(user.positionTitle) || '',
-					professionalTitle: getFirstItem(user.professionalTitle) || '暂未设置社会职务'
+					professionalTitle: getFirstItem(user.professionalTitle) || '暂未设置社会职务',
+					combinedTitle: combinedTitle
 				};
 			});
 		}

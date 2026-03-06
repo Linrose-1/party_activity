@@ -115,7 +115,8 @@
 					<text>{{ isFavorite ? '已收藏' : '收藏' }}</text>
 				</button>
 				<!-- 本人发布的聚会不显示报名按钮 -->
-				<button v-if="!isOwner" class="btn btn-primary" @click.stop="handleRegisterClick">报名</button>
+				<button v-if="!isOwner" class="btn btn-primary" :class="{ 'btn-disabled': isRegistrationDisabled }"
+					@click.stop="handleRegisterClick">报名</button>
 			</view>
 		</view>
 	</view>
@@ -154,6 +155,12 @@
 	const isOwner = computed(() => {
 		const userId = uni.getStorageSync('userId');
 		return !!userId && props.activity.memberUser?.id == userId;
+	});
+
+	const isRegistrationDisabled = computed(() => {
+		// 包含 "已结束"、"活动取消"、"聚会取消" 等不可报名状态
+		const disabledStatuses = ['已结束', '活动取消', '聚会取消', '已取消'];
+		return disabledStatuses.includes(props.activity.statusStr);
 	});
 
 	// ── 格式化 ──
@@ -204,6 +211,7 @@
 
 	const handleRegisterClick = async () => {
 		if (!await checkLoginGuard('登录并绑定手机号后才能报名聚会，是否立即登录？')) return;
+		if (isRegistrationDisabled.value) return;
 		uni.navigateTo({
 			url: `/packages/active-enroll/active-enroll?id=${props.activity.id}`
 		});
@@ -636,8 +644,15 @@
 		background: linear-gradient(135deg, #FF6B00 0%, #FF8C00 100%);
 		color: white;
 
-		&:active {
-			opacity: 0.9;
+		&.btn-disabled {
+			background: #DCDFE6 !important; // 灰色背景
+			color: #FFFFFF !important;
+			border: none;
+
+			// 移除点击态效果
+			&:active {
+				opacity: 1;
+			}
 		}
 	}
 
