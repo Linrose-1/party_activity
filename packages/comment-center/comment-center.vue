@@ -66,6 +66,13 @@
 				<view class="card-content">
 					<text>{{ item.content }}</text>
 				</view>
+				
+				<!-- 评论图片展示 -->
+				<view v-if="item.imageUrls && item.imageUrls.length > 0" class="comment-images">
+					<view v-for="(img, imgIndex) in item.imageUrls" :key="imgIndex" class="comment-image-item" @click="previewImage(item.imageUrls, imgIndex)">
+						<image :src="img" mode="aspectFill" class="comment-image"></image>
+					</view>
+				</view>
 
 				<!-- 动态被评论对象（商机/聚会/聚店） -->
 				<view class="target-section" @click="goToTarget(item)">
@@ -104,7 +111,7 @@
 			<!-- 加载/空状态 -->
 			<uni-load-more :status="loadingStatus" v-if="commentList.length > 0 || loadingStatus === 'loading'" />
 			<view v-if="commentList.length === 0 && loadingStatus === 'noMore'" class="empty-state">
-				<image src="/static/images/empty-comment.png" class="empty-img" />
+				<uni-icons type="chat-filled" size="80" color="#e0e0e0" class="empty-icon"></uni-icons>
 				<text class="empty-text">暂无相关评论</text>
 			</view>
 		</view>
@@ -176,7 +183,50 @@
 
 			if (!error && data) {
 				const list = data.list || [];
-				commentList.value = isRefresh ? list : [...commentList.value, ...list];
+				// 处理评论数据，确保imageUrls字段正确格式化
+				const processedList = list.map(item => {
+					// 处理当前评论的imageUrls
+					let imageUrls = item.imageUrls || [];
+					if (Array.isArray(imageUrls) && imageUrls.length > 0) {
+						// 如果数组中第一个元素是字符串格式的数组（如"[\"url1\",\"url2\"]"），需要解析
+						if (typeof imageUrls[0] === 'string' && imageUrls[0].startsWith('[')) {
+							try {
+								imageUrls = JSON.parse(imageUrls[0]);
+							} catch (e) {
+								console.warn('解析imageUrls失败:', e);
+								imageUrls = [];
+							}
+						}
+					}
+					
+					// 处理子评论的imageUrls
+					if (item.childrenList && Array.isArray(item.childrenList)) {
+						item.childrenList = item.childrenList.map(child => {
+							let childImageUrls = child.imageUrls || [];
+							if (Array.isArray(childImageUrls) && childImageUrls.length > 0) {
+								if (typeof childImageUrls[0] === 'string' && childImageUrls[0].startsWith('[')) {
+									try {
+										childImageUrls = JSON.parse(childImageUrls[0]);
+									} catch (e) {
+										console.warn('解析子评论imageUrls失败:', e);
+										childImageUrls = [];
+									}
+								}
+							}
+							return {
+								...child,
+								imageUrls: childImageUrls
+							};
+						});
+					}
+					
+					return {
+						...item,
+						imageUrls: imageUrls
+					};
+				});
+				
+				commentList.value = isRefresh ? processedList : [...commentList.value, ...processedList];
 				total.value = data.total;
 				loadingStatus.value = commentList.value.length >= total.value ? 'noMore' : 'more';
 				pageNo.value++;
@@ -247,6 +297,18 @@
 		if (!str) return '';
 		const d = new Date(str);
 		return `${d.getMonth()+1}-${d.getDate()} ${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`;
+	};
+
+	/**
+	 * 预览图片
+	 * @param {Array} urls - 图片URL数组
+	 * @param {Number} current - 当前图片索引
+	 */
+	const previewImage = (urls, current) => {
+		uni.previewImage({
+			urls: urls,
+			current: current
+		});
 	};
 
 	onMounted(() => fetchList(true));
@@ -406,6 +468,28 @@
 		line-height: 1.6;
 	}
 
+	/* 评论图片样式 */
+	.comment-images {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 10rpx;
+		margin: 10rpx 0;
+	}
+
+	.comment-image-item {
+		width: 120rpx;
+		height: 120rpx;
+		border-radius: 12rpx;
+		overflow: hidden;
+		flex-shrink: 0;
+	}
+
+	.comment-image {
+		width: 100%;
+		height: 100%;
+		display: block;
+	}
+
 	.target-section {
 		display: flex;
 		align-items: center;
@@ -475,17 +559,18 @@
 		flex-direction: column;
 		align-items: center;
 		padding-top: 100rpx;
+	}
 
-		.empty-img {
-			width: 200rpx;
-			height: 200rpx;
-			opacity: 0.5;
-		}
+	.empty-icon {
+		width: 200rpx;
+		height: 200rpx;
+		opacity: 0.5;
+		margin-bottom: 20rpx;
+	}
 
-		.empty-text {
-			font-size: 28rpx;
-			color: #999;
-			margin-top: 20rpx;
-		}
+	.empty-text {
+		font-size: 28rpx;
+		color: #999;
+		margin-top: 20rpx;
 	}
 </style>

@@ -3,40 +3,48 @@
 		<!-- 评论列表区域 -->
 		<scroll-view scroll-y class="comment-scroll" @scrolltolower="onReachBottom">
 			<view class="comment-list" v-if="comments.length > 0">
-				<view class="comment-item" v-for="comment in comments" :key="comment.id"
-					:class="{'is-reply': comment.parentId !== 0}">
-					<!-- 头像 -->
-					<image :src="comment.avatar" class="c-avatar" mode="aspectFill" @click="goUserCard(comment)">
-					</image>
-
-					<view class="c-body">
-						<view class="c-header">
-							<text class="c-name">{{ comment.user }}</text>
-							<text class="c-time">{{ comment.time }}</text>
-						</view>
-
-						<view class="c-text" @longpress="handleLongPress(comment.text)">
-							<text v-if="comment.replyTo" class="reply-to">@{{ comment.replyTo }} </text>
-							{{ comment.text }}
-						</view>
-
-						<view class="c-actions">
-							<view class="action-btn" @click="startReply(comment)">
-								<uni-icons type="chatbubble" size="14" color="#666"></uni-icons>
-								<text>回复</text>
-							</view>
-							<view v-if="loggedInUserId == comment.userId" class="action-btn delete"
-								@click="deleteComment(comment.id)">
-								<uni-icons type="trash" size="14" color="#999"></uni-icons>
-								<text>删除</text>
-							</view>
-						</view>
-					</view>
-				</view>
+								<view class="comment-item" v-for="comment in comments" :key="comment.id"
+									:class="{'is-reply': comment.parentId !== 0}">
+									<!-- 头像和内容行 -->
+									<view class="comment-header-row">
+										<image :src="comment.avatar" class="c-avatar" mode="aspectFill" @click="goUserCard(comment)"></image>
+				
+										<view class="c-body">
+											<view class="c-header">
+												<text class="c-name">{{ comment.user }}</text>
+												<text class="c-time">{{ comment.time }}</text>
+											</view>
+				
+											<view class="c-text" @longpress="handleLongPress(comment.text)">
+												<text v-if="comment.replyTo" class="reply-to">@{{ comment.replyTo }} </text>
+												{{ comment.text }}
+											</view>
+											
+											<!-- 评论图片展示 -->
+											<view v-if="comment.imageUrls && comment.imageUrls.length > 0" class="comment-images">
+												<view v-for="(img, imgIndex) in comment.imageUrls" :key="imgIndex" class="comment-image-item" @click="previewImage(comment.imageUrls, imgIndex)">
+													<image :src="img" mode="aspectFill" class="comment-image"></image>
+												</view>
+											</view>
+				
+											<view class="c-actions">
+												<view class="action-btn" @click="startReply(comment)">
+													<uni-icons type="chatbubble" size="14" color="#666"></uni-icons>
+													<text>回复</text>
+												</view>
+												<view v-if="loggedInUserId == comment.userId" class="action-btn delete"
+													@click="deleteComment(comment.id)">
+													<uni-icons type="trash" size="14" color="#999"></uni-icons>
+													<text>删除</text>
+												</view>
+											</view>
+										</view>
+									</view>
+								</view>
 			</view>
 
 			<view v-else class="empty-holder">
-				<image src="/static/icon/empty-comment.png" mode="aspectFit" class="empty-img"></image>
+				<uni-icons type="chatbubble-filled" size="60" color="#e0e0e0" class="empty-icon"></uni-icons>
 				<text>抢个沙发，发表第一条评论吧！</text>
 			</view>
 
@@ -57,10 +65,27 @@
 
 				<textarea auto-height maxlength="200" v-model="newCommentText" :placeholder="placeholderText"
 					:adjust-position="false" class="bar-textarea" cursor-spacing="10"></textarea>
+					
+				<!-- 图片上传按钮 -->
+				<view v-if="!imageUrls || imageUrls.length === 0" class="image-upload-btn" @click="handleChooseImage">
+					<uni-icons type="image" size="24" color="#999"></uni-icons>
+				</view>
+				
+				<!-- 发送按钮 -->
+				<view class="send-btn" :class="{ 'can-send': (newCommentText.trim().length > 0 || (imageUrls && imageUrls.length > 0)) }" @click="handleSend">
+					<uni-icons type="paperplane-filled" size="22" color="#ffff7f"></uni-icons>
+				</view>
 			</view>
 
-			<view class="send-btn" :class="{ 'can-send': newCommentText.trim().length > 0 }" @click="handleSend">
-				<uni-icons type="paperplane-filled" size="22" color="#ffff7f"></uni-icons>
+			<!-- 已选择的图片预览 -->
+			<view v-if="imageUrls && imageUrls.length > 0" class="selected-images-container">
+				<view v-for="(img, index) in imageUrls" :key="index" class="selected-image-item">
+					<image :src="img" mode="aspectFill" class="selected-image" @click="previewImage(imageUrls, index)"></image>
+					<view class="remove-image" @click="removeImage(index)">×</view>
+				</view>
+				<view class="image-comment-hint">
+					发布图片评论需消耗2智米
+				</view>
 			</view>
 		</view>
 
@@ -82,6 +107,7 @@
 		onLoad
 	} from '@dcloudio/uni-app';
 	import request from '@/utils/request.js';
+	import uploadFile from '@/utils/upload.js';
 	import {
 		checkLoginGuard
 	} from '@/utils/user.js';
@@ -96,6 +122,9 @@
 	const replyToId = ref(0);
 	const replyToName = ref('');
 	const keyboardHeight = ref(0);
+	
+	// 图片相关
+	const imageUrls = ref([]);
 
 	const placeholderText = computed(() =>
 		replyToName.value ? `回复 @${replyToName.value}` : '友善评论，文明互动...'
@@ -154,6 +183,22 @@
 			const name = isAnon ? '匿名商友' : (c.memberUserBaseVO?.nickname || '商友');
 			const avatar = isAnon ? '/static/icon/default-avatar.png' : c.memberUserBaseVO?.avatar;
 
+			// 处理 imageUrls 字段的数据格式问题
+			let imageUrls = c.imageUrls || [];
+			if (Array.isArray(imageUrls) && imageUrls.length > 0) {
+				// 检查是否是字符串格式而非数组格式
+				if (typeof imageUrls[0] === 'string' && imageUrls[0].startsWith('["') && imageUrls[0].endsWith('"]')) {
+					try {
+						// 尝试解析字符串格式的数组
+						const parsed = JSON.parse(imageUrls[0]);
+						imageUrls = Array.isArray(parsed) ? parsed : imageUrls;
+					} catch (e) {
+						// 如果解析失败，保持原始格式
+						console.error('解析imageUrls失败:', e);
+					}
+				}
+			}
+
 			list.push({
 				id: c.id,
 				userId: c.userId,
@@ -163,7 +208,9 @@
 				text: c.content,
 				parentId: c.parentId,
 				replyTo: replyTo,
-				isAnon: isAnon
+				isAnon: isAnon,
+				// 添加并处理图片字段
+				imageUrls: imageUrls
 			});
 			if (c.childrenList) {
 				list = list.concat(flattenComments(c.childrenList, name));
@@ -203,7 +250,7 @@
 	 */
 	const handleSend = async () => {
 		if (!await checkLoginGuard()) return;
-		if (!newCommentText.value.trim()) return;
+		if (!newCommentText.value.trim() && (!imageUrls.value || imageUrls.value.length === 0)) return;
 
 		uni.showLoading({
 			title: '发布中...'
@@ -219,7 +266,8 @@
 				targetType: targetType.value,
 				parentId: replyToId.value || 0,
 				content: newCommentText.value,
-				anonymous: isAnonymous.value ? 1 : 0
+				anonymous: isAnonymous.value ? 1 : 0,
+				imageUrls: imageUrls.value // 添加图片字段
 			}
 		});
 
@@ -233,6 +281,7 @@
 			replyToId.value = 0;
 			replyToName.value = '';
 			isAnonymous.value = false;
+			imageUrls.value = []; // 清空图片
 			// 先刷新本页列表，再 emit（确保 totalCount 是最新值）
 			await fetchComments();
 			emitCommentChanged();
@@ -303,6 +352,71 @@
 			}
 		});
 	};
+	
+	/**
+	 * 选择并上传图片（限制为1张，单张限5MB）
+	 */
+	const handleChooseImage = async () => {
+		uni.chooseImage({
+			count: 1, // 限制为1张
+			sourceType: ['album', 'camera'],
+			success: async (res) => {
+				const validFiles = res.tempFiles.filter(file => file.size <= 5 * 1024 * 1024);
+				if (res.tempFiles.length > validFiles.length) {
+					uni.showToast({
+						title: '部分文件过大(>5MB)，已忽略',
+						icon: 'none'
+					});
+				}
+				if (validFiles.length === 0) return;
+
+				uni.showLoading({
+					title: `正在上传...`,
+					mask: true
+				});
+				const uploadPromises = validFiles.map(file => uploadFile(file, {
+					directory: 'comment'
+				}));
+				const results = await Promise.all(uploadPromises);
+				uni.hideLoading();
+
+				const successfulUrls = [];
+				results.forEach(result => {
+					if (result.data) successfulUrls.push(result.data);
+					else console.error('上传失败:', result.error);
+				});
+
+				imageUrls.value = successfulUrls; // 直接赋值，而不是push
+
+				if (successfulUrls.length < validFiles.length) {
+					uni.showToast({
+						title: '部分图片上传失败',
+						icon: 'none'
+					});
+				}
+			},
+		});
+	};
+	
+	/**
+	 * 预览图片
+	 * @param {Array} urls - 图片URL数组
+	 * @param {Number} current - 当前图片索引
+	 */
+	const previewImage = (urls, current) => {
+		uni.previewImage({
+			urls: urls,
+			current: current
+		});
+	};
+	
+	/**
+	 * 删除已选择的图片
+	 * @param {Number} index - 图片索引
+	 */
+	const removeImage = (index) => {
+		imageUrls.value.splice(index, 1);
+	};
 </script>
 
 <style scoped>
@@ -317,15 +431,24 @@
 		flex: 1;
 	}
 
+	.comment-header-row {
+		display: flex;
+		flex-direction: row;
+		align-items: flex-start;
+		width: 100%;
+	}
+
 	.comment-item {
 		background-color: #fff;
 		padding: 30rpx;
 		display: flex;
 		margin-bottom: 2rpx;
+		flex-direction: column;
 	}
 
 	.comment-item.is-reply {
-		padding-left: 110rpx;
+		padding-left: 30rpx;
+		padding-top: 30rpx;
 		background-color: #fafafa;
 	}
 
@@ -335,10 +458,13 @@
 		border-radius: 10rpx;
 		margin-right: 20rpx;
 		background-color: #f0f0f0;
+		flex-shrink: 0;
 	}
 
 	.c-body {
 		flex: 1;
+		display: flex;
+		flex-direction: column;
 	}
 
 	.c-header {
@@ -402,21 +528,22 @@
 		z-index: 999;
 		box-sizing: border-box;
 		display: flex;
-		align-items: flex-end;
-		gap: 20rpx;
+		flex-direction: column;
+		gap: 10rpx;
 	}
 
 	.input-container {
+		display: flex;
+		align-items: center;
 		flex: 1;
 		background: #f5f7fa;
 		border-radius: 40rpx;
 		padding: 14rpx 20rpx;
-		display: flex;
-		align-items: center;
 		min-height: 80rpx;
 		box-sizing: border-box;
 		transition: all 0.3s;
 		border: 2rpx solid transparent;
+		gap: 10rpx;
 	}
 
 	.anon-switch {
@@ -425,6 +552,7 @@
 		padding: 0 10rpx;
 		transition: all 0.3s;
 		flex-shrink: 0;
+		flex-wrap: nowrap;
 	}
 
 	.anon-switch uni-icons {
@@ -435,29 +563,94 @@
 		font-size: 24rpx;
 		color: #666;
 		font-weight: 500;
+		white-space: nowrap;
 	}
 
 	.anon-switch.is-active text {
 		color: #FF6A00;
 	}
 
+	.bar-textarea {
+		flex: 1;
+		padding: 6rpx 10rpx;
+		font-size: 28rpx;
+		line-height: 1.4;
+		color: #333;
+		background: transparent;
+		border: none;
+		outline: none;
+		min-height: 40rpx;
+		max-height: 160rpx;
+		height: auto;
+		margin: 0 10rpx;
+	}
+
 	.vertical-line {
 		width: 2rpx;
-		height: 32rpx;
-		background-color: #e0e0e0;
-		margin: 0 16rpx;
+		height: 40rpx;
+		background-color: #ddd;
+		margin: 0 10rpx;
+		flex-shrink: 0;
+		align-self: center;
+	}
+
+	.selected-images-container {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 10rpx;
+		padding: 10rpx 0;
+	}
+
+	.image-comment-hint {
+		width: 100%;
+		font-size: 24rpx;
+		color: #ff6a00;
+		padding: 10rpx 0;
+		text-align: center;
+	}
+	
+	.selected-image-item {
+		position: relative;
+		width: 120rpx;
+		height: 120rpx;
+		border-radius: 12rpx;
+		overflow: hidden;
 		flex-shrink: 0;
 	}
 
-	.bar-textarea {
-		flex: 1;
-		font-size: 28rpx;
-		color: #333;
+	.selected-image {
 		width: 100%;
-		padding: 0;
-		line-height: 1.5;
-		max-height: 200rpx;
-		min-height: 40rpx;
+		height: 100%;
+		display: block;
+	}
+
+	.remove-image {
+		position: absolute;
+		top: -8rpx;
+		right: -8rpx;
+		width: 30rpx;
+		height: 30rpx;
+		background-color: #ff4d4f;
+		color: white;
+		border-radius: 50%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 20rpx;
+		font-weight: bold;
+		line-height: 1;
+		z-index: 2;
+	}
+	
+	.image-upload-btn {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 40rpx;
+		height: 40rpx;
+		margin-left: 10rpx;
+		padding: 10rpx;
+		flex-shrink: 0;
 	}
 
 	.send-btn {
@@ -470,7 +663,6 @@
 		justify-content: center;
 		flex-shrink: 0;
 		margin-left: 20rpx;
-		margin-bottom: 5rpx;
 	}
 
 	.send-btn.can-send {
@@ -480,6 +672,28 @@
 	.send-btn:deep(.uni-icons) {
 		display: block;
 		line-height: 1;
+	}
+	
+	/* 评论图片样式 */
+	.comment-images {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 10rpx;
+		margin: 10rpx 0;
+	}
+	
+	.comment-image-item {
+		width: 240rpx;
+		height: 240rpx;
+		border-radius: 12rpx;
+		overflow: hidden;
+		flex-shrink: 0;
+	}
+	
+	.comment-image {
+		width: 100%;
+		height: 100%;
+		display: block;
 	}
 
 	/* ── 复制菜单 ── */
@@ -509,6 +723,11 @@
 		padding-top: 200rpx;
 		color: #999;
 		font-size: 28rpx;
+	}
+
+	.empty-icon {
+		margin-bottom: 20rpx;
+		opacity: 0.5;
 	}
 
 	.empty-img {

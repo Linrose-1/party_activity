@@ -46,6 +46,7 @@
 				<!-- 标题 -->
 				<view style="font-weight: 700;font-size: 36rpx;" class="post-selectable">
 					<text v-if="postDetail.postType == 1" class="detail-type-tag hunter">创业猎伙</text>
+					<text v-else-if="postDetail.postType == 2" class="detail-type-tag business-hunter">商机分享+创业猎伙</text>
 					<text v-else-if="postDetail.postType == 3" class="detail-type-tag connection">商友连接</text>
 					<text v-else class="detail-type-tag business">商机分享</text>
 					{{postDetail.postTitle}}
@@ -56,9 +57,8 @@
 					{{ postDetail.content }}
 				</view>
 
-				<!-- ===== 猎伙专属信息卡片（仅 postType == 1 时展示）===== -->
-				<view v-if="postDetail.postType == 1" class="liehuo-info-card">
-					<!-- 紧急程度 -->
+									<!-- ===== 猎伙专属信息卡片（仅 postType == 1 或 postType == 2 时展示）===== -->
+									<view v-if="postDetail.postType == 1 || postDetail.postType == 2" class="liehuo-info-card">					<!-- 紧急程度 -->
 					<view class="liehuo-row" v-if="postDetail.urgentLevel">
 						<text class="liehuo-key">紧急程度</text>
 						<view class="urgency-badge" :class="{
@@ -110,7 +110,7 @@
 				<view v-else-if="postDetail.images && postDetail.images.length"
 					:class="['post-images', 'images-count-' + postDetail.images.length]">
 					<view v-for="(image, imgIndex) in postDetail.images" :key="imgIndex" class="image-wrapper"
-						@click.stop="previewImage(postDetail.images, imgIndex)">
+						@click.stop="previewBusinessImage(postDetail.images, imgIndex)">
 						<image :src="image" class="post-image" mode="aspectFill" />
 					</view>
 				</view>
@@ -149,9 +149,8 @@
 					</view>
 				</view>
 
-				<!-- ===== 感兴趣按钮（仅猎伙商机 && 非本人发布时显示）===== -->
-				<view v-if="postDetail.postType == 1 && loggedInUserId && loggedInUserId !== postDetail.userId"
-					class="interest-btn-wrap">
+									<!-- ===== 感兴趣按钮（仅猎伙商机 && 非本人发布时显示）===== -->
+									<view v-if="(postDetail.postType == 1 || postDetail.postType == 2) && loggedInUserId && loggedInUserId !== postDetail.userId"					class="interest-btn-wrap">
 					<view class="interest-btn" :class="{ 'interested': postDetail.isInterested }"
 						@click="toggleInterest">
 						<text class="interest-icon">{{ postDetail.isInterested ? '✅' : '🤝' }}</text>
@@ -208,6 +207,14 @@
 								</view>
 								<view class="comment-time">{{ comment.time }}</view>
 								<view class="comment-text">{{ comment.text }}</view>
+								
+								<!-- 评论图片 -->
+								<view v-if="comment.imageUrls && comment.imageUrls.length > 0" class="comment-images">
+									<view v-for="(img, imgIndex) in comment.imageUrls" :key="imgIndex" class="comment-image-item" @click="previewCommentImage(comment.imageUrls, imgIndex)">
+										<image :src="img" mode="aspectFill" class="comment-image"></image>
+									</view>
+								</view>
+								
 								<view class="comment-actions">
 									<view class="comment-action" @click="replyComment(comment)">
 										<uni-icons type="chatbubble" size="16" color="#666"></uni-icons> 回复
@@ -238,10 +245,27 @@
 						<textarea auto-height maxlength="200" v-model="newCommentText"
 							:placeholder="commentInputPlaceholder" :adjust-position="false" class="bar-textarea"
 							cursor-spacing="10"></textarea>
+							
+						<!-- 图片上传按钮 -->
+						<view v-if="!imageUrls || imageUrls.length === 0" class="image-upload-btn" @click="handleChooseImage">
+							<uni-icons type="image" size="24" color="#999"></uni-icons>
+						</view>
+						
+						<view class="send-btn" :class="{ 'can-send': newCommentText.trim().length > 0 || (imageUrls && imageUrls.length > 0) }"
+							@click="addComment">
+							<uni-icons type="paperplane-filled" size="20" color="#fff"></uni-icons>
+						</view>
 					</view>
-					<view class="send-btn" :class="{ 'can-send': newCommentText.trim().length > 0 }"
-						@click="addComment">
-						<uni-icons type="paperplane-filled" size="20" color="#fff"></uni-icons>
+					
+					<!-- 已选择的图片预览 -->
+					<view v-if="imageUrls && imageUrls.length > 0" class="selected-images-container">
+						<view v-for="(img, index) in imageUrls" :key="index" class="selected-image-item">
+							<image :src="img" mode="aspectFill" class="selected-image" @click="previewImage(imageUrls, index)"></image>
+							<view class="remove-image" @click="removeImage(index)">×</view>
+						</view>
+						<view class="image-comment-hint">
+							发布图片评论需消耗2智米
+						</view>
 					</view>
 				</view>
 			</template>
@@ -325,6 +349,7 @@
 		getInviteCode,
 		checkLoginGuard
 	} from '../../utils/user.js';
+	import uploadFile from '../../utils/upload.js';
 	import feedback from '@/utils/feedback.js';
 	import PointsFeedbackPopup from '@/components/PointsFeedbackPopup.vue';
 
@@ -397,6 +422,9 @@
 		interestCount: 0, // 感兴趣人数
 		isInterested: false, // 当前用户是否已表达感兴趣
 	});
+	
+	// 评论图片相关
+	const imageUrls = ref([]);
 
 	const viewerList = ref([]);
 	const viewerTotal = ref(0);
@@ -618,7 +646,7 @@
 				postDetail.tags = item.tags || [];
 
 				// ===== 还原猎伙专属字段 =====
-				if (item.postType == 1) {
+				if (item.postType == 1 || item.postType == 2) {
 					postDetail.urgentLevel = item.urgentLevel || null;
 
 					// partnerTypes 为逗号分隔字符串，转为标签数组
@@ -817,6 +845,22 @@
 			let displayText = comment.content;
 			if (replyToUser) displayText = `回复 @${replyToUser}: ${displayText}`;
 
+			// 处理 imageUrls 字段的数据格式问题
+			let imageUrls = comment.imageUrls || [];
+			if (Array.isArray(imageUrls) && imageUrls.length > 0) {
+				// 检查是否是字符串格式而非数组格式
+				if (typeof imageUrls[0] === 'string' && imageUrls[0].startsWith('["') && imageUrls[0].endsWith('"]')) {
+					try {
+						// 尝试解析字符串格式的数组
+						const parsed = JSON.parse(imageUrls[0]);
+						imageUrls = Array.isArray(parsed) ? parsed : imageUrls;
+					} catch (e) {
+						// 如果解析失败，保持原始格式
+						console.error('解析imageUrls失败:', e);
+					}
+				}
+			}
+
 			flatList.push({
 				id: comment.id,
 				userId: comment.userId,
@@ -826,7 +870,8 @@
 				text: displayText,
 				parentId: comment.parentId,
 				anonymous: isAnon,
-				rawNickname: displayName
+				rawNickname: displayName,
+				imageUrls: imageUrls // 使用处理后的imageUrls
 			});
 
 			if (comment.childrenList && comment.childrenList.length > 0) {
@@ -878,8 +923,8 @@
 	const addComment = async () => {
 		if (!await checkLoginGuard()) return;
 		const content = newCommentText.value.trim();
-		if (!content) return uni.showToast({
-			title: '评论内容不能为空',
+		if (!content && (!imageUrls.value || imageUrls.value.length === 0)) return uni.showToast({
+			title: '评论内容或图片不能为空',
 			icon: 'none'
 		});
 		if (!loggedInUserId.value) return uni.showToast({
@@ -899,6 +944,7 @@
 					targetType: 'post',
 					parentId: replyToCommentId.value,
 					content,
+					imageUrls: imageUrls.value, // 添加图片URL数组
 					anonymous: isAnonymous.value ? 1 : 0
 				}
 			});
@@ -910,6 +956,7 @@
 				newCommentText.value = '';
 				replyToCommentId.value = 0;
 				replyToNickname.value = '';
+				imageUrls.value = []; // 清空图片数组
 				await getCommentList();
 				const currentTotalCount = comments.value.length;
 				uni.$emit('postInteractionChanged', {
@@ -965,6 +1012,90 @@
 					}
 				}
 			}
+		});
+	};
+	
+	// ===== 评论图片功能 =====
+	
+	/**
+	 * 选择并上传图片（限制为1张，单张限5MB）
+	 */
+	const handleChooseImage = async () => {
+		uni.chooseImage({
+			count: 1, // 限制为1张
+			sourceType: ['album', 'camera'],
+			success: async (res) => {
+				const validFiles = res.tempFiles.filter(file => file.size <= 5 * 1024 * 1024);
+				if (res.tempFiles.length > validFiles.length) {
+					uni.showToast({
+						title: '部分文件过大(>5MB)，已忽略',
+						icon: 'none'
+					});
+				}
+				if (validFiles.length === 0) return;
+
+				uni.showLoading({
+					title: `正在上传...`,
+					mask: true
+				});
+				const uploadPromises = validFiles.map(file => uploadFile(file, {
+					directory: 'comment'
+				}));
+				const results = await Promise.all(uploadPromises);
+				uni.hideLoading();
+
+				const successfulUrls = [];
+				results.forEach(result => {
+					if (result.data) successfulUrls.push(result.data);
+					else console.error('上传失败:', result.error);
+				});
+
+				imageUrls.value = successfulUrls; // 直接赋值，而不是push
+
+				if (successfulUrls.length < validFiles.length) {
+					uni.showToast({
+						title: '部分图片上传失败',
+						icon: 'none'
+					});
+				}
+			},
+		});
+	};
+	
+	/**
+	 * 删除已选择的图片
+	 */
+	const removeImage = (index) => {
+		uni.showModal({
+			title: '提示',
+			content: '确定删除这张图片吗？',
+			success: (res) => {
+				if (res.confirm) {
+					imageUrls.value.splice(index, 1);
+				}
+			}
+		});
+	};
+	
+	/**
+	 * 预览已选择的图片
+	 */
+	const previewImage = (urls, index) => {
+		uni.previewImage({
+			urls: urls,
+			current: index,
+			loop: true
+		});
+	};
+	
+	/**
+	 * 预览评论中的图片
+	 */
+	const previewCommentImage = (urls, index) => {
+		uni.previewImage({
+			urls: urls,
+			current: index,
+			loop: true
 		});
 	};
 
@@ -1185,7 +1316,7 @@
 	};
 
 	/** 预览图片 */
-	const previewImage = (urls, current) => {
+	const previewBusinessImage = (urls, current) => {
 		uni.previewImage({
 			urls,
 			current: urls[current]
@@ -1506,6 +1637,12 @@
 		color: #722ed1;
 		background-color: #f9f0ff;
 		border: 1rpx solid rgba(114, 46, 209, 0.3);
+	}
+
+	.detail-type-tag.business-hunter {
+		color: #52c41a;
+		background-color: #f6ffed;
+		border: 1rpx solid rgba(82, 196, 26, 0.3);
 	}
 
 	/* --- 商机内容 --- */
@@ -1963,6 +2100,33 @@
 		background-color: #fafafa;
 	}
 
+	/* ==================== 评论图片样式 ==================== */
+	.comment-images {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 10rpx;
+		margin: 10rpx 0;
+	}
+	
+	.comment-image-item {
+		width: 240rpx;
+		height: 240rpx;
+		border-radius: 12rpx;
+		overflow: hidden;
+		position: relative;
+		flex-shrink: 0;
+	}
+	
+	.comment-image {
+		width: 100%;
+		height: 100%;
+		display: block;
+	}
+	
+	.comment-image-item:active {
+		opacity: 0.7;
+	}
+	
 	/* ==================== 评论区 ==================== */
 	.comments-section {
 		background: white;
@@ -2109,8 +2273,8 @@
 		z-index: 999;
 		box-sizing: border-box;
 		display: flex;
-		align-items: flex-end;
-		gap: 20rpx;
+		flex-direction: column;
+		gap: 10rpx;
 	}
 
 	.input-container {
@@ -2124,6 +2288,88 @@
 		box-sizing: border-box;
 		transition: all 0.3s;
 		border: 2rpx solid transparent;
+	}
+
+	.selected-images-container {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 10rpx;
+		padding: 10rpx 0;
+	}
+
+	.image-comment-hint {
+		width: 100%;
+		font-size: 24rpx;
+		color: #ff6a00;
+		padding: 10rpx 0;
+		text-align: center;
+	}
+	
+	.selected-image-item {
+		position: relative;
+		width: 120rpx;
+		height: 120rpx;
+		border-radius: 12rpx;
+		overflow: hidden;
+		flex-shrink: 0;
+	}
+
+	.selected-image {
+		width: 100%;
+		height: 100%;
+		display: block;
+	}
+
+	.remove-image {
+		position: absolute;
+		top: -8rpx;
+		right: -8rpx;
+		width: 30rpx;
+		height: 30rpx;
+		background-color: #ff4d4f;
+		color: white;
+		border-radius: 50%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 20rpx;
+		font-weight: bold;
+		line-height: 1;
+		z-index: 2;
+	}
+	
+	.image-upload-btn {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 40rpx;
+		height: 40rpx;
+		margin-left: 10rpx;
+		padding: 10rpx;
+		flex-shrink: 0;
+	}
+
+	.send-btn {
+		width: 80rpx;
+		height: 80rpx;
+		border-radius: 50%;
+		background-color: #e0e0e0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		flex-shrink: 0;
+		margin-left: 20rpx;
+		margin-bottom: 5rpx;
+		align-self: flex-end;
+	}
+
+	.send-btn.can-send {
+		background: linear-gradient(135deg, #FF8C00, #FF6B00);
+	}
+
+	.send-btn:deep(.uni-icons) {
+		display: block;
+		line-height: 1;
 	}
 
 	.input-container:focus-within {

@@ -50,16 +50,23 @@
 
 				<view class="form-group">
 					<view class="form-label">选择分类</view>
-					<radio-group @change="topicChange" class="radio-group-container">
+					<radio-group @change="topicChange" class="radio-group-container" style="flex-direction: column; gap: 20rpx;">
+						<view class="radio-two-in-line">
+							<label class="radio-item-inline">
+								<radio value="商机分享" :checked="form.topic === '商机分享'" :disabled="isEditMode"
+									color="#FF6A00" />
+								<text :style="{color: isEditMode ? '#999' : '#333'}">商机分享</text>
+							</label>
+							<label class="radio-item-inline">
+								<radio value="创业猎伙" :checked="form.topic === '创业猎伙'" :disabled="isEditMode"
+									color="#FF6A00" />
+								<text :style="{color: isEditMode ? '#999' : '#333'}">创业猎伙🔥</text>
+							</label>
+						</view>
 						<label class="radio-item">
-							<radio value="商机分享" :checked="form.topic === '商机分享'" :disabled="isEditMode"
+							<radio value="商机分享+创业猎伙" :checked="form.topic === '商机分享+创业猎伙'" :disabled="isEditMode"
 								color="#FF6A00" />
-							<text :style="{color: isEditMode ? '#999' : '#333'}">商机分享</text>
-						</label>
-						<label class="radio-item">
-							<radio value="创业猎伙" :checked="form.topic === '创业猎伙'" :disabled="isEditMode"
-								color="#FF6A00" />
-							<text :style="{color: isEditMode ? '#999' : '#333'}">创业猎伙🔥</text>
+							<text :style="{color: isEditMode ? '#999' : '#333'}">商机分享+创业猎伙🔥</text>
 						</label>
 					</radio-group>
 					<!-- 编辑模式下的温馨提示 -->
@@ -68,8 +75,8 @@
 					</view>
 				</view>
 
-				<!-- ===== 猎伙专属字段（仅在选择"创业猎伙"时显示）===== -->
-				<view v-if="form.topic === '创业猎伙'" class="liehuoFields-card">
+				<!-- ===== 猎伙专属字段（仅在选择"创业猎伙"或"商机分享+创业猎伙"时显示）===== -->
+				<view v-if="form.topic === '创业猎伙' || form.topic === '商机分享+创业猎伙'" class="liehuoFields-card">
 
 					<!-- 猎伙类型（多选） -->
 					<view class="form-group">
@@ -335,15 +342,15 @@
 
 	/** 根据当前分类返回 textarea 的 placeholder */
 	const contentPlaceholder = computed(() => {
-		if (form.topic === '创业猎伙') {
-			return '发布寻找创业项目合伙人需求。';
+		if (form.topic === '创业猎伙' || form.topic === '商机分享+创业猎伙') {
+			return '发布寻找创业项目合伙人需求或商业机会。';
 		}
 		return '描述您的项目/商机、需求/经验分享。';
 	});
 
 	/** 根据当前选中的 topic 返回对应的剩余发布额度 */
 	const currentRemainingQuota = computed(() => {
-		if (form.topic === '创业猎伙') {
+		if (form.topic === '创业猎伙' || form.topic === '商机分享+创业猎伙') {
 			return quotaPartner.value;
 		}
 		return quotaBusiness.value;
@@ -464,8 +471,7 @@
 		if (!error && data) {
 			form.title = data.postTitle;
 			form.content = data.postContent;
-			form.topic = data.postType == 1 ? '创业猎伙' : '商机分享';
-			form.tags = data.tags || [];
+							form.topic = data.postType == 1 ? '创业猎伙' : (data.postType == 2 ? '商机分享+创业猎伙' : '商机分享');			form.tags = data.tags || [];
 			form.showProfile = data.cardFlag;
 			form.isReadTrace = data.isReadTrace;
 			form.isEnterprise = data.isEnterprise;
@@ -655,14 +661,14 @@
 		// 编辑模式不允许切换，直接返回
 		if (isEditMode.value) return;
 
-		// 如果切换到商机分享，直接设置并重置智米标记
-		if (newTopic !== '创业猎伙') {
+		// 如果切换到商机分享或"商机分享+创业猎伙"，直接设置并重置智米标记
+		if (newTopic !== '创业猎伙' && newTopic !== '商机分享+创业猎伙') {
 			form.topic = newTopic;
 			usePointForPublish.value = false;
 			return;
 		}
 
-		// 切换到"创业猎伙"时检查权限
+		// 切换到"创业猎伙"或"商机分享+创业猎伙"时检查权限
 		if (hasLiehuoPermission()) {
 			// 有权限，直接切换
 			form.topic = newTopic;
@@ -1155,7 +1161,7 @@
 
 		// 构建预期投入 JSON（仅在有内容时拼入）
 		let expectedInvestment = '';
-		if (form.topic === '创业猎伙') {
+		if (form.topic === '创业猎伙' || form.topic === '商机分享+创业猎伙') {
 			const inv = {};
 			if (form.investmentFund.trim()) inv['资金范围'] = form.investmentFund.trim();
 			if (form.investmentResource.trim()) inv['资源类型'] = form.investmentResource.trim();
@@ -1167,7 +1173,7 @@
 			id: form.id,
 			userId: uni.getStorageSync('userId') || 0,
 			postTitle: form.title,
-			postType: form.topic === '商机分享' ? '0' : '1',
+			postType: form.topic === '商机分享' ? '0' : (form.topic === '商机分享+创业猎伙' ? '2' : '1'),
 			postContent: form.content,
 			postImg: form.mediaType === 'image' ? form.images.join(',') : '',
 			postVideo: form.mediaType === 'video' ? form.postVideo : '',
@@ -1181,7 +1187,7 @@
 			tags: form.tags,
 			status: 'active',
 			// ===== 猎伙专属字段（非猎伙时不传或传空）=====
-			...(form.topic === '创业猎伙' && {
+			...(form.topic === '创业猎伙' || form.topic === '商机分享+创业猎伙' ? {
 				// 「其他」(value='4') 替换为用户自定义文本
 				partnerTypes: form.partnerTypes
 					.map(v => (v === '4' && form.partnerTypeOther.trim()) ? form.partnerTypeOther.trim() : v)
@@ -1189,7 +1195,7 @@
 				urgentLevel: form.urgentLevel,
 				expectedInvestment: expectedInvestment,
 				usePointForPublish: usePointForPublish.value,
-			})
+			} : {})
 		};
 
 		uni.showModal({
@@ -1386,7 +1392,7 @@
 	.radio-group-container {
 		display: flex;
 		flex-wrap: wrap;
-		align-items: center;
+		align-items: flex-start;
 		gap: 40rpx;
 		margin-top: 10rpx;
 	}
@@ -1400,6 +1406,27 @@
 
 	.radio-item text {
 		margin-left: 10rpx;
+		white-space: nowrap;
+	}
+	
+	/* 两列布局的单选框 */
+	.radio-two-in-line {
+		display: flex;
+		gap: 40rpx;
+		align-items: flex-start;
+	}
+	
+	.radio-item-inline {
+		display: flex;
+		align-items: center;
+		font-size: 28rpx;
+		color: #333;
+		flex: 1;
+	}
+	
+	.radio-item-inline text {
+		margin-left: 10rpx;
+		white-space: nowrap;
 	}
 
 	/* ==================== 猎伙专属字段卡片 ==================== */

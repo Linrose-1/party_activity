@@ -121,6 +121,7 @@
 				<!-- 为标题添加新的 longpress 事件 -->
 				<view class="post-content-title post-selectable">
 					<text v-if="post.postType == 1" class="type-tag hunter">创业猎伙</text>
+					<text v-else-if="post.postType == 2" class="type-tag business-hunter">商机分享+创业猎伙</text>
 					<text v-else-if="post.postType == 3" class="type-tag connection">商友连接</text>
 					<text v-else class="type-tag business">商机分享</text>
 					{{ post.title }}
@@ -2406,6 +2407,12 @@
 		color: #1890FF;
 		background-color: #E6F7FF;
 		border: 1rpx solid rgba(24, 144, 255, 0.3);
+	}
+
+	.type-tag.business-hunter {
+		color: #52c41a;
+		background-color: #f6ffed;
+		border: 1rpx solid rgba(82, 196, 26, 0.3);
 	}
 
 	.post-content-preview {
