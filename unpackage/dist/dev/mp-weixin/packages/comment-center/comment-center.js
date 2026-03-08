@@ -1,6 +1,5 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
-const common_assets = require("../../common/assets.js");
 const utils_request = require("../../utils/request.js");
 if (!Array) {
   const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
@@ -56,13 +55,49 @@ const _sfc_main = {
         });
         if (!error && data) {
           const list = data.list || [];
-          commentList.value = isRefresh ? list : [...commentList.value, ...list];
+          const processedList = list.map((item) => {
+            let imageUrls = item.imageUrls || [];
+            if (Array.isArray(imageUrls) && imageUrls.length > 0) {
+              if (typeof imageUrls[0] === "string" && imageUrls[0].startsWith("[")) {
+                try {
+                  imageUrls = JSON.parse(imageUrls[0]);
+                } catch (e) {
+                  common_vendor.index.__f__("warn", "at packages/comment-center/comment-center.vue:196", "解析imageUrls失败:", e);
+                  imageUrls = [];
+                }
+              }
+            }
+            if (item.childrenList && Array.isArray(item.childrenList)) {
+              item.childrenList = item.childrenList.map((child) => {
+                let childImageUrls = child.imageUrls || [];
+                if (Array.isArray(childImageUrls) && childImageUrls.length > 0) {
+                  if (typeof childImageUrls[0] === "string" && childImageUrls[0].startsWith("[")) {
+                    try {
+                      childImageUrls = JSON.parse(childImageUrls[0]);
+                    } catch (e) {
+                      common_vendor.index.__f__("warn", "at packages/comment-center/comment-center.vue:211", "解析子评论imageUrls失败:", e);
+                      childImageUrls = [];
+                    }
+                  }
+                }
+                return {
+                  ...child,
+                  imageUrls: childImageUrls
+                };
+              });
+            }
+            return {
+              ...item,
+              imageUrls
+            };
+          });
+          commentList.value = isRefresh ? processedList : [...commentList.value, ...processedList];
           total.value = data.total;
           loadingStatus.value = commentList.value.length >= total.value ? "noMore" : "more";
           pageNo.value++;
         }
       } catch (e) {
-        common_vendor.index.__f__("error", "at packages/comment-center/comment-center.vue:185", e);
+        common_vendor.index.__f__("error", "at packages/comment-center/comment-center.vue:235", e);
       } finally {
         if (isRefresh)
           common_vendor.index.stopPullDownRefresh();
@@ -127,6 +162,12 @@ const _sfc_main = {
       const d = new Date(str);
       return `${d.getMonth() + 1}-${d.getDate()} ${d.getHours()}:${String(d.getMinutes()).padStart(2, "0")}`;
     };
+    const previewImage = (urls, current) => {
+      common_vendor.index.previewImage({
+        urls,
+        current
+      });
+    };
     common_vendor.onMounted(() => fetchList(true));
     common_vendor.onPullDownRefresh(() => fetchList(true));
     common_vendor.onReachBottom(() => loadingStatus.value === "more" && fetchList());
@@ -157,13 +198,23 @@ const _sfc_main = {
             e: actionTab.value === "received" && item.isRead === 0
           }, actionTab.value === "received" && item.isRead === 0 ? {} : {}, {
             f: common_vendor.t(item.content),
-            g: "c078da3e-0-" + i0,
-            h: common_vendor.t(getTargetTitle(item)),
-            i: "c078da3e-1-" + i0,
-            j: common_vendor.o(($event) => goToTarget(item), item.id),
-            k: item.childrenList && item.childrenList.length > 0
+            g: item.imageUrls && item.imageUrls.length > 0
+          }, item.imageUrls && item.imageUrls.length > 0 ? {
+            h: common_vendor.f(item.imageUrls, (img, imgIndex, i1) => {
+              return {
+                a: img,
+                b: imgIndex,
+                c: common_vendor.o(($event) => previewImage(item.imageUrls, imgIndex), imgIndex)
+              };
+            })
+          } : {}, {
+            i: "c078da3e-0-" + i0,
+            j: common_vendor.t(getTargetTitle(item)),
+            k: "c078da3e-1-" + i0,
+            l: common_vendor.o(($event) => goToTarget(item), item.id),
+            m: item.childrenList && item.childrenList.length > 0
           }, item.childrenList && item.childrenList.length > 0 ? common_vendor.e({
-            l: common_vendor.f(item.childrenList.slice(0, 1), (child, k1, i1) => {
+            n: common_vendor.f(item.childrenList.slice(0, 1), (child, k1, i1) => {
               var _a2;
               return {
                 a: common_vendor.t(((_a2 = child.memberUserBaseVO) == null ? void 0 : _a2.nickname) || "商友"),
@@ -171,19 +222,19 @@ const _sfc_main = {
                 c: child.id
               };
             }),
-            m: item.childrenList.length > 1
+            o: item.childrenList.length > 1
           }, item.childrenList.length > 1 ? {
-            n: common_vendor.t(item.childrenList.length)
+            p: common_vendor.t(item.childrenList.length)
           } : {}) : {}, actionTab.value === "received" ? {
-            o: "c078da3e-2-" + i0,
-            p: common_vendor.p({
+            q: "c078da3e-2-" + i0,
+            r: common_vendor.p({
               type: "chatbubble",
               size: "14",
               color: "#FF8700"
             }),
-            q: common_vendor.o(($event) => goToTarget(item), item.id)
+            s: common_vendor.o(($event) => goToTarget(item), item.id)
           } : {}, {
-            r: item.id
+            t: item.id
           });
         }),
         i: common_vendor.p({
@@ -207,7 +258,11 @@ const _sfc_main = {
       } : {}, {
         p: commentList.value.length === 0 && loadingStatus.value === "noMore"
       }, commentList.value.length === 0 && loadingStatus.value === "noMore" ? {
-        q: common_assets._imports_0$12
+        q: common_vendor.p({
+          type: "chat-filled",
+          size: "80",
+          color: "#e0e0e0"
+        })
       } : {});
     };
   }

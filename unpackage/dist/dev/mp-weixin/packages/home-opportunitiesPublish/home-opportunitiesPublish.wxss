@@ -77,7 +77,7 @@
 .radio-group-container.data-v-4f014bb0 {
 		display: flex;
 		flex-wrap: wrap;
-		align-items: center;
+		align-items: flex-start;
 		gap: 40rpx;
 		margin-top: 10rpx;
 }
@@ -89,6 +89,25 @@
 }
 .radio-item text.data-v-4f014bb0 {
 		margin-left: 10rpx;
+		white-space: nowrap;
+}
+	
+	/* 两列布局的单选框 */
+.radio-two-in-line.data-v-4f014bb0 {
+		display: flex;
+		gap: 40rpx;
+		align-items: flex-start;
+}
+.radio-item-inline.data-v-4f014bb0 {
+		display: flex;
+		align-items: center;
+		font-size: 28rpx;
+		color: #333;
+		flex: 1;
+}
+.radio-item-inline text.data-v-4f014bb0 {
+		margin-left: 10rpx;
+		white-space: nowrap;
 }
 
 	/* ==================== 猎伙专属字段卡片 ==================== */

@@ -83,14 +83,14 @@
 
 				<!-- 公司/行业/职务 组合展示 -->
 				<view class="list-item wide-item">
-					<text class="label">公司 / 行业 / 职务</text>
+					<text class="label">公司 / 职务 / 行业 </text>
 					<view class="company-group">
 						<view v-for="(company, index) in formattedCompanies" :key="index" class="company-card">
 							<view class="company-name">{{ company.name || '公司名称未填写' }}</view>
 							<view class="company-details">
-								<text class="detail-item">{{ company.industry || '行业未填写' }}</text>
-								<text class="detail-separator">|</text>
 								<text class="detail-item">{{ company.position || '职务未填写' }}</text>
+								<text class="detail-separator">|</text>
+								<text class="detail-item">{{ company.industry || '行业未填写' }}</text>
 							</view>
 						</view>
 						<text v-if="formattedCompanies.length === 0" class="value-placeholder">未填写公司职位信息</text>

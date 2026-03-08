@@ -94,13 +94,13 @@ const _sfc_main = {
       }
     ];
     const contentPlaceholder = common_vendor.computed(() => {
-      if (form.topic === "创业猎伙") {
-        return "发布寻找创业项目合伙人需求。";
+      if (form.topic === "创业猎伙" || form.topic === "商机分享+创业猎伙") {
+        return "发布寻找创业项目合伙人需求或商业机会。";
       }
       return "描述您的项目/商机、需求/经验分享。";
     });
     const currentRemainingQuota = common_vendor.computed(() => {
-      if (form.topic === "创业猎伙") {
+      if (form.topic === "创业猎伙" || form.topic === "商机分享+创业猎伙") {
         return quotaPartner.value;
       }
       return quotaBusiness.value;
@@ -155,7 +155,7 @@ const _sfc_main = {
     const saveDraft = (data) => {
       if (data.title || data.content || data.tags.length > 0 || data.images.length > 0) {
         common_vendor.index.setStorageSync(DRAFT_KEY, JSON.stringify(data));
-        common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:413", "📝 草稿已自动保存");
+        common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:420", "📝 草稿已自动保存");
       }
     };
     const checkDraft = () => {
@@ -179,7 +179,7 @@ const _sfc_main = {
     };
     const clearDraft = () => {
       common_vendor.index.removeStorageSync(DRAFT_KEY);
-      common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:442", "🧹 草稿已清除");
+      common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:449", "🧹 草稿已清除");
     };
     const fetchOpportunityDetail = async (id) => {
       common_vendor.index.showLoading({
@@ -198,7 +198,7 @@ const _sfc_main = {
       if (!error && data) {
         form.title = data.postTitle;
         form.content = data.postContent;
-        form.topic = data.postType == 1 ? "创业猎伙" : "商机分享";
+        form.topic = data.postType == 1 ? "创业猎伙" : data.postType == 2 ? "商机分享+创业猎伙" : "商机分享";
         form.tags = data.tags || [];
         form.showProfile = data.cardFlag;
         form.isReadTrace = data.isReadTrace;
@@ -227,7 +227,7 @@ const _sfc_main = {
               form.investmentResource = inv["资源类型"] || "";
               form.investmentEquity = inv["股权比例"] || "";
             } catch (e) {
-              common_vendor.index.__f__("error", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:500", "解析 expectedInvestment 失败:", e);
+              common_vendor.index.__f__("error", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:506", "解析 expectedInvestment 失败:", e);
             }
           }
         }
@@ -260,9 +260,9 @@ const _sfc_main = {
         quotaBusiness.value = typeof res1.data === "number" ? res1.data : 0;
         quotaPartner.value = typeof res2.data === "number" ? res2.data : 0;
         isQuotaLoaded.value = true;
-        common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:540", `权益加载完成: 商机=${quotaBusiness.value}, 猎伙=${quotaPartner.value}`);
+        common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:546", `权益加载完成: 商机=${quotaBusiness.value}, 猎伙=${quotaPartner.value}`);
       } catch (e) {
-        common_vendor.index.__f__("error", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:542", "获取权益失败", e);
+        common_vendor.index.__f__("error", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:548", "获取权益失败", e);
       }
     };
     const hasLiehuoPermission = () => {
@@ -344,7 +344,7 @@ const _sfc_main = {
       const newTopic = e.detail.value;
       if (isEditMode.value)
         return;
-      if (newTopic !== "创业猎伙") {
+      if (newTopic !== "创业猎伙" && newTopic !== "商机分享+创业猎伙") {
         form.topic = newTopic;
         usePointForPublish.value = false;
         return;
@@ -421,9 +421,9 @@ const _sfc_main = {
             type
           }
         });
-        common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:753", `标签历史 "${tagName}" 已记录`);
+        common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:759", `标签历史 "${tagName}" 已记录`);
       } catch (error) {
-        common_vendor.index.__f__("error", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:755", "记录标签历史失败:", error);
+        common_vendor.index.__f__("error", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:761", "记录标签历史失败:", error);
       }
     }
     common_vendor.watch(() => form.tagInput, (newValue) => {
@@ -457,7 +457,7 @@ const _sfc_main = {
         const suggestions = data.list.map((item) => item.name);
         tagSuggestions.value = [...new Set(suggestions)];
       } catch (e) {
-        common_vendor.index.__f__("error", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:796", "获取标签建议失败:", e);
+        common_vendor.index.__f__("error", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:802", "获取标签建议失败:", e);
         tagSuggestions.value = [];
       }
     }
@@ -494,7 +494,7 @@ const _sfc_main = {
             if (result.data)
               successfulUrls.push(result.data);
             else
-              common_vendor.index.__f__("error", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:838", "上传失败:", result.error);
+              common_vendor.index.__f__("error", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:844", "上传失败:", result.error);
           });
           form.images.push(...successfulUrls);
           if (successfulUrls.length < validFiles.length) {
@@ -549,7 +549,7 @@ const _sfc_main = {
           }
         },
         fail: (err) => {
-          common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:949", "取消选择视频");
+          common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:955", "取消选择视频");
         }
       });
     }
@@ -578,11 +578,11 @@ const _sfc_main = {
             src: tempFilePath,
             cropScale: "4:3",
             success: (cropRes) => {
-              common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:983", "裁剪成功:", cropRes.tempFilePath);
+              common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:989", "裁剪成功:", cropRes.tempFilePath);
               uploadCoverToCloud(cropRes.tempFilePath);
             },
             fail: (err) => {
-              common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:987", "用户取消裁剪或失败:", err);
+              common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:993", "用户取消裁剪或失败:", err);
             }
           });
         }
@@ -653,7 +653,7 @@ const _sfc_main = {
           text: item.enterpriseName,
           value: item.id
         }));
-        common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:1087", "✅ 可用发布身份企业数:", myEnterprises.value.length);
+        common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:1093", "✅ 可用发布身份企业数:", myEnterprises.value.length);
       }
     };
     const handleIdentityChange = (e) => {
@@ -713,7 +713,7 @@ const _sfc_main = {
           });
       }
       let expectedInvestment = "";
-      if (form.topic === "创业猎伙") {
+      if (form.topic === "创业猎伙" || form.topic === "商机分享+创业猎伙") {
         const inv = {};
         if (form.investmentFund.trim())
           inv["资金范围"] = form.investmentFund.trim();
@@ -728,7 +728,7 @@ const _sfc_main = {
         id: form.id,
         userId: common_vendor.index.getStorageSync("userId") || 0,
         postTitle: form.title,
-        postType: form.topic === "商机分享" ? "0" : "1",
+        postType: form.topic === "商机分享" ? "0" : form.topic === "商机分享+创业猎伙" ? "2" : "1",
         postContent: form.content,
         postImg: form.mediaType === "image" ? form.images.join(",") : "",
         postVideo: form.mediaType === "video" ? form.postVideo : "",
@@ -742,13 +742,13 @@ const _sfc_main = {
         tags: form.tags,
         status: "active",
         // ===== 猎伙专属字段（非猎伙时不传或传空）=====
-        ...form.topic === "创业猎伙" && {
+        ...form.topic === "创业猎伙" || form.topic === "商机分享+创业猎伙" ? {
           // 「其他」(value='4') 替换为用户自定义文本
           partnerTypes: form.partnerTypes.map((v) => v === "4" && form.partnerTypeOther.trim() ? form.partnerTypeOther.trim() : v).join(","),
           urgentLevel: form.urgentLevel,
           expectedInvestment,
           usePointForPublish: usePointForPublish.value
-        }
+        } : {}
       };
       common_vendor.index.showModal({
         title: isEditMode.value ? "确认修改" : "确认发布",
@@ -870,12 +870,15 @@ const _sfc_main = {
         v: form.topic === "创业猎伙",
         w: isEditMode.value,
         x: isEditMode.value ? "#999" : "#333",
-        y: common_vendor.o(topicChange),
-        z: isEditMode.value
+        y: form.topic === "商机分享+创业猎伙",
+        z: isEditMode.value,
+        A: isEditMode.value ? "#999" : "#333",
+        B: common_vendor.o(topicChange),
+        C: isEditMode.value
       }, isEditMode.value ? {} : {}, {
-        A: form.topic === "创业猎伙"
-      }, form.topic === "创业猎伙" ? common_vendor.e({
-        B: common_vendor.f(partnerTypeOptions, (item, k0, i0) => {
+        D: form.topic === "创业猎伙" || form.topic === "商机分享+创业猎伙"
+      }, form.topic === "创业猎伙" || form.topic === "商机分享+创业猎伙" ? common_vendor.e({
+        E: common_vendor.f(partnerTypeOptions, (item, k0, i0) => {
           return common_vendor.e({
             a: form.partnerTypes.includes(item.value)
           }, form.partnerTypes.includes(item.value) ? {} : {}, {
@@ -885,12 +888,12 @@ const _sfc_main = {
             e: common_vendor.o(($event) => togglePartnerType(item.value), item.value)
           });
         }),
-        C: form.partnerTypes.includes("4")
+        F: form.partnerTypes.includes("4")
       }, form.partnerTypes.includes("4") ? {
-        D: form.partnerTypeOther,
-        E: common_vendor.o(($event) => form.partnerTypeOther = $event.detail.value)
+        G: form.partnerTypeOther,
+        H: common_vendor.o(($event) => form.partnerTypeOther = $event.detail.value)
       } : {}, {
-        F: common_vendor.f(urgentLevelOptions, (item, k0, i0) => {
+        I: common_vendor.f(urgentLevelOptions, (item, k0, i0) => {
           return {
             a: common_vendor.t(item.label),
             b: item.value,
@@ -901,24 +904,24 @@ const _sfc_main = {
             e: common_vendor.o(($event) => form.urgentLevel = item.value, item.value)
           };
         }),
-        G: form.investmentFund,
-        H: common_vendor.o(($event) => form.investmentFund = $event.detail.value),
-        I: form.investmentResource,
-        J: common_vendor.o(($event) => form.investmentResource = $event.detail.value),
-        K: form.investmentEquity,
-        L: common_vendor.o(($event) => form.investmentEquity = $event.detail.value),
-        M: !isEditMode.value && usePointForPublish.value
+        J: form.investmentFund,
+        K: common_vendor.o(($event) => form.investmentFund = $event.detail.value),
+        L: form.investmentResource,
+        M: common_vendor.o(($event) => form.investmentResource = $event.detail.value),
+        N: form.investmentEquity,
+        O: common_vendor.o(($event) => form.investmentEquity = $event.detail.value),
+        P: !isEditMode.value && usePointForPublish.value
       }, !isEditMode.value && usePointForPublish.value ? {} : {}) : {}, {
-        N: common_vendor.f(form.tags, (tag, index, i0) => {
+        Q: common_vendor.f(form.tags, (tag, index, i0) => {
           return {
             a: common_vendor.t(tag),
             b: common_vendor.o(($event) => removeTag(index), index),
             c: index
           };
         }),
-        O: tagSuggestions.value.length > 0
+        R: tagSuggestions.value.length > 0
       }, tagSuggestions.value.length > 0 ? {
-        P: common_vendor.f(tagSuggestions.value, (suggestion, index, i0) => {
+        S: common_vendor.f(tagSuggestions.value, (suggestion, index, i0) => {
           return {
             a: common_vendor.t(suggestion),
             b: index,
@@ -926,57 +929,57 @@ const _sfc_main = {
           };
         })
       } : {}, {
-        Q: form.tagInput,
-        R: common_vendor.o(($event) => form.tagInput = $event.detail.value),
-        S: common_vendor.o(handleAddTagManually),
-        T: form.images.length === 0 && !form.postVideo
+        T: form.tagInput,
+        U: common_vendor.o(($event) => form.tagInput = $event.detail.value),
+        V: common_vendor.o(handleAddTagManually),
+        W: form.images.length === 0 && !form.postVideo
       }, form.images.length === 0 && !form.postVideo ? {
-        U: common_vendor.p({
+        X: common_vendor.p({
           type: "image-filled",
           size: "30",
           color: "#4CAF50"
         }),
-        V: common_vendor.o(handleChooseImage),
-        W: common_vendor.p({
+        Y: common_vendor.o(handleChooseImage),
+        Z: common_vendor.p({
           type: "videocam-filled",
           size: "30",
           color: "#2196F3"
         }),
-        X: common_vendor.o(handleChooseVideo)
+        aa: common_vendor.o(handleChooseVideo)
       } : {}, {
-        Y: form.mediaType === "image" && form.images.length > 0
+        ab: form.mediaType === "image" && form.images.length > 0
       }, form.mediaType === "image" && form.images.length > 0 ? {
-        Z: common_vendor.o(handleChooseImage),
-        aa: common_vendor.o(($event) => form.images = $event),
-        ab: common_vendor.p({
+        ac: common_vendor.o(handleChooseImage),
+        ad: common_vendor.o(($event) => form.images = $event),
+        ae: common_vendor.p({
           ["max-count"]: 9,
           modelValue: form.images
         })
       } : {}, {
-        ac: form.mediaType === "video" && form.postVideo
+        af: form.mediaType === "video" && form.postVideo
       }, form.mediaType === "video" && form.postVideo ? common_vendor.e({
-        ad: form.postVideo,
-        ae: common_vendor.o(deleteVideo),
-        af: form.businessCoverImageUrl
+        ag: form.postVideo,
+        ah: common_vendor.o(deleteVideo),
+        ai: form.businessCoverImageUrl
       }, form.businessCoverImageUrl ? {
-        ag: form.businessCoverImageUrl
+        aj: form.businessCoverImageUrl
       } : {
-        ah: common_vendor.p({
+        ak: common_vendor.p({
           type: "image",
           size: "24",
           color: "#999"
         })
       }, {
-        ai: common_vendor.o(handleChooseVideoCover)
+        al: common_vendor.o(handleChooseVideoCover)
       }) : {}, {
-        aj: common_vendor.t(form.mediaType === "image" ? "最多可上传9张图片" : "仅支持上传一个视频"),
-        ak: form.showProfile,
-        al: common_vendor.o((e) => form.showProfile = e.detail.value),
-        am: form.isReadTrace === 1,
-        an: common_vendor.o((e) => form.isReadTrace = e.detail.value ? 1 : 0),
-        ao: common_vendor.t(isEditMode.value ? "提交修改" : "发布帖子"),
-        ap: isQuotaLoaded.value && currentRemainingQuota.value <= 0 && !isEditMode.value ? 1 : "",
-        aq: common_vendor.o(handleSubmitClick)
+        am: common_vendor.t(form.mediaType === "image" ? "最多可上传9张图片" : "仅支持上传一个视频"),
+        an: form.showProfile,
+        ao: common_vendor.o((e) => form.showProfile = e.detail.value),
+        ap: form.isReadTrace === 1,
+        aq: common_vendor.o((e) => form.isReadTrace = e.detail.value ? 1 : 0),
+        ar: common_vendor.t(isEditMode.value ? "提交修改" : "发布帖子"),
+        as: isQuotaLoaded.value && currentRemainingQuota.value <= 0 && !isEditMode.value ? 1 : "",
+        at: common_vendor.o(handleSubmitClick)
       });
     };
   }

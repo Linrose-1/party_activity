@@ -1,7 +1,7 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
-const common_assets = require("../../common/assets.js");
 const utils_request = require("../../utils/request.js");
+const utils_upload = require("../../utils/upload.js");
 const utils_user = require("../../utils/user.js");
 if (!Array) {
   const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
@@ -23,6 +23,7 @@ const _sfc_main = {
     const replyToId = common_vendor.ref(0);
     const replyToName = common_vendor.ref("");
     const keyboardHeight = common_vendor.ref(0);
+    const imageUrls = common_vendor.ref([]);
     const placeholderText = common_vendor.computed(
       () => replyToName.value ? `回复 @${replyToName.value}` : "友善评论，文明互动..."
     );
@@ -65,6 +66,17 @@ const _sfc_main = {
         const isAnon = c.anonymous === 1;
         const name = isAnon ? "匿名商友" : ((_a = c.memberUserBaseVO) == null ? void 0 : _a.nickname) || "商友";
         const avatar = isAnon ? "/static/icon/default-avatar.png" : (_b = c.memberUserBaseVO) == null ? void 0 : _b.avatar;
+        let imageUrls2 = c.imageUrls || [];
+        if (Array.isArray(imageUrls2) && imageUrls2.length > 0) {
+          if (typeof imageUrls2[0] === "string" && imageUrls2[0].startsWith('["') && imageUrls2[0].endsWith('"]')) {
+            try {
+              const parsed = JSON.parse(imageUrls2[0]);
+              imageUrls2 = Array.isArray(parsed) ? parsed : imageUrls2;
+            } catch (e) {
+              common_vendor.index.__f__("error", "at packages/comment-page/comment-page.vue:197", "解析imageUrls失败:", e);
+            }
+          }
+        }
         list.push({
           id: c.id,
           userId: c.userId,
@@ -74,7 +86,9 @@ const _sfc_main = {
           text: c.content,
           parentId: c.parentId,
           replyTo,
-          isAnon
+          isAnon,
+          // 添加并处理图片字段
+          imageUrls: imageUrls2
         });
         if (c.childrenList) {
           list = list.concat(flattenComments(c.childrenList, name));
@@ -100,7 +114,7 @@ const _sfc_main = {
     const handleSend = async () => {
       if (!await utils_user.checkLoginGuard())
         return;
-      if (!newCommentText.value.trim())
+      if (!newCommentText.value.trim() && (!imageUrls.value || imageUrls.value.length === 0))
         return;
       common_vendor.index.showLoading({
         title: "发布中..."
@@ -115,7 +129,9 @@ const _sfc_main = {
           targetType: targetType.value,
           parentId: replyToId.value || 0,
           content: newCommentText.value,
-          anonymous: isAnonymous.value ? 1 : 0
+          anonymous: isAnonymous.value ? 1 : 0,
+          imageUrls: imageUrls.value
+          // 添加图片字段
         }
       });
       common_vendor.index.hideLoading();
@@ -127,6 +143,7 @@ const _sfc_main = {
         replyToId.value = 0;
         replyToName.value = "";
         isAnonymous.value = false;
+        imageUrls.value = [];
         await fetchComments();
         emitCommentChanged();
       }
@@ -177,6 +194,56 @@ const _sfc_main = {
         }
       });
     };
+    const handleChooseImage = async () => {
+      common_vendor.index.chooseImage({
+        count: 1,
+        // 限制为1张
+        sourceType: ["album", "camera"],
+        success: async (res) => {
+          const validFiles = res.tempFiles.filter((file) => file.size <= 5 * 1024 * 1024);
+          if (res.tempFiles.length > validFiles.length) {
+            common_vendor.index.showToast({
+              title: "部分文件过大(>5MB)，已忽略",
+              icon: "none"
+            });
+          }
+          if (validFiles.length === 0)
+            return;
+          common_vendor.index.showLoading({
+            title: `正在上传...`,
+            mask: true
+          });
+          const uploadPromises = validFiles.map((file) => utils_upload.uploadFile(file, {
+            directory: "comment"
+          }));
+          const results = await Promise.all(uploadPromises);
+          common_vendor.index.hideLoading();
+          const successfulUrls = [];
+          results.forEach((result) => {
+            if (result.data)
+              successfulUrls.push(result.data);
+            else
+              common_vendor.index.__f__("error", "at packages/comment-page/comment-page.vue:386", "上传失败:", result.error);
+          });
+          imageUrls.value = successfulUrls;
+          if (successfulUrls.length < validFiles.length) {
+            common_vendor.index.showToast({
+              title: "部分图片上传失败",
+              icon: "none"
+            });
+          }
+        }
+      });
+    };
+    const previewImage = (urls, current) => {
+      common_vendor.index.previewImage({
+        urls,
+        current
+      });
+    };
+    const removeImage = (index) => {
+      imageUrls.value.splice(index, 1);
+    };
     return (_ctx, _cache) => {
       return common_vendor.e({
         a: comments.value.length > 0
@@ -193,20 +260,30 @@ const _sfc_main = {
           } : {}, {
             g: common_vendor.t(comment.text),
             h: common_vendor.o(($event) => handleLongPress(comment.text), comment.id),
-            i: "3a461f42-0-" + i0,
-            j: common_vendor.o(($event) => startReply(comment), comment.id),
-            k: loggedInUserId.value == comment.userId
+            i: comment.imageUrls && comment.imageUrls.length > 0
+          }, comment.imageUrls && comment.imageUrls.length > 0 ? {
+            j: common_vendor.f(comment.imageUrls, (img, imgIndex, i1) => {
+              return {
+                a: img,
+                b: imgIndex,
+                c: common_vendor.o(($event) => previewImage(comment.imageUrls, imgIndex), imgIndex)
+              };
+            })
+          } : {}, {
+            k: "3a461f42-0-" + i0,
+            l: common_vendor.o(($event) => startReply(comment), comment.id),
+            m: loggedInUserId.value == comment.userId
           }, loggedInUserId.value == comment.userId ? {
-            l: "3a461f42-1-" + i0,
-            m: common_vendor.p({
+            n: "3a461f42-1-" + i0,
+            o: common_vendor.p({
               type: "trash",
               size: "14",
               color: "#999"
             }),
-            n: common_vendor.o(($event) => deleteComment(comment.id), comment.id)
+            p: common_vendor.o(($event) => deleteComment(comment.id), comment.id)
           } : {}, {
-            o: comment.id,
-            p: comment.parentId !== 0 ? 1 : ""
+            q: comment.id,
+            r: comment.parentId !== 0 ? 1 : ""
           });
         }),
         c: common_vendor.p({
@@ -215,7 +292,11 @@ const _sfc_main = {
           color: "#666"
         })
       } : {
-        d: common_assets._imports_0$11
+        d: common_vendor.p({
+          type: "chatbubble-filled",
+          size: "60",
+          color: "#e0e0e0"
+        })
       }, {
         e: common_vendor.o((...args) => _ctx.onReachBottom && _ctx.onReachBottom(...args)),
         f: common_vendor.p({
@@ -229,18 +310,38 @@ const _sfc_main = {
         j: placeholderText.value,
         k: newCommentText.value,
         l: common_vendor.o(($event) => newCommentText.value = $event.detail.value),
-        m: common_vendor.p({
+        m: !imageUrls.value || imageUrls.value.length === 0
+      }, !imageUrls.value || imageUrls.value.length === 0 ? {
+        n: common_vendor.p({
+          type: "image",
+          size: "24",
+          color: "#999"
+        }),
+        o: common_vendor.o(handleChooseImage)
+      } : {}, {
+        p: common_vendor.p({
           type: "paperplane-filled",
           size: "22",
           color: "#ffff7f"
         }),
-        n: newCommentText.value.trim().length > 0 ? 1 : "",
-        o: common_vendor.o(handleSend),
-        p: keyboardHeight.value + "px",
-        q: copyMenu.show
+        q: newCommentText.value.trim().length > 0 || imageUrls.value && imageUrls.value.length > 0 ? 1 : "",
+        r: common_vendor.o(handleSend),
+        s: imageUrls.value && imageUrls.value.length > 0
+      }, imageUrls.value && imageUrls.value.length > 0 ? {
+        t: common_vendor.f(imageUrls.value, (img, index, i0) => {
+          return {
+            a: img,
+            b: common_vendor.o(($event) => previewImage(imageUrls.value, index), index),
+            c: common_vendor.o(($event) => removeImage(index), index),
+            d: index
+          };
+        })
+      } : {}, {
+        v: keyboardHeight.value + "px",
+        w: copyMenu.show
       }, copyMenu.show ? {
-        r: common_vendor.o(executeCopy),
-        s: common_vendor.o(($event) => copyMenu.show = false)
+        x: common_vendor.o(executeCopy),
+        y: common_vendor.o(($event) => copyMenu.show = false)
       } : {});
     };
   }

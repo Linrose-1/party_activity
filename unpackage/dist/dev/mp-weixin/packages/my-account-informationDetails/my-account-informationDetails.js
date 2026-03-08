@@ -228,8 +228,8 @@ const _sfc_main = {
         r: common_vendor.f(formattedCompanies.value, (company, index, i0) => {
           return {
             a: common_vendor.t(company.name || "公司名称未填写"),
-            b: common_vendor.t(company.industry || "行业未填写"),
-            c: common_vendor.t(company.position || "职务未填写"),
+            b: common_vendor.t(company.position || "职务未填写"),
+            c: common_vendor.t(company.industry || "行业未填写"),
             d: index
           };
         }),

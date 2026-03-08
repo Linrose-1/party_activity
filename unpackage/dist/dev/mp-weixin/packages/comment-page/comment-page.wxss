@@ -8,14 +8,22 @@
 .comment-scroll.data-v-3a461f42 {
 		flex: 1;
 }
+.comment-header-row.data-v-3a461f42 {
+		display: flex;
+		flex-direction: row;
+		align-items: flex-start;
+		width: 100%;
+}
 .comment-item.data-v-3a461f42 {
 		background-color: #fff;
 		padding: 30rpx;
 		display: flex;
 		margin-bottom: 2rpx;
+		flex-direction: column;
 }
 .comment-item.is-reply.data-v-3a461f42 {
-		padding-left: 110rpx;
+		padding-left: 30rpx;
+		padding-top: 30rpx;
 		background-color: #fafafa;
 }
 .c-avatar.data-v-3a461f42 {
@@ -24,9 +32,12 @@
 		border-radius: 10rpx;
 		margin-right: 20rpx;
 		background-color: #f0f0f0;
+		flex-shrink: 0;
 }
 .c-body.data-v-3a461f42 {
 		flex: 1;
+		display: flex;
+		flex-direction: column;
 }
 .c-header.data-v-3a461f42 {
 		display: flex;
@@ -82,20 +93,21 @@
 		z-index: 999;
 		box-sizing: border-box;
 		display: flex;
-		align-items: flex-end;
-		gap: 20rpx;
+		flex-direction: column;
+		gap: 10rpx;
 }
 .input-container.data-v-3a461f42 {
+		display: flex;
+		align-items: center;
 		flex: 1;
 		background: #f5f7fa;
 		border-radius: 40rpx;
 		padding: 14rpx 20rpx;
-		display: flex;
-		align-items: center;
 		min-height: 80rpx;
 		box-sizing: border-box;
 		transition: all 0.3s;
 		border: 2rpx solid transparent;
+		gap: 10rpx;
 }
 .anon-switch.data-v-3a461f42 {
 		display: flex;
@@ -103,6 +115,7 @@
 		padding: 0 10rpx;
 		transition: all 0.3s;
 		flex-shrink: 0;
+		flex-wrap: nowrap;
 }
 .anon-switch uni-icons.data-v-3a461f42 {
 		margin-right: 6rpx;
@@ -111,26 +124,85 @@
 		font-size: 24rpx;
 		color: #666;
 		font-weight: 500;
+		white-space: nowrap;
 }
 .anon-switch.is-active text.data-v-3a461f42 {
 		color: #FF6A00;
 }
-.vertical-line.data-v-3a461f42 {
-		width: 2rpx;
-		height: 32rpx;
-		background-color: #e0e0e0;
-		margin: 0 16rpx;
-		flex-shrink: 0;
-}
 .bar-textarea.data-v-3a461f42 {
 		flex: 1;
+		padding: 6rpx 10rpx;
 		font-size: 28rpx;
+		line-height: 1.4;
 		color: #333;
-		width: 100%;
-		padding: 0;
-		line-height: 1.5;
-		max-height: 200rpx;
+		background: transparent;
+		border: none;
+		outline: none;
 		min-height: 40rpx;
+		max-height: 160rpx;
+		height: auto;
+		margin: 0 10rpx;
+}
+.vertical-line.data-v-3a461f42 {
+		width: 2rpx;
+		height: 40rpx;
+		background-color: #ddd;
+		margin: 0 10rpx;
+		flex-shrink: 0;
+		align-self: center;
+}
+.selected-images-container.data-v-3a461f42 {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 10rpx;
+		padding: 10rpx 0;
+}
+.image-comment-hint.data-v-3a461f42 {
+		width: 100%;
+		font-size: 24rpx;
+		color: #ff6a00;
+		padding: 10rpx 0;
+		text-align: center;
+}
+.selected-image-item.data-v-3a461f42 {
+		position: relative;
+		width: 120rpx;
+		height: 120rpx;
+		border-radius: 12rpx;
+		overflow: hidden;
+		flex-shrink: 0;
+}
+.selected-image.data-v-3a461f42 {
+		width: 100%;
+		height: 100%;
+		display: block;
+}
+.remove-image.data-v-3a461f42 {
+		position: absolute;
+		top: -8rpx;
+		right: -8rpx;
+		width: 30rpx;
+		height: 30rpx;
+		background-color: #ff4d4f;
+		color: white;
+		border-radius: 50%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 20rpx;
+		font-weight: bold;
+		line-height: 1;
+		z-index: 2;
+}
+.image-upload-btn.data-v-3a461f42 {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 40rpx;
+		height: 40rpx;
+		margin-left: 10rpx;
+		padding: 10rpx;
+		flex-shrink: 0;
 }
 .send-btn.data-v-3a461f42 {
 		width: 80rpx;
@@ -142,7 +214,6 @@
 		justify-content: center;
 		flex-shrink: 0;
 		margin-left: 20rpx;
-		margin-bottom: 5rpx;
 }
 .send-btn.can-send.data-v-3a461f42 {
 		background: linear-gradient(135deg, #FF8C00, #FF6B00);
@@ -150,6 +221,26 @@
 .send-btn.data-v-3a461f42 .uni-icons {
 		display: block;
 		line-height: 1;
+}
+	
+	/* 评论图片样式 */
+.comment-images.data-v-3a461f42 {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 10rpx;
+		margin: 10rpx 0;
+}
+.comment-image-item.data-v-3a461f42 {
+		width: 240rpx;
+		height: 240rpx;
+		border-radius: 12rpx;
+		overflow: hidden;
+		flex-shrink: 0;
+}
+.comment-image.data-v-3a461f42 {
+		width: 100%;
+		height: 100%;
+		display: block;
 }
 
 	/* ── 复制菜单 ── */
@@ -178,6 +269,10 @@
 		padding-top: 200rpx;
 		color: #999;
 		font-size: 28rpx;
+}
+.empty-icon.data-v-3a461f42 {
+		margin-bottom: 20rpx;
+		opacity: 0.5;
 }
 .empty-img.data-v-3a461f42 {
 		width: 240rpx;

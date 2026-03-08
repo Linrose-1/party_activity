@@ -15,6 +15,7 @@ const _sfc_main = {
   setup(__props) {
     const searchKeyword = common_vendor.ref("");
     const recommendUsers = common_vendor.ref([]);
+    const refreshing = common_vendor.ref(false);
     const tiers = [
       {
         id: 1,
@@ -39,17 +40,21 @@ const _sfc_main = {
       }
     ];
     const selectedTier = common_vendor.ref(tiers[1]);
-    const fetchRecommendUsers = async () => {
-      common_vendor.index.showLoading({
-        title: "AI匹配中..."
-      });
+    const fetchRecommendUsers = async (isRefresh = false) => {
+      if (!isRefresh) {
+        common_vendor.index.showLoading({
+          title: "AI匹配中..."
+        });
+      }
       const {
         data,
         error
       } = await utils_request.request("/app-api/member/user/random-recommend", {
         method: "GET"
       });
-      common_vendor.index.hideLoading();
+      if (!isRefresh) {
+        common_vendor.index.hideLoading();
+      }
       if (!error && data) {
         const getFirstItem = (value) => {
           if (!value)
@@ -160,6 +165,11 @@ const _sfc_main = {
         });
       }
     };
+    const onPullDownRefresh = async () => {
+      refreshing.value = true;
+      await fetchRecommendUsers(true);
+      refreshing.value = false;
+    };
     common_vendor.onShow(() => {
       fetchRecommendUsers();
     });
@@ -204,7 +214,9 @@ const _sfc_main = {
             g: common_vendor.o(($event) => selectedTier.value = tier, tier.id)
           });
         }),
-        k: common_vendor.o(handleConsumeZhimi)
+        k: common_vendor.o(handleConsumeZhimi),
+        l: common_vendor.o(onPullDownRefresh),
+        m: refreshing.value
       });
     };
   }
