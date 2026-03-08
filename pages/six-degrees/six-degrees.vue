@@ -1,5 +1,5 @@
 <template>
-	<view class="six-degrees-container">
+	<scroll-view class="six-degrees-container" scroll-y="true" @refresherrefresh="onPullDownRefresh" :refresher-enabled="true" :refresher-triggered="refreshing" enable-back-to-top="true">
 		<!-- 沉浸式头部 -->
 		<view class="premium-header">
 			<!-- 背景装饰：独立出来并设置裁剪 -->
@@ -134,7 +134,7 @@
 				<view class="submit-btn" @click="handleConsumeZhimi">开启扩展人脉</view>
 			</view>
 		</view>
-	</view>
+	</scroll-view>
 </template>
 
 <script setup>
@@ -152,6 +152,7 @@
 
 	const searchKeyword = ref('');
 	const recommendUsers = ref([]);
+	const refreshing = ref(false);
 
 	// 付费档位配置
 	const tiers = [{
@@ -181,17 +182,23 @@
 	/**
 	 * 获取智能推荐列表
 	 */
-	const fetchRecommendUsers = async () => {
-		uni.showLoading({
-			title: 'AI匹配中...'
-		});
+	const fetchRecommendUsers = async (isRefresh = false) => {
+		if (!isRefresh) {
+			uni.showLoading({
+				title: 'AI匹配中...'
+			});
+		}
+		
 		const {
 			data,
 			error
 		} = await request('/app-api/member/user/random-recommend', {
 			method: 'GET'
 		});
-		uni.hideLoading();
+		
+		if (!isRefresh) {
+			uni.hideLoading();
+		}
 
 		if (!error && data) {
 			// 处理数组或逗号分隔的字符串，取第一个元素显示
@@ -318,6 +325,15 @@
 				url: `/packages/applicationBusinessCard/applicationBusinessCard?id=${user.id}&name=${encodeURIComponent(name)}&avatar=${encodeURIComponent(avatarUrl)}`
 			});
 		}
+	};
+
+	/**
+	 * 下拉刷新
+	 */
+	const onPullDownRefresh = async () => {
+		refreshing.value = true; // 开始刷新，显示刷新动画
+		await fetchRecommendUsers(true); // 传入true表示刷新模式
+		refreshing.value = false; // 停止刷新，隐藏刷新动画
 	};
 
 	onShow(() => {

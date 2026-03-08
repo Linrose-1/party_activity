@@ -166,7 +166,6 @@
 					<view class="left-title">
 						<view class="title-indicator"></view>
 						<text class="title-txt">最近浏览</text>
-						<text class="title-count">{{ viewerTotal }}</text>
 					</view>
 					<view class="right-more">
 						<text>浏览详情</text>
@@ -184,7 +183,6 @@
 							<text class="dot"></text>
 						</view>
 					</view>
-					<view class="viewer-tips">已有 {{ viewerTotal }} 位商友阅读了您的商机</view>
 				</view>
 			</view>
 
