@@ -15,6 +15,9 @@
 					<view class="tags-line">
 						<text class="tag-style pinyin-tag" v-if="pinyinName">{{ pinyinName }}</text>
 						<text class="tag-style title-tag" v-if="title">{{ title }}</text>
+						<text class="tag-style credit-tag" v-if="creditLevel" @click.stop="$emit('goToCredit')">
+							{{ creditLevel }}
+						</text>
 					</view>
 				</view>
 			</view>
@@ -395,6 +398,10 @@
 			type: String,
 			default: '' // 默认是空字符串
 		},
+		creditLevel: {
+			type: String,
+			default: ''
+		},
 
 		// --- 以下为旧版兼容，新版已不再直接使用 ---
 		department: {
@@ -601,6 +608,20 @@
 				border: 1rpx solid #ffd591;
 				/* 可选：加个细边框增加精致感 */
 				font-weight: 500;
+			}
+
+			.credit-tag {
+				/* 使用具有信誉感的蓝青色渐变 */
+				background: linear-gradient(90deg, #1890FF 0%, #00D2FF 100%);
+				color: #fff;
+				border: none;
+				font-weight: bold;
+				box-shadow: 0 2rpx 8rpx rgba(24, 144, 255, 0.2);
+			}
+
+			.credit-tag:active {
+				opacity: 0.8;
+				transform: scale(0.95);
 			}
 		}
 	}

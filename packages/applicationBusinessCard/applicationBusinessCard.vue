@@ -18,7 +18,10 @@
 					</view>
 
 					<view class="target-name">{{ targetUserInfo.realName || targetUserInfo.nickname }}</view>
-					<!-- <view class="target-title">{{ targetUserInfo.companyName || '公司信息未设置' }}</view> -->
+					<view v-if="creditLevel" class="preview-credit-tag" @click="goToCreditScore">
+						<uni-icons type="vip-filled" size="12" color="#fff"></uni-icons>
+						<text>{{ creditLevel }}</text>
+					</view>
 				</view>
 
 				<!-- ==================== 用户信息预览区 ==================== -->
@@ -113,7 +116,8 @@
 			</view>
 			<!-- 加载中的占位符 -->
 			<view v-else class="loading-placeholder">
-				<uni-load-more status="loading" :contentText="{ contentdown: '上拉加载更多', contentrefresh: '正在加载用户信息...', contentnomore: '—— 我是有底线的 ——' }"></uni-load-more>
+				<uni-load-more status="loading"
+					:contentText="{ contentdown: '上拉加载更多', contentrefresh: '正在加载用户信息...', contentnomore: '—— 我是有底线的 ——' }"></uni-load-more>
 			</view>
 
 			<!-- 提示信息 -->
@@ -171,6 +175,8 @@
 	const isLoading = ref(true);
 
 	const friendOwnerUserId = ref(null);
+
+	const creditLevel = ref('');
 
 	// --- 页面生命周期 ---
 	onLoad((options) => {
@@ -256,7 +262,7 @@
 		if (fromShare.value) {
 			requestData.notPay = 1;
 		}
-		
+
 		console.log('requestData:', JSON.stringify(requestData)); // 看看 notPay 有没有
 
 		const {
@@ -324,6 +330,8 @@
 				...targetUserInfo.value,
 				...data
 			};
+
+			fetchOtherCreditLevel(targetUserId.value);
 		}
 	};
 	// ===================================================================================
@@ -410,6 +418,25 @@
 				duration: 2000
 			});
 		}
+	};
+
+	// 新增：独立获取信用等级方法
+	const fetchOtherCreditLevel = async (userId) => {
+		const {
+			data
+		} = await request(`/app-api/member/user/other_credit-score/${userId}`, {
+			method: 'GET'
+		});
+		if (data) {
+			creditLevel.value = data.creditLevel;
+		}
+	};
+
+	// 新增：跳转信用详情
+	const goToCreditScore = () => {
+		uni.navigateTo({
+			url: '/packages/credit-score/credit-score'
+		});
 	};
 
 	const handleEditRemark = () => {
@@ -687,6 +714,19 @@
 		/* 转换为 rpx */
 		font-weight: 700;
 		color: #333;
+	}
+
+	.preview-credit-tag {
+		margin-top: 10rpx;
+		background: linear-gradient(90deg, #1890FF, #00D2FF);
+		color: #fff;
+		font-size: 22rpx;
+		padding: 4rpx 16rpx;
+		border-radius: 20rpx;
+		display: inline-flex;
+		align-items: center;
+		gap: 4rpx;
+		box-shadow: 0 4rpx 10rpx rgba(24, 144, 255, 0.2);
 	}
 
 	.target-title {

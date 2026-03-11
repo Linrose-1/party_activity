@@ -56,10 +56,8 @@
 					</view>
 
 					<!-- 资源匹配 -->
-					<view class="grid-item primary-outline"
-						@click="handleAction('resourceMatch')">
-						<view class="icon-box"><uni-icons type="search" size="26"
-								color="#FF7009" /></view>
+					<view class="grid-item primary-outline" @click="handleAction('resourceMatch')">
+						<view class="icon-box"><uni-icons type="search" size="26" color="#FF7009" /></view>
 						<text class="item-text">资源匹配</text>
 					</view>
 				</view>
@@ -97,6 +95,8 @@
 	const inviteCircleRef = ref(null);
 	const targetUser = ref({});
 	const defaultAvatar = '/static/icon/default-avatar.png';
+
+	const creditLevel = ref('');
 
 	/**
 	 * 默认业务路径配置

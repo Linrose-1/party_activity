@@ -146,6 +146,10 @@ const _sfc_main = {
       default: ""
       // 默认是空字符串
     },
+    creditLevel: {
+      type: String,
+      default: ""
+    },
     // --- 以下为旧版兼容，新版已不再直接使用 ---
     department: {
       type: String,
@@ -234,31 +238,36 @@ const _sfc_main = {
       }, __props.title ? {
         g: common_vendor.t(__props.title)
       } : {}, {
-        h: !__props.isViewingOwnCard
+        h: __props.creditLevel
+      }, __props.creditLevel ? {
+        i: common_vendor.t(__props.creditLevel),
+        j: common_vendor.o(($event) => _ctx.$emit("goToCredit"))
+      } : {}, {
+        k: !__props.isViewingOwnCard
       }, !__props.isViewingOwnCard ? common_vendor.e({
-        i: common_vendor.p({
+        l: common_vendor.p({
           type: "compose",
           size: "18",
           color: "#888"
         }),
-        j: __props.remarkName
+        m: __props.remarkName
       }, __props.remarkName ? {
-        k: common_vendor.t(__props.remarkName)
+        n: common_vendor.t(__props.remarkName)
       } : {}, {
-        l: common_vendor.p({
+        o: common_vendor.p({
           type: "right",
           size: "16",
           color: "#bbb"
         }),
-        m: common_vendor.o(($event) => _ctx.$emit("editRemark"))
+        p: common_vendor.o(($event) => _ctx.$emit("editRemark"))
       }) : {}, {
-        n: common_vendor.p({
+        q: common_vendor.p({
           type: "calendar-filled",
           size: "18",
           color: "#888"
         }),
-        o: common_vendor.t(__props.era || "未设置"),
-        p: common_vendor.f(__props.contactInfo, (item, index, i0) => {
+        r: common_vendor.t(__props.era || "未设置"),
+        s: common_vendor.f(__props.contactInfo, (item, index, i0) => {
           return {
             a: "0262bca8-3-" + i0,
             b: common_vendor.p({
@@ -271,14 +280,14 @@ const _sfc_main = {
             e: index
           };
         }),
-        q: __props.associationList && __props.associationList.length > 0
+        t: __props.associationList && __props.associationList.length > 0
       }, __props.associationList && __props.associationList.length > 0 ? {
-        r: common_vendor.p({
+        v: common_vendor.p({
           type: "staff-filled",
           size: "18",
           color: "#C9A063"
         }),
-        s: common_vendor.f(__props.associationList, (item, index, i0) => {
+        w: common_vendor.f(__props.associationList, (item, index, i0) => {
           return common_vendor.e({
             a: common_vendor.t(item.name || "未填写"),
             b: common_vendor.t(item.title || "未填写"),
@@ -288,14 +297,14 @@ const _sfc_main = {
           });
         })
       } : {}, {
-        t: __props.companyList && __props.companyList.length > 0
+        x: __props.companyList && __props.companyList.length > 0
       }, __props.companyList && __props.companyList.length > 0 ? {
-        v: common_vendor.p({
+        y: common_vendor.p({
           type: "flag-filled",
           size: "18",
           color: "#F78C2F"
         }),
-        w: common_vendor.f(__props.companyList, (item, index, i0) => {
+        z: common_vendor.f(__props.companyList, (item, index, i0) => {
           return common_vendor.e({
             a: common_vendor.t(item.name || "未填写"),
             b: common_vendor.t(item.position || "未填写"),
@@ -306,73 +315,73 @@ const _sfc_main = {
           });
         })
       } : {}, {
-        x: __props.haveResources || __props.needResources
+        A: __props.haveResources || __props.needResources
       }, __props.haveResources || __props.needResources ? common_vendor.e({
-        y: __props.haveResources
+        B: __props.haveResources
       }, __props.haveResources ? {
-        z: common_vendor.p({
+        C: common_vendor.p({
           type: "hand-up-filled",
           size: "18",
           color: "#28a745"
         }),
-        A: common_vendor.t(__props.haveResources)
+        D: common_vendor.t(__props.haveResources)
       } : {}, {
-        B: __props.needResources
+        E: __props.needResources
       }, __props.needResources ? {
-        C: common_vendor.p({
+        F: common_vendor.p({
           type: "paperplane-filled",
           size: "18",
           color: "#007bff"
         }),
-        D: common_vendor.t(__props.needResources)
+        G: common_vendor.t(__props.needResources)
       } : {}) : {}, {
-        E: __props.signature || __props.personalBio
+        H: __props.signature || __props.personalBio
       }, __props.signature || __props.personalBio ? common_vendor.e({
-        F: __props.signature
+        I: __props.signature
       }, __props.signature ? {
-        G: common_vendor.t(__props.signature)
+        J: common_vendor.t(__props.signature)
       } : {}, {
-        H: __props.personalBio
+        K: __props.personalBio
       }, __props.personalBio ? {
-        I: common_vendor.t(__props.personalBio)
+        L: common_vendor.t(__props.personalBio)
       } : {}) : {}, {
-        J: common_vendor.p({
+        M: common_vendor.p({
           type: "pyq",
           size: "18",
           color: "#FF6A00"
         }),
-        K: common_vendor.o(($event) => _ctx.$emit("goToOpportunities")),
-        L: __props.radarDatasets && __props.radarDatasets.length > 0
+        N: common_vendor.o(($event) => _ctx.$emit("goToOpportunities")),
+        O: __props.radarDatasets && __props.radarDatasets.length > 0
       }, __props.radarDatasets && __props.radarDatasets.length > 0 ? {
-        M: common_vendor.p({
+        P: common_vendor.p({
           type: "star-filled",
           size: "18",
           color: "#FF8500"
         }),
-        N: common_vendor.t(__props.isViewingOwnCard ? "我的猩友评价" : "TA的猩友评价"),
-        O: common_vendor.p({
+        Q: common_vendor.t(__props.isViewingOwnCard ? "我的猩友评价" : "TA的猩友评价"),
+        R: common_vendor.p({
           datasets: __props.radarDatasets,
           showCard: false,
           showTitle: false
         })
       } : {}, {
-        P: __props.showUserQrCode
+        S: __props.showUserQrCode
       }, __props.showUserQrCode ? {
-        Q: __props.userWeChatQrCodeUrl,
-        R: common_vendor.o(($event) => previewImage(__props.userWeChatQrCodeUrl))
+        T: __props.userWeChatQrCodeUrl,
+        U: common_vendor.o(($event) => previewImage(__props.userWeChatQrCodeUrl))
       } : {}, {
-        S: __props.shardCode
+        V: __props.shardCode
       }, __props.shardCode ? {
-        T: common_vendor.t(__props.shardCode),
-        U: common_vendor.p({
+        W: common_vendor.t(__props.shardCode),
+        X: common_vendor.p({
           type: "paperclip",
           size: "16",
           color: "#F78C2F"
         }),
-        V: common_vendor.o(copyShardCode)
+        Y: common_vendor.o(copyShardCode)
       } : {}, {
-        W: __props.dynamicQrCodeUrl || __props.platformQrCodeUrl,
-        X: common_vendor.o(($event) => previewImage(__props.dynamicQrCodeUrl || __props.platformQrCodeUrl))
+        Z: __props.dynamicQrCodeUrl || __props.platformQrCodeUrl,
+        aa: common_vendor.o(($event) => previewImage(__props.dynamicQrCodeUrl || __props.platformQrCodeUrl))
       });
     };
   }

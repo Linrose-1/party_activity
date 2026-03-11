@@ -38,8 +38,8 @@
 				:signature="userInfo.signature" :personal-bio="userInfo.personalBio"
 				:contact-info="formattedContactInfo" :show-user-qr-code="!!userInfo.wechatQrCodeUrl"
 				:user-we-chat-qr-code-url="userInfo.wechatQrCodeUrl" :shard-code="userInfo.shardCode"
-				:dynamic-qr-code-url="promotionQrCodeBase64" :radar-datasets="radarDatasets"
-				platform-qr-code-url="https://img.gofor.club/mmexport1759211962539.jpg"
+				:dynamic-qr-code-url="promotionQrCodeBase64" :radar-datasets="radarDatasets" :credit-level="creditLevel"
+				@goToCredit="handleGoToCredit" platform-qr-code-url="https://img.gofor.club/mmexport1759211962539.jpg"
 				@goToOpportunities="handleGoToOpportunities" />
 
 			<!-- <view style="width: 100%;height: 140rpx;"></view> -->
@@ -175,6 +175,8 @@
 	const shareTypePopupRef = ref(null);
 	const currentShareMode = ref('PROXY'); // 默认模式， 'SELF' | 'PROXY'
 	const isShareTypePopupOpen = ref(false);
+
+	const creditLevel = ref('');
 
 	// 假设后端返回的名片信息里有一个字段表示是否互圈，比如 isFriend
 	// 目前先模拟一下，或者根据需求说明先预留
@@ -332,6 +334,8 @@
 
 			if (userInfo.value.id) {
 				await fetchRadarStatistics(userInfo.value.id);
+
+				fetchCreditLevel(userInfo.value.id);
 			}
 
 			await fetchPromotionQrCode();
@@ -350,6 +354,30 @@
 		} finally {
 			isLoading.value = false;
 		}
+	};
+
+	// 获取信用等级的方法
+	const fetchCreditLevel = async (userId) => {
+		try {
+			const {
+				data,
+				error
+			} = await request(`/app-api/member/user/other_credit-score/${userId}`, {
+				method: 'GET'
+			});
+			if (!error && data) {
+				creditLevel.value = data.creditLevel; // 存储如 "铁级猩友"
+			}
+		} catch (e) {
+			console.error('获取信用等级失败', e);
+		}
+	};
+
+	// 4. 处理标签点击跳转
+	const handleGoToCredit = () => {
+		uni.navigateTo({
+			url: '/packages/credit-score/credit-score'
+		});
 	};
 
 	// 获取雷达图数据

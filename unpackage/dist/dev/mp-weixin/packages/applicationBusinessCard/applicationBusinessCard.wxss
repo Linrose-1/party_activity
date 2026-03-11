@@ -180,6 +180,18 @@
 		font-weight: 700;
 		color: #333;
 }
+.preview-credit-tag.data-v-fd2d3e1c {
+		margin-top: 10rpx;
+		background: linear-gradient(90deg, #1890FF, #00D2FF);
+		color: #fff;
+		font-size: 22rpx;
+		padding: 4rpx 16rpx;
+		border-radius: 20rpx;
+		display: inline-flex;
+		align-items: center;
+		gap: 4rpx;
+		box-shadow: 0 4rpx 10rpx rgba(24, 144, 255, 0.2);
+}
 .target-title.data-v-fd2d3e1c {
 		font-size: 32rpx;
 		/* 转换为 rpx */

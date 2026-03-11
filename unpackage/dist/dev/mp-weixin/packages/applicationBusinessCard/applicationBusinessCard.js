@@ -23,8 +23,9 @@ const _sfc_main = {
     common_vendor.ref(false);
     const isLoading = common_vendor.ref(true);
     const friendOwnerUserId = common_vendor.ref(null);
+    const creditLevel = common_vendor.ref("");
     common_vendor.onLoad((options) => {
-      common_vendor.index.__f__("log", "at packages/applicationBusinessCard/applicationBusinessCard.vue:177", "[business-card-apply] onLoad 触发。收到的选项：", options);
+      common_vendor.index.__f__("log", "at packages/applicationBusinessCard/applicationBusinessCard.vue:183", "[business-card-apply] onLoad 触发。收到的选项：", options);
       if (options.friendOwnerUserId) {
         friendOwnerUserId.value = options.friendOwnerUserId;
       }
@@ -61,7 +62,7 @@ const _sfc_main = {
           fetchSimpleTargetUserInfo()
         ]);
       } catch (e) {
-        common_vendor.index.__f__("error", "at packages/applicationBusinessCard/applicationBusinessCard.vue:241", "初始化页面时发生错误:", e);
+        common_vendor.index.__f__("error", "at packages/applicationBusinessCard/applicationBusinessCard.vue:247", "初始化页面时发生错误:", e);
       } finally {
         isLoading.value = false;
       }
@@ -75,7 +76,7 @@ const _sfc_main = {
       if (fromShare.value) {
         requestData.notPay = 1;
       }
-      common_vendor.index.__f__("log", "at packages/applicationBusinessCard/applicationBusinessCard.vue:260", "requestData:", JSON.stringify(requestData));
+      common_vendor.index.__f__("log", "at packages/applicationBusinessCard/applicationBusinessCard.vue:266", "requestData:", JSON.stringify(requestData));
       const {
         data,
         error
@@ -84,7 +85,7 @@ const _sfc_main = {
         data: requestData
       });
       if (data && !error) {
-        common_vendor.index.__f__("log", "at packages/applicationBusinessCard/applicationBusinessCard.vue:271", "权限检查成功，直接跳转到名片页。");
+        common_vendor.index.__f__("log", "at packages/applicationBusinessCard/applicationBusinessCard.vue:277", "权限检查成功，直接跳转到名片页。");
         let targetUrl = `/packages/my-businessCard/my-businessCard?id=${targetUserId.value}`;
         if (friendOwnerUserId.value) {
           targetUrl += `&friendOwnerUserId=${friendOwnerUserId.value}`;
@@ -94,13 +95,13 @@ const _sfc_main = {
         });
         return true;
       } else {
-        common_vendor.index.__f__("log", "at packages/applicationBusinessCard/applicationBusinessCard.vue:281", "权限检查失败，显示支付页面。", error);
+        common_vendor.index.__f__("log", "at packages/applicationBusinessCard/applicationBusinessCard.vue:287", "权限检查失败，显示支付页面。", error);
         return false;
       }
     };
     const fetchSimpleTargetUserInfo = async () => {
       if (!targetUserId.value) {
-        common_vendor.index.__f__("warn", "at packages/applicationBusinessCard/applicationBusinessCard.vue:293", "无法获取简要信息，因为 targetUserId 不存在。");
+        common_vendor.index.__f__("warn", "at packages/applicationBusinessCard/applicationBusinessCard.vue:299", "无法获取简要信息，因为 targetUserId 不存在。");
         return;
       }
       const {
@@ -114,11 +115,11 @@ const _sfc_main = {
           // 固定传 1
         }
       });
-      common_vendor.index.__f__("log", "at packages/applicationBusinessCard/applicationBusinessCard.vue:309", "----------- getSimpleUserInfo 接口返回数据 -----------");
-      common_vendor.index.__f__("log", "at packages/applicationBusinessCard/applicationBusinessCard.vue:310", JSON.stringify(data, null, 2));
-      common_vendor.index.__f__("log", "at packages/applicationBusinessCard/applicationBusinessCard.vue:311", "----------------------------------------------------");
+      common_vendor.index.__f__("log", "at packages/applicationBusinessCard/applicationBusinessCard.vue:315", "----------- getSimpleUserInfo 接口返回数据 -----------");
+      common_vendor.index.__f__("log", "at packages/applicationBusinessCard/applicationBusinessCard.vue:316", JSON.stringify(data, null, 2));
+      common_vendor.index.__f__("log", "at packages/applicationBusinessCard/applicationBusinessCard.vue:317", "----------------------------------------------------");
       if (error) {
-        common_vendor.index.__f__("error", "at packages/applicationBusinessCard/applicationBusinessCard.vue:315", "获取目标用户简要信息失败:", error);
+        common_vendor.index.__f__("error", "at packages/applicationBusinessCard/applicationBusinessCard.vue:321", "获取目标用户简要信息失败:", error);
         return;
       }
       if (data) {
@@ -126,6 +127,7 @@ const _sfc_main = {
           ...targetUserInfo.value,
           ...data
         };
+        fetchOtherCreditLevel(targetUserId.value);
       }
     };
     const fetchCurrentUserInfo = async () => {
@@ -138,7 +140,7 @@ const _sfc_main = {
       if (data) {
         currentUserInfo.value = data;
       } else {
-        common_vendor.index.__f__("error", "at packages/applicationBusinessCard/applicationBusinessCard.vue:342", "获取当前用户信息失败:", error);
+        common_vendor.index.__f__("error", "at packages/applicationBusinessCard/applicationBusinessCard.vue:350", "获取当前用户信息失败:", error);
       }
     };
     const handlePayToReadCard = async () => {
@@ -202,6 +204,21 @@ const _sfc_main = {
           duration: 2e3
         });
       }
+    };
+    const fetchOtherCreditLevel = async (userId) => {
+      const {
+        data
+      } = await utils_request.request(`/app-api/member/user/other_credit-score/${userId}`, {
+        method: "GET"
+      });
+      if (data) {
+        creditLevel.value = data.creditLevel;
+      }
+    };
+    const goToCreditScore = () => {
+      common_vendor.index.navigateTo({
+        url: "/packages/credit-score/credit-score"
+      });
     };
     const handleEditRemark = () => {
       common_vendor.index.showModal({
@@ -288,89 +305,99 @@ const _sfc_main = {
         e: common_vendor.t((targetUserInfo.value.realName || targetUserInfo.value.nickname || "?").charAt(0))
       }, {
         f: common_vendor.t(targetUserInfo.value.realName || targetUserInfo.value.nickname),
-        g: common_vendor.p({
+        g: creditLevel.value
+      }, creditLevel.value ? {
+        h: common_vendor.p({
+          type: "vip-filled",
+          size: "12",
+          color: "#fff"
+        }),
+        i: common_vendor.t(creditLevel.value),
+        j: common_vendor.o(goToCreditScore)
+      } : {}, {
+        k: common_vendor.p({
           type: "compose",
           size: "16",
           color: "#888"
         }),
-        h: targetUserInfo.value.remarkName
+        l: targetUserInfo.value.remarkName
       }, targetUserInfo.value.remarkName ? {
-        i: common_vendor.t(targetUserInfo.value.remarkName)
+        m: common_vendor.t(targetUserInfo.value.remarkName)
       } : {}, {
-        j: common_vendor.p({
+        n: common_vendor.p({
           type: "right",
           size: "14",
           color: "#ccc"
         }),
-        k: common_vendor.o(handleEditRemark),
-        l: targetUserInfo.value.companyName
+        o: common_vendor.o(handleEditRemark),
+        p: targetUserInfo.value.companyName
       }, targetUserInfo.value.companyName ? {
-        m: common_vendor.p({
+        q: common_vendor.p({
           type: "flag",
           size: "16",
           color: "#888"
         }),
-        n: common_vendor.t(targetUserInfo.value.companyName)
+        r: common_vendor.t(targetUserInfo.value.companyName)
       } : {}, {
-        o: targetUserInfo.value.positionTitle
+        s: targetUserInfo.value.positionTitle
       }, targetUserInfo.value.positionTitle ? {
-        p: common_vendor.p({
+        t: common_vendor.p({
           type: "staff",
           size: "16",
           color: "#888"
         }),
-        q: common_vendor.t(targetUserInfo.value.positionTitle)
+        v: common_vendor.t(targetUserInfo.value.positionTitle)
       } : {}, {
-        r: targetUserInfo.value.professionalTitle
+        w: targetUserInfo.value.professionalTitle
       }, targetUserInfo.value.professionalTitle ? {
-        s: common_vendor.p({
+        x: common_vendor.p({
           type: "medal",
           size: "16",
           color: "#888"
         }),
-        t: common_vendor.t(targetUserInfo.value.professionalTitle)
+        y: common_vendor.t(targetUserInfo.value.professionalTitle)
       } : {}, {
-        v: targetUserInfo.value.socialOrganization
+        z: targetUserInfo.value.socialOrganization
       }, targetUserInfo.value.socialOrganization ? {
-        w: common_vendor.p({
+        A: common_vendor.p({
           type: "network",
           size: "16",
           color: "#888"
         }),
-        x: common_vendor.t(targetUserInfo.value.socialOrganization)
+        B: common_vendor.t(targetUserInfo.value.socialOrganization)
       } : {}, {
-        y: targetUserInfo.value.personalBio
+        C: targetUserInfo.value.personalBio
       }, targetUserInfo.value.personalBio ? {
-        z: common_vendor.p({
+        D: common_vendor.p({
           type: "paperclip",
           size: "16",
           color: "#888"
         }),
-        A: common_vendor.t(targetUserInfo.value.personalBio)
+        E: common_vendor.t(targetUserInfo.value.personalBio)
       } : {}, {
-        B: common_vendor.t(targetUserInfo.value.realName || targetUserInfo.value.nickname),
-        C: common_vendor.t(costAmount.value),
-        D: common_vendor.p({
+        F: common_vendor.t(targetUserInfo.value.realName || targetUserInfo.value.nickname),
+        G: common_vendor.t(costAmount.value),
+        H: common_vendor.p({
           type: "info-filled",
           size: "14",
           color: "#FF6A00"
         }),
-        E: friendOwnerUserId.value
+        I: friendOwnerUserId.value
       }, friendOwnerUserId.value ? {} : {}, {
-        F: currentUserInfo.value
+        J: currentUserInfo.value
       }, currentUserInfo.value ? {
-        G: common_vendor.t(currentUserInfo.value.point),
-        H: currentUserInfo.value.point < 1 ? 1 : ""
+        K: common_vendor.t(currentUserInfo.value.point),
+        L: currentUserInfo.value.point < 1 ? 1 : ""
       } : {}, {
-        I: showInsufficient.value
+        M: showInsufficient.value
       }, showInsufficient.value ? {} : {}, {
-        J: common_vendor.t(isPaying.value ? "支付中..." : "确认支付"),
-        K: common_vendor.o(handlePayToReadCard),
-        L: isPaying.value,
-        M: isPaying.value,
-        N: common_vendor.o(goToEarnPoints)
+        N: common_vendor.t(isPaying.value ? "支付中..." : "确认支付"),
+        O: common_vendor.o(handlePayToReadCard),
+        P: isPaying.value,
+        Q: isPaying.value,
+        R: common_vendor.o(goToEarnPoints)
       }) : {
-        O: common_vendor.p({
+        S: common_vendor.p({
           status: "loading",
           contentText: {
             contentdown: "上拉加载更多",
@@ -379,10 +406,10 @@ const _sfc_main = {
           }
         })
       }, {
-        P: currentUserInfo.value && targetUserInfo.value
+        T: currentUserInfo.value && targetUserInfo.value
       }, currentUserInfo.value && targetUserInfo.value ? {
-        Q: common_vendor.t(formattedFriendRequestMessage.value),
-        R: common_vendor.o(copyFriendRequestMessage)
+        U: common_vendor.t(formattedFriendRequestMessage.value),
+        V: common_vendor.o(copyFriendRequestMessage)
       } : {}));
     };
   }

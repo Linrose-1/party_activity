@@ -157,7 +157,7 @@
 			id: user.id,
 			name: user.nickname || user.realName || '商友',
 			avatar: user.avatar || defaultAvatar,
-			isEnterpriseSource: user.enterpriseIdCert === 1,
+			// isEnterpriseSource: user.enterpriseIdCert === 1,
 			isIdVerified: user.idCert === 1
 		};
 

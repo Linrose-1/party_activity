@@ -29,6 +29,7 @@ const _sfc_main = {
     const addCircleRef = common_vendor.ref(null);
     const inviteCircleRef = common_vendor.ref(null);
     const targetUser = common_vendor.ref({});
+    common_vendor.ref("");
     const PATHS = {
       personalCard: "/packages/applicationBusinessCard/applicationBusinessCard",
       enterpriseCard: "/packages/enterprise-card/enterprise-card",
