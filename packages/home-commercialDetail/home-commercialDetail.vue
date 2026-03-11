@@ -57,8 +57,9 @@
 					{{ postDetail.content }}
 				</view>
 
-									<!-- ===== 猎伙专属信息卡片（仅 postType == 1 或 postType == 2 时展示）===== -->
-									<view v-if="postDetail.postType == 1 || postDetail.postType == 2" class="liehuo-info-card">					<!-- 紧急程度 -->
+				<!-- ===== 猎伙专属信息卡片（仅 postType == 1 或 postType == 2 时展示）===== -->
+				<view v-if="postDetail.postType == 1 || postDetail.postType == 2" class="liehuo-info-card">
+					<!-- 紧急程度 -->
 					<view class="liehuo-row" v-if="postDetail.urgentLevel">
 						<text class="liehuo-key">紧急程度</text>
 						<view class="urgency-badge" :class="{
@@ -149,8 +150,10 @@
 					</view>
 				</view>
 
-									<!-- ===== 感兴趣按钮（仅猎伙商机 && 非本人发布时显示）===== -->
-									<view v-if="(postDetail.postType == 1 || postDetail.postType == 2) && loggedInUserId && loggedInUserId !== postDetail.userId"					class="interest-btn-wrap">
+				<!-- ===== 感兴趣按钮（仅猎伙商机 && 非本人发布时显示）===== -->
+				<view
+					v-if="(postDetail.postType == 1 || postDetail.postType == 2) && loggedInUserId && loggedInUserId !== postDetail.userId"
+					class="interest-btn-wrap">
 					<view class="interest-btn" :class="{ 'interested': postDetail.isInterested }"
 						@click="toggleInterest">
 						<text class="interest-icon">{{ postDetail.isInterested ? '✅' : '🤝' }}</text>
@@ -205,14 +208,16 @@
 								</view>
 								<view class="comment-time">{{ comment.time }}</view>
 								<view class="comment-text">{{ comment.text }}</view>
-								
+
 								<!-- 评论图片 -->
 								<view v-if="comment.imageUrls && comment.imageUrls.length > 0" class="comment-images">
-									<view v-for="(img, imgIndex) in comment.imageUrls" :key="imgIndex" class="comment-image-item" @click="previewCommentImage(comment.imageUrls, imgIndex)">
+									<view v-for="(img, imgIndex) in comment.imageUrls" :key="imgIndex"
+										class="comment-image-item"
+										@click="previewCommentImage(comment.imageUrls, imgIndex)">
 										<image :src="img" mode="aspectFill" class="comment-image"></image>
 									</view>
 								</view>
-								
+
 								<view class="comment-actions">
 									<view class="comment-action" @click="replyComment(comment)">
 										<uni-icons type="chatbubble" size="16" color="#666"></uni-icons> 回复
@@ -243,22 +248,25 @@
 						<textarea auto-height maxlength="200" v-model="newCommentText"
 							:placeholder="commentInputPlaceholder" :adjust-position="false" class="bar-textarea"
 							cursor-spacing="10"></textarea>
-							
+
 						<!-- 图片上传按钮 -->
-						<view v-if="!imageUrls || imageUrls.length === 0" class="image-upload-btn" @click="handleChooseImage">
+						<view v-if="!imageUrls || imageUrls.length === 0" class="image-upload-btn"
+							@click="handleChooseImage">
 							<uni-icons type="image" size="24" color="#999"></uni-icons>
 						</view>
-						
-						<view class="send-btn" :class="{ 'can-send': newCommentText.trim().length > 0 || (imageUrls && imageUrls.length > 0) }"
+
+						<view class="send-btn"
+							:class="{ 'can-send': newCommentText.trim().length > 0 || (imageUrls && imageUrls.length > 0) }"
 							@click="addComment">
 							<uni-icons type="paperplane-filled" size="20" color="#fff"></uni-icons>
 						</view>
 					</view>
-					
+
 					<!-- 已选择的图片预览 -->
 					<view v-if="imageUrls && imageUrls.length > 0" class="selected-images-container">
 						<view v-for="(img, index) in imageUrls" :key="index" class="selected-image-item">
-							<image :src="img" mode="aspectFill" class="selected-image" @click="previewImage(imageUrls, index)"></image>
+							<image :src="img" mode="aspectFill" class="selected-image"
+								@click="previewImage(imageUrls, index)"></image>
 							<view class="remove-image" @click="removeImage(index)">×</view>
 						</view>
 						<view class="image-comment-hint">
@@ -303,7 +311,7 @@
 				<text>分享到朋友圈</text>
 			</view>
 		</view>
-		
+
 		<!-- ===== 感兴趣成功反馈弹窗 ===== -->
 		<view v-if="showInterestSuccessModal" class="interest-modal-mask" @click="closeInterestModal">
 			<view class="interest-modal-box" @click.stop>
@@ -420,7 +428,7 @@
 		interestCount: 0, // 感兴趣人数
 		isInterested: false, // 当前用户是否已表达感兴趣
 	});
-	
+
 	// 评论图片相关
 	const imageUrls = ref([]);
 
@@ -847,7 +855,8 @@
 			let imageUrls = comment.imageUrls || [];
 			if (Array.isArray(imageUrls) && imageUrls.length > 0) {
 				// 检查是否是字符串格式而非数组格式
-				if (typeof imageUrls[0] === 'string' && imageUrls[0].startsWith('["') && imageUrls[0].endsWith('"]')) {
+				if (typeof imageUrls[0] === 'string' && imageUrls[0].startsWith('["') && imageUrls[0].endsWith(
+						'"]')) {
 					try {
 						// 尝试解析字符串格式的数组
 						const parsed = JSON.parse(imageUrls[0]);
@@ -893,9 +902,7 @@
 				comments.value = flattenComments(result.data);
 				if (targetCommentId.value) {
 					nextTick(() => {
-						setTimeout(() => {
-							scrollToTargetComment(targetCommentId.value);
-						}, 200);
+						scrollToTargetComment(targetCommentId.value);
 					});
 				}
 			} else {
@@ -1012,9 +1019,9 @@
 			}
 		});
 	};
-	
+
 	// ===== 评论图片功能 =====
-	
+
 	/**
 	 * 选择并上传图片（限制为1张，单张限5MB）
 	 */
@@ -1059,7 +1066,7 @@
 			},
 		});
 	};
-	
+
 	/**
 	 * 删除已选择的图片
 	 */
@@ -1074,7 +1081,7 @@
 			}
 		});
 	};
-	
+
 	/**
 	 * 预览已选择的图片
 	 */
@@ -1085,7 +1092,7 @@
 			loop: true
 		});
 	};
-	
+
 	/**
 	 * 预览评论中的图片
 	 */
@@ -1355,31 +1362,46 @@
 		}, 100);
 	};
 
+	/**
+	 * 精准定位到目标评论
+	 */
 	const scrollToTargetComment = (commentId) => {
 		if (!commentId) return;
+
+		// 增加延迟，确保 v-for 已经完成了 DOM 的渲染
+		// 500ms 是一个比较稳妥的数值
 		setTimeout(() => {
 			const query = uni.createSelectorQuery();
-			query.select(`[data-comment-id="${commentId}"]`).boundingClientRect();
+
+			// 核心修复：确保 ID 转换为字符串，并使用更稳固的选择器
+			const idSelector = `[data-comment-id="${commentId}"]`;
+
+			query.select(idSelector).boundingClientRect();
 			query.selectViewport().scrollOffset();
+
 			query.exec(res => {
-				if (res && res[0] && res[1]) {
+				// res[0] 是元素位置，res[1] 是当前滚动位置
+				if (res && res[0]) {
+					console.log('✅ 找到目标评论元素，准备滚动', res[0].top);
 					uni.pageScrollTo({
+						// 目标位置 = 当前滚动位 + 元素相对顶部的距离 - 预留的偏移量(100rpx)
 						scrollTop: res[1].scrollTop + res[0].top - 100,
-						duration: 300,
-						success: () => uni.showToast({
-							title: '已定位到该评论',
-							icon: 'none',
-							duration: 1500
-						})
+						duration: 300
+					});
+
+					// 可选：给定位的评论加一个高亮动画或提示
+					uni.showToast({
+						title: '已定位到该评论',
+						icon: 'none'
 					});
 				} else {
+					// 如果 res[0] 为空，说明还是没找到 DOM 节点
+					console.warn('❌ 未找到评论元素，执行兜底：跳转到评论区顶部');
 					scrollToCommentsSection();
 				}
 			});
-		}, 300);
+		}, 600); // 稍微调高延迟，确保渲染完成
 	};
-
-
 </script>
 
 <style scoped>
@@ -2105,7 +2127,7 @@
 		gap: 10rpx;
 		margin: 10rpx 0;
 	}
-	
+
 	.comment-image-item {
 		width: 240rpx;
 		height: 240rpx;
@@ -2114,17 +2136,17 @@
 		position: relative;
 		flex-shrink: 0;
 	}
-	
+
 	.comment-image {
 		width: 100%;
 		height: 100%;
 		display: block;
 	}
-	
+
 	.comment-image-item:active {
 		opacity: 0.7;
 	}
-	
+
 	/* ==================== 评论区 ==================== */
 	.comments-section {
 		background: white;
@@ -2302,7 +2324,7 @@
 		padding: 10rpx 0;
 		text-align: center;
 	}
-	
+
 	.selected-image-item {
 		position: relative;
 		width: 120rpx;
@@ -2335,7 +2357,7 @@
 		line-height: 1;
 		z-index: 2;
 	}
-	
+
 	.image-upload-btn {
 		display: flex;
 		align-items: center;
@@ -2551,17 +2573,16 @@
 		display: block;
 		margin-bottom: 10rpx;
 	}
-	
+
 	/* ============ 文本选择支持 ============ */
 	.post-selectable {
-	  /* 允许文本被选择 */
-	  user-select: text;
-	  -webkit-user-select: text;
-	  -moz-user-select: text;
-	  -ms-user-select: text;
-	  
-	  /* 确保长按时显示系统菜单 */
-	  -webkit-touch-callout: auto;
-	}
+		/* 允许文本被选择 */
+		user-select: text;
+		-webkit-user-select: text;
+		-moz-user-select: text;
+		-ms-user-select: text;
 
+		/* 确保长按时显示系统菜单 */
+		-webkit-touch-callout: auto;
+	}
 </style>

@@ -112,7 +112,7 @@ const _sfc_main = {
           scrollToCommentsSection();
         });
       }
-      common_vendor.index.__f__("log", "at packages/home-commercialDetail/home-commercialDetail.vue:463", `✅ [商机详情页] onLoad options: ${JSON.stringify(options)}`);
+      common_vendor.index.__f__("log", "at packages/home-commercialDetail/home-commercialDetail.vue:471", `✅ [商机详情页] onLoad options: ${JSON.stringify(options)}`);
       if (options && options.inviteCode) {
         common_vendor.index.setStorageSync("pendingInviteCode", options.inviteCode);
       }
@@ -124,7 +124,7 @@ const _sfc_main = {
         postId.value = options.id;
         getBusinessOpportunitiesDetail();
       } else {
-        common_vendor.index.__f__("error", "at packages/home-commercialDetail/home-commercialDetail.vue:478", "未接收到商机ID");
+        common_vendor.index.__f__("error", "at packages/home-commercialDetail/home-commercialDetail.vue:486", "未接收到商机ID");
         common_vendor.index.showToast({
           title: "加载失败，无效的商机",
           icon: "none"
@@ -135,7 +135,7 @@ const _sfc_main = {
         const sharerId = options.sharerId;
         const bizId = options.id;
         if (sharerId && loggedInUserId.value && sharerId === loggedInUserId.value) {
-          common_vendor.index.__f__("log", "at packages/home-commercialDetail/home-commercialDetail.vue:491", "用户点击了自己的分享链接，不计分。");
+          common_vendor.index.__f__("log", "at packages/home-commercialDetail/home-commercialDetail.vue:499", "用户点击了自己的分享链接，不计分。");
         } else if (sharerId && loggedInUserId.value && bizId) {
           triggerShareHitApi(sharerId, bizId);
         } else if (sharerId && bizId) {
@@ -231,7 +231,7 @@ const _sfc_main = {
         }
       });
       if (error)
-        common_vendor.index.__f__("error", "at packages/home-commercialDetail/home-commercialDetail.vue:598", "调用分享加分接口失败:", error);
+        common_vendor.index.__f__("error", "at packages/home-commercialDetail/home-commercialDetail.vue:606", "调用分享加分接口失败:", error);
     };
     const getBusinessOpportunitiesDetail = async () => {
       var _a, _b, _c;
@@ -306,7 +306,7 @@ const _sfc_main = {
           });
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at packages/home-commercialDetail/home-commercialDetail.vue:694", "获取商机详情失败:", error);
+        common_vendor.index.__f__("error", "at packages/home-commercialDetail/home-commercialDetail.vue:702", "获取商机详情失败:", error);
         common_vendor.index.showToast({
           title: "网络请求异常",
           icon: "none"
@@ -436,12 +436,14 @@ const _sfc_main = {
           displayText = `回复 @${replyToUser}: ${displayText}`;
         let imageUrls2 = comment.imageUrls || [];
         if (Array.isArray(imageUrls2) && imageUrls2.length > 0) {
-          if (typeof imageUrls2[0] === "string" && imageUrls2[0].startsWith('["') && imageUrls2[0].endsWith('"]')) {
+          if (typeof imageUrls2[0] === "string" && imageUrls2[0].startsWith('["') && imageUrls2[0].endsWith(
+            '"]'
+          )) {
             try {
               const parsed = JSON.parse(imageUrls2[0]);
               imageUrls2 = Array.isArray(parsed) ? parsed : imageUrls2;
             } catch (e) {
-              common_vendor.index.__f__("error", "at packages/home-commercialDetail/home-commercialDetail.vue:857", "解析imageUrls失败:", e);
+              common_vendor.index.__f__("error", "at packages/home-commercialDetail/home-commercialDetail.vue:866", "解析imageUrls失败:", e);
             }
           }
         }
@@ -477,16 +479,14 @@ const _sfc_main = {
           comments.value = flattenComments(result.data);
           if (targetCommentId.value) {
             common_vendor.nextTick$1(() => {
-              setTimeout(() => {
-                scrollToTargetComment(targetCommentId.value);
-              }, 200);
+              scrollToTargetComment(targetCommentId.value);
             });
           }
         } else {
           comments.value = [];
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at packages/home-commercialDetail/home-commercialDetail.vue:905", "请求评论列表异常:", error);
+        common_vendor.index.__f__("error", "at packages/home-commercialDetail/home-commercialDetail.vue:912", "请求评论列表异常:", error);
       }
     };
     const replyComment = async (comment) => {
@@ -555,7 +555,7 @@ const _sfc_main = {
           });
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at packages/home-commercialDetail/home-commercialDetail.vue:973", "创建评论异常:", error);
+        common_vendor.index.__f__("error", "at packages/home-commercialDetail/home-commercialDetail.vue:980", "创建评论异常:", error);
         common_vendor.index.showToast({
           title: "评论失败，请稍后重试",
           icon: "none"
@@ -624,7 +624,7 @@ const _sfc_main = {
             if (result.data)
               successfulUrls.push(result.data);
             else
-              common_vendor.index.__f__("error", "at packages/home-commercialDetail/home-commercialDetail.vue:1048", "上传失败:", result.error);
+              common_vendor.index.__f__("error", "at packages/home-commercialDetail/home-commercialDetail.vue:1055", "上传失败:", result.error);
           });
           imageUrls.value = successfulUrls;
           if (successfulUrls.length < validFiles.length) {
@@ -910,24 +910,27 @@ const _sfc_main = {
         return;
       setTimeout(() => {
         const query = common_vendor.index.createSelectorQuery();
-        query.select(`[data-comment-id="${commentId}"]`).boundingClientRect();
+        const idSelector = `[data-comment-id="${commentId}"]`;
+        query.select(idSelector).boundingClientRect();
         query.selectViewport().scrollOffset();
         query.exec((res) => {
-          if (res && res[0] && res[1]) {
+          if (res && res[0]) {
+            common_vendor.index.__f__("log", "at packages/home-commercialDetail/home-commercialDetail.vue:1385", "✅ 找到目标评论元素，准备滚动", res[0].top);
             common_vendor.index.pageScrollTo({
+              // 目标位置 = 当前滚动位 + 元素相对顶部的距离 - 预留的偏移量(100rpx)
               scrollTop: res[1].scrollTop + res[0].top - 100,
-              duration: 300,
-              success: () => common_vendor.index.showToast({
-                title: "已定位到该评论",
-                icon: "none",
-                duration: 1500
-              })
+              duration: 300
+            });
+            common_vendor.index.showToast({
+              title: "已定位到该评论",
+              icon: "none"
             });
           } else {
+            common_vendor.index.__f__("warn", "at packages/home-commercialDetail/home-commercialDetail.vue:1399", "❌ 未找到评论元素，执行兜底：跳转到评论区顶部");
             scrollToCommentsSection();
           }
         });
-      }, 300);
+      }, 600);
     };
     return (_ctx, _cache) => {
       return common_vendor.e({

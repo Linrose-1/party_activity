@@ -29,6 +29,8 @@ const DRAFT_STORAGE_KEY = "activity_draft";
 const _sfc_main = {
   __name: "active-publish",
   setup(__props) {
+    const autoSaveTimer = common_vendor.ref(null);
+    const lastAutoSaveTime = common_vendor.ref("");
     const isUserVerified = common_vendor.ref(true);
     const isPublishing = common_vendor.ref(false);
     const mode = common_vendor.ref("create");
@@ -138,10 +140,46 @@ const _sfc_main = {
     });
     common_vendor.onUnload(() => {
       common_vendor.index.$off("shopSelected");
+      if (autoSaveTimer.value)
+        clearTimeout(autoSaveTimer.value);
     });
     common_vendor.watch([timeRange, enrollTimeRange], () => {
       isPickerOpen.value = false;
     });
+    common_vendor.watch(
+      [form, timeRange, enrollTimeRange, sponsorsList, associatedStoreName],
+      () => {
+        triggerAutoSave();
+      },
+      {
+        deep: true
+      }
+    );
+    const autoSaveDraft = () => {
+      if (mode.value !== "create")
+        return;
+      const draft = {
+        form: form.value,
+        timeRange: timeRange.value,
+        enrollTimeRange: enrollTimeRange.value,
+        associatedStoreName: associatedStoreName.value,
+        sponsorsList: sponsorsList.value,
+        savedAt: Date.now()
+      };
+      common_vendor.index.setStorageSync(DRAFT_STORAGE_KEY, JSON.stringify(draft));
+      const now = /* @__PURE__ */ new Date();
+      const pad = (n) => n.toString().padStart(2, "0");
+      lastAutoSaveTime.value = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+    };
+    const triggerAutoSave = () => {
+      if (mode.value !== "create")
+        return;
+      if (autoSaveTimer.value)
+        clearTimeout(autoSaveTimer.value);
+      autoSaveTimer.value = setTimeout(() => {
+        autoSaveDraft();
+      }, 500);
+    };
     const formatTimestamp = (ts) => {
       if (!ts)
         return "";
@@ -181,7 +219,7 @@ const _sfc_main = {
           }
         }
       } catch (e) {
-        common_vendor.index.__f__("error", "at packages/active-publish/active-publish.vue:491", "获取用户实名状态失败:", e);
+        common_vendor.index.__f__("error", "at packages/active-publish/active-publish.vue:534", "获取用户实名状态失败:", e);
         isUserVerified.value = true;
       }
     };
@@ -229,7 +267,7 @@ const _sfc_main = {
               processUpload(cropRes.tempFilePath);
             },
             fail: (err) => {
-              common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:549", "用户取消裁剪或失败:", err);
+              common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:592", "用户取消裁剪或失败:", err);
             }
           });
         }
@@ -541,7 +579,7 @@ const _sfc_main = {
         remainingQuota.value = typeof data === "number" ? data : 0;
         isQuotaLoaded.value = true;
       } catch (e) {
-        common_vendor.index.__f__("error", "at packages/active-publish/active-publish.vue:894", "获取权益网络异常", e);
+        common_vendor.index.__f__("error", "at packages/active-publish/active-publish.vue:937", "获取权益网络异常", e);
       }
     };
     const showQuotaExceededModal = () => {
@@ -683,7 +721,7 @@ const _sfc_main = {
           })
         });
       } catch (e) {
-        common_vendor.index.__f__("error", "at packages/active-publish/active-publish.vue:1042", "发布失败:", e);
+        common_vendor.index.__f__("error", "at packages/active-publish/active-publish.vue:1085", "发布失败:", e);
         const errMsg = e.message || String(e) || "系统异常，请稍后重试";
         const isAuthError = errMsg.includes("实名") || errMsg.includes("认证") || errMsg.includes("idCert");
         common_vendor.index.showModal({

@@ -68,6 +68,14 @@ const _sfc_main = {
       type: String,
       default: ""
     },
+    companyList: {
+      type: Array,
+      default: () => []
+    },
+    associationList: {
+      type: Array,
+      default: () => []
+    },
     // --- 资源信息 ---
     haveResources: {
       type: String,
@@ -158,7 +166,7 @@ const _sfc_main = {
     common_vendor.computed(() => {
       return props.professionalTitle ? props.professionalTitle.split(",").filter((item) => item.trim()) : [];
     });
-    const careerGroups = common_vendor.computed(() => {
+    common_vendor.computed(() => {
       const companies = props.companyName ? props.companyName.split(",") : [];
       const positions = props.positionTitle ? props.positionTitle.split(",") : [];
       const industries = props.industry ? props.industry.split(",") : [];
@@ -173,7 +181,7 @@ const _sfc_main = {
       }
       return groups;
     });
-    const socialGroups = common_vendor.computed(() => {
+    common_vendor.computed(() => {
       const associations = props.associationName ? props.associationName.split(",") : [];
       const titles = props.professionalTitle ? props.professionalTitle.split(",") : [];
       const maxLength = Math.max(associations.length, titles.length);
@@ -263,37 +271,39 @@ const _sfc_main = {
             e: index
           };
         }),
-        q: socialGroups.value.length > 0
-      }, socialGroups.value.length > 0 ? {
+        q: __props.associationList && __props.associationList.length > 0
+      }, __props.associationList && __props.associationList.length > 0 ? {
         r: common_vendor.p({
           type: "staff-filled",
           size: "18",
           color: "#C9A063"
         }),
-        s: common_vendor.f(socialGroups.value, (group, index, i0) => {
+        s: common_vendor.f(__props.associationList, (item, index, i0) => {
           return common_vendor.e({
-            a: common_vendor.t(group.association),
-            b: common_vendor.t(group.title),
-            c: index < socialGroups.value.length - 1
-          }, index < socialGroups.value.length - 1 ? {} : {}, {
+            a: common_vendor.t(item.name || "未填写"),
+            b: common_vendor.t(item.title || "未填写"),
+            c: index < __props.associationList.length - 1
+          }, index < __props.associationList.length - 1 ? {} : {}, {
             d: index
           });
         })
       } : {}, {
-        t: careerGroups.value.length > 0
-      }, careerGroups.value.length > 0 ? {
+        t: __props.companyList && __props.companyList.length > 0
+      }, __props.companyList && __props.companyList.length > 0 ? {
         v: common_vendor.p({
           type: "flag-filled",
           size: "18",
           color: "#F78C2F"
         }),
-        w: common_vendor.f(careerGroups.value, (group, index, i0) => {
-          return {
-            a: common_vendor.t(group.company),
-            b: common_vendor.t(group.position),
-            c: common_vendor.t(group.industry),
-            d: index
-          };
+        w: common_vendor.f(__props.companyList, (item, index, i0) => {
+          return common_vendor.e({
+            a: common_vendor.t(item.name || "未填写"),
+            b: common_vendor.t(item.position || "未填写"),
+            c: common_vendor.t(item.industry || "未填写"),
+            d: index < __props.companyList.length - 1
+          }, index < __props.companyList.length - 1 ? {} : {}, {
+            e: index
+          });
         })
       } : {}, {
         x: __props.haveResources || __props.needResources
@@ -331,43 +341,38 @@ const _sfc_main = {
           size: "18",
           color: "#FF6A00"
         }),
-        K: common_vendor.p({
-          type: "right",
-          size: "16",
-          color: "#bbb"
-        }),
-        L: common_vendor.o(($event) => _ctx.$emit("goToOpportunities")),
-        M: __props.radarDatasets && __props.radarDatasets.length > 0
+        K: common_vendor.o(($event) => _ctx.$emit("goToOpportunities")),
+        L: __props.radarDatasets && __props.radarDatasets.length > 0
       }, __props.radarDatasets && __props.radarDatasets.length > 0 ? {
-        N: common_vendor.p({
+        M: common_vendor.p({
           type: "star-filled",
           size: "18",
           color: "#FF8500"
         }),
-        O: common_vendor.t(__props.isViewingOwnCard ? "我的猩友评价" : "TA的猩友评价"),
-        P: common_vendor.p({
+        N: common_vendor.t(__props.isViewingOwnCard ? "我的猩友评价" : "TA的猩友评价"),
+        O: common_vendor.p({
           datasets: __props.radarDatasets,
           showCard: false,
           showTitle: false
         })
       } : {}, {
-        Q: __props.showUserQrCode
+        P: __props.showUserQrCode
       }, __props.showUserQrCode ? {
-        R: __props.userWeChatQrCodeUrl,
-        S: common_vendor.o(($event) => previewImage(__props.userWeChatQrCodeUrl))
+        Q: __props.userWeChatQrCodeUrl,
+        R: common_vendor.o(($event) => previewImage(__props.userWeChatQrCodeUrl))
       } : {}, {
-        T: __props.shardCode
+        S: __props.shardCode
       }, __props.shardCode ? {
-        U: common_vendor.t(__props.shardCode),
-        V: common_vendor.p({
+        T: common_vendor.t(__props.shardCode),
+        U: common_vendor.p({
           type: "paperclip",
           size: "16",
           color: "#F78C2F"
         }),
-        W: common_vendor.o(copyShardCode)
+        V: common_vendor.o(copyShardCode)
       } : {}, {
-        X: __props.dynamicQrCodeUrl || __props.platformQrCodeUrl,
-        Y: common_vendor.o(($event) => previewImage(__props.dynamicQrCodeUrl || __props.platformQrCodeUrl))
+        W: __props.dynamicQrCodeUrl || __props.platformQrCodeUrl,
+        X: common_vendor.o(($event) => previewImage(__props.dynamicQrCodeUrl || __props.platformQrCodeUrl))
       });
     };
   }

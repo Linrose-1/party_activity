@@ -256,6 +256,8 @@
 		if (fromShare.value) {
 			requestData.notPay = 1;
 		}
+		
+		console.log('requestData:', JSON.stringify(requestData)); // 看看 notPay 有没有
 
 		const {
 			data,

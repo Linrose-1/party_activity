@@ -7297,9 +7297,9 @@ function initOnError() {
   };
 }
 function initRuntimeSocketService() {
-  const hosts = "192.168.144.182,127.0.0.1";
+  const hosts = "192.168.190.182,127.0.0.1";
   const port = "8090";
-  const id = "mp-weixin_uj9DaM";
+  const id = "mp-weixin_9QBkPG";
   const lazy = typeof swan !== "undefined";
   let restoreError = lazy ? () => {
   } : initOnError();
@@ -8755,6 +8755,12 @@ const subPackages = [
         path: "liehuo-interests/liehuo-interests",
         style: {
           navigationBarTitleText: "感兴趣商友列表"
+        }
+      },
+      {
+        path: "hunter-interaction/hunter-interaction",
+        style: {
+          navigationBarTitleText: "猎伙互动"
         }
       }
     ]

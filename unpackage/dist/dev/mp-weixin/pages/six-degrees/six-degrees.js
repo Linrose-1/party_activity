@@ -8,14 +8,21 @@ if (!Array) {
 }
 const _easycom_uni_icons = () => "../../uni_modules/uni-icons/components/uni-icons/uni-icons.js";
 if (!Math) {
-  _easycom_uni_icons();
+  (_easycom_uni_icons + AvatarLongPressMenu + AddCircleConfirmPopup + InviteCircleConfirmPopup)();
 }
+const AvatarLongPressMenu = () => "../../components/AvatarLongPressMenu.js";
+const AddCircleConfirmPopup = () => "../../components/AddCircleConfirmPopup.js";
+const InviteCircleConfirmPopup = () => "../../components/InviteCircleConfirmPopup.js";
 const _sfc_main = {
   __name: "six-degrees",
   setup(__props) {
+    const avatarMenuRef = common_vendor.ref(null);
+    const addCirclePopup = common_vendor.ref(null);
+    const invitePopupRef = common_vendor.ref(null);
     const searchKeyword = common_vendor.ref("");
     const recommendUsers = common_vendor.ref([]);
     const refreshing = common_vendor.ref(false);
+    const isFirstShow = common_vendor.ref(true);
     const tiers = [
       {
         id: 1,
@@ -40,6 +47,57 @@ const _sfc_main = {
       }
     ];
     const selectedTier = common_vendor.ref(tiers[1]);
+    const handleAvatarClick = async (user) => {
+      if (!await utils_user.checkLoginGuard())
+        return;
+      const menuUserData = {
+        id: user.id,
+        name: user.nickname || "商友",
+        avatar: user.avatar || "/static/icon/default-avatar.png",
+        isEnterpriseSource: false,
+        // 推荐页目前以个人为主，如有企业推荐可动态判断
+        isIdVerified: user.idCert === 1
+      };
+      avatarMenuRef.value.open(menuUserData);
+    };
+    const handleMenuAction = ({
+      type,
+      user
+    }) => {
+      switch (type) {
+        case "viewCard":
+          if (user.isEnterpriseSource) {
+            common_vendor.index.navigateTo({
+              url: `/packages/enterprise-card/enterprise-card?id=${user.id}`
+            });
+          } else {
+            navigateToBusinessCard(user);
+          }
+          break;
+        case "viewPath":
+          common_vendor.index.navigateTo({
+            url: `/packages/relationship-path/relationship-path?targetUserId=${user.id}&name=${encodeURIComponent(user.name)}`
+          });
+          break;
+        case "addCircle":
+          addCirclePopup.value.open(user);
+          break;
+        case "inviteCircle":
+          invitePopupRef.value.open(user);
+          break;
+        case "comment":
+          common_vendor.index.navigateTo({
+            url: `/packages/user-reviews/user-reviews?userId=${user.id}`
+          });
+          break;
+      }
+    };
+    const navigateToBusinessCard = (user) => {
+      const avatarUrl = user.avatar || "/static/icon/default-avatar.png";
+      common_vendor.index.navigateTo({
+        url: `/packages/applicationBusinessCard/applicationBusinessCard?id=${user.id}&name=${encodeURIComponent(user.name)}&avatar=${encodeURIComponent(avatarUrl)}`
+      });
+    };
     const fetchRecommendUsers = async (isRefresh = false) => {
       if (!isRefresh) {
         common_vendor.index.showLoading({
@@ -170,8 +228,14 @@ const _sfc_main = {
       await fetchRecommendUsers(true);
       refreshing.value = false;
     };
-    common_vendor.onShow(() => {
-      fetchRecommendUsers();
+    common_vendor.onShow(async () => {
+      if (isFirstShow.value || recommendUsers.value.length === 0) {
+        common_vendor.index.__f__("log", "at pages/six-degrees/six-degrees.vue:423", "首次加载或列表为空，执行刷新");
+        await fetchRecommendUsers();
+        isFirstShow.value = false;
+      } else {
+        common_vendor.index.__f__("log", "at pages/six-degrees/six-degrees.vue:427", "从其他页面返回，保持当前列表不刷新");
+      }
     });
     return (_ctx, _cache) => {
       return common_vendor.e({
@@ -189,15 +253,16 @@ const _sfc_main = {
         h: common_vendor.f(recommendUsers.value, (user, index, i0) => {
           return common_vendor.e({
             a: user.avatar || "/static/images/default-avatar.png",
-            b: common_vendor.t(user.nickname),
-            c: user.idCert === 1
+            b: common_vendor.o(($event) => handleAvatarClick(user), user.id),
+            c: common_vendor.t(user.nickname),
+            d: user.idCert === 1
           }, user.idCert === 1 ? {} : {}, {
-            d: common_vendor.t(user.combinedTitle),
-            e: common_vendor.t(user.companyName || "暂未设置公司"),
-            f: common_vendor.t(user.school || "暂未设置学校"),
-            g: common_vendor.t(user.locationAddressStr || "暂未设置商务/办公地"),
-            h: user.id,
-            i: common_vendor.o(($event) => viewUserDetail(user), user.id)
+            e: common_vendor.t(user.combinedTitle),
+            f: common_vendor.t(user.companyName || "暂未设置公司"),
+            g: common_vendor.t(user.school || "暂未设置学校"),
+            h: common_vendor.t(user.locationAddressStr || "暂未设置商务/办公地"),
+            i: user.id,
+            j: common_vendor.o(($event) => viewUserDetail(user), user.id)
           });
         }),
         i: recommendUsers.value.length === 0
@@ -216,7 +281,17 @@ const _sfc_main = {
         }),
         k: common_vendor.o(handleConsumeZhimi),
         l: common_vendor.o(onPullDownRefresh),
-        m: refreshing.value
+        m: refreshing.value,
+        n: common_vendor.sr(avatarMenuRef, "132afe13-1", {
+          "k": "avatarMenuRef"
+        }),
+        o: common_vendor.o(handleMenuAction),
+        p: common_vendor.sr(addCirclePopup, "132afe13-2", {
+          "k": "addCirclePopup"
+        }),
+        q: common_vendor.sr(invitePopupRef, "132afe13-3", {
+          "k": "invitePopupRef"
+        })
       });
     };
   }

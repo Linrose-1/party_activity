@@ -57,6 +57,77 @@ const _sfc_main = {
         range: "<300"
       }
     ];
+    const dimensions = [
+      {
+        key: "contributionScore",
+        label: "贡分权重",
+        icon: "medal-filled",
+        max: 300,
+        url: "/packages/getPoints/getPoints",
+        // 贡分页面，自行替换
+        tip: "获取贡分"
+      },
+      {
+        key: "pointScore",
+        label: "智米权重",
+        icon: "vip-filled",
+        max: 200,
+        url: "/packages/my-zhimi/my-zhimi",
+        // 智米页面，自行替换
+        tip: "获取智米"
+      },
+      {
+        key: "interactionScore",
+        label: "商友点评",
+        icon: "chat-filled",
+        max: 200,
+        url: null,
+        // ✨ 不跳转
+        tip: "查看说明",
+        infoText: "该评分为商友互动点评（赞踩）统计映射"
+        // ✨ 说明文字
+      },
+      {
+        key: "digitalIdentityScore",
+        label: "数字身份",
+        icon: "person-filled",
+        max: 100,
+        url: null,
+        // ✨ 不跳转
+        tip: "查看说明",
+        infoText: "该评分为数字标签评分统计雷达图映射"
+        // ✨ 说明文字
+      },
+      {
+        key: "basicInfoScore",
+        label: "基础信息",
+        icon: "info-filled",
+        max: 150,
+        url: "/packages/my-edit/my-edit",
+        // 编辑资料页面，自行替换
+        tip: "前往完善"
+      },
+      {
+        key: "realNameAuthScore",
+        label: "实名认证",
+        icon: "auth-filled",
+        max: 50,
+        url: "/packages/my-auth/my-auth",
+        // 实名认证页面，自行替换
+        tip: "前往认证"
+      }
+    ];
+    const activeTipKey = common_vendor.ref("");
+    const handleDimensionClick = (dim) => {
+      if (!dim.url && dim.infoText) {
+        activeTipKey.value = activeTipKey.value === dim.key ? "" : dim.key;
+      } else if (dim.url) {
+        activeTipKey.value = "";
+        common_vendor.index.navigateTo({
+          url: dim.url
+        });
+      }
+    };
     const showRules = () => {
       rulesPopup.value.open();
     };
@@ -93,48 +164,46 @@ const _sfc_main = {
         d: common_vendor.t(scoreData.value.creditLevel || "待提升"),
         e: common_vendor.o(showRules),
         f: common_vendor.p({
-          type: "medal-filled",
-          size: "20",
+          type: "hand-up-filled",
+          size: "16",
           color: "#FF8300"
         }),
-        g: common_vendor.t(scoreData.value.contributionScore),
-        h: scoreData.value.contributionScore / 300 * 100 + "%",
-        i: common_vendor.p({
-          type: "vip-filled",
-          size: "20",
-          color: "#FF8300"
+        g: common_vendor.f(dimensions, (dim, k0, i0) => {
+          return common_vendor.e({
+            a: "d495462d-1-" + i0,
+            b: common_vendor.p({
+              type: dim.icon,
+              size: "20",
+              color: "#FF8300"
+            }),
+            c: common_vendor.t(dim.label),
+            d: common_vendor.t(scoreData.value[dim.key]),
+            e: common_vendor.t(dim.max),
+            f: common_vendor.t(dim.tip),
+            g: "d495462d-2-" + i0,
+            h: common_vendor.p({
+              type: dim.infoText ? "info" : "right",
+              size: "14",
+              color: "#FF8300"
+            }),
+            i: scoreData.value[dim.key] / dim.max * 100 + "%",
+            j: dim.infoText && activeTipKey.value === dim.key
+          }, dim.infoText && activeTipKey.value === dim.key ? {
+            k: "d495462d-3-" + i0,
+            l: common_vendor.p({
+              type: "info-filled",
+              size: "14",
+              color: "#FF8300"
+            }),
+            m: common_vendor.t(dim.infoText),
+            n: common_vendor.o(() => {
+            }, dim.key)
+          } : {}, {
+            o: dim.key,
+            p: common_vendor.o(($event) => handleDimensionClick(dim), dim.key)
+          });
         }),
-        j: common_vendor.t(scoreData.value.pointScore),
-        k: scoreData.value.pointScore / 200 * 100 + "%",
-        l: common_vendor.p({
-          type: "chat-filled",
-          size: "20",
-          color: "#FF8300"
-        }),
-        m: common_vendor.t(scoreData.value.interactionScore),
-        n: scoreData.value.interactionScore / 200 * 100 + "%",
-        o: common_vendor.p({
-          type: "person-filled",
-          size: "20",
-          color: "#FF8300"
-        }),
-        p: common_vendor.t(scoreData.value.digitalIdentityScore),
-        q: scoreData.value.digitalIdentityScore / 100 * 100 + "%",
-        r: common_vendor.p({
-          type: "info-filled",
-          size: "20",
-          color: "#FF8400"
-        }),
-        s: common_vendor.t(scoreData.value.basicInfoScore),
-        t: scoreData.value.basicInfoScore / 150 * 100 + "%",
-        v: common_vendor.p({
-          type: "auth-filled",
-          size: "20",
-          color: "#FF8400"
-        }),
-        w: common_vendor.t(scoreData.value.realNameAuthScore),
-        x: scoreData.value.realNameAuthScore / 50 * 100 + "%",
-        y: common_vendor.f(rules, (rule, index, i0) => {
+        h: common_vendor.f(rules, (rule, index, i0) => {
           return {
             a: common_vendor.t(rule.icon),
             b: common_vendor.t(rule.name),
@@ -143,17 +212,17 @@ const _sfc_main = {
             e: scoreData.value.creditLevel === rule.name ? 1 : ""
           };
         }),
-        z: common_vendor.o(closeRules),
-        A: common_vendor.p({
+        i: common_vendor.o(closeRules),
+        j: common_vendor.p({
           type: "closeempty",
           size: "24",
           color: "#999"
         }),
-        B: common_vendor.o(closeRules),
-        C: common_vendor.sr(rulesPopup, "d495462d-6", {
+        k: common_vendor.o(closeRules),
+        l: common_vendor.sr(rulesPopup, "d495462d-4", {
           "k": "rulesPopup"
         }),
-        D: common_vendor.p({
+        m: common_vendor.p({
           type: "bottom",
           ["background-color"]: "#ffffff"
         })

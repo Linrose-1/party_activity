@@ -49,8 +49,54 @@
 				</view>
 			</view>
 
+			<!-- 3. 社会职务区 - 改为循环显示所有项 -->
+			<view class="section-block professional-section" v-if="associationList && associationList.length > 0">
+				<view class="section-title">
+					<uni-icons type="staff-filled" size="18" color="#C9A063"></uni-icons>
+					<text>组织/机构/职务</text>
+				</view>
+				<!-- 循环开始 -->
+				<view class="social-group-item" v-for="(item, index) in associationList" :key="index">
+					<view class="social-row">
+						<text class="social-label">组织：</text>
+						<text class="social-value" selectable>{{ item.name || '未填写' }}</text>
+					</view>
+					<view class="social-row">
+						<text class="social-label">职务：</text>
+						<text class="social-value" selectable>{{ item.title || '未填写' }}</text>
+					</view>
+					<!-- 如果不是最后一项，显示分割线 -->
+					<view v-if="index < associationList.length - 1" class="group-divider"></view>
+				</view>
+			</view>
+
+			<!-- 4. 职业信息区 - 改为循环显示所有项 -->
+			<view class="section-block career-section" v-if="companyList && companyList.length > 0">
+				<view class="section-title">
+					<uni-icons type="flag-filled" size="18" color="#F78C2F"></uni-icons>
+					<text>职业信息</text>
+				</view>
+				<!-- 循环开始 -->
+				<view class="career-group-item" v-for="(item, index) in companyList" :key="index">
+					<view class="career-row">
+						<text class="career-label">公司：</text>
+						<text class="career-value" selectable>{{ item.name || '未填写' }}</text>
+					</view>
+					<view class="career-row">
+						<text class="career-label">职务：</text>
+						<text class="career-value" selectable>{{ item.position || '未填写' }}</text>
+					</view>
+					<view class="career-row">
+						<text class="career-label">行业：</text>
+						<text class="career-value" selectable>{{ item.industry || '未填写' }}</text>
+					</view>
+					<!-- 如果不是最后一项，显示分割线 -->
+					<view v-if="index < companyList.length - 1" class="group-divider"></view>
+				</view>
+			</view>
+
 			<!-- 3. 社会职务区 -->
-			<view class="section-block professional-section" v-if="socialGroups.length > 0">
+			<!-- <view class="section-block professional-section" v-if="socialGroups.length > 0">
 				<view class="section-title">
 					<uni-icons type="staff-filled" size="18" color="#C9A063"></uni-icons>
 					<text>组织/机构/职务</text>
@@ -65,13 +111,12 @@
 						<text class="social-label">职务：</text>
 						<text class="social-value" selectable>{{ group.title }}</text>
 					</view>
-					<!-- 分割线：如果是多组，在组之间加个微弱的分割 -->
 					<view v-if="index < socialGroups.length - 1" class="group-divider"></view>
 				</view>
-			</view>
+			</view> -->
 
 			<!-- 4. 职业信息区  -->
-			<view class="section-block career-section" v-if="careerGroups.length > 0">
+			<!-- <view class="section-block career-section" v-if="careerGroups.length > 0">
 				<view class="section-title">
 					<uni-icons type="flag-filled" size="18" color="#F78C2F"></uni-icons>
 					<text>职业信息</text>
@@ -90,7 +135,7 @@
 						<text class="career-value" selectable>{{ group.industry }}</text>
 					</view>
 				</view>
-			</view>
+			</view> -->
 
 			<!-- 5. 资源对接区 -->
 			<view class="section-block resource-section" v-if="haveResources || needResources">
@@ -131,7 +176,7 @@
 				</view>
 				<view class="section-content">
 					<text class="content-text">查看TA发布的所有商机</text>
-					<uni-icons type="right" size="16" color="#bbb"></uni-icons>
+					<text class="triple-arrow">>>></text>
 				</view>
 			</view>
 
@@ -270,6 +315,15 @@
 		associationName: {
 			type: String,
 			default: ''
+		},
+
+		companyList: {
+			type: Array,
+			default: () => []
+		},
+		associationList: {
+			type: Array,
+			default: () => []
 		},
 
 		// --- 资源信息 ---
@@ -684,8 +738,15 @@
 
 			.group-divider {
 				height: 1rpx;
-				background-color: rgba(201, 160, 99, 0.1);
-				margin: 15rpx 0;
+				/* 必须有高度 */
+				width: 100%;
+				/* 宽度撑满 */
+				background-color: #eee;
+				/* 线的颜色 */
+				margin: 20rpx 0;
+				/* 上下间距，让两组数据分开 */
+				border-bottom: 1rpx dashed #f0f0f0;
+				/* 增加虚线感，更精致 */
 			}
 		}
 	}
@@ -859,6 +920,21 @@
 	.user-opportunities-section .content-text {
 		font-size: 28rpx;
 		color: #666;
+	}
+
+	.triple-arrow {
+		font-size: 32rpx;
+		/* 调整箭头大小 */
+		font-weight: bold;
+		/* 加粗箭头 */
+		color: #FF8C00;
+		/* 设置为您期望的橙色 */
+		line-height: 1;
+		/* 确保垂直居中 */
+		letter-spacing: -8rpx;
+		/* 负字间距，让两个 >> 叠加，看起来像三个 >>> */
+		transform: scaleY(1.2);
+		/* (可选) 稍微拉长一点，更有动感 */
 	}
 
 
@@ -1067,5 +1143,60 @@
 				height: 100%;
 			}
 		}
+	}
+
+	/* 社会职务块内部样式 */
+	.social-group-item {
+		.social-row {
+			display: flex;
+			font-size: 28rpx;
+			margin-bottom: 12rpx;
+		}
+
+		.social-label {
+			color: #A37E4A;
+			width: 100rpx;
+			flex-shrink: 0;
+		}
+
+		.social-value {
+			color: #333;
+			font-weight: 500;
+			word-break: break-all;
+		}
+	}
+
+	/* 职业信息块内部样式 */
+	.career-group-item {
+		.career-row {
+			display: flex;
+			font-size: 28rpx;
+			margin-bottom: 12rpx;
+		}
+
+		.career-label {
+			color: #888;
+			width: 100rpx;
+			flex-shrink: 0;
+		}
+
+		.career-value {
+			color: #333;
+			font-weight: 500;
+			word-break: break-all;
+		}
+	}
+
+	.group-divider {
+		height: 1rpx;
+		/* 必须有高度 */
+		width: 100%;
+		/* 宽度撑满 */
+		background-color: #eee;
+		/* 线的颜色 */
+		margin: 20rpx 0;
+		/* 上下间距，让两组数据分开 */
+		border-bottom: 1rpx dashed #f0f0f0;
+		/* 增加虚线感，更精致 */
 	}
 </style>

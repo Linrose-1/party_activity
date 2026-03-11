@@ -629,6 +629,13 @@
 				{
 					"navigationBarTitleText" : "感兴趣商友列表"
 				}
+			},
+			{
+				"path" : "hunter-interaction/hunter-interaction",
+				"style" : 
+				{
+					"navigationBarTitleText" : "猎伙互动"
+				}
 			}
 			// 如果还有其他页面要放进这个分包，继续在这里加
 		]

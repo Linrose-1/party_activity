@@ -656,7 +656,7 @@
 .comment-image-item.data-v-8303b14f:active {
 		opacity: 0.7;
 }
-	
+
 	/* ==================== 评论区 ==================== */
 .comments-section.data-v-8303b14f {
 		background: white;
@@ -1034,16 +1034,15 @@
 		display: block;
 		margin-bottom: 10rpx;
 }
-	
+
 	/* ============ 文本选择支持 ============ */
 .post-selectable.data-v-8303b14f {
-	  /* 允许文本被选择 */
-	  user-select: text;
-	  -webkit-user-select: text;
-	  -moz-user-select: text;
-	  -ms-user-select: text;
-	  
-	  /* 确保长按时显示系统菜单 */
-	  -webkit-touch-callout: auto;
-}
+		/* 允许文本被选择 */
+		user-select: text;
+		-webkit-user-select: text;
+		-moz-user-select: text;
+		-ms-user-select: text;
 
+		/* 确保长按时显示系统菜单 */
+		-webkit-touch-callout: auto;
+}

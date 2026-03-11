@@ -87,7 +87,8 @@
         "comment-page/comment-page",
         "comment-center/comment-center",
         "store-activity-list/store-activity-list",
-        "liehuo-interests/liehuo-interests"
+        "liehuo-interests/liehuo-interests",
+        "hunter-interaction/hunter-interaction"
       ]
     }
   ],

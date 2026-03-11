@@ -87,6 +87,7 @@ if (!Math) {
   "./packages/comment-center/comment-center.js";
   "./packages/store-activity-list/store-activity-list.js";
   "./packages/liehuo-interests/liehuo-interests.js";
+  "./packages/hunter-interaction/hunter-interaction.js";
 }
 const _sfc_main = {
   data() {

@@ -59,9 +59,8 @@
 				});
 				break;
 			case 'hunter':
-				uni.showToast({
-					title: '猎伙互动功能开发中',
-					icon: 'none'
+				uni.navigateTo({
+					url: '/packages/hunter-interaction/hunter-interaction'
 				});
 				break;
 			case 'business':

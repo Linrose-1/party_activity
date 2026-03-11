@@ -579,17 +579,17 @@
 		color: #666;
 		box-shadow: none;
 }
-	
+
 	/* ============ 文本选择支持 ============ */
 .post-selectable.data-v-07e72d3c {
-	  /* 允许文本被选择 */
-	  user-select: text;
-	  -webkit-user-select: text;
-	  -moz-user-select: text;
-	  -ms-user-select: text;
-	  
-	  /* 确保长按时显示系统菜单 */
-	  -webkit-touch-callout: auto;
+		/* 允许文本被选择 */
+		user-select: text;
+		-webkit-user-select: text;
+		-moz-user-select: text;
+		-ms-user-select: text;
+
+		/* 确保长按时显示系统菜单 */
+		-webkit-touch-callout: auto;
 }
 
 	/* 3.2 卡片内容 */
@@ -759,6 +759,13 @@
 		align-items: center;
 }
 
+	/* 静默用户头像的特殊样式 */
+.tiny-avatar.silent-avatar.data-v-07e72d3c {
+		border: 2rpx solid #FF8C00;
+		/* 使用主题色边框稍微区分，也可以不加 */
+		background-color: #fff;
+}
+
 	/* 微型头像样式 */
 .tiny-avatar.data-v-07e72d3c {
 		width: 36rpx;
@@ -820,4 +827,3 @@
 		color: #999;
 		font-size: 32rpx;
 }
-

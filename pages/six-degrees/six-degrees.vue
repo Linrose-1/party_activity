@@ -1,5 +1,6 @@
 <template>
-	<scroll-view class="six-degrees-container" scroll-y="true" @refresherrefresh="onPullDownRefresh" :refresher-enabled="true" :refresher-triggered="refreshing" enable-back-to-top="true">
+	<scroll-view class="six-degrees-container" scroll-y="true" @refresherrefresh="onPullDownRefresh"
+		:refresher-enabled="true" :refresher-triggered="refreshing" enable-back-to-top="true">
 		<!-- 沉浸式头部 -->
 		<view class="premium-header">
 			<!-- 背景装饰：独立出来并设置裁剪 -->
@@ -70,7 +71,7 @@
 					@click="viewUserDetail(user)">
 					<view class="card-top">
 						<image :src="user.avatar || '/static/images/default-avatar.png'" mode="aspectFill"
-							class="avatar-img" />
+							class="avatar-img" @click.stop="handleAvatarClick(user)" />
 						<view class="main-meta">
 							<view class="name-row">
 								<text class="u-name">{{ user.nickname }}</text>
@@ -135,6 +136,11 @@
 			</view>
 		</view>
 	</scroll-view>
+
+	<!-- 功能弹窗组件 -->
+	<AvatarLongPressMenu ref="avatarMenuRef" @action="handleMenuAction" />
+	<AddCircleConfirmPopup ref="addCirclePopup" />
+	<InviteCircleConfirmPopup ref="invitePopupRef" />
 </template>
 
 <script setup>
@@ -150,9 +156,18 @@
 		checkLoginGuard
 	} from '@/utils/user.js';
 
+	import AvatarLongPressMenu from '@/components/AvatarLongPressMenu.vue';
+	import AddCircleConfirmPopup from '@/components/AddCircleConfirmPopup.vue';
+	import InviteCircleConfirmPopup from '@/components/InviteCircleConfirmPopup.vue';
+
+	const avatarMenuRef = ref(null);
+	const addCirclePopup = ref(null);
+	const invitePopupRef = ref(null);
+
 	const searchKeyword = ref('');
 	const recommendUsers = ref([]);
 	const refreshing = ref(false);
+	const isFirstShow = ref(true);
 
 	// 付费档位配置
 	const tiers = [{
@@ -180,6 +195,72 @@
 	const selectedTier = ref(tiers[1]);
 
 	/**
+	 * 处理头像点击
+	 */
+	const handleAvatarClick = async (user) => {
+		// 调用 user.js 的权限检查
+		if (!await checkLoginGuard()) return;
+
+		// 格式化数据，确保符合组件需要的字段名
+		const menuUserData = {
+			id: user.id,
+			name: user.nickname || '商友',
+			avatar: user.avatar || '/static/icon/default-avatar.png',
+			isEnterpriseSource: false, // 推荐页目前以个人为主，如有企业推荐可动态判断
+			isIdVerified: user.idCert === 1
+		};
+
+		avatarMenuRef.value.open(menuUserData);
+	};
+
+	/**
+	 * 统一处理菜单项点击
+	 */
+	const handleMenuAction = ({
+		type,
+		user
+	}) => {
+		switch (type) {
+			case 'viewCard':
+				if (user.isEnterpriseSource) {
+					uni.navigateTo({
+						url: `/packages/enterprise-card/enterprise-card?id=${user.id}`
+					});
+				} else {
+					navigateToBusinessCard(user);
+				}
+				break;
+			case 'viewPath':
+				uni.navigateTo({
+					url: `/packages/relationship-path/relationship-path?targetUserId=${user.id}&name=${encodeURIComponent(user.name)}`
+				});
+				break;
+			case 'addCircle':
+				addCirclePopup.value.open(user);
+				break;
+			case 'inviteCircle':
+				invitePopupRef.value.open(user);
+				break;
+			case 'comment':
+				uni.navigateTo({
+					url: `/packages/user-reviews/user-reviews?userId=${user.id}`
+				});
+				break;
+				// 其他案例按需添加
+		}
+	};
+
+	/**
+	 * 辅助跳转个人名片方法
+	 */
+	const navigateToBusinessCard = (user) => {
+		const avatarUrl = user.avatar || '/static/icon/default-avatar.png';
+		uni.navigateTo({
+			url: `/packages/applicationBusinessCard/applicationBusinessCard?id=${user.id}&name=${encodeURIComponent(user.name)}&avatar=${encodeURIComponent(avatarUrl)}`
+		});
+	};
+
+	/**
 	 * 获取智能推荐列表
 	 */
 	const fetchRecommendUsers = async (isRefresh = false) => {
@@ -188,14 +269,14 @@
 				title: 'AI匹配中...'
 			});
 		}
-		
+
 		const {
 			data,
 			error
 		} = await request('/app-api/member/user/random-recommend', {
 			method: 'GET'
 		});
-		
+
 		if (!isRefresh) {
 			uni.hideLoading();
 		}
@@ -336,8 +417,15 @@
 		refreshing.value = false; // 停止刷新，隐藏刷新动画
 	};
 
-	onShow(() => {
-		fetchRecommendUsers();
+	onShow(async () => {
+		// 2. 只有在首次进入，或者列表为空时才主动刷新
+		if (isFirstShow.value || recommendUsers.value.length === 0) {
+			console.log('首次加载或列表为空，执行刷新');
+			await fetchRecommendUsers();
+			isFirstShow.value = false; // 加载完后关闭标志位
+		} else {
+			console.log('从其他页面返回，保持当前列表不刷新');
+		}
 	});
 </script>
 

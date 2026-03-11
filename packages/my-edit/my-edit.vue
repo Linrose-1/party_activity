@@ -35,7 +35,7 @@
 							<uni-easyinput v-model="form.nickname" placeholder="请输入用户昵称" />
 						</uni-forms-item>
 						<uni-forms-item label="真实姓名" name="realName">
-							<uni-easyinput v-model="form.realName" placeholder="请输入真实姓名" :disabled="true" />
+							<uni-easyinput v-model="form.realName" placeholder="请输入真实姓名"  :disabled="isIdVerified"  />
 						</uni-forms-item>
 						<uni-forms-item label="性别" name="sex">
 							<uni-data-select v-model="form.sex" :localdata="genderOptions" placeholder="请选择性别"
@@ -397,6 +397,12 @@
 			}]
 		},
 	};
+	
+	// 1. 完善计算属性：判断是否已实名
+	const isIdVerified = computed(() => {
+	    // 如果 idCard 存在且不为空字符串，则视为已实名
+	    return !!(form.value.idCard && form.value.idCard.trim() !== '');
+	});
 
 
 	/**

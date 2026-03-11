@@ -20,93 +20,43 @@
 				<text>信用维度分析</text>
 			</view>
 
+			<!-- ✨ 新增：引导提示文字 -->
+			<view class="dimension-guide-tip">
+				<uni-icons type="hand-up-filled" size="16" color="#FF8300"></uni-icons>
+				<text>点击各维度可前往对应页面提升得分</text>
+			</view>
+
 			<view class="dimension-list">
-				<!-- 1. 贡分权重 -->
-				<view class="dimension-item">
+				<view class="dimension-item clickable" v-for="dim in dimensions" :key="dim.key"
+					@click="handleDimensionClick(dim)">
 					<view class="item-top">
 						<view class="label-group">
-							<uni-icons type="medal-filled" size="20" color="#FF8300"></uni-icons>
-							<text class="label">贡分权重</text>
+							<uni-icons :type="dim.icon" size="20" color="#FF8300"></uni-icons>
+							<text class="label">{{ dim.label }}</text>
+							<!-- ✨ 特殊标记：有说明文字的维度加问号角标 -->
+							<!-- <view v-if="dim.infoText" class="info-badge">?</view> -->
 						</view>
-						<text class="value">{{ scoreData.contributionScore }}<text class="max">/300</text></text>
-					</view>
-					<view class="progress-bg">
-						<view class="progress-bar" :style="{ width: (scoreData.contributionScore / 300 * 100) + '%' }">
+						<view class="item-right">
+							<text class="value">
+								{{ scoreData[dim.key] }}<text class="max">/{{ dim.max }}</text>
+							</text>
+							<view class="boost-tip">
+								<text class="boost-text">{{ dim.tip }}</text>
+								<uni-icons :type="dim.infoText ? 'info' : 'right'" size="14"
+									color="#FF8300"></uni-icons>
+							</view>
 						</view>
 					</view>
-				</view>
 
-				<!-- 2. 智米权重 -->
-				<view class="dimension-item">
-					<view class="item-top">
-						<view class="label-group">
-							<uni-icons type="vip-filled" size="20" color="#FF8300"></uni-icons>
-							<text class="label">智米权重</text>
-						</view>
-						<text class="value">{{ scoreData.pointScore }}<text class="max">/200</text></text>
-					</view>
 					<view class="progress-bg">
-						<view class="progress-bar" :style="{ width: (scoreData.pointScore / 200 * 100) + '%' }"></view>
+						<view class="progress-bar" :style="{ width: (scoreData[dim.key] / dim.max * 100) + '%' }">
+						</view>
 					</view>
-				</view>
 
-				<!-- 3. 商友点评 -->
-				<view class="dimension-item">
-					<view class="item-top">
-						<view class="label-group">
-							<uni-icons type="chat-filled" size="20" color="#FF8300"></uni-icons>
-							<text class="label">商友点评</text>
-						</view>
-						<text class="value">{{ scoreData.interactionScore }}<text class="max">/200</text></text>
-					</view>
-					<view class="progress-bg">
-						<view class="progress-bar" :style="{ width: (scoreData.interactionScore / 200 * 100) + '%' }">
-						</view>
-					</view>
-				</view>
-
-				<!-- 4. 数字身份 -->
-				<view class="dimension-item">
-					<view class="item-top">
-						<view class="label-group">
-							<uni-icons type="person-filled" size="20" color="#FF8300"></uni-icons>
-							<text class="label">数字身份</text>
-						</view>
-						<text class="value">{{ scoreData.digitalIdentityScore }}<text class="max">/100</text></text>
-					</view>
-					<view class="progress-bg">
-						<view class="progress-bar"
-							:style="{ width: (scoreData.digitalIdentityScore / 100 * 100) + '%' }"></view>
-					</view>
-				</view>
-
-				<!-- 5. 基础信息 -->
-				<view class="dimension-item">
-					<view class="item-top">
-						<view class="label-group">
-							<uni-icons type="info-filled" size="20" color="#FF8400"></uni-icons>
-							<text class="label">基础信息</text>
-						</view>
-						<text class="value">{{ scoreData.basicInfoScore }}<text class="max">/150</text></text>
-					</view>
-					<view class="progress-bg">
-						<view class="progress-bar" :style="{ width: (scoreData.basicInfoScore / 150 * 100) + '%' }">
-						</view>
-					</view>
-				</view>
-
-				<!-- 6. 实名认证 -->
-				<view class="dimension-item">
-					<view class="item-top">
-						<view class="label-group">
-							<uni-icons type="auth-filled" size="20" color="#FF8400"></uni-icons>
-							<text class="label">实名认证</text>
-						</view>
-						<text class="value">{{ scoreData.realNameAuthScore }}<text class="max">/50</text></text>
-					</view>
-					<view class="progress-bg">
-						<view class="progress-bar" :style="{ width: (scoreData.realNameAuthScore / 50 * 100) + '%' }">
-						</view>
+					<!-- ✨ 说明气泡，点击展开/收起 -->
+					<view v-if="dim.infoText && activeTipKey === dim.key" class="info-bubble" @click.stop>
+						<uni-icons type="info-filled" size="14" color="#FF8300"></uni-icons>
+						<text>{{ dim.infoText }}</text>
 					</view>
 				</view>
 			</view>
@@ -261,6 +211,74 @@
 			range: '<300'
 		}
 	];
+
+	// 替换原来直接在 template 里写死的六个维度，改为数据驱动
+	const dimensions = [{
+			key: 'contributionScore',
+			label: '贡分权重',
+			icon: 'medal-filled',
+			max: 300,
+			url: '/packages/getPoints/getPoints', // 贡分页面，自行替换
+			tip: '获取贡分'
+		},
+		{
+			key: 'pointScore',
+			label: '智米权重',
+			icon: 'vip-filled',
+			max: 200,
+			url: '/packages/my-zhimi/my-zhimi', // 智米页面，自行替换
+			tip: '获取智米'
+		},
+		{
+			key: 'interactionScore',
+			label: '商友点评',
+			icon: 'chat-filled',
+			max: 200,
+			url: null, // ✨ 不跳转
+			tip: '查看说明',
+			infoText: '该评分为商友互动点评（赞踩）统计映射' // ✨ 说明文字
+		},
+		{
+			key: 'digitalIdentityScore',
+			label: '数字身份',
+			icon: 'person-filled',
+			max: 100,
+			url: null, // ✨ 不跳转
+			tip: '查看说明',
+			infoText: '该评分为数字标签评分统计雷达图映射' // ✨ 说明文字
+		},
+		{
+			key: 'basicInfoScore',
+			label: '基础信息',
+			icon: 'info-filled',
+			max: 150,
+			url: '/packages/my-edit/my-edit', // 编辑资料页面，自行替换
+			tip: '前往完善'
+		},
+		{
+			key: 'realNameAuthScore',
+			label: '实名认证',
+			icon: 'auth-filled',
+			max: 50,
+			url: '/packages/my-auth/my-auth', // 实名认证页面，自行替换
+			tip: '前往认证'
+		}
+	];
+
+	// 控制说明气泡的展示
+	const activeTipKey = ref('');
+
+	const handleDimensionClick = (dim) => {
+		if (!dim.url && dim.infoText) {
+			// 点击同一个再次关闭，点击不同的切换
+			activeTipKey.value = activeTipKey.value === dim.key ? '' : dim.key;
+		} else if (dim.url) {
+			activeTipKey.value = '';
+			uni.navigateTo({
+				url: dim.url
+			});
+		}
+	};
 
 	// ───── 方法 ─────
 
@@ -477,6 +495,101 @@
 					}
 				}
 			}
+		}
+	}
+
+	/* 维度引导提示文字 */
+	.dimension-guide-tip {
+		display: flex;
+		align-items: center;
+		gap: 8rpx;
+		margin-bottom: 28rpx;
+		padding: 14rpx 20rpx;
+		background: rgba($theme-color, 0.06);
+		border-radius: 12rpx;
+		border-left: 4rpx solid $theme-color;
+
+		text {
+			font-size: 22rpx;
+			color: $theme-color;
+			font-weight: 500;
+		}
+	}
+
+	/* 维度右侧区域：分数 + 提升提示垂直排列 */
+	.item-right {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-end;
+		gap: 4rpx;
+	}
+
+	/* 提升提示 */
+	.boost-tip {
+		display: flex;
+		align-items: center;
+		gap: 4rpx;
+
+		.boost-text {
+			font-size: 20rpx;
+			color: $theme-color;
+		}
+	}
+
+	/* 可点击维度 */
+	.dimension-item.clickable {
+		&:active {
+			background: rgba($theme-color, 0.04);
+			border-radius: 16rpx;
+			margin: 0 -16rpx;
+			padding: 0 16rpx;
+		}
+	}
+
+	/* 问号角标 */
+	.info-badge {
+		width: 28rpx;
+		height: 28rpx;
+		border-radius: 50%;
+		background: rgba($theme-color, 0.12);
+		color: $theme-color;
+		font-size: 18rpx;
+		font-weight: bold;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		margin-left: 6rpx;
+	}
+
+	/* 说明气泡 */
+	.info-bubble {
+		display: flex;
+		align-items: flex-start;
+		gap: 10rpx;
+		margin-top: 18rpx;
+		padding: 18rpx 24rpx;
+		background: rgba($theme-color, 0.06);
+		border-radius: 12rpx;
+		border-left: 4rpx solid $theme-color;
+		animation: fadeIn 0.2s ease;
+
+		text {
+			font-size: 22rpx;
+			color: #8B5E00;
+			line-height: 1.6;
+			flex: 1;
+		}
+	}
+
+	@keyframes fadeIn {
+		from {
+			opacity: 0;
+			transform: translateY(-6rpx);
+		}
+
+		to {
+			opacity: 1;
+			transform: translateY(0);
 		}
 	}
 

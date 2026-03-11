@@ -199,13 +199,19 @@
 					<view class="post-view-trace" v-if="post.isReadTrace === 1 && post.viewers.length > 0"
 						@click.stop="handleViewTrace(post)">
 						<view class="view-avatar-row">
-							<!-- 增加 v-if 保护 -->
-							<template v-for="(viewer, vIdx) in post.viewers.slice(0, 8)" :key="vIdx">
+
+							<!-- 这里的 src 你可以之后替换为正式的图标地址 -->
+							<image v-if="post.hasSilentUser" src="https://img.gofor.club/post/20251231/1gcYJWmdcqe0de467fbd77b15cffaa30eb05468f5f7f_1767178458259.png"
+								class="tiny-avatar silent-avatar" mode="aspectFill" />
+
+							<!-- 渲染普通真实用户头像 (如果有静默用户，切片数量减1，保证总数不多于8个) -->
+							<template v-for="(viewer, vIdx) in post.viewers.slice(0, post.hasSilentUser ? 7 : 8)"
+								:key="vIdx">
 								<image v-if="viewer.memberUser" :src="viewer.memberUser.avatar || defaultAvatarUrl"
 									class="tiny-avatar" mode="aspectFill" />
 							</template>
 
-							<text class="view-count-txt" v-if="post.viewNum > 0">
+							<text class="view-count-txt">
 								等{{ post.viewNum }}位商友看过
 							</text>
 						</view>
@@ -789,8 +795,7 @@
 					count: data.totalExperience || 0
 				});
 
-				// 3. 【新增】用户确认 (待审核报名)
-				// 假设接口字段名为 pendingConfirmUserTotal
+				// 3. 用户确认 (待审核报名)
 				if (data.pendingConfirmUserTotal > 0) {
 					list.push({
 						type: 'confirm',
@@ -799,7 +804,7 @@
 					});
 				}
 
-				// 4. 【新增】他人评论
+				// 4. 他人评论
 				if (data.otherCommentCount > 0) {
 					list.push({
 						type: 'otherComment',
@@ -814,6 +819,24 @@
 						type: 'myComment',
 						label: '评论他人',
 						count: data.myCommentCount
+					});
+				}
+
+				// 6. 猎伙商机感兴趣人数
+				if (data.businessOpportunitiesInterestCount > 0) {
+					list.push({
+						type: 'liehuoInterest',
+						label: '猎伙互动',
+						count: data.businessOpportunitiesInterestCount
+					});
+				}
+
+				// 7. 点评互动未读数
+				if (data.reviewUnreadCount > 0) {
+					list.push({
+						type: 'reviewUnread',
+						label: '点评互动',
+						count: data.reviewUnreadCount
 					});
 				}
 
@@ -1033,7 +1056,8 @@
 					isReadTrace: item.isReadTrace, // 1表示开启留痕
 					viewNum: item.targetViewNum || 0, // 总浏览人数
 					viewers: item.targetViews ?
-						item.targetViews.filter(v => v && v.memberUser) : []
+						item.targetViews.filter(v => v && v.memberUser) : [],
+					hasSilentUser: item.hasSilentLoginUser === 1
 				}
 			});
 
@@ -1051,7 +1075,6 @@
 				loadingStatus.value = 'noMore';
 			} else {
 				loadingStatus.value = 'more';
-				pageNo.value++;
 			}
 		} catch (err) {
 			console.error('getBusinessOpportunitiesList 逻辑异常:', err);
@@ -1262,35 +1285,77 @@
 	};
 
 	// 点击处理
+	// 点击滚动条项的处理
 	const handleNoticeClick = (item) => {
-		if (item.type === 'friend') {
-			uni.navigateTo({
-				url: '/packages/my-friendInvitation/my-friendInvitation?currentTab=1'
-			});
-		} else if (item.type === 'points') {
-			if (scrollPointsPopup.value) {
-				scrollPointsPopup.value.open(pointsDetailData.value);
-			}
-		} else if (item.type === 'confirm') {
-			// 【新增】点击“用户确认”
-			// 跳转到“我的聚会 - 我的发布”页面，那里有处理申请的入口
-			uni.navigateTo({
-				url: '/packages/my-active/my-active?currentTab=1'
-			});
-		} else if (item.type === 'otherComment') {
-			// 【新增】点击"他人评论"
-			// 跳转到商友点评列表页面
-			uni.navigateTo({
-				url: '/packages/business-interaction/business-interaction'
-			});
-		} else if (item.type === 'myComment') {
-			// 【新增】点击"评论他人"
-			// 跳转到商机评论页面
-			uni.navigateTo({
-				url: '/packages/my-comments/my-comments'
-			});
+		switch (item.type) {
+			case 'friend':
+				uni.navigateTo({
+					url: '/packages/my-friendInvitation/my-friendInvitation?currentTab=1'
+				});
+				break;
+			case 'points':
+				if (scrollPointsPopup.value) scrollPointsPopup.value.open(pointsDetailData.value);
+				break;
+			case 'confirm':
+				uni.navigateTo({
+					url: '/packages/my-active/my-active?currentTab=1'
+				});
+				break;
+			case 'otherComment':
+				uni.navigateTo({
+					url: '/packages/business-interaction/business-interaction'
+				});
+				break;
+			case 'myComment':
+				uni.navigateTo({
+					url: '/packages/my-comments/my-comments'
+				});
+				break;
+
+			case 'liehuoInterest':
+				// 跳转到刚才编写的猎伙互动页面
+				uni.navigateTo({
+					url: '/packages/hunter-interaction/hunter-interaction'
+				});
+				break;
+			case 'reviewUnread':
+				// 跳转到点评互动/社交互动页面
+				uni.navigateTo({
+					url: '/packages/my-reviews/my-reviews'
+				});
+				break;
+				// =============================
 		}
 	};
+	// const handleNoticeClick = (item) => {
+	// 	if (item.type === 'friend') {
+	// 		uni.navigateTo({
+	// 			url: '/packages/my-friendInvitation/my-friendInvitation?currentTab=1'
+	// 		});
+	// 	} else if (item.type === 'points') {
+	// 		if (scrollPointsPopup.value) {
+	// 			scrollPointsPopup.value.open(pointsDetailData.value);
+	// 		}
+	// 	} else if (item.type === 'confirm') {
+	// 		// 【新增】点击“用户确认”
+	// 		// 跳转到“我的聚会 - 我的发布”页面，那里有处理申请的入口
+	// 		uni.navigateTo({
+	// 			url: '/packages/my-active/my-active?currentTab=1'
+	// 		});
+	// 	} else if (item.type === 'otherComment') {
+	// 		// 【新增】点击"他人评论"
+	// 		// 跳转到商友点评列表页面
+	// 		uni.navigateTo({
+	// 			url: '/packages/business-interaction/business-interaction'
+	// 		});
+	// 	} else if (item.type === 'myComment') {
+	// 		// 【新增】点击"评论他人"
+	// 		// 跳转到商机评论页面
+	// 		uni.navigateTo({
+	// 			url: '/packages/my-comments/my-comments'
+	// 		});
+	// 	}
+	// };
 
 	// ============================
 	// 6. 卡片交互方法 (Card Interaction Methods)
@@ -1719,7 +1784,6 @@
 		const m = date.getMinutes().toString().padStart(2, '0');
 		return `${Y}-${M}-${D} ${h}:${m}`;
 	};
-
 </script>
 
 <style scoped>
@@ -2353,17 +2417,17 @@
 		color: #666;
 		box-shadow: none;
 	}
-	
+
 	/* ============ 文本选择支持 ============ */
 	.post-selectable {
-	  /* 允许文本被选择 */
-	  user-select: text;
-	  -webkit-user-select: text;
-	  -moz-user-select: text;
-	  -ms-user-select: text;
-	  
-	  /* 确保长按时显示系统菜单 */
-	  -webkit-touch-callout: auto;
+		/* 允许文本被选择 */
+		user-select: text;
+		-webkit-user-select: text;
+		-moz-user-select: text;
+		-ms-user-select: text;
+
+		/* 确保长按时显示系统菜单 */
+		-webkit-touch-callout: auto;
 	}
 
 	/* 3.2 卡片内容 */
@@ -2549,6 +2613,13 @@
 		align-items: center;
 	}
 
+	/* 静默用户头像的特殊样式 */
+	.tiny-avatar.silent-avatar {
+		border: 2rpx solid #FF8C00;
+		/* 使用主题色边框稍微区分，也可以不加 */
+		background-color: #fff;
+	}
+
 	/* 微型头像样式 */
 	.tiny-avatar {
 		width: 36rpx;
@@ -2615,5 +2686,4 @@
 		color: #999;
 		font-size: 32rpx;
 	}
-
 </style>

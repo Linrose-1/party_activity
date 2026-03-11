@@ -282,7 +282,8 @@
 		ref,
 		onMounted,
 		watch,
-		nextTick
+		nextTick,
+		computed
 	} from 'vue';
 	import {
 		onShow,
@@ -301,6 +302,9 @@
 	// ==============================================================================
 	// 2. 状态定义 (State Definitions)
 	// ==============================================================================
+
+	const autoSaveTimer = ref(null);
+	const lastAutoSaveTime = ref('');
 
 	const DRAFT_STORAGE_KEY = 'activity_draft';
 	const isUserVerified = ref(true);
@@ -428,15 +432,54 @@
 
 	onUnload(() => {
 		uni.$off('shopSelected');
+		if (autoSaveTimer.value) clearTimeout(autoSaveTimer.value); 
 	});
 
 	watch([timeRange, enrollTimeRange], () => {
 		isPickerOpen.value = false;
 	});
 
+	// 监听所有关键数据，自动保存草稿
+	watch(
+		[form, timeRange, enrollTimeRange, sponsorsList, associatedStoreName],
+		() => {
+			triggerAutoSave();
+		}, {
+			deep: true
+		}
+	);
+
 	// ==============================================================================
 	// 4. 工具与辅助方法 (Utils & Helpers)
 	// ==============================================================================
+
+	// 自动保存方法（复用 saveDraft 的逻辑，但不弹 Toast）
+	const autoSaveDraft = () => {
+		if (mode.value !== 'create') return; // 编辑模式不自动保存草稿
+
+		const draft = {
+			form: form.value,
+			timeRange: timeRange.value,
+			enrollTimeRange: enrollTimeRange.value,
+			associatedStoreName: associatedStoreName.value,
+			sponsorsList: sponsorsList.value,
+			savedAt: Date.now()
+		};
+		uni.setStorageSync(DRAFT_STORAGE_KEY, JSON.stringify(draft));
+
+		const now = new Date();
+		const pad = n => n.toString().padStart(2, '0');
+		lastAutoSaveTime.value = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+	};
+
+	// 防抖自动保存（3秒无操作后触发）
+	const triggerAutoSave = () => {
+		if (mode.value !== 'create') return;
+		if (autoSaveTimer.value) clearTimeout(autoSaveTimer.value);
+		autoSaveTimer.value = setTimeout(() => {
+			autoSaveDraft();
+		}, 500);
+	};
 
 	const formatTimestamp = (ts) => {
 		if (!ts) return '';
@@ -664,7 +707,7 @@
 		currentSponsorIndex.value = index;
 		currentSponsorData.value = sponsorsList.value[index];
 		nextTick(() => {
-		    showSponsorPopup.value = true;
+			showSponsorPopup.value = true;
 		});
 	};
 
@@ -816,7 +859,7 @@
 		form.value.organizerContactPhone = data.organizerContactPhone;
 		form.value.organizerPaymentQrCodeUrl = data.organizerPaymentQrCodeUrl;
 		form.value.activityCoverImageUrls = (data.activityCoverImageUrls && data.activityCoverImageUrls.length >
-			0) ?
+				0) ?
 			data.activityCoverImageUrls : [];
 
 		let matchedValue = '';

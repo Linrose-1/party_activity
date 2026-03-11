@@ -33,9 +33,7 @@
 			<MyCard :avatar="userInfo.avatar" :name="userInfo.realName || userInfo.nickname"
 				:remark-name="userInfo.remarkName" :is-viewing-own-card="isViewingOwnCard"
 				@editRemark="handleEditRemark" :pinyin-name="userInfo.pinyinName" :title="userInfo.titleName"
-				:era="userInfo.era" :company-name="userInfo.companyName" :position-title="userInfo.positionTitle"
-				 :association-name="userInfo.associationName" 
-				:industry="userInfo.industry" :professional-title="userInfo.professionalTitle"
+				:era="userInfo.era" :company-list="userInfo.companyList" :association-list="userInfo.associationList"
 				:have-resources="userInfo.haveResources" :need-resources="userInfo.needResources"
 				:signature="userInfo.signature" :personal-bio="userInfo.personalBio"
 				:contact-info="formattedContactInfo" :show-user-qr-code="!!userInfo.wechatQrCodeUrl"
@@ -702,44 +700,67 @@
 	};
 
 	/**
-	 * @description 适配不同接口返回的用户数据，统一为组件所需格式
+	 * @description 适配并处理所有项（组织机构、公司行业等）
 	 */
 	const adaptUserInfo = (rawUserData) => {
 		if (!rawUserData) return null;
+
+		// 辅助函数：安全分割字符串为数组
+		const splitStr = (str) => str ? String(str).split(',').map(s => s.trim()).filter(s => s) : [];
+
+		const associations = splitStr(rawUserData.associationName);
+		const titles = splitStr(rawUserData.professionalTitle);
+		// 组装社会职务数组
+		const associationList = associations.map((name, i) => ({
+			name: name,
+			title: titles[i] || ''
+		})).filter(item => item.name || item.title);
+
+		const companies = splitStr(rawUserData.companyName);
+		const industries = splitStr(rawUserData.industry);
+		const positions = splitStr(rawUserData.positionTitle);
+		// 组装公司职业数组
+		const companyList = companies.map((name, i) => ({
+			name: name,
+			industry: industries[i] || '',
+			position: positions[i] || ''
+		})).filter(item => item.name || item.industry || item.position);
+
 		return {
-			id: rawUserData.id,
-			// --- 身份核心信息 ---
-			avatar: rawUserData.avatar,
-			realName: rawUserData.realName,
-			nickname: rawUserData.nickname,
-			remarkName: rawUserData.remarkName,
-			pinyinName: rawUserData.topUpLevel?.name || rawUserData.topUpLevelName || '', // 会员等级
-			titleName: rawUserData.level?.name || rawUserData.levelName || '', // 身份头衔
-			era: rawUserData.era, // 新增：年代
-
-			// --- 职业与社会信息 ---
-			companyName: rawUserData.companyName,
-			positionTitle: rawUserData.positionTitle, // 新增：职务
-			industry: rawUserData.industry, // 新增：行业
-			professionalTitle: rawUserData.professionalTitle, // 新增：社会职务
-			associationName: rawUserData.associationName,
-			// --- 资源信息 ---
-			haveResources: rawUserData.haveResources, // 新增：我有资源
-			needResources: rawUserData.needResources, // 新增：我需资源
-
-			// --- 个人展示信息 ---
-			signature: rawUserData.signature, // 新增：个性签名
-			personalBio: rawUserData.personalBio, // 新增：个人简介
-
-			// --- 联系方式 (保持不变) ---
-			mobile: rawUserData.mobile,
-			contactEmail: rawUserData.contactEmail,
-			locationAddressStr: rawUserData.locationAddressStr,
-
-			// --- 二维码与邀请码 ---
-			wechatQrCodeUrl: rawUserData.wechatQrCodeUrl,
-			shardCode: rawUserData.shardCode,
+			...rawUserData, // 保留原始数据
+			associationList, // 结构化后的数组
+			companyList, // 结构化后的数组
+			// 下面这些字段如果 MyCard 内部还在用，也要保留
+			pinyinName: rawUserData.topUpLevel?.name || rawUserData.topUpLevelName || '',
+			titleName: rawUserData.level?.name || rawUserData.levelName || '',
 		};
+
+		// return {
+		// 	id: rawUserData.id,
+		// 	avatar: rawUserData.avatar,
+		// 	realName: rawUserData.realName,
+		// 	nickname: rawUserData.nickname,
+		// 	remarkName: rawUserData.remarkName,
+		// 	pinyinName: rawUserData.topUpLevel?.name || rawUserData.topUpLevelName || '',
+		// 	titleName: rawUserData.level?.name || rawUserData.levelName || '',
+		// 	era: rawUserData.era,
+
+		// 	// --- 核心修改：由字符串改为处理好的数组 ---
+		// 	associationList: associationList,
+		// 	companyList: companyList,
+
+		// 	// 其他字段保持原样传递（或根据组件需求处理）
+		// 	haveResources: rawUserData.haveResources,
+		// 	needResources: rawUserData.needResources,
+		// 	signature: rawUserData.signature,
+		// 	personalBio: rawUserData.personalBio,
+		// 	mobile: rawUserData.mobile,
+		// 	contactEmail: rawUserData.contactEmail,
+		// 	locationAddressStr: rawUserData.locationAddressStr,
+		// 	wechatQrCodeUrl: rawUserData.wechatQrCodeUrl,
+		// 	shardCode: rawUserData.shardCode,
+		// 	isFriend: rawUserData.isFriend // 确保这个字段被传入用于底部状态判断
+		// };
 	};
 
 	// --- 4. 计算属性 ---
@@ -757,8 +778,13 @@
 			},
 			{
 				icon: 'location-filled',
-				label: '地址',
+				label: '商区',
 				value: userInfo.value.locationAddressStr || '未设置'
+			},
+			{
+				icon: 'location-filled',
+				label: '家乡',
+				value: userInfo.value.nativePlaceStr || '未设置'
 			}
 		];
 	});

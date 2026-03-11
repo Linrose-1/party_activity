@@ -75,6 +75,7 @@ const _sfc_main = {
       if (fromShare.value) {
         requestData.notPay = 1;
       }
+      common_vendor.index.__f__("log", "at packages/applicationBusinessCard/applicationBusinessCard.vue:260", "requestData:", JSON.stringify(requestData));
       const {
         data,
         error
@@ -83,7 +84,7 @@ const _sfc_main = {
         data: requestData
       });
       if (data && !error) {
-        common_vendor.index.__f__("log", "at packages/applicationBusinessCard/applicationBusinessCard.vue:269", "权限检查成功，直接跳转到名片页。");
+        common_vendor.index.__f__("log", "at packages/applicationBusinessCard/applicationBusinessCard.vue:271", "权限检查成功，直接跳转到名片页。");
         let targetUrl = `/packages/my-businessCard/my-businessCard?id=${targetUserId.value}`;
         if (friendOwnerUserId.value) {
           targetUrl += `&friendOwnerUserId=${friendOwnerUserId.value}`;
@@ -93,13 +94,13 @@ const _sfc_main = {
         });
         return true;
       } else {
-        common_vendor.index.__f__("log", "at packages/applicationBusinessCard/applicationBusinessCard.vue:279", "权限检查失败，显示支付页面。", error);
+        common_vendor.index.__f__("log", "at packages/applicationBusinessCard/applicationBusinessCard.vue:281", "权限检查失败，显示支付页面。", error);
         return false;
       }
     };
     const fetchSimpleTargetUserInfo = async () => {
       if (!targetUserId.value) {
-        common_vendor.index.__f__("warn", "at packages/applicationBusinessCard/applicationBusinessCard.vue:291", "无法获取简要信息，因为 targetUserId 不存在。");
+        common_vendor.index.__f__("warn", "at packages/applicationBusinessCard/applicationBusinessCard.vue:293", "无法获取简要信息，因为 targetUserId 不存在。");
         return;
       }
       const {
@@ -113,11 +114,11 @@ const _sfc_main = {
           // 固定传 1
         }
       });
-      common_vendor.index.__f__("log", "at packages/applicationBusinessCard/applicationBusinessCard.vue:307", "----------- getSimpleUserInfo 接口返回数据 -----------");
-      common_vendor.index.__f__("log", "at packages/applicationBusinessCard/applicationBusinessCard.vue:308", JSON.stringify(data, null, 2));
-      common_vendor.index.__f__("log", "at packages/applicationBusinessCard/applicationBusinessCard.vue:309", "----------------------------------------------------");
+      common_vendor.index.__f__("log", "at packages/applicationBusinessCard/applicationBusinessCard.vue:309", "----------- getSimpleUserInfo 接口返回数据 -----------");
+      common_vendor.index.__f__("log", "at packages/applicationBusinessCard/applicationBusinessCard.vue:310", JSON.stringify(data, null, 2));
+      common_vendor.index.__f__("log", "at packages/applicationBusinessCard/applicationBusinessCard.vue:311", "----------------------------------------------------");
       if (error) {
-        common_vendor.index.__f__("error", "at packages/applicationBusinessCard/applicationBusinessCard.vue:313", "获取目标用户简要信息失败:", error);
+        common_vendor.index.__f__("error", "at packages/applicationBusinessCard/applicationBusinessCard.vue:315", "获取目标用户简要信息失败:", error);
         return;
       }
       if (data) {
@@ -137,7 +138,7 @@ const _sfc_main = {
       if (data) {
         currentUserInfo.value = data;
       } else {
-        common_vendor.index.__f__("error", "at packages/applicationBusinessCard/applicationBusinessCard.vue:340", "获取当前用户信息失败:", error);
+        common_vendor.index.__f__("error", "at packages/applicationBusinessCard/applicationBusinessCard.vue:342", "获取当前用户信息失败:", error);
       }
     };
     const handlePayToReadCard = async () => {

@@ -203,8 +203,15 @@
 }
 .professional-section .social-group .group-divider.data-v-0262bca8 {
   height: 1rpx;
-  background-color: rgba(201, 160, 99, 0.1);
-  margin: 15rpx 0;
+  /* 必须有高度 */
+  width: 100%;
+  /* 宽度撑满 */
+  background-color: #eee;
+  /* 线的颜色 */
+  margin: 20rpx 0;
+  /* 上下间距，让两组数据分开 */
+  border-bottom: 1rpx dashed #f0f0f0;
+  /* 增加虚线感，更精致 */
 }
 .career-section .section-title.data-v-0262bca8 {
   display: flex;
@@ -336,6 +343,20 @@
 .user-opportunities-section .content-text.data-v-0262bca8 {
   font-size: 28rpx;
   color: #666;
+}
+.triple-arrow.data-v-0262bca8 {
+  font-size: 32rpx;
+  /* 调整箭头大小 */
+  font-weight: bold;
+  /* 加粗箭头 */
+  color: #FF8C00;
+  /* 设置为您期望的橙色 */
+  line-height: 1;
+  /* 确保垂直居中 */
+  letter-spacing: -8rpx;
+  /* 负字间距，让两个 >> 叠加，看起来像三个 >>> */
+  transform: scaleY(1.2);
+  /* (可选) 稍微拉长一点，更有动感 */
 }
 .user-qr-section.data-v-0262bca8 {
   text-align: center;
@@ -502,4 +523,50 @@
 .card-back .logo image.data-v-0262bca8 {
   width: 100%;
   height: 100%;
+}
+
+/* 社会职务块内部样式 */
+.social-group-item .social-row.data-v-0262bca8 {
+  display: flex;
+  font-size: 28rpx;
+  margin-bottom: 12rpx;
+}
+.social-group-item .social-label.data-v-0262bca8 {
+  color: #A37E4A;
+  width: 100rpx;
+  flex-shrink: 0;
+}
+.social-group-item .social-value.data-v-0262bca8 {
+  color: #333;
+  font-weight: 500;
+  word-break: break-all;
+}
+
+/* 职业信息块内部样式 */
+.career-group-item .career-row.data-v-0262bca8 {
+  display: flex;
+  font-size: 28rpx;
+  margin-bottom: 12rpx;
+}
+.career-group-item .career-label.data-v-0262bca8 {
+  color: #888;
+  width: 100rpx;
+  flex-shrink: 0;
+}
+.career-group-item .career-value.data-v-0262bca8 {
+  color: #333;
+  font-weight: 500;
+  word-break: break-all;
+}
+.group-divider.data-v-0262bca8 {
+  height: 1rpx;
+  /* 必须有高度 */
+  width: 100%;
+  /* 宽度撑满 */
+  background-color: #eee;
+  /* 线的颜色 */
+  margin: 20rpx 0;
+  /* 上下间距，让两组数据分开 */
+  border-bottom: 1rpx dashed #f0f0f0;
+  /* 增加虚线感，更精致 */
 }
