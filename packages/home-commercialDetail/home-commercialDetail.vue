@@ -1107,20 +1107,31 @@
 	// ===== 点赞/踩/收藏/关注 =====
 
 	/** 切换点赞或点踩，含乐观更新与失败回滚 */
+	/** 切换点赞或点踩，含乐观更新与失败回滚 */
 	const toggleAction = async (post, clickedAction) => {
 		if (!await checkLoginGuard()) return;
 		if (isActionInProgress.value) return;
 		isActionInProgress.value = true;
 
-		const originalAction = post.userAction;
+		const originalAction = post.userAction; // 记录操作前的状态
 		const originalLikes = post.likes;
 		const originalDislikes = post.dislikes;
 
-		if (post.userAction === clickedAction) {
+		// --- 1. 计算要发送给后端的 action 值 ---
+		let apiActionToSend = clickedAction;
+		if (originalAction === clickedAction) {
+			// 如果操作前的状态和当前点击的按钮一致，说明是“取消”操作
+			apiActionToSend = 'cancel';
+		}
+
+		// --- 2. 乐观更新 UI (这部分保持你的逻辑即可) ---
+		if (originalAction === clickedAction) {
+			// 取消
 			post.userAction = null;
 			if (clickedAction === 'like') post.likes--;
 			else post.dislikes--;
 		} else {
+			// 新增或切换
 			if (clickedAction === 'like') {
 				post.likes++;
 				if (originalAction === 'dislike') post.dislikes--;
@@ -1132,6 +1143,7 @@
 		}
 
 		try {
+			// --- 3. 调用接口，发送计算好的 apiActionToSend ---
 			const {
 				error
 			} = await request('/app-api/member/like-action/add', {
@@ -1139,11 +1151,13 @@
 				data: {
 					targetId: post.id,
 					targetType: 'post',
-					action: clickedAction
+					action: apiActionToSend // 【关键修改】：使用计算后的值
 				}
 			});
+
 			if (!error) {
 				hasDataChanged.value = true;
+				// 同步给首页
 				uni.$emit('postInteractionChanged', {
 					postId: post.id,
 					type: 'action',
@@ -1151,8 +1165,8 @@
 					likes: post.likes,
 					dislikes: post.dislikes
 				});
-			}
-			if (error) {
+			} else {
+				// API失败，回滚UI
 				post.userAction = originalAction;
 				post.likes = originalLikes;
 				post.dislikes = originalDislikes;
@@ -1162,6 +1176,7 @@
 				});
 			}
 		} catch (err) {
+			// 网络异常，回滚UI
 			post.userAction = originalAction;
 			post.likes = originalLikes;
 			post.dislikes = originalDislikes;
@@ -1173,6 +1188,72 @@
 			isActionInProgress.value = false;
 		}
 	};
+	// const toggleAction = async (post, clickedAction) => {
+	// 	if (!await checkLoginGuard()) return;
+	// 	if (isActionInProgress.value) return;
+	// 	isActionInProgress.value = true;
+
+	// 	const originalAction = post.userAction;
+	// 	const originalLikes = post.likes;
+	// 	const originalDislikes = post.dislikes;
+
+	// 	if (post.userAction === clickedAction) {
+	// 		post.userAction = null;
+	// 		if (clickedAction === 'like') post.likes--;
+	// 		else post.dislikes--;
+	// 	} else {
+	// 		if (clickedAction === 'like') {
+	// 			post.likes++;
+	// 			if (originalAction === 'dislike') post.dislikes--;
+	// 		} else {
+	// 			post.dislikes++;
+	// 			if (originalAction === 'like') post.likes--;
+	// 		}
+	// 		post.userAction = clickedAction;
+	// 	}
+
+	// 	try {
+	// 		const {
+	// 			error
+	// 		} = await request('/app-api/member/like-action/add', {
+	// 			method: 'POST',
+	// 			data: {
+	// 				targetId: post.id,
+	// 				targetType: 'post',
+	// 				action: clickedAction
+	// 			}
+	// 		});
+	// 		if (!error) {
+	// 			hasDataChanged.value = true;
+	// 			uni.$emit('postInteractionChanged', {
+	// 				postId: post.id,
+	// 				type: 'action',
+	// 				userAction: post.userAction,
+	// 				likes: post.likes,
+	// 				dislikes: post.dislikes
+	// 			});
+	// 		}
+	// 		if (error) {
+	// 			post.userAction = originalAction;
+	// 			post.likes = originalLikes;
+	// 			post.dislikes = originalDislikes;
+	// 			uni.showToast({
+	// 				title: `操作失败: ${error}`,
+	// 				icon: 'none'
+	// 			});
+	// 		}
+	// 	} catch (err) {
+	// 		post.userAction = originalAction;
+	// 		post.likes = originalLikes;
+	// 		post.dislikes = originalDislikes;
+	// 		uni.showToast({
+	// 			title: '操作失败，请重试',
+	// 			icon: 'none'
+	// 		});
+	// 	} finally {
+	// 		isActionInProgress.value = false;
+	// 	}
+	// };
 
 	/** 关注/取关用户 */
 	const toggleFollow = async (post) => {

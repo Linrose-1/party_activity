@@ -31,7 +31,7 @@ const _sfc_main = {
         method: "DELETE"
       })
     };
-    const currentTab = common_vendor.ref(1);
+    const currentTab = common_vendor.ref(0);
     const loadingStatus = common_vendor.ref("more");
     const filterLike = common_vendor.ref(null);
     const reviewList = common_vendor.ref([]);
@@ -199,14 +199,14 @@ const _sfc_main = {
     };
     return (_ctx, _cache) => {
       return common_vendor.e({
-        a: currentTab.value === 1
-      }, currentTab.value === 1 ? {} : {}, {
-        b: currentTab.value === 1 ? 1 : "",
-        c: common_vendor.o(($event) => switchTab(1)),
-        d: currentTab.value === 0
+        a: currentTab.value === 0
       }, currentTab.value === 0 ? {} : {}, {
-        e: currentTab.value === 0 ? 1 : "",
-        f: common_vendor.o(($event) => switchTab(0)),
+        b: currentTab.value === 0 ? 1 : "",
+        c: common_vendor.o(($event) => switchTab(0)),
+        d: currentTab.value === 1
+      }, currentTab.value === 1 ? {} : {}, {
+        e: currentTab.value === 1 ? 1 : "",
+        f: common_vendor.o(($event) => switchTab(1)),
         g: currentTab.value === 0
       }, currentTab.value === 0 ? {
         h: common_vendor.t(total.value),

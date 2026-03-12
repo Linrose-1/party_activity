@@ -18,23 +18,35 @@
 		<view class="filter-panel" :class="{ 'expanded': isFilterExpanded }">
 			<view class="filter-inner">
 				<uni-forms label-position="top" label-width="100">
-					<view class="filter-grid">
-						<uni-forms-item label="用户名/昵称">
+					<!-- <view class="filter-grid"> -->
+						<uni-forms-item label="用户名">
 							<uni-easyinput v-model="queryParams.nickname" placeholder="请输入" :inputBorder="false"
 								class="custom-input" />
 						</uni-forms-item>
-						<uni-forms-item label="学校/学历">
+						<uni-forms-item label="手机号码">
+							<uni-easyinput v-model="queryParams.mobile" type="number" maxlength="11"
+								placeholder="请输入手机号" :inputBorder="false" class="custom-input" />
+						</uni-forms-item>
+
+					<!-- </view> -->
+
+					<!-- <view class="filter-grid"> -->
+						<uni-forms-item label="学校">
 							<uni-easyinput v-model="queryParams.school" placeholder="请输入学校" :inputBorder="false"
 								class="custom-input" />
 						</uni-forms-item>
-					</view>
+						<!-- 如果这一行空出一个，可以放年代或者其他 -->
+						<uni-forms-item label="出生年代">
+							<uni-data-select v-model="queryParams.era" :localdata="eraOptions" placeholder="选择年代" />
+						</uni-forms-item>
+					<!-- </view> -->
 
 					<uni-forms-item label="行业领域">
 						<uni-data-picker :localdata="industryTree" v-model="queryParams.industry" placeholder="请选择行业"
 							:map="{text: 'name', value: 'name'}" />
 					</uni-forms-item>
 
-					<view class="filter-grid">
+					<!-- <view class="filter-grid"> -->
 						<uni-forms-item label="我有资源">
 							<uni-easyinput v-model="queryParams.haveResources" placeholder="提供资源" :inputBorder="false"
 								class="custom-input" />
@@ -43,10 +55,10 @@
 							<uni-easyinput v-model="queryParams.needResources" placeholder="需求资源" :inputBorder="false"
 								class="custom-input" />
 						</uni-forms-item>
-					</view>
+					<!-- </view> -->
 
-					<view class="filter-grid">
-						<uni-forms-item label="籍贯/家乡">
+					<!-- <view class="filter-grid"> -->
+						<uni-forms-item label="籍贯">
 							<uni-data-picker :localdata="areaTree" v-model="queryParams.nativePlace" placeholder="请选择"
 								:map="{text: 'name', value: 'id'}" />
 						</uni-forms-item>
@@ -54,12 +66,12 @@
 							<uni-data-picker :localdata="areaTree" v-model="queryParams.locationAddress"
 								placeholder="请选择" :map="{text: 'name', value: 'id'}" />
 						</uni-forms-item>
-					</view>
+					<!-- </view> -->
 
 					<view class="filter-grid">
-						<uni-forms-item label="出生年代">
+						<!-- <uni-forms-item label="出生年代">
 							<uni-data-select v-model="queryParams.era" :localdata="eraOptions" placeholder="选择年代" />
-						</uni-forms-item>
+						</uni-forms-item> -->
 						<uni-forms-item label="兴趣爱好">
 							<uni-easyinput v-model="queryParams.hobby" placeholder="如：登山/高尔夫" :inputBorder="false"
 								class="custom-input" />
@@ -204,6 +216,7 @@
 		nickname: '',
 		school: '',
 		industry: '',
+		mobile: '',
 		haveResources: '',
 		needResources: '',
 		nativePlace: '',
@@ -425,7 +438,7 @@
 
 		&.expanded {
 			/* 展开时的最大高度要足够大 */
-			max-height: 1400rpx;
+			max-height: 1800rpx;
 			/* 关键修复：展开完成后允许内容溢出，这样下拉框才能正常显示 */
 			overflow: visible;
 			border-bottom: 1rpx solid #EEE;

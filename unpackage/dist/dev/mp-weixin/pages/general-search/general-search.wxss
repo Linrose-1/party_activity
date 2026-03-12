@@ -53,7 +53,7 @@
 }
 .filter-panel.expanded.data-v-797ccd59 {
   /* 展开时的最大高度要足够大 */
-  max-height: 1400rpx;
+  max-height: 1800rpx;
   /* 关键修复：展开完成后允许内容溢出，这样下拉框才能正常显示 */
   overflow: visible;
   border-bottom: 1rpx solid #EEE;

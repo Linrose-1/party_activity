@@ -50,7 +50,8 @@
 
 				<view class="form-group">
 					<view class="form-label">选择分类</view>
-					<radio-group @change="topicChange" class="radio-group-container" style="flex-direction: column; gap: 20rpx;">
+					<radio-group @change="topicChange" class="radio-group-container"
+						style="flex-direction: column; gap: 20rpx;">
 						<view class="radio-two-in-line">
 							<label class="radio-item-inline">
 								<radio value="商机分享" :checked="form.topic === '商机分享'" :disabled="isEditMode"
@@ -81,20 +82,25 @@
 					<!-- 猎伙类型（多选） -->
 					<view class="form-group">
 						<view class="form-label">猎伙类型 <text class="required-star">*</text></view>
-						<view class="checkbox-group-container">
-							<label v-for="item in partnerTypeOptions" :key="item.value" class="checkbox-item"
+						<view class="checkbox-group-container-vertical">
+							<label v-for="item in partnerTypeOptions" :key="item.value" class="checkbox-item-new"
 								@click="togglePartnerType(item.value)">
-								<view class="custom-checkbox"
-									:class="{ 'checked': form.partnerTypes.includes(item.value) }">
-									<text v-if="form.partnerTypes.includes(item.value)" class="check-icon">✓</text>
+								<view class="checkbox-left">
+									<view class="custom-checkbox"
+										:class="{ 'checked': form.partnerTypes.includes(item.value) }">
+										<text v-if="form.partnerTypes.includes(item.value)" class="check-icon">✓</text>
+									</view>
 								</view>
-								<text class="checkbox-label">{{ item.label }}</text>
+								<view class="checkbox-right">
+									<text class="checkbox-label-main">{{ item.label }}</text>
+									<text class="checkbox-label-sub">({{ item.desc }})</text>
+								</view>
 							</label>
 						</view>
-						<!-- 选中「其他」时显示自定义输入框 -->
-						<view v-if="form.partnerTypes.includes('4')" class="other-type-input-wrap">
+						<!-- 选中「其他合作」(value='4') 时显示自定义输入框 -->
+						<view v-if="form.partnerTypes.includes('4')" class="other-type-input-wrap animate-fade">
 							<input v-model="form.partnerTypeOther" class="other-type-input"
-								placeholder="请输入自定义类型（最多20字）" maxlength="20" />
+								placeholder="请输入您的精准需求（最多20字）" maxlength="20" />
 						</view>
 					</view>
 
@@ -304,19 +310,28 @@
 	// ===== 猎伙类型选项配置 =====
 	const partnerTypeOptions = [{
 			value: '1',
-			label: '求贤'
+			label: '求贤若渴',
+			desc: '猎头、招聘人才'
 		},
 		{
 			value: '2',
-			label: '找合伙人'
+			label: '产品众筹',
+			desc: '前沿产品众筹意向'
 		},
 		{
 			value: '3',
-			label: '寻资源'
+			label: '项目合作',
+			desc: '启动项目寻找合伙'
 		},
 		{
-			value: '4',
-			label: '其他'
+			value: '5', // 新增一个值
+			label: '寻找资源',
+			desc: '寻找项目缺失资源'
+		},
+		{
+			value: '4', // 保持 4 为其他合作
+			label: '其他合作',
+			desc: '精准自定义合作'
 		},
 	];
 
@@ -471,7 +486,8 @@
 		if (!error && data) {
 			form.title = data.postTitle;
 			form.content = data.postContent;
-							form.topic = data.postType == 1 ? '创业猎伙' : (data.postType == 2 ? '商机分享+创业猎伙' : '商机分享');			form.tags = data.tags || [];
+			form.topic = data.postType == 1 ? '创业猎伙' : (data.postType == 2 ? '商机分享+创业猎伙' : '商机分享');
+			form.tags = data.tags || [];
 			form.showProfile = data.cardFlag;
 			form.isReadTrace = data.isReadTrace;
 			form.isEnterprise = data.isEnterprise;
@@ -1408,14 +1424,14 @@
 		margin-left: 10rpx;
 		white-space: nowrap;
 	}
-	
+
 	/* 两列布局的单选框 */
 	.radio-two-in-line {
 		display: flex;
 		gap: 40rpx;
 		align-items: flex-start;
 	}
-	
+
 	.radio-item-inline {
 		display: flex;
 		align-items: center;
@@ -1423,7 +1439,7 @@
 		color: #333;
 		flex: 1;
 	}
-	
+
 	.radio-item-inline text {
 		margin-left: 10rpx;
 		white-space: nowrap;
@@ -1438,46 +1454,48 @@
 		margin-bottom: 30rpx;
 	}
 
-	/* ===== 猎伙类型多选框 ===== */
-	.checkbox-group-container {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 20rpx;
+	/* ===== 猎伙类型：新版两行布局 ===== */
+	.checkbox-group-container-vertical {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		/* 保持双列，如果内容太挤可改为 1fr */
+		gap: 24rpx;
 		margin-top: 10rpx;
 	}
 
-	.checkbox-item {
+	.checkbox-item-new {
 		display: flex;
-		align-items: center;
-		gap: 10rpx;
-	}
-
-	.custom-checkbox {
-		width: 36rpx;
-		height: 36rpx;
-		border: 2rpx solid #ccc;
-		border-radius: 8rpx;
-		display: flex;
-		align-items: center;
-		justify-content: center;
+		align-items: flex-start;
+		/* 顶部对齐，适合多行文本 */
+		gap: 16rpx;
 		background: #fff;
-		transition: all 0.2s;
+		padding: 16rpx;
+		border-radius: 12rpx;
+		border: 1rpx solid #f0f0f0;
 	}
 
-	.custom-checkbox.checked {
-		background: #FF6A00;
-		border-color: #FF6A00;
+	.checkbox-right {
+		display: flex;
+		flex-direction: column;
+		flex: 1;
 	}
 
-	.check-icon {
-		color: #fff;
-		font-size: 22rpx;
-		font-weight: bold;
-	}
-
-	.checkbox-label {
+	.checkbox-label-main {
 		font-size: 28rpx;
+		font-weight: bold;
 		color: #333;
+	}
+
+	.checkbox-label-sub {
+		font-size: 20rpx;
+		color: #999;
+		margin-top: 4rpx;
+	}
+
+	/* 覆盖之前可能存在的 simple 布局 */
+	.checkbox-group-container {
+		display: none;
+		/* 如果不删旧的，可以给个不同类名 */
 	}
 
 	/* ===== 「其他」自定义输入框 ===== */
@@ -1513,17 +1531,21 @@
 		transition: all 0.2s;
 	}
 
-	/* 普通 - 灰色 */
+	/* 普通 - 绿色 */
 	.urgency-normal {
-		background: #f5f5f5;
-		color: #666;
-		border-color: #e0e0e0;
+		background: #E8F5E9;
+		/* 极浅绿色 */
+		color: #4CAF50;
+		/* 绿色文字 */
+		border-color: #C8E6C9;
 	}
 
 	.urgency-normal.urgency-selected {
-		background: #ececec;
-		border-color: #999;
-		color: #333;
+		background: #4CAF50;
+		/* 深绿色 */
+		color: #fff;
+		/* 白色文字 */
+		border-color: #4CAF50;
 		font-weight: bold;
 	}
 

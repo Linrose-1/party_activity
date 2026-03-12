@@ -7,21 +7,21 @@ if (!Array) {
   const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
   const _easycom_uni_easyinput2 = common_vendor.resolveComponent("uni-easyinput");
   const _easycom_uni_forms_item2 = common_vendor.resolveComponent("uni-forms-item");
-  const _easycom_uni_data_picker2 = common_vendor.resolveComponent("uni-data-picker");
   const _easycom_uni_data_select2 = common_vendor.resolveComponent("uni-data-select");
+  const _easycom_uni_data_picker2 = common_vendor.resolveComponent("uni-data-picker");
   const _easycom_uni_forms2 = common_vendor.resolveComponent("uni-forms");
   const _easycom_uni_load_more2 = common_vendor.resolveComponent("uni-load-more");
-  (_easycom_uni_icons2 + _easycom_uni_easyinput2 + _easycom_uni_forms_item2 + _easycom_uni_data_picker2 + _easycom_uni_data_select2 + _easycom_uni_forms2 + _easycom_uni_load_more2)();
+  (_easycom_uni_icons2 + _easycom_uni_easyinput2 + _easycom_uni_forms_item2 + _easycom_uni_data_select2 + _easycom_uni_data_picker2 + _easycom_uni_forms2 + _easycom_uni_load_more2)();
 }
 const _easycom_uni_icons = () => "../../uni_modules/uni-icons/components/uni-icons/uni-icons.js";
 const _easycom_uni_easyinput = () => "../../uni_modules/uni-easyinput/components/uni-easyinput/uni-easyinput.js";
 const _easycom_uni_forms_item = () => "../../uni_modules/uni-forms/components/uni-forms-item/uni-forms-item.js";
-const _easycom_uni_data_picker = () => "../../uni_modules/uni-data-picker/components/uni-data-picker/uni-data-picker.js";
 const _easycom_uni_data_select = () => "../../uni_modules/uni-data-select/components/uni-data-select/uni-data-select.js";
+const _easycom_uni_data_picker = () => "../../uni_modules/uni-data-picker/components/uni-data-picker/uni-data-picker.js";
 const _easycom_uni_forms = () => "../../uni_modules/uni-forms/components/uni-forms/uni-forms.js";
 const _easycom_uni_load_more = () => "../../uni_modules/uni-load-more/components/uni-load-more/uni-load-more.js";
 if (!Math) {
-  (_easycom_uni_icons + _easycom_uni_easyinput + _easycom_uni_forms_item + _easycom_uni_data_picker + _easycom_uni_data_select + _easycom_uni_forms + _easycom_uni_load_more)();
+  (_easycom_uni_icons + _easycom_uni_easyinput + _easycom_uni_forms_item + _easycom_uni_data_select + _easycom_uni_data_picker + _easycom_uni_forms + _easycom_uni_load_more)();
 }
 const _sfc_main = {
   __name: "general-search",
@@ -38,6 +38,7 @@ const _sfc_main = {
       nickname: "",
       school: "",
       industry: "",
+      mobile: "",
       haveResources: "",
       needResources: "",
       nativePlace: "",
@@ -216,19 +217,39 @@ const _sfc_main = {
           modelValue: queryParams.nickname
         }),
         j: common_vendor.p({
-          label: "用户名/昵称"
+          label: "用户名"
         }),
-        k: common_vendor.o(($event) => queryParams.school = $event),
+        k: common_vendor.o(($event) => queryParams.mobile = $event),
         l: common_vendor.p({
+          type: "number",
+          maxlength: "11",
+          placeholder: "请输入手机号",
+          inputBorder: false,
+          modelValue: queryParams.mobile
+        }),
+        m: common_vendor.p({
+          label: "手机号码"
+        }),
+        n: common_vendor.o(($event) => queryParams.school = $event),
+        o: common_vendor.p({
           placeholder: "请输入学校",
           inputBorder: false,
           modelValue: queryParams.school
         }),
-        m: common_vendor.p({
-          label: "学校/学历"
+        p: common_vendor.p({
+          label: "学校"
         }),
-        n: common_vendor.o(($event) => queryParams.industry = $event),
-        o: common_vendor.p({
+        q: common_vendor.o(($event) => queryParams.era = $event),
+        r: common_vendor.p({
+          localdata: eraOptions,
+          placeholder: "选择年代",
+          modelValue: queryParams.era
+        }),
+        s: common_vendor.p({
+          label: "出生年代"
+        }),
+        t: common_vendor.o(($event) => queryParams.industry = $event),
+        v: common_vendor.p({
           localdata: industryTree.value,
           placeholder: "请选择行业",
           map: {
@@ -237,29 +258,29 @@ const _sfc_main = {
           },
           modelValue: queryParams.industry
         }),
-        p: common_vendor.p({
+        w: common_vendor.p({
           label: "行业领域"
         }),
-        q: common_vendor.o(($event) => queryParams.haveResources = $event),
-        r: common_vendor.p({
+        x: common_vendor.o(($event) => queryParams.haveResources = $event),
+        y: common_vendor.p({
           placeholder: "提供资源",
           inputBorder: false,
           modelValue: queryParams.haveResources
         }),
-        s: common_vendor.p({
+        z: common_vendor.p({
           label: "我有资源"
         }),
-        t: common_vendor.o(($event) => queryParams.needResources = $event),
-        v: common_vendor.p({
+        A: common_vendor.o(($event) => queryParams.needResources = $event),
+        B: common_vendor.p({
           placeholder: "需求资源",
           inputBorder: false,
           modelValue: queryParams.needResources
         }),
-        w: common_vendor.p({
+        C: common_vendor.p({
           label: "我需资源"
         }),
-        x: common_vendor.o(($event) => queryParams.nativePlace = $event),
-        y: common_vendor.p({
+        D: common_vendor.o(($event) => queryParams.nativePlace = $event),
+        E: common_vendor.p({
           localdata: areaTree.value,
           placeholder: "请选择",
           map: {
@@ -268,11 +289,11 @@ const _sfc_main = {
           },
           modelValue: queryParams.nativePlace
         }),
-        z: common_vendor.p({
-          label: "籍贯/家乡"
+        F: common_vendor.p({
+          label: "籍贯"
         }),
-        A: common_vendor.o(($event) => queryParams.locationAddress = $event),
-        B: common_vendor.p({
+        G: common_vendor.o(($event) => queryParams.locationAddress = $event),
+        H: common_vendor.p({
           localdata: areaTree.value,
           placeholder: "请选择",
           map: {
@@ -281,49 +302,40 @@ const _sfc_main = {
           },
           modelValue: queryParams.locationAddress
         }),
-        C: common_vendor.p({
+        I: common_vendor.p({
           label: "商务办公地"
         }),
-        D: common_vendor.o(($event) => queryParams.era = $event),
-        E: common_vendor.p({
-          localdata: eraOptions,
-          placeholder: "选择年代",
-          modelValue: queryParams.era
-        }),
-        F: common_vendor.p({
-          label: "出生年代"
-        }),
-        G: common_vendor.o(($event) => queryParams.hobby = $event),
-        H: common_vendor.p({
+        J: common_vendor.o(($event) => queryParams.hobby = $event),
+        K: common_vendor.p({
           placeholder: "如：登山/高尔夫",
           inputBorder: false,
           modelValue: queryParams.hobby
         }),
-        I: common_vendor.p({
+        L: common_vendor.p({
           label: "兴趣爱好"
         }),
-        J: common_vendor.p({
+        M: common_vendor.p({
           ["label-position"]: "top",
           ["label-width"]: "100"
         }),
-        K: common_vendor.o(resetFilters),
-        L: common_vendor.o(handleSearch),
-        M: isFilterExpanded.value ? 1 : "",
-        N: list.value.length === 0 && loadStatus.value !== "loading"
+        N: common_vendor.o(resetFilters),
+        O: common_vendor.o(handleSearch),
+        P: isFilterExpanded.value ? 1 : "",
+        Q: list.value.length === 0 && loadStatus.value !== "loading"
       }, list.value.length === 0 && loadStatus.value !== "loading" ? {
-        O: common_assets._imports_0$2
+        R: common_assets._imports_0$2
       } : common_vendor.e({
-        P: totalCount.value > 0
+        S: totalCount.value > 0
       }, totalCount.value > 0 ? {
-        Q: common_vendor.t(totalCount.value)
+        T: common_vendor.t(totalCount.value)
       } : {}, {
-        R: common_vendor.f(freeList.value, (user, index, i0) => {
+        U: common_vendor.f(freeList.value, (user, index, i0) => {
           return common_vendor.e({
             a: user.avatar || "/static/images/default-avatar.png",
             b: common_vendor.t(user.nickname),
             c: user.idCert === 1
           }, user.idCert === 1 ? {
-            d: "797ccd59-21-" + i0,
+            d: "797ccd59-23-" + i0,
             e: common_vendor.p({
               type: "auth-filled",
               size: "12",
@@ -338,9 +350,9 @@ const _sfc_main = {
             k: common_vendor.o(($event) => goToDetail(user), user.id)
           });
         }),
-        S: totalCount.value > 10
+        V: totalCount.value > 10
       }, totalCount.value > 10 ? common_vendor.e({
-        T: common_vendor.f(paidList.value, (user, index, i0) => {
+        W: common_vendor.f(paidList.value, (user, index, i0) => {
           return common_vendor.e({
             a: user.avatar,
             b: common_vendor.t(user.nickname),
@@ -352,13 +364,13 @@ const _sfc_main = {
             g: common_vendor.o(($event) => goToDetail(user), user.id)
           });
         }),
-        U: list.value.length < totalCount.value
+        X: list.value.length < totalCount.value
       }, list.value.length < totalCount.value ? common_vendor.e({
-        V: paidList.value.length > 0
+        Y: paidList.value.length > 0
       }, paidList.value.length > 0 ? {
-        W: common_vendor.t(paidList.value.length)
+        Z: common_vendor.t(paidList.value.length)
       } : {}, {
-        X: common_vendor.f(unlockTiers, (tier, k0, i0) => {
+        aa: common_vendor.f(unlockTiers, (tier, k0, i0) => {
           return {
             a: common_vendor.t(tier.count),
             b: common_vendor.t(tier.price),
@@ -367,11 +379,11 @@ const _sfc_main = {
             e: common_vendor.o(($event) => selectedTier.value = tier, tier.id)
           };
         }),
-        Y: common_vendor.o(handleUnlock)
+        ab: common_vendor.o(handleUnlock)
       }) : {}) : {}), {
-        Z: list.value.length > 0
+        ac: list.value.length > 0
       }, list.value.length > 0 ? {
-        aa: common_vendor.p({
+        ad: common_vendor.p({
           status: loadStatus.value
         })
       } : {});

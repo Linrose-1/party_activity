@@ -19,6 +19,11 @@
 							{{ creditLevel }}
 						</text>
 					</view>
+					<view class="score-line" v-if="totalScore">
+						<uni-icons type="star-filled" size="14" color="#FF8400"></uni-icons>
+						<text class="score-label">猩球信用：</text>
+						<text class="score-num">{{ totalScore }}分</text>
+					</view>
 				</view>
 			</view>
 
@@ -348,6 +353,10 @@
 			type: String,
 			default: ''
 		}, // 个人简介
+		totalScore: {
+			type: [Number, String],
+			default: 0
+		},
 
 		// --- 联系方式 ---
 		contactInfo: {
@@ -588,6 +597,7 @@
 				display: inline-block;
 			}
 
+
 			/* 拼音标签样式 */
 			.pinyin-tag {
 				background-color: #f0f2f5;
@@ -623,6 +633,39 @@
 				opacity: 0.8;
 				transform: scale(0.95);
 			}
+		}
+	}
+
+	/* 猩球信用分行样式 */
+	.score-line {
+		margin-top: 16rpx;
+		/* 与上方标签行拉开间距 */
+		display: inline-flex;
+		/* 宽度随内容自适应 */
+		align-items: center;
+		background-color: rgba(255, 132, 0, 0.08);
+		/* 极浅的橙色背景 */
+		padding: 6rpx 20rpx;
+		border-radius: 30rpx;
+		border: 1rpx solid rgba(255, 132, 0, 0.15);
+		/* 淡淡的边框增加精致感 */
+
+		.score-label {
+			font-size: 24rpx;
+			color: #666;
+			margin-left: 8rpx;
+		}
+
+		.score-num {
+			font-size: 26rpx;
+			font-weight: bold;
+			color: #FF8400;
+			/* 突出显示分数 */
+		}
+
+		&:active {
+			opacity: 0.7;
+			background-color: rgba(255, 132, 0, 0.15);
 		}
 	}
 

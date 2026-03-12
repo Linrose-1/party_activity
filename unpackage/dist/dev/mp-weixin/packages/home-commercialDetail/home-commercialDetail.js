@@ -670,7 +670,11 @@ const _sfc_main = {
       const originalAction = post.userAction;
       const originalLikes = post.likes;
       const originalDislikes = post.dislikes;
-      if (post.userAction === clickedAction) {
+      let apiActionToSend = clickedAction;
+      if (originalAction === clickedAction) {
+        apiActionToSend = "cancel";
+      }
+      if (originalAction === clickedAction) {
         post.userAction = null;
         if (clickedAction === "like")
           post.likes--;
@@ -696,7 +700,8 @@ const _sfc_main = {
           data: {
             targetId: post.id,
             targetType: "post",
-            action: clickedAction
+            action: apiActionToSend
+            // 【关键修改】：使用计算后的值
           }
         });
         if (!error) {
@@ -708,8 +713,7 @@ const _sfc_main = {
             likes: post.likes,
             dislikes: post.dislikes
           });
-        }
-        if (error) {
+        } else {
           post.userAction = originalAction;
           post.likes = originalLikes;
           post.dislikes = originalDislikes;
@@ -915,7 +919,7 @@ const _sfc_main = {
         query.selectViewport().scrollOffset();
         query.exec((res) => {
           if (res && res[0]) {
-            common_vendor.index.__f__("log", "at packages/home-commercialDetail/home-commercialDetail.vue:1385", "✅ 找到目标评论元素，准备滚动", res[0].top);
+            common_vendor.index.__f__("log", "at packages/home-commercialDetail/home-commercialDetail.vue:1466", "✅ 找到目标评论元素，准备滚动", res[0].top);
             common_vendor.index.pageScrollTo({
               // 目标位置 = 当前滚动位 + 元素相对顶部的距离 - 预留的偏移量(100rpx)
               scrollTop: res[1].scrollTop + res[0].top - 100,
@@ -926,7 +930,7 @@ const _sfc_main = {
               icon: "none"
             });
           } else {
-            common_vendor.index.__f__("warn", "at packages/home-commercialDetail/home-commercialDetail.vue:1399", "❌ 未找到评论元素，执行兜底：跳转到评论区顶部");
+            common_vendor.index.__f__("warn", "at packages/home-commercialDetail/home-commercialDetail.vue:1480", "❌ 未找到评论元素，执行兜底：跳转到评论区顶部");
             scrollToCommentsSection();
           }
         });

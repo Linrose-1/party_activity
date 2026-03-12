@@ -104,6 +104,36 @@
   opacity: 0.8;
   transform: scale(0.95);
 }
+
+/* 猩球信用分行样式 */
+.score-line.data-v-0262bca8 {
+  margin-top: 16rpx;
+  /* 与上方标签行拉开间距 */
+  display: inline-flex;
+  /* 宽度随内容自适应 */
+  align-items: center;
+  background-color: rgba(255, 132, 0, 0.08);
+  /* 极浅的橙色背景 */
+  padding: 6rpx 20rpx;
+  border-radius: 30rpx;
+  border: 1rpx solid rgba(255, 132, 0, 0.15);
+  /* 淡淡的边框增加精致感 */
+}
+.score-line .score-label.data-v-0262bca8 {
+  font-size: 24rpx;
+  color: #666;
+  margin-left: 8rpx;
+}
+.score-line .score-num.data-v-0262bca8 {
+  font-size: 26rpx;
+  font-weight: bold;
+  color: #FF8400;
+  /* 突出显示分数 */
+}
+.score-line.data-v-0262bca8:active {
+  opacity: 0.7;
+  background-color: rgba(255, 132, 0, 0.15);
+}
 .section-block.data-v-0262bca8 {
   background-color: #ffffff;
   border: 1rpx solid #f0f0f0;

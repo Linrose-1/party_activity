@@ -2,14 +2,16 @@
 	<view class="container">
 		<!-- 1. 顶部 Tabs -->
 		<view class="tabs">
-			<view class="tab-item" :class="{ active: currentTab === 1 }" @click="switchTab(1)">
-				我发出的点评
-				<view class="active-line" v-if="currentTab === 1"></view>
-			</view>
 			<view class="tab-item" :class="{ active: currentTab === 0 }" @click="switchTab(0)">
 				我收到的点评
 				<view class="active-line" v-if="currentTab === 0"></view>
 			</view>
+
+			<view class="tab-item" :class="{ active: currentTab === 1 }" @click="switchTab(1)">
+				我发出的点评
+				<view class="active-line" v-if="currentTab === 1"></view>
+			</view>
+
 		</view>
 
 		<!-- 2. 内容列表 -->
@@ -118,7 +120,7 @@
 	// ==========================================
 
 	// 视图状态
-	const currentTab = ref(1); // 1=我发出的, 0=我收到的
+	const currentTab = ref(0); // 1=我发出的, 0=我收到的
 	const loadingStatus = ref('more'); // more, loading, noMore
 	const filterLike = ref(null); // 筛选状态 (null=全部, 1=好评, 2=差评)
 
