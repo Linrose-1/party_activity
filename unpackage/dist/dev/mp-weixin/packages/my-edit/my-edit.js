@@ -45,6 +45,7 @@ const _sfc_main = {
       realName: "",
       sex: null,
       birthday: "",
+      country: null,
       locationAddress: null,
       // 将存储ID数组用于反显，或单个ID用于提交
       birthplace: null,
@@ -78,6 +79,7 @@ const _sfc_main = {
     const professionOptions = common_vendor.ref([]);
     const hobbyOptions = common_vendor.ref([]);
     const radarDatasets = common_vendor.ref([]);
+    const globalAreaTree = common_vendor.ref([]);
     const eraOptions = [
       {
         value: "50/60",
@@ -188,9 +190,9 @@ const _sfc_main = {
         };
         try {
           common_vendor.index.setStorageSync(DRAFT_KEY, JSON.stringify(draftData));
-          common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:470", "✅ [自动保存] 资料已写入缓存", (/* @__PURE__ */ new Date()).toLocaleTimeString());
+          common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:478", "✅ [自动保存] 资料已写入缓存", (/* @__PURE__ */ new Date()).toLocaleTimeString());
         } catch (e) {
-          common_vendor.index.__f__("error", "at packages/my-edit/my-edit.vue:472", "保存缓存失败", e);
+          common_vendor.index.__f__("error", "at packages/my-edit/my-edit.vue:480", "保存缓存失败", e);
         }
       }, 1e3);
     }, {
@@ -215,6 +217,9 @@ const _sfc_main = {
         data: {
           type
         }
+      }),
+      getGlobalAreaTree: () => utils_request.request("/app-api/system/area/global_tree", {
+        method: "GET"
       }),
       updateUser: (data) => utils_request.request("/app-api/member/user/update", {
         method: "PUT",
@@ -241,6 +246,7 @@ const _sfc_main = {
       await Promise.all([
         getAreaTreeData(),
         getIndustryTreeData(),
+        getGlobalAreaTreeData(),
         getProfessionData(),
         getHobbyData(),
         fetchRadarStatistics()
@@ -270,6 +276,15 @@ const _sfc_main = {
     });
     const handleTabClick = (e) => {
       currentTab.value = e.currentIndex;
+    };
+    const getGlobalAreaTreeData = async () => {
+      const {
+        data,
+        error
+      } = await Api.getGlobalAreaTree();
+      if (!error) {
+        globalAreaTree.value = data || [];
+      }
     };
     const fetchRadarStatistics = async () => {
       try {
@@ -310,9 +325,9 @@ const _sfc_main = {
           color: "#1890FF"
         });
         radarDatasets.value = newDatasets;
-        common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:635", "✅ 统计数据加载完毕，索引已固定：[0]自我, [1]商友, [2]综合");
+        common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:657", "✅ 统计数据加载完毕，索引已固定：[0]自我, [1]商友, [2]综合");
       } catch (e) {
-        common_vendor.index.__f__("error", "at packages/my-edit/my-edit.vue:638", "获取统计数据异常", e);
+        common_vendor.index.__f__("error", "at packages/my-edit/my-edit.vue:660", "获取统计数据异常", e);
       }
     };
     const getAreaTreeData = async () => {
@@ -321,7 +336,7 @@ const _sfc_main = {
         error
       } = await Api.getAreaTree();
       if (error) {
-        common_vendor.index.__f__("error", "at packages/my-edit/my-edit.vue:705", "获取地区树失败:", error);
+        common_vendor.index.__f__("error", "at packages/my-edit/my-edit.vue:727", "获取地区树失败:", error);
       } else {
         areaTree.value = data || [];
       }
@@ -369,7 +384,7 @@ const _sfc_main = {
         finalName = lastNodeText;
       }
       companyAndIndustryList.value[index].industryName = finalName;
-      common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:768", `第 ${index + 1} 组行业选择结果:`, finalName);
+      common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:790", `第 ${index + 1} 组行业选择结果:`, finalName);
     };
     const getIndustryTreeData = async () => {
       const {
@@ -377,10 +392,10 @@ const _sfc_main = {
         error
       } = await Api.getIndustryTree();
       if (error) {
-        common_vendor.index.__f__("error", "at packages/my-edit/my-edit.vue:777", "获取行业树失败:", error);
+        common_vendor.index.__f__("error", "at packages/my-edit/my-edit.vue:799", "获取行业树失败:", error);
       } else {
         industryTree.value = processIndustryTree(data || []);
-        common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:781", "处理后的行业树:", industryTree.value);
+        common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:803", "处理后的行业树:", industryTree.value);
       }
     };
     function findPathById(tree, targetId) {
@@ -422,10 +437,13 @@ const _sfc_main = {
             form.value[key] = userInfo[key];
           }
         });
-        ["locationAddress", "birthplace", "nativePlace"].forEach((key) => {
+        ["country", "locationAddress", "birthplace", "nativePlace"].forEach((key) => {
           if (userInfo[key]) {
             const targetId = parseInt(userInfo[key], 10);
-            const path = findPathById(areaTree.value, targetId);
+            const path = findPathById(
+              key === "country" ? globalAreaTree.value : areaTree.value,
+              targetId
+            );
             if (path)
               form.value[key] = path;
           }
@@ -505,14 +523,14 @@ const _sfc_main = {
       }
       setTimeout(() => {
         isDataLoaded.value = true;
-        common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:985", "✅ [系统状态] 数据初始化完成，开始监听修改...");
+        common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:1008", "✅ [系统状态] 数据初始化完成，开始监听修改...");
         checkAndRestoreDraft();
       }, 500);
     };
     const checkAndRestoreDraft = () => {
       const draftStr = common_vendor.index.getStorageSync(DRAFT_KEY);
       if (!draftStr) {
-        common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:996", "📭 [缓存检查] 无本地草稿");
+        common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:1019", "📭 [缓存检查] 无本地草稿");
         return;
       }
       common_vendor.index.showModal({
@@ -628,7 +646,7 @@ const _sfc_main = {
             src: tempFilePath,
             cropScale: "1:1",
             success: (cropRes) => uploadAvatar(cropRes.tempFilePath),
-            fail: (err) => common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:1132", "用户取消裁剪或裁剪失败:", err)
+            fail: (err) => common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:1155", "用户取消裁剪或裁剪失败:", err)
           });
         }
       });
@@ -667,11 +685,11 @@ const _sfc_main = {
             src: tempFilePath,
             cropScale: "1:1",
             success: (cropRes) => {
-              common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:1184", "二维码裁剪成功");
+              common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:1207", "二维码裁剪成功");
               uploadQrCode(cropRes.tempFilePath);
             },
             fail: (err) => {
-              common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:1188", "取消裁剪或失败:", err);
+              common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:1211", "取消裁剪或失败:", err);
             }
           });
         }
@@ -722,7 +740,7 @@ const _sfc_main = {
         const payload = {
           ...form.value
         };
-        ["locationAddress", "birthplace", "nativePlace"].forEach((key) => {
+        ["country", "locationAddress", "birthplace", "nativePlace"].forEach((key) => {
           if (Array.isArray(payload[key]) && payload[key].length > 0) {
             payload[key] = payload[key][payload[key].length - 1];
           }
@@ -753,7 +771,7 @@ const _sfc_main = {
         }
         common_vendor.index.hideLoading();
         common_vendor.index.removeStorageSync(DRAFT_KEY);
-        common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:1353", "🧹 [提交成功] 草稿已清除");
+        common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:1376", "🧹 [提交成功] 草稿已清除");
         let shouldGiveReward = false;
         if (checkIsAllDimensionsFilled(payload)) {
           try {
@@ -762,7 +780,7 @@ const _sfc_main = {
             });
             if (giveRes === true || giveRes && (giveRes.success === true || giveRes.data === true)) {
               shouldGiveReward = true;
-              common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:1368", "✅ 符合赠送条件，准备弹出奖励提示");
+              common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:1392", "✅ 符合赠送条件，准备弹出奖励提示");
             }
             if (shouldGiveReward) {
               await new Promise((resolve) => {
@@ -778,7 +796,7 @@ const _sfc_main = {
               });
             }
           } catch (e) {
-            common_vendor.index.__f__("error", "at packages/my-edit/my-edit.vue:1385", "奖励接口异常:", e);
+            common_vendor.index.__f__("error", "at packages/my-edit/my-edit.vue:1409", "奖励接口异常:", e);
           }
         }
         common_vendor.index.showModal({
@@ -796,7 +814,7 @@ const _sfc_main = {
           }
         });
       }).catch((err) => {
-        common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:1407", "表单验证未通过：", err);
+        common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:1431", "表单验证未通过：", err);
       });
     };
     const handleAutoPost = async () => {
@@ -941,8 +959,23 @@ const _sfc_main = {
           name: "wechatQrCodeUrl",
           ["label-position"]: "top"
         }),
-        K: common_vendor.o(($event) => form.value.locationAddress = $event),
+        K: common_vendor.o(($event) => form.value.country = $event),
         L: common_vendor.p({
+          placeholder: "请选择国家/地区",
+          ["popup-title"]: "请选择国家",
+          localdata: globalAreaTree.value,
+          map: {
+            text: "name",
+            value: "id"
+          },
+          modelValue: form.value.country
+        }),
+        M: common_vendor.p({
+          label: "国家/地区",
+          name: "country"
+        }),
+        N: common_vendor.o(($event) => form.value.locationAddress = $event),
+        O: common_vendor.p({
           placeholder: "请选择商务/办公地",
           ["popup-title"]: "请选择省市区",
           localdata: areaTree.value,
@@ -952,12 +985,12 @@ const _sfc_main = {
           },
           modelValue: form.value.locationAddress
         }),
-        M: common_vendor.p({
+        P: common_vendor.p({
           label: "商务/办公地",
           name: "locationAddress"
         }),
-        N: common_vendor.o(($event) => form.value.nativePlace = $event),
-        O: common_vendor.p({
+        Q: common_vendor.o(($event) => form.value.nativePlace = $event),
+        R: common_vendor.p({
           placeholder: "请选择籍贯/出生地",
           ["popup-title"]: "请选择省市区",
           localdata: areaTree.value,
@@ -967,70 +1000,70 @@ const _sfc_main = {
           },
           modelValue: form.value.nativePlace
         }),
-        P: common_vendor.p({
+        S: common_vendor.p({
           label: "籍贯/出生地",
           name: "nativePlace"
         }),
-        Q: professionsList.value.length < 3
+        T: professionsList.value.length < 3
       }, professionsList.value.length < 3 ? {
-        R: common_vendor.p({
+        U: common_vendor.p({
           type: "plusempty",
           size: "14",
           color: "#FF8700"
         }),
-        S: common_vendor.o(addProfession)
+        V: common_vendor.o(addProfession)
       } : {}, {
-        T: common_vendor.f(professionsList.value, (item, index, i0) => {
+        W: common_vendor.f(professionsList.value, (item, index, i0) => {
           return common_vendor.e({
             a: common_vendor.t(index + 1)
           }, professionsList.value.length > 1 ? {
             b: common_vendor.o(($event) => removeProfession(index), index)
           } : {}, {
-            c: "2d637515-25-" + i0 + "," + ("2d637515-24-" + i0),
+            c: "2d637515-27-" + i0 + "," + ("2d637515-26-" + i0),
             d: common_vendor.o(($event) => item.associationName = $event, index),
             e: common_vendor.p({
               placeholder: "请填写各类组织/机构,如商会协会等",
               inputBorder: false,
               modelValue: item.associationName
             }),
-            f: "2d637515-24-" + i0 + ",2d637515-1",
-            g: "2d637515-27-" + i0 + "," + ("2d637515-26-" + i0),
+            f: "2d637515-26-" + i0 + ",2d637515-1",
+            g: "2d637515-29-" + i0 + "," + ("2d637515-28-" + i0),
             h: common_vendor.o(($event) => item.professionalTitle = $event, index),
             i: common_vendor.p({
               placeholder: "如会长/副会长/秘书长/理事/会员等",
               inputBorder: false,
               modelValue: item.professionalTitle
             }),
-            j: "2d637515-26-" + i0 + ",2d637515-1",
+            j: "2d637515-28-" + i0 + ",2d637515-1",
             k: index
           });
         }),
-        U: professionsList.value.length > 1,
-        V: common_vendor.p({
+        X: professionsList.value.length > 1,
+        Y: common_vendor.p({
           label: "组织机构",
           ["label-width"]: "70px"
         }),
-        W: common_vendor.p({
+        Z: common_vendor.p({
           label: "担任职务",
           ["label-width"]: "70px"
         }),
-        X: companyAndIndustryList.value.length < 3
+        aa: companyAndIndustryList.value.length < 3
       }, companyAndIndustryList.value.length < 3 ? {
-        Y: common_vendor.p({
+        ab: common_vendor.p({
           type: "plusempty",
           size: "14",
           color: "#FF8700"
         }),
-        Z: common_vendor.o(addCompany)
+        ac: common_vendor.o(addCompany)
       } : {}, {
-        aa: common_vendor.f(companyAndIndustryList.value, (company, index, i0) => {
+        ad: common_vendor.f(companyAndIndustryList.value, (company, index, i0) => {
           return common_vendor.e({
             a: common_vendor.t(index + 1)
           }, companyAndIndustryList.value.length > 1 ? {
             b: common_vendor.o(($event) => removeCompany(index), index)
           } : {}, {
             c: common_vendor.o((e) => onIndustryChangeWithAll(e, index), index),
-            d: "2d637515-30-" + i0 + "," + ("2d637515-29-" + i0),
+            d: "2d637515-32-" + i0 + "," + ("2d637515-31-" + i0),
             e: common_vendor.o(($event) => company.industryName = $event, index),
             f: common_vendor.p({
               placeholder: "请选择行业",
@@ -1042,31 +1075,31 @@ const _sfc_main = {
               },
               modelValue: company.industryName
             }),
-            g: "2d637515-29-" + i0 + ",2d637515-1",
+            g: "2d637515-31-" + i0 + ",2d637515-1",
             h: common_vendor.p({
               label: `所在行业`,
               name: `industry_${index}`,
               ["label-width"]: "70px"
             }),
-            i: "2d637515-32-" + i0 + "," + ("2d637515-31-" + i0),
+            i: "2d637515-34-" + i0 + "," + ("2d637515-33-" + i0),
             j: common_vendor.o(($event) => company.name = $event, index),
             k: common_vendor.p({
               placeholder: "请输入公司名称",
               modelValue: company.name
             }),
-            l: "2d637515-31-" + i0 + ",2d637515-1",
+            l: "2d637515-33-" + i0 + ",2d637515-1",
             m: common_vendor.p({
               label: `公司名称`,
               name: `company_${index}`,
               ["label-width"]: "70px"
             }),
-            n: "2d637515-34-" + i0 + "," + ("2d637515-33-" + i0),
+            n: "2d637515-36-" + i0 + "," + ("2d637515-35-" + i0),
             o: common_vendor.o(($event) => company.positionTitle = $event, index),
             p: common_vendor.p({
               placeholder: "请输入您的职务",
               modelValue: company.positionTitle
             }),
-            q: "2d637515-33-" + i0 + ",2d637515-1",
+            q: "2d637515-35-" + i0 + ",2d637515-1",
             r: common_vendor.p({
               label: `担任职务`,
               name: `position_${index}`,
@@ -1075,26 +1108,26 @@ const _sfc_main = {
             s: index
           });
         }),
-        ab: companyAndIndustryList.value.length > 1,
-        ac: schoolsList.value.length < 6
+        ae: companyAndIndustryList.value.length > 1,
+        af: schoolsList.value.length < 6
       }, schoolsList.value.length < 6 ? {
-        ad: common_vendor.p({
+        ag: common_vendor.p({
           type: "plusempty",
           size: "14",
           color: "#FF8700"
         }),
-        ae: common_vendor.o(addSchool)
+        ah: common_vendor.o(addSchool)
       } : {}, {
-        af: common_vendor.f(schoolsList.value, (school, index, i0) => {
+        ai: common_vendor.f(schoolsList.value, (school, index, i0) => {
           return common_vendor.e({
-            a: "2d637515-36-" + i0 + ",2d637515-1",
+            a: "2d637515-38-" + i0 + ",2d637515-1",
             b: common_vendor.o(($event) => schoolsList.value[index] = $event, index),
             c: common_vendor.p({
               placeholder: "请输入学校名称",
               modelValue: schoolsList.value[index]
             })
           }, schoolsList.value.length > 1 ? {
-            d: "2d637515-37-" + i0 + ",2d637515-1",
+            d: "2d637515-39-" + i0 + ",2d637515-1",
             e: common_vendor.p({
               type: "trash",
               size: "18",
@@ -1105,120 +1138,120 @@ const _sfc_main = {
             g: index
           });
         }),
-        ag: schoolsList.value.length > 1,
-        ah: common_vendor.o(onHobbyChange),
-        ai: common_vendor.o(($event) => selectedHobbies.value = $event),
-        aj: common_vendor.p({
+        aj: schoolsList.value.length > 1,
+        ak: common_vendor.o(onHobbyChange),
+        al: common_vendor.o(($event) => selectedHobbies.value = $event),
+        am: common_vendor.p({
           localdata: hobbyOptions.value,
           multiple: true,
           selectedColor: "#FF8700",
           selectedTextColor: "#FF8700",
           modelValue: selectedHobbies.value
         }),
-        ak: isOtherHobbySelected.value
+        an: isOtherHobbySelected.value
       }, isOtherHobbySelected.value ? {
-        al: common_vendor.o(($event) => otherHobbyText.value = $event),
-        am: common_vendor.p({
+        ao: common_vendor.o(($event) => otherHobbyText.value = $event),
+        ap: common_vendor.p({
           placeholder: "请输入您的其他爱好",
           modelValue: otherHobbyText.value
         })
       } : {}, {
-        an: common_vendor.p({
+        aq: common_vendor.p({
           label: "个人爱好",
           name: "hobby",
           ["label-position"]: "top"
         }),
-        ao: common_vendor.o(($event) => form.value.signature = $event),
-        ap: common_vendor.p({
+        ar: common_vendor.o(($event) => form.value.signature = $event),
+        as: common_vendor.p({
           placeholder: "设置一个独特的个性签名吧",
           type: "textarea",
           autoHeight: true,
           modelValue: form.value.signature
         }),
-        aq: common_vendor.p({
+        at: common_vendor.p({
           label: "个性签名",
           name: "signature",
           ["label-position"]: "top"
         }),
-        ar: common_vendor.o(($event) => form.value.personalBio = $event),
-        as: common_vendor.p({
+        av: common_vendor.o(($event) => form.value.personalBio = $event),
+        aw: common_vendor.p({
           placeholder: "介绍一下自己...",
           type: "textarea",
           autoHeight: true,
           modelValue: form.value.personalBio
         }),
-        at: common_vendor.p({
+        ax: common_vendor.p({
           label: "个人简介",
           name: "personalBio",
           ["label-position"]: "top"
         }),
-        av: common_vendor.o(($event) => form.value.haveResources = $event),
-        aw: common_vendor.p({
+        ay: common_vendor.o(($event) => form.value.haveResources = $event),
+        az: common_vendor.p({
           placeholder: "用来智能匹配商友资源",
           type: "textarea",
           autoHeight: true,
           modelValue: form.value.haveResources
         }),
-        ax: common_vendor.p({
+        aA: common_vendor.p({
           label: "我有资源",
           name: "haveResources",
           ["label-position"]: "top"
         }),
-        ay: common_vendor.o(($event) => form.value.needResources = $event),
-        az: common_vendor.p({
+        aB: common_vendor.o(($event) => form.value.needResources = $event),
+        aC: common_vendor.p({
           placeholder: "用来智能匹配商友资源",
           type: "textarea",
           autoHeight: true,
           modelValue: form.value.needResources
         }),
-        aA: common_vendor.p({
+        aD: common_vendor.p({
           label: "我需资源",
           name: "needResources",
           ["label-position"]: "top"
         }),
-        aB: common_vendor.sr(formRef, "2d637515-1", {
+        aE: common_vendor.sr(formRef, "2d637515-1", {
           "k": "formRef"
         }),
-        aC: common_vendor.p({
+        aF: common_vendor.p({
           modelValue: form.value,
           rules,
           ["label-width"]: "85px",
           ["label-position"]: "top"
         }),
-        aD: !isKeyboardShow.value
+        aG: !isKeyboardShow.value
       }, !isKeyboardShow.value ? {
-        aE: common_vendor.o(submitForm)
+        aH: common_vendor.o(submitForm)
       } : {}, {
-        aF: currentTab.value === 0,
-        aG: currentTab.value === 1
+        aI: currentTab.value === 0,
+        aJ: currentTab.value === 1
       }, currentTab.value === 1 ? {
-        aH: common_vendor.p({
+        aK: common_vendor.p({
           type: "info",
           size: "24",
           color: "#FF8700"
         }),
-        aI: common_vendor.p({
-          type: "checkmarkempty",
-          size: "14",
-          color: "#fff"
-        }),
-        aJ: common_vendor.p({
-          type: "checkmarkempty",
-          size: "14",
-          color: "#fff"
-        }),
-        aK: common_vendor.p({
-          type: "checkmarkempty",
-          size: "14",
-          color: "#fff"
-        }),
         aL: common_vendor.p({
+          type: "checkmarkempty",
+          size: "14",
+          color: "#fff"
+        }),
+        aM: common_vendor.p({
+          type: "checkmarkempty",
+          size: "14",
+          color: "#fff"
+        }),
+        aN: common_vendor.p({
+          type: "checkmarkempty",
+          size: "14",
+          color: "#fff"
+        }),
+        aO: common_vendor.p({
           type: "compose",
           color: "#fff",
           size: "18"
         }),
-        aM: common_vendor.o(goToLabelEditPage),
-        aN: common_vendor.p({
+        aP: common_vendor.o(goToLabelEditPage),
+        aQ: common_vendor.p({
           datasets: radarDatasets.value,
           showTitle: true
         })

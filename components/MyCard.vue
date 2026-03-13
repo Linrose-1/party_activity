@@ -13,8 +13,8 @@
 						<!-- <text class="pinyin">{{ pinyinName }}</text> -->
 					</view>
 					<view class="tags-line">
-						<text class="tag-style pinyin-tag" v-if="pinyinName">{{ pinyinName }}</text>
-						<text class="tag-style title-tag" v-if="title">{{ title }}</text>
+						<text class="tag-style pinyin-tag" v-if="pinyinName"  @click.stop="$emit('goToMember')">{{ pinyinName }}</text>
+						<text class="tag-style title-tag" v-if="title"  @click.stop="$emit('goToMember')">{{ title }}</text>
 						<text class="tag-style credit-tag" v-if="creditLevel" @click.stop="$emit('goToCredit')">
 							{{ creditLevel }}
 						</text>

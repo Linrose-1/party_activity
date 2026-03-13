@@ -38,8 +38,9 @@
 				:signature="userInfo.signature" :personal-bio="userInfo.personalBio"
 				:contact-info="formattedContactInfo" :show-user-qr-code="!!userInfo.wechatQrCodeUrl"
 				:user-we-chat-qr-code-url="userInfo.wechatQrCodeUrl" :shard-code="userInfo.shardCode"
-				:dynamic-qr-code-url="promotionQrCodeBase64" :radar-datasets="radarDatasets" :credit-level="creditLevel"  :total-score="totalScore"
-				@goToCredit="handleGoToCredit" platform-qr-code-url="https://img.gofor.club/mmexport1759211962539.jpg"
+				:dynamic-qr-code-url="promotionQrCodeBase64" :radar-datasets="radarDatasets" :credit-level="creditLevel"
+				:total-score="totalScore" @goToCredit="handleGoToCredit" @goToMember="handleGoToMember"
+				platform-qr-code-url="https://img.gofor.club/mmexport1759211962539.jpg"
 				@goToOpportunities="handleGoToOpportunities" />
 
 			<!-- <view style="width: 100%;height: 140rpx;"></view> -->
@@ -380,6 +381,15 @@
 		uni.navigateTo({
 			url: '/packages/credit-score/credit-score'
 		});
+	};
+	
+	/**
+	 * 跳转到会员/等级中心
+	 */
+	const handleGoToMember = () => {
+	    uni.navigateTo({
+	        url: '/packages/my-member/my-member'
+	    });
 	};
 
 	// 获取雷达图数据

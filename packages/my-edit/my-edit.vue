@@ -35,7 +35,7 @@
 							<uni-easyinput v-model="form.nickname" placeholder="请输入用户昵称" />
 						</uni-forms-item>
 						<uni-forms-item label="真实姓名" name="realName">
-							<uni-easyinput v-model="form.realName" placeholder="请输入真实姓名"  :disabled="isIdVerified"  />
+							<uni-easyinput v-model="form.realName" placeholder="请输入真实姓名" :disabled="isIdVerified" />
 						</uni-forms-item>
 						<uni-forms-item label="性别" name="sex">
 							<uni-data-select v-model="form.sex" :localdata="genderOptions" placeholder="请选择性别"
@@ -86,6 +86,11 @@
 					<!-- 模块：地域信息 -->
 					<view class="form-card">
 						<view class="card-title">地域分布</view>
+						<uni-forms-item label="国家/地区" name="country">
+							<uni-data-picker placeholder="请选择国家/地区" popup-title="请选择国家" :localdata="globalAreaTree"
+								:map="{text: 'name', value: 'id'}" v-model="form.country" />
+						</uni-forms-item>
+
 						<uni-forms-item label="商务/办公地" name="locationAddress">
 							<uni-data-picker placeholder="请选择商务/办公地" popup-title="请选择省市区" :localdata="areaTree"
 								:map="{text: 'name', value: 'id'}" v-model="form.locationAddress" />
@@ -300,6 +305,7 @@
 		realName: '',
 		sex: null,
 		birthday: '',
+		country: null,
 		locationAddress: null, // 将存储ID数组用于反显，或单个ID用于提交
 		birthplace: null, // 将存储ID数组用于反显，或单个ID用于提交
 		associationName: '', // 组织机构名称
@@ -327,6 +333,8 @@
 	const professionOptions = ref([]);
 	const hobbyOptions = ref([]);
 	const radarDatasets = ref([]);
+
+	const globalAreaTree = ref([]);
 
 	const eraOptions = [{
 			value: '50/60',
@@ -397,11 +405,11 @@
 			}]
 		},
 	};
-	
+
 	// 1. 完善计算属性：判断是否已实名
 	const isIdVerified = computed(() => {
-	    // 如果 idCard 存在且不为空字符串，则视为已实名
-	    return !!(form.value.idCard && form.value.idCard.trim() !== '');
+		// 如果 idCard 存在且不为空字符串，则视为已实名
+		return !!(form.value.idCard && form.value.idCard.trim() !== '');
 	});
 
 
@@ -502,6 +510,9 @@
 				type
 			}
 		}),
+		getGlobalAreaTree: () => request('/app-api/system/area/global_tree', {
+			method: 'GET'
+		}),
 		updateUser: (data) => request('/app-api/member/user/update', {
 			method: 'PUT',
 			data
@@ -532,6 +543,7 @@
 		await Promise.all([
 			getAreaTreeData(),
 			getIndustryTreeData(),
+			getGlobalAreaTreeData(),
 			getProfessionData(),
 			getHobbyData(),
 			fetchRadarStatistics()
@@ -591,6 +603,16 @@
 
 
 	// --- 4. 数据获取与处理方法 ---
+	// --- 3. 获取数据方法 ---
+	const getGlobalAreaTreeData = async () => {
+		const {
+			data,
+			error
+		} = await Api.getGlobalAreaTree();
+		if (!error) {
+			globalAreaTree.value = data || [];
+		}
+	};
 	// 获取并计算雷达图数据
 	const fetchRadarStatistics = async () => {
 		try {
@@ -848,10 +870,11 @@
 			});
 
 			// 【关键】处理地区反显
-			['locationAddress', 'birthplace', 'nativePlace'].forEach(key => {
+			['country', 'locationAddress', 'birthplace', 'nativePlace'].forEach(key => {
 				if (userInfo[key]) {
 					const targetId = parseInt(userInfo[key], 10);
-					const path = findPathById(areaTree.value, targetId);
+					const path = findPathById(key === 'country' ? globalAreaTree.value : areaTree.value,
+						targetId);
 					if (path) form.value[key] = path;
 				}
 			});
@@ -1298,7 +1321,7 @@
 			};
 
 			// A. 处理地域分布：ID数组 -> 取最后一级ID
-			['locationAddress', 'birthplace', 'nativePlace'].forEach(key => {
+			['country', 'locationAddress', 'birthplace', 'nativePlace'].forEach(key => {
 				if (Array.isArray(payload[key]) && payload[key].length > 0) {
 					payload[key] = payload[key][payload[key].length - 1];
 				}
@@ -1363,7 +1386,8 @@
 					});
 
 					// 兼容多种返回格式：true / {success: true} / {data: true}
-					if (giveRes === true || (giveRes && (giveRes.success === true || giveRes.data === true))) {
+					if (giveRes === true || (giveRes && (giveRes.success === true || giveRes.data ===
+							true))) {
 						shouldGiveReward = true;
 						console.log('✅ 符合赠送条件，准备弹出奖励提示');
 					}
