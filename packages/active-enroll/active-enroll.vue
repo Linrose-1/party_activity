@@ -182,10 +182,7 @@
 			</button>
 		</view>
 
-		<!-- <view class="footer">
-			<p>创新科技聚会策划部 © 2023 版权所有</p>
-			<p>客服电话: 021-68881234 | 服务时间: 9:00-18:00</p>
-		</view> -->
+		<SmartGuidePopup ref="smartGuidePopupRef" :scenario="3" />
 	</view>
 </template>
 
@@ -198,12 +195,19 @@
 		watch
 	} from 'vue';
 	import {
-		onLoad
+		onLoad,
+		onReady
 	} from '@dcloudio/uni-app'
 	import request from '../../utils/request.js';
 	import uploadFile from '../../utils/upload.js';
+	import {
+		isScenario3User
+	} from '@/utils/user.js';
+	import SmartGuidePopup from '@/components/SmartGuidePopup.vue';
 
 	const isUserVerified = ref(true); // 默认为 true，避免页面闪烁
+
+	const smartGuidePopupRef = ref(null);
 
 	// 检查用户实名认证状态的函数
 	const checkUserVerificationStatus = async () => {
@@ -284,6 +288,13 @@
 			}
 		} catch (e) {
 			console.error('读取缓存失败', e);
+		}
+	});
+
+	onReady(() => {
+		// 页面加载完了，用户可以开始写内容了，此时弹出引导
+		if (isScenario3User()) {
+			smartGuidePopupRef.value?.open();
 		}
 	});
 

@@ -2,8 +2,8 @@
 <template>
 	<uni-popup ref="popupRef" type="bottom" background-color="#fff" @change="onChange">
 		<view class="share-type-container">
-			<view class="popup-title">选择分享方式</view>
-			<view class="popup-subtitle">转发名片给好友，您希望新用户绑定谁？</view>
+			<view class="popup-title">智能分享</view>
+			<view class="popup-subtitle">请选择分享名片方式，您希望新用户绑定谁的邀请码？</view>
 
 			<view class="share-options">
 				<!-- 选项1：自发 (绑定我自己) -->

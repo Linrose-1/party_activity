@@ -84,6 +84,8 @@
 
 		<!-- 头像操作菜单 (复用组件) -->
 		<AvatarLongPressMenu ref="menuRef" @action="handleMenuAction" />
+
+		<SmartGuidePopup ref="smartGuidePopupRef" :scenario="3" />
 	</view>
 </template>
 
@@ -94,16 +96,29 @@
 		onMounted
 	} from 'vue';
 	import {
-		onPullDownRefresh
+		onPullDownRefresh,
+		onReady
 	} from '@dcloudio/uni-app';
 	import request from '@/utils/request.js';
+	import {
+		isScenario3User
+	} from '@/utils/user.js';
 	import AvatarLongPressMenu from '@/components/AvatarLongPressMenu.vue';
+	import SmartGuidePopup from '@/components/SmartGuidePopup.vue';
 
 	// --- 常量与状态 ---
 	const defaultAvatar = 'https://img.gofor.club/mmexport1759211962539.jpg';
 	const rankingList = ref([]);
 	const loading = ref(false);
 	const menuRef = ref(null);
+	const smartGuidePopupRef = ref(null);
+
+	onReady(() => {
+		// 页面加载完了，用户可以开始写内容了，此时弹出引导
+		if (isScenario3User()) {
+			smartGuidePopupRef.value?.open();
+		}
+	});
 
 	onMounted(() => {
 		fetchRanking();

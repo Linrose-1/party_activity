@@ -1,6 +1,7 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
 const utils_request = require("../../utils/request.js");
+const utils_user = require("../../utils/user.js");
 if (!Array) {
   const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
   const _easycom_uni_load_more2 = common_vendor.resolveComponent("uni-load-more");
@@ -9,9 +10,10 @@ if (!Array) {
 const _easycom_uni_icons = () => "../../uni_modules/uni-icons/components/uni-icons/uni-icons.js";
 const _easycom_uni_load_more = () => "../../uni_modules/uni-load-more/components/uni-load-more/uni-load-more.js";
 if (!Math) {
-  (_easycom_uni_icons + _easycom_uni_load_more + AvatarLongPressMenu)();
+  (_easycom_uni_icons + _easycom_uni_load_more + AvatarLongPressMenu + SmartGuidePopup)();
 }
 const AvatarLongPressMenu = () => "../../components/AvatarLongPressMenu.js";
+const SmartGuidePopup = () => "../../components/SmartGuidePopup.js";
 const defaultAvatar = "https://img.gofor.club/mmexport1759211962539.jpg";
 const _sfc_main = {
   __name: "contribution-ranking",
@@ -19,6 +21,13 @@ const _sfc_main = {
     const rankingList = common_vendor.ref([]);
     const loading = common_vendor.ref(false);
     const menuRef = common_vendor.ref(null);
+    const smartGuidePopupRef = common_vendor.ref(null);
+    common_vendor.onReady(() => {
+      var _a;
+      if (utils_user.isScenario3User()) {
+        (_a = smartGuidePopupRef.value) == null ? void 0 : _a.open();
+      }
+    });
     common_vendor.onMounted(() => {
       fetchRanking();
     });
@@ -128,7 +137,13 @@ const _sfc_main = {
         v: common_vendor.sr(menuRef, "3c4f4856-2", {
           "k": "menuRef"
         }),
-        w: common_vendor.o(handleMenuAction)
+        w: common_vendor.o(handleMenuAction),
+        x: common_vendor.sr(smartGuidePopupRef, "3c4f4856-3", {
+          "k": "smartGuidePopupRef"
+        }),
+        y: common_vendor.p({
+          scenario: 3
+        })
       });
     };
   }

@@ -39,7 +39,7 @@ const _sfc_main = {
       }
       loggedInUserId.value = common_vendor.index.getStorageSync("userId");
       if (!options.id) {
-        common_vendor.index.__f__("error", "at packages/active-detail/active-detail.vue:403", "[聚会详情] 缺少聚会ID");
+        common_vendor.index.__f__("error", "at packages/active-detail/active-detail.vue:404", "[聚会详情] 缺少聚会ID");
         common_vendor.index.showToast({
           title: "加载聚会详情失败，缺少ID",
           icon: "none"
@@ -54,7 +54,7 @@ const _sfc_main = {
         const sharerId = options.sharerId;
         const bizId = options.id;
         if (sharerId === loggedInUserId.value) {
-          common_vendor.index.__f__("log", "at packages/active-detail/active-detail.vue:423", "[分享加分] 本人点击，跳过");
+          common_vendor.index.__f__("log", "at packages/active-detail/active-detail.vue:424", "[分享加分] 本人点击，跳过");
         } else if (loggedInUserId.value && bizId) {
           triggerShareHitApi(sharerId, bizId);
         } else if (bizId) {
@@ -503,8 +503,8 @@ const _sfc_main = {
         q: common_vendor.t(activityDetail.value.locationAddress),
         r: common_vendor.t(participantTotal.value || 0),
         s: common_vendor.t(activityDetail.value.totalSlots),
-        t: activityDetail.value.activityFunds === 1
-      }, activityDetail.value.activityFunds === 1 ? {
+        t: [1, 3].includes(activityDetail.value.activityFunds)
+      }, [1, 3].includes(activityDetail.value.activityFunds) ? {
         v: common_vendor.t(activityDetail.value.registrationFee)
       } : activityDetail.value.activityFunds === 2 ? {} : {}, {
         w: activityDetail.value.activityFunds === 2,

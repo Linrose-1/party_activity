@@ -12,9 +12,10 @@ const _easycom_uni_icons = () => "../../uni_modules/uni-icons/components/uni-ico
 const _easycom_uni_collapse_item = () => "../../uni_modules/uni-collapse/components/uni-collapse-item/uni-collapse-item.js";
 const _easycom_uni_collapse = () => "../../uni_modules/uni-collapse/components/uni-collapse/uni-collapse.js";
 if (!Math) {
-  (_easycom_uni_icons + _easycom_uni_collapse_item + _easycom_uni_collapse + ActivityCard)();
+  (_easycom_uni_icons + _easycom_uni_collapse_item + _easycom_uni_collapse + ActivityCard + SmartGuidePopup)();
 }
 const ActivityCard = () => "../../components/ActivityCard.js";
+const SmartGuidePopup = () => "../../components/SmartGuidePopup.js";
 const pageSize = 10;
 const _sfc_main = {
   __name: "active",
@@ -25,6 +26,7 @@ const _sfc_main = {
     const activitiesData = common_vendor.ref([]);
     const isLogin = common_vendor.ref(false);
     const bannerList = common_vendor.ref([]);
+    const smartGuidePopupRef = common_vendor.ref(null);
     const searchKeyword = common_vendor.ref("");
     const typeList = common_vendor.ref([]);
     const typeIndex = common_vendor.ref(0);
@@ -44,9 +46,13 @@ const _sfc_main = {
             dislikesCount: data.dislikesCount
           });
         } else if (data.type === "save") {
-          updateLocalActivityData(data.id, { followFlag: data.isSaved ? 1 : 0 });
+          updateLocalActivityData(data.id, {
+            followFlag: data.isSaved ? 1 : 0
+          });
         } else if (data.type === "comment") {
-          updateLocalActivityData(data.id, { commonCount: data.totalCount });
+          updateLocalActivityData(data.id, {
+            commonCount: data.totalCount
+          });
         }
       });
     });
@@ -72,10 +78,17 @@ const _sfc_main = {
     const updateLocalActivityData = (id, payload) => {
       const index = activitiesData.value.findIndex((item) => item.id == id);
       if (index !== -1) {
-        activitiesData.value[index] = { ...activitiesData.value[index], ...payload };
+        activitiesData.value[index] = {
+          ...activitiesData.value[index],
+          ...payload
+        };
       }
     };
-    const handleLikeChange = async ({ id, action, clickedAction }) => {
+    const handleLikeChange = async ({
+      id,
+      action,
+      clickedAction
+    }) => {
       const activity = activitiesData.value.find((item) => item.id == id);
       if (!activity)
         return;
@@ -97,19 +110,30 @@ const _sfc_main = {
             activity.likesCount--;
         }
       }
-      const { error } = await utils_request.request("/app-api/member/like-action/add", {
+      const {
+        error
+      } = await utils_request.request("/app-api/member/like-action/add", {
         method: "POST",
-        data: { targetId: id, targetType: "activity", action }
+        data: {
+          targetId: id,
+          targetType: "activity",
+          action
+        }
       });
       if (error) {
         activity.userLikeStr = originalAction;
         activity.likesCount = originalLikes;
         activity.dislikesCount = originalDislikes;
-        common_vendor.index.showToast({ title: "操作失败", icon: "none" });
+        common_vendor.index.showToast({
+          title: "操作失败",
+          icon: "none"
+        });
       }
     };
     const initializePage = async () => {
-      common_vendor.index.showLoading({ title: "加载中..." });
+      common_vendor.index.showLoading({
+        title: "加载中..."
+      });
       try {
         pageNo.value = 1;
         hasMore.value = true;
@@ -121,38 +145,56 @@ const _sfc_main = {
         ]);
         await getActiveList(false);
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/active/active.vue:270", "[聚会列表] 初始化失败:", error);
-        common_vendor.index.showToast({ title: "数据加载失败", icon: "none" });
+        common_vendor.index.__f__("error", "at pages/active/active.vue:312", "[聚会列表] 初始化失败:", error);
+        common_vendor.index.showToast({
+          title: "数据加载失败",
+          icon: "none"
+        });
       } finally {
         common_vendor.index.hideLoading();
       }
     };
     const fetchBanners = async () => {
-      const { data, error } = await utils_request.request("/app-api/member/banner-rec/list", {
+      const {
+        data,
+        error
+      } = await utils_request.request("/app-api/member/banner-rec/list", {
         method: "GET",
-        data: { positionCode: "0", pageNo: 1, pageSize: 50 }
+        data: {
+          positionCode: "0",
+          pageNo: 1,
+          pageSize: 50
+        }
       });
       if (error) {
-        common_vendor.index.__f__("error", "at pages/active/active.vue:286", "[轮播图] 获取失败:", error);
+        common_vendor.index.__f__("error", "at pages/active/active.vue:338", "[轮播图] 获取失败:", error);
         bannerList.value = [];
         return;
       }
       bannerList.value = data && data.list ? data.list.sort((a, b) => a.sort - b.sort) : [];
     };
     const fetchActivityTypeList = async () => {
-      const { data, error } = await utils_request.request("/app-api/system/dict-data/type", {
-        data: { type: "member_activity_category" }
+      const {
+        data,
+        error
+      } = await utils_request.request("/app-api/system/dict-data/type", {
+        data: {
+          type: "member_activity_category"
+        }
       });
       if (error) {
-        common_vendor.index.__f__("error", "at pages/active/active.vue:303", "[类型列表] 获取失败:", error);
+        common_vendor.index.__f__("error", "at pages/active/active.vue:360", "[类型列表] 获取失败:", error);
         throw new Error("获取类型失败");
       }
       typeList.value = data || [];
     };
     const fetchActivityStatusList = async () => {
-      const { data, error } = await utils_request.request("/app-api/member/activity/status-list");
+      const {
+        data,
+        error
+      } = await utils_request.request("/app-api/member/activity/status-list");
       if (error) {
-        common_vendor.index.__f__("error", "at pages/active/active.vue:315", "[状态列表] 获取失败:", error);
+        common_vendor.index.__f__("error", "at pages/active/active.vue:375", "[状态列表] 获取失败:", error);
         throw new Error("获取状态失败");
       }
       statusList.value = data || [];
@@ -176,19 +218,28 @@ const _sfc_main = {
         latitude: selectedLocationInfo.value ? selectedLocationInfo.value.latitude : ""
       };
       try {
-        const result = await utils_request.request("/app-api/member/activity/list", { method: "GET", data: params });
+        const result = await utils_request.request("/app-api/member/activity/list", {
+          method: "GET",
+          data: params
+        });
         if (result.error) {
           if (result.error.includes("信息绑定")) {
             await utils_user.checkLoginGuard();
             loading.value = false;
             return;
           }
-          common_vendor.index.showToast({ title: result.error, icon: "none" });
+          common_vendor.index.showToast({
+            title: result.error,
+            icon: "none"
+          });
           hasMore.value = false;
           return;
         }
         if (result && result.data) {
-          const { list = [], total = 0 } = result.data;
+          const {
+            list = [],
+            total = 0
+          } = result.data;
           isLoadMore ? activitiesData.value.push(...list) : activitiesData.value = list;
           hasMore.value = activitiesData.value.length < total;
           pageNo.value++;
@@ -196,7 +247,7 @@ const _sfc_main = {
           hasMore.value = false;
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/active/active.vue:369", "[聚会列表] 请求异常:", error);
+        common_vendor.index.__f__("error", "at pages/active/active.vue:438", "[聚会列表] 请求异常:", error);
         hasMore.value = false;
       } finally {
         loading.value = false;
@@ -208,7 +259,10 @@ const _sfc_main = {
       selectedCategory.value = "";
       statusIndex.value = 0;
       selectedLocationInfo.value = null;
-      common_vendor.index.showToast({ title: "筛选已重置", icon: "none" });
+      common_vendor.index.showToast({
+        title: "筛选已重置",
+        icon: "none"
+      });
     };
     const bindTypePickerChange = (e) => {
       const newIndex = Number(e.detail.value);
@@ -250,25 +304,33 @@ const _sfc_main = {
     const publishActivity = async () => {
       if (!await utils_user.checkLoginGuard())
         return;
-      common_vendor.index.navigateTo({ url: "/packages/active-publish/active-publish" });
+      common_vendor.index.navigateTo({
+        url: "/packages/active-publish/active-publish"
+      });
     };
     const handleBannerClick = async (banner) => {
       if (!await utils_user.checkLoginGuard())
         return;
       if (!banner || !banner.targetUrl)
         return;
-      common_vendor.index.navigateTo({ url: "/packages/active-detail/active-detail?id=" + banner.targetUrl });
+      common_vendor.index.navigateTo({
+        url: "/packages/active-detail/active-detail?id=" + banner.targetUrl
+      });
     };
     common_vendor.watch(
       [searchKeyword, selectedCategory, statusIndex, selectedLocationInfo],
       () => {
         clearTimeout(filterDebounceTimer);
         filterDebounceTimer = setTimeout(() => {
-          common_vendor.index.showLoading({ title: "正在筛选..." });
+          common_vendor.index.showLoading({
+            title: "正在筛选..."
+          });
           getActiveList(false).finally(() => common_vendor.index.hideLoading());
         }, 300);
       },
-      { deep: true }
+      {
+        deep: true
+      }
     );
     common_vendor.onShareAppMessage(() => {
       const inviteCode = utils_user.getInviteCode();
@@ -351,7 +413,13 @@ const _sfc_main = {
           size: "18",
           color: "white"
         }),
-        x: common_vendor.o(publishActivity)
+        x: common_vendor.o(publishActivity),
+        y: common_vendor.sr(smartGuidePopupRef, "12e513cf-5", {
+          "k": "smartGuidePopupRef"
+        }),
+        z: common_vendor.p({
+          scenario: 3
+        })
       });
     };
   }

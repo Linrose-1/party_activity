@@ -30,14 +30,152 @@
   flex: 1;
   display: flex;
   flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+  padding-right: 20rpx;
 }
 .user-info .user-name.data-v-5571075f {
   font-size: 34rpx;
   font-weight: bold;
   color: #fff;
-  margin-bottom: 4rpx;
+  display: block;
+  /* 确保占行 */
+  margin-bottom: 6rpx;
 }
 .user-info .user-desc.data-v-5571075f {
+  font-size: 24rpx;
+  color: rgba(255, 255, 255, 0.8);
+  display: block;
+  margin-top: 10rpx;
+}
+.mini-tags-line.data-v-5571075f {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+  margin-top: 8rpx;
+  /* 解决由于数据未加载时可能的高度塌陷 */
+  min-height: 30rpx;
+}
+
+/* 核心修正：确保标签可见 */
+.mini-tag.data-v-5571075f {
+  display: inline-block !important;
+  /* 强制 text 表现为块，否则背景色不显示 */
+  font-size: 20rpx;
+  color: #fff;
+  padding: 4rpx 14rpx;
+  border-radius: 8rpx;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1rpx solid rgba(255, 255, 255, 0.3);
+  line-height: 1.2;
+}
+.mini-credit-line.data-v-5571075f {
+  display: inline-flex !important;
+  /* 确保能在一行排列并显示背景 */
+  align-items: center;
+  background: rgba(255, 255, 255, 0.15);
+  padding: 6rpx 18rpx;
+  border-radius: 30rpx;
+  margin-top: 14rpx;
+  gap: 8rpx;
+  border: 1rpx solid rgba(255, 255, 255, 0.2);
+}
+
+/* 标签行布局优化 */
+.mini-tags-line.data-v-5571075f {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+  margin-top: 10rpx;
+}
+.mini-tag.data-v-5571075f {
+  font-size: 20rpx;
+  color: #fff;
+  padding: 4rpx 14rpx;
+  /* 增加一点内边距，呼吸感更好 */
+  border-radius: 8rpx;
+  background: rgba(255, 255, 255, 0.18);
+  border: 1rpx solid rgba(255, 255, 255, 0.3);
+}
+
+/* 信用分行布局优化 */
+.mini-credit-line.data-v-5571075f {
+  display: inline-flex;
+  align-items: center;
+  /* 核心修改：使用白色半透明背景，适配橙色渐变 */
+  background: rgba(255, 255, 255, 0.15);
+  padding: 6rpx 18rpx;
+  border-radius: 30rpx;
+  /* 胶囊形状 */
+  margin-top: 14rpx;
+  gap: 8rpx;
+  border: 1rpx solid rgba(255, 255, 255, 0.2);
+}
+.mini-credit-line .credit-text.data-v-5571075f {
+  font-size: 20rpx;
+  color: #fff;
+  font-weight: bold;
+}
+.mini-credit-line .score-text.data-v-5571075f {
+  font-size: 20rpx;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* 操作网格间距优化 */
+.action-grid.data-v-5571075f {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 44rpx 20rpx;
+  /* 增加水平间距到 20rpx */
+  padding: 50rpx 30rpx;
+  /* 增加左右内边距 */
+}
+
+/* 头部标签行布局 */
+.mini-tags-line.data-v-5571075f {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+  margin-top: 8rpx;
+}
+.mini-tag.data-v-5571075f {
+  font-size: 20rpx;
+  color: #fff;
+  padding: 2rpx 12rpx;
+  border-radius: 6rpx;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1rpx solid rgba(255, 255, 255, 0.3);
+}
+.mini-tag.data-v-5571075f:active {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* 信用分行布局 */
+.mini-credit-line.data-v-5571075f {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.1);
+  padding: 4rpx 16rpx;
+  border-radius: 20rpx;
+  margin-top: 12rpx;
+  gap: 8rpx;
+}
+.mini-credit-line .credit-text.data-v-5571075f {
+  font-size: 20rpx;
+  color: #fff;
+  font-weight: bold;
+}
+.mini-credit-line .score-text.data-v-5571075f {
+  font-size: 20rpx;
+  color: rgba(255, 255, 255, 0.9);
+}
+.mini-credit-line.data-v-5571075f:active {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+/* 调整原有描述文字，防止重叠 */
+.user-desc.data-v-5571075f {
+  margin-top: 8rpx;
   font-size: 22rpx;
   color: rgba(255, 255, 255, 0.8);
 }

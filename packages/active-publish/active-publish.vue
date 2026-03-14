@@ -120,7 +120,7 @@
 							selectedColor="#FF6F00" selectedTextColor="#FF6F00"></uni-data-checkbox>
 					</uni-forms-item>
 
-					<uni-forms-item label="单人费用" v-if="form.activityFunds === 1" required>
+					<uni-forms-item label="单人费用" v-if="[1, 3].includes(form.activityFunds)" required>
 						<uni-easyinput type="digit" v-model="form.registrationFee" placeholder="请输入聚会费用(元)"
 							:inputBorder="true" :styles="inputStyles">
 							<template #right>
@@ -132,7 +132,7 @@
 			</view>
 
 			<!-- ============ 2. 赞助商管理模块 ============ -->
-			<view class="form-card" v-if="form.activityFunds !== 1">
+			<view class="form-card" v-if="[2, 3].includes(form.activityFunds)">
 				<view class="section-header" @click="isSponsorExpanded = !isSponsorExpanded">
 					<view class="header-left">
 						<view class="header-line"></view>
@@ -232,7 +232,7 @@
 						<uni-easyinput type="number" v-model="form.organizerContactPhone" placeholder="请输入联系电话"
 							:inputBorder="true" :styles="inputStyles" />
 					</uni-forms-item>
-					<uni-forms-item label="收款码" v-if="form.activityFunds === 1" required>
+					<uni-forms-item label="收款码" v-if="[1, 3].includes(form.activityFunds)" required>
 						<view class="qrcode-upload-box" @click="uploadCode">
 							<image v-if="form.organizerPaymentQrCodeUrl" :src="form.organizerPaymentQrCodeUrl"
 								mode="aspectFit" class="uploaded-qr"></image>
@@ -271,6 +271,8 @@
 			@close="showSponsorPopup = false" @confirm="handleSponsorSave">
 		</sponsor-popup>
 
+		<SmartGuidePopup ref="smartGuidePopupRef" :scenario="3" />
+
 	</view>
 </template>
 
@@ -288,6 +290,7 @@
 	import {
 		onShow,
 		onLoad,
+		onReady,
 		onUnload,
 		onShareAppMessage,
 		onShareTimeline
@@ -295,9 +298,11 @@
 	import request from '@/utils/request.js';
 	import uploadFile from '@/utils/upload.js';
 	import {
-		getInviteCode
+		getInviteCode,
+		isScenario3User
 	} from '@/utils/user.js';
 	import SponsorPopup from '@/components/sponsor-popup.vue';
+	import SmartGuidePopup from '@/components/SmartGuidePopup.vue';
 
 	// ==============================================================================
 	// 2. 状态定义 (State Definitions)
@@ -314,6 +319,8 @@
 	const remainingQuota = ref(0);
 	const isQuotaLoaded = ref(false);
 
+	const smartGuidePopupRef = ref(null);
+
 	const timeRange = ref([]);
 	const enrollTimeRange = ref([]);
 	const associatedStoreName = ref('');
@@ -325,6 +332,10 @@
 		{
 			text: '赞助/免费',
 			value: 2
+		},
+		{
+			text: 'AA+赞助',
+			value: 3
 		}
 	]);
 
@@ -430,9 +441,16 @@
 		});
 	});
 
+	onReady(() => {
+		// 页面加载完了，用户可以开始写内容了，此时弹出引导
+		if (isScenario3User()) {
+			smartGuidePopupRef.value?.open();
+		}
+	});
+
 	onUnload(() => {
 		uni.$off('shopSelected');
-		if (autoSaveTimer.value) clearTimeout(autoSaveTimer.value); 
+		if (autoSaveTimer.value) clearTimeout(autoSaveTimer.value);
 	});
 
 	watch([timeRange, enrollTimeRange], () => {
@@ -980,6 +998,18 @@
 			icon: 'none'
 		});
 
+		const needsFee = [1, 3].includes(form.value.activityFunds);
+		if (needsFee) {
+			if (!form.value.registrationFee) return uni.showToast({
+				title: '请输入单人费用',
+				icon: 'none'
+			});
+			if (!form.value.organizerPaymentQrCodeUrl) return uni.showToast({
+				title: '请上传收款码',
+				icon: 'none'
+			});
+		}
+
 		// 【优化1】判断用户是否手动选择过时间
 		if (!isTimeRangeUserSelected.value) {
 			uni.showModal({
@@ -1040,7 +1070,10 @@
 			}));
 			delete payload.companyName;
 			delete payload.companyLogo;
-			if (payload.activityFunds === 2) delete payload.registrationFee;
+			if (payload.activityFunds === 2) {
+				delete payload.registrationFee;
+				delete payload.organizerPaymentQrCodeUrl;
+			}
 
 			let finalActivityId = null;
 

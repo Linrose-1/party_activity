@@ -88,6 +88,8 @@
 			</view>
 		</view>
 	</view>
+
+	<SmartGuidePopup ref="smartGuidePopupRef" :scenario="3" />
 </template>
 
 <script setup>
@@ -99,14 +101,17 @@
 	} from 'vue';
 	import {
 		onLoad,
+		onReady,
 		onPullDownRefresh,
 		onReachBottom,
 		onShow
 	} from '@dcloudio/uni-app';
 	import request from '@/utils/request.js';
 	import {
-		checkLoginGuard
+		checkLoginGuard,
+		isScenario3User
 	} from '@/utils/user.js';
+	import SmartGuidePopup from '@/components/SmartGuidePopup.vue';
 
 	const themeColor = '#FF8400';
 
@@ -136,6 +141,8 @@
 	});
 	const isFollowActionInProgress = ref(false);
 
+	const smartGuidePopupRef = ref(null);
+
 	const timeRangeText = computed(() => {
 		if (timeRange.value && timeRange.value.length === 2) {
 			const start = timeRange.value[0].slice(5, 16);
@@ -146,6 +153,13 @@
 	});
 
 	const isListEmpty = computed(() => userList.value.length === 0 && loadingStatus.value !== 'loading');
+
+	onReady(() => {
+		// 页面加载完了，用户可以开始写内容了，此时弹出引导
+		if (isScenario3User()) {
+			smartGuidePopupRef.value?.open();
+		}
+	});
 
 	// --- API 调用 (核心逻辑更新) ---
 	const fetchUserList = async (isRefresh = false) => {

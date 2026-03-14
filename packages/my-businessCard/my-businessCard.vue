@@ -56,17 +56,19 @@
 			</view>
 
 			<!-- 场景 B: 已登录，陌生人-->
+			<!-- my-businessCard.vue 内部修改 -->
 			<view v-else-if="userStatus === 'STRANGER'" class="action-group">
-				<!-- 1. 邀入我圈 (橙色) -->
+				<!-- 1. 加入TA圈 (次要按钮，浅色背景) -->
+				<button class="btn btn-ghost-primary" @click="handleAddCircle">加入TA圈</button>
+
+				<!-- 2. 邀入我圈 (主要按钮，品牌渐变) -->
 				<button class="btn btn-primary" @click="handleInviteCircle">邀入我圈</button>
 
-				<!-- 2. 加入TA圈 (绿色) -->
-				<button class="btn btn-secondary" @click="handleAddCircle">加入TA圈</button>
-
-				<!-- 3. 分享 (最右侧，小按钮，明显橙色) -->
-				<button class="btn btn-share-orange" @click="openShareTypePopup">
-					<uni-icons type="paperplane" size="18" color="#fff"></uni-icons>
-				</button>
+				<!-- 3. 智能分享 (独立标识，橙色边框/圆角) -->
+				<view class="smart-share-btn" @click="openShareTypePopup">
+					<!-- <uni-icons type="paperplane-filled" size="22" color="#FF6A00"></uni-icons> -->
+					<text>智能分享</text>
+				</view>
 			</view>
 
 			<!-- 场景 C: 已登录，已是圈友 -->
@@ -126,6 +128,13 @@
 
 	<ShareTypePopup ref="shareTypePopupRef" @selectMode="handleShareTypeSelect" @change="onShareTypePopupChange" />
 
+	<!--需求诱发悬浮按钮组 -->
+	<!-- 逻辑：只有已完整登录（绑定手机号）的用户才显示此悬浮窗 -->
+	<DemandActionFab v-if="userStatus !== 'GUEST' && userStatus !== 'SELF'" />
+
+	<!-- 智能引导弹窗 -->
+	<SmartGuidePopup ref="guidePopupRef" :scenario="guideScenario" />
+
 </template>
 
 <script setup>
@@ -136,6 +145,7 @@
 	import {
 		onHide,
 		onLoad,
+		onReady,
 		onShareAppMessage,
 		onShareTimeline
 	} from '@dcloudio/uni-app';
@@ -143,6 +153,8 @@
 	import request from '../../utils/request.js';
 	import AddCircleConfirmPopup from '@/components/AddCircleConfirmPopup.vue';
 	import InviteCircleConfirmPopup from '@/components/InviteCircleConfirmPopup.vue';
+	import DemandActionFab from '@/components/DemandActionFab.vue';
+	import SmartGuidePopup from '@/components/SmartGuidePopup.vue';
 	import {
 		getInviteCode,
 		getCachedUserInfo,
@@ -164,6 +176,9 @@
 	const isQuotaLoaded = ref(false);
 
 	const radarDatasets = ref([]);
+
+	const guideScenario = ref(1);
+	const guidePopupRef = ref(null);
 
 	// 分享UI相关的状态
 	const sharePopup = ref(null);
@@ -209,6 +224,11 @@
 
 
 	// --- 2. 页面生命周期与初始化 ---
+	// onLoad(() => {
+	// 	startGuideTimer();
+	// });
+
+
 	onLoad(async (options) => {
 		// 1. 获取本地 Token
 		const token = uni.getStorageSync('token');
@@ -313,6 +333,29 @@
 		uni.showShareMenu({
 			menus: ['shareAppMessage', 'shareTimeline'] // 关键：必须包含 shareTimeline
 		});
+		// 启动 6 秒引导逻辑
+		startGuideTimer();
+	});
+
+	// 在 onLoad 内部或者末尾添加
+	onReady(() => {
+		// ======= 调试专用：手动控制显示场景 =======
+
+		// 测试情况 1：全新户 (欢迎语 + 5智米奖励)
+		guideScenario.value = 3;
+
+		// 测试情况 2：老游客 (欢迎您再次来到... + 5智米奖励)
+		// guideScenario.value = 2; 
+
+		// 测试情况 3：未完善资料 (欢迎语 + 10智米提示 + 3x2按钮)
+		// guideScenario.value = 3; 
+
+		// 立即打开，不需要等 6 秒
+		if (guidePopupRef.value) {
+			console.log('--- 正在测试引导弹窗，场景 ID:', guideScenario.value);
+			guidePopupRef.value.open();
+		}
+		// =======================================
 	});
 
 	/**
@@ -382,14 +425,14 @@
 			url: '/packages/credit-score/credit-score'
 		});
 	};
-	
+
 	/**
 	 * 跳转到会员/等级中心
 	 */
 	const handleGoToMember = () => {
-	    uni.navigateTo({
-	        url: '/packages/my-member/my-member'
-	    });
+		uni.navigateTo({
+			url: '/packages/my-member/my-member'
+		});
 	};
 
 	// 获取雷达图数据
@@ -457,66 +500,7 @@
 			console.error('获取评分统计失败', e);
 		}
 	};
-	// const fetchRadarStatistics = async (userId) => {
-	// 	try {
-	// 		// 并发请求 type 0 (自评) 和 type 3 (综合)
-	// 		const [selfRes, friendRes, complexRes] = await Promise.all([
-	// 			request('/app-api/member/user-scores/complexStatistics', {
-	// 				method: 'GET',
-	// 				data: {
-	// 					userId,
-	// 					type: 0
-	// 				}
-	// 			}),
-	// 			request('/app-api/member/user-scores/complexStatistics', {
-	// 				method: 'GET',
-	// 				data: {
-	// 					userId,
-	// 					type: 1
-	// 				}
-	// 			}),
-	// 			request('/app-api/member/user-scores/complexStatistics', {
-	// 				method: 'GET',
-	// 				data: {
-	// 					userId,
-	// 					type: 3
-	// 				}
-	// 			})
-	// 		]);
 
-	// 		const newDatasets = [];
-	// 		if (!selfRes.error && selfRes.data) {
-	// 			newDatasets.push({
-	// 				name: '自我评价',
-	// 				data: [selfRes.data.avg1 || 0, selfRes.data.avg2 || 0, selfRes.data.avg3 || 0, selfRes
-	// 					.data.avg4 || 0
-	// 				],
-	// 				color: '#FF7D00'
-	// 			});
-	// 		}
-	// 		if (!friendRes.error && friendRes.data) {
-	// 			newDatasets.push({
-	// 				name: '商友评价',
-	// 				data: [friendRes.data.avg1 || 0, friendRes.data.avg2 || 0, friendRes.data.avg3 || 0,
-	// 					friendRes.data.avg4 || 0
-	// 				],
-	// 				color: '#4CAF50'
-	// 			});
-	// 		}
-	// 		if (!complexRes.error && complexRes.data) {
-	// 			newDatasets.push({
-	// 				name: '综合评价',
-	// 				data: [complexRes.data.avg1 || 0, complexRes.data.avg2 || 0, complexRes.data.avg3 || 0,
-	// 					complexRes.data.avg4 || 0
-	// 				],
-	// 				color: '#1890FF'
-	// 			});
-	// 		}
-	// 		radarDatasets.value = newDatasets;
-	// 	} catch (e) {
-	// 		console.error('获取评分统计失败', e);
-	// 	}
-	// };
 
 	// --- 3. 数据获取与适配 ---
 
@@ -774,39 +758,13 @@
 			pinyinName: rawUserData.topUpLevel?.name || rawUserData.topUpLevelName || '',
 			titleName: rawUserData.level?.name || rawUserData.levelName || '',
 		};
-
-		// return {
-		// 	id: rawUserData.id,
-		// 	avatar: rawUserData.avatar,
-		// 	realName: rawUserData.realName,
-		// 	nickname: rawUserData.nickname,
-		// 	remarkName: rawUserData.remarkName,
-		// 	pinyinName: rawUserData.topUpLevel?.name || rawUserData.topUpLevelName || '',
-		// 	titleName: rawUserData.level?.name || rawUserData.levelName || '',
-		// 	era: rawUserData.era,
-
-		// 	// --- 核心修改：由字符串改为处理好的数组 ---
-		// 	associationList: associationList,
-		// 	companyList: companyList,
-
-		// 	// 其他字段保持原样传递（或根据组件需求处理）
-		// 	haveResources: rawUserData.haveResources,
-		// 	needResources: rawUserData.needResources,
-		// 	signature: rawUserData.signature,
-		// 	personalBio: rawUserData.personalBio,
-		// 	mobile: rawUserData.mobile,
-		// 	contactEmail: rawUserData.contactEmail,
-		// 	locationAddressStr: rawUserData.locationAddressStr,
-		// 	wechatQrCodeUrl: rawUserData.wechatQrCodeUrl,
-		// 	shardCode: rawUserData.shardCode,
-		// 	isFriend: rawUserData.isFriend // 确保这个字段被传入用于底部状态判断
-		// };
 	};
 
 	// --- 4. 计算属性 ---
 	const formattedContactInfo = computed(() => {
 		if (!userInfo.value) return [];
-		return [{
+
+		const info = [{
 				icon: 'phone-filled',
 				label: '手机',
 				value: userInfo.value.mobile || '未设置'
@@ -815,19 +773,31 @@
 				icon: 'email-filled',
 				label: '邮箱',
 				value: userInfo.value.contactEmail || '未设置'
-			},
-			{
-				icon: 'location-filled',
-				label: '商区',
-				value: userInfo.value.locationAddressStr || '未设置'
-			},
-			{
-				icon: 'location-filled',
-				label: '家乡',
-				value: userInfo.value.nativePlaceStr || '未设置'
 			}
 		];
+		if (userInfo.value.countryStr) {
+			info.push({
+				icon: 'map-pin-ellipse', // 使用地图图标
+				label: '国家',
+				value: userInfo.value.countryStr
+			});
+		}
+
+		info.push({
+			icon: 'location-filled',
+			label: '商区',
+			value: userInfo.value.locationAddressStr || '未设置'
+		});
+
+		info.push({
+			icon: 'location-filled',
+			label: '家乡',
+			value: userInfo.value.nativePlaceStr || '未设置'
+		});
+
+		return info;
 	});
+
 
 	const isAnyPopupOpen = computed(() => {
 		return isPopupOpen.value || isShareTypePopupOpen.value;
@@ -838,7 +808,38 @@
 		isShareTypePopupOpen.value = e.show;
 	};
 
+	
 	// --- 5. 分享相关逻辑 ---
+	/**
+	 * 核心逻辑：6秒后判断身份并弹窗
+	 */
+	const startGuideTimer = () => {
+	    setTimeout(() => {
+	        const token = uni.getStorageSync('token');
+	        const userInfo = getCachedUserInfo(); 
+	
+	        // 1. 如果完全没有 token，视为全新户
+	        if (!token) {
+	            guideScenario.value = 1;
+	            if (guidePopupRef.value) guidePopupRef.value.open();
+	        } 
+	        // 2. 如果有 token 但没有手机号，视为已静默的游客
+	        else if (!userInfo || !userInfo.mobile) {
+	            guideScenario.value = 2;
+	            if (guidePopupRef.value) guidePopupRef.value.open();
+	        } 
+	        // 3. 如果已绑定手机号，但 isComplete !== 1 (未完善资料)，视为情况3
+	        else if (userInfo.isComplete !== 1) {
+	            guideScenario.value = 3;
+	            if (guidePopupRef.value) guidePopupRef.value.open();
+	        }
+	        // 4. 其余情况（即 isComplete === 1，已是会员）：直接 return，什么都不弹
+	        else {
+	            console.log('✅ 用户已完善资料，跳过引导弹窗');
+	            return;
+	        }
+	    }, 6000);
+	};
 
 	/**
 	 * 打开转发选择弹窗
@@ -1536,6 +1537,31 @@
 		&:active {
 			opacity: 0.9;
 		}
+	}
+
+	.smart-share-btn {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		width: 120rpx;
+		height: 88rpx;
+		border: 2rpx solid #FF6A00;
+		border-radius: 16rpx;
+		background: #fff;
+
+		text {
+			font-size: 18rpx;
+			color: #FF6A00;
+			font-weight: bold;
+			margin-top: 4rpx;
+		}
+	}
+
+	.btn-ghost-primary {
+		background: rgba(255, 106, 0, 0.05);
+		color: #FF6A00;
+		border: 2rpx solid rgba(255, 106, 0, 0.2);
 	}
 
 	.btn-secondary {

@@ -7,6 +7,8 @@
     "my-card": "../../components/MyCard",
     "add-circle-confirm-popup": "../../components/AddCircleConfirmPopup",
     "invite-circle-confirm-popup": "../../components/InviteCircleConfirmPopup",
+    "demand-action-fab": "../../components/DemandActionFab",
+    "smart-guide-popup": "../../components/SmartGuidePopup",
     "share-type-popup": "../../components/ShareTypePopup"
   }
 }

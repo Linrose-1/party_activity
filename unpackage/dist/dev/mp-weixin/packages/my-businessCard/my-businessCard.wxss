@@ -168,6 +168,28 @@
 .btn-primary.data-v-34d71473:active {
   opacity: 0.9;
 }
+.smart-share-btn.data-v-34d71473 {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 120rpx;
+  height: 88rpx;
+  border: 2rpx solid #FF6A00;
+  border-radius: 16rpx;
+  background: #fff;
+}
+.smart-share-btn text.data-v-34d71473 {
+  font-size: 18rpx;
+  color: #FF6A00;
+  font-weight: bold;
+  margin-top: 4rpx;
+}
+.btn-ghost-primary.data-v-34d71473 {
+  background: rgba(255, 106, 0, 0.05);
+  color: #FF6A00;
+  border: 2rpx solid rgba(255, 106, 0, 0.2);
+}
 .btn-secondary.data-v-34d71473 {
   /* 将原来的灰色背景替换为绿色渐变 */
   background: linear-gradient(to right, #4cd964, #34a853);

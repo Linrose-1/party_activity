@@ -103,48 +103,6 @@
 				</view>
 			</view>
 
-			<!-- 3. 社会职务区 -->
-			<!-- <view class="section-block professional-section" v-if="socialGroups.length > 0">
-				<view class="section-title">
-					<uni-icons type="staff-filled" size="18" color="#C9A063"></uni-icons>
-					<text>组织/机构/职务</text>
-				</view>
-
-				<view class="social-group" v-for="(group, index) in socialGroups" :key="index">
-					<view class="social-row">
-						<text class="social-label">组织：</text>
-						<text class="social-value" selectable>{{ group.association }}</text>
-					</view>
-					<view class="social-row">
-						<text class="social-label">职务：</text>
-						<text class="social-value" selectable>{{ group.title }}</text>
-					</view>
-					<view v-if="index < socialGroups.length - 1" class="group-divider"></view>
-				</view>
-			</view> -->
-
-			<!-- 4. 职业信息区  -->
-			<!-- <view class="section-block career-section" v-if="careerGroups.length > 0">
-				<view class="section-title">
-					<uni-icons type="flag-filled" size="18" color="#F78C2F"></uni-icons>
-					<text>职业信息</text>
-				</view>
-				<view class="career-group" v-for="(group, index) in careerGroups" :key="index">
-					<view class="career-item">
-						<text class="career-label">公司：</text>
-						<text class="career-value" selectable>{{ group.company }}</text>
-					</view>
-					<view class="career-item">
-						<text class="career-label">职务：</text>
-						<text class="career-value" selectable>{{ group.position }}</text>
-					</view>
-					<view class="career-item">
-						<text class="career-label">行业：</text>
-						<text class="career-value" selectable>{{ group.industry }}</text>
-					</view>
-				</view>
-			</view> -->
-
 			<!-- 5. 资源对接区 -->
 			<view class="section-block resource-section" v-if="haveResources || needResources">
 				<view v-if="haveResources" class="resource-item">
@@ -197,24 +155,6 @@
 
 				<UserScoreBoard :datasets="radarDatasets" :showCard="false" :showTitle="false" />
 
-				<!-- 雷达图容器 -->
-				<!-- <view class="chart-wrapper">
-					<MyRadarChart :categories="['基础信用', '协作态度', '专业能力', '精神格局']" :datasets="radarDatasets" />
-				</view> -->
-
-				<!-- 维度得分对比表 -->
-				<!-- <view class="score-compare-table">
-					<view class="table-row header-row">
-						<view class="col dim">维度</view>
-						<view class="col val self">自我</view>
-						<view class="col val total">综合</view>
-					</view>
-					<view class="table-row" v-for="(dim, index) in ['基础信用', '协作态度', '专业能力', '精神格局']" :key="index">
-						<view class="col dim">{{ dim }}</view>
-						<view class="col val self">{{ getScoreValue(0, index) }}</view>
-						<view class="col val total">{{ getScoreValue(1, index) }}</view>
-					</view>
-				</view> -->
 			</view>
 
 			<!-- 7. 用户个人微信二维码 -->

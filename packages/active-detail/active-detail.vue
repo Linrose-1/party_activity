@@ -55,7 +55,8 @@
 				</view>
 				<view class="stat-item">
 					<view class="stat-value">
-						<text v-if="activityDetail.activityFunds === 1">¥{{ activityDetail.registrationFee }}</text>
+						<text
+							v-if="[1, 3].includes(activityDetail.activityFunds)">¥{{ activityDetail.registrationFee }}</text>
 						<text v-else-if="activityDetail.activityFunds === 2">免费</text>
 					</view>
 					<view class="stat-label">报名费</view>
@@ -611,8 +612,7 @@
 			getViewerList(activityId.value);
 
 			sponsorList.value = (result.data.memberSponsorList && Array.isArray(result.data.memberSponsorList)) ?
-				result.data.memberSponsorList :
-				[];
+				result.data.memberSponsorList : [];
 
 			// 后端标记需要触发贡分弹窗时，延迟 500ms 弹出（等页面渲染完成）
 			if (result.data.checkContribution === 1) {
@@ -784,7 +784,7 @@
 	const openSharePopup = async () => {
 		if (!await checkLoginGuard()) return;
 		customShareTitle.value = (activityDetail.value && activityDetail.value.activityTitle) ||
-		'发现一个很棒的聚会，快来看看吧！';
+			'发现一个很棒的聚会，快来看看吧！';
 		sharePopup.value.open();
 	};
 

@@ -61,7 +61,7 @@ const _sfc_main = {
           }
         }
       } catch (e) {
-        common_vendor.index.__f__("error", "at pages/my/my.vue:208", "获取未读数失败", e);
+        common_vendor.index.__f__("error", "at pages/my/my.vue:212", "获取未读数失败", e);
       }
     };
     const checkLoginStatusAndFetchData = () => {
@@ -93,15 +93,15 @@ const _sfc_main = {
         });
         if (!error && data) {
           userInfo.value = data;
-          common_vendor.index.__f__("log", "at pages/my/my.vue:247", "getUserInfo userInfo:", userInfo.value);
+          common_vendor.index.__f__("log", "at pages/my/my.vue:251", "getUserInfo userInfo:", userInfo.value);
           getCreditScore();
         } else {
-          common_vendor.index.__f__("log", "at pages/my/my.vue:251", "获取用户信息失败:", error);
+          common_vendor.index.__f__("log", "at pages/my/my.vue:255", "获取用户信息失败:", error);
           isLogin.value = false;
           userInfo.value = {};
         }
       } catch (err) {
-        common_vendor.index.__f__("log", "at pages/my/my.vue:257", "请求异常:", err);
+        common_vendor.index.__f__("log", "at pages/my/my.vue:261", "请求异常:", err);
         isLogin.value = false;
         userInfo.value = {};
       }
@@ -116,10 +116,10 @@ const _sfc_main = {
         });
         if (!error && data) {
           creditScore.value = data.totalScore || null;
-          common_vendor.index.__f__("log", "at pages/my/my.vue:274", "getCreditScore:", creditScore.value);
+          common_vendor.index.__f__("log", "at pages/my/my.vue:278", "getCreditScore:", creditScore.value);
         }
       } catch (err) {
-        common_vendor.index.__f__("log", "at pages/my/my.vue:277", "获取信用分失败:", err);
+        common_vendor.index.__f__("log", "at pages/my/my.vue:281", "获取信用分失败:", err);
       }
     };
     const accountList = common_vendor.computed(() => {
@@ -420,10 +420,10 @@ const _sfc_main = {
         common_vendor.index.makePhoneCall({
           phoneNumber: item.phone,
           success: () => {
-            common_vendor.index.__f__("log", "at pages/my/my.vue:637", "拨打电话成功");
+            common_vendor.index.__f__("log", "at pages/my/my.vue:641", "拨打电话成功");
           },
           fail: (err) => {
-            common_vendor.index.__f__("log", "at pages/my/my.vue:640", "拨打电话失败:", err);
+            common_vendor.index.__f__("log", "at pages/my/my.vue:644", "拨打电话失败:", err);
           }
         });
         return;
@@ -506,10 +506,11 @@ const _sfc_main = {
         o: common_vendor.t(userInfo.value.parentName || "无"),
         p: userInfo.value.id
       }, userInfo.value.id ? {
-        q: common_vendor.t(userInfo.value.virtualId)
+        q: common_vendor.t(userInfo.value.countryStr ? userInfo.value.countryStr + " · " : ""),
+        r: common_vendor.t(userInfo.value.virtualId)
       } : {}, {
-        r: common_vendor.o(onViewAccountDetail),
-        s: common_vendor.f(accountList.value, (item, k0, i0) => {
+        s: common_vendor.o(onViewAccountDetail),
+        t: common_vendor.f(accountList.value, (item, k0, i0) => {
           return {
             a: common_vendor.t(item.value),
             b: common_vendor.t(item.label),
@@ -518,17 +519,17 @@ const _sfc_main = {
           };
         })
       }) : {
-        t: common_vendor.p({
+        v: common_vendor.p({
           type: "person-filled",
           size: "30",
           color: "#FF8C00"
         }),
-        v: common_vendor.o(handleLoginClick)
+        w: common_vendor.o(handleLoginClick)
       }, {
-        w: isLogin.value && userInfo.value && userInfo.value.topUpLevel && userInfo.value.topUpLevel.isExpirySoon
+        x: isLogin.value && userInfo.value && userInfo.value.topUpLevel && userInfo.value.topUpLevel.isExpirySoon
       }, isLogin.value && userInfo.value && userInfo.value.topUpLevel && userInfo.value.topUpLevel.isExpirySoon ? {
-        x: common_vendor.o(goToMemberRecharge),
-        y: common_vendor.p({
+        y: common_vendor.o(goToMemberRecharge),
+        z: common_vendor.p({
           ["show-icon"]: true,
           scrollable: true,
           speed: 50,
@@ -537,7 +538,7 @@ const _sfc_main = {
           text: `温馨提示：您的会员将于 ${formatDate((_a = userInfo.value.topUpLevel) == null ? void 0 : _a.expirationTime)} 到期，距离到期还有 ${(_b = userInfo.value.topUpLevel) == null ? void 0 : _b.daysUntilExpiry} 天，可以到用户中心进行会员续期充值或者升级会员`
         })
       } : {}, {
-        z: common_vendor.f(coreFeatures.value, (item, k0, i0) => {
+        A: common_vendor.f(coreFeatures.value, (item, k0, i0) => {
           return common_vendor.e({
             a: common_vendor.t(item.name),
             b: item.icon,
@@ -548,7 +549,7 @@ const _sfc_main = {
             f: common_vendor.o(($event) => navigateToCoreFeature(item), item.name)
           });
         }),
-        A: common_vendor.f(featureList.value, (item, k0, i0) => {
+        B: common_vendor.f(featureList.value, (item, k0, i0) => {
           return common_vendor.e({
             a: item.icon,
             b: item.name === "评论中心" && unreadData.value.total > 0

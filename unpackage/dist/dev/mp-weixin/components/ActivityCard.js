@@ -8,8 +8,9 @@ if (!Array) {
 }
 const _easycom_uni_icons = () => "../uni_modules/uni-icons/components/uni-icons/uni-icons.js";
 if (!Math) {
-  _easycom_uni_icons();
+  (_easycom_uni_icons + SmartGuidePopup)();
 }
+const SmartGuidePopup = () => "./SmartGuidePopup.js";
 const _sfc_main = {
   __name: "ActivityCard",
   props: {
@@ -25,6 +26,7 @@ const _sfc_main = {
   emits: ["updateFavoriteStatus", "updateLikeStatus"],
   setup(__props, { emit: __emit }) {
     const props = __props;
+    const smartGuidePopupRef = common_vendor.ref(null);
     const emit = __emit;
     const isFavorite = common_vendor.ref(props.activity.followFlag === 1);
     const loading = common_vendor.ref(false);
@@ -117,6 +119,12 @@ const _sfc_main = {
             id: props.activity.id,
             newFollowFlag: isFavorite.value ? 1 : 0
           });
+          if (utils_user.isScenario3User()) {
+            setTimeout(() => {
+              var _a;
+              (_a = smartGuidePopupRef.value) == null ? void 0 : _a.open();
+            }, 1e3);
+          }
         } else {
           isFavorite.value = original;
           common_vendor.index.showToast({
@@ -167,7 +175,7 @@ const _sfc_main = {
             availableActions[tappedItem]();
         },
         fail: (res) => {
-          common_vendor.index.__f__("log", "at components/ActivityCard.vue:314", res.errMsg);
+          common_vendor.index.__f__("log", "at components/ActivityCard.vue:327", res.errMsg);
         }
       });
     };
@@ -328,7 +336,14 @@ const _sfc_main = {
       }, !isOwner.value ? {
         Y: isRegistrationDisabled.value ? 1 : "",
         Z: common_vendor.o(handleRegisterClick)
-      } : {});
+      } : {}, {
+        aa: common_vendor.sr(smartGuidePopupRef, "f73ae0ce-12", {
+          "k": "smartGuidePopupRef"
+        }),
+        ab: common_vendor.p({
+          scenario: 3
+        })
+      });
     };
   }
 };

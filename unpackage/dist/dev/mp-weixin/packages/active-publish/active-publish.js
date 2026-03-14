@@ -2,6 +2,7 @@
 const common_vendor = require("../../common/vendor.js");
 const utils_request = require("../../utils/request.js");
 const utils_upload = require("../../utils/upload.js");
+const utils_user = require("../../utils/user.js");
 if (!Array) {
   const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
   const _easycom_uni_easyinput2 = common_vendor.resolveComponent("uni-easyinput");
@@ -22,9 +23,10 @@ const _easycom_uni_datetime_picker = () => "../../uni_modules/uni-datetime-picke
 const _easycom_uni_data_checkbox = () => "../../uni_modules/uni-data-checkbox/components/uni-data-checkbox/uni-data-checkbox.js";
 const _easycom_uni_forms = () => "../../uni_modules/uni-forms/components/uni-forms/uni-forms.js";
 if (!Math) {
-  (_easycom_uni_icons + _easycom_uni_easyinput + _easycom_uni_forms_item + _easycom_uni_data_select + _easycom_DragImageUploader + _easycom_uni_datetime_picker + _easycom_uni_data_checkbox + _easycom_uni_forms + SponsorPopup)();
+  (_easycom_uni_icons + _easycom_uni_easyinput + _easycom_uni_forms_item + _easycom_uni_data_select + _easycom_DragImageUploader + _easycom_uni_datetime_picker + _easycom_uni_data_checkbox + _easycom_uni_forms + SponsorPopup + SmartGuidePopup)();
 }
 const SponsorPopup = () => "../../components/sponsor-popup.js";
+const SmartGuidePopup = () => "../../components/SmartGuidePopup.js";
 const DRAFT_STORAGE_KEY = "activity_draft";
 const _sfc_main = {
   __name: "active-publish",
@@ -37,6 +39,7 @@ const _sfc_main = {
     const editActivityId = common_vendor.ref(null);
     const remainingQuota = common_vendor.ref(0);
     const isQuotaLoaded = common_vendor.ref(false);
+    const smartGuidePopupRef = common_vendor.ref(null);
     const timeRange = common_vendor.ref([]);
     const enrollTimeRange = common_vendor.ref([]);
     const associatedStoreName = common_vendor.ref("");
@@ -49,6 +52,10 @@ const _sfc_main = {
       {
         text: "赞助/免费",
         value: 2
+      },
+      {
+        text: "AA+赞助",
+        value: 3
       }
     ]);
     const isTimeRangeUserSelected = common_vendor.ref(false);
@@ -138,6 +145,12 @@ const _sfc_main = {
         associatedStoreName.value = shop.storeName;
       });
     });
+    common_vendor.onReady(() => {
+      var _a;
+      if (utils_user.isScenario3User()) {
+        (_a = smartGuidePopupRef.value) == null ? void 0 : _a.open();
+      }
+    });
     common_vendor.onUnload(() => {
       common_vendor.index.$off("shopSelected");
       if (autoSaveTimer.value)
@@ -219,7 +232,7 @@ const _sfc_main = {
           }
         }
       } catch (e) {
-        common_vendor.index.__f__("error", "at packages/active-publish/active-publish.vue:534", "获取用户实名状态失败:", e);
+        common_vendor.index.__f__("error", "at packages/active-publish/active-publish.vue:552", "获取用户实名状态失败:", e);
         isUserVerified.value = true;
       }
     };
@@ -267,7 +280,7 @@ const _sfc_main = {
               processUpload(cropRes.tempFilePath);
             },
             fail: (err) => {
-              common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:592", "用户取消裁剪或失败:", err);
+              common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:610", "用户取消裁剪或失败:", err);
             }
           });
         }
@@ -579,7 +592,7 @@ const _sfc_main = {
         remainingQuota.value = typeof data === "number" ? data : 0;
         isQuotaLoaded.value = true;
       } catch (e) {
-        common_vendor.index.__f__("error", "at packages/active-publish/active-publish.vue:937", "获取权益网络异常", e);
+        common_vendor.index.__f__("error", "at packages/active-publish/active-publish.vue:955", "获取权益网络异常", e);
       }
     };
     const showQuotaExceededModal = () => {
@@ -623,6 +636,19 @@ const _sfc_main = {
           title: "地点必填",
           icon: "none"
         });
+      const needsFee = [1, 3].includes(form.value.activityFunds);
+      if (needsFee) {
+        if (!form.value.registrationFee)
+          return common_vendor.index.showToast({
+            title: "请输入单人费用",
+            icon: "none"
+          });
+        if (!form.value.organizerPaymentQrCodeUrl)
+          return common_vendor.index.showToast({
+            title: "请上传收款码",
+            icon: "none"
+          });
+      }
       if (!isTimeRangeUserSelected.value) {
         common_vendor.index.showModal({
           title: "请确认聚会时间",
@@ -678,8 +704,10 @@ const _sfc_main = {
         }));
         delete payload.companyName;
         delete payload.companyLogo;
-        if (payload.activityFunds === 2)
+        if (payload.activityFunds === 2) {
           delete payload.registrationFee;
+          delete payload.organizerPaymentQrCodeUrl;
+        }
         let finalActivityId = null;
         if (mode.value === "edit") {
           payload.id = editActivityId.value;
@@ -721,7 +749,7 @@ const _sfc_main = {
           })
         });
       } catch (e) {
-        common_vendor.index.__f__("error", "at packages/active-publish/active-publish.vue:1085", "发布失败:", e);
+        common_vendor.index.__f__("error", "at packages/active-publish/active-publish.vue:1118", "发布失败:", e);
         const errMsg = e.message || String(e) || "系统异常，请稍后重试";
         const isAuthError = errMsg.includes("实名") || errMsg.includes("认证") || errMsg.includes("idCert");
         common_vendor.index.showModal({
@@ -896,8 +924,8 @@ const _sfc_main = {
           label: "报名类型",
           required: true
         }),
-        ac: form.value.activityFunds === 1
-      }, form.value.activityFunds === 1 ? {
+        ac: [1, 3].includes(form.value.activityFunds)
+      }, [1, 3].includes(form.value.activityFunds) ? {
         ad: common_vendor.o(($event) => form.value.registrationFee = $event),
         ae: common_vendor.p({
           type: "digit",
@@ -915,8 +943,8 @@ const _sfc_main = {
           ["label-width"]: 80,
           ["label-position"]: "top"
         }),
-        ah: form.value.activityFunds !== 1
-      }, form.value.activityFunds !== 1 ? common_vendor.e({
+        ah: [2, 3].includes(form.value.activityFunds)
+      }, [2, 3].includes(form.value.activityFunds) ? common_vendor.e({
         ai: common_vendor.t(sponsorsList.value.length > 0 ? `已添加 ${sponsorsList.value.length} 位` : "暂无赞助商"),
         aj: common_vendor.p({
           type: isSponsorExpanded.value ? "top" : "bottom",
@@ -1020,8 +1048,8 @@ const _sfc_main = {
           label: "联系电话",
           required: true
         }),
-        aG: form.value.activityFunds === 1
-      }, form.value.activityFunds === 1 ? common_vendor.e({
+        aG: [1, 3].includes(form.value.activityFunds)
+      }, [1, 3].includes(form.value.activityFunds) ? common_vendor.e({
         aH: form.value.organizerPaymentQrCodeUrl
       }, form.value.organizerPaymentQrCodeUrl ? {
         aI: form.value.organizerPaymentQrCodeUrl
@@ -1063,6 +1091,12 @@ const _sfc_main = {
         aY: common_vendor.p({
           visible: showSponsorPopup.value,
           data: currentSponsorData.value
+        }),
+        aZ: common_vendor.sr(smartGuidePopupRef, "5d3444db-45", {
+          "k": "smartGuidePopupRef"
+        }),
+        ba: common_vendor.p({
+          scenario: 3
         })
       });
     };

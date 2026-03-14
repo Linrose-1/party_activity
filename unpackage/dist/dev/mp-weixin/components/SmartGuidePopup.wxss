@@ -1,0 +1,105 @@
+/* 水平间距 */
+/* 水平间距 */
+.guide-card.data-v-2c5025b6 {
+  width: 620rpx;
+  background-color: #fff;
+  border-radius: 40rpx;
+  padding: 60rpx 40rpx 40rpx;
+  /* 增加顶部内边距给X留空间 */
+  box-shadow: 0 20rpx 60rpx rgba(0, 0, 0, 0.15);
+  position: relative;
+}
+
+/* 右上角 X 按钮 */
+.close-icon-top.data-v-2c5025b6 {
+  position: absolute;
+  top: 18rpx;
+  right: 24rpx;
+  padding: 10rpx;
+  z-index: 10;
+}
+.guide-header.data-v-2c5025b6 {
+  margin-bottom: 44rpx;
+  padding: 0 10rpx;
+}
+
+/* 标题字号调小至 28rpx */
+.guide-title.data-v-2c5025b6 {
+  font-size: 26rpx;
+  font-weight: bold;
+  color: #333;
+  line-height: 1.6;
+  text-align: center;
+  display: block;
+}
+.guide-body.data-v-2c5025b6 {
+  display: flex;
+  flex-direction: column;
+  gap: 24rpx;
+}
+.action-card.data-v-2c5025b6 {
+  display: flex;
+  align-items: center;
+  padding: 24rpx;
+  border-radius: 20rpx;
+  background-color: #f9f9f9;
+  border: 1rpx solid #eee;
+  transition: all 0.2s;
+}
+.action-card.data-v-2c5025b6:active {
+  transform: scale(0.98);
+  background-color: #f2f2f2;
+}
+.action-card .card-left.data-v-2c5025b6 {
+  margin-right: 20rpx;
+  flex-shrink: 0;
+}
+.action-card .card-left .icon-circle.data-v-2c5025b6 {
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.action-card .card-left .icon-circle.gray.data-v-2c5025b6 {
+  background-color: #eee;
+}
+.action-card .card-left .icon-circle.white.data-v-2c5025b6 {
+  background-color: #fff;
+}
+.action-card .card-right.data-v-2c5025b6 {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+.action-card .card-right .btn-title.data-v-2c5025b6 {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 4rpx;
+}
+.action-card .card-right .btn-desc.data-v-2c5025b6 {
+  font-size: 20rpx;
+  color: #888;
+  line-height: 1.4;
+}
+
+/* 高亮样式 */
+.action-card.highlight.data-v-2c5025b6 {
+  background: linear-gradient(135deg, #FF8C00, #FF6A00);
+  border: none;
+  box-shadow: 0 6rpx 16rpx rgba(255, 106, 0, 0.2);
+}
+.action-card.highlight .btn-title.data-v-2c5025b6 {
+  color: #fff;
+}
+.action-card.highlight .btn-desc.data-v-2c5025b6 {
+  color: rgba(255, 255, 255, 0.85);
+}
+.bottom-skip.data-v-2c5025b6 {
+  text-align: center;
+  font-size: 24rpx;
+  color: #bbb;
+  padding-top: 20rpx;
+}

@@ -13,8 +13,9 @@ const _easycom_uni_icons = () => "../../uni_modules/uni-icons/components/uni-ico
 const _easycom_uni_datetime_picker = () => "../../uni_modules/uni-datetime-picker/components/uni-datetime-picker/uni-datetime-picker.js";
 const _easycom_uni_load_more = () => "../../uni_modules/uni-load-more/components/uni-load-more/uni-load-more.js";
 if (!Math) {
-  (_easycom_uni_icons + _easycom_uni_datetime_picker + _easycom_uni_load_more)();
+  (_easycom_uni_icons + _easycom_uni_datetime_picker + _easycom_uni_load_more + SmartGuidePopup)();
 }
+const SmartGuidePopup = () => "../../components/SmartGuidePopup.js";
 const _sfc_main = {
   __name: "relation",
   setup(__props) {
@@ -41,6 +42,7 @@ const _sfc_main = {
       pageSize: 10
     });
     const isFollowActionInProgress = common_vendor.ref(false);
+    const smartGuidePopupRef = common_vendor.ref(null);
     const timeRangeText = common_vendor.computed(() => {
       if (timeRange.value && timeRange.value.length === 2) {
         const start = timeRange.value[0].slice(5, 16);
@@ -50,6 +52,12 @@ const _sfc_main = {
       return "请选择拟访友时段";
     });
     const isListEmpty = common_vendor.computed(() => userList.value.length === 0 && loadingStatus.value !== "loading");
+    common_vendor.onReady(() => {
+      var _a;
+      if (utils_user.isScenario3User()) {
+        (_a = smartGuidePopupRef.value) == null ? void 0 : _a.open();
+      }
+    });
     const fetchUserList = async (isRefresh = false) => {
       if (isRefresh)
         common_vendor.index.stopPullDownRefresh();
@@ -274,7 +282,14 @@ const _sfc_main = {
         w: common_vendor.p({
           status: loadingStatus.value
         })
-      } : {});
+      } : {}, {
+        x: common_vendor.sr(smartGuidePopupRef, "85e55c19-8", {
+          "k": "smartGuidePopupRef"
+        }),
+        y: common_vendor.p({
+          scenario: 3
+        })
+      });
     };
   }
 };

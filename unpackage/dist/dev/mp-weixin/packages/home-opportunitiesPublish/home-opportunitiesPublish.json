@@ -3,6 +3,7 @@
   "usingComponents": {
     "uni-data-select": "../../uni_modules/uni-data-select/components/uni-data-select/uni-data-select",
     "uni-icons": "../../uni_modules/uni-icons/components/uni-icons/uni-icons",
-    "drag-image-uploader": "../../components/DragImageUploader/DragImageUploader"
+    "drag-image-uploader": "../../components/DragImageUploader/DragImageUploader",
+    "smart-guide-popup": "../../components/SmartGuidePopup"
   }
 }

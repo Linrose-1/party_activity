@@ -2,6 +2,7 @@
 const common_vendor = require("../../common/vendor.js");
 const utils_request = require("../../utils/request.js");
 const utils_shakeLock = require("../../utils/shakeLock.js");
+const utils_user = require("../../utils/user.js");
 if (!Array) {
   const _easycom_uni_segmented_control2 = common_vendor.resolveComponent("uni-segmented-control");
   const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
@@ -12,9 +13,10 @@ const _easycom_uni_segmented_control = () => "../../uni_modules/uni-segmented-co
 const _easycom_uni_icons = () => "../../uni_modules/uni-icons/components/uni-icons/uni-icons.js";
 const _easycom_uni_load_more = () => "../../uni_modules/uni-load-more/components/uni-load-more/uni-load-more.js";
 if (!Math) {
-  (_easycom_uni_segmented_control + _easycom_uni_icons + _easycom_uni_load_more + ActivityCard)();
+  (_easycom_uni_segmented_control + _easycom_uni_icons + _easycom_uni_load_more + ActivityCard + SmartGuidePopup)();
 }
 const ActivityCard = () => "../../components/ActivityCard.js";
+const SmartGuidePopup = () => "../../components/SmartGuidePopup.js";
 const _sfc_main = {
   __name: "location",
   setup(__props) {
@@ -31,6 +33,7 @@ const _sfc_main = {
     const loading = common_vendor.ref(false);
     common_vendor.ref(true);
     const userLocation = common_vendor.ref(null);
+    const smartGuidePopupRef = common_vendor.ref(null);
     const activityPageNo = common_vendor.ref(1);
     const businessPageNo = common_vendor.ref(1);
     const activityLoadingStatus = common_vendor.ref("more");
@@ -39,7 +42,7 @@ const _sfc_main = {
     const activities = common_vendor.ref([]);
     const businesses = common_vendor.ref([]);
     const resetState = () => {
-      common_vendor.index.__f__("log", "at packages/location/location.vue:138", "页面状态已重置");
+      common_vendor.index.__f__("log", "at packages/location/location.vue:149", "页面状态已重置");
       shaken.value = false;
       loading.value = false;
       activities.value = [];
@@ -57,11 +60,11 @@ const _sfc_main = {
       if (loading.value)
         return;
       currentTab.value = e.currentIndex;
-      common_vendor.index.__f__("log", "at packages/location/location.vue:161", "🔥点击切换tab！当前 Tab 索引为:", currentTab.value);
+      common_vendor.index.__f__("log", "at packages/location/location.vue:172", "🔥点击切换tab！当前 Tab 索引为:", currentTab.value);
     };
     const triggerShakeSequence = () => {
       const savedTabIndex = currentTab.value;
-      common_vendor.index.__f__("log", "at packages/location/location.vue:168", "🔥 摇一摇触发！当前 Tab 索引为:", savedTabIndex);
+      common_vendor.index.__f__("log", "at packages/location/location.vue:179", "🔥 摇一摇触发！当前 Tab 索引为:", savedTabIndex);
       lockShake();
       if (shakeAudioContext) {
         shakeAudioContext.stop();
@@ -92,7 +95,7 @@ const _sfc_main = {
               getNearbyBusinesses(true)
             ]);
           } catch (error) {
-            common_vendor.index.__f__("error", "at packages/location/location.vue:210", "加载错误:", error);
+            common_vendor.index.__f__("error", "at packages/location/location.vue:221", "加载错误:", error);
           } finally {
             loading.value = false;
             if (currentTab.value !== savedTabIndex) {
@@ -231,7 +234,7 @@ const _sfc_main = {
       const name = user.nickname || "匿名用户";
       const avatarUrl = user.avatar || defaultAvatar;
       const url = `/packages/applicationBusinessCard/applicationBusinessCard?id=${user.id}&name=${encodeURIComponent(name)}&avatar=${encodeURIComponent(avatarUrl)}`;
-      common_vendor.index.__f__("log", "at packages/location/location.vue:388", "从摇一摇页跳转，URL:", url);
+      common_vendor.index.__f__("log", "at packages/location/location.vue:399", "从摇一摇页跳转，URL:", url);
       common_vendor.index.navigateTo({
         url
       });
@@ -259,8 +262,14 @@ const _sfc_main = {
     common_vendor.onLoad((options) => {
       resetState();
       if (options.autoShake === "true") {
-        common_vendor.index.__f__("log", "at packages/location/location.vue:437", "onLoad: 接收到自动摇一摇指令");
+        common_vendor.index.__f__("log", "at packages/location/location.vue:448", "onLoad: 接收到自动摇一摇指令");
         autoShakeOnLoad.value = true;
+      }
+    });
+    common_vendor.onReady(() => {
+      var _a;
+      if (utils_user.isScenario3User()) {
+        (_a = smartGuidePopupRef.value) == null ? void 0 : _a.open();
       }
     });
     common_vendor.onShow(() => {
@@ -270,7 +279,7 @@ const _sfc_main = {
         shakeAudioContext.src = "https://img.gofor.club/wechat_shake.mp3";
       }
       if (autoShakeOnLoad.value) {
-        common_vendor.index.__f__("log", "at packages/location/location.vue:454", "onShow: 执行自动摇一摇流程");
+        common_vendor.index.__f__("log", "at packages/location/location.vue:472", "onShow: 执行自动摇一摇流程");
         resetState();
         triggerShakeSequence();
         autoShakeOnLoad.value = false;
@@ -294,13 +303,13 @@ const _sfc_main = {
       switch (currentTab.value) {
         case 0:
           if (businessLoadingStatus.value === "more") {
-            common_vendor.index.__f__("log", "at packages/location/location.vue:490", "触底加载更多商友...");
+            common_vendor.index.__f__("log", "at packages/location/location.vue:508", "触底加载更多商友...");
             getNearbyBusinesses();
           }
           break;
         case 1:
           if (activityLoadingStatus.value === "more") {
-            common_vendor.index.__f__("log", "at packages/location/location.vue:497", "触底加载更多聚会...");
+            common_vendor.index.__f__("log", "at packages/location/location.vue:515", "触底加载更多聚会...");
             getNearbyActivities();
           }
           break;
@@ -392,7 +401,13 @@ const _sfc_main = {
       } : {}, {
         t: currentTab.value === 1
       }), {
-        f: loading.value
+        f: loading.value,
+        v: common_vendor.sr(smartGuidePopupRef, "302d9b55-7", {
+          "k": "smartGuidePopupRef"
+        }),
+        w: common_vendor.p({
+          scenario: 3
+        })
       });
     };
   }

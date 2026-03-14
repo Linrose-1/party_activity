@@ -141,6 +141,7 @@
 	<AvatarLongPressMenu ref="avatarMenuRef" @action="handleMenuAction" />
 	<AddCircleConfirmPopup ref="addCirclePopup" />
 	<InviteCircleConfirmPopup ref="invitePopupRef" />
+	<SmartGuidePopup ref="smartGuidePopupRef" :scenario="3" />
 </template>
 
 <script setup>
@@ -153,12 +154,16 @@
 	} from '@dcloudio/uni-app';
 	import request from '@/utils/request.js';
 	import {
-		checkLoginGuard
+		checkLoginGuard,
+		isScenario3User
 	} from '@/utils/user.js';
 
 	import AvatarLongPressMenu from '@/components/AvatarLongPressMenu.vue';
 	import AddCircleConfirmPopup from '@/components/AddCircleConfirmPopup.vue';
 	import InviteCircleConfirmPopup from '@/components/InviteCircleConfirmPopup.vue';
+	import SmartGuidePopup from '@/components/SmartGuidePopup.vue';
+
+	const smartGuidePopupRef = ref(null);
 
 	const avatarMenuRef = ref(null);
 	const addCirclePopup = ref(null);
@@ -415,6 +420,12 @@
 		refreshing.value = true; // 开始刷新，显示刷新动画
 		await fetchRecommendUsers(true); // 传入true表示刷新模式
 		refreshing.value = false; // 停止刷新，隐藏刷新动画
+
+		if (isScenario3User()) {
+			setTimeout(() => {
+				smartGuidePopupRef.value?.open();
+			}, 500);
+		}
 	};
 
 	onShow(async () => {

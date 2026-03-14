@@ -61,7 +61,8 @@
 							<view class="uni-list-cell-left register-btn">选择位置</view>
 							<view class="uni-list-cell-db">
 								<view @click="openMapToChooseLocation" class="uni-input">
-									<text v-if="selectedLocationInfo">{{ selectedLocationInfo.address || selectedLocationInfo.name }}</text>
+									<text
+										v-if="selectedLocationInfo">{{ selectedLocationInfo.address || selectedLocationInfo.name }}</text>
 									<text v-else class="placeholder">点击选择位置</text>
 									<text class="arrow">></text>
 								</view>
@@ -75,8 +76,7 @@
 		<!-- 聚会列表 -->
 		<view class="activity-list">
 			<ActivityCard v-for="(activity, index) in activitiesData" :key="activity.id" :activity="activity"
-				:is-login="isLogin" @updateFavoriteStatus="handleFavoriteChange"
-				@updateLikeStatus="handleLikeChange" />
+				:is-login="isLogin" @updateFavoriteStatus="handleFavoriteChange" @updateLikeStatus="handleLikeChange" />
 		</view>
 
 		<view v-if="!hasMore && activitiesData.length > 0" class="no-more-content">暂无更多聚会</view>
@@ -90,14 +90,33 @@
 			</view>
 		</view>
 	</view>
+
+	<SmartGuidePopup ref="smartGuidePopupRef" :scenario="3" />
 </template>
 
 <script setup>
-	import { ref, computed, onMounted, watch, onUnmounted } from 'vue';
-	import { onReachBottom, onPullDownRefresh, onShow, onShareAppMessage, onShareTimeline } from '@dcloudio/uni-app';
+	import {
+		ref,
+		computed,
+		onMounted,
+		watch,
+		onUnmounted
+	} from 'vue';
+	import {
+		onReachBottom,
+		onPullDownRefresh,
+		onShow,
+		onShareAppMessage,
+		onShareTimeline
+	} from '@dcloudio/uni-app';
 	import ActivityCard from '@/components/ActivityCard.vue';
 	import request from '../../utils/request.js';
-	import { getInviteCode, checkLoginGuard } from '../../utils/user.js';
+	import {
+		getInviteCode,
+		checkLoginGuard,
+		isScenario3User
+	} from '../../utils/user.js';
+	import SmartGuidePopup from '@/components/SmartGuidePopup.vue';
 
 	// ─── 核心状态 ───
 	const loading = ref(false);
@@ -107,6 +126,7 @@
 	const activitiesData = ref([]);
 	const isLogin = ref(false);
 	const bannerList = ref([]);
+	const smartGuidePopupRef = ref(null);
 
 	// ─── 筛选条件 ───
 	const searchKeyword = ref('');
@@ -138,9 +158,13 @@
 					dislikesCount: data.dislikesCount
 				});
 			} else if (data.type === 'save') {
-				updateLocalActivityData(data.id, { followFlag: data.isSaved ? 1 : 0 });
+				updateLocalActivityData(data.id, {
+					followFlag: data.isSaved ? 1 : 0
+				});
 			} else if (data.type === 'comment') {
-				updateLocalActivityData(data.id, { commonCount: data.totalCount });
+				updateLocalActivityData(data.id, {
+					commonCount: data.totalCount
+				});
 			}
 		});
 	});
@@ -201,7 +225,10 @@
 	const updateLocalActivityData = (id, payload) => {
 		const index = activitiesData.value.findIndex(item => item.id == id);
 		if (index !== -1) {
-			activitiesData.value[index] = { ...activitiesData.value[index], ...payload };
+			activitiesData.value[index] = {
+				...activitiesData.value[index],
+				...payload
+			};
 		}
 	};
 
@@ -210,7 +237,11 @@
 	 * 乐观更新本地 UI，接口失败后回滚
 	 * @param {{ id, action, clickedAction }} param
 	 */
-	const handleLikeChange = async ({ id, action, clickedAction }) => {
+	const handleLikeChange = async ({
+		id,
+		action,
+		clickedAction
+	}) => {
 		const activity = activitiesData.value.find(item => item.id == id);
 		if (!activity) return;
 
@@ -233,9 +264,15 @@
 			}
 		}
 
-		const { error } = await request('/app-api/member/like-action/add', {
+		const {
+			error
+		} = await request('/app-api/member/like-action/add', {
 			method: 'POST',
-			data: { targetId: id, targetType: 'activity', action }
+			data: {
+				targetId: id,
+				targetType: 'activity',
+				action
+			}
 		});
 
 		if (error) {
@@ -243,7 +280,10 @@
 			activity.userLikeStr = originalAction;
 			activity.likesCount = originalLikes;
 			activity.dislikesCount = originalDislikes;
-			uni.showToast({ title: '操作失败', icon: 'none' });
+			uni.showToast({
+				title: '操作失败',
+				icon: 'none'
+			});
 		}
 	};
 
@@ -253,7 +293,9 @@
 	 * 仅在首次进入或下拉刷新时调用，从详情页返回时不调用（防回顶）
 	 */
 	const initializePage = async () => {
-		uni.showLoading({ title: '加载中...' });
+		uni.showLoading({
+			title: '加载中...'
+		});
 		try {
 			pageNo.value = 1;
 			hasMore.value = true;
@@ -268,7 +310,10 @@
 			await getActiveList(false);
 		} catch (error) {
 			console.error('[聚会列表] 初始化失败:', error);
-			uni.showToast({ title: '数据加载失败', icon: 'none' });
+			uni.showToast({
+				title: '数据加载失败',
+				icon: 'none'
+			});
 		} finally {
 			uni.hideLoading();
 		}
@@ -278,26 +323,38 @@
 	 * 获取轮播图数据，失败时不中断整体流程
 	 */
 	const fetchBanners = async () => {
-		const { data, error } = await request('/app-api/member/banner-rec/list', {
+		const {
+			data,
+			error
+		} = await request('/app-api/member/banner-rec/list', {
 			method: 'GET',
-			data: { positionCode: '0', pageNo: 1, pageSize: 50 }
+			data: {
+				positionCode: '0',
+				pageNo: 1,
+				pageSize: 50
+			}
 		});
 		if (error) {
 			console.error('[轮播图] 获取失败:', error);
 			bannerList.value = [];
 			return; // 不抛出，避免中断 Promise.all
 		}
-		bannerList.value = (data && data.list)
-			? data.list.sort((a, b) => a.sort - b.sort)
-			: [];
+		bannerList.value = (data && data.list) ?
+			data.list.sort((a, b) => a.sort - b.sort) :
+			[];
 	};
 
 	/**
 	 * 获取聚会类型字典列表（用于筛选 Picker）
 	 */
 	const fetchActivityTypeList = async () => {
-		const { data, error } = await request('/app-api/system/dict-data/type', {
-			data: { type: 'member_activity_category' }
+		const {
+			data,
+			error
+		} = await request('/app-api/system/dict-data/type', {
+			data: {
+				type: 'member_activity_category'
+			}
 		});
 		if (error) {
 			console.error('[类型列表] 获取失败:', error);
@@ -310,7 +367,10 @@
 	 * 获取聚会状态列表（用于筛选 Picker）
 	 */
 	const fetchActivityStatusList = async () => {
-		const { data, error } = await request('/app-api/member/activity/status-list');
+		const {
+			data,
+			error
+		} = await request('/app-api/member/activity/status-list');
 		if (error) {
 			console.error('[状态列表] 获取失败:', error);
 			throw new Error('获取状态失败');
@@ -341,7 +401,10 @@
 		};
 
 		try {
-			const result = await request('/app-api/member/activity/list', { method: 'GET', data: params });
+			const result = await request('/app-api/member/activity/list', {
+				method: 'GET',
+				data: params
+			});
 
 			if (result.error) {
 				if (result.error.includes('信息绑定')) {
@@ -349,16 +412,22 @@
 					loading.value = false;
 					return;
 				}
-				uni.showToast({ title: result.error, icon: 'none' });
+				uni.showToast({
+					title: result.error,
+					icon: 'none'
+				});
 				hasMore.value = false;
 				return;
 			}
 
 			if (result && result.data) {
-				const { list = [], total = 0 } = result.data;
+				const {
+					list = [], total = 0
+				} = result.data;
 				isLoadMore
-					? activitiesData.value.push(...list)
-					: activitiesData.value = list;
+					?
+					activitiesData.value.push(...list) :
+					activitiesData.value = list;
 
 				hasMore.value = activitiesData.value.length < total;
 				pageNo.value++;
@@ -386,7 +455,10 @@
 		selectedCategory.value = '';
 		statusIndex.value = 0;
 		selectedLocationInfo.value = null;
-		uni.showToast({ title: '筛选已重置', icon: 'none' });
+		uni.showToast({
+			title: '筛选已重置',
+			icon: 'none'
+		});
 	};
 
 	/**
@@ -449,7 +521,9 @@
 	 */
 	const publishActivity = async () => {
 		if (!await checkLoginGuard()) return;
-		uni.navigateTo({ url: '/packages/active-publish/active-publish' });
+		uni.navigateTo({
+			url: '/packages/active-publish/active-publish'
+		});
 	};
 
 	/**
@@ -459,7 +533,9 @@
 	const handleBannerClick = async (banner) => {
 		if (!await checkLoginGuard()) return;
 		if (!banner || !banner.targetUrl) return;
-		uni.navigateTo({ url: '/packages/active-detail/active-detail?id=' + banner.targetUrl });
+		uni.navigateTo({
+			url: '/packages/active-detail/active-detail?id=' + banner.targetUrl
+		});
 	};
 
 
@@ -470,11 +546,14 @@
 		() => {
 			clearTimeout(filterDebounceTimer);
 			filterDebounceTimer = setTimeout(() => {
-				uni.showLoading({ title: '正在筛选...' });
+				uni.showLoading({
+					title: '正在筛选...'
+				});
 				getActiveList(false).finally(() => uni.hideLoading());
 			}, 300);
-		},
-		{ deep: true }
+		}, {
+			deep: true
+		}
 	);
 
 

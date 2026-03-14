@@ -4,6 +4,7 @@
     "uni-icons": "../../uni_modules/uni-icons/components/uni-icons/uni-icons",
     "avatar-long-press-menu": "../../components/AvatarLongPressMenu",
     "add-circle-confirm-popup": "../../components/AddCircleConfirmPopup",
-    "invite-circle-confirm-popup": "../../components/InviteCircleConfirmPopup"
+    "invite-circle-confirm-popup": "../../components/InviteCircleConfirmPopup",
+    "smart-guide-popup": "../../components/SmartGuidePopup"
   }
 }

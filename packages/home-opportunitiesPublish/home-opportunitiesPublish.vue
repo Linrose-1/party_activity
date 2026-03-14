@@ -245,6 +245,8 @@
 			</button>
 		</view>
 	</view>
+	
+	<SmartGuidePopup ref="smartGuidePopupRef" :scenario="3" />
 </template>
 
 <script setup>
@@ -258,6 +260,7 @@
 	} from 'vue';
 	import {
 		onLoad,
+		onReady,
 		onShareAppMessage,
 		onShareTimeline
 	} from '@dcloudio/uni-app';
@@ -265,8 +268,10 @@
 	import uploadFile from '../../utils/upload.js';
 	import {
 		getInviteCode,
-		getCachedUserInfo
+		getCachedUserInfo,
+		isScenario3User
 	} from '../../utils/user.js';
+	import SmartGuidePopup from '@/components/SmartGuidePopup.vue';
 
 	// --- 统一使用 reactive 管理所有表单状态 ---
 	const form = reactive({
@@ -292,6 +297,8 @@
 		investmentResource: '', // 预期投入-资源类型
 		investmentEquity: '', // 预期投入-股权比例
 	});
+	
+	const smartGuidePopupRef = ref(null);
 
 	const isEditMode = ref(false); // 标记是否为编辑模式
 	let hasCheckedDraft = false; // 草稿检查锁
@@ -412,6 +419,13 @@
 		uni.showShareMenu({
 			menus: ["shareAppMessage", "shareTimeline"]
 		});
+	});
+	
+	onReady(() => {
+	    // 页面加载完了，用户可以开始写内容了，此时弹出引导
+	    if (isScenario3User()) {
+	        smartGuidePopupRef.value?.open();
+	    }
 	});
 
 	// --- 草稿功能 ---

@@ -139,9 +139,15 @@ async function globalSilentLogin() {
   });
   return loginPromise;
 }
+function isScenario3User() {
+  const userInfo = getCachedUserInfo();
+  const token = common_vendor.index.getStorageSync("token");
+  return !!(token && userInfo && userInfo.mobile && userInfo.isComplete !== 1);
+}
 exports.checkLoginGuard = checkLoginGuard;
 exports.getCachedUserInfo = getCachedUserInfo;
 exports.getInviteCode = getInviteCode;
 exports.globalSilentLogin = globalSilentLogin;
+exports.isScenario3User = isScenario3User;
 exports.isUserFullyLoggedIn = isUserFullyLoggedIn;
 //# sourceMappingURL=../../.sourcemap/mp-weixin/utils/user.js.map

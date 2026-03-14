@@ -8,14 +8,16 @@ if (!Array) {
 }
 const _easycom_uni_icons = () => "../../uni_modules/uni-icons/components/uni-icons/uni-icons.js";
 if (!Math) {
-  (_easycom_uni_icons + AvatarLongPressMenu + AddCircleConfirmPopup + InviteCircleConfirmPopup)();
+  (_easycom_uni_icons + AvatarLongPressMenu + AddCircleConfirmPopup + InviteCircleConfirmPopup + SmartGuidePopup)();
 }
 const AvatarLongPressMenu = () => "../../components/AvatarLongPressMenu.js";
 const AddCircleConfirmPopup = () => "../../components/AddCircleConfirmPopup.js";
 const InviteCircleConfirmPopup = () => "../../components/InviteCircleConfirmPopup.js";
+const SmartGuidePopup = () => "../../components/SmartGuidePopup.js";
 const _sfc_main = {
   __name: "six-degrees",
   setup(__props) {
+    const smartGuidePopupRef = common_vendor.ref(null);
     const avatarMenuRef = common_vendor.ref(null);
     const addCirclePopup = common_vendor.ref(null);
     const invitePopupRef = common_vendor.ref(null);
@@ -227,14 +229,20 @@ const _sfc_main = {
       refreshing.value = true;
       await fetchRecommendUsers(true);
       refreshing.value = false;
+      if (utils_user.isScenario3User()) {
+        setTimeout(() => {
+          var _a;
+          (_a = smartGuidePopupRef.value) == null ? void 0 : _a.open();
+        }, 500);
+      }
     };
     common_vendor.onShow(async () => {
       if (isFirstShow.value || recommendUsers.value.length === 0) {
-        common_vendor.index.__f__("log", "at pages/six-degrees/six-degrees.vue:423", "首次加载或列表为空，执行刷新");
+        common_vendor.index.__f__("log", "at pages/six-degrees/six-degrees.vue:434", "首次加载或列表为空，执行刷新");
         await fetchRecommendUsers();
         isFirstShow.value = false;
       } else {
-        common_vendor.index.__f__("log", "at pages/six-degrees/six-degrees.vue:427", "从其他页面返回，保持当前列表不刷新");
+        common_vendor.index.__f__("log", "at pages/six-degrees/six-degrees.vue:438", "从其他页面返回，保持当前列表不刷新");
       }
     });
     return (_ctx, _cache) => {
@@ -291,6 +299,12 @@ const _sfc_main = {
         }),
         q: common_vendor.sr(invitePopupRef, "132afe13-3", {
           "k": "invitePopupRef"
+        }),
+        r: common_vendor.sr(smartGuidePopupRef, "132afe13-4", {
+          "k": "smartGuidePopupRef"
+        }),
+        s: common_vendor.p({
+          scenario: 3
         })
       });
     };

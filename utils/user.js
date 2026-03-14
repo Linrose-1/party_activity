@@ -237,3 +237,21 @@ export async function globalSilentLogin() {
 
 	return loginPromise;
 }
+
+
+
+/**
+ * @description 判断用户是否属于“情况3”：已登录、已绑手机号、但资料未完善
+ * @returns {boolean} true=属于情况3，需要弹窗
+ */
+export function isScenario3User() {
+	// ======= 测试专用：强制开启情况3 =======
+	// return true;
+	// =====================================
+
+	//原有逻辑
+	const userInfo = getCachedUserInfo();
+	const token = uni.getStorageSync('token');
+	return !!(token && userInfo && userInfo.mobile && userInfo.isComplete !== 1);
+	
+}

@@ -201,7 +201,8 @@
 						<view class="view-avatar-row">
 
 							<!-- 这里的 src 你可以之后替换为正式的图标地址 -->
-							<image v-if="post.hasSilentUser" src="https://img.gofor.club/post/20251231/1gcYJWmdcqe0de467fbd77b15cffaa30eb05468f5f7f_1767178458259.png"
+							<image v-if="post.hasSilentUser"
+								src="https://img.gofor.club/post/20251231/1gcYJWmdcqe0de467fbd77b15cffaa30eb05468f5f7f_1767178458259.png"
 								class="tiny-avatar silent-avatar" mode="aspectFill" />
 
 							<!-- 渲染普通真实用户头像 (如果有静默用户，切片数量减1，保证总数不多于8个) -->
@@ -240,6 +241,8 @@
 		</view>
 	</view>
 
+	<SmartGuidePopup ref="smartGuidePopupRef" :scenario="3" />
+
 	<GuidePopup ref="guidePopupRef" />
 
 	<AvatarLongPressMenu ref="avatarMenuRef" />
@@ -275,14 +278,17 @@
 	import {
 		getInviteCode,
 		getCachedUserInfo,
-		checkLoginGuard
+		checkLoginGuard,
+		isScenario3User
 	} from '../../utils/user.js';
 	import GuidePopup from '@/components/GuidePopup.vue';
 	import AvatarLongPressMenu from '@/components/AvatarLongPressMenu.vue';
 	import AddCircleConfirmPopup from '@/components/AddCircleConfirmPopup.vue';
 	import InviteCircleConfirmPopup from '@/components/InviteCircleConfirmPopup.vue';
-	import ScrollPointsPopup from '@/components/ScrollPointsPopup.vue'
+	import ScrollPointsPopup from '@/components/ScrollPointsPopup.vue';
 	import ZhimiPayPopup from '@/components/ZhimiPayPopup.vue';
+	import SmartGuidePopup from '@/components/SmartGuidePopup.vue';
+
 
 
 
@@ -297,6 +303,9 @@
 	const member = ref('白银'); // 示例会员等级
 
 	const currentUserInfo = ref(null);
+
+	const smartGuidePopupRef = ref(null);
+
 
 	// 存储从接口获取的轮播图数据
 	const swiperList = ref([]);
@@ -1500,6 +1509,7 @@
 	const toggleGenericFollow = async (post, type, targetId, statusKey, successMsg, failureMsg) => {
 		// 1. 防抖/节流检查
 		if (isActionInProgress.value || !isLogin.value) return;
+
 		if (!await checkLoginGuard()) return;
 		isActionInProgress.value = true;
 
@@ -1540,6 +1550,12 @@
 					title: newStatus ? successMsg.add : successMsg.remove,
 					icon: 'none'
 				});
+				if (isScenario3User()) {
+					// 延迟一秒弹出，避免跟上面的 Toast 提示重叠，体验更好
+					setTimeout(() => {
+						smartGuidePopupRef.value?.open();
+					}, 1000);
+				}
 			}
 		} catch (err) {
 			// 4. 失败回滚

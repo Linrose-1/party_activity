@@ -61,7 +61,8 @@
 					</view>
 					<uni-load-more :status="businessLoadingStatus"></uni-load-more>
 					<view v-if="businesses.length === 0 && businessLoadingStatus === 'noMore'" class="no-more-content">
-						附近15公里无商友，去<text class="underline-link" @click="navigateToInvite">邀请</text>附近商友加入猩聚社，或去<text class="underline-link" @click="navigateToSearch">别处</text>找找商友？
+						附近15公里无商友，去<text class="underline-link" @click="navigateToInvite">邀请</text>附近商友加入猩聚社，或去<text
+							class="underline-link" @click="navigateToSearch">别处</text>找找商友？
 					</view>
 				</view>
 
@@ -75,7 +76,8 @@
 						:is-login="isUserLoggedIn" />
 					<uni-load-more :status="activityLoadingStatus"></uni-load-more>
 					<view v-if="activities.length === 0 && activityLoadingStatus === 'noMore'" class="no-more-content">
-						附近15公里无聚会，去<text class="underline-link" @click="navigateToPublish">发起</text>聚会，或去<text class="underline-link" @click="navigateToSearchActive">别处</text>找找聚会？
+						附近15公里无聚会，去<text class="underline-link" @click="navigateToPublish">发起</text>聚会，或去<text
+							class="underline-link" @click="navigateToSearchActive">别处</text>找找聚会？
 					</view>
 
 
@@ -84,6 +86,8 @@
 			</view>
 		</view>
 	</view>
+
+	<SmartGuidePopup ref="smartGuidePopupRef" :scenario="3" />
 </template>
 
 <script setup>
@@ -95,13 +99,18 @@
 		onReachBottom,
 		onShow,
 		onHide,
-		onLoad
+		onLoad,
+		onReady
 	} from '@dcloudio/uni-app';
 	import ActivityCard from '@/components/ActivityCard.vue';
 	import request from '../../utils/request.js';
 	import {
 		useShakeLock
 	} from '@/utils/shakeLock.js';
+	import {
+		isScenario3User
+	} from '@/utils/user.js';
+	import SmartGuidePopup from '@/components/SmartGuidePopup.vue';
 
 	let shakeAudioContext = null;
 
@@ -121,6 +130,8 @@
 	const loading = ref(false); // 是否正在加载数据（摇动后）
 	const shakeDebounce = ref(true); // 摇一摇的防抖
 	const userLocation = ref(null);
+
+	const smartGuidePopupRef = ref(null);
 
 	// 分页和加载状态
 	const activityPageNo = ref(1);
@@ -410,7 +421,7 @@
 			url: '/packages/my-friendInvitation/my-friendInvitation'
 		});
 	};
-	
+
 	/**
 	 * 跳转到聚会导航搜索页面
 	 */
@@ -438,6 +449,13 @@
 			// 设置标记，告诉 onShow 需要立即执行
 			autoShakeOnLoad.value = true;
 		}
+	});
+	
+	onReady(() => {
+	    // 页面加载完了，用户可以开始写内容了，此时弹出引导
+	    if (isScenario3User()) {
+	        smartGuidePopupRef.value?.open();
+	    }
 	});
 
 	onShow(() => {

@@ -120,6 +120,8 @@
 			</view>
 		</view>
 	</view>
+
+	<SmartGuidePopup ref="smartGuidePopupRef" :scenario="3" />
 </template>
 
 <script setup>
@@ -131,8 +133,10 @@
 	} from 'vue';
 	import request from '../utils/request.js';
 	import {
-		checkLoginGuard
+		checkLoginGuard,
+		isScenario3User
 	} from '../utils/user.js';
+	import SmartGuidePopup from '@/components/SmartGuidePopup.vue';
 
 	const props = defineProps({
 		activity: {
@@ -144,6 +148,8 @@
 			default: false
 		}
 	});
+
+	const smartGuidePopupRef = ref(null);
 
 	const emit = defineEmits(['updateFavoriteStatus', 'updateLikeStatus']);
 
@@ -244,6 +250,13 @@
 					id: props.activity.id,
 					newFollowFlag: isFavorite.value ? 1 : 0
 				});
+
+				if (isScenario3User()) {
+					// 延迟一秒弹出，避免跟上面的 Toast 提示重叠，体验更好
+					setTimeout(() => {
+						smartGuidePopupRef.value?.open();
+					}, 1000);
+				}
 			} else {
 				isFavorite.value = original;
 				uni.showToast({

@@ -43,7 +43,11 @@
 							</view>
 						</view>
 					</view>
-					<text v-if="userInfo.id" class="user-id-display">ID: {{ userInfo.virtualId }}</text>
+
+					<text v-if="userInfo.id" class="user-id-display">
+						<!-- 如果有国家信息，显示国家并加一个分隔点 -->
+						{{ userInfo.countryStr ? userInfo.countryStr + ' · ' : '' }}ID: {{ userInfo.virtualId }}
+					</text>
 				</view>
 
 				<!-- 【优化 3】账户信息网格，现在会有 5 项 -->
@@ -1019,12 +1023,14 @@
 		font-size: 22rpx;
 		color: rgba(255, 255, 255, 0.7);
 		background-color: rgba(0, 0, 0, 0.1);
-		padding: 4rpx 12rpx;
+		padding: 4rpx 16rpx;
+		/* 稍微增加左右内边距 */
 		border-radius: 10rpx;
 		align-self: flex-end;
-		/* (2) 关键：使其在自己的行内靠右 */
 		margin-top: 10rpx;
-		/* (3) 关键：与上方信息拉开距离 */
+		/* 确保文字水平居中 */
+		display: inline-flex;
+		align-items: center;
 	}
 
 	/* ========================================================== */
