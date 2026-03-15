@@ -112,6 +112,9 @@
 	import ActivityCard from '@/components/ActivityCard.vue';
 	import request from '../../utils/request.js';
 	import {
+		fetchGlobalUnread
+	} from '@/utils/unread.js';
+	import {
 		getInviteCode,
 		checkLoginGuard,
 		isScenario3User
@@ -202,6 +205,8 @@
 	onPullDownRefresh(async () => {
 		await initializePage();
 		uni.stopPullDownRefresh();
+		
+		fetchGlobalUnread(); 
 	});
 
 	/**
@@ -340,8 +345,7 @@
 			return; // 不抛出，避免中断 Promise.all
 		}
 		bannerList.value = (data && data.list) ?
-			data.list.sort((a, b) => a.sort - b.sort) :
-			[];
+			data.list.sort((a, b) => a.sort - b.sort) : [];
 	};
 
 	/**
@@ -434,6 +438,9 @@
 			} else {
 				hasMore.value = false;
 			}
+
+			fetchGlobalUnread();
+
 		} catch (error) {
 			console.error('[聚会列表] 请求异常:', error);
 			hasMore.value = false;

@@ -1,6 +1,4 @@
 {
   "navigationBarTitleText": "商友邀请",
-  "usingComponents": {
-    "uni-icons": "../../uni_modules/uni-icons/components/uni-icons/uni-icons"
-  }
+  "usingComponents": {}
 }

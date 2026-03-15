@@ -1,14 +1,6 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
 const utils_request = require("../../utils/request.js");
-if (!Array) {
-  const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
-  _easycom_uni_icons2();
-}
-const _easycom_uni_icons = () => "../../uni_modules/uni-icons/components/uni-icons/uni-icons.js";
-if (!Math) {
-  _easycom_uni_icons();
-}
 const _sfc_main = {
   __name: "my-friendInvitation",
   setup(__props) {
@@ -87,29 +79,24 @@ const _sfc_main = {
       }, platformInfo.value.name ? {
         c: platformInfo.value.img,
         d: common_vendor.t(platformInfo.value.name),
-        e: common_vendor.p({
-          type: "right",
-          size: "16",
-          color: "#ccc"
-        }),
-        f: common_vendor.o(goToPlatformIntro)
+        e: common_vendor.o(goToPlatformIntro)
       } : {}, {
-        g: userInfo.value && userInfo.value.parentName
+        f: userInfo.value && userInfo.value.parentName
       }, userInfo.value && userInfo.value.parentName ? {} : {}, {
-        h: userInfo.value && userInfo.value.parentName
+        g: userInfo.value && userInfo.value.parentName
       }, userInfo.value && userInfo.value.parentName ? common_vendor.e({
-        i: userInfo.value.parentAvatar
+        h: userInfo.value.parentAvatar
       }, userInfo.value.parentAvatar ? {
-        j: userInfo.value.parentAvatar
+        i: userInfo.value.parentAvatar
       } : {
-        k: common_vendor.t(userInfo.value.parentName.charAt(0))
+        j: common_vendor.t(userInfo.value.parentName.charAt(0))
       }, {
-        l: common_vendor.t(userInfo.value.parentName),
-        m: userInfo.value.parentName === "猩聚社"
+        k: common_vendor.t(userInfo.value.parentName),
+        l: userInfo.value.parentName === "猩聚社"
       }, userInfo.value.parentName === "猩聚社" ? {} : {}, {
-        n: common_vendor.o(viewParentCard)
+        m: common_vendor.o(viewParentCard)
       }) : {}, {
-        o: userInfo.value && !userInfo.value.parentName
+        n: userInfo.value && !userInfo.value.parentName
       }, userInfo.value && !userInfo.value.parentName ? {} : {});
     };
   }

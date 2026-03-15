@@ -1,6 +1,7 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
 const utils_request = require("../../utils/request.js");
+const utils_unread = require("../../utils/unread.js");
 const utils_user = require("../../utils/user.js");
 if (!Array) {
   const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
@@ -40,13 +41,13 @@ const _sfc_main = {
     });
     const filteredStores = common_vendor.computed(() => allStores.value);
     const getCurrentLocation = () => {
-      common_vendor.index.__f__("log", "at pages/shop/shop.vue:163", "[定位] 开始定位...");
+      common_vendor.index.__f__("log", "at pages/shop/shop.vue:166", "[定位] 开始定位...");
       return new Promise((resolve) => {
         let isResolved = false;
         const timeoutId = setTimeout(() => {
           if (!isResolved) {
             isResolved = true;
-            common_vendor.index.__f__("error", "at pages/shop/shop.vue:172", "[定位] 超时（8秒），主动返回失败");
+            common_vendor.index.__f__("error", "at pages/shop/shop.vue:175", "[定位] 超时（8秒），主动返回失败");
             common_vendor.index.showToast({
               title: "定位超时，请稍后重试",
               icon: "none"
@@ -59,7 +60,7 @@ const _sfc_main = {
             return;
           isResolved = true;
           clearTimeout(timeoutId);
-          common_vendor.index.__f__("log", "at pages/shop/shop.vue:185", "[定位] 成功:", res);
+          common_vendor.index.__f__("log", "at pages/shop/shop.vue:188", "[定位] 成功:", res);
           const location = {
             latitude: res.latitude,
             longitude: res.longitude
@@ -86,7 +87,7 @@ const _sfc_main = {
             return;
           isResolved = true;
           clearTimeout(timeoutId);
-          common_vendor.index.__f__("error", "at pages/shop/shop.vue:215", "[定位] 失败:", err);
+          common_vendor.index.__f__("error", "at pages/shop/shop.vue:218", "[定位] 失败:", err);
           common_vendor.index.showToast({
             title: "定位失败，请检查权限",
             icon: "none"
@@ -99,7 +100,7 @@ const _sfc_main = {
           accuracy: "best",
           success: handleSuccess,
           fail: (err) => {
-            common_vendor.index.__f__("warn", "at pages/shop/shop.vue:230", "[定位] 高精度失败，尝试普通定位...", err);
+            common_vendor.index.__f__("warn", "at pages/shop/shop.vue:233", "[定位] 高精度失败，尝试普通定位...", err);
             common_vendor.index.getLocation({
               type: "gcj02",
               success: handleSuccess,
@@ -112,7 +113,7 @@ const _sfc_main = {
     const handleChooseLocation = () => {
       common_vendor.index.chooseLocation({
         success: (res) => {
-          common_vendor.index.__f__("log", "at pages/shop/shop.vue:248", "[选址] 用户手动选择:", res);
+          common_vendor.index.__f__("log", "at pages/shop/shop.vue:251", "[选址] 用户手动选择:", res);
           const newAddress = res.name || res.address;
           const newLocation = {
             latitude: res.latitude,
@@ -147,7 +148,7 @@ const _sfc_main = {
         }
       });
       if (error) {
-        common_vendor.index.__f__("error", "at pages/shop/shop.vue:293", "[Banner] 获取失败:", error);
+        common_vendor.index.__f__("error", "at pages/shop/shop.vue:296", "[Banner] 获取失败:", error);
         bannerList.value = [];
         return;
       }
@@ -192,7 +193,7 @@ const _sfc_main = {
       if (activeFilter.value !== "all") {
         params.category = activeFilter.value;
       }
-      common_vendor.index.__f__("log", "at pages/shop/shop.vue:353", "[StoreList] 请求参数:", params);
+      common_vendor.index.__f__("log", "at pages/shop/shop.vue:356", "[StoreList] 请求参数:", params);
       const {
         data: result,
         error
@@ -203,17 +204,18 @@ const _sfc_main = {
       loadingMore.value = false;
       if (error) {
         if (error.includes("信息绑定")) {
-          common_vendor.index.__f__("warn", "at pages/shop/shop.vue:367", "[StoreList] 需绑定信息才能查看更多");
+          common_vendor.index.__f__("warn", "at pages/shop/shop.vue:370", "[StoreList] 需绑定信息才能查看更多");
           await utils_user.checkLoginGuard();
           return;
         }
-        common_vendor.index.__f__("error", "at pages/shop/shop.vue:371", "[StoreList] 获取失败:", error);
+        common_vendor.index.__f__("error", "at pages/shop/shop.vue:374", "[StoreList] 获取失败:", error);
         common_vendor.index.showToast({
           title: error,
           icon: "none"
         });
         return;
       }
+      utils_unread.fetchGlobalUnread();
       const newList = (result == null ? void 0 : result.list) ?? [];
       const total = (result == null ? void 0 : result.total) ?? 0;
       if (pageNo.value === 1) {
@@ -241,14 +243,14 @@ const _sfc_main = {
         allStores.value = [];
         await getStoreList();
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/shop/shop.vue:414", "[handleRefresh] 异常:", error);
+        common_vendor.index.__f__("error", "at pages/shop/shop.vue:419", "[handleRefresh] 异常:", error);
       } finally {
         isLoading.value = false;
         isRefreshing.value = false;
       }
     };
     const handleRefresherRefresh = async () => {
-      common_vendor.index.__f__("log", "at pages/shop/shop.vue:427", "[下拉刷新] 触发");
+      common_vendor.index.__f__("log", "at pages/shop/shop.vue:432", "[下拉刷新] 触发");
       await handleRefresh(true);
     };
     const loadMore = () => {
@@ -377,10 +379,10 @@ const _sfc_main = {
           return;
         const oldLoc = userLocation.value;
         if (oldLoc && isSameLocation(oldLoc, newLoc, 500)) {
-          common_vendor.index.__f__("log", "at pages/shop/shop.vue:624", "[onShow] 位置未明显变化，跳过刷新");
+          common_vendor.index.__f__("log", "at pages/shop/shop.vue:629", "[onShow] 位置未明显变化，跳过刷新");
           return;
         }
-        common_vendor.index.__f__("log", "at pages/shop/shop.vue:629", "[onShow] 位置变化超过 500m，刷新列表");
+        common_vendor.index.__f__("log", "at pages/shop/shop.vue:634", "[onShow] 位置变化超过 500m，刷新列表");
         handleRefresh();
       });
     });

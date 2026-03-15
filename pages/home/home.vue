@@ -281,6 +281,10 @@
 		checkLoginGuard,
 		isScenario3User
 	} from '../../utils/user.js';
+	import {
+		fetchGlobalUnread
+	} from '@/utils/unread.js';
+
 	import GuidePopup from '@/components/GuidePopup.vue';
 	import AvatarLongPressMenu from '@/components/AvatarLongPressMenu.vue';
 	import AddCircleConfirmPopup from '@/components/AddCircleConfirmPopup.vue';
@@ -1084,6 +1088,10 @@
 				loadingStatus.value = 'noMore';
 			} else {
 				loadingStatus.value = 'more';
+			}
+
+			if (isRefresh || pageNo.value === 1) {
+				fetchGlobalUnread();
 			}
 		} catch (err) {
 			console.error('getBusinessOpportunitiesList 逻辑异常:', err);

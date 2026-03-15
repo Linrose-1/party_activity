@@ -3,6 +3,15 @@
 	import {
 		globalSilentLogin
 	} from '@/utils/user.js';
+	import {
+		onLaunch,
+		onShow,
+		onHide
+	} from '@dcloudio/uni-app';
+	import {
+		startUnreadPolling,
+		stopUnreadPolling
+	} from './utils/unread.js';
 
 	export default {
 		data() {
@@ -12,6 +21,8 @@
 		},
 		onLaunch: function(options) {
 			console.log('App Launch, 启动参数 options:', options);
+			
+			startUnreadPolling();
 
 			let finalQuery = options.query || {};
 
@@ -87,6 +98,7 @@
 		// 	}
 		// },
 		onShow: function() {
+			startUnreadPolling();
 			// 尝试预加载登录态，不 await，让它在后台跑
 			globalSilentLogin();
 			console.log('App Show');
@@ -96,6 +108,7 @@
 			this.checkUpdate();
 		},
 		onHide: function() {
+			stopUnreadPolling(); 
 			console.log('App Hide');
 			// 应用隐藏时，停止定时器
 			this.stopLocationUpdates();

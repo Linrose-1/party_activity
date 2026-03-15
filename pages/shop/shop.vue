@@ -112,6 +112,9 @@
 	import StoreCard from '../../components/StoreCard.vue';
 	import request from '../../utils/request.js';
 	import {
+		fetchGlobalUnread
+	} from '@/utils/unread.js';
+	import {
 		getInviteCode,
 		checkLoginGuard
 	} from '../../utils/user.js';
@@ -376,6 +379,8 @@
 			return;
 		}
 
+		fetchGlobalUnread();
+
 		const newList = result?.list ?? [];
 		const total = result?.total ?? 0;
 
@@ -465,7 +470,7 @@
 			if (clickedAction === 'like') {
 				store.likesCount = (store.likesCount || 0) + 1;
 				if (originalAction === 'dislike') store.dislikesCount = Math.max(0, (store.dislikesCount || 0) -
-				1);
+					1);
 			} else {
 				store.dislikesCount = (store.dislikesCount || 0) + 1;
 				if (originalAction === 'like') store.likesCount = Math.max(0, (store.likesCount || 0) - 1);
@@ -666,8 +671,7 @@
 			title: '我发现了很多宝藏"聚店"，快来一起看看吧！',
 			path: sharePath,
 			imageUrl: bannerList.value.length > 0 ?
-				bannerList.value[0].imageUrl :
-				'https://img.gofor.club/logo.png'
+				bannerList.value[0].imageUrl : 'https://img.gofor.club/logo.png'
 		};
 	});
 
@@ -680,8 +684,7 @@
 			title: '我发现了很多宝藏"聚店"，快来一起看看吧！',
 			query: inviteCode ? `inviteCode=${inviteCode}` : '',
 			imageUrl: bannerList.value.length > 0 ?
-				bannerList.value[0].imageUrl :
-				'https://img.gofor.club/logo.png'
+				bannerList.value[0].imageUrl : 'https://img.gofor.club/logo.png'
 		};
 	});
 </script>

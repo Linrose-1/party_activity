@@ -30,7 +30,7 @@
 						<view class="inviter-name">{{ platformInfo.name }} <text class="tag-platform">平台</text></view>
 						<view class="inviter-desc">点击查看平台介绍与首页邀约码</view>
 					</view>
-					<uni-icons type="right" size="16" color="#ccc"></uni-icons>
+					<!-- <uni-icons type="right" size="16" color="#ccc"></uni-icons> -->
 				</view>
 
 				<view v-if="userInfo && userInfo.parentName" class="section-title" style="margin-top: 30rpx;">我的邀请人

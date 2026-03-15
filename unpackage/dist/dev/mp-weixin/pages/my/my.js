@@ -52,11 +52,11 @@ const _sfc_main = {
           };
           if (data.totalUnreadCount > 0) {
             common_vendor.index.showTabBarRedDot({
-              index: 2
+              index: 4
             });
           } else {
             common_vendor.index.hideTabBarRedDot({
-              index: 2
+              index: 4
             });
           }
         }

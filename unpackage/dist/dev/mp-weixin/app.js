@@ -3,6 +3,7 @@ Object.defineProperty(exports, Symbol.toStringTag, { value: "Module" });
 const common_vendor = require("./common/vendor.js");
 const utils_request = require("./utils/request.js");
 const utils_user = require("./utils/user.js");
+const utils_unread = require("./utils/unread.js");
 if (!Math) {
   "./pages/home/home.js";
   "./pages/index/index.js";
@@ -99,15 +100,16 @@ const _sfc_main = {
     };
   },
   onLaunch: function(options) {
-    common_vendor.index.__f__("log", "at App.vue:14", "App Launch, 启动参数 options:", options);
+    common_vendor.index.__f__("log", "at App.vue:23", "App Launch, 启动参数 options:", options);
+    utils_unread.startUnreadPolling();
     let finalQuery = options.query || {};
     if (options.query && options.query.scene) {
       const sceneStr = decodeURIComponent(options.query.scene);
-      common_vendor.index.__f__("log", "at App.vue:22", "✅ 解析 query.scene:", sceneStr);
+      common_vendor.index.__f__("log", "at App.vue:33", "✅ 解析 query.scene:", sceneStr);
       parseScene(sceneStr);
     } else if (options.scene && typeof options.scene === "string" && options.scene.includes("=")) {
       const sceneStr = decodeURIComponent(options.scene);
-      common_vendor.index.__f__("log", "at App.vue:29", "✅ 解析 options.scene:", sceneStr);
+      common_vendor.index.__f__("log", "at App.vue:40", "✅ 解析 options.scene:", sceneStr);
       parseScene(sceneStr);
     }
     function parseScene(str) {
@@ -125,19 +127,19 @@ const _sfc_main = {
     }
     const inviteCode = finalQuery.c || finalQuery.inviteCode;
     if (inviteCode) {
-      common_vendor.index.__f__("log", "at App.vue:50", "✅ 最终捕获到邀请码:", inviteCode);
+      common_vendor.index.__f__("log", "at App.vue:61", "✅ 最终捕获到邀请码:", inviteCode);
       common_vendor.index.setStorageSync("pendingInviteCode", inviteCode);
     }
   },
   // onLaunch: function(options) {
-  // 	uni.__f__('warn','at App.vue:55','当前组件仅支持 uni_modules 目录结构 ，请升级 HBuilderX 到 3.1.0 版本以上！')
-  // 	uni.__f__('log','at App.vue:56','App Launch')
-  // 	uni.__f__('log','at App.vue:58','App Launch, 启动参数 options:', options);
+  // 	uni.__f__('warn','at App.vue:66','当前组件仅支持 uni_modules 目录结构 ，请升级 HBuilderX 到 3.1.0 版本以上！')
+  // 	uni.__f__('log','at App.vue:67','App Launch')
+  // 	uni.__f__('log','at App.vue:69','App Launch, 启动参数 options:', options);
   // 	let finalQuery = options.query || {};
   // 	// 1. 检查是否存在 scene 参数 (扫码进入)
   // 	if (options.scene) {
   // 		const sceneStr = decodeURIComponent(options.scene);
-  // 		uni.__f__('log','at App.vue:65','✅ [App.vue] 检测到 scene 参数:', sceneStr);
+  // 		uni.__f__('log','at App.vue:76','✅ [App.vue] 检测到 scene 参数:', sceneStr);
   // 		// 2. 将 scene 字符串解析成键值对对象
   // 		const sceneParams = {};
   // 		sceneStr.split('&').forEach(item => {
@@ -146,7 +148,7 @@ const _sfc_main = {
   // 				sceneParams[parts[0]] = parts[1];
   // 			}
   // 		});
-  // 		uni.__f__('log','at App.vue:74','✅ [App.vue] scene 解析结果:', sceneParams);
+  // 		uni.__f__('log','at App.vue:85','✅ [App.vue] scene 解析结果:', sceneParams);
   // 		// 3. 将解析后的参数合并到 finalQuery 中，优先使用 scene 里的参数
   // 		finalQuery = {
   // 			...finalQuery,
@@ -156,18 +158,20 @@ const _sfc_main = {
   // 	// 4. 从最终的参数对象中提取邀请码
   // 	const inviteCode = finalQuery.c || finalQuery.inviteCode;
   // 	if (inviteCode) {
-  // 		uni.__f__('log','at App.vue:85','✅ [App.vue] 全局捕获到邀请码:', inviteCode);
+  // 		uni.__f__('log','at App.vue:96','✅ [App.vue] 全局捕获到邀请码:', inviteCode);
   // 		uni.setStorageSync('pendingInviteCode', inviteCode);
   // 	}
   // },
   onShow: function() {
+    utils_unread.startUnreadPolling();
     utils_user.globalSilentLogin();
-    common_vendor.index.__f__("log", "at App.vue:92", "App Show");
+    common_vendor.index.__f__("log", "at App.vue:104", "App Show");
     this.startLocationUpdates();
     this.checkUpdate();
   },
   onHide: function() {
-    common_vendor.index.__f__("log", "at App.vue:99", "App Hide");
+    utils_unread.stopUnreadPolling();
+    common_vendor.index.__f__("log", "at App.vue:112", "App Hide");
     this.stopLocationUpdates();
   },
   methods: {
@@ -177,7 +181,7 @@ const _sfc_main = {
     checkUpdate() {
       const updateManager = common_vendor.index.getUpdateManager();
       updateManager.onCheckForUpdate(function(res) {
-        common_vendor.index.__f__("log", "at App.vue:114", "是否有新版本发布:", res.hasUpdate);
+        common_vendor.index.__f__("log", "at App.vue:127", "是否有新版本发布:", res.hasUpdate);
       });
       updateManager.onUpdateReady(function() {
         common_vendor.index.showModal({
@@ -191,7 +195,7 @@ const _sfc_main = {
         });
       });
       updateManager.onUpdateFailed(function() {
-        common_vendor.index.__f__("error", "at App.vue:134", "新版本下载失败");
+        common_vendor.index.__f__("error", "at App.vue:147", "新版本下载失败");
       });
     },
     /**
@@ -207,15 +211,15 @@ const _sfc_main = {
     startLocationUpdates() {
       this.stopLocationUpdates();
       if (!this.isLoggedIn()) {
-        common_vendor.index.__f__("log", "at App.vue:159", "用户未登录，不启动位置上传定时器");
+        common_vendor.index.__f__("log", "at App.vue:172", "用户未登录，不启动位置上传定时器");
         return;
       }
       const updateTask = () => {
-        common_vendor.index.__f__("log", "at App.vue:164", "正在获取并上传用户当前位置...");
+        common_vendor.index.__f__("log", "at App.vue:177", "正在获取并上传用户当前位置...");
         common_vendor.index.getLocation({
           type: "gcj02",
           success: async (res) => {
-            common_vendor.index.__f__("log", "at App.vue:168", `获取位置成功: ${res.longitude}, ${res.latitude}`);
+            common_vendor.index.__f__("log", "at App.vue:181", `获取位置成功: ${res.longitude}, ${res.latitude}`);
             const {
               error
             } = await utils_request.request("/app-api/member/user/upload-location", {
@@ -226,19 +230,19 @@ const _sfc_main = {
               }
             });
             if (error) {
-              common_vendor.index.__f__("error", "at App.vue:182", "自动上传位置信息失败:", error);
+              common_vendor.index.__f__("error", "at App.vue:195", "自动上传位置信息失败:", error);
             } else {
-              common_vendor.index.__f__("log", "at App.vue:184", "用户当前位置上传成功！");
+              common_vendor.index.__f__("log", "at App.vue:197", "用户当前位置上传成功！");
             }
           },
           fail: (err) => {
-            common_vendor.index.__f__("error", "at App.vue:188", "获取位置信息失败:", err);
+            common_vendor.index.__f__("error", "at App.vue:201", "获取位置信息失败:", err);
           }
         });
       };
       updateTask();
       this.locationTimer = setInterval(updateTask, 6e5);
-      common_vendor.index.__f__("log", "at App.vue:198", "位置上传定时器已启动");
+      common_vendor.index.__f__("log", "at App.vue:211", "位置上传定时器已启动");
     },
     /**
      * 停止位置上传
@@ -247,7 +251,7 @@ const _sfc_main = {
       if (this.locationTimer) {
         clearInterval(this.locationTimer);
         this.locationTimer = null;
-        common_vendor.index.__f__("log", "at App.vue:208", "位置上传定时器已停止");
+        common_vendor.index.__f__("log", "at App.vue:221", "位置上传定时器已停止");
       }
     }
   }

@@ -200,11 +200,11 @@
 				// 同步设置小程序底部 TabBar 的红点（可选，假设“我的”是第3个Tab）
 				if (data.totalUnreadCount > 0) {
 					uni.showTabBarRedDot({
-						index: 2
+						index: 4
 					});
 				} else {
 					uni.hideTabBarRedDot({
-						index: 2
+						index: 4
 					});
 				}
 			}

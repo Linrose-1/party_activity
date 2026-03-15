@@ -1,6 +1,7 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
 const utils_request = require("../../utils/request.js");
+const utils_unread = require("../../utils/unread.js");
 const utils_user = require("../../utils/user.js");
 if (!Array) {
   const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
@@ -69,6 +70,7 @@ const _sfc_main = {
     common_vendor.onPullDownRefresh(async () => {
       await initializePage();
       common_vendor.index.stopPullDownRefresh();
+      utils_unread.fetchGlobalUnread();
     });
     common_vendor.onReachBottom(() => {
       if (hasMore.value && !loading.value) {
@@ -145,7 +147,7 @@ const _sfc_main = {
         ]);
         await getActiveList(false);
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/active/active.vue:312", "[聚会列表] 初始化失败:", error);
+        common_vendor.index.__f__("error", "at pages/active/active.vue:317", "[聚会列表] 初始化失败:", error);
         common_vendor.index.showToast({
           title: "数据加载失败",
           icon: "none"
@@ -167,7 +169,7 @@ const _sfc_main = {
         }
       });
       if (error) {
-        common_vendor.index.__f__("error", "at pages/active/active.vue:338", "[轮播图] 获取失败:", error);
+        common_vendor.index.__f__("error", "at pages/active/active.vue:343", "[轮播图] 获取失败:", error);
         bannerList.value = [];
         return;
       }
@@ -183,7 +185,7 @@ const _sfc_main = {
         }
       });
       if (error) {
-        common_vendor.index.__f__("error", "at pages/active/active.vue:360", "[类型列表] 获取失败:", error);
+        common_vendor.index.__f__("error", "at pages/active/active.vue:364", "[类型列表] 获取失败:", error);
         throw new Error("获取类型失败");
       }
       typeList.value = data || [];
@@ -194,7 +196,7 @@ const _sfc_main = {
         error
       } = await utils_request.request("/app-api/member/activity/status-list");
       if (error) {
-        common_vendor.index.__f__("error", "at pages/active/active.vue:375", "[状态列表] 获取失败:", error);
+        common_vendor.index.__f__("error", "at pages/active/active.vue:379", "[状态列表] 获取失败:", error);
         throw new Error("获取状态失败");
       }
       statusList.value = data || [];
@@ -246,8 +248,9 @@ const _sfc_main = {
         } else {
           hasMore.value = false;
         }
+        utils_unread.fetchGlobalUnread();
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/active/active.vue:438", "[聚会列表] 请求异常:", error);
+        common_vendor.index.__f__("error", "at pages/active/active.vue:445", "[聚会列表] 请求异常:", error);
         hasMore.value = false;
       } finally {
         loading.value = false;
