@@ -1,0 +1,452 @@
+/* 水平间距 */
+/* 水平间距 */
+.page-container.data-v-e59cab78 {
+  min-height: 100vh;
+  background-color: #f7f8fa;
+  /*  paddingTop 为固定定位的 Tabs 留出空间 */
+  padding-top: 100rpx;
+}
+
+/* --- 3. 吸顶头部 (列表标题+搜索) --- */
+.sticky-header.data-v-e59cab78 {
+  position: -webkit-sticky;
+  position: sticky;
+  /* 吸顶位置 = Tabs 的高度 */
+  /* 如果有 var(--window-top)，也要加上 */
+  top: 100rpx;
+  /* top: calc(100rpx + var(--window-top)); */
+  z-index: 10;
+  background-color: #f7f8fa;
+  padding-top: 20rpx;
+}
+.list-title.data-v-e59cab78 {
+  /* 增加具体的左内边距 */
+  padding-left: 30rpx;
+  padding-right: 30rpx;
+  padding-bottom: 20rpx;
+  font-size: 34rpx;
+  font-weight: bold;
+  color: #333;
+}
+.tabs-container.data-v-e59cab78 {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 999;
+  background-color: #fff;
+  border-bottom: 1rpx solid #eee;
+  height: 100rpx;
+  /* 【关键】移除 padding，改用 Flex 居中 */
+  padding: 0;
+  display: flex;
+  align-items: center;
+  /* justify-content: center;  这个可以保留，作为双重保险 */
+  justify-content: center;
+  box-sizing: border-box;
+}
+.tab-panel.data-v-e59cab78 {
+  height: 100%;
+}
+.search-wrapper.data-v-e59cab78 {
+  padding: 20rpx;
+  background-color: #fff;
+}
+.search-wrapper.data-v-e59cab78 .uni-easyinput__content {
+  border-radius: 40rpx !important;
+  background-color: #f7f8fa !important;
+  border: 1rpx solid #eee !important;
+}
+
+/* --- "我邀请的人" 列表样式 (基本复用) --- */
+.friend-list.data-v-e59cab78 {
+  padding: 20rpx;
+}
+.friend-card.data-v-e59cab78 {
+  display: flex;
+  align-items: center;
+  background-color: #ffffff;
+  border-radius: 20rpx;
+  padding: 30rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.05);
+}
+.friend-avatar.data-v-e59cab78 {
+  width: 100rpx;
+  height: 100rpx;
+  border-radius: 50%;
+  margin-right: 30rpx;
+  flex-shrink: 0;
+}
+.friend-info.data-v-e59cab78 {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+}
+.info-header.data-v-e59cab78 {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+.friend-name.data-v-e59cab78 {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #333;
+}
+.relation-tags.data-v-e59cab78 {
+  display: flex;
+  gap: 10rpx;
+  flex-shrink: 0;
+  /* 防止标签被挤压 */
+}
+.tag.data-v-e59cab78 {
+  font-size: 20rpx;
+  /* 可以适当调整大小 */
+  padding: 4rpx 12rpx;
+  border-radius: 6rpx;
+  font-weight: 500;
+}
+.fellow-circle.data-v-e59cab78 {
+  background-color: #f3e5f5;
+  /* 浅紫色背景 */
+  color: #9c27b0;
+  /* 紫色文字 */
+  border: 1rpx solid #e1bee7;
+}
+.fellow-townsman.data-v-e59cab78 {
+  background-color: #e8f5e9;
+  color: #388e3c;
+  border: 1rpx solid #a5d6a7;
+}
+.peer.data-v-e59cab78 {
+  background-color: #e3f2fd;
+  color: #1976d2;
+  border: 1rpx solid #90caf9;
+}
+.classmate.data-v-e59cab78 {
+  background-color: #fff3e0;
+  color: #ef6c00;
+  border: 1rpx solid #ffcc80;
+}
+.friend-company.data-v-e59cab78 {
+  display: flex;
+  align-items: center;
+  font-size: 26rpx;
+  color: #666;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.friend-company uni-icons.data-v-e59cab78 {
+  margin-right: 10rpx;
+}
+.action-area.data-v-e59cab78 {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* 居中对齐 */
+  gap: 8rpx;
+  /* 按钮和时间之间的间距 */
+  margin-left: 20rpx;
+  flex-shrink: 0;
+}
+.follow-btn.data-v-e59cab78 {
+  background-color: var(--0ed62fe8);
+  color: white;
+  border: none;
+  padding: 0 30rpx;
+  height: 60rpx;
+  line-height: 60rpx;
+  border-radius: 40rpx;
+  font-size: 26rpx;
+  flex-shrink: 0;
+}
+.follow-btn.data-v-e59cab78::after {
+  border: none;
+}
+.invite-time.data-v-e59cab78 {
+  font-size: 22rpx;
+  color: #999;
+  white-space: nowrap;
+  /* 防止换行 */
+}
+.follow-btn.followed.data-v-e59cab78 {
+  background: #f0f2f5;
+  color: #999;
+}
+
+/* --- "我的邀请人" 模块样式 --- */
+.platform-card.data-v-e59cab78 {
+  margin-bottom: 20rpx;
+  /* 与下方的个人卡片隔开 */
+  background-color: #fcfcfc;
+  /*稍微区分一下背景*/
+  border: 1rpx solid #eee;
+}
+.tag-platform.data-v-e59cab78 {
+  font-size: 20rpx;
+  background-color: #FF6E00;
+  color: white;
+  padding: 2rpx 8rpx;
+  border-radius: 6rpx;
+  margin-left: 10rpx;
+  vertical-align: middle;
+}
+.inviter-section.data-v-e59cab78 {
+  padding: 30rpx 30rpx 0 30rpx;
+  /* 调整 padding */
+}
+.invite-tools-section.data-v-e59cab78 {
+  padding: 30rpx;
+}
+.section-title.data-v-e59cab78 {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #333;
+}
+.inviter-card.data-v-e59cab78 {
+  display: flex;
+  align-items: center;
+  padding: 40rpx;
+  background: #fff;
+  border-radius: 30rpx;
+  box-shadow: 0 10rpx 30rpx rgba(0, 0, 0, 0.06);
+  margin-top: 10rpx;
+}
+.inviter-avatar.data-v-e59cab78 {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--0ed62fe8), #ff8c00);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 30rpx;
+  color: white;
+  font-size: 48rpx;
+  font-weight: bold;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.inviter-avatar-img.data-v-e59cab78 {
+  width: 100%;
+  height: 100%;
+}
+
+/* 专门给平台头像加个白色背景，看起来更像 logo */
+.platform-avatar-bg.data-v-e59cab78 {
+  background: #fff !important;
+  /* 覆盖原来的渐变色 */
+  border: 1rpx solid #eee;
+  /* 加个边框防止和白底混在一起 */
+}
+
+/* 控制图片大小，不要撑满，留点呼吸感 */
+.platform-img.data-v-e59cab78 {
+  width: 70% !important;
+  /* 缩小到 70% */
+  height: 70% !important;
+}
+.inviter-info.data-v-e59cab78 {
+  flex: 1;
+}
+.inviter-name.data-v-e59cab78 {
+  font-size: 34rpx;
+  font-weight: bold;
+  margin-bottom: 10rpx;
+}
+.inviter-desc.data-v-e59cab78 {
+  font-size: 28rpx;
+  color: #666;
+}
+.tools-grid.data-v-e59cab78 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  /* 双列 */
+  gap: 20rpx;
+  margin-top: 10rpx;
+}
+.tool-item.data-v-e59cab78 {
+  background: #fff;
+  padding: 30rpx 20rpx;
+  border-radius: 20rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.03);
+  transition: background-color 0.2s;
+}
+.tool-item.data-v-e59cab78:active {
+  background-color: #fafafa;
+}
+.tool-item-inner.data-v-e59cab78 {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+.tool-icon.data-v-e59cab78 {
+  width: 70rpx;
+  height: 70rpx;
+  margin-right: 20rpx;
+  flex-shrink: 0;
+}
+.tool-content.data-v-e59cab78 {
+  flex: 1;
+  min-width: 0;
+}
+.tool-name.data-v-e59cab78 {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 6rpx;
+}
+.tool-desc.data-v-e59cab78 {
+  font-size: 22rpx;
+  color: #999;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.chevron-icon.data-v-e59cab78 {
+  font-size: 30rpx;
+  color: #ddd;
+  margin-left: 10rpx;
+}
+
+/* --- 通用空状态样式 --- */
+.empty-container.data-v-e59cab78 {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding-top: 200rpx;
+  color: #999;
+}
+.empty-image.data-v-e59cab78 {
+  width: 300rpx;
+  margin-bottom: 30rpx;
+}
+.empty-text.data-v-e59cab78 {
+  font-size: 28rpx;
+}
+
+/* 圈友列表的吸顶搜索栏 */
+/* 圈友列表的吸顶容器 */
+.sticky-header-circle.data-v-e59cab78 {
+  position: -webkit-sticky;
+  position: sticky;
+  top: 100rpx;
+  z-index: 10;
+  background-color: #f7f8fa;
+  padding-bottom: 20rpx;
+  /* 移除之前的 padding-bottom: 20rpx，改由子元素控制间距 */
+}
+
+/* 子 Tab 筛选样式 */
+.circle-sub-tabs.data-v-e59cab78 {
+  display: flex;
+  background-color: #fff;
+  padding: 10rpx 20rpx;
+  margin-top: 2rpx;
+  /* 稍微与搜索框隔开一点 */
+  border-bottom: 1rpx solid #eee;
+}
+.sub-tab-item.data-v-e59cab78 {
+  flex: 1;
+  text-align: center;
+  font-size: 28rpx;
+  color: #666;
+  padding: 20rpx 0;
+  position: relative;
+  transition: all 0.3s;
+  font-weight: 500;
+}
+.sub-tab-item.active.data-v-e59cab78 {
+  color: #FF6E00;
+  /* 主题色 */
+  font-weight: bold;
+}
+.sub-tab-item.active.data-v-e59cab78::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40rpx;
+  height: 4rpx;
+  background-color: #FF6E00;
+  border-radius: 2rpx;
+}
+.friend-status.data-v-e59cab78 {
+  font-size: 24rpx;
+  color: #999;
+  background-color: #f0f2f5;
+  padding: 4rpx 12rpx;
+  border-radius: 8rpx;
+  /* 增加点击感 */
+  padding: 8rpx 16rpx;
+  background-color: #f0f2f5;
+  border: 1rpx solid transparent;
+  transition: all 0.2s;
+}
+.friend-status.data-v-e59cab78:active {
+  background-color: #e6e6e6;
+  border-color: #d9d9d9;
+}
+
+/* 新申请入口样式 */
+.new-apply-entry.data-v-e59cab78 {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #fff;
+  padding: 24rpx 30rpx;
+  margin-bottom: 20rpx;
+  /* 与下方列表隔开 */
+  /* 如果需要吸顶，也可以加 sticky，或者就让它随页面滚动 */
+}
+.entry-left.data-v-e59cab78 {
+  display: flex;
+  align-items: center;
+}
+.icon-box.data-v-e59cab78 {
+  width: 80rpx;
+  height: 80rpx;
+  background-color: #FF6E00;
+  /* 主题色背景 */
+  border-radius: 12rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 20rpx;
+}
+.entry-title.data-v-e59cab78 {
+  font-size: 30rpx;
+  font-weight: bold;
+  color: #333;
+}
+.entry-right.data-v-e59cab78 {
+  display: flex;
+  align-items: center;
+}
+.badge.data-v-e59cab78 {
+  background-color: #ff4d4f;
+  color: #fff;
+  font-size: 24rpx;
+  padding: 4rpx 12rpx;
+  border-radius: 20rpx;
+  margin-right: 10rpx;
+}
+
+/* 平台头像优化 */
+.platform-card .inviter-avatar.data-v-e59cab78 {
+  background: #fff !important;
+  /* 白色底 */
+  border: 1rpx solid #f0f0f0;
+}
+.platform-card .inviter-avatar-img.data-v-e59cab78 {
+  width: 75% !important;
+  /* 缩小图片比例 */
+  height: 75% !important;
+  border-radius: 0;
+  /* 如果 logo 是方形的，这里可以去掉圆角；如果是圆框内的logo，保持父级overflow:hidden即可 */
+}

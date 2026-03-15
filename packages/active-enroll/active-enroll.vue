@@ -255,6 +255,37 @@
 	// 定义缓存 Key
 	const FORM_CACHE_KEY = 'active_enroll_form_cache';
 
+	/**
+	 * 获取当前用户资料并预填表单
+	 */
+	const fetchAndPrefillUserInfo = async () => {
+		try {
+			const {
+				data,
+				error
+			} = await request('/app-api/member/user/get', {
+				method: 'GET'
+			});
+
+			if (!error && data) {
+				// 只有当表单对应字段为空时才进行填充，避免覆盖用户的手动输入（如果缓存恢复了数据的话）
+				if (!formData.userName) {
+					formData.userName = data.realName || data.nickname || '';
+				}
+				if (!formData.userPhone) {
+					formData.userPhone = data.mobile || '';
+				}
+				if (!formData.contactAddress) {
+					// 将用户的公司名称填充到“所在公司/机构/组织”字段
+					formData.contactAddress = data.companyName || '';
+				}
+				console.log('✅ 已根据用户资料自动预填报名信息');
+			}
+		} catch (e) {
+			console.error('自动预填信息失败:', e);
+		}
+	};
+
 	onLoad((options) => {
 		// checkUserVerificationStatus();
 
@@ -272,6 +303,8 @@
 			setTimeout(() => uni.navigateBack(), 1500);
 		}
 
+		let hasCache = false;
+
 		// 尝试恢复缓存的表单数据
 		try {
 			const cachedData = uni.getStorageSync(FORM_CACHE_KEY);
@@ -285,9 +318,15 @@
 				formData.paymentScreenshotUrl = parsedData.paymentScreenshotUrl || '';
 
 				console.log('已恢复上次未提交的报名信息');
+
+				hasCache = true;
 			}
 		} catch (e) {
 			console.error('读取缓存失败', e);
+		}
+
+		if (!hasCache) {
+			fetchAndPrefillUserInfo();
 		}
 	});
 

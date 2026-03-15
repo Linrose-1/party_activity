@@ -88,6 +88,9 @@ if (!Math) {
   "./packages/store-activity-list/store-activity-list.js";
   "./packages/liehuo-interests/liehuo-interests.js";
   "./packages/hunter-interaction/hunter-interaction.js";
+  "./packages/my-friendInvitionone/my-friendInvitionone.js";
+  "./packages/my-shareList/my-shareList.js";
+  "./packages/my-circleList/my-circleList.js";
 }
 const _sfc_main = {
   data() {

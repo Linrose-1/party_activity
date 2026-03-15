@@ -154,7 +154,7 @@ const _sfc_main = {
       } : {}, {
         e: list.value.length === 0 && loadingStatus.value === "noMore"
       }, list.value.length === 0 && loadingStatus.value === "noMore" ? {
-        f: common_assets._imports_0$6
+        f: common_assets._imports_0$5
       } : {}, {
         g: common_vendor.p({
           status: loadingStatus.value

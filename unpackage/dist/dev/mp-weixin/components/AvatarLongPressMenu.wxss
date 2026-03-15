@@ -1,6 +1,5 @@
 /* 水平间距 */
 /* 水平间距 */
-/* 样式保持 3x2 布局及 #FF7009 主题色 */
 .menu-card.data-v-5571075f {
   width: 620rpx;
   background-color: #fff;
@@ -8,19 +7,23 @@
   overflow: hidden;
   position: relative;
 }
+
+/* --- 头部样式优化 --- */
 .card-header.data-v-5571075f {
   background: linear-gradient(135deg, #FF7009, #FF9A44);
-  padding: 40rpx 30rpx;
+  padding: 50rpx 30rpx;
   display: flex;
   align-items: center;
+  position: relative;
 }
 .avatar-wrapper.data-v-5571075f {
-  width: 100rpx;
-  height: 100rpx;
+  width: 120rpx;
+  height: 120rpx;
   border-radius: 50%;
-  border: 4rpx solid rgba(255, 255, 255, 0.6);
+  border: 4rpx solid rgba(255, 255, 255, 0.5);
   overflow: hidden;
   margin-right: 24rpx;
+  background: #f0f0f0;
 }
 .menu-avatar.data-v-5571075f {
   width: 100%;
@@ -28,177 +31,96 @@
 }
 .user-info.data-v-5571075f {
   flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  min-width: 0;
-  padding-right: 20rpx;
 }
 .user-info .user-name.data-v-5571075f {
-  font-size: 34rpx;
+  font-size: 38rpx;
   font-weight: bold;
   color: #fff;
-  display: block;
-  /* 确保占行 */
-  margin-bottom: 6rpx;
+  margin-bottom: 8rpx;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .user-info .user-desc.data-v-5571075f {
-  font-size: 24rpx;
+  font-size: 22rpx;
   color: rgba(255, 255, 255, 0.8);
-  display: block;
   margin-top: 10rpx;
 }
+
+/* 第一行标签：毛玻璃质感 */
 .mini-tags-line.data-v-5571075f {
   display: flex;
   flex-wrap: wrap;
   gap: 12rpx;
-  margin-top: 8rpx;
-  /* 解决由于数据未加载时可能的高度塌陷 */
-  min-height: 30rpx;
+  margin-top: 4rpx;
 }
-
-/* 核心修正：确保标签可见 */
 .mini-tag.data-v-5571075f {
-  display: inline-block !important;
-  /* 强制 text 表现为块，否则背景色不显示 */
+  display: inline-block;
   font-size: 20rpx;
   color: #fff;
   padding: 4rpx 14rpx;
-  border-radius: 8rpx;
-  background: rgba(255, 255, 255, 0.2);
-  border: 1rpx solid rgba(255, 255, 255, 0.3);
-  line-height: 1.2;
-}
-.mini-credit-line.data-v-5571075f {
-  display: inline-flex !important;
-  /* 确保能在一行排列并显示背景 */
-  align-items: center;
-  background: rgba(255, 255, 255, 0.15);
-  padding: 6rpx 18rpx;
-  border-radius: 30rpx;
-  margin-top: 14rpx;
-  gap: 8rpx;
-  border: 1rpx solid rgba(255, 255, 255, 0.2);
-}
-
-/* 标签行布局优化 */
-.mini-tags-line.data-v-5571075f {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12rpx;
-  margin-top: 10rpx;
-}
-.mini-tag.data-v-5571075f {
-  font-size: 20rpx;
-  color: #fff;
-  padding: 4rpx 14rpx;
-  /* 增加一点内边距，呼吸感更好 */
   border-radius: 8rpx;
   background: rgba(255, 255, 255, 0.18);
   border: 1rpx solid rgba(255, 255, 255, 0.3);
-}
-
-/* 信用分行布局优化 */
-.mini-credit-line.data-v-5571075f {
-  display: inline-flex;
-  align-items: center;
-  /* 核心修改：使用白色半透明背景，适配橙色渐变 */
-  background: rgba(255, 255, 255, 0.15);
-  padding: 6rpx 18rpx;
-  border-radius: 30rpx;
-  /* 胶囊形状 */
-  margin-top: 14rpx;
-  gap: 8rpx;
-  border: 1rpx solid rgba(255, 255, 255, 0.2);
-}
-.mini-credit-line .credit-text.data-v-5571075f {
-  font-size: 20rpx;
-  color: #fff;
-  font-weight: bold;
-}
-.mini-credit-line .score-text.data-v-5571075f {
-  font-size: 20rpx;
-  color: rgba(255, 255, 255, 0.9);
-}
-
-/* 操作网格间距优化 */
-.action-grid.data-v-5571075f {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 44rpx 20rpx;
-  /* 增加水平间距到 20rpx */
-  padding: 50rpx 30rpx;
-  /* 增加左右内边距 */
-}
-
-/* 头部标签行布局 */
-.mini-tags-line.data-v-5571075f {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12rpx;
-  margin-top: 8rpx;
-}
-.mini-tag.data-v-5571075f {
-  font-size: 20rpx;
-  color: #fff;
-  padding: 2rpx 12rpx;
-  border-radius: 6rpx;
-  background: rgba(255, 255, 255, 0.15);
-  border: 1rpx solid rgba(255, 255, 255, 0.3);
+  line-height: 1.2;
 }
 .mini-tag.data-v-5571075f:active {
   background: rgba(255, 255, 255, 0.3);
 }
 
-/* 信用分行布局 */
-.mini-credit-line.data-v-5571075f {
+/* 信用分胶囊：紧凑且圆润 */
+.mini-credit-capsule.data-v-5571075f {
   display: inline-flex;
+  /* 关键：不占满行 */
   align-items: center;
-  background: rgba(0, 0, 0, 0.1);
-  padding: 4rpx 16rpx;
-  border-radius: 20rpx;
-  margin-top: 12rpx;
+  background: rgba(255, 255, 255, 0.12);
+  padding: 6rpx 18rpx;
+  border-radius: 40rpx;
+  margin-top: 16rpx;
   gap: 8rpx;
+  border: 1rpx solid rgba(255, 255, 255, 0.15);
+  width: -webkit-fit-content;
+  width: fit-content;
+  /* 兼容性写法，确保只包围文字 */
 }
-.mini-credit-line .credit-text.data-v-5571075f {
+.mini-credit-capsule .credit-text.data-v-5571075f {
   font-size: 20rpx;
   color: #fff;
   font-weight: bold;
 }
-.mini-credit-line .score-text.data-v-5571075f {
+.mini-credit-capsule .score-text.data-v-5571075f {
   font-size: 20rpx;
   color: rgba(255, 255, 255, 0.9);
 }
-.mini-credit-line.data-v-5571075f:active {
-  background: rgba(0, 0, 0, 0.2);
-}
-
-/* 调整原有描述文字，防止重叠 */
-.user-desc.data-v-5571075f {
-  margin-top: 8rpx;
-  font-size: 22rpx;
-  color: rgba(255, 255, 255, 0.8);
+.mini-credit-capsule.data-v-5571075f:active {
+  background: rgba(255, 255, 255, 0.25);
 }
 .close-icon.data-v-5571075f {
   position: absolute;
   top: 20rpx;
   right: 20rpx;
   padding: 10rpx;
+  opacity: 0.8;
 }
+
+/* --- 操作网格优化 --- */
 .action-grid.data-v-5571075f {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 40rpx 10rpx;
-  padding: 50rpx 20rpx;
+  gap: 50rpx 20rpx;
+  padding: 50rpx 20rpx 60rpx;
 }
 .grid-item.data-v-5571075f {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  transition: all 0.2s;
 }
 .grid-item.data-v-5571075f:active {
-  transform: scale(0.95);
+  transform: scale(0.92);
   opacity: 0.8;
 }
 .grid-item .icon-box.data-v-5571075f {
@@ -208,9 +130,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 12rpx;
+  margin-bottom: 16rpx;
   border: 2rpx solid #FF7009;
-  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
+  background: #fff;
+  box-shadow: 0 6rpx 16rpx rgba(255, 112, 9, 0.1);
 }
 .grid-item .icon-box.path-style.data-v-5571075f {
   background-color: #FFF5EE;
@@ -224,10 +147,10 @@
   pointer-events: none;
 }
 .grid-item.disabled .icon-box.data-v-5571075f {
-  background-color: #f2f2f2;
-  border-color: #ddd;
+  background-color: #f8f8f8;
+  border-color: #eee;
   box-shadow: none;
 }
 .grid-item.disabled .item-text.data-v-5571075f {
-  color: #bbb;
+  color: #ccc;
 }

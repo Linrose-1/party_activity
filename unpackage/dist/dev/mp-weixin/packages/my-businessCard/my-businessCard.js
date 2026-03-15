@@ -125,13 +125,6 @@ const _sfc_main = {
       });
       startGuideTimer();
     });
-    common_vendor.onReady(() => {
-      guideScenario.value = 3;
-      if (guidePopupRef.value) {
-        common_vendor.index.__f__("log", "at packages/my-businessCard/my-businessCard.vue:355", "--- 正在测试引导弹窗，场景 ID:", guideScenario.value);
-        guidePopupRef.value.open();
-      }
-    });
     const initializePage = async (isFromShare = false) => {
       isLoading.value = true;
       errorMsg.value = "";

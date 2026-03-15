@@ -609,7 +609,7 @@ const _sfc_main = {
         }),
         ah: userSearchResults.value.length === 0
       }, userSearchResults.value.length === 0 ? {
-        ai: common_assets._imports_0$6,
+        ai: common_assets._imports_0$5,
         aj: common_vendor.t(searchKeyword.value ? "未找到相关用户" : "请输入关键字搜索商友")
       } : {}, {
         ak: common_vendor.o(closeUserSearch),

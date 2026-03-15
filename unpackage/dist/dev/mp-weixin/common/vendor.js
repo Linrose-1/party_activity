@@ -7299,7 +7299,7 @@ function initOnError() {
 function initRuntimeSocketService() {
   const hosts = "192.168.190.182,127.0.0.1";
   const port = "8090";
-  const id = "mp-weixin_ZmQgoq";
+  const id = "mp-weixin_0ZRkho";
   const lazy = typeof swan !== "undefined";
   let restoreError = lazy ? () => {
   } : initOnError();
@@ -8761,6 +8761,24 @@ const subPackages = [
         path: "hunter-interaction/hunter-interaction",
         style: {
           navigationBarTitleText: "猎伙互动"
+        }
+      },
+      {
+        path: "my-friendInvitionone/my-friendInvitionone",
+        style: {
+          navigationBarTitleText: ""
+        }
+      },
+      {
+        path: "my-shareList/my-shareList",
+        style: {
+          navigationBarTitleText: "我的商友"
+        }
+      },
+      {
+        path: "my-circleList/my-circleList",
+        style: {
+          navigationBarTitleText: "我的圈友"
         }
       }
     ]

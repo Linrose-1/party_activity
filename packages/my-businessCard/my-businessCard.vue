@@ -338,25 +338,25 @@
 	});
 
 	// 在 onLoad 内部或者末尾添加
-	onReady(() => {
-		// ======= 调试专用：手动控制显示场景 =======
+	// onReady(() => {
+	// 	// ======= 调试专用：手动控制显示场景 =======
 
-		// 测试情况 1：全新户 (欢迎语 + 5智米奖励)
-		guideScenario.value = 3;
+	// 	// 测试情况 1：全新户 (欢迎语 + 5智米奖励)
+	// 	guideScenario.value = 3;
 
-		// 测试情况 2：老游客 (欢迎您再次来到... + 5智米奖励)
-		// guideScenario.value = 2; 
+	// 	// 测试情况 2：老游客 (欢迎您再次来到... + 5智米奖励)
+	// 	// guideScenario.value = 2; 
 
-		// 测试情况 3：未完善资料 (欢迎语 + 10智米提示 + 3x2按钮)
-		// guideScenario.value = 3; 
+	// 	// 测试情况 3：未完善资料 (欢迎语 + 10智米提示 + 3x2按钮)
+	// 	// guideScenario.value = 3; 
 
-		// 立即打开，不需要等 6 秒
-		if (guidePopupRef.value) {
-			console.log('--- 正在测试引导弹窗，场景 ID:', guideScenario.value);
-			guidePopupRef.value.open();
-		}
-		// =======================================
-	});
+	// 	// 立即打开，不需要等 6 秒
+	// 	if (guidePopupRef.value) {
+	// 		console.log('--- 正在测试引导弹窗，场景 ID:', guideScenario.value);
+	// 		guidePopupRef.value.open();
+	// 	}
+	// 	// =======================================
+	// });
 
 	/**
 	 * @description 页面初始化总函数，负责数据加载和状态管理

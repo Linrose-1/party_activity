@@ -284,18 +284,22 @@ const _sfc_main = {
     };
     const featureList = common_vendor.ref([
       // 第 1 行
-      // {
-      // 	name: '我的商机',
-      // 	desc: '查看您发布的商机内容',
-      // 	icon: '../../static/icon/商机.png',
-      // 	path: '/packages/my-opportunity/my-opportunity'
-      // },
-      // {
-      // 	name: '我的聚会',
-      // 	desc: '已报名/已发布的聚会',
-      // 	icon: '../../static/icon/聚会.png',
-      // 	path: '/packages/my-active/my-active'
-      // },
+      {
+        name: "我的商友",
+        desc: "查看我邀请的商友列表",
+        icon: "../../static/icon/商友邀请.png",
+        // 建议换一个列表图标
+        path: "/packages/my-shareList/my-shareList",
+        highlight: true
+      },
+      {
+        name: "我的圈友",
+        desc: "管理您的互圈人脉",
+        icon: "../../static/icon/社交互动.png",
+        // 建议换一个圈子图标
+        path: "/packages/my-circleList/my-circleList",
+        highlight: true
+      },
       // 第 2 行
       {
         name: "我的推荐",
@@ -420,10 +424,10 @@ const _sfc_main = {
         common_vendor.index.makePhoneCall({
           phoneNumber: item.phone,
           success: () => {
-            common_vendor.index.__f__("log", "at pages/my/my.vue:641", "拨打电话成功");
+            common_vendor.index.__f__("log", "at pages/my/my.vue:643", "拨打电话成功");
           },
           fail: (err) => {
-            common_vendor.index.__f__("log", "at pages/my/my.vue:644", "拨打电话失败:", err);
+            common_vendor.index.__f__("log", "at pages/my/my.vue:646", "拨打电话失败:", err);
           }
         });
         return;

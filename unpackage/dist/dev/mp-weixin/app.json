@@ -88,7 +88,10 @@
         "comment-center/comment-center",
         "store-activity-list/store-activity-list",
         "liehuo-interests/liehuo-interests",
-        "hunter-interaction/hunter-interaction"
+        "hunter-interaction/hunter-interaction",
+        "my-friendInvitionone/my-friendInvitionone",
+        "my-shareList/my-shareList",
+        "my-circleList/my-circleList"
       ]
     }
   ],

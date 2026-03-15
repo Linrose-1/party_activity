@@ -90,7 +90,7 @@
 		<!-- ==================== 社交资产模块 ==================== -->
 		<view class="core-features-section">
 			<view class="section-header">
-				<text class="section-title-main">社交资产</text>
+				<text class="section-title-main">社交引擎</text>
 			</view>
 			<!-- 网格容器 -->
 			<view class="core-features-grid">
@@ -213,7 +213,7 @@
 		}
 	};
 
-	// 【新增】一个整合的函数，用于检查登录状态并获取数据
+	// 一个整合的函数，用于检查登录状态并获取数据
 	const checkLoginStatusAndFetchData = () => {
 		const token = uni.getStorageSync('token'); // 或者检查 userId
 		if (token) {
@@ -503,18 +503,20 @@
 
 	const featureList = ref([
 		// 第 1 行
-		// {
-		// 	name: '我的商机',
-		// 	desc: '查看您发布的商机内容',
-		// 	icon: '../../static/icon/商机.png',
-		// 	path: '/packages/my-opportunity/my-opportunity'
-		// },
-		// {
-		// 	name: '我的聚会',
-		// 	desc: '已报名/已发布的聚会',
-		// 	icon: '../../static/icon/聚会.png',
-		// 	path: '/packages/my-active/my-active'
-		// },
+		{
+			name: '我的商友',
+			desc: '查看我邀请的商友列表',
+			icon: '../../static/icon/商友邀请.png', // 建议换一个列表图标
+			path: '/packages/my-shareList/my-shareList',
+			highlight: true
+		},
+		{
+			name: '我的圈友',
+			desc: '管理您的互圈人脉',
+			icon: '../../static/icon/社交互动.png', // 建议换一个圈子图标
+			path: '/packages/my-circleList/my-circleList',
+			highlight: true
+		},
 		// 第 2 行
 		{
 			name: '我的推荐',

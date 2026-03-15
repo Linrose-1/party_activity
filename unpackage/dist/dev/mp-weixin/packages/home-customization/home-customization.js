@@ -25,12 +25,11 @@ const _sfc_main = {
       homeTitle: "",
       homeSlogan: "",
       isMergeBusinessFriend: 0
-      // 默认 0 (不融合)
     });
     const isLoading = common_vendor.ref(true);
     const isSaving = common_vendor.ref(false);
+    const isPaidUser = common_vendor.ref(false);
     const errorMsg = common_vendor.ref("");
-    const initialStatusText = common_vendor.ref("正在检查权限...");
     common_vendor.onLoad(async () => {
       common_vendor.index.setNavigationBarTitle({
         title: "首页定制"
@@ -50,27 +49,73 @@ const _sfc_main = {
       } = await utils_request.request("/app-api/member/user/get", {
         method: "GET"
       });
-      if (error) {
+      if (error)
         throw new Error(error);
-      }
       if (data) {
         form.homeTitle = data.homeTitle || "";
         form.homeSlogan = data.homeSlogan || "";
         form.isMergeBusinessFriend = data.isMergeBusinessFriend || 0;
+        isPaidUser.value = data.payBusinessFriendAuth === 1;
       }
     };
     const onMergeSwitchChange = (e) => {
       form.isMergeBusinessFriend = e.detail.value ? 1 : 0;
     };
-    const submitForm = async () => {
+    const handleSaveClick = async () => {
       if (isSaving.value)
         return;
+      if (!form.homeTitle.trim()) {
+        return common_vendor.index.showToast({
+          title: "请输入标题",
+          icon: "none"
+        });
+      }
+      if (!isPaidUser.value) {
+        common_vendor.index.showModal({
+          title: "确认定制",
+          content: "开通首页定制功能需支付 10 智米，是否确认支付并保存设置？",
+          confirmText: "确认支付",
+          confirmColor: "#FF6A00",
+          success: async (res) => {
+            if (res.confirm) {
+              await executePaymentAndSave();
+            }
+          }
+        });
+      } else {
+        await executeSaveProcess();
+      }
+    };
+    const executePaymentAndSave = async () => {
       isSaving.value = true;
       common_vendor.index.showLoading({
-        title: "正在保存..."
+        title: "正在支付..."
       });
       try {
-        const tasks = [];
+        const payRes = await utils_request.request("/app-api/member/user/pay-business-friend-auth", {
+          method: "POST"
+        });
+        if (payRes.error) {
+          throw new Error(payRes.error || "支付失败，请检查智米余额");
+        }
+        isPaidUser.value = true;
+        await executeSaveProcess();
+      } catch (err) {
+        common_vendor.index.hideLoading();
+        isSaving.value = false;
+        common_vendor.index.showModal({
+          title: "支付失败",
+          content: err.message || "智米不足或系统异常",
+          showCancel: false
+        });
+      }
+    };
+    const executeSaveProcess = async () => {
+      isSaving.value = true;
+      common_vendor.index.showLoading({
+        title: "正在保存设置..."
+      });
+      try {
         const updateTask = utils_request.request("/app-api/member/user/update", {
           method: "PUT",
           data: {
@@ -78,18 +123,13 @@ const _sfc_main = {
             homeSlogan: form.homeSlogan
           }
         });
-        tasks.push(updateTask);
         const authUrl = `/app-api/member/user/edit-business-friend-auth?isMergeBusinessFriend=${form.isMergeBusinessFriend}`;
         const authTask = utils_request.request(authUrl, {
           method: "POST"
         });
-        tasks.push(authTask);
-        const results = await Promise.all(tasks);
-        const updateRes = results[0];
-        const authRes = results[1];
+        const [updateRes, authRes] = await Promise.all([updateTask, authTask]);
         if (updateRes.error || authRes.error) {
-          const errorMsg2 = (updateRes.error || "") + (authRes.error ? " " + authRes.error : "");
-          throw new Error(errorMsg2 || "部分设置保存失败");
+          throw new Error("部分设置保存失败");
         }
         common_vendor.index.showToast({
           title: "保存成功",
@@ -100,9 +140,8 @@ const _sfc_main = {
           common_vendor.index.navigateBack();
         }, 1500);
       } catch (err) {
-        common_vendor.index.__f__("error", "at packages/home-customization/home-customization.vue:189", "保存设置失败:", err);
         common_vendor.index.showToast({
-          title: typeof err === "string" ? err : err.message || "保存失败",
+          title: err.message || "保存失败",
           icon: "none"
         });
       } finally {
@@ -116,9 +155,7 @@ const _sfc_main = {
       }, isLoading.value ? {
         b: common_vendor.p({
           status: "loading",
-          contentText: {
-            contentrefresh: initialStatusText.value
-          }
+          contentText: "正在加载设置..."
         })
       } : errorMsg.value ? {
         d: common_vendor.p({
@@ -127,45 +164,53 @@ const _sfc_main = {
           color: "#e43d33"
         }),
         e: common_vendor.t(errorMsg.value)
-      } : {
-        f: common_vendor.o(($event) => form.homeTitle = $event),
+      } : common_vendor.e({
+        f: !isPaidUser.value
+      }, !isPaidUser.value ? {
         g: common_vendor.p({
+          type: "info",
+          size: "14",
+          color: "#FF6A00"
+        })
+      } : {}, {
+        h: common_vendor.o(($event) => form.homeTitle = $event),
+        i: common_vendor.p({
           placeholder: "请输入自定义商友圈标题",
           modelValue: form.homeTitle
         }),
-        h: common_vendor.p({
+        j: common_vendor.p({
           label: "商友圈标题",
           name: "homeTitle"
         }),
-        i: common_vendor.o(($event) => form.homeSlogan = $event),
-        j: common_vendor.p({
+        k: common_vendor.o(($event) => form.homeSlogan = $event),
+        l: common_vendor.p({
           type: "textarea",
           placeholder: "请输入自定义商友圈口号",
           modelValue: form.homeSlogan
         }),
-        k: common_vendor.p({
+        m: common_vendor.p({
           label: "商友圈口号",
           name: "homeSlogan"
         }),
-        l: form.isMergeBusinessFriend === 1,
-        m: common_vendor.o(onMergeSwitchChange),
-        n: common_vendor.t(form.isMergeBusinessFriend === 1 ? "融合模式" : "非融合模式"),
-        o: common_vendor.t(form.isMergeBusinessFriend === 1 ? "共享您的商友资源，也将获得平台共享的商友资源" : "您不共享您的商友资源，您也不能获得平台共享的商友资源"),
-        p: common_vendor.p({
+        n: form.isMergeBusinessFriend === 1,
+        o: common_vendor.o(onMergeSwitchChange),
+        p: common_vendor.t(form.isMergeBusinessFriend === 1 ? "融合模式" : "非融合模式"),
+        q: common_vendor.t(form.isMergeBusinessFriend === 1 ? "共享您的商友资源，也将获得平台共享的商友资源" : "您不共享您的商友资源，您也不能获得平台共享的商友资源"),
+        r: common_vendor.p({
           label: "商友圈模式",
           name: "isMergeBusinessFriend"
         }),
-        q: common_vendor.sr(formRef, "9b385765-2", {
+        s: common_vendor.sr(formRef, "9b385765-3", {
           "k": "formRef"
         }),
-        r: common_vendor.p({
+        t: common_vendor.p({
           modelValue: form,
           ["label-width"]: 100
         }),
-        s: common_vendor.t(isSaving.value ? "保存中..." : "保存设置"),
-        t: common_vendor.o(submitForm),
-        v: isSaving.value
-      }, {
+        v: common_vendor.t(isSaving.value ? "处理中..." : "保存设置"),
+        w: common_vendor.o(handleSaveClick),
+        x: isSaving.value
+      }), {
         c: errorMsg.value
       });
     };

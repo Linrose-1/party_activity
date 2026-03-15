@@ -636,6 +636,27 @@
 				{
 					"navigationBarTitleText" : "猎伙互动"
 				}
+			},
+			{
+				"path" : "my-friendInvitionone/my-friendInvitionone",
+				"style" : 
+				{
+					"navigationBarTitleText" : ""
+				}
+			},
+			{
+				"path" : "my-shareList/my-shareList",
+				"style" : 
+				{
+					"navigationBarTitleText" : "我的商友"
+				}
+			},
+			{
+				"path" : "my-circleList/my-circleList",
+				"style" : 
+				{
+					"navigationBarTitleText" : "我的圈友"
+				}
 			}
 			// 如果还有其他页面要放进这个分包，继续在这里加
 		]

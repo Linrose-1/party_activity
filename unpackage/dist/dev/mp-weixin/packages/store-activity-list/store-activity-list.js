@@ -143,7 +143,7 @@ const _sfc_main = {
       return common_vendor.e({
         a: !loading.value && activitiesData.value.length === 0
       }, !loading.value && activitiesData.value.length === 0 ? {
-        b: common_assets._imports_0$11
+        b: common_assets._imports_0$10
       } : {}, {
         c: common_vendor.f(activitiesData.value, (activity, k0, i0) => {
           return {

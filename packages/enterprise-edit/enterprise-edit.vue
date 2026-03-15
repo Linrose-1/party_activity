@@ -4,7 +4,7 @@
 		<view class="step-header">
 			<view class="step-nav">
 				<view class="nav-item" v-for="(title, index) in stepTitles" :key="index"
-					:class="{ active: currentStep >= (index + 1) }">
+					:class="{ active: currentStep >= (index + 1) }" @click="handleStepClick(index + 1)">
 					<view class="node-wrap">
 						<view class="node">{{ currentStep > (index + 1) ? '✓' : (index + 1) }}</view>
 						<view class="line" v-if="index < 3"></view>
@@ -450,6 +450,70 @@
 	// ==========================================
 	// 4. 业务逻辑方法
 	// ==========================================
+	/**
+	 * 处理顶部步骤条点击
+	 * @param {Number} targetStep 目标步骤
+	 */
+	const handleStepClick = async (targetStep) => {
+		// 1. 如果点击的是当前步骤，不操作
+		if (targetStep === currentStep.value) return;
+
+		// 2. 新增模式下的安全拦截：如果没有 enterpriseId，不允许跳过第一步
+		if (!isEditMode.value && !enterpriseId.value && targetStep > 1) {
+			uni.showToast({
+				title: '请先填写并保存基本信息',
+				icon: 'none'
+			});
+			return;
+		}
+
+		// 3. 切换前自动保存当前步骤已填写的资料（可选，为了体验更好）
+		// 如果你觉得没必要每一步都强制点顶部时保存，可以去掉下面的 await 逻辑，直接切换
+		try {
+			await saveCurrentProgressSilence();
+		} catch (e) {
+			console.warn('静默保存失败:', e);
+		}
+
+		// 4. 执行跳转
+		currentStep.value = targetStep;
+
+		// 5. 滚动回顶部
+		nextTick(() => {
+			uni.pageScrollTo({
+				scrollTop: 0,
+				duration: 100
+			});
+		});
+	};
+
+	/**
+	 * 【助手函数】静默保存当前进度
+	 * 逻辑基本复用 handleStepProcess 的前半部分，但不做步骤加法
+	 */
+	const saveCurrentProgressSilence = async () => {
+		// 序列化当前已有的列表数据
+		form.brandImages = brandImageList.value.join(',');
+		form.offlineStores = JSON.stringify(offlineStores.value);
+		form.onlineStores = JSON.stringify(onlineStores.value);
+
+		if (isEditMode.value || enterpriseId.value) {
+			await Api.update(form);
+		} else {
+			// 第一步必须填了基本信息才能触发
+			if (!form.enterpriseName || !form.creditCode) return;
+
+			const {
+				id,
+				...createParams
+			} = form;
+			const res = await Api.create(createParams);
+			if (!res.error && res.data) {
+				enterpriseId.value = res.data;
+				form.id = res.data;
+			}
+		}
+	};
 
 	/**
 	 * 加载页面所需的全部字典数据
@@ -892,6 +956,13 @@
 		flex-direction: column;
 		align-items: center;
 		position: relative;
+		cursor: pointer;
+		padding: 10rpx 0;
+
+		&:active {
+			opacity: 0.7;
+			transform: scale(0.95);
+		}
 
 		.node-wrap {
 			display: flex;

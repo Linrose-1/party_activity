@@ -155,6 +155,49 @@ const _sfc_main = {
       fetchIndustryTree();
       loadAllDicts();
     });
+    const handleStepClick = async (targetStep) => {
+      if (targetStep === currentStep.value)
+        return;
+      if (!isEditMode.value && !enterpriseId.value && targetStep > 1) {
+        common_vendor.index.showToast({
+          title: "请先填写并保存基本信息",
+          icon: "none"
+        });
+        return;
+      }
+      try {
+        await saveCurrentProgressSilence();
+      } catch (e) {
+        common_vendor.index.__f__("warn", "at packages/enterprise-edit/enterprise-edit.vue:475", "静默保存失败:", e);
+      }
+      currentStep.value = targetStep;
+      common_vendor.nextTick$1(() => {
+        common_vendor.index.pageScrollTo({
+          scrollTop: 0,
+          duration: 100
+        });
+      });
+    };
+    const saveCurrentProgressSilence = async () => {
+      form.brandImages = brandImageList.value.join(",");
+      form.offlineStores = JSON.stringify(offlineStores.value);
+      form.onlineStores = JSON.stringify(onlineStores.value);
+      if (isEditMode.value || enterpriseId.value) {
+        await Api.update(form);
+      } else {
+        if (!form.enterpriseName || !form.creditCode)
+          return;
+        const {
+          id,
+          ...createParams
+        } = form;
+        const res = await Api.create(createParams);
+        if (!res.error && res.data) {
+          enterpriseId.value = res.data;
+          form.id = res.data;
+        }
+      }
+    };
     const loadAllDicts = async () => {
       try {
         const [typeRes, platformRes] = await Promise.all([
@@ -175,9 +218,9 @@ const _sfc_main = {
             value: item.label
           }));
         }
-        common_vendor.index.__f__("log", "at packages/enterprise-edit/enterprise-edit.vue:481", "✅ 字典数据加载成功");
+        common_vendor.index.__f__("log", "at packages/enterprise-edit/enterprise-edit.vue:545", "✅ 字典数据加载成功");
       } catch (e) {
-        common_vendor.index.__f__("error", "at packages/enterprise-edit/enterprise-edit.vue:483", "❌ 加载字典失败", e);
+        common_vendor.index.__f__("error", "at packages/enterprise-edit/enterprise-edit.vue:547", "❌ 加载字典失败", e);
       }
     };
     const fetchIndustryTree = async () => {
@@ -188,7 +231,7 @@ const _sfc_main = {
       if (data) {
         industryTree.value = processTree(data);
       } else if (error) {
-        common_vendor.index.__f__("error", "at packages/enterprise-edit/enterprise-edit.vue:498", "获取行业树失败:", error);
+        common_vendor.index.__f__("error", "at packages/enterprise-edit/enterprise-edit.vue:562", "获取行业树失败:", error);
       }
     };
     const processTree = (tree) => {
@@ -221,7 +264,7 @@ const _sfc_main = {
     };
     const onIndustryChange = (e) => {
       const nodes = e.detail.value;
-      common_vendor.index.__f__("log", "at packages/enterprise-edit/enterprise-edit.vue:539", "📦 原始选择节点:", nodes);
+      common_vendor.index.__f__("log", "at packages/enterprise-edit/enterprise-edit.vue:603", "📦 原始选择节点:", nodes);
       if (nodes && nodes.length > 0) {
         const level1Name = nodes[0].text || nodes[0].name;
         const level2Name = nodes[1] ? nodes[1].text || nodes[1].name : "";
@@ -234,7 +277,7 @@ const _sfc_main = {
           form.industrySecond = level2Name;
           industryLabel.value = level2Name || level1Name;
         }
-        common_vendor.index.__f__("log", "at packages/enterprise-edit/enterprise-edit.vue:556", "✅ 最终存储结果:", form.industryFirst, form.industrySecond);
+        common_vendor.index.__f__("log", "at packages/enterprise-edit/enterprise-edit.vue:620", "✅ 最终存储结果:", form.industryFirst, form.industrySecond);
       }
     };
     const fetchEnterpriseDetail = async (id) => {
@@ -268,7 +311,7 @@ const _sfc_main = {
         else if (Array.isArray(data.offlineStores))
           offlineStores.value = data.offlineStores;
       } catch (e) {
-        common_vendor.index.__f__("error", "at packages/enterprise-edit/enterprise-edit.vue:598", "数据格式转换失败:", e);
+        common_vendor.index.__f__("error", "at packages/enterprise-edit/enterprise-edit.vue:662", "数据格式转换失败:", e);
       }
     };
     const handleImageUpload = (field, dir) => {
@@ -357,7 +400,7 @@ const _sfc_main = {
           }
         },
         fail: (err) => {
-          common_vendor.index.__f__("log", "at packages/enterprise-edit/enterprise-edit.vue:702", "用户取消视频选择", err);
+          common_vendor.index.__f__("log", "at packages/enterprise-edit/enterprise-edit.vue:766", "用户取消视频选择", err);
         }
       });
     };
@@ -418,7 +461,7 @@ const _sfc_main = {
           });
         },
         fail: (err) => {
-          common_vendor.index.__f__("log", "at packages/enterprise-edit/enterprise-edit.vue:779", "用户取消了位置选择");
+          common_vendor.index.__f__("log", "at packages/enterprise-edit/enterprise-edit.vue:843", "用户取消了位置选择");
         }
       });
     };
@@ -489,7 +532,8 @@ const _sfc_main = {
           }, index < 3 ? {} : {}, {
             c: common_vendor.t(title),
             d: index,
-            e: currentStep.value >= index + 1 ? 1 : ""
+            e: currentStep.value >= index + 1 ? 1 : "",
+            f: common_vendor.o(($event) => handleStepClick(index + 1), index)
           });
         }),
         b: currentStep.value === 1
