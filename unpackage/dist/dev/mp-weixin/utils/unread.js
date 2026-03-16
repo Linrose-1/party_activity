@@ -80,4 +80,5 @@ const stopUnreadPolling = () => {
 exports.fetchGlobalUnread = fetchGlobalUnread;
 exports.startUnreadPolling = startUnreadPolling;
 exports.stopUnreadPolling = stopUnreadPolling;
+exports.unreadState = unreadState;
 //# sourceMappingURL=../../.sourcemap/mp-weixin/utils/unread.js.map

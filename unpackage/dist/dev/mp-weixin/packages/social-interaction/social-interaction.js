@@ -1,6 +1,7 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
 const utils_user = require("../../utils/user.js");
+const utils_unread = require("../../utils/unread.js");
 if (!Array) {
   const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
   _easycom_uni_icons2();
@@ -12,6 +13,9 @@ if (!Math) {
 const _sfc_main = {
   __name: "social-interaction",
   setup(__props) {
+    common_vendor.onShow(() => {
+      utils_unread.fetchGlobalUnread();
+    });
     const navigateTo = async (type) => {
       if (!await utils_user.checkLoginGuard())
         return;
@@ -34,41 +38,53 @@ const _sfc_main = {
       }
     };
     return (_ctx, _cache) => {
-      return {
+      return common_vendor.e({
         a: common_vendor.p({
           type: "chatboxes-filled",
           size: "24",
           color: "#fff"
         }),
-        b: common_vendor.p({
+        b: common_vendor.unref(utils_unread.unreadState).reviewUnreadCount > 0
+      }, common_vendor.unref(utils_unread.unreadState).reviewUnreadCount > 0 ? {
+        c: common_vendor.t(common_vendor.unref(utils_unread.unreadState).reviewUnreadCount > 99 ? "99+" : common_vendor.unref(utils_unread.unreadState).reviewUnreadCount)
+      } : {}, {
+        d: common_vendor.p({
           type: "right",
           size: "16",
           color: "#ccc"
         }),
-        c: common_vendor.o(($event) => navigateTo("reviews")),
-        d: common_vendor.p({
+        e: common_vendor.o(($event) => navigateTo("reviews")),
+        f: common_vendor.p({
           type: "staff-filled",
           size: "24",
           color: "#fff"
         }),
-        e: common_vendor.p({
+        g: common_vendor.unref(utils_unread.unreadState).hunterInterestCount > 0
+      }, common_vendor.unref(utils_unread.unreadState).hunterInterestCount > 0 ? {
+        h: common_vendor.t(common_vendor.unref(utils_unread.unreadState).hunterInterestCount > 99 ? "99+" : common_vendor.unref(utils_unread.unreadState).hunterInterestCount)
+      } : {}, {
+        i: common_vendor.p({
           type: "right",
           size: "16",
           color: "#ccc"
         }),
-        f: common_vendor.o(($event) => navigateTo("hunter")),
-        g: common_vendor.p({
+        j: common_vendor.o(($event) => navigateTo("hunter")),
+        k: common_vendor.p({
           type: "shop-filled",
           size: "24",
           color: "#fff"
         }),
-        h: common_vendor.p({
+        l: common_vendor.unref(utils_unread.unreadState).businessCount > 0
+      }, common_vendor.unref(utils_unread.unreadState).businessCount > 0 ? {
+        m: common_vendor.t(common_vendor.unref(utils_unread.unreadState).businessCount > 99 ? "99+" : common_vendor.unref(utils_unread.unreadState).businessCount)
+      } : {}, {
+        n: common_vendor.p({
           type: "right",
           size: "16",
           color: "#ccc"
         }),
-        i: common_vendor.o(($event) => navigateTo("business"))
-      };
+        o: common_vendor.o(($event) => navigateTo("business"))
+      });
     };
   }
 };

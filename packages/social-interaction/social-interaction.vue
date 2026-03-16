@@ -11,6 +11,10 @@
 					<view class="title">点评互动</view>
 					<view class="desc">查看与回复他人的点评</view>
 				</view>
+				<!-- 点评互动未读数 -->
+				<view class="badge" v-if="unreadState.reviewUnreadCount > 0">
+					{{ unreadState.reviewUnreadCount > 99 ? '99+' : unreadState.reviewUnreadCount }}
+				</view>
 				<uni-icons type="right" size="16" color="#ccc"></uni-icons>
 			</view>
 
@@ -23,8 +27,10 @@
 					<view class="title">猎伙互动</view>
 					<view class="desc">寻找合作伙伴或团队成员</view>
 				</view>
-				<!-- 示例角标 -->
-				<!-- <view class="badge">2</view> -->
+				<!-- 猎伙感兴趣人数未读 -->
+				<view class="badge" v-if="unreadState.hunterInterestCount > 0">
+					{{ unreadState.hunterInterestCount > 99 ? '99+' : unreadState.hunterInterestCount }}
+				</view>
 				<uni-icons type="right" size="16" color="#ccc"></uni-icons>
 			</view>
 
@@ -37,6 +43,10 @@
 					<view class="title">商机互动</view>
 					<view class="desc">查看商友与我发布商机的互动</view>
 				</view>
+				<!-- 如果商机未读数大于0显示红点 (此处对应 businessCount) -->
+				<view class="badge" v-if="unreadState.businessCount > 0">
+					{{ unreadState.businessCount > 99 ? '99+' : unreadState.businessCount }}
+				</view>
 				<uni-icons type="right" size="16" color="#ccc"></uni-icons>
 			</view>
 
@@ -46,8 +56,21 @@
 
 <script setup>
 	import {
+		onShow
+	} from '@dcloudio/uni-app';
+	import {
 		checkLoginGuard
 	} from '@/utils/user.js';
+	// 引入全局未读状态
+	import {
+		unreadState,
+		fetchGlobalUnread
+	} from '@/utils/unread.js';
+
+	onShow(() => {
+		// 每次进入页面刷新一次未读数
+		fetchGlobalUnread();
+	});
 
 	const navigateTo = async (type) => {
 		if (!await checkLoginGuard()) return;
@@ -83,12 +106,13 @@
 		background-color: #fff;
 		border-radius: 20rpx;
 		overflow: hidden;
+		box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.03);
 	}
 
 	.menu-item {
 		display: flex;
 		align-items: center;
-		padding: 30rpx;
+		padding: 36rpx 30rpx;
 		border-bottom: 1rpx solid #f9f9f9;
 		position: relative;
 
@@ -104,14 +128,14 @@
 	.icon-box {
 		width: 80rpx;
 		height: 80rpx;
-		border-radius: 16rpx;
+		border-radius: 20rpx;
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		margin-right: 24rpx;
 
 		&.review {
-			background: linear-gradient(135deg, #FF9A9E, #FECFEF);
+			background: linear-gradient(135deg, #FF9A9E, #fecfef);
 		}
 
 		&.hunter {
@@ -139,12 +163,19 @@
 		}
 	}
 
+	/* 角标样式优化：更显眼的数字红点 */
 	.badge {
 		background-color: #ff4d4f;
 		color: #fff;
-		font-size: 20rpx;
-		padding: 2rpx 10rpx;
-		border-radius: 20rpx;
-		margin-right: 10rpx;
+		font-size: 22rpx;
+		font-weight: bold;
+		min-width: 36rpx;
+		height: 36rpx;
+		line-height: 36rpx;
+		text-align: center;
+		border-radius: 18rpx;
+		padding: 0 10rpx;
+		margin-right: 14rpx;
+		box-shadow: 0 4rpx 8rpx rgba(255, 77, 79, 0.3);
 	}
 </style>

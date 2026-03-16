@@ -9,11 +9,12 @@
   background-color: #fff;
   border-radius: 20rpx;
   overflow: hidden;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.03);
 }
 .menu-item.data-v-bcbcdbe7 {
   display: flex;
   align-items: center;
-  padding: 30rpx;
+  padding: 36rpx 30rpx;
   border-bottom: 1rpx solid #f9f9f9;
   position: relative;
 }
@@ -26,14 +27,14 @@
 .icon-box.data-v-bcbcdbe7 {
   width: 80rpx;
   height: 80rpx;
-  border-radius: 16rpx;
+  border-radius: 20rpx;
   display: flex;
   align-items: center;
   justify-content: center;
   margin-right: 24rpx;
 }
 .icon-box.review.data-v-bcbcdbe7 {
-  background: linear-gradient(135deg, #FF9A9E, #FECFEF);
+  background: linear-gradient(135deg, #FF9A9E, #fecfef);
 }
 .icon-box.hunter.data-v-bcbcdbe7 {
   background: linear-gradient(135deg, #a18cd1, #fbc2eb);
@@ -54,11 +55,19 @@
   font-size: 24rpx;
   color: #999;
 }
+
+/* 角标样式优化：更显眼的数字红点 */
 .badge.data-v-bcbcdbe7 {
   background-color: #ff4d4f;
   color: #fff;
-  font-size: 20rpx;
-  padding: 2rpx 10rpx;
-  border-radius: 20rpx;
-  margin-right: 10rpx;
+  font-size: 22rpx;
+  font-weight: bold;
+  min-width: 36rpx;
+  height: 36rpx;
+  line-height: 36rpx;
+  text-align: center;
+  border-radius: 18rpx;
+  padding: 0 10rpx;
+  margin-right: 14rpx;
+  box-shadow: 0 4rpx 8rpx rgba(255, 77, 79, 0.3);
 }
