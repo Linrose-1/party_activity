@@ -772,31 +772,32 @@ const _sfc_main = {
         common_vendor.index.hideLoading();
         common_vendor.index.removeStorageSync(DRAFT_KEY);
         common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:1376", "🧹 [提交成功] 草稿已清除");
-        let shouldGiveReward = false;
-        if (checkIsAllDimensionsFilled(payload)) {
+        const isFilled = checkIsAllDimensionsFilled(payload);
+        common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:1382", "维度检查结果:", isFilled);
+        if (isFilled) {
           try {
-            const giveRes = await utils_request.request("/app-api/member/user/complete-profile-give-member", {
+            const {
+              data: rewardMsg,
+              error: rewardError
+            } = await utils_request.request("/app-api/member/user/complete-profile-give-member", {
               method: "POST"
             });
-            if (giveRes === true || giveRes && (giveRes.success === true || giveRes.data === true)) {
-              shouldGiveReward = true;
-              common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:1392", "✅ 符合赠送条件，准备弹出奖励提示");
-            }
-            if (shouldGiveReward) {
+            if (!rewardError && rewardMsg) {
+              common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:1396", "✅ 触发奖励弹窗, 后端返回:", rewardMsg);
               await new Promise((resolve) => {
                 common_vendor.index.showModal({
                   title: "恭喜获得奖励",
-                  content: "检测到您已完善核心资料，系统已为您赠送一年的【玄铁会员】权益，感谢您对猩聚社的贡献！",
+                  // 直接显示后端返回的那句话，或者用你自定义的文案
+                  content: "您已完善好基础资料(可随时更新)，系统已为您赠送一年的【玄铁会员】权益(含10智米！)，感谢您参与猩聚社——精英商友跨域社区的共建！继续探索，获得与积累猩聚社更多贡献奖励！",
                   showCancel: false,
                   confirmText: "太棒了",
                   confirmColor: "#FF8700",
                   success: () => resolve()
-                  // 用户点击后才继续下一步
                 });
               });
             }
           } catch (e) {
-            common_vendor.index.__f__("error", "at packages/my-edit/my-edit.vue:1409", "奖励接口异常:", e);
+            common_vendor.index.__f__("error", "at packages/my-edit/my-edit.vue:1412", "奖励接口调用异常:", e);
           }
         }
         common_vendor.index.showModal({
@@ -814,7 +815,7 @@ const _sfc_main = {
           }
         });
       }).catch((err) => {
-        common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:1431", "表单验证未通过：", err);
+        common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:1433", "表单验证未通过：", err);
       });
     };
     const handleAutoPost = async () => {

@@ -424,10 +424,10 @@ const _sfc_main = {
         common_vendor.index.makePhoneCall({
           phoneNumber: item.phone,
           success: () => {
-            common_vendor.index.__f__("log", "at pages/my/my.vue:643", "拨打电话成功");
+            common_vendor.index.__f__("log", "at pages/my/my.vue:612", "拨打电话成功");
           },
           fail: (err) => {
-            common_vendor.index.__f__("log", "at pages/my/my.vue:646", "拨打电话失败:", err);
+            common_vendor.index.__f__("log", "at pages/my/my.vue:615", "拨打电话失败:", err);
           }
         });
         return;

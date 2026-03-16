@@ -384,37 +384,6 @@
 	};
 
 
-	// 使用 computed 优雅地处理职位和公司的显示逻辑
-	// 【优化】处理未登录时的情况
-	// const userTitleAndCompany = computed(() => {
-	// 	// 1. 未登录时的判断保持不变
-	// 	if (!isLogin.value) return '登录后查看';
-
-	// 	// 2. 【核心修改】从完整的字符串中提取第一项
-	// 	const titlesString = userInfo.value.professionalTitle; // e.g., "XXX协会会长,it工作者"
-	// 	const companiesString = userInfo.value.companyName; // e.g., "公司一,公司2"
-
-	// 	let firstTitle = '';
-	// 	// 如果 professionalTitle 存在，则分割字符串并取第一个元素
-	// 	if (titlesString) {
-	// 		firstTitle = titlesString.split(',')[0].trim();
-	// 	}
-
-	// 	let firstCompany = '';
-	// 	// 如果 companyName 存在，则分割字符串并取第一个元素
-	// 	if (companiesString) {
-	// 		firstCompany = companiesString.split(',')[0].trim();
-	// 	}
-
-	// 	// 3. 根据提取出的第一项进行拼接
-	// 	if (firstTitle && firstCompany) {
-	// 		return `${firstTitle} | ${firstCompany}`;
-	// 	}
-
-	// 	// 4. 如果只有一个存在，或都为空，则返回存在的那个或默认文本
-	// 	return firstTitle || firstCompany || '暂未设置职位和公司';
-	// });
-
 	const coreFeatures = ref([{
 			name: '商友邀请',
 			desc: '您的商脉金库',

@@ -1673,34 +1673,48 @@
 		});
 	};
 
-	// 跳转到定制页的函数
+	/**
+	 * 跳转到定制页
+	 * 不再在首页拦截支付，直接让用户进入定制页
+	 */
 	const goToCustomizationPage = async () => {
+		// 1. 仅保留登录和资料完善校验
 		if (!await checkLoginGuard()) return;
-		// 1. 检查是否登录
-		if (!isLogin.value) {
-			goToLogin();
-			return;
-		}
 
-		// 2. 确保已获取到最新的用户信息
-		// 如果 currentUserInfo 还没有值，主动获取一次
-		if (!currentUserInfo.value) {
-			await fetchCurrentUserInfo();
-		}
-
-		// 3. 从【实时】用户信息中获取支付状态
-		const isPaid = currentUserInfo.value?.payBusinessFriendAuth === 1;
-
-		if (isPaid) {
-			// 如果已支付，直接跳转
-			uni.navigateTo({
-				url: `/packages/home-customization/home-customization`
-			});
-		} else {
-			// 如果未支付，弹出确认支付弹窗
-			payPopup.value.open();
-		}
+		// 2. 直接跳转到定制页面
+		uni.navigateTo({
+			url: `/packages/home-customization/home-customization`
+		});
 	};
+
+	// 跳转到定制页的函数
+	// const goToCustomizationPage = async () => {
+	// 	if (!await checkLoginGuard()) return;
+	// 	// 1. 检查是否登录
+	// 	if (!isLogin.value) {
+	// 		goToLogin();
+	// 		return;
+	// 	}
+
+	// 	// 2. 确保已获取到最新的用户信息
+	// 	// 如果 currentUserInfo 还没有值，主动获取一次
+	// 	if (!currentUserInfo.value) {
+	// 		await fetchCurrentUserInfo();
+	// 	}
+
+	// 	// 3. 从【实时】用户信息中获取支付状态
+	// 	const isPaid = currentUserInfo.value?.payBusinessFriendAuth === 1;
+
+	// 	if (isPaid) {
+	// 		// 如果已支付，直接跳转
+	// 		uni.navigateTo({
+	// 			url: `/packages/home-customization/home-customization`
+	// 		});
+	// 	} else {
+	// 		// 如果未支付，弹出确认支付弹窗
+	// 		payPopup.value.open();
+	// 	}
+	// };
 
 	// 支付成功回调
 	const handlePaySuccess = async () => {

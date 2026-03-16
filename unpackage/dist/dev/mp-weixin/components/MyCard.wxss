@@ -140,7 +140,7 @@
   border-radius: 16rpx;
   padding: 30rpx;
   margin-bottom: 30rpx;
-  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.04);
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.2);
 }
 .basic-info-section.data-v-0262bca8 {
   display: flex;

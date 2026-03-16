@@ -21,7 +21,14 @@ const _sfc_main = {
     const props = __props;
     const qrBase64 = common_vendor.ref("");
     common_vendor.onMounted(async () => {
-      qrBase64.value = await utils_qrcode.generatePromotionQrCode(props.path, props.params);
+      try {
+        const res = await utils_qrcode.generatePromotionQrCode(props.path, props.params);
+        if (res) {
+          qrBase64.value = res;
+        }
+      } catch (e) {
+        common_vendor.index.__f__("error", "at components/ShareQrCode.vue:45", "生成二维码失败", e);
+      }
     });
     const handlePreview = () => {
       if (qrBase64.value) {

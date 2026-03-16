@@ -1377,40 +1377,42 @@
 
 			// --- 4. 【关键优化】奖励逻辑与引导逻辑的串行执行 ---
 
-			// 步骤 A: 检查是否满足 7 个维度的赠送条件，并调用赠送接口
-			let shouldGiveReward = false;
-			if (checkIsAllDimensionsFilled(payload)) {
+			// 1. 判断是否满足 7 个维度的填写要求
+			const isFilled = checkIsAllDimensionsFilled(payload);
+			console.log('维度检查结果:', isFilled);
+
+			if (isFilled) {
 				try {
-					const giveRes = await request('/app-api/member/user/complete-profile-give-member', {
+					// 2. 调用赠送会员接口
+					const {
+						data: rewardMsg,
+						error: rewardError
+					} = await request('/app-api/member/user/complete-profile-give-member', {
 						method: 'POST'
 					});
 
-					// 兼容多种返回格式：true / {success: true} / {data: true}
-					if (giveRes === true || (giveRes && (giveRes.success === true || giveRes.data ===
-							true))) {
-						shouldGiveReward = true;
-						console.log('✅ 符合赠送条件，准备弹出奖励提示');
-					}
-					// 步骤 B: 如果满足赠送条件，先弹出奖励提示，等待用户确认后再继续
-					if (shouldGiveReward) {
-						// 【核心修复】使用 Promise 等待用户关闭第一个弹窗
+					// 【关键修改】：只要没有错误，且 data 有内容（不管它是 true 还是那段字符串）
+					if (!rewardError && rewardMsg) {
+						console.log('✅ 触发奖励弹窗, 后端返回:', rewardMsg);
+
+						// 使用 await 确保用户点掉“太棒了”之前，不会弹出下一个窗
 						await new Promise((resolve) => {
 							uni.showModal({
 								title: '恭喜获得奖励',
-								content: '检测到您已完善核心资料，系统已为您赠送一年的【玄铁会员】权益，感谢您对猩聚社的贡献！',
+								// 直接显示后端返回的那句话，或者用你自定义的文案
+								content: '您已完善好基础资料(可随时更新)，系统已为您赠送一年的【玄铁会员】权益(含10智米！)，感谢您参与猩聚社——精英商友跨域社区的共建！继续探索，获得与积累猩聚社更多贡献奖励！',
 								showCancel: false,
 								confirmText: '太棒了',
 								confirmColor: '#FF8700',
-								success: () => resolve() // 用户点击后才继续下一步
+								success: () => resolve()
 							});
 						});
 					}
 				} catch (e) {
-					console.error('奖励接口异常:', e);
+					console.error('奖励接口调用异常:', e);
 				}
 			}
 
-			// 步骤 B: 弹出“发布到商友圈”引导
 			// 无论有没有领到奖励，只要保存成功且走完上面的 Promise，就会执行这里
 			uni.showModal({
 				title: '发布到商友圈',

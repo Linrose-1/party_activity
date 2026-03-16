@@ -24,14 +24,13 @@
   font-size: 24rpx;
   color: #ccc;
 }
+.footer-spacer.data-v-08c6f3b5 {
+  height: 100rpx;
+}
 
 /* ============ 文本选择支持 ============ */
 .post-selectable.data-v-08c6f3b5 {
-  /* 允许文本被选择 */
   user-select: text;
   -webkit-user-select: text;
-  -moz-user-select: text;
-  -ms-user-select: text;
-  /* 确保长按时显示系统菜单 */
   -webkit-touch-callout: auto;
 }

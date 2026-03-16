@@ -35,7 +35,15 @@
 	const qrBase64 = ref('');
 
 	onMounted(async () => {
-		qrBase64.value = await generatePromotionQrCode(props.path, props.params);
+		// 组件内部静默生成，生成好了 v-if 就会让它跳出来
+		try {
+			const res = await generatePromotionQrCode(props.path, props.params);
+			if (res) {
+				qrBase64.value = res;
+			}
+		} catch (e) {
+			console.error('生成二维码失败', e);
+		}
 	});
 
 	const handlePreview = () => {

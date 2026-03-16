@@ -893,24 +893,11 @@ const _sfc_main = {
       });
     };
     const goToCustomizationPage = async () => {
-      var _a;
       if (!await utils_user.checkLoginGuard())
         return;
-      if (!isLogin.value) {
-        goToLogin();
-        return;
-      }
-      if (!currentUserInfo.value) {
-        await fetchCurrentUserInfo();
-      }
-      const isPaid = ((_a = currentUserInfo.value) == null ? void 0 : _a.payBusinessFriendAuth) === 1;
-      if (isPaid) {
-        common_vendor.index.navigateTo({
-          url: `/packages/home-customization/home-customization`
-        });
-      } else {
-        payPopup.value.open();
-      }
+      common_vendor.index.navigateTo({
+        url: `/packages/home-customization/home-customization`
+      });
     };
     const handlePaySuccess = async () => {
       await fetchCurrentUserInfo();
@@ -947,9 +934,6 @@ const _sfc_main = {
         url: "/packages/home-opportunitiesPublish/home-opportunitiesPublish"
       });
     };
-    const goToLogin = () => common_vendor.index.navigateTo({
-      url: "/pages/index/index"
-    });
     const goToMembership = () => common_vendor.index.showToast({
       title: "正在前往会员中心...",
       icon: "none"
