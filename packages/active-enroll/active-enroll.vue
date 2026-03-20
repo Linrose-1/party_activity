@@ -1,186 +1,160 @@
 <template>
-	<view class="container">
-		<!-- 实名认证引导提示 -->
-		<!-- <view v-if="!isUserVerified" class="auth-reminder" @click="goToAuthPage">
-			<uni-icons type="info-filled" size="18" color="#e6a23c"></uni-icons>
-			<text class="reminder-text">为保障活动用户安全，请先进行实名认证，点击前往</text>
-			<text class="reminder-arrow">›</text>
-		</view> -->
-
-
-		<view class="header">
-			<!-- 动态绑定聚会标题 -->
-			<h1>{{ activityDetail ? activityDetail.activityTitle : '聚会报名' }}</h1>
+	<view class="page user-select-text">
+		<!-- 顶部渐变标题 -->
+		<view class="header-banner">
+			<text class="header-title">{{ activityDetail ? activityDetail.activityTitle : '聚会报名' }}</text>
 		</view>
 
 		<!-- 步骤指示器 -->
 		<view class="step-indicator">
 			<view class="step" :class="{ active: currentStep >= 1 }">
 				<view class="step-circle">1</view>
-				<view class="step-text">填写信息</view>
+				<text class="step-text">填写信息</text>
 			</view>
 			<view class="step" :class="{ active: currentStep >= 2 }">
 				<view class="step-circle">2</view>
-				<view class="step-text">支付费用</view>
+				<text class="step-text">支付费用</text>
 			</view>
 			<view class="step" :class="{ active: currentStep >= 3 }">
 				<view class="step-circle">3</view>
-				<view class="step-text">完成报名</view>
+				<text class="step-text">完成报名</text>
 			</view>
 		</view>
 
-		<!-- 使用 v-if 确保数据加载后再渲染 -->
-		<view class="section" v-if="activityDetail">
-			<view class="section-title">
-				<!-- <uni-icons type="person" size="18" color="#FF6E00"></uni-icons> -->
-				<span>组织者信息</span>
+		<!-- 基础信息卡片 -->
+		<view class="section-card" v-if="activityDetail">
+			<view class="section-header">
+				<view class="header-mark"></view>
+				<text class="section-title">组织者信息</text>
 			</view>
-			<view class="info-box">
-				<view><span class="info-label">组织者：</span> {{ activityDetail.organizerUnitName }}</view>
-				<view><span class="info-label">电话：</span> {{ activityDetail.organizerContactPhone }}</view>
-				<view><span class="info-label">聚会时间：</span>
-					{{ formatRangeTime(activityDetail.startDatetime, activityDetail.endDatetime) }}
+			<view class="info-content">
+				<view class="info-row"><text class="label">组织者：</text><text
+						class="val">{{ activityDetail.organizerUnitName }}</text></view>
+				<view class="info-row"><text class="label">聚会时间：</text><text
+						class="val">{{ formatRangeTime(activityDetail.startDatetime, activityDetail.endDatetime) }}</text>
 				</view>
-				<view><span class="info-label">报名时间：</span> {{ formattedRegistrationTime }}</view>
-				<view><span class="info-label">聚会地点：</span> {{ activityDetail.locationAddress }}</view>
+				<view class="info-row"><text class="label">聚会地点：</text><text
+						class="val">{{ activityDetail.locationAddress }}</text></view>
 			</view>
 		</view>
 
 		<!-- 第一步：填写信息 -->
-		<view class="section" v-if="currentStep === 1">
-			<view class="section-title">
-				<!-- <uni-icons type="compose" size="18" color="#FF6E00"></uni-icons> -->
-				<span>填写报名信息</span>
+		<view class="section-card" v-if="currentStep === 1">
+			<view class="section-header">
+				<view class="header-mark"></view>
+				<text class="section-title">填写报名信息</text>
 			</view>
 
-			<!-- 【修改】formData 的字段与后端接口对应 -->
-			<view class="input-item">
-				<label for="name">姓名</label>
-				<uni-easyinput type="text" v-model="formData.userName" placeholder="请输入您的姓名"
-					:styles="{ borderColor: '#eee', borderRadius: '12rpx' }"></uni-easyinput>
-			</view>
-			<view class="input-item">
-				<label for="phone">手机</label>
-				<uni-easyinput type="tel" v-model="formData.userPhone" placeholder="请输入手机号"
-					:styles="{ borderColor: '#eee', borderRadius: '12rpx' }"></uni-easyinput>
-			</view>
-			<view class="input-item">
-				<label for="company">所在机公司/机构/组织</label>
-				<uni-easyinput type="text" v-model="formData.contactAddress" placeholder="请输入单位或学校名称"
-					:styles="{ borderColor: '#eee', borderRadius: '12rpx' }"></uni-easyinput>
-			</view>
-
-			<!-- 当需要排队时，显示申请理由输入框 -->
-			<view class="input-item" v-if="isQueuing">
-				<label for="remark">申请理由（排队中）</label>
-				<uni-easyinput type="textarea" autoHeight v-model="formData.remark"
-					placeholder="当前报名人数已满，填写申请理由可提高审核通过率"
-					:styles="{ borderColor: '#eee', borderRadius: '12rpx' }"></uni-easyinput>
+			<view class="form-group">
+				<view class="input-item">
+					<text class="form-label">姓名</text>
+					<uni-easyinput v-model="formData.userName" placeholder="请输入姓名" :styles="inputStyles" />
+				</view>
+				<view class="input-item">
+					<text class="form-label">手机号</text>
+					<uni-easyinput type="tel" v-model="formData.userPhone" placeholder="请输入手机号" :styles="inputStyles" />
+				</view>
+				<view class="input-item">
+					<text class="form-label">单位/机构/组织</text>
+					<uni-easyinput v-model="formData.contactAddress" placeholder="请输入单位或组织名称" :styles="inputStyles" />
+				</view>
+				<view class="input-item" v-if="isQueuing">
+					<text class="form-label">申请理由（当前已满额排队中）</text>
+					<uni-easyinput type="textarea" autoHeight v-model="formData.remark" placeholder="请填写申请理由"
+						:styles="inputStyles" />
+				</view>
 			</view>
 
-			<button class="btn" :class="{ 'btn-disabled': !canSubmitStep1 }" @click="confirmSignup">
+			<button class="action-btn" :class="{ 'btn-disabled': !canSubmitStep1 }" @click="confirmSignup">
 				{{ step1ButtonText }}
 			</button>
 		</view>
 
 		<!-- 第二步：支付费用 -->
-		<view class="section" v-if="currentStep === 2 && activityDetail">
-			<view class="section-title">
-				<!-- <uni-icons type="shop" size="18" color="#FF6E00"></uni-icons> -->
-				<!-- 动态绑定报名费用 -->
-				<span>支付报名费用 <span class="price-tag">¥{{ activityDetail.registrationFee }}</span></span>
+		<view class="section-card" v-if="currentStep === 2 && activityDetail">
+			<view class="section-header">
+				<view class="header-mark"></view>
+				<text class="section-title">支付报名费</text>
+				<text class="price-tag">¥{{ activityDetail.registrationFee }}</text>
 			</view>
 
-			<view class="qr-code">
-				<!-- 动态绑定收款码 -->
+			<view class="payment-box">
 				<image v-if="activityDetail.organizerPaymentQrCodeUrl" :src="activityDetail.organizerPaymentQrCodeUrl"
-					class="qr-code-image" mode="widthFix" @click="previewQrCode" alt="微信支付二维码" show-menu-by-longpress
-					binderror="onImageError" bindload="onImageLoad" :style="{ width: '400rpx', height: '400rpx' }" />
-				<view class="qr-note">请使用微信扫码完成支付</view>
+					class="qr-image" mode="widthFix" show-menu-by-longpress @click="previewQrCode" />
+				<text class="qr-tip">长按或点击放大识别二维码支付</text>
 			</view>
 
-			<view class="section-title">
-				<uni-icons type="image" size="18" color="#FF6E00"></uni-icons>
-				<span>上传付款凭证</span>
+			<view class="section-header" style="margin-top: 40rpx;">
+				<view class="header-mark"></view>
+				<text class="section-title">上传付款凭证</text>
 			</view>
 
-			<!-- 【修改】使用真实上传逻辑 -->
-			<view class="upload-box" @click="chooseImage">
-				<view v-if="!formData.paymentScreenshotUrl">
-					<!-- <view class="upload-icon">
-						<uni-icons type="plus" size="24" color="#FF6E00"></uni-icons>
-					</view> -->
-					<view class="upload-text">点击上传付款截图</view>
-					<view class="upload-text" style="font-size: 24rpx; margin-top: 10rpx">
-						支持JPG、PNG格式，小于5MB
-					</view>
+			<view class="upload-area" @click="chooseImage">
+				<image v-if="formData.paymentScreenshotUrl" :src="formData.paymentScreenshotUrl" class="preview-img"
+					mode="aspectFill" />
+				<view v-else class="upload-placeholder">
+					<uni-icons type="camera-filled" size="30" color="#FF62B1"></uni-icons>
+					<text>点击上传支付成功截图</text>
 				</view>
-				<img v-else :src="formData.paymentScreenshotUrl" class="preview-image" alt="付款截图" />
 			</view>
-			<view class="prompt">
-				ⓘ请上传带支付订单号的付款凭证截图（微信支付-->账单详情页）
-			</view>
+			<text class="prompt-text">提示：请上传带订单号的微信支付账单详情页截图</text>
 
-			<view class="agreement-section">
-				<!-- 用户协议勾选框 -->
-				<view class="agreement-checkbox">
-					<radio :checked="agreedToTerms" @click="toggleAgreement" color="#FF6E00"
-						style="transform:scale(0.8)" />
-					<view class="agreement-text">
-						我已充分知悉并同意
-						<text class="link" @click.stop="navigateToAgreement">《用户协议》</text>
-					</view>
-				</view>
+			<view class="agreement-box">
+				<label class="checkbox-row" @click="toggleAgreement">
+					<radio :checked="agreedToTerms" color="#FF62B1" style="transform:scale(0.7)" />
+					<text class="agree-txt">我已阅读并同意 <text class="link"
+							@click.stop="navigateToAgreement">《用户协议》</text></text>
+				</label>
 
-				<!-- 风险提示 -->
-				<view class="risk-warning">
-					<view class="risk-title">猩聚会聚会风险提示</view>
-					<view class="risk-content">
-						猩聚会为平台用户提供自主化的主题聚会/聚会的组织工具，平台会通过腾讯风控系统对小程序的风控措施与要求，对聚会上传的文案与图片进行基本审核，但对主题聚会/聚会组织者以及聚会/聚会本身的动机与环境不能给予足够完善或全面的审核，请用户务必基于实际风险判断决定是否参与主题聚会/聚会；主题聚会/聚会组织者有义务与责任，共同监督与杜绝欺瞒、诈骗甚至人身安全等商业社交风险的发生，并对聚会/聚会中发生的以上商业社交风险负有全部责任。
-					</view>
+				<view class="risk-card">
+					<text class="risk-title">猩聚会风险提示</text>
+					<text class="risk-desc">本平台仅提供聚会组织工具，请用户务必基于实际风险判断参与。组织者对聚会中的商业社交风险负有全部责任。</text>
 				</view>
 			</view>
 
-			<!-- 绑定真实的提交方法 -->
-			<button class="btn" :class="{ 'btn-disabled': !formData.paymentScreenshotUrl || !agreedToTerms }"
+			<button class="action-btn" :class="{ 'btn-disabled': !formData.paymentScreenshotUrl || !agreedToTerms }"
 				@click="joinActivity">
-				提交报名信息
+				提交报名申请
 			</button>
 		</view>
 
 		<!-- 第三步：完成报名 -->
-		<view v-if="currentStep === 3">
-			<!-- 情况 A: 待确认 (joinStatus === 1) -->
-			<view v-if="activityDetail && activityDetail.joinStatus === 1" class="success-message">
-				<view class="success-icon" style="font-size: 60rpx;">⏳</view> <!-- 换个沙漏图标 -->
-				<view class="status-title">报名已提交，等待确认</view>
-				<view class="status-desc" style="font-size: 28rpx; color: #666; margin-top: 20rpx; padding: 0 40rpx;">
-					您的报名申请已提交给组织者，请耐心等待审核。审核结果将通过系统消息通知您。
+		<view v-if="currentStep === 3" class="result-page">
+			<view class="status-box">
+				<icon v-if="activityDetail?.joinStatus === 2" type="success" size="60" color="#4caf50" />
+				<icon v-else type="waiting" size="60" color="#FF62B1" />
+				<text class="result-title">{{ activityDetail?.joinStatus === 2 ? '报名成功' : '报名已提交，等待确认' }}</text>
+				<text class="result-desc">
+					{{ activityDetail?.joinStatus === 2 ? '期待您的准时参与！' : '您的申请已提交给组织者，审核结果将通过消息通知。' }}
+				</text>
+			</view>
+
+			<view class="section-card">
+				<view class="info-content">
+					<view class="info-row"><text class="label">聚会名称：</text><text
+							class="val">{{ activityDetail?.activityTitle }}</text></view>
+					<view class="info-row"><text class="label">提交时间：</text><text class="val">{{ currentDate }}</text>
+					</view>
 				</view>
 			</view>
 
-			<!-- 情况 B: 已报名成功 (joinStatus === 2 或 刚刚提交成功) -->
-			<view v-else class="success-message">
-				<view class="success-icon">🎉</view>
-				<view class="status-title">报名成功</view>
-				<view class="status-desc" style="font-size: 28rpx; color: #666; margin-top: 20rpx;">
-					您的报名已通过确认，期待您的到来！
-				</view>
-			</view>
-
-			<view class="section" v-if="activityDetail">
-				<view class="info-box">
-					<view><span class="info-label">聚会名称：</span> {{ activityDetail.activityTitle }}</view>
-					<view><span class="info-label">报名时间：</span> {{ currentDate }}</view>
-					<view><span class="info-label">温馨提示：</span> 请于聚会开始前15分钟携带本页面截图签到</view>
-					<!-- <view><strong>报名编号：</strong> {{ generateTicketNumber() }}</view> -->
-				</view>
-			</view>
-
-			<button class="btn" @click="backToHome" style="margin: 30rpx">
-				返回首页
-			</button>
+			<button class="action-btn outline" @click="backToHome">返回</button>
 		</view>
+
+		<!-- 【新增】邀请码输入弹窗 -->
+		<uni-popup ref="invitePopup" :mask-click="false">
+			<view class="invite-modal">
+				<text class="modal-title">🔒 需输入邀请码</text>
+				<text class="modal-desc">此聚会为专邀聚会，请输入邀请码后继续报名</text>
+				<view class="modal-input-wrap">
+					<input class="modal-input" v-model="inputInviteCode" placeholder="请输入邀请码" />
+				</view>
+				<view class="modal-btns">
+					<button class="m-btn cancel" @click="cancelInvite">返回</button>
+					<button class="m-btn confirm" @click="verifyInviteCode">确定</button>
+				</view>
+			</view>
+		</uni-popup>
 
 		<SmartGuidePopup ref="smartGuidePopupRef" :scenario="3" />
 	</view>
@@ -245,12 +219,17 @@
 		paymentScreenshotUrl: '' // 用于存储上传后的真实网络URL
 	});
 
+	const loggedInUserId = ref(null);
 	const activityId = ref(null);
 	const activityDetail = ref(null);
 
 	const agreedToTerms = ref(false);
 
 	const ticketNumber = ref('');
+
+	const invitePopup = ref(null);
+	const inputInviteCode = ref('');
+	const verifiedInviteCode = ref(''); // 已验证通过的码
 
 	// 定义缓存 Key
 	const FORM_CACHE_KEY = 'active_enroll_form_cache';
@@ -288,10 +267,17 @@
 
 	onLoad((options) => {
 		// checkUserVerificationStatus();
+		const storageUserId = uni.getStorageSync('userId');
+		loggedInUserId.value = storageUserId;
+
+		console.log('当前登录用户ID:', loggedInUserId.value);
 
 		if (options.id) {
 			activityId.value = options.id;
 			// 现在 getActiveDetail 会处理所有逻辑
+			if (options.meetingInviteCode) {
+				verifiedInviteCode.value = options.meetingInviteCode;
+			}
 			getActiveDetail();
 		} else {
 			console.error('未接收到聚会ID！');
@@ -351,6 +337,18 @@
 		deep: true
 	});
 
+	/**
+	 * 计算属性：判断当前用户是否为组织者本人
+	 */
+	const isOrganizer = computed(() => {
+		// 增加严谨的空值判断
+		if (!loggedInUserId.value || !activityDetail.value || !activityDetail.value.memberUser) {
+			return false;
+		}
+		// 统一转为 Number 进行比较，防止字符串和数字类型不匹配
+		return Number(loggedInUserId.value) === Number(activityDetail.value.memberUser.id);
+	});
+
 	// 切换协议勾选状态的方法
 	const toggleAgreement = () => {
 		agreedToTerms.value = !agreedToTerms.value;
@@ -361,6 +359,10 @@
 		uni.navigateTo({
 			url: '/pages/user-agreement/user-agreement'
 		});
+	};
+
+	const cancelInvite = () => {
+		uni.navigateBack();
 	};
 
 	const currentDate = new Date().toLocaleString('zh-CN', {
@@ -488,6 +490,31 @@
 		});
 	};
 
+	/**
+	 * 验证邀请码
+	 */
+	const verifyInviteCode = () => {
+		if (!inputInviteCode.value) return uni.showToast({
+			title: '请输入邀请码',
+			icon: 'none'
+		});
+
+		// 简单的本地校验（如果后端没给专门接口，直接比对详情里的 inviteCode）
+		if (inputInviteCode.value === activityDetail.value.inviteCode) {
+			verifiedInviteCode.value = inputInviteCode.value;
+			invitePopup.value.close();
+			uni.showToast({
+				title: '验证通过',
+				icon: 'success'
+			});
+		} else {
+			uni.showToast({
+				title: '邀请码错误',
+				icon: 'none'
+			});
+		}
+	};
+
 
 	const getActiveDetail = async () => {
 		if (!activityId.value) return;
@@ -512,6 +539,22 @@
 				console.log('getActiveDetail result:', data);
 
 				activityDetail.value = data; // 先赋值，后续逻辑依赖它
+
+
+				// 【核心优化逻辑】
+				// 满足以下全部条件才弹出邀请码框：
+				// 1. 后端配置需要邀请码 (requireInviteCode === 1)
+				// 2. 当前用户还没报名 (joinStatus === 0)
+				// 3. URL里没带自动验证码 (!verifiedInviteCode.value)
+				// 4. 【新增】当前用户不是组织者本人 (!isOrganizer.value)
+
+				if (activityDetail.value.requireInviteCode === 1 &&
+					activityDetail.value.joinStatus === 0 &&
+					!verifiedInviteCode.value &&
+					!isOrganizer.value) { // <-- 关键拦截：如果是本人，直接跳过弹窗
+
+					invitePopup.value.open();
+				}
 
 				// 获取 joinStatus，如果没有则默认为 0 (未报名)
 				// 注意：有些后端可能放在 data.joinStatus，也可能放在 data.memberActivityJoinResp.joinStatus
@@ -621,7 +664,8 @@
 			userName: formData.userName,
 			userPhone: formData.userPhone,
 			contactAddress: formData.contactAddress,
-			remark: formData.remark
+			remark: formData.remark,
+			inviteCode: isOrganizer.value ? (activityDetail.value.inviteCode || '') : verifiedInviteCode.value
 		};
 
 		const result = await request('/app-api/member/activity-join/join-activity', {
@@ -718,356 +762,306 @@
 </script>
 
 
-<style scoped>
-	.container {
-		max-width: 500px;
-		margin: 0 auto;
-		background-color: #fff;
-		border-radius: 16rpx;
-		overflow: hidden;
-		box-shadow: 0 10rpx 30rpx rgba(0, 0, 0, 0.05);
+<style lang="scss" scoped>
+	$theme-color: #FF62B1;
+
+	.page {
+		min-height: 100vh;
+		background-color: #f8f8f8;
+		padding-bottom: 60rpx;
 	}
 
-	.auth-reminder {
+	/* 顶部 Banner */
+	.header-banner {
+		background: linear-gradient(135deg, $theme-color 0%, darken($theme-color, 10%) 100%);
+		height: 180rpx;
 		display: flex;
 		align-items: center;
+		justify-content: center;
+
+		.header-title {
+			color: #fff;
+			font-size: 34rpx;
+			font-weight: bold;
+			padding: 0 40rpx;
+			text-align: center;
+		}
+	}
+
+	/* 步骤指示器 */
+	.step-indicator {
+		display: flex;
+		justify-content: center;
+		margin: -40rpx 30rpx 30rpx;
+		background: #fff;
+		padding: 30rpx;
+		border-radius: 20rpx;
+		box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.05);
+
+		.step {
+			flex: 1;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			position: relative;
+
+			&.active {
+				.step-circle {
+					background: $theme-color;
+				}
+
+				.step-text {
+					color: $theme-color;
+					font-weight: bold;
+				}
+			}
+
+			&:not(:last-child)::after {
+				content: '';
+				position: absolute;
+				top: 30rpx;
+				right: -50%;
+				width: 100%;
+				height: 2rpx;
+				background: #eee;
+				z-index: 1;
+			}
+		}
+
+		.step-circle {
+			width: 50rpx;
+			height: 50rpx;
+			border-radius: 50%;
+			background: #ddd;
+			color: #fff;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			font-size: 24rpx;
+			z-index: 2;
+			margin-bottom: 10rpx;
+		}
+
+		.step-text {
+			font-size: 24rpx;
+			color: #999;
+		}
+	}
+
+	/* 通用卡片 */
+	.section-card {
+		background: #fff;
+		margin: 24rpx;
+		padding: 30rpx;
+		border-radius: 20rpx;
+
+		.section-header {
+			display: flex;
+			align-items: center;
+			margin-bottom: 24rpx;
+
+			.header-mark {
+				width: 8rpx;
+				height: 32rpx;
+				background: $theme-color;
+				border-radius: 4rpx;
+				margin-right: 16rpx;
+			}
+
+			.section-title {
+				font-size: 30rpx;
+				font-weight: bold;
+				color: $theme-color;
+			}
+
+			.price-tag {
+				margin-left: auto;
+				color: #ff1a3c;
+				font-size: 36rpx;
+				font-weight: bold;
+			}
+		}
+	}
+
+	/* 信息展示与表单 */
+	.info-content {
+		background: #fff9fb;
 		padding: 20rpx;
-		/* 为了美观，可以调整外边距，让它在白色容器内部显示 */
-		margin: 20rpx 30rpx 0;
-		background-color: #fdf6ec;
-		border: 1rpx solid #faecd8;
 		border-radius: 12rpx;
-		color: #e6a23c;
-		font-size: 26rpx;
-	}
 
-	.reminder-text {
-		flex: 1;
-		margin: 0 16rpx;
-	}
+		.info-row {
+			display: flex;
+			margin-bottom: 12rpx;
+			font-size: 26rpx;
 
-	.reminder-arrow {
-		font-size: 32rpx;
-		color: #c0c4cc;
-	}
+			.label {
+				color: $theme-color;
+				width: 140rpx;
+			}
 
-
-	.header {
-		text-align: center;
-		background: linear-gradient(135deg, #ff6e00 0%, #ff8e3d 100%);
-		color: white;
-		padding: 40rpx 0;
-		margin-bottom: 20rpx;
-	}
-
-	.header h1 {
-		font-size: 36rpx;
-		font-weight: bold;
-		letter-spacing: 1rpx;
-	}
-
-	.section {
-		margin-bottom: 40rpx;
-		padding: 0 30rpx;
-	}
-
-	.section-title {
-		font-size: 32rpx;
-		font-weight: bold;
-		color: #ff6e00;
-		border-left: 8rpx solid #ff6e00;
-		padding-left: 20rpx;
-		margin-bottom: 20rpx;
-		display: flex;
-		align-items: center;
-	}
-
-	.section-title .icon {
-		margin-right: 10rpx;
-		font-size: 36rpx;
-	}
-
-	.info-box {
-		background: #fff8f2;
-		border: 1rpx solid #ffd9c4;
-		padding: 25rpx 30rpx;
-		border-radius: 12rpx;
-		line-height: 1.6;
-		font-size: 28rpx;
-	}
-
-	.info-label {
-		font-weight: bold;
-	}
-
-	.info-box view {
-		margin: 15rpx 0;
-	}
-
-	label {
-		display: block;
-		margin: 20rpx 0 10rpx;
-		font-weight: bold;
-		font-size: 28rpx;
+			.val {
+				color: #555;
+				flex: 1;
+			}
+		}
 	}
 
 	.input-item {
 		margin-bottom: 30rpx;
+
+		.form-label {
+			display: block;
+			font-size: 28rpx;
+			color: #333;
+			font-weight: bold;
+			margin-bottom: 16rpx;
+		}
 	}
 
-	.btn {
-		padding: 10rpx;
-		background: linear-gradient(135deg, #ff6e00 0%, #ff8e3d 100%);
-		color: white;
-		border: none;
-		border-radius: 12rpx;
-		font-size: 32rpx;
-		font-weight: bold;
-		cursor: pointer;
-		transition: all 0.3s;
+	/* 支付与上传 */
+	.payment-box {
 		text-align: center;
-		margin: 20rpx 0;
-		box-shadow: 0 4rpx 12rpx rgba(255, 110, 0, 0.2);
+		padding: 40rpx;
+		background: #fafafa;
+		border-radius: 20rpx;
+
+		.qr-image {
+			width: 320rpx;
+			height: 320rpx;
+			border: 1rpx solid #eee;
+		}
+
+		.qr-tip {
+			display: block;
+			margin-top: 20rpx;
+			font-size: 24rpx;
+			color: $theme-color;
+			font-weight: bold;
+		}
 	}
 
-	.btn:active {
-		transform: translateY(4rpx);
-		box-shadow: 0 2rpx 6rpx rgba(255, 110, 0, 0.2);
-	}
-
-	.btn-disabled {
-		background: #ccc;
-		box-shadow: none;
-		opacity: 0.7;
-		cursor: not-allowed;
-	}
-
-	.qr-code {
-		text-align: center;
-		margin: 30rpx 0;
-		padding: 20rpx;
-		background: #fff8f2;
-		border-radius: 16rpx;
-	}
-
-	.qr-code .qr-code-image {
-		/* 使用新的 class 选择器 */
-		width: 400rpx;
-		/* 可以适当调大宽度，让二维码更清晰 */
-		/* height: 300rpx;  <--  关键：删除或注释掉固定的 height 属性 */
-		border-radius: 16rpx;
-		border: 1rpx solid #eee;
-		background: white;
-		padding: 20rpx;
-		box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
-		display: block;
-		/* 确保图片表现为块级元素，便于居中 */
-		margin: 0 auto;
-		/* 水平居中图片 */
-	}
-
-	.qr-note {
-		color: #ff6e00;
-		font-size: 26rpx;
-		margin-top: 20rpx;
-		font-weight: bold;
-	}
-
-	.price-tag {
-		background: #ff6e00;
-		color: white;
-		padding: 10rpx 20rpx;
-		border-radius: 40rpx;
-		font-size: 26rpx;
-		display: inline-block;
-		margin-left: 20rpx;
-	}
-
-	.success-message {
-		text-align: center;
-		color: #4caf50;
-		font-size: 36rpx;
-		font-weight: bold;
-		padding: 60rpx 0;
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-	}
-
-	.success-icon {
-		font-size: 80rpx;
-		margin-bottom: 30rpx;
-		animation: bounce 0.8s ease-in-out;
-	}
-
-	.upload-box {
-		background: #f8f8f8;
+	.upload-area {
+		width: 100%;
+		height: 360rpx;
+		background: #fdfdfd;
 		border: 2rpx dashed #ddd;
-		border-radius: 16rpx;
-		padding: 40rpx 20rpx;
-		text-align: center;
-		margin: 30rpx 0;
-		transition: all 0.3s;
-		cursor: pointer;
-	}
-
-	.prompt {
-		color: #999;
-		font-size: 28rpx;
-	}
-
-	.upload-box.active {
-		border-color: #ff6e00;
-		background: #fff8f2;
-	}
-
-	.upload-icon {
-		font-size: 60rpx;
-		color: #ff6e00;
-		margin-bottom: 20rpx;
-	}
-
-	.upload-text {
-		color: #666;
-		font-size: 26rpx;
-	}
-
-	.preview-image {
-		width: 300rpx;
-		height: 300rpx;
-		border-radius: 16rpx;
-		margin: 0 auto;
-		display: block;
-		border: 1rpx solid #eee;
-		object-fit: cover;
-		/* Ensure image covers the area */
-	}
-
-	.step-indicator {
+		border-radius: 20rpx;
 		display: flex;
+		align-items: center;
 		justify-content: center;
-		margin: 30rpx 0;
+		overflow: hidden;
+
+		.preview-img {
+			width: 100%;
+			height: 100%;
+		}
+
+		.upload-placeholder {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			color: #999;
+			font-size: 26rpx;
+			gap: 10rpx;
+		}
 	}
 
-	.step {
+	.prompt-text {
+		font-size: 24rpx;
+		color: #999;
+		margin-top: 20rpx;
+		display: block;
+	}
+
+	/* 按钮 */
+	.action-btn {
+		width: 100%;
+		height: 90rpx;
+		background: linear-gradient(to right, $theme-color, darken($theme-color, 5%));
+		color: #fff;
+		border-radius: 45rpx;
+		font-weight: bold;
+		font-size: 30rpx;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		margin-top: 40rpx;
+
+		&.btn-disabled {
+			background: #e0e0e0 !important;
+			color: #fff;
+		}
+
+		&.outline {
+			background: #fff;
+			color: $theme-color;
+			border: 2rpx solid $theme-color;
+		}
+	}
+
+	/* 邀请码弹窗 */
+	.invite-modal {
+		width: 600rpx;
+		background: #fff;
+		border-radius: 30rpx;
+		padding: 50rpx;
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		width: 200rpx;
-		position: relative;
-	}
 
-	.step:not(:last-child)::after {
-		content: '';
-		position: absolute;
-		top: 30rpx;
-		right: -60rpx;
-		width: 120rpx;
-		height: 4rpx;
-		background: #ddd;
-		z-index: 1;
-		/* Ensure line is behind circle */
-	}
-
-	.step.active:not(:last-child)::after {
-		background: #ff6e00;
-	}
-
-	.step-circle {
-		width: 60rpx;
-		height: 60rpx;
-		border-radius: 50%;
-		background: #ddd;
-		color: white;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		font-size: 32rpx;
-		font-weight: bold;
-		margin-bottom: 15rpx;
-		z-index: 2;
-	}
-
-	.step.active .step-circle {
-		background: #ff6e00;
-	}
-
-	.step-text {
-		font-size: 26rpx;
-		color: #999;
-		text-align: center;
-	}
-
-	.step.active .step-text {
-		color: #ff6e00;
-		font-weight: bold;
-	}
-
-	@keyframes bounce {
-
-		0%,
-		20%,
-		50%,
-		80%,
-		100% {
-			transform: translateY(0);
+		.modal-title {
+			font-size: 36rpx;
+			font-weight: bold;
+			color: #333;
+			margin-bottom: 20rpx;
 		}
 
-		40% {
-			transform: translateY(-30rpx);
+		.modal-desc {
+			font-size: 26rpx;
+			color: #999;
+			text-align: center;
+			margin-bottom: 40rpx;
 		}
 
-		60% {
-			transform: translateY(-15rpx);
+		.modal-input-wrap {
+			width: 100%;
+			background: #f5f5f5;
+			border-radius: 12rpx;
+			padding: 20rpx;
+			margin-bottom: 40rpx;
+
+			.modal-input {
+				font-size: 32rpx;
+				text-align: center;
+				font-weight: bold;
+				color: $theme-color;
+			}
 		}
-	}
 
-	.footer {
-		text-align: center;
-		padding: 30rpx;
-		color: #999;
-		font-size: 24rpx;
-		border-top: 1rpx solid #eee;
-		margin-top: 30rpx;
-	}
+		.modal-btns {
+			display: flex;
+			width: 100%;
+			gap: 20rpx;
 
-	.agreement-section {
-		margin-top: 40rpx;
-		margin-bottom: 20rpx;
-	}
+			.m-btn {
+				flex: 1;
+				height: 80rpx;
+				border-radius: 40rpx;
+				font-size: 28rpx;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+			}
 
-	.agreement-checkbox {
-		display: flex;
-		align-items: center;
-		margin-bottom: 30rpx;
-	}
+			.cancel {
+				background: #f5f5f5;
+				color: #666;
+			}
 
-	.agreement-text {
-		font-size: 26rpx;
-		color: #606266;
-		margin-left: 10rpx;
-	}
-
-	.agreement-text .link {
-		color: #FF6E00;
-		/* 主题色 */
-		text-decoration: none;
-		/* 去掉下划线，如果需要可以保留 */
-	}
-
-	.risk-warning {
-		background-color: #f5f5f5;
-		border-radius: 12rpx;
-		padding: 20rpx;
-		font-size: 24rpx;
-		color: #909399;
-		line-height: 1.6;
-	}
-
-	.risk-title {
-		font-weight: bold;
-		color: #606266;
-		margin-bottom: 10rpx;
-		text-align: center;
+			.confirm {
+				background: $theme-color;
+				color: #fff;
+			}
+		}
 	}
 </style>

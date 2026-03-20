@@ -57,6 +57,12 @@
 					<text class="info-label">聚会地点：</text>
 					<text class="info-value">{{ activityDetail.activityLocation }}</text>
 				</view>
+				<view class="info-item" v-if="isOrganizer && activityDetail.inviteCode">
+					<text class="info-label">邀请码：</text>
+					<text class="info-value theme-text"
+						style="font-weight: bold; font-size: 32rpx;">{{ activityDetail.inviteCode }}</text>
+					<text class="copy-tag" @click="copyInviteCode">复制</text>
+				</view>
 			</view>
 
 			<view class="event-stats">
@@ -86,15 +92,24 @@
 					<view class="header-mark"></view>
 					<text class="section-title">聚会介绍</text>
 				</view>
-				<view class="event-description-text">{{ activityDetail.activityDescription }}</view>
+				<view v-if="isContentLocked" class="private-mask">
+					<uni-icons type="locked-filled" size="30" color="#FF62B1"></uni-icons>
+					<text class="mask-text">非公开内容，需获取聚会邀请码报名之后才可查看信息内容</text>
+				</view>
+				<view v-else class="event-description-text">{{ activityDetail.activityDescription }}</view>
 			</view>
 
 			<view class="content-section" style="margin-top: 40rpx;">
 				<view class="section-header-row">
-					<view class="header-mark"></view>
-					<text class="section-title">聚会内容</text>
+						<view class="header-mark"></view>
+						<text class="section-title">聚会内容</text>
 				</view>
-				<view class="timeline-box">
+				<!-- 隐私遮罩 -->
+				<view v-if="isContentLocked" class="private-mask">
+					<uni-icons type="eye-slash-filled" size="30" color="#FF62B1"></uni-icons>
+					<text class="mask-text">聚会流程暂不公开</text>
+				</view>
+				<view v-else class="timeline-box">
 					<view class="timeline-item" v-for="(item, index) in activityDetail.memberActivitySessionList"
 						:key="item.id">
 						<view class="timeline-line-col">
@@ -188,11 +203,16 @@
 		<!-- 8. 赞助单位 -->
 		<view class="sponsor-section" v-if="sponsorList && sponsorList.length > 0">
 			<view class="section-header-row">
-				<view class="header-mark"></view>
-				<text class="section-title">赞助单位</text>
-				<text class="count-tag">({{ sponsorList.length }})</text>
+				<view class="left-box">
+					<view class="header-mark"></view>
+					<text class="section-title">赞助单位</text>
+					<text class="count-tag">({{ sponsorList.length }})</text>
+				</view>
 			</view>
-			<scroll-view scroll-x class="sponsor-scroll" enable-flex>
+			<view v-if="isContentLocked" class="private-mask" style="padding: 20rpx;">
+				<text class="mask-text">赞助商信息已隐藏</text>
+			</view>
+			<scroll-view v-else scroll-x class="sponsor-scroll" enable-flex>
 				<view class="sponsor-item-card" v-for="item in sponsorList" :key="item.id"
 					@click="navigateToSponsorDetail(item)">
 					<image v-if="item.logoUrl" :src="item.logoUrl" mode="aspectFit" class="sp-logo"></image>
@@ -294,17 +314,26 @@
 		<uni-popup ref="sharePopup" type="bottom" background-color="#fff" @change="onPopupChange">
 			<view class="share-popup-content">
 				<view class="share-popup-title">自定义分享内容</view>
+
 				<view class="share-title-editor">
-					<text class="editor-label">标题:</text>
+					<text class="editor-label">分享标题:</text>
 					<input class="editor-input" v-model="customShareTitle" placeholder="请输入分享标题" />
 				</view>
+
+				<!-- 发起人专属：携带邀请码开关 -->
+				<view class="share-option-row" v-if="isOrganizer && activityDetail.requireInviteCode === 1">
+					<text class="option-label">携带邀请码分享 (受邀人无感报名)</text>
+					<switch :checked="includeInviteCodeInShare" @change="toggleShareInviteCode" color="#FF62B1"
+						style="transform:scale(0.8)" />
+				</view>
+
 				<view class="share-channels">
 					<button class="share-channel-btn" open-type="share">
-						<uni-icons type="weixin" size="30" color="#07c160"></uni-icons>
+						<uni-icons type="weixin" size="34" color="#07c160"></uni-icons>
 						<text>微信好友</text>
 					</button>
 					<button class="share-channel-btn" @click="guideShareTimeline">
-						<uni-icons type="pyq" size="30" color="#53a046"></uni-icons>
+						<uni-icons type="pyq" size="34" color="#53a046"></uni-icons>
 						<text>朋友圈</text>
 					</button>
 				</view>
@@ -339,6 +368,7 @@
 	const activityDetail = ref(null);
 	const sponsorList = ref([]);
 	const loggedInUserId = ref(null);
+	const includeInviteCodeInShare = ref(true);
 
 	// ─── 报名用户 ───
 	const participantList = ref([]);
@@ -429,6 +459,36 @@
 
 
 	// ─── 计算属性 ───
+
+	/**
+	 * 判断内容是否被锁定（非公开聚会且未获得详情数据）
+	 */
+	const isContentLocked = computed(() => {
+		if (!activityDetail.value) return false;
+		// 条件：非公开 (isPublic:0) 且后端没给关键数据 (比如介绍为空)
+		// 注意：已报名用户后端会返回数据，此时 activityDescription 不为空，会自动解锁
+		return activityDetail.value.isPublic === 0 && !activityDetail.value.activityDescription;
+	});
+
+	/**
+	 * 切换分享时是否携带邀请码
+	 */
+	const toggleShareInviteCode = (e) => {
+		includeInviteCodeInShare.value = e.detail.value;
+	};
+
+	/**
+	 * 复制邀请码
+	 */
+	const copyInviteCode = () => {
+		uni.setClipboardData({
+			data: activityDetail.value.inviteCode,
+			success: () => uni.showToast({
+				title: '已复制',
+				icon: 'none'
+			})
+		});
+	};
 
 	/**
 	 * 判断当前登录用户是否为本次聚会的组织者
@@ -976,23 +1036,29 @@
 	onShareAppMessage(() => {
 		closeSharePopup();
 		const sharerId = uni.getStorageSync('userId');
-		const inviteCode = getInviteCode();
-		const finalTitle = customShareTitle.value ||
-			(activityDetail.value && activityDetail.value.activityTitle) ||
-			'发现一个很棒的聚会，快来看看吧！';
+		const inviteCode = getInviteCode(); // 基础邀请码
 
-		let sharePath = '/packages/active-detail/active-detail?id=' + (activityDetail.value && activityDetail.value
-			.id);
-		if (sharerId) sharePath += '&sharerId=' + sharerId;
-		if (inviteCode) sharePath += '&inviteCode=' + inviteCode;
+		// 如果是组织者且勾选了携带聚会邀请码
+		let activeInviteCode = '';
+		if (isOrganizer.value && includeInviteCodeInShare.value) {
+			activeInviteCode = activityDetail.value.inviteCode;
+		}
+
+		const finalTitle = customShareTitle.value || activityDetail.value?.activityTitle || '邀请你参加聚会';
+
+		let sharePath = `/packages/active-detail/active-detail?id=${activityId.value}`;
+		if (sharerId) sharePath += `&sharerId=${sharerId}`;
+		if (inviteCode) sharePath += `&inviteCode=${inviteCode}`;
+		// 【逻辑实现】拼接聚会专属验证码
+		if (activeInviteCode) sharePath += `&meetingInviteCode=${activeInviteCode}`;
 
 		return {
 			title: finalTitle,
 			path: sharePath,
-			imageUrl: (activityDetail.value && activityDetail.value.coverImageUrl) ||
-				'/static/default-share-image.png'
+			imageUrl: activityDetail.value?.coverImageUrl || ''
 		};
 	});
+
 
 	/**
 	 * 分享到朋友圈
@@ -1107,14 +1173,14 @@
 				line-height: 1.5;
 
 				.info-label {
-					font-size: 28rpx;
+					font-size: 26rpx;
 					color: $theme-color; // 标签用主题色
 					flex-shrink: 0;
-					width: 150rpx;
+					width: 130rpx;
 				}
 
 				.info-value {
-					font-size: 28rpx;
+					font-size: 26rpx;
 					color: #555;
 					flex: 1;
 
@@ -2011,6 +2077,62 @@
 		text {
 			display: block;
 			margin-bottom: 10rpx;
+		}
+	}
+
+	/* 隐私遮罩样式 */
+	.private-mask {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		background-color: #fff9fb;
+		border: 2rpx dashed rgba($theme-color, 0.2);
+		border-radius: 16rpx;
+		padding: 60rpx 40rpx;
+		margin: 20rpx 0;
+
+		.mask-text {
+			font-size: 26rpx;
+			color: $theme-color;
+			text-align: center;
+			margin-top: 20rpx;
+			line-height: 1.6;
+			font-weight: 500;
+		}
+	}
+
+	/* 邀请码信息项 */
+	.info-item {
+		.copy-tag {
+			font-size: 22rpx;
+			color: #999;
+			background: #f0f0f0;
+			padding: 4rpx 16rpx;
+			border-radius: 20rpx;
+			margin-left: 20rpx;
+
+			&:active {
+				background: #e0e0e0;
+			}
+		}
+	}
+
+	/* 分享弹窗选项 */
+	.share-option-row {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: 24rpx;
+		background: #fff8fb;
+		border-radius: 12rpx;
+		margin-bottom: 30rpx;
+		border: 1rpx solid rgba($theme-color, 0.1);
+
+		.option-label {
+			font-size: 26rpx;
+			color: #333;
+			font-weight: 500;
 		}
 	}
 </style>
