@@ -90,15 +90,22 @@
 						</view>
 					</uni-forms-item>
 
-					<!-- 地点选择 (全边框样式) -->
-					<uni-forms-item label="聚会地点" required>
+					<!-- 导航地址：由地图决定，不可直接输入 -->
+					<uni-forms-item label="导航地址" required>
 						<view @click="openMapToChooseLocation" class="custom-picker-box">
 							<view class="picker-content">
+								<!-- 绑定位置地址 -->
 								<text v-if="form.locationAddress" class="has-value">{{ form.locationAddress }}</text>
-								<text v-else class="placeholder">点击选择位置</text>
+								<text v-else class="placeholder">点击在地图上选择位置</text>
 							</view>
-							<uni-icons type="location" size="20" color="#FF6F00"></uni-icons>
+							<uni-icons type="map-pin-ellipse" size="20" color="#FF6F00"></uni-icons>
 						</view>
+					</uni-forms-item>
+
+					<!-- 聚会地点：支持手动修改 -->
+					<uni-forms-item label="聚会地点" required>
+						<uni-easyinput v-model="form.activityLocation" maxlength="500"
+							placeholder="请输入具体聚会地点(如：XX大厦B座302)" primaryColor="#FF6F00" />
 					</uni-forms-item>
 
 					<!-- 合作店铺 -->
@@ -257,6 +264,40 @@
 				</uni-forms>
 			</view>
 
+			<!-- ============ 5. 隐私与准入设置 ============ -->
+			<view class="form-card">
+				<view class="card-header space-between">
+					<view class="header-left">
+						<view class="header-line"></view>
+						<text class="header-title">隐私与准入</text>
+					</view>
+					<!-- 说明图标 -->
+					<uni-icons type="help-filled" size="20" color="#999" @click="handlePrivacyHelp"></uni-icons>
+				</view>
+
+				<uni-forms :label-width="200" label-position="top">
+					<!-- 聚会邀请码控制 -->
+					<uni-forms-item label="聚会邀请码 (报名准入)" required>
+						<uni-data-checkbox v-model="form.requireInviteCode"
+							:localdata="[{text:'不需要',value:0},{text:'需要',value:1}]" mode="tag">
+						</uni-data-checkbox>
+						<view class="input-hint">
+							{{ form.requireInviteCode === 1 ? '开启后，系统将自动生成邀请码，用户需凭码报名' : '任何人看到聚会后均可直接填写资料报名' }}
+						</view>
+					</uni-forms-item>
+
+					<!-- 聚会内容公开性 -->
+					<uni-forms-item label="聚会公开性 (内容可见)" required>
+						<uni-data-checkbox v-model="form.isPublic"
+							:localdata="[{text:'不公开',value:0},{text:'公开',value:1}]" mode="tag">
+						</uni-data-checkbox>
+						<view class="input-hint">
+							{{ form.isPublic === 1 ? '所有人均可查看聚会全部详情' : '未报名用户将无法查看详情及环节，仅显示标题与公告' }}
+						</view>
+					</uni-forms-item>
+				</uni-forms>
+			</view>
+
 			<view class="form-bottom">
 				<text>— 到底啦，请发起聚会吧 —</text>
 			</view>
@@ -362,7 +403,10 @@
 		limitSlots: null,
 		activityFunds: 1,
 		registrationFee: null,
-		locationAddress: '',
+		locationAddress: '', // 导航地址 (地图用)
+		activityLocation: '', // 聚会地点 (展示用，长文本)
+		requireInviteCode: 0, // 是否需要邀请码
+		isPublic: 1, // 是否公开
 		latitude: null,
 		longitude: null,
 		coverImageUrl: '',
@@ -439,8 +483,7 @@
 			uni.setNavigationBarTitle({
 				title: '发起聚会'
 			});
-			const hasDraft = loadDraft();
-			if (!hasDraft) initDefaultTimes();
+			checkDraftAndPrompt();
 		}
 
 		if (options && options.storeId && options.storeName) {
@@ -483,6 +526,79 @@
 	// ==============================================================================
 	// 4. 工具与辅助方法 (Utils & Helpers)
 	// ==============================================================================
+
+	/**
+	 * 检查本地是否存在草稿，并弹出询问窗
+	 */
+	const checkDraftAndPrompt = () => {
+		try {
+			const str = uni.getStorageSync(DRAFT_STORAGE_KEY);
+			if (str) {
+				const draftData = JSON.parse(str);
+				// 只有当草稿内容不为空时才提示（可以根据标题是否有值判断）
+				if (draftData.form && (draftData.form.activityTitle || draftData.form.activityDescription)) {
+					uni.showModal({
+						title: '发现未完成草稿',
+						content: '您有上次未发布完成的聚会内容，是否恢复？',
+						confirmText: '恢复',
+						cancelText: '不用了',
+						confirmColor: '#FF6F00',
+						success: (res) => {
+							if (res.confirm) {
+								applyDraftData(draftData);
+							} else {
+								// 用户拒绝恢复，为了防止下次进场继续弹窗，可以选择清空或保留
+								// 这里建议保留，但本次不填充，初始化默认时间
+								initDefaultTimes();
+							}
+						}
+					});
+				} else {
+					initDefaultTimes();
+				}
+			} else {
+				initDefaultTimes();
+			}
+		} catch (e) {
+			initDefaultTimes();
+		}
+	};
+
+	/**
+	 * 真正将草稿数据填充到表单
+	 */
+	const applyDraftData = (d) => {
+		if (!d || !d.form) return;
+
+		// 1. 整体恢复 form 对象
+		form.value = {
+			...form.value,
+			...d.form
+		};
+
+		// 2. 特别检查地址字段（双重保险）
+		if (d.form.locationAddress) form.value.locationAddress = d.form.locationAddress;
+		if (d.form.activityLocation) form.value.activityLocation = d.form.activityLocation;
+
+		// 3. 恢复关联店铺名称显示
+		associatedStoreName.value = d.associatedStoreName || '';
+
+		// 4. 恢复时间范围
+		timeRange.value = d.timeRange || [];
+		enrollTimeRange.value = d.enrollTimeRange || [];
+
+		// 5. 恢复赞助商
+		if (d.sponsorsList) sponsorsList.value = d.sponsorsList;
+
+		// 6. 标记时间已手动确认（恢复草稿视为已填）
+		isTimeRangeUserSelected.value = !!(d.timeRange && d.timeRange.length >= 2);
+		isEnrollTimeRangeUserSelected.value = !!(d.enrollTimeRange && d.enrollTimeRange.length >= 2);
+
+		uni.showToast({
+			title: '草稿已恢复',
+			icon: 'none'
+		});
+	};
 
 	// 自动保存方法（复用 saveDraft 的逻辑，但不弹 Toast）
 	const autoSaveDraft = () => {
@@ -567,7 +683,7 @@
 		}
 	};
 
-	// 【Bug1】跳转实名认证页
+	// 跳转实名认证页
 	const goToAuthPage = () => {
 		uni.navigateTo({
 			url: '/packages/my-auth/my-auth'
@@ -587,16 +703,45 @@
 		}));
 	};
 
+	/**
+	 * 弹出隐私与准入的规则说明
+	 */
+	const handlePrivacyHelp = () => {
+		uni.showModal({
+			title: '隐私准入说明',
+			content: '【邀请码】：开启后，系统会自动为该活动生成专属邀请码。用户在报名时，必须正确输入该码才能进入资料填写页。您可以在发布后的“聚会详情”或“分享”中查看该码。\n\n【公开性】：若设为不公开，系统将对未报名的商友隐藏聚会详情、环节和赞助信息。这能有效保护活动隐私，引导用户先输入邀请码并报名。',
+			showCancel: false,
+			confirmText: '我知道了',
+			confirmColor: '#FF6F00'
+		});
+	};
+
 	// ==============================================================================
 	// 5. 交互事件处理 (UI Handlers)
 	// ==============================================================================
 
+	/**
+	 * 打开地图选择位置
+	 * 修复：确保导航地址和聚会地点同步更新
+	 */
 	const openMapToChooseLocation = () => {
 		uni.chooseLocation({
 			success: (res) => {
+				console.log('📍 地图选择成功:', res);
+
+				// 1. 存储精确的导航地址（不可改，用于导航）
 				form.value.locationAddress = res.address;
 				form.value.latitude = res.latitude;
 				form.value.longitude = res.longitude;
+
+				// 2. 存储聚会地点（可改，初始赋值为 名字+地址）
+				// 优先取地点名称（如：某某大厦），如果没有则取详细地址
+				form.value.activityLocation = res.name || res.address;
+
+				console.log('✅ 地址已同步到表单');
+			},
+			fail: (err) => {
+				console.log('地图打开失败或取消', err);
 			}
 		});
 	};
@@ -883,6 +1028,9 @@
 		form.value.activityFunds = data.activityFunds;
 		form.value.registrationFee = data.registrationFee;
 		form.value.locationAddress = data.locationAddress;
+		form.value.activityLocation = data.activityLocation || '';
+		form.value.requireInviteCode = data.requireInviteCode ?? 0;
+		form.value.isPublic = data.isPublic ?? 1;
 		form.value.latitude = data.latitude;
 		form.value.longitude = data.longitude;
 		form.value.coverImageUrl = data.coverImageUrl;
@@ -1008,7 +1156,11 @@
 			icon: 'none'
 		});
 		if (!form.value.locationAddress) return uni.showToast({
-			title: '地点必填',
+			title: '导航地址必选',
+			icon: 'none'
+		});
+		if (!form.value.activityLocation) return uni.showToast({
+			title: '聚会地点必填',
 			icon: 'none'
 		});
 
@@ -1421,6 +1573,105 @@
 			font-weight: 500;
 			line-height: 1.4;
 		}
+	}
+
+	/* 强制修复 uni-data-checkbox 选中样式 */
+	:deep(.uni-data-checklist .checklist-group .checklist-box.is--tag) {
+		background-color: #f5f5f5 !important; // 未选中背景
+		border: 1px solid #eeeeee !important;
+
+		.checklist-text {
+			color: #666 !important; // 未选中文字颜色
+		}
+	}
+
+	:deep(.uni-data-checklist .checklist-group .checklist-box.is--tag.is-checked) {
+		background-color: rgba(255, 111, 0, 0.1) !important; // 选中后的浅橙色背景
+		border-color: #FF6F00 !important; // 选中后的橙色边框
+
+		.checklist-text {
+			color: #FF6F00 !important; // 选中后的文字颜色（不再是白色）
+			font-weight: bold;
+		}
+	}
+
+	/* 帮助图标容器对齐 */
+	.space-between {
+		display: flex;
+		justify-content: space-between;
+		width: 100%;
+	}
+
+	.input-hint {
+		font-size: 22rpx;
+		color: #999;
+		margin-top: 12rpx;
+		line-height: 1.4;
+		padding-left: 4rpx;
+	}
+
+	/* 新增：隐私设置提示样式 */
+	.privacy-settings-box {
+		background: #fcfcfc;
+		border: 1rpx solid #f0f0f0;
+		padding: 20rpx;
+		border-radius: 12rpx;
+		margin-bottom: 20rpx;
+	}
+
+	.setting-tips {
+		margin-top: 10rpx;
+
+		.tip-item {
+			display: block;
+			font-size: 22rpx;
+			color: #999;
+			line-height: 1.6;
+
+			&:before {
+				content: '* ';
+				color: $theme-color;
+			}
+		}
+	}
+
+	/* 调整单选框容器高度 */
+	:deep(.uni-data-checklist .checklist-group) {
+		justify-content: space-between;
+	}
+
+	/* 导航地址盒子高亮 */
+	.custom-picker-box {
+		border: 1px solid #dcdfe6;
+		height: 80rpx; // 稍微加高一点
+		border-radius: 8rpx;
+		padding: 0 20rpx;
+	}
+
+	/* 邀请码输入框额外包裹 */
+	.invite-code-input-wrap {
+		margin-top: 20rpx;
+		background-color: #fafafa;
+		padding: 20rpx;
+		border-radius: 12rpx;
+		border: 1rpx solid #eee;
+	}
+
+	.input-hint {
+		font-size: 22rpx;
+		color: #999;
+		margin-top: 12rpx;
+		line-height: 1.4;
+	}
+
+	.header-left {
+		display: flex;
+		align-items: center;
+	}
+
+	/* 顶部说明图标间距 */
+	.card-header {
+		justify-content: space-between;
 	}
 
 	.row-inputs {

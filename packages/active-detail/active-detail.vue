@@ -1,8 +1,8 @@
 <template>
-	<!-- 使用 v-if 确保在数据加载完成后再渲染主要内容，避免闪烁和错误 -->
-	<view v-if="activityDetail" class="page">
+	<!-- user-select-text 类允许全页面文字可选择复制 -->
+	<view v-if="activityDetail" class="page user-select-text">
 
-		<!-- 聚会封面轮播 -->
+		<!-- 1. 封面轮播区 -->
 		<view class="banner-section">
 			<swiper v-if="bannerImages.length > 0" class="banner-swiper" circular indicator-dots autoplay
 				:interval="4000" :duration="500">
@@ -16,34 +16,49 @@
 				<uni-icons type="image" size="40" color="#ccc"></uni-icons>
 			</view>
 
-			<!-- 标签浮层 -->
+			<!-- 【优化】聚会状态标签 - 移至右上角 -->
+			<view v-if="statusInfo.text" class="status-tag" :style="{ backgroundColor: statusInfo.color }">
+				{{ statusInfo.text }}
+			</view>
+
+			<!-- 标签浮层（左下角） -->
 			<view class="tags-overlay" v-if="activityDetail.tags && activityDetail.tags.length > 0">
 				<text class="event-cover-text">{{ activityDetail.tags.join(' · ') }}</text>
 			</view>
 		</view>
 
-		<!-- 聚会状态横幅 -->
-		<view v-if="statusInfo.text" class="status-banner" :style="{ backgroundColor: statusInfo.color }">
-			{{ statusInfo.text }}
-		</view>
-
 		<!-- 最低起聚名额提示 -->
 		<view v-if="showLimitSlotsTip" class="limit-slots-tip">
 			<uni-icons type="info-filled" color="#e6a23c" size="16" style="margin-right: 10rpx;"></uni-icons>
-			当前报名人数未达到最低起聚名额 ({{ activityDetail.limitSlots }}人)，聚会可能被取消；若有收费聚会组织者将退回报名费用。
+			<text>当前报名人数未达到最低起聚名额 ({{ activityDetail.limitSlots }}人)，聚会可能被取消。</text>
 		</view>
 
-		<!-- 聚会基础信息 -->
+		<!-- 2. 聚会基础信息区 -->
 		<view class="event-header">
 			<text class="event-title">{{ activityDetail.activityTitle }}</text>
-			<view class="event-meta">
-				<uni-icons type="calendar" size="18" color="#FF6B00" />
-				<text>{{ formattedActivityTime }}</text>
+
+			<view class="info-list">
+				<view class="info-item">
+					<text class="info-label">聚会时间：</text>
+					<text class="info-value">{{ formattedActivityTime }}</text>
+				</view>
+				<view class="info-item">
+					<text class="info-label">报名时间：</text>
+					<text class="info-value highlight">{{ formattedRegistrationTimes.start }} 至
+						{{ formattedRegistrationTimes.end }}</text>
+				</view>
+				<view class="info-item">
+					<text class="info-label">导航地址：</text>
+					<!-- 蓝色下划线，点击导航 -->
+					<text class="info-value nav-link"
+						@click="openLocationMap">{{ activityDetail.locationAddress }}</text>
+				</view>
+				<view class="info-item">
+					<text class="info-label">聚会地点：</text>
+					<text class="info-value">{{ activityDetail.activityLocation }}</text>
+				</view>
 			</view>
-			<view class="event-meta">
-				<uni-icons type="location" size="18" color="#FF6B00" />
-				<text>{{ activityDetail.locationAddress }}</text>
-			</view>
+
 			<view class="event-stats">
 				<view class="stat-item">
 					<view class="stat-value">{{ participantTotal || 0 }}</view>
@@ -64,20 +79,16 @@
 			</view>
 		</view>
 
-		<!-- 聚会介绍与环节 -->
+		<!-- 3. 聚会介绍与环节 -->
 		<view class="event-content">
-			<!-- 聚会介绍 -->
 			<view class="content-section">
 				<view class="section-header-row">
 					<view class="header-mark"></view>
 					<text class="section-title">聚会介绍</text>
 				</view>
-				<view class="event-description-text">
-					{{ activityDetail.activityDescription }}
-				</view>
+				<view class="event-description-text">{{ activityDetail.activityDescription }}</view>
 			</view>
 
-			<!-- 聚会环节（时间轴） -->
 			<view class="content-section" style="margin-top: 40rpx;">
 				<view class="section-header-row">
 					<view class="header-mark"></view>
@@ -100,12 +111,14 @@
 			</view>
 		</view>
 
-		<!-- 聚会组织者 -->
+		<!-- 4. 组织者 -->
 		<view class="organizer-section">
-			<view class="organizer-title">聚会组织者</view>
+			<view class="section-header-row">
+				<view class="header-mark"></view>
+				<text class="section-title">聚会组织者</text>
+			</view>
 			<view class="organizer-info" @click="navigateToBusinessCard(activityDetail.memberUser, true)">
 				<view class="organizer-avatar-wrap">
-					<!-- 修复：<img> → <image>，小程序不支持原生 HTML img 标签 -->
 					<image :src="activityDetail.memberUser.avatar" class="organizer-avatar-img" mode="aspectFill" />
 				</view>
 				<view>
@@ -115,10 +128,13 @@
 			</view>
 		</view>
 
-		<!-- 关联聚店信息 -->
+		<!-- 5. 聚店信息 -->
 		<view v-if="activityDetail.memberStoreRespVO" class="business-section"
 			@click="navigateToStoreDetail(activityDetail.memberStoreRespVO)">
-			<view class="business-title">聚会聚店</view>
+			<view class="section-header-row">
+				<view class="header-mark"></view>
+				<text class="section-title">聚会聚店</text>
+			</view>
 			<view class="business-info">
 				<view class="business-logo">
 					<image v-if="activityDetail.memberStoreRespVO.storeCoverImageUrl"
@@ -128,127 +144,102 @@
 				<view class="business-details">
 					<text class="business-name">{{ activityDetail.memberStoreRespVO.storeName }}</text>
 					<view class="business-meta">
-						<view style="font-size: 25rpx;margin: 10rpx 0;">
-							{{ activityDetail.memberStoreRespVO.fullAddress }}
-						</view>
-						<view style="font-size: 25rpx;margin: 10rpx 0;">
-							{{ activityDetail.memberStoreRespVO.contactPhone }}
-						</view>
+						<view class="meta-line">{{ activityDetail.memberStoreRespVO.fullAddress }}</view>
+						<view class="meta-line">{{ activityDetail.memberStoreRespVO.contactPhone }}</view>
 					</view>
 				</view>
 			</view>
 		</view>
 
-		<!-- 聚会贡分说明 -->
-		<!-- 修复：<span> → <text>，小程序不支持原生 HTML span 标签 -->
+		<!-- 6. 贡分说明 -->
 		<view class="organizer-section">
-			<view class="organizer-title">聚会贡分</view>
+			<view class="section-header-row">
+				<view class="header-mark"></view>
+				<text class="section-title">聚会贡分</text>
+			</view>
 			<view class="organizer-info">
-				<view class="organizer-name">参与本次聚会，聚会结束可以获得<text style="color: #ff6b00;">100</text>贡分</view>
+				<view class="organizer-name">参与本次聚会，聚会结束可以获得<text class="theme-text">100</text>贡分</view>
 			</view>
 		</view>
 
-		<!-- 参与用户 -->
+		<!-- 7. 参与用户 -->
 		<view class="participants-section">
 			<view class="participants-header">
-				<view class="participants-title">参与用户</view>
+				<view class="section-header-row">
+					<view class="header-mark"></view>
+					<text class="section-title">参与用户</text>
+				</view>
 				<view v-if="participantTotal > 0" class="view-all-link" @click="viewAllUsers">查看全部 ></view>
 			</view>
 			<view v-if="participantList.length > 0" class="participants-body">
-				<!-- 头像组独占一行 -->
 				<view class="avatar-group">
 					<image v-for="participant in participantList" :key="participant.id"
 						:src="participant.memberUser.avatar" class="avatar-item" />
-					<view v-if="participantTotal > participantList.length" class="avatar-item more-avatars">
-						...
-					</view>
+					<view v-if="participantTotal > participantList.length" class="avatar-item more-avatars">...</view>
 				</view>
-				<!-- 人数统计独占一行，显示在头像下方 -->
 				<view class="total-registered-info">
-					<text class="registered-count">{{ participantTotal }}</text>
+					<text class="registered-count theme-text">{{ participantTotal }}</text>
 					<text> 人已报名</text>
 				</view>
 			</view>
-			<view v-else class="no-participants">
-				<text>暂无用户报名，快来成为第一个参与者吧！</text>
-			</view>
+			<view v-else class="no-participants">暂无用户报名</view>
 		</view>
 
-		<!-- 赞助商（横向滚动） -->
+		<!-- 8. 赞助单位 -->
 		<view class="sponsor-section" v-if="sponsorList && sponsorList.length > 0">
-			<view class="section-title">
-				赞助单位
-				<text style="font-size: 24rpx; color:#999; margin-left: 10rpx;">({{ sponsorList.length }})</text>
+			<view class="section-header-row">
+				<view class="header-mark"></view>
+				<text class="section-title">赞助单位</text>
+				<text class="count-tag">({{ sponsorList.length }})</text>
 			</view>
 			<scroll-view scroll-x class="sponsor-scroll" enable-flex>
-				<view class="sponsor-item-card" v-for="(item, index) in sponsorList" :key="item.id"
+				<view class="sponsor-item-card" v-for="item in sponsorList" :key="item.id"
 					@click="navigateToSponsorDetail(item)">
 					<image v-if="item.logoUrl" :src="item.logoUrl" mode="aspectFit" class="sp-logo"></image>
-					<view v-else class="sp-logo-placeholder">
-						<text>LOGO</text>
-					</view>
+					<view v-else class="sp-logo-placeholder"><text>LOGO</text></view>
 					<view class="sp-name text-ellipsis">{{ item.sponsorName }}</view>
-					<view class="sp-tag-row">
-						<view v-if="item.sponsorType === 1" class="sp-tag money">现金</view>
-						<view v-else-if="item.sponsorType === 2" class="sp-tag goods">物品</view>
-						<view v-else-if="item.sponsorType === 3" class="sp-tag mixed">
-							<text class="tag-icon">💰</text>+<text class="tag-icon">🎁</text>
-						</view>
-					</view>
 				</view>
 			</scroll-view>
 		</view>
 
-		<!-- 聚会详情：浏览留痕模块优化 -->
+		<!-- 9. 浏览留痕 -->
 		<view class="viewer-module-card"
 			v-if="activityDetail && activityDetail.isReadTrace === 1 && (viewerTotal > 0 || activityDetail.hasSilentLoginUser === 1)">
 			<view class="viewer-header" @click="goToTraceList">
-				<view class="left-title">
-					<view class="title-indicator"></view>
-					<text class="title-txt">最近浏览</text>
-					<!-- 优化：增加黑色小眼睛 + 总人数 -->
+				<view class="section-header-row" style="margin-bottom: 0;">
+					<view class="header-mark"></view>
+					<text class="section-title">最近浏览</text>
 					<view class="view-count-wrap" v-if="activityDetail.targetViewNum > 0">
 						<uni-icons type="eye" size="16" color="#333"></uni-icons>
 						<text class="total-num">{{ activityDetail.targetViewNum }}</text>
 					</view>
 				</view>
 				<view class="right-more">
-					<text>浏览详情</text>
+					<text>详情</text>
 					<uni-icons type="right" size="14" color="#999"></uni-icons>
 				</view>
 			</view>
-
 			<view class="viewer-content" @click="goToTraceList">
 				<view class="avatar-stack">
-					<!-- 注册用户头像 -->
-					<view class="avatar-stack-item" v-for="(item, index) in viewerList" :key="item.id">
+					<view class="avatar-stack-item" v-for="item in viewerList" :key="item.id">
 						<image :src="item.memberUser?.avatar || '/static/icon/default-avatar.png'" class="v-avatar"
 							mode="aspectFill"></image>
 					</view>
-
-					<!-- 静默用户专用头像入口 -->
 					<view class="avatar-stack-item" v-if="activityDetail.hasSilentLoginUser === 1">
 						<image
 							src="https://img.gofor.club/post/20251231/1gcYJWmdcqe0de467fbd77b15cffaa30eb05468f5f7f_1767178458259.png"
 							class="v-avatar silent-avatar-border" mode="aspectFill"></image>
 					</view>
-
-					<view v-if="viewerTotal > 7" class="more-dots">
-						<text class="mdot"></text><text class="mdot"></text><text class="mdot"></text>
-					</view>
 				</view>
-				
 			</view>
 		</view>
 
-
-
-		<!-- 评论预览：整体可点击，回到详情页时 onShow 自动刷新 -->
+		<!-- 10. 商友评论 -->
 		<view class="comment-preview-card" @click="goToCommentPage">
 			<view class="preview-header">
-				<view class="left-title">
-					<view class="title-indicator"></view>
-					<text class="title-txt">商友评论</text>
+				<view class="section-header-row" style="margin-bottom: 0;">
+					<view class="header-mark"></view>
+					<text class="section-title">商友评论</text>
 					<text class="title-count" v-if="commentTotal > 0">{{ commentTotal }}</text>
 				</view>
 				<view class="right-more">
@@ -258,41 +249,26 @@
 			</view>
 			<view class="preview-list" v-if="commentPreviewList.length > 0">
 				<view class="preview-item" v-for="c in commentPreviewList" :key="c.id">
-					<!-- 修复：可选链兼容写法 -->
 					<text
-						class="p-user">{{ c.anonymous === 1 ? '匿名商友' : (c.memberUserBaseVO && c.memberUserBaseVO.nickname ? c.memberUserBaseVO.nickname : '商友') }}:</text>
+						class="p-user">{{ c.anonymous === 1 ? '匿名商友' : (c.memberUserBaseVO?.nickname || '商友') }}:</text>
 					<text class="p-content">{{ c.content }}</text>
 				</view>
 			</view>
-			<view v-else class="preview-empty">
-				<uni-icons type="chatbubble" size="18" color="#ccc"></uni-icons>
-				<text>暂无评论，点击发表第一条评论</text>
-			</view>
+			<view v-else class="preview-empty">暂无评论，点击发表第一条评论</view>
 		</view>
 
-		<!-- 报名时间 -->
-		<view style="margin: 20rpx auto; flex: 1; text-align: center;">
-			报名时间：
-			<!-- 修复：<span> → <text> -->
-			<text style="color: #ff1a3c;">
-				{{ formattedRegistrationTimes.start }} - {{ formattedRegistrationTimes.end }}
-			</text>
-		</view>
-
-		<!-- 赞踩互动胶囊 -->
+		<!-- 11. 赞踩互动 -->
 		<view class="interaction-capsule-section">
 			<view class="capsule-container">
-				<!-- 修复：激活类名改为独立平铺类，避免 WXSS &嵌套报错 -->
-				<view class="capsule-item" :class="activityDetail.userLikeStr === 'like' ? 'capsule-like-active' : ''"
+				<view class="capsule-item" :class="{ 'active': activityDetail.userLikeStr === 'like' }"
 					@click="toggleAction('like')">
 					<uni-icons :type="activityDetail.userLikeStr === 'like' ? 'hand-up-filled' : 'hand-up'" size="22"
-						:color="activityDetail.userLikeStr === 'like' ? '#FF6B00' : '#666'"></uni-icons>
+						:color="activityDetail.userLikeStr === 'like' ? '#FF62B1' : '#666'"></uni-icons>
 					<text class="count">{{ activityDetail.likesCount || 0 }}</text>
 					<text class="label">靠谱</text>
 				</view>
 				<view class="capsule-divider"></view>
-				<view class="capsule-item"
-					:class="activityDetail.userLikeStr === 'dislike' ? 'capsule-dislike-active' : ''"
+				<view class="capsule-item" :class="{ 'dislike-active': activityDetail.userLikeStr === 'dislike' }"
 					@click="toggleAction('dislike')">
 					<uni-icons :type="activityDetail.userLikeStr === 'dislike' ? 'hand-down-filled' : 'hand-down'"
 						size="22" :color="activityDetail.userLikeStr === 'dislike' ? '#3498db' : '#666'"></uni-icons>
@@ -302,20 +278,19 @@
 			</view>
 		</view>
 
-		<view style="width: 100%; height: 100rpx;"></view>
+		<view style="height: 120rpx;"></view>
 
-		<!-- 底部操作栏 -->
+		<!-- 12. 底部操作栏 -->
 		<view class="action-bar" v-if="!isActionBarHidden">
 			<view class="action-btn share-btn" @click="openSharePopup">
-				<text>🔗聚会分享</text>
+				<text>🔗 聚会分享</text>
 			</view>
-			<view class="action-btn register-btn" :class="{ 'disabled': !isRegistrationActive }"
-				:disabled="!isRegistrationActive" @click="register">
-				<text>➕立即报名</text>
+			<view class="action-btn register-btn" :class="{ 'disabled': !isRegistrationActive }" @click="register">
+				<text>➕ 立即报名</text>
 			</view>
 		</view>
 
-		<!-- 自定义分享弹窗 -->
+		<!-- 分享弹窗 -->
 		<uni-popup ref="sharePopup" type="bottom" background-color="#fff" @change="onPopupChange">
 			<view class="share-popup-content">
 				<view class="share-popup-title">自定义分享内容</view>
@@ -336,15 +311,6 @@
 				<view class="share-popup-cancel" @click="closeSharePopup">取消</view>
 			</view>
 		</uni-popup>
-
-		<!-- 朋友圈分享引导遮罩 -->
-		<view v-if="showTimelineGuide" class="timeline-guide-mask" @click="hideTimelineGuide">
-			<image src="/static/icons/share-guide-arrow.png" class="guide-arrow"></image>
-			<view class="guide-text">
-				<text>点击右上角</text>
-				<text>分享到朋友圈</text>
-			</view>
-		</view>
 
 		<PointsFeedbackPopup ref="pointsPopup" />
 	</view>
@@ -525,8 +491,8 @@
 			},
 			2: {
 				text: '正在报名中',
-				color: '#4cd964'
-			},
+				color: '#FF62B1'
+			}, // 主题色
 			3: {
 				text: '聚会即将开始',
 				color: '#007aff'
@@ -550,16 +516,6 @@
 		};
 	});
 
-	/**
-	 * 判断是否显示"起聚名额未达到"提示
-	 * 仅在"未开始"或"报名中"、且当前报名人数不足最低名额时显示
-	 */
-	// const showLimitSlotsTip = computed(() => {
-	// 	if (!activityDetail.value) return false;
-	// 	const inRelevantStatus = [1, 2].includes(activityDetail.value.status);
-	// 	const notEnough = (activityDetail.value.joinCount || 0) < activityDetail.value.limitSlots;
-	// 	return inRelevantStatus && notEnough;
-	// });
 	const showLimitSlotsTip = computed(() => {
 		if (!activityDetail.value) return false;
 
@@ -597,6 +553,23 @@
 
 
 	// ─── 工具函数 ───
+
+	// 地图导航
+	const openLocationMap = () => {
+		if (!activityDetail.value.latitude || !activityDetail.value.longitude) {
+			uni.showToast({
+				title: '暂无位置经纬度信息',
+				icon: 'none'
+			});
+			return;
+		}
+		uni.openLocation({
+			latitude: Number(activityDetail.value.latitude),
+			longitude: Number(activityDetail.value.longitude),
+			name: activityDetail.value.activityLocation,
+			address: activityDetail.value.locationAddress
+		});
+	};
 
 	/**
 	 * 格式化时间戳为 YYYY-MM-DD HH:mm 格式
@@ -1046,6 +1019,15 @@
 </script>
 
 <style lang="scss" scoped>
+	// 1. 定义全局主题色变量
+	$theme-color: #FF62B1;
+
+	// 2. 启用全页面文字选择复制
+	.user-select-text {
+		user-select: text;
+		-webkit-user-select: text;
+	}
+
 	.page {
 		padding-bottom: 120rpx;
 		background-color: #f8f8f8;
@@ -1055,35 +1037,41 @@
 	.banner-section {
 		position: relative;
 		width: 100%;
-		height: 600rpx;
-		background-color: #f0f0f0;
+		height: 560rpx;
+		background-color: #eee;
+
+		.status-tag {
+			position: absolute;
+			top: 30rpx;
+			right: 0;
+			padding: 10rpx 24rpx;
+			border-radius: 40rpx 0 0 40rpx;
+			color: #fff;
+			font-size: 24rpx;
+			font-weight: bold;
+			box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
+			z-index: 20;
+		}
 	}
 
-	.banner-swiper {
-		width: 100%;
-		height: 100%;
-	}
-
+	.banner-swiper,
 	.banner-image {
 		width: 100%;
 		height: 100%;
-		display: block;
-	}
-
-	.banner-placeholder {
-		width: 100%;
-		height: 100%;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		background-color: #eee;
 	}
 
 	.tags-overlay {
 		position: absolute;
 		bottom: 20rpx;
 		left: 20rpx;
-		z-index: 10;
+
+		.event-cover-text {
+			color: white;
+			font-size: 24rpx;
+			padding: 6rpx 16rpx;
+			background: rgba(0, 0, 0, 0.5);
+			border-radius: 6rpx;
+		}
 	}
 
 	.event-cover-text {
@@ -1093,6 +1081,56 @@
 		padding: 8rpx 16rpx;
 		background-color: rgba(0, 0, 0, 0.4);
 		border-radius: 8rpx;
+	}
+
+	/* ── 基础信息重构 ── */
+	.event-header {
+		background: #fff;
+		margin: 24rpx;
+		padding: 30rpx;
+		border-radius: 20rpx;
+
+		.event-title {
+			font-size: 40rpx;
+			font-weight: bold;
+			margin-bottom: 30rpx;
+			display: block;
+			color: #333;
+		}
+
+		.info-list {
+			margin-bottom: 30rpx;
+
+			.info-item {
+				display: flex;
+				margin-bottom: 16rpx;
+				line-height: 1.5;
+
+				.info-label {
+					font-size: 28rpx;
+					color: $theme-color; // 标签用主题色
+					flex-shrink: 0;
+					width: 150rpx;
+				}
+
+				.info-value {
+					font-size: 28rpx;
+					color: #555;
+					flex: 1;
+
+					&.highlight {
+						color: #ff1a3c;
+						font-weight: 500;
+					}
+
+					&.nav-link {
+						color: #3a7bd5;
+						text-decoration: underline;
+						font-weight: 500;
+					}
+				}
+			}
+		}
 	}
 
 	/* ── 状态横幅 & 提示 ── */
@@ -1166,6 +1204,35 @@
 		color: #888;
 	}
 
+	/* ── 贡分/统计样式 ── */
+	.theme-text {
+		color: $theme-color !important;
+		font-weight: bold;
+	}
+
+	.event-stats {
+		display: flex;
+		justify-content: space-between;
+		padding-top: 30rpx;
+		border-top: 1rpx solid #f0f0f0;
+
+		.stat-item {
+			text-align: center;
+
+			.stat-value {
+				font-size: 36rpx;
+				color: $theme-color;
+				font-weight: bold;
+			}
+
+			.stat-label {
+				font-size: 24rpx;
+				color: #999;
+				margin-top: 4rpx;
+			}
+		}
+	}
+
 	/* ── 内容区 ── */
 	.event-content {
 		background: #fff;
@@ -1179,20 +1246,20 @@
 		display: flex;
 		align-items: center;
 		margin-bottom: 24rpx;
-	}
 
-	.header-mark {
-		width: 8rpx;
-		height: 32rpx;
-		background: linear-gradient(to bottom, #FF6B00, #ffb347);
-		border-radius: 4rpx;
-		margin-right: 16rpx;
-	}
+		.header-mark {
+			width: 8rpx;
+			height: 32rpx;
+			background: $theme-color;
+			border-radius: 4rpx;
+			margin-right: 16rpx;
+		}
 
-	.section-title {
-		font-size: 32rpx;
-		font-weight: 700;
-		color: #333;
+		.section-title {
+			font-size: 32rpx;
+			font-weight: 800; // 粗体
+			color: $theme-color; // 主题色
+		}
 	}
 
 	.event-description-text {
@@ -1761,6 +1828,7 @@
 	}
 
 	/* ── 底部操作栏 ── */
+	/* ── 底部按钮渐变重构 ── */
 	.action-bar {
 		position: fixed;
 		bottom: 0;
@@ -1768,39 +1836,69 @@
 		right: 0;
 		background: #fff;
 		display: flex;
-		padding: 20rpx;
+		padding: 20rpx 30rpx;
 		padding-bottom: calc(20rpx + env(safe-area-inset-bottom));
-		box-shadow: 0 -5rpx 10rpx rgba(0, 0, 0, 0.05);
+		box-shadow: 0 -5rpx 20rpx rgba(0, 0, 0, 0.05);
 		z-index: 100;
+
+		.action-btn {
+			flex: 1;
+			height: 90rpx;
+			margin: 0 10rpx;
+			border-radius: 50rpx;
+			font-weight: bold;
+			font-size: 30rpx;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+
+			&.share-btn {
+				background: linear-gradient(to right, lighten($theme-color, 15%), $theme-color);
+				color: #fff;
+			}
+
+			&.register-btn {
+				background: linear-gradient(to right, #FF8C00, #FF6B00);
+				color: #fff;
+
+				&.disabled {
+					background: #ccc;
+				}
+			}
+		}
 	}
 
-	.action-btn {
-		flex: 1;
-		padding: 24rpx;
-		margin: 0 10rpx;
-		text-align: center;
-		border-radius: 16rpx;
-		font-weight: bold;
-		font-size: 32rpx;
-		display: flex;
-		align-items: center;
-		justify-content: center;
+	/* ── 其余通用卡片 ── */
+	.event-content,
+	.organizer-section,
+	.business-section,
+	.participants-section,
+	.sponsor-section,
+	.viewer-module-card,
+	.comment-preview-card {
+		background: #fff;
+		margin: 24rpx;
+		padding: 30rpx;
+		border-radius: 20rpx;
 	}
 
-	.action-btn.share-btn {
-		background: linear-gradient(to right, #4cd964, #34a853);
-		color: #fff;
+	.timeline-item .dot {
+		border-color: $theme-color;
 	}
 
-	.action-btn.register-btn {
-		background: linear-gradient(to right, #FF8C00, #FF6B00);
-		color: #fff;
+	.count-tag,
+	.title-count {
+		font-size: 24rpx;
+		color: $theme-color;
+		margin-left: 10rpx;
 	}
 
-	.action-btn.register-btn.disabled {
-		background: #c8c9cc;
-		color: #fff;
-		pointer-events: none;
+	.capsule-item.active {
+
+		.count,
+		.label {
+			color: $theme-color;
+		}
 	}
 
 	/* ── 分享弹窗 ── */

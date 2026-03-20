@@ -217,6 +217,96 @@
   font-weight: 500;
   line-height: 1.4;
 }
+
+/* 强制修复 uni-data-checkbox 选中样式 */
+.data-v-5d3444db .uni-data-checklist .checklist-group .checklist-box.is--tag {
+  background-color: #f5f5f5 !important;
+  border: 1px solid #eeeeee !important;
+}
+.data-v-5d3444db .uni-data-checklist .checklist-group .checklist-box.is--tag .checklist-text {
+  color: #666 !important;
+}
+.data-v-5d3444db .uni-data-checklist .checklist-group .checklist-box.is--tag.is-checked {
+  background-color: rgba(255, 111, 0, 0.1) !important;
+  border-color: #FF6F00 !important;
+}
+.data-v-5d3444db .uni-data-checklist .checklist-group .checklist-box.is--tag.is-checked .checklist-text {
+  color: #FF6F00 !important;
+  font-weight: bold;
+}
+
+/* 帮助图标容器对齐 */
+.space-between.data-v-5d3444db {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+.input-hint.data-v-5d3444db {
+  font-size: 22rpx;
+  color: #999;
+  margin-top: 12rpx;
+  line-height: 1.4;
+  padding-left: 4rpx;
+}
+
+/* 新增：隐私设置提示样式 */
+.privacy-settings-box.data-v-5d3444db {
+  background: #fcfcfc;
+  border: 1rpx solid #f0f0f0;
+  padding: 20rpx;
+  border-radius: 12rpx;
+  margin-bottom: 20rpx;
+}
+.setting-tips.data-v-5d3444db {
+  margin-top: 10rpx;
+}
+.setting-tips .tip-item.data-v-5d3444db {
+  display: block;
+  font-size: 22rpx;
+  color: #999;
+  line-height: 1.6;
+}
+.setting-tips .tip-item.data-v-5d3444db:before {
+  content: "* ";
+  color: #FF6F00;
+}
+
+/* 调整单选框容器高度 */
+.data-v-5d3444db .uni-data-checklist .checklist-group {
+  justify-content: space-between;
+}
+
+/* 导航地址盒子高亮 */
+.custom-picker-box.data-v-5d3444db {
+  border: 1px solid #dcdfe6;
+  height: 80rpx;
+  border-radius: 8rpx;
+  padding: 0 20rpx;
+}
+
+/* 邀请码输入框额外包裹 */
+.invite-code-input-wrap.data-v-5d3444db {
+  margin-top: 20rpx;
+  background-color: #fafafa;
+  padding: 20rpx;
+  border-radius: 12rpx;
+  border: 1rpx solid #eee;
+}
+.input-hint.data-v-5d3444db {
+  font-size: 22rpx;
+  color: #999;
+  margin-top: 12rpx;
+  line-height: 1.4;
+}
+.header-left.data-v-5d3444db {
+  display: flex;
+  align-items: center;
+}
+
+/* 顶部说明图标间距 */
+.card-header.data-v-5d3444db {
+  justify-content: space-between;
+}
 .row-inputs.data-v-5d3444db {
   display: flex;
   gap: 24rpx;

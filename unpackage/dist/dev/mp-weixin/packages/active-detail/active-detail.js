@@ -1,6 +1,5 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
-const common_assets = require("../../common/assets.js");
 const utils_request = require("../../utils/request.js");
 const utils_user = require("../../utils/user.js");
 if (!Array) {
@@ -39,7 +38,7 @@ const _sfc_main = {
       }
       loggedInUserId.value = common_vendor.index.getStorageSync("userId");
       if (!options.id) {
-        common_vendor.index.__f__("error", "at packages/active-detail/active-detail.vue:413", "[聚会详情] 缺少聚会ID");
+        common_vendor.index.__f__("error", "at packages/active-detail/active-detail.vue:379", "[聚会详情] 缺少聚会ID");
         common_vendor.index.showToast({
           title: "加载聚会详情失败，缺少ID",
           icon: "none"
@@ -54,7 +53,7 @@ const _sfc_main = {
         const sharerId = options.sharerId;
         const bizId = options.id;
         if (sharerId === loggedInUserId.value) {
-          common_vendor.index.__f__("log", "at packages/active-detail/active-detail.vue:433", "[分享加分] 本人点击，跳过");
+          common_vendor.index.__f__("log", "at packages/active-detail/active-detail.vue:399", "[分享加分] 本人点击，跳过");
         } else if (loggedInUserId.value && bizId) {
           triggerShareHitApi(sharerId, bizId);
         } else if (bizId) {
@@ -117,8 +116,9 @@ const _sfc_main = {
         },
         2: {
           text: "正在报名中",
-          color: "#4cd964"
+          color: "#FF62B1"
         },
+        // 主题色
         3: {
           text: "聚会即将开始",
           color: "#007aff"
@@ -163,6 +163,21 @@ const _sfc_main = {
       }
       return [];
     });
+    const openLocationMap = () => {
+      if (!activityDetail.value.latitude || !activityDetail.value.longitude) {
+        common_vendor.index.showToast({
+          title: "暂无位置经纬度信息",
+          icon: "none"
+        });
+        return;
+      }
+      common_vendor.index.openLocation({
+        latitude: Number(activityDetail.value.latitude),
+        longitude: Number(activityDetail.value.longitude),
+        name: activityDetail.value.activityLocation,
+        address: activityDetail.value.locationAddress
+      });
+    };
     const formatDateTime = (timestamp) => {
       if (!timestamp)
         return "时间待定";
@@ -194,7 +209,7 @@ const _sfc_main = {
           }, 500);
         }
       } else {
-        common_vendor.index.__f__("error", "at packages/active-detail/active-detail.vue:651", "[聚会详情] 获取失败:", result ? result.error : "无返回");
+        common_vendor.index.__f__("error", "at packages/active-detail/active-detail.vue:624", "[聚会详情] 获取失败:", result ? result.error : "无返回");
       }
     };
     const getParticipantList = async () => {
@@ -212,7 +227,7 @@ const _sfc_main = {
         }
       });
       if (error) {
-        common_vendor.index.__f__("error", "at packages/active-detail/active-detail.vue:674", "[报名列表] 获取失败:", error);
+        common_vendor.index.__f__("error", "at packages/active-detail/active-detail.vue:647", "[报名列表] 获取失败:", error);
         return;
       }
       if (data && data.list) {
@@ -327,9 +342,6 @@ const _sfc_main = {
       closeSharePopup();
       showTimelineGuide.value = true;
     };
-    const hideTimelineGuide = () => {
-      showTimelineGuide.value = false;
-    };
     const onPopupChange = (e) => {
       isActionBarHidden.value = e.show;
     };
@@ -422,9 +434,9 @@ const _sfc_main = {
         }
       });
       if (error) {
-        common_vendor.index.__f__("error", "at packages/active-detail/active-detail.vue:990", "[分享加分] 接口失败:", error);
+        common_vendor.index.__f__("error", "at packages/active-detail/active-detail.vue:963", "[分享加分] 接口失败:", error);
       } else {
-        common_vendor.index.__f__("log", "at packages/active-detail/active-detail.vue:992", "[分享加分] 成功触发, sharerId:", sharerId);
+        common_vendor.index.__f__("log", "at packages/active-detail/active-detail.vue:965", "[分享加分] 成功触发, sharerId:", sharerId);
       }
     };
     common_vendor.onShareAppMessage(() => {
@@ -478,14 +490,14 @@ const _sfc_main = {
           color: "#ccc"
         })
       }, {
-        e: activityDetail.value.tags && activityDetail.value.tags.length > 0
-      }, activityDetail.value.tags && activityDetail.value.tags.length > 0 ? {
-        f: common_vendor.t(activityDetail.value.tags.join(" · "))
-      } : {}, {
-        g: statusInfo.value.text
+        e: statusInfo.value.text
       }, statusInfo.value.text ? {
-        h: common_vendor.t(statusInfo.value.text),
-        i: statusInfo.value.color
+        f: common_vendor.t(statusInfo.value.text),
+        g: statusInfo.value.color
+      } : {}, {
+        h: activityDetail.value.tags && activityDetail.value.tags.length > 0
+      }, activityDetail.value.tags && activityDetail.value.tags.length > 0 ? {
+        i: common_vendor.t(activityDetail.value.tags.join(" · "))
       } : {}, {
         j: showLimitSlotsTip.value
       }, showLimitSlotsTip.value ? {
@@ -497,27 +509,21 @@ const _sfc_main = {
         l: common_vendor.t(activityDetail.value.limitSlots)
       } : {}, {
         m: common_vendor.t(activityDetail.value.activityTitle),
-        n: common_vendor.p({
-          type: "calendar",
-          size: "18",
-          color: "#FF6B00"
-        }),
-        o: common_vendor.t(formattedActivityTime.value),
-        p: common_vendor.p({
-          type: "location",
-          size: "18",
-          color: "#FF6B00"
-        }),
+        n: common_vendor.t(formattedActivityTime.value),
+        o: common_vendor.t(formattedRegistrationTimes.value.start),
+        p: common_vendor.t(formattedRegistrationTimes.value.end),
         q: common_vendor.t(activityDetail.value.locationAddress),
-        r: common_vendor.t(participantTotal.value || 0),
-        s: common_vendor.t(activityDetail.value.totalSlots),
-        t: [1, 3].includes(activityDetail.value.activityFunds)
+        r: common_vendor.o(openLocationMap),
+        s: common_vendor.t(activityDetail.value.activityLocation),
+        t: common_vendor.t(participantTotal.value || 0),
+        v: common_vendor.t(activityDetail.value.totalSlots),
+        w: [1, 3].includes(activityDetail.value.activityFunds)
       }, [1, 3].includes(activityDetail.value.activityFunds) ? {
-        v: common_vendor.t(activityDetail.value.registrationFee)
+        x: common_vendor.t(activityDetail.value.registrationFee)
       } : activityDetail.value.activityFunds === 2 ? {} : {}, {
-        w: activityDetail.value.activityFunds === 2,
-        x: common_vendor.t(activityDetail.value.activityDescription),
-        y: common_vendor.f(activityDetail.value.memberActivitySessionList, (item, index, i0) => {
+        y: activityDetail.value.activityFunds === 2,
+        z: common_vendor.t(activityDetail.value.activityDescription),
+        A: common_vendor.f(activityDetail.value.memberActivitySessionList, (item, index, i0) => {
           return common_vendor.e({
             a: index !== activityDetail.value.memberActivitySessionList.length - 1
           }, index !== activityDetail.value.memberActivitySessionList.length - 1 ? {} : {}, {
@@ -526,171 +532,152 @@ const _sfc_main = {
             d: item.id
           });
         }),
-        z: activityDetail.value.memberUser.avatar,
-        A: common_vendor.t(activityDetail.value.memberUser.nickname),
-        B: common_vendor.t(activityDetail.value.organizerContactPhone),
-        C: common_vendor.o(($event) => navigateToBusinessCard(activityDetail.value.memberUser, true)),
-        D: activityDetail.value.memberStoreRespVO
+        B: activityDetail.value.memberUser.avatar,
+        C: common_vendor.t(activityDetail.value.memberUser.nickname),
+        D: common_vendor.t(activityDetail.value.organizerContactPhone),
+        E: common_vendor.o(($event) => navigateToBusinessCard(activityDetail.value.memberUser, true)),
+        F: activityDetail.value.memberStoreRespVO
       }, activityDetail.value.memberStoreRespVO ? common_vendor.e({
-        E: activityDetail.value.memberStoreRespVO.storeCoverImageUrl
+        G: activityDetail.value.memberStoreRespVO.storeCoverImageUrl
       }, activityDetail.value.memberStoreRespVO.storeCoverImageUrl ? {
-        F: activityDetail.value.memberStoreRespVO.storeCoverImageUrl
+        H: activityDetail.value.memberStoreRespVO.storeCoverImageUrl
       } : {
-        G: common_vendor.p({
+        I: common_vendor.p({
           type: "shop-filled",
           size: "24",
           color: "#fff"
         })
       }, {
-        H: common_vendor.t(activityDetail.value.memberStoreRespVO.storeName),
-        I: common_vendor.t(activityDetail.value.memberStoreRespVO.fullAddress),
-        J: common_vendor.t(activityDetail.value.memberStoreRespVO.contactPhone),
-        K: common_vendor.o(($event) => navigateToStoreDetail(activityDetail.value.memberStoreRespVO))
+        J: common_vendor.t(activityDetail.value.memberStoreRespVO.storeName),
+        K: common_vendor.t(activityDetail.value.memberStoreRespVO.fullAddress),
+        L: common_vendor.t(activityDetail.value.memberStoreRespVO.contactPhone),
+        M: common_vendor.o(($event) => navigateToStoreDetail(activityDetail.value.memberStoreRespVO))
       }) : {}, {
-        L: participantTotal.value > 0
+        N: participantTotal.value > 0
       }, participantTotal.value > 0 ? {
-        M: common_vendor.o(viewAllUsers)
+        O: common_vendor.o(viewAllUsers)
       } : {}, {
-        N: participantList.value.length > 0
+        P: participantList.value.length > 0
       }, participantList.value.length > 0 ? common_vendor.e({
-        O: common_vendor.f(participantList.value, (participant, k0, i0) => {
+        Q: common_vendor.f(participantList.value, (participant, k0, i0) => {
           return {
             a: participant.id,
             b: participant.memberUser.avatar
           };
         }),
-        P: participantTotal.value > participantList.value.length
+        R: participantTotal.value > participantList.value.length
       }, participantTotal.value > participantList.value.length ? {} : {}, {
-        Q: common_vendor.t(participantTotal.value)
+        S: common_vendor.t(participantTotal.value)
       }) : {}, {
-        R: sponsorList.value && sponsorList.value.length > 0
+        T: sponsorList.value && sponsorList.value.length > 0
       }, sponsorList.value && sponsorList.value.length > 0 ? {
-        S: common_vendor.t(sponsorList.value.length),
-        T: common_vendor.f(sponsorList.value, (item, index, i0) => {
+        U: common_vendor.t(sponsorList.value.length),
+        V: common_vendor.f(sponsorList.value, (item, k0, i0) => {
           return common_vendor.e({
             a: item.logoUrl
           }, item.logoUrl ? {
             b: item.logoUrl
           } : {}, {
             c: common_vendor.t(item.sponsorName),
-            d: item.sponsorType === 1
-          }, item.sponsorType === 1 ? {} : item.sponsorType === 2 ? {} : item.sponsorType === 3 ? {} : {}, {
-            e: item.sponsorType === 2,
-            f: item.sponsorType === 3,
-            g: item.id,
-            h: common_vendor.o(($event) => navigateToSponsorDetail(item), item.id)
+            d: item.id,
+            e: common_vendor.o(($event) => navigateToSponsorDetail(item), item.id)
           });
         })
       } : {}, {
-        U: activityDetail.value && activityDetail.value.isReadTrace === 1 && (viewerTotal.value > 0 || activityDetail.value.hasSilentLoginUser === 1)
+        W: activityDetail.value && activityDetail.value.isReadTrace === 1 && (viewerTotal.value > 0 || activityDetail.value.hasSilentLoginUser === 1)
       }, activityDetail.value && activityDetail.value.isReadTrace === 1 && (viewerTotal.value > 0 || activityDetail.value.hasSilentLoginUser === 1) ? common_vendor.e({
-        V: activityDetail.value.targetViewNum > 0
+        X: activityDetail.value.targetViewNum > 0
       }, activityDetail.value.targetViewNum > 0 ? {
-        W: common_vendor.p({
+        Y: common_vendor.p({
           type: "eye",
           size: "16",
           color: "#333"
         }),
-        X: common_vendor.t(activityDetail.value.targetViewNum)
+        Z: common_vendor.t(activityDetail.value.targetViewNum)
       } : {}, {
-        Y: common_vendor.p({
+        aa: common_vendor.p({
           type: "right",
           size: "14",
           color: "#999"
         }),
-        Z: common_vendor.o(goToTraceList),
-        aa: common_vendor.f(viewerList.value, (item, index, i0) => {
+        ab: common_vendor.o(goToTraceList),
+        ac: common_vendor.f(viewerList.value, (item, k0, i0) => {
           var _a;
           return {
             a: ((_a = item.memberUser) == null ? void 0 : _a.avatar) || "/static/icon/default-avatar.png",
             b: item.id
           };
         }),
-        ab: activityDetail.value.hasSilentLoginUser === 1
+        ad: activityDetail.value.hasSilentLoginUser === 1
       }, activityDetail.value.hasSilentLoginUser === 1 ? {} : {}, {
-        ac: viewerTotal.value > 7
-      }, viewerTotal.value > 7 ? {} : {}, {
-        ad: common_vendor.o(goToTraceList)
+        ae: common_vendor.o(goToTraceList)
       }) : {}, {
-        ae: commentTotal.value > 0
+        af: commentTotal.value > 0
       }, commentTotal.value > 0 ? {
-        af: common_vendor.t(commentTotal.value)
+        ag: common_vendor.t(commentTotal.value)
       } : {}, {
-        ag: common_vendor.p({
+        ah: common_vendor.p({
           type: "right",
           size: "14",
           color: "#999"
         }),
-        ah: commentPreviewList.value.length > 0
+        ai: commentPreviewList.value.length > 0
       }, commentPreviewList.value.length > 0 ? {
-        ai: common_vendor.f(commentPreviewList.value, (c, k0, i0) => {
+        aj: common_vendor.f(commentPreviewList.value, (c, k0, i0) => {
+          var _a;
           return {
-            a: common_vendor.t(c.anonymous === 1 ? "匿名商友" : c.memberUserBaseVO && c.memberUserBaseVO.nickname ? c.memberUserBaseVO.nickname : "商友"),
+            a: common_vendor.t(c.anonymous === 1 ? "匿名商友" : ((_a = c.memberUserBaseVO) == null ? void 0 : _a.nickname) || "商友"),
             b: common_vendor.t(c.content),
             c: c.id
           };
         })
-      } : {
-        aj: common_vendor.p({
-          type: "chatbubble",
-          size: "18",
-          color: "#ccc"
-        })
-      }, {
+      } : {}, {
         ak: common_vendor.o(goToCommentPage),
-        al: common_vendor.t(formattedRegistrationTimes.value.start),
-        am: common_vendor.t(formattedRegistrationTimes.value.end),
-        an: common_vendor.p({
+        al: common_vendor.p({
           type: activityDetail.value.userLikeStr === "like" ? "hand-up-filled" : "hand-up",
           size: "22",
-          color: activityDetail.value.userLikeStr === "like" ? "#FF6B00" : "#666"
+          color: activityDetail.value.userLikeStr === "like" ? "#FF62B1" : "#666"
         }),
-        ao: common_vendor.t(activityDetail.value.likesCount || 0),
-        ap: common_vendor.n(activityDetail.value.userLikeStr === "like" ? "capsule-like-active" : ""),
-        aq: common_vendor.o(($event) => toggleAction("like")),
-        ar: common_vendor.p({
+        am: common_vendor.t(activityDetail.value.likesCount || 0),
+        an: activityDetail.value.userLikeStr === "like" ? 1 : "",
+        ao: common_vendor.o(($event) => toggleAction("like")),
+        ap: common_vendor.p({
           type: activityDetail.value.userLikeStr === "dislike" ? "hand-down-filled" : "hand-down",
           size: "22",
           color: activityDetail.value.userLikeStr === "dislike" ? "#3498db" : "#666"
         }),
-        as: common_vendor.t(activityDetail.value.dislikesCount || 0),
-        at: common_vendor.n(activityDetail.value.userLikeStr === "dislike" ? "capsule-dislike-active" : ""),
-        av: common_vendor.o(($event) => toggleAction("dislike")),
-        aw: !isActionBarHidden.value
+        aq: common_vendor.t(activityDetail.value.dislikesCount || 0),
+        ar: activityDetail.value.userLikeStr === "dislike" ? 1 : "",
+        as: common_vendor.o(($event) => toggleAction("dislike")),
+        at: !isActionBarHidden.value
       }, !isActionBarHidden.value ? {
-        ax: common_vendor.o(openSharePopup),
-        ay: !isRegistrationActive.value ? 1 : "",
-        az: !isRegistrationActive.value,
-        aA: common_vendor.o(register)
+        av: common_vendor.o(openSharePopup),
+        aw: !isRegistrationActive.value ? 1 : "",
+        ax: common_vendor.o(register)
       } : {}, {
-        aB: customShareTitle.value,
-        aC: common_vendor.o(($event) => customShareTitle.value = $event.detail.value),
-        aD: common_vendor.p({
+        ay: customShareTitle.value,
+        az: common_vendor.o(($event) => customShareTitle.value = $event.detail.value),
+        aA: common_vendor.p({
           type: "weixin",
           size: "30",
           color: "#07c160"
         }),
-        aE: common_vendor.p({
+        aB: common_vendor.p({
           type: "pyq",
           size: "30",
           color: "#53a046"
         }),
-        aF: common_vendor.o(guideShareTimeline),
-        aG: common_vendor.o(closeSharePopup),
-        aH: common_vendor.sr(sharePopup, "9217aa1c-11", {
+        aC: common_vendor.o(guideShareTimeline),
+        aD: common_vendor.o(closeSharePopup),
+        aE: common_vendor.sr(sharePopup, "9217aa1c-8", {
           "k": "sharePopup"
         }),
-        aI: common_vendor.o(onPopupChange),
-        aJ: common_vendor.p({
+        aF: common_vendor.o(onPopupChange),
+        aG: common_vendor.p({
           type: "bottom",
           ["background-color"]: "#fff"
         }),
-        aK: showTimelineGuide.value
-      }, showTimelineGuide.value ? {
-        aL: common_assets._imports_0$3,
-        aM: common_vendor.o(hideTimelineGuide)
-      } : {}, {
-        aN: common_vendor.sr(pointsPopup, "9217aa1c-14", {
+        aH: common_vendor.sr(pointsPopup, "9217aa1c-11", {
           "k": "pointsPopup"
         })
       }) : {});
