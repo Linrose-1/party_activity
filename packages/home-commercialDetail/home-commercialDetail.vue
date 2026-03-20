@@ -136,7 +136,8 @@
 						<span>{{ postDetail.dislikes }}</span>
 					</view>
 					<view class="interaction-btn" @click="openSharePopup">
-						<uni-icons type="redo" size="18" color="#666"></uni-icons> 分享
+						<uni-icons type="redo" size="18" color="#666"></uni-icons>
+						<text style="font-size: 26rpx;">分享</text>
 					</view>
 					<view class="interaction-btn" :class="{ active: postDetail.saved }"
 						@click="toggleBookmark(postDetail)">
@@ -157,7 +158,7 @@
 					<view class="interest-btn" :class="{ 'interested': postDetail.isInterested }"
 						@click="toggleInterest">
 						<text class="interest-icon">{{ postDetail.isInterested ? '✅' : '🤝' }}</text>
-						<text>{{ postDetail.isInterested ? '已表达兴趣' : '感兴趣' }}</text>
+						<text style="font-size: 26rpx;">{{ postDetail.isInterested ? '已表达兴趣' : '感兴趣' }}</text>
 					</view>
 				</view>
 				<!-- ===== 感兴趣按钮 结束 ===== -->
@@ -169,6 +170,11 @@
 					<view class="left-title">
 						<view class="title-indicator"></view>
 						<text class="title-txt">最近浏览</text>
+
+						<view class="view-count-wrap" v-if="postDetail.targetViewNum > 0">
+							<uni-icons type="eye" size="16" color="#333"></uni-icons>
+							<text class="total-num">{{ postDetail.targetViewNum }}</text>
+						</view>
 					</view>
 					<view class="right-more">
 						<text>浏览详情</text>
@@ -179,6 +185,11 @@
 					<view class="avatar-stack">
 						<view class="avatar-item" v-for="(item, index) in viewerList" :key="item.id">
 							<image :src="item.memberUser.avatar" class="v-avatar" mode="aspectFill"></image>
+						</view>
+						<view class="avatar-item" v-if="postDetail.hasSilentLoginUser === 1">
+							<image
+								src="https://img.gofor.club/post/20251231/1gcYJWmdcqe0de467fbd77b15cffaa30eb05468f5f7f_1767178458259.png"
+								class="v-avatar silent-avatar" mode="aspectFill"></image>
 						</view>
 						<view v-if="viewerTotal > 7" class="more-dots">
 							<text class="dot"></text>
@@ -427,6 +438,8 @@
 		expectedInvestmentObj: null, // 预期投入（解析后的对象）
 		interestCount: 0, // 感兴趣人数
 		isInterested: false, // 当前用户是否已表达感兴趣
+		targetViewNum: 0, // 总阅读人数
+		hasSilentLoginUser: 0, // 是否有静默用户查看
 	});
 
 	// 评论图片相关
@@ -647,6 +660,8 @@
 				postDetail.userAction = item.userLikeStr || null;
 				postDetail.cardFlag = item.cardFlag;
 				postDetail.isReadTrace = item.isReadTrace;
+				postDetail.targetViewNum = item.targetViewNum || 0; // 同步总人数
+				postDetail.hasSilentLoginUser = item.hasSilentLoginUser || 0; // 同步静默用户标识
 				postDetail.commentFlag = item.commentFlag;
 				postDetail.postType = item.postType || 0;
 				postDetail.tags = item.tags || [];
@@ -832,9 +847,13 @@
 
 	/** 跳转到浏览记录详情页 */
 	const goToTraceList = () => {
-		const id = (typeof postId.value === 'object') ? postId.value.id : postId.value;
+		// 确保 postId 有值
+		const id = postDetail.id;
+		// 确保 hasSilentLoginUser 被正确传入
+		const hasSilent = postDetail.hasSilentLoginUser || 0;
+
 		uni.navigateTo({
-			url: `/packages/user-view-trace/user-view-trace?id=${id}&type=post`
+			url: `/packages/user-view-trace/user-view-trace?id=${id}&type=post&hasSilent=${hasSilent}`
 		});
 	};
 
@@ -1911,7 +1930,7 @@
 	}
 
 	.interest-icon {
-		font-size: 32rpx;
+		font-size: 28rpx;
 	}
 
 	/* ==================== 感兴趣成功弹窗 ==================== */
@@ -2126,6 +2145,34 @@
 		font-size: 28rpx;
 		font-weight: bold;
 		color: #333;
+	}
+
+	.view-count-wrap {
+		display: flex;
+		align-items: center;
+		margin-left: 20rpx;
+		background: #f0f0f0;
+		padding: 1rpx 16rpx;
+		border-radius: 30rpx;
+	}
+
+	/* 注意：这里不要嵌套在 .view-count-wrap 里面 */
+	.view-count-wrap .total-num {
+		font-size: 24rpx;
+		color: #333;
+		font-weight: bold;
+		margin-left: 6rpx;
+	}
+
+	/* --- 优化：静默用户头像样式 --- */
+	.silent-avatar {
+		border: 2rpx solid #FF6A00 !important;
+		background-color: #FFF5EE;
+	}
+
+	/* 留痕模块卡片触发样式 */
+	.viewer-module-card:active {
+		background-color: #fafafa;
 	}
 
 	.title-count {

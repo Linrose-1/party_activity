@@ -133,8 +133,6 @@ const _sfc_main = {
           inviteCircleRef.value.open(user);
           break;
       }
-      if (!["addCircle", "inviteCircle"].includes(type))
-        close();
     };
     const onSocialSuccess = (id) => emit("actionSuccess", id);
     __expose({
@@ -165,13 +163,13 @@ const _sfc_main = {
           color: "#fff"
         }),
         l: common_vendor.t(creditLevel.value),
-        m: common_vendor.t(totalScore.value),
-        n: common_vendor.p({
+        m: common_vendor.o(($event) => handleAction("navToCredit")),
+        n: common_vendor.t(totalScore.value),
+        o: common_vendor.p({
           type: "right",
           size: "10",
           color: "rgba(255,255,255,0.7)"
-        }),
-        o: common_vendor.o(($event) => handleAction("navToCredit"))
+        })
       } : {}, {
         p: !targetUser.value.pinyinName && !targetUser.value.title && !creditLevel.value && !totalScore.value
       }, !targetUser.value.pinyinName && !targetUser.value.title && !creditLevel.value && !totalScore.value ? {} : {}, {

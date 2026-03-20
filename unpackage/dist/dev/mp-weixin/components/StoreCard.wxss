@@ -199,3 +199,35 @@
   color: #ff6b00;
   background-color: transparent;
 }
+.post-view-trace.data-v-8cae2ec5 {
+  margin-top: 16rpx;
+  padding-top: 16rpx;
+  border-top: 1rpx solid #f8f8f8;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.view-avatar-row.data-v-8cae2ec5 {
+  display: flex;
+  align-items: center;
+}
+.tiny-avatar.data-v-8cae2ec5 {
+  width: 32rpx;
+  height: 32rpx;
+  border-radius: 50%;
+  border: 2rpx solid #fff;
+  background-color: #f0f0f0;
+  margin-right: -8rpx;
+}
+.tiny-avatar.data-v-8cae2ec5:last-child {
+  margin-right: 0;
+}
+.silent-avatar.data-v-8cae2ec5 {
+  border: 2rpx solid #FF8C00 !important;
+  background-color: #fff;
+}
+.view-count-txt.data-v-8cae2ec5 {
+  font-size: 20rpx;
+  color: #999;
+  margin-left: 16rpx;
+}

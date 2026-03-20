@@ -1,10 +1,5 @@
 <template>
 	<view class="container">
-		<!--  悬浮分享按钮：仅在数据加载成功后显示 -->
-		<!-- <view class="share-fab" v-if="userInfo" @click="openSharePopup">
-			<uni-icons type="undo-filled" size="24" color="#fff"></uni-icons>
-		</view> -->
-
 		<!--  页面状态处理：加载、错误、成功 -->
 		<!-- 加载中 -->
 		<view v-if="isLoading" class="status-indicator">
@@ -24,10 +19,6 @@
 					{{ isViewingOwnCard ? '我的数字名片' : 'TA的数字名片' }}
 				</view>
 				<view class="header-subtitle">实时身份，及时连接！</view>
-				<!-- 编辑提示：仅在查看自己的名片时显示 -->
-				<!-- <view v-if="isViewingOwnCard" class="edit-hint">
-					名片信息可在 <text @click="goToEdit" class="edit-link">个人资料</text> 中编辑
-				</view> -->
 			</view>
 
 			<MyCard :avatar="userInfo.avatar" :name="userInfo.realName || userInfo.nickname"
@@ -42,8 +33,6 @@
 				:total-score="totalScore" @goToCredit="handleGoToCredit" @goToMember="handleGoToMember"
 				platform-qr-code-url="https://img.gofor.club/mmexport1759211962539.jpg"
 				@goToOpportunities="handleGoToOpportunities" />
-
-			<!-- <view style="width: 100%;height: 140rpx;"></view> -->
 		</template>
 
 		<!-- ==================== 底部动态操作栏 ==================== -->
@@ -64,11 +53,6 @@
 				<!-- 2. 邀入我圈 (主要按钮，品牌渐变) -->
 				<button class="btn btn-primary" @click="handleInviteCircle">邀入我圈</button>
 
-				<!-- 3. 智能分享 (独立标识，橙色边框/圆角) -->
-				<view class="smart-share-btn" @click="openShareTypePopup">
-					<!-- <uni-icons type="paperplane-filled" size="22" color="#FF6A00"></uni-icons> -->
-					<text>智能分享</text>
-				</view>
 			</view>
 
 			<!-- 场景 C: 已登录，已是圈友 -->
@@ -130,7 +114,7 @@
 
 	<!--需求诱发悬浮按钮组 -->
 	<!-- 逻辑：只有已完整登录（绑定手机号）的用户才显示此悬浮窗 -->
-	<DemandActionFab v-if="userStatus !== 'GUEST' && userStatus !== 'SELF'" />
+	<DemandActionFab v-if="userStatus !== 'GUEST' && userStatus !== 'SELF'" @shareClick="openShareTypePopup" />
 
 	<!-- 智能引导弹窗 -->
 	<SmartGuidePopup ref="guidePopupRef" :scenario="guideScenario" />
@@ -808,37 +792,37 @@
 		isShareTypePopupOpen.value = e.show;
 	};
 
-	
+
 	// --- 5. 分享相关逻辑 ---
 	/**
 	 * 核心逻辑：6秒后判断身份并弹窗
 	 */
 	const startGuideTimer = () => {
-	    setTimeout(() => {
-	        const token = uni.getStorageSync('token');
-	        const userInfo = getCachedUserInfo(); 
-	
-	        // 1. 如果完全没有 token，视为全新户
-	        if (!token) {
-	            guideScenario.value = 1;
-	            if (guidePopupRef.value) guidePopupRef.value.open();
-	        } 
-	        // 2. 如果有 token 但没有手机号，视为已静默的游客
-	        else if (!userInfo || !userInfo.mobile) {
-	            guideScenario.value = 2;
-	            if (guidePopupRef.value) guidePopupRef.value.open();
-	        } 
-	        // 3. 如果已绑定手机号，但 isComplete !== 1 (未完善资料)，视为情况3
-	        else if (userInfo.isComplete !== 1) {
-	            guideScenario.value = 3;
-	            if (guidePopupRef.value) guidePopupRef.value.open();
-	        }
-	        // 4. 其余情况（即 isComplete === 1，已是会员）：直接 return，什么都不弹
-	        else {
-	            console.log('✅ 用户已完善资料，跳过引导弹窗');
-	            return;
-	        }
-	    }, 6000);
+		setTimeout(() => {
+			const token = uni.getStorageSync('token');
+			const userInfo = getCachedUserInfo();
+
+			// 1. 如果完全没有 token，视为全新户
+			if (!token) {
+				guideScenario.value = 1;
+				if (guidePopupRef.value) guidePopupRef.value.open();
+			}
+			// 2. 如果有 token 但没有手机号，视为已静默的游客
+			else if (!userInfo || !userInfo.mobile) {
+				guideScenario.value = 2;
+				if (guidePopupRef.value) guidePopupRef.value.open();
+			}
+			// 3. 如果已绑定手机号，但 isComplete !== 1 (未完善资料)，视为情况3
+			else if (userInfo.isComplete !== 1) {
+				guideScenario.value = 3;
+				if (guidePopupRef.value) guidePopupRef.value.open();
+			}
+			// 4. 其余情况（即 isComplete === 1，已是会员）：直接 return，什么都不弹
+			else {
+				console.log('✅ 用户已完善资料，跳过引导弹窗');
+				return;
+			}
+		}, 6000);
 	};
 
 	/**

@@ -14,7 +14,7 @@
 			<view class="form-card">
 				<view class="payment-tip" v-if="!isPaidUser">
 					<uni-icons type="info" size="14" color="#FF6A00"></uni-icons>
-					<text>提示：首次保存定制内容需支付 10 智米</text>
+					<text>提示：首次保存定制内容需消耗 10 智米</text>
 				</view>
 
 				<uni-forms ref="formRef" :modelValue="form" :label-width="100">

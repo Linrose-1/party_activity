@@ -86,6 +86,32 @@
 					</template>
 				</view>
 			</view>
+
+			<!-- 聚店卡片：新增阅读留痕区域 -->
+			<view class="post-view-trace"
+				v-if="mode === 'browse' && store.isReadTrace === 1 && (store.targetViews?.length > 0 || store.hasSilentLoginUser === 1)"
+				@click.stop="handleViewTrace">
+				<view class="view-avatar-row">
+					<!-- 渲染普通真实用户头像 -->
+					<template
+						v-for="(viewer, vIdx) in (store.targetViews || []).slice(0, store.hasSilentLoginUser === 1 ? 7 : 8)"
+						:key="vIdx">
+						<image :src="viewer.memberUser?.avatar || '/static/icon/default-avatar.png'" class="tiny-avatar"
+							mode="aspectFill" />
+					</template>
+
+					<!-- 静默用户标识头像 -->
+					<image v-if="store.hasSilentLoginUser === 1"
+						src="https://img.gofor.club/post/20251231/1gcYJWmdcqe0de467fbd77b15cffaa30eb05468f5f7f_1767178458259.png"
+						class="tiny-avatar silent-avatar" mode="aspectFill" />
+
+					<text class="view-count-txt">
+						等{{ store.targetViewNum || 0 }}位商友看过
+					</text>
+				</view>
+				<uni-icons type="right" size="12" color="#ccc" />
+			</view>
+
 		</view>
 	</view>
 </template>
@@ -202,6 +228,16 @@
 		if (!await checkLoginGuard()) return;
 		uni.navigateTo({
 			url: `/packages/shop-detail/shop-detail?id=${props.store.id}`
+		});
+	};
+
+	/**
+	 * 跳转到聚店浏览记录，携带 type=store 和 hasSilent 参数
+	 */
+	const handleViewTrace = () => {
+		const hasSilent = props.store.hasSilentLoginUser || 0;
+		uni.navigateTo({
+			url: `/packages/user-view-trace/user-view-trace?id=${props.store.id}&type=store&hasSilent=${hasSilent}`
 		});
 	};
 
@@ -443,5 +479,43 @@
 		border: 1rpx solid $primary;
 		color: $primary;
 		background-color: transparent;
+	}
+
+	.post-view-trace {
+		margin-top: 16rpx;
+		padding-top: 16rpx;
+		border-top: 1rpx solid #f8f8f8;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+	}
+
+	.view-avatar-row {
+		display: flex;
+		align-items: center;
+	}
+
+	.tiny-avatar {
+		width: 32rpx;
+		height: 32rpx;
+		border-radius: 50%;
+		border: 2rpx solid #fff;
+		background-color: #f0f0f0;
+		margin-right: -8rpx;
+	}
+
+	.tiny-avatar:last-child {
+		margin-right: 0;
+	}
+
+	.silent-avatar {
+		border: 2rpx solid #FF8C00 !important;
+		background-color: #fff;
+	}
+
+	.view-count-txt {
+		font-size: 20rpx;
+		color: #999;
+		margin-left: 16rpx;
 	}
 </style>

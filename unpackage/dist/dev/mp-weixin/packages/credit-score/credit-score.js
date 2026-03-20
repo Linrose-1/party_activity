@@ -78,25 +78,22 @@ const _sfc_main = {
       },
       {
         key: "interactionScore",
-        label: "商友点评",
+        label: "商友赞踩",
         icon: "chat-filled",
         max: 200,
+        // url: '/packages/user-reviews/user-reviews', 
         url: null,
-        // ✨ 不跳转
         tip: "查看说明",
-        infoText: "该评分为商友互动点评（赞踩）统计映射"
+        infoText: "该评分为商友赞踩统计映射"
         // ✨ 说明文字
       },
       {
         key: "digitalIdentityScore",
-        label: "数字身份",
+        label: "数字评价",
         icon: "person-filled",
         max: 100,
-        url: null,
-        // ✨ 不跳转
-        tip: "查看说明",
-        infoText: "该评分为数字标签评分统计雷达图映射"
-        // ✨ 说明文字
+        url: "/packages/my-edit/my-edit?currentTab=1",
+        tip: "前往评价"
       },
       {
         key: "basicInfoScore",

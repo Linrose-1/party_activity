@@ -23,11 +23,11 @@
 						</view>
 
 						<!-- 第二行：信用信息胶囊 (紧凑型布局) -->
-						<view class="mini-credit-capsule" v-if="creditLevel || totalScore"
-							@click.stop="handleAction('navToCredit')">
+						<view class="mini-credit-capsule" v-if="creditLevel || totalScore">
 							<uni-icons type="vip-filled" size="12" color="#fff"></uni-icons>
-							<text class="credit-text">{{ creditLevel }}</text>
-							<text class="score-text">信用：{{ totalScore }}分</text>
+							<text class="credit-text" @click.stop="handleAction('navToCredit')">{{ creditLevel }} |
+							</text>
+							<text class="score-text">猩友信用：{{ totalScore }}分</text>
 							<uni-icons type="right" size="10" color="rgba(255,255,255,0.7)"></uni-icons>
 						</view>
 
@@ -245,7 +245,6 @@
 				inviteCircleRef.value.open(user);
 				break;
 		}
-		if (!['addCircle', 'inviteCircle'].includes(type)) close();
 	};
 
 	const onSocialSuccess = (id) => emit('actionSuccess', id);

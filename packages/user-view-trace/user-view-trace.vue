@@ -30,15 +30,33 @@
 
 				<uni-icons type="right" size="16" color="#ccc"></uni-icons>
 			</view>
-		</view>
 
-		<!-- 空状态 -->
-		<view v-if="list.length === 0 && loadingStatus === 'noMore'" class="empty-box">
-			<image src="/static/icon/empty.png" class="empty-img"></image>
-			<text>暂无浏览记录</text>
-		</view>
+			<!-- 静默用户入口：当正常列表加载完且有静默用户时显示 -->
+			<view class="silent-entry-card" v-if="hasSilent"
+				@click="goSilentList">
+				<view class="trace-item silent-item">
+					<image
+						src="https://img.gofor.club/post/20251231/1gcYJWmdcqe0de467fbd77b15cffaa30eb05468f5f7f_1767178458259.png"
+						class="u-avatar silent-avatar-border" mode="aspectFill"></image>
+					<view class="u-info">
+						<view class="u-top">
+							<text class="u-name">商友 (潜在意向)</text>
+							<text class="u-tag">意向访客</text>
+						</view>
+						<view class="u-desc">点击查看通过分享进入的潜在商友列表</view>
+					</view>
+					<uni-icons type="right" size="16" color="#FF6A00"></uni-icons>
+				</view>
+			</view>
 
-		<uni-load-more :status="loadingStatus"></uni-load-more>
+			<!-- 3. 空状态：只有既没有普通用户，也没有静默用户时才显示 -->
+			<view v-if="list.length === 0 && !hasSilent && loadingStatus === 'noMore'" class="empty-box">
+				<image src="/static/icon/empty.png" class="empty-img"></image>
+				<text>暂无浏览记录</text>
+			</view>
+
+			<uni-load-more :status="loadingStatus"></uni-load-more>
+		</view>
 	</view>
 </template>
 
@@ -56,6 +74,8 @@
 	const targetId = ref(null);
 	const targetType = ref('post'); // 默认为商机类型
 
+	const hasSilent = ref(false);
+
 	const list = ref([]);
 	const pageNo = ref(1);
 	const loadingStatus = ref('more');
@@ -63,6 +83,7 @@
 	const defaultAvatar = '/static/icon/default-avatar.png';
 
 	onLoad((options) => {
+		console.log("options",options)
 		// 1. 接收 ID
 		targetId.value = options.id;
 
@@ -81,6 +102,10 @@
 		uni.setNavigationBarTitle({
 			title: titleMap[targetType.value] || '浏览记录'
 		});
+
+		if (options.hasSilent == 1) {
+			hasSilent.value = true;
+		}
 
 		loadData(true);
 	});
@@ -145,6 +170,13 @@
 		if (!user || !user.id) return;
 		uni.navigateTo({
 			url: `/packages/applicationBusinessCard/applicationBusinessCard?id=${user.id}&name=${encodeURIComponent(user.nickname || '')}&avatar=${encodeURIComponent(user.avatar || '')}`
+		});
+	};
+
+	// 跳转到静默用户专用列表页
+	const goSilentList = () => {
+		uni.navigateTo({
+			url: `/packages/silent-view-trace/silent-view-trace?id=${targetId.value}&type=${targetType.value}`
 		});
 	};
 
@@ -288,6 +320,22 @@
 		color: #999;
 	}
 
+	.silent-border {
+		border: 2rpx solid #FF6A00 !important;
+	}
+
+	.u-tag-intent {
+		font-size: 20rpx;
+		background: #FF6A00;
+		color: #fff;
+		padding: 2rpx 12rpx;
+		border-radius: 6rpx;
+	}
+
+	.silent-bg {
+		background-color: #FFF5EE !important;
+	}
+
 	/* 空状态样式 */
 	.empty-box {
 		padding-top: 200rpx;
@@ -303,5 +351,33 @@
 		height: 200rpx;
 		margin-bottom: 20rpx;
 		opacity: 0.5;
+	}
+
+	.silent-entry-card {
+		margin-top: 10rpx;
+	}
+
+	.silent-item {
+		border: 2rpx dashed #FF6A00;
+		background: #FFF9F5;
+	}
+
+	.silent-avatar-border {
+		border: 2rpx solid #FF6A00;
+	}
+
+	.u-tag {
+		font-size: 20rpx;
+		background: #FF6A00;
+		color: #fff;
+		padding: 2rpx 12rpx;
+		border-radius: 6rpx;
+		margin-left: 10rpx;
+	}
+
+	.u-desc {
+		font-size: 24rpx;
+		color: #999;
+		margin-top: 8rpx;
 	}
 </style>

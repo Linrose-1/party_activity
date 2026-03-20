@@ -108,33 +108,46 @@
 			</view>
 
 			<!-- 4. 浏览留痕模块 -->
-			<view class="viewer-module-card" v-if="storeDetail.isReadTrace === 1 && viewerTotal > 0"
+			<!-- 聚店详情：浏览留痕模块优化 -->
+			<view class="viewer-module-card"
+				v-if="storeDetail && storeDetail.isReadTrace === 1 && (viewerTotal > 0 || storeDetail.hasSilentLoginUser === 1)"
 				@click="goToTraceList">
 				<view class="viewer-header">
 					<view class="left-title">
 						<view class="title-indicator"></view>
 						<text class="title-txt">最近浏览</text>
-						<text class="title-count">{{ viewerTotal }}</text>
+						<!-- 优化：增加眼睛图标 + 总人数 -->
+						<view class="view-count-wrap" v-if="storeDetail.targetViewNum > 0">
+							<uni-icons type="eye" size="16" color="#333"></uni-icons>
+							<text class="total-num">{{ storeDetail.targetViewNum }}</text>
+						</view>
 					</view>
 					<view class="right-more">
 						<text>浏览详情</text>
 						<uni-icons type="right" size="14" color="#999"></uni-icons>
 					</view>
 				</view>
+
 				<view class="viewer-content">
 					<view class="avatar-stack">
+						<!-- 已注册商友 -->
 						<view class="avatar-item" v-for="item in viewerList" :key="item.id">
-							<image
-								:src="item.memberUser && item.memberUser.avatar ? item.memberUser.avatar : '/static/icon/default-avatar.png'"
-								class="v-avatar" mode="aspectFill"></image>
+							<image :src="item.memberUser?.avatar || '/static/icon/default-avatar.png'" class="v-avatar"
+								mode="aspectFill"></image>
 						</view>
+
+						<!-- 静默意向商友 -->
+						<view class="avatar-item" v-if="storeDetail.hasSilentLoginUser === 1">
+							<image
+								src="https://img.gofor.club/post/20251231/1gcYJWmdcqe0de467fbd77b15cffaa30eb05468f5f7f_1767178458259.png"
+								class="v-avatar silent-avatar-border" mode="aspectFill"></image>
+						</view>
+
 						<view v-if="viewerTotal > 7" class="more-dots">
-							<text class="dot"></text>
-							<text class="dot"></text>
-							<text class="dot"></text>
+							<text class="dot"></text><text class="dot"></text><text class="dot"></text>
 						</view>
 					</view>
-					<view class="viewer-tips">已有 {{ viewerTotal }} 位商友进入了您的聚店</view>
+					
 				</view>
 			</view>
 
@@ -693,10 +706,12 @@
 
 	/**
 	 * 跳转至完整浏览留痕列表页
+	 * 增加 type=store 和 hasSilent
 	 */
 	const goToTraceList = () => {
+		const hasSilent = storeDetail.value.hasSilentLoginUser || 0;
 		uni.navigateTo({
-			url: '/packages/user-view-trace/user-view-trace?id=' + storeDetail.value.id + '&type=store'
+			url: `/packages/user-view-trace/user-view-trace?id=${storeDetail.value.id}&type=store&hasSilent=${hasSilent}`
 		});
 	};
 
@@ -708,6 +723,8 @@
 			url: '/packages/comment-page/comment-page?id=' + storeId.value + '&type=store'
 		});
 	};
+
+
 
 
 	// ─── 分享 ───
@@ -873,6 +890,29 @@
 		height: 32rpx;
 		background: var(--primary);
 		border-radius: 4rpx;
+	}
+
+	/* 人数展示背景 */
+	.view-count-wrap {
+		display: flex;
+		align-items: center;
+		margin-left: 20rpx;
+		background: #f0f0f0;
+		padding: 4rpx 16rpx;
+		border-radius: 30rpx;
+	}
+
+	.view-count-wrap .total-num {
+		font-size: 24rpx;
+		color: #333;
+		font-weight: bold;
+		margin-left: 6rpx;
+	}
+
+	/* 静默头像橙色边框 */
+	.silent-avatar-border {
+		border: 2rpx solid #FF6B00 !important;
+		background-color: #FFF5EE;
 	}
 
 	/* ── 信息条目 ── */

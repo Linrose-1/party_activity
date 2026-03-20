@@ -11,7 +11,7 @@
 					<view class="title">点评互动</view>
 					<view class="desc">查看与回复他人的点评</view>
 				</view>
-				<!-- 点评互动未读数 -->
+				<!-- 使用 reviewUnreadCount -->
 				<view class="badge" v-if="unreadState.reviewUnreadCount > 0">
 					{{ unreadState.reviewUnreadCount > 99 ? '99+' : unreadState.reviewUnreadCount }}
 				</view>
@@ -27,7 +27,7 @@
 					<view class="title">猎伙互动</view>
 					<view class="desc">寻找合作伙伴或团队成员</view>
 				</view>
-				<!-- 猎伙感兴趣人数未读 -->
+				<!-- 使用 hunterInterestCount -->
 				<view class="badge" v-if="unreadState.hunterInterestCount > 0">
 					{{ unreadState.hunterInterestCount > 99 ? '99+' : unreadState.hunterInterestCount }}
 				</view>
@@ -43,9 +43,9 @@
 					<view class="title">商机互动</view>
 					<view class="desc">查看商友与我发布商机的互动</view>
 				</view>
-				<!-- 如果商机未读数大于0显示红点 (此处对应 businessCount) -->
-				<view class="badge" v-if="unreadState.businessCount > 0">
-					{{ unreadState.businessCount > 99 ? '99+' : unreadState.businessCount }}
+				<!-- 使用 businessOpCommentCount (商机评论未读) -->
+				<view class="badge" v-if="unreadState.businessOpCommentCount > 0">
+					{{ unreadState.businessOpCommentCount > 99 ? '99+' : unreadState.businessOpCommentCount }}
 				</view>
 				<uni-icons type="right" size="16" color="#ccc"></uni-icons>
 			</view>

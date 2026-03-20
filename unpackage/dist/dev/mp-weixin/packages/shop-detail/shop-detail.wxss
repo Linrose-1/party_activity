@@ -131,6 +131,28 @@
 		border-radius: 4rpx;
 }
 
+	/* 人数展示背景 */
+.view-count-wrap.data-v-4c71c098 {
+		display: flex;
+		align-items: center;
+		margin-left: 20rpx;
+		background: #f0f0f0;
+		padding: 4rpx 16rpx;
+		border-radius: 30rpx;
+}
+.view-count-wrap .total-num.data-v-4c71c098 {
+		font-size: 24rpx;
+		color: #333;
+		font-weight: bold;
+		margin-left: 6rpx;
+}
+
+	/* 静默头像橙色边框 */
+.silent-avatar-border.data-v-4c71c098 {
+		border: 2rpx solid #FF6B00 !important;
+		background-color: #FFF5EE;
+}
+
 	/* ── 信息条目 ── */
 .info-item.data-v-4c71c098 {
 		display: flex;

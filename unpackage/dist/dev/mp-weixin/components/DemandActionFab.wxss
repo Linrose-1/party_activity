@@ -85,6 +85,9 @@
 }
 
 /* 图标背景色 */
+.bg-orange.data-v-6d679bc3 {
+  background: linear-gradient(135deg, #ffaa00 0%, #fee526 100%);
+}
 .bg-blue.data-v-6d679bc3 {
   background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
 }

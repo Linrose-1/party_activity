@@ -102,11 +102,12 @@
   display: flex;
   align-items: center;
   margin-bottom: 6rpx;
+  flex-wrap: wrap;
+  gap: 12rpx;
 }
 .friend-name.data-v-cee902af {
   font-size: 30rpx;
   font-weight: bold;
-  margin-right: 12rpx;
 }
 .relation-tags.data-v-cee902af {
   display: flex;
@@ -115,7 +116,7 @@
 .tag.data-v-cee902af {
   font-size: 18rpx;
   padding: 2rpx 10rpx;
-  border-radius: 4rpx;
+  border-radius: 6rpx;
 }
 .tag.fellow-circle.data-v-cee902af {
   background: #f3e5f5;
@@ -135,7 +136,16 @@
 }
 .friend-company.data-v-cee902af {
   font-size: 24rpx;
-  color: #888;
+  color: #666;
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  margin-top: 6rpx;
+}
+.invite-time-row.data-v-cee902af {
+  margin-top: 12rpx;
+  font-size: 20rpx;
+  color: #bbb;
 }
 .action-area.data-v-cee902af {
   display: flex;

@@ -61,16 +61,16 @@
 			<view class="section-block professional-section" v-if="associationList && associationList.length > 0">
 				<view class="section-title">
 					<uni-icons type="staff-filled" size="18" color="#C9A063"></uni-icons>
-					<text>组织/机构/职务</text>
+					<text>组织/机构，职务/荣誉</text>
 				</view>
 				<!-- 循环开始 -->
 				<view class="social-group-item" v-for="(item, index) in associationList" :key="index">
 					<view class="social-row">
-						<text class="social-label">组织：</text>
+						<text class="social-label">组织/机构：</text>
 						<text class="social-value" selectable>{{ item.name || '未填写' }}</text>
 					</view>
 					<view class="social-row">
-						<text class="social-label">职务：</text>
+						<text class="social-label">职务/荣誉：</text>
 						<text class="social-value" selectable>{{ item.title || '未填写' }}</text>
 					</view>
 					<!-- 如果不是最后一项，显示分割线 -->
@@ -729,7 +729,7 @@
 
 			.social-label {
 				color: #A37E4A; // 使用更深一点的金色
-				width: 100rpx;
+				// width: 200rpx;
 				flex-shrink: 0;
 				font-size: 26rpx;
 			}
@@ -1159,7 +1159,7 @@
 
 		.social-label {
 			color: #A37E4A;
-			width: 100rpx;
+			// width: 100rpx;
 			flex-shrink: 0;
 		}
 

@@ -30,9 +30,9 @@
 
 				<uni-forms :label-width="80" label-position="top" class="custom-forms">
 					<!-- 聚会名称 -->
-					<uni-forms-item label="聚会名称" required>
-						<uni-easyinput v-model="form.activityTitle" placeholder="请输入聚会名称" :inputBorder="true"
-							primaryColor="#FF6F00" :styles="inputStyles" />
+					<uni-forms-item label="聚会主题" required>
+						<uni-easyinput v-model="form.activityTitle" placeholder="请输入聚会主题" :inputBorder="true"
+							primaryColor="#FF6F00" :styles="inputStyles" :cursorSpacing="30" :adjustPosition="true" />
 					</uni-forms-item>
 
 					<!-- 聚会类型 -->
@@ -70,6 +70,11 @@
 							<uni-datetime-picker type="datetimerange" v-model="timeRange" rangeSeparator=" 至 "
 								@maskClick="closePicker" @change="onTimeRangeChange" />
 						</view>
+
+						<view class="time-preview-box" v-if="timeRange && timeRange.length === 2">
+							<uni-icons type="calendar-filled" size="14" color="#FF6F00"></uni-icons>
+							<text class="time-text">{{ timeRange[0] }} 至 {{ timeRange[1] }}</text>
+						</view>
 					</uni-forms-item>
 
 					<!-- 【优化1】报名时间：监听用户主动修改 -->
@@ -77,6 +82,11 @@
 						<view class="picker-trigger-box" @click="openPicker">
 							<uni-datetime-picker type="datetimerange" v-model="enrollTimeRange" rangeSeparator=" 至 "
 								@maskClick="closePicker" @change="onEnrollTimeRangeChange" />
+						</view>
+
+						<view class="time-preview-box" v-if="enrollTimeRange && enrollTimeRange.length === 2">
+							<uni-icons type="time-filled" size="14" color="#FF6F00"></uni-icons>
+							<text class="time-text">{{ enrollTimeRange[0] }} 至 {{ enrollTimeRange[1] }}</text>
 						</view>
 					</uni-forms-item>
 
@@ -186,7 +196,8 @@
 				<uni-forms :label-width="80" label-position="top">
 					<uni-forms-item label="聚会介绍" required>
 						<uni-easyinput type="textarea" autoHeight v-model="form.activityDescription" maxlength="2000"
-							placeholder="请输入聚会详细介绍，让大家更了解活动内容~" :inputBorder="true" :styles="inputStyles" />
+							placeholder="请输入聚会详细介绍，让大家更了解活动内容~" :inputBorder="true" :styles="inputStyles"
+							:cursor-spacing="50" :adjust-position="true" />
 					</uni-forms-item>
 				</uni-forms>
 
@@ -206,7 +217,8 @@
 						</view>
 						<view class="native-input-wrapper">
 							<textarea v-model="item.sessionDescription" placeholder="请输入环节描述" class="native-textarea"
-								placeholder-class="input-placeholder" auto-height maxlength="800" />
+								placeholder-class="input-placeholder" auto-height maxlength="800" :cursor-spacing="40"
+								:adjust-position="true" />
 						</view>
 					</view>
 				</view>
@@ -377,7 +389,8 @@
 	const isPickerOpen = ref(false);
 	const inputStyles = ref({
 		color: '#333',
-		borderColor: '#dcdfe6'
+		borderColor: '#dcdfe6',
+		disableColor: '#f5f7fa'
 	});
 
 	const openPicker = () => {
@@ -974,6 +987,7 @@
 	};
 
 	const handlePublishClick = () => {
+		uni.hideKeyboard(); // 发起前主动收起键盘，防止弹窗错位
 		if (mode.value === 'create' && isQuotaLoaded.value && remainingQuota.value == 0) {
 			showQuotaExceededModal();
 			return;
@@ -1105,6 +1119,10 @@
 			}
 
 			if (mode.value === 'create') uni.removeStorageSync(DRAFT_STORAGE_KEY);
+
+			// 发送全局信号，通知列表页数据变了
+			uni.$emit('refreshActivityList');
+
 			uni.showModal({
 				title: '成功',
 				content: '发布完成',
@@ -1152,6 +1170,27 @@
 	$text-main: #333333;
 	$text-sub: #666666;
 	$input-border: #dcdfe6;
+
+	/* 优化：主滚动容器底部间距，确保不被操作栏遮挡 */
+	.main-scroll {
+		padding-bottom: 200rpx; // 增加间距
+	}
+
+	/* 优化：表单项间距，防止键盘弹起时太挤 */
+	:deep(.uni-forms-item) {
+		margin-bottom: 30rpx !important;
+	}
+
+	/* 解决 textarea 在某些机型下的层级穿透问题 */
+	.native-textarea {
+		width: 100%;
+		font-size: 14px;
+		color: #333;
+		padding: 10px 0;
+		min-height: 80rpx;
+		line-height: 1.5;
+		z-index: 1;
+	}
 
 	.page {
 		min-height: 100vh;
@@ -1366,6 +1405,24 @@
 		}
 	}
 
+	.time-preview-box {
+		margin-top: 16rpx;
+		background-color: #FFF5EE;
+		border-radius: 12rpx;
+		padding: 12rpx 20rpx;
+		display: flex;
+		align-items: center;
+		border: 1rpx solid rgba(255, 111, 0, 0.1);
+
+		.time-text {
+			font-size: 24rpx;
+			color: #FF6F00;
+			margin-left: 10rpx;
+			font-weight: 500;
+			line-height: 1.4;
+		}
+	}
+
 	.row-inputs {
 		display: flex;
 		gap: 24rpx;
@@ -1522,14 +1579,14 @@
 		width: 100%;
 	}
 
-	.native-textarea {
-		width: 100%;
-		font-size: 14px;
-		color: #333;
-		padding: 10px 0;
-		min-height: 40px;
-		line-height: 1.5;
-	}
+	// .native-textarea {
+	// 	width: 100%;
+	// 	font-size: 14px;
+	// 	color: #333;
+	// 	padding: 10px 0;
+	// 	min-height: 40px;
+	// 	line-height: 1.5;
+	// }
 
 	::v-deep .input-placeholder {
 		color: #999;

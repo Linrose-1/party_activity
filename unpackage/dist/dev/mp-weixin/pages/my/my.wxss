@@ -487,6 +487,34 @@
 		position: relative;
 		/* 确保红点相对于图标定位 */
 }
+
+	/* 确保数字红点在 icon-wrapper 里的定位 */
+.icon-wrapper .red-dot-num.data-v-2f1ef635 {
+		position: absolute;
+		top: -10rpx;
+		/* 向上偏移 */
+		right: -10rpx;
+		/* 向右偏移 */
+		background-color: #ff4d4f;
+		color: #fff;
+		font-size: 20rpx;
+		font-weight: bold;
+		min-width: 32rpx;
+		height: 32rpx;
+		line-height: 28rpx;
+		/* 稍微调低一点，使文字居中 */
+		text-align: center;
+		border-radius: 16rpx;
+		padding: 0 6rpx;
+		border: 2rpx solid #fff;
+		/* 白色边框增加识别度 */
+		box-shadow: 0 2rpx 8rpx rgba(255, 77, 79, 0.3);
+		z-index: 10;
+		box-sizing: border-box;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+}
 .red-dot-mini.data-v-2f1ef635 {
 		position: absolute;
 		top: 0;

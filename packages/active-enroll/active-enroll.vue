@@ -641,6 +641,9 @@
 			// 提交成功，清除缓存
 			uni.removeStorageSync(FORM_CACHE_KEY);
 
+			// 通知列表页刷新（这样列表里的报名人数、状态才会更新）
+			uni.$emit('refreshActivityList');
+
 			await getActiveDetail();
 		} else {
 			// 报名失败，处理错误

@@ -32,6 +32,7 @@
 				<view class="friend-info">
 					<view class="info-header">
 						<text class="friend-name">{{ friend.realName || friend.nickname || '匿名用户' }}</text>
+						<!-- 1. 关系标签：保持与商友页面一致 -->
 						<view class="relation-tags"
 							v-if="friend.fellowTownspeopleCityFlag === 1 || friend.peerFlag === 1 || friend.classmateFlag === 1 || friend.friendParentFlag === 1">
 							<text v-if="friend.friendParentFlag === 1" class="tag fellow-circle">同圈</text>
@@ -40,11 +41,19 @@
 							<text v-if="friend.classmateFlag === 1" class="tag classmate">同学</text>
 						</view>
 					</view>
+
+					<!-- 3. 公司职位精简显示：取[0]位数据 -->
 					<view class="friend-company">
 						<uni-icons type="briefcase-filled" size="14" color="#888"></uni-icons>
-						<text>{{ friend.companyName || '暂无公司信息' }}</text>
+						<text>{{ formatCompanyInfo(friend) }}</text>
+					</view>
+
+					<!-- 2. 新增：邀请/成为圈友时间 -->
+					<view class="invite-time-row" v-if="friend.followTime || friend.createTime">
+						<text>成为圈友于 {{ formatTimestamp(friend.followTime || friend.createTime) }}</text>
 					</view>
 				</view>
+
 				<view class="action-area" @click.stop="confirmDeleteFriend(friend)">
 					<view class="status-box">
 						<uni-icons type="checkbox-filled" size="18" color="#4cd964"></uni-icons>
@@ -54,7 +63,7 @@
 				</view>
 			</view>
 		</view>
-		<uni-load-more :status="circleLoadStatus"></uni-load-more>
+		<uni-load-more :status="circleLoadStatus" v-if="circleFriendList.length > 0"></uni-load-more>
 
 		<CircleApplyPopup ref="applyPopupRef" @refresh="handleAuditSuccess" />
 	</view>
@@ -72,6 +81,7 @@
 	import request from '@/utils/request.js';
 	import CircleApplyPopup from '@/components/CircleApplyPopup.vue';
 
+	// --- 状态变量 ---
 	const circleFriendList = ref([]);
 	const circlePageNo = ref(1);
 	const circleLoadStatus = ref('more');
@@ -81,6 +91,7 @@
 	const newApplyCount = ref(0);
 	const applyPopupRef = ref(null);
 
+	// --- 数据获取 ---
 	const fetchCircleList = async (isRefresh = false) => {
 		if (circleLoadStatus.value === 'loading') return;
 		if (isRefresh) circlePageNo.value = 1;
@@ -108,6 +119,7 @@
 		uni.stopPullDownRefresh();
 	};
 
+	// 获取待处理列表
 	const getNewApplyList = async () => {
 		const {
 			data
@@ -125,6 +137,37 @@
 		}
 	};
 
+	// --- 辅助处理函数 ---
+
+	/**
+	 * 格式化公司和职位信息
+	 * 逻辑：companyName 和 positionTitle 分别按逗号/中文逗号分割，取第一个元素拼接
+	 */
+	const formatCompanyInfo = (item) => {
+		const companyRaw = item.companyName || '';
+		const positionRaw = item.positionTitle || '';
+
+		// 兼容中文逗号和英文逗号，同时兼容“丨”
+		const companies = companyRaw.split(/[,，丨]/);
+		const positions = positionRaw.split(/[,，丨]/);
+
+		const company = companies[0]?.trim() || '';
+		const position = positions[0]?.trim() || '';
+
+		if (company && position) return `${company} · ${position}`;
+		return company || position || '暂无公司信息';
+	};
+
+	/**
+	 * 格式化时间戳
+	 */
+	const formatTimestamp = (ts) => {
+		if (!ts) return '';
+		const d = new Date(Number(ts));
+		return `${d.getFullYear()}-${(d.getMonth()+1).toString().padStart(2,'0')}-${d.getDate().toString().padStart(2,'0')}`;
+	};
+
+	// --- 事件监听 ---
 	const openApplyPopup = () => applyPopupRef.value.open(newApplyList.value);
 	const handleAuditSuccess = () => {
 		getNewApplyList();
@@ -135,6 +178,7 @@
 		fetchCircleList(true);
 	};
 	const handleCircleSearch = () => fetchCircleList(true);
+
 	const confirmDeleteFriend = (friend) => {
 		uni.showModal({
 			title: '提示',
@@ -145,6 +189,7 @@
 			}
 		});
 	};
+
 	const deleteFriend = async (friend) => {
 		await request(`/app-api/member/user/friend/del`, {
 			method: 'POST',
@@ -154,6 +199,7 @@
 		});
 		fetchCircleList(true);
 	};
+
 	const navigateToBusinessCard = (user) => uni.navigateTo({
 		url: `/packages/applicationBusinessCard/applicationBusinessCard?id=${user.id}&name=${encodeURIComponent(user.nickname || user.realName)}&avatar=${encodeURIComponent(user.avatar || '')}&fromShare=1`
 	});
@@ -287,12 +333,13 @@
 		display: flex;
 		align-items: center;
 		margin-bottom: 6rpx;
+		flex-wrap: wrap;
+		gap: 12rpx;
 	}
 
 	.friend-name {
 		font-size: 30rpx;
 		font-weight: bold;
-		margin-right: 12rpx;
 	}
 
 	.relation-tags {
@@ -303,7 +350,7 @@
 	.tag {
 		font-size: 18rpx;
 		padding: 2rpx 10rpx;
-		border-radius: 4rpx;
+		border-radius: 6rpx;
 
 		&.fellow-circle {
 			background: #f3e5f5;
@@ -328,7 +375,17 @@
 
 	.friend-company {
 		font-size: 24rpx;
-		color: #888;
+		color: #666;
+		display: flex;
+		align-items: center;
+		gap: 8rpx;
+		margin-top: 6rpx;
+	}
+
+	.invite-time-row {
+		margin-top: 12rpx;
+		font-size: 20rpx;
+		color: #bbb;
 	}
 
 	.action-area {

@@ -102,7 +102,9 @@
 					<!-- 中：图标 -->
 					<view class="icon-wrapper">
 						<image :src="item.icon" class="feature-icon" mode="aspectFit" />
-						<view class="red-dot-mini" v-if="item.name === '社交互动' && unreadData.total > 0"></view>
+						<view class="red-dot-num" v-if="item.name === '社交互动' && unreadData.interaction > 0">
+							{{ unreadData.interaction > 99 ? '99+' : unreadData.interaction }}
+						</view>
 					</view>
 					<!-- 下：描述 -->
 					<view class="grid-item-desc">{{ item.desc }}</view>
@@ -123,9 +125,10 @@
 					<view class="feature-item-inner">
 						<view class="icon-rel-box">
 							<img :src="item.icon" alt="" class="feature-icon" />
-							<!-- 【新增红点】如果是评论中心且有未读消息 -->
-							<view class="red-dot-num" v-if="item.name === '评论中心' && unreadData.total > 0">
-								{{ unreadData.total > 99 ? '99+' : unreadData.total }}
+							<!-- 如果是评论中心且有未读消息 -->
+							<view class="red-dot-num"
+								v-if="item.name === '评论中心' && (unreadData.activity + unreadData.business + unreadData.store) > 0">
+								{{ (unreadData.activity + unreadData.business + unreadData.store) > 99 ? '99+' : (unreadData.activity + unreadData.business + unreadData.store) }}
 							</view>
 						</view>
 						<view class="feature-content">
@@ -173,31 +176,36 @@
 	const creditScore = ref(null); // 猩球信用分
 
 	const unreadData = ref({
-		total: 0,
-		post: 0,
-		activity: 0,
-		store: 0
+		total: 0, // 总未读
+		interaction: 0, // 社交互动总数 (点评+猎伙+商机)
+		activity: 0, // 聚会评论未读
+		business: 0, // 商机评论未读
+		store: 0 // 聚店评论未读
 	});
 
 	// --- 新增获取未读数的方法 ---
 	const fetchUnreadCount = async () => {
 		if (!isLogin.value) return;
 		try {
+			// 替换为新的接口地址
 			const {
 				data,
 				error
-			} = await request('/app-api/member/comment/unread-count', {
+			} = await request('/app-api/member/user/unread-count', {
 				method: 'GET'
 			});
+
 			if (!error && data) {
 				unreadData.value = {
 					total: data.totalUnreadCount || 0,
-					post: data.businessOpportunitiesUnreadCount || 0,
+					// 核心：这里的 interactionCount 对应“社交互动”
+					interaction: data.interactionCount || 0,
 					activity: data.activityUnreadCount || 0,
+					business: data.businessOpportunitiesUnreadCount || 0,
 					store: data.storeUnreadCount || 0
 				};
 
-				// 同步设置小程序底部 TabBar 的红点（可选，假设“我的”是第3个Tab）
+				// 同步设置小程序底部 TabBar 的红点
 				if (data.totalUnreadCount > 0) {
 					uni.showTabBarRedDot({
 						index: 4
@@ -1372,6 +1380,34 @@
 	.icon-wrapper {
 		position: relative;
 		/* 确保红点相对于图标定位 */
+	}
+
+	/* 确保数字红点在 icon-wrapper 里的定位 */
+	.icon-wrapper .red-dot-num {
+		position: absolute;
+		top: -10rpx;
+		/* 向上偏移 */
+		right: -10rpx;
+		/* 向右偏移 */
+		background-color: #ff4d4f;
+		color: #fff;
+		font-size: 20rpx;
+		font-weight: bold;
+		min-width: 32rpx;
+		height: 32rpx;
+		line-height: 28rpx;
+		/* 稍微调低一点，使文字居中 */
+		text-align: center;
+		border-radius: 16rpx;
+		padding: 0 6rpx;
+		border: 2rpx solid #fff;
+		/* 白色边框增加识别度 */
+		box-shadow: 0 2rpx 8rpx rgba(255, 77, 79, 0.3);
+		z-index: 10;
+		box-sizing: border-box;
+		display: flex;
+		align-items: center;
+		justify-content: center;
 	}
 
 	.red-dot-mini {

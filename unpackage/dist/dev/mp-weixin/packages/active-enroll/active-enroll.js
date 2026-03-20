@@ -331,6 +331,7 @@ const _sfc_main = {
           icon: "success"
         });
         common_vendor.index.removeStorageSync(FORM_CACHE_KEY);
+        common_vendor.index.$emit("refreshActivityList");
         await getActiveDetail();
       } else {
         const error = result.error;

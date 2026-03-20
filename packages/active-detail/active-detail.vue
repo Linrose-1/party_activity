@@ -199,36 +199,45 @@
 			</scroll-view>
 		</view>
 
-		<!-- 浏览留痕模块 -->
-		<view class="viewer-module-card" v-if="activityDetail && activityDetail.isReadTrace === 1 && viewerTotal > 0">
+		<!-- 聚会详情：浏览留痕模块优化 -->
+		<view class="viewer-module-card"
+			v-if="activityDetail && activityDetail.isReadTrace === 1 && (viewerTotal > 0 || activityDetail.hasSilentLoginUser === 1)">
 			<view class="viewer-header" @click="goToTraceList">
 				<view class="left-title">
 					<view class="title-indicator"></view>
 					<text class="title-txt">最近浏览</text>
-					<text class="title-count">{{ viewerTotal }}</text>
+					<!-- 优化：增加黑色小眼睛 + 总人数 -->
+					<view class="view-count-wrap" v-if="activityDetail.targetViewNum > 0">
+						<uni-icons type="eye" size="16" color="#333"></uni-icons>
+						<text class="total-num">{{ activityDetail.targetViewNum }}</text>
+					</view>
 				</view>
 				<view class="right-more">
 					<text>浏览详情</text>
 					<uni-icons type="right" size="14" color="#999"></uni-icons>
 				</view>
 			</view>
+
 			<view class="viewer-content" @click="goToTraceList">
 				<view class="avatar-stack">
+					<!-- 注册用户头像 -->
 					<view class="avatar-stack-item" v-for="(item, index) in viewerList" :key="item.id">
-						<!-- 修复：可选链 ?. 兼容性写法 -->
+						<image :src="item.memberUser?.avatar || '/static/icon/default-avatar.png'" class="v-avatar"
+							mode="aspectFill"></image>
+					</view>
+
+					<!-- 静默用户专用头像入口 -->
+					<view class="avatar-stack-item" v-if="activityDetail.hasSilentLoginUser === 1">
 						<image
-							:src="item.memberUser && item.memberUser.avatar ? item.memberUser.avatar : '/static/icon/default-avatar.png'"
-							class="v-avatar" mode="aspectFill"></image>
+							src="https://img.gofor.club/post/20251231/1gcYJWmdcqe0de467fbd77b15cffaa30eb05468f5f7f_1767178458259.png"
+							class="v-avatar silent-avatar-border" mode="aspectFill"></image>
 					</view>
+
 					<view v-if="viewerTotal > 7" class="more-dots">
-						<text class="mdot"></text>
-						<text class="mdot"></text>
-						<text class="mdot"></text>
+						<text class="mdot"></text><text class="mdot"></text><text class="mdot"></text>
 					</view>
 				</view>
-				<view class="viewer-tips">
-					已有 {{ viewerTotal }} 位商友关注了您的聚会
-				</view>
+				
 			</view>
 		</view>
 
@@ -545,10 +554,28 @@
 	 * 判断是否显示"起聚名额未达到"提示
 	 * 仅在"未开始"或"报名中"、且当前报名人数不足最低名额时显示
 	 */
+	// const showLimitSlotsTip = computed(() => {
+	// 	if (!activityDetail.value) return false;
+	// 	const inRelevantStatus = [1, 2].includes(activityDetail.value.status);
+	// 	const notEnough = (activityDetail.value.joinCount || 0) < activityDetail.value.limitSlots;
+	// 	return inRelevantStatus && notEnough;
+	// });
 	const showLimitSlotsTip = computed(() => {
 		if (!activityDetail.value) return false;
+
+		// 仅在"未开始(1)"或"报名中(2)"状态下提示
 		const inRelevantStatus = [1, 2].includes(activityDetail.value.status);
-		const notEnough = (activityDetail.value.joinCount || 0) < activityDetail.value.limitSlots;
+
+		// 获取当前真实报名人数（取 participantTotal 和 joinCount 中较大的一个，双重保险）
+		const currentCount = Number(participantTotal.value || activityDetail.value.joinCount || 0);
+		const requiredCount = Number(activityDetail.value.limitSlots || 0);
+
+		// 如果起聚人数设置为0或未设置，则不提示
+		if (requiredCount <= 0) return false;
+
+		// 判断逻辑：当前人数 < 起聚人数
+		const notEnough = currentCount < requiredCount;
+
 		return inRelevantStatus && notEnough;
 	});
 
@@ -650,6 +677,10 @@
 		if (data && data.list) {
 			participantList.value = data.list;
 			participantTotal.value = data.total;
+
+			if (activityDetail.value) {
+				activityDetail.value.joinCount = data.total;
+			}
 		}
 	};
 
@@ -860,15 +891,6 @@
 	};
 
 	/**
-	 * 跳转到浏览留痕完整列表页
-	 */
-	const goToTraceList = () => {
-		uni.navigateTo({
-			url: '/packages/user-view-trace/user-view-trace?id=' + activityId.value + '&type=activity'
-		});
-	};
-
-	/**
 	 * 点击"立即报名"
 	 * 先校验登录，再校验是否处于报名中状态，通过后跳转报名页
 	 */
@@ -895,6 +917,17 @@
 		uni.navigateTo({
 			url: '/pages/sponsor-detail/sponsor-detail?sponsorId=' + item.id + '&activityId=' + activityId
 				.value
+		});
+	};
+
+	/**
+	 * 跳转到浏览留痕完整列表页
+	 * 增加了 hasSilent 参数传递
+	 */
+	const goToTraceList = () => {
+		const hasSilent = activityDetail.value.hasSilentLoginUser || 0;
+		uni.navigateTo({
+			url: `/packages/user-view-trace/user-view-trace?id=${activityId.value}&type=activity&hasSilent=${hasSilent}`
 		});
 	};
 
@@ -1558,6 +1591,29 @@
 		border: 2rpx solid #fff;
 		background-color: #f5f5f5;
 		box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.05);
+	}
+
+	/* 标题旁的人数背景 */
+	.view-count-wrap {
+		display: flex;
+		align-items: center;
+		margin-left: 20rpx;
+		background: #f0f0f0;
+		padding: 4rpx 16rpx;
+		border-radius: 30rpx;
+	}
+
+	.view-count-wrap .total-num {
+		font-size: 24rpx;
+		color: #333;
+		font-weight: bold;
+		margin-left: 6rpx;
+	}
+
+	/* 静默头像特殊边框 */
+	.silent-avatar-border {
+		border: 2rpx solid #FF6B00 !important;
+		background-color: #FFF5EE;
 	}
 
 	.more-dots {

@@ -65,7 +65,7 @@
 			<view class="list-container">
 				<!-- 商协会职务列表 -->
 				<view class="list-item wide-item">
-					<text class="label">组织 / 机构 / 职务</text>
+					<text class="label">组织/机构，职务/荣誉</text>
 					<view class="association-group">
 						<view v-for="(item, index) in formattedAssociations" :key="index" class="association-card">
 							<view class="association-name">
@@ -73,7 +73,7 @@
 								<text class="name-text">{{ item.name }}</text>
 							</view>
 							<view class="association-title">
-								<text class="title-label">担任职务：</text>
+								<text class="title-label">职务/荣誉：</text>
 								<text class="title-value">{{ item.title }}</text>
 							</view>
 						</view>

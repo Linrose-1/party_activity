@@ -2,7 +2,7 @@
 	<view class="activity-card">
 		<view @click="handleCardClick">
 
-			<!-- ========== 【新增】发布者操作栏：封面正上方，仅本人发布的聚会显示 ========== -->
+			<!-- ========== 发布者操作栏：封面正上方，仅本人发布的聚会显示 ========== -->
 			<!-- 完全对齐「我的聚会」原始按钮组逻辑，从右向左排布 -->
 			<view v-if="isOwner" class="owner-action-bar" @click.stop>
 
@@ -25,7 +25,8 @@
 				<!-- 报名商友（始终显示）：带待确认红点 -->
 				<view class="owner-btn" @click.stop="goToRegisteredUsers">
 					<uni-icons type="person-filled" size="14" color="#FF6B00" />
-					<text>报名商友</text>
+					<text>报名确认</text>
+					<!-- 红点：当有待确认人数时显示 -->
 					<view v-if="activity.pendingConfirmCount > 0" class="owner-badge">
 						{{ activity.pendingConfirmCount }}
 					</view>
@@ -100,7 +101,31 @@
 					</view>
 				</view>
 			</view>
+		</view>
 
+		<!-- 聚会卡片：新增阅读留痕区域 -->
+		<view class="post-view-trace"
+			v-if="activity.isReadTrace === 1 && (activity.targetViews?.length > 0 || activity.hasSilentLoginUser === 1)"
+			@click.stop="handleViewTrace">
+			<view class="view-avatar-row">
+				<!-- 渲染普通用户头像 (如果有静默用户，切片留出一个位置给静默头像) -->
+				<template
+					v-for="(viewer, vIdx) in (activity.targetViews || []).slice(0, activity.hasSilentLoginUser === 1 ? 7 : 8)"
+					:key="vIdx">
+					<image :src="viewer.memberUser?.avatar || '/static/icon/default-avatar.png'" class="tiny-avatar"
+						mode="aspectFill" />
+				</template>
+
+				<!-- 静默用户标识头像 -->
+				<image v-if="activity.hasSilentLoginUser === 1"
+					src="https://img.gofor.club/post/20251231/1gcYJWmdcqe0de467fbd77b15cffaa30eb05468f5f7f_1767178458259.png"
+					class="tiny-avatar silent-avatar" mode="aspectFill" />
+
+				<text class="view-count-txt">
+					等{{ activity.targetViewNum || 0 }}位商友看过
+				</text>
+			</view>
+			<uni-icons type="right" size="12" color="#ccc" />
 		</view>
 
 		<!-- ========== 底部：组织者 + 收藏/报名 ========== -->
@@ -115,7 +140,7 @@
 					<text>{{ isFavorite ? '已收藏' : '收藏' }}</text>
 				</button>
 				<!-- 本人发布的聚会不显示报名按钮 -->
-				<button v-if="!isOwner" class="btn btn-primary" :class="{ 'btn-disabled': isRegistrationDisabled }"
+				<button class="btn btn-primary" :class="{ 'btn-disabled': isRegistrationDisabled }"
 					@click.stop="handleRegisterClick">报名</button>
 			</view>
 		</view>
@@ -295,6 +320,16 @@
 		});
 	};
 
+	/**
+	 * 跳转到浏览记录，携带 hasSilent 参数
+	 */
+	const handleViewTrace = () => {
+		const hasSilent = props.activity.hasSilentLoginUser || 0;
+		uni.navigateTo({
+			url: `/packages/user-view-trace/user-view-trace?id=${props.activity.id}&type=activity&hasSilent=${hasSilent}`
+		});
+	};
+
 	const showOwnerMoreActions = () => {
 		const itemList = [];
 		const availableActions = {};
@@ -395,6 +430,7 @@
 	}
 
 	.owner-btn {
+		position: relative;
 		display: flex;
 		align-items: center;
 		gap: 6rpx;
@@ -426,6 +462,34 @@
 			&:active {
 				opacity: 0.88;
 			}
+		}
+	}
+
+	// 红点徽标通用样式
+	.owner-badge {
+		position: absolute;
+		// 稍微向右上偏移，使其悬浮在图标/文字边缘
+		top: 0rpx;
+		right: 4rpx;
+		background: #f56c6c;
+		color: #fff;
+		font-size: 18rpx;
+		height: 28rpx;
+		min-width: 28rpx;
+		line-height: 28rpx;
+		text-align: center;
+		border-radius: 14rpx;
+		padding: 0 6rpx;
+		border: 2rpx solid #fff8f3; // 使用操作栏的背景色作为边框，产生“镂空”感
+		box-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.1);
+		font-weight: bold;
+		z-index: 10;
+
+		// 如果是处理申请里的白色背景红点
+		&--white {
+			background: #fff;
+			color: $primary;
+			border-color: $primary;
 		}
 	}
 
@@ -611,6 +675,44 @@
 		&.active {
 			font-weight: bold;
 		}
+	}
+
+	.post-view-trace {
+		margin-top: 24rpx;
+		padding: 20rpx 0;
+		border-top: 1rpx solid #f8f8f8;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+	}
+
+	.view-avatar-row {
+		display: flex;
+		align-items: center;
+	}
+
+	.tiny-avatar {
+		width: 36rpx;
+		height: 36rpx;
+		border-radius: 50%;
+		border: 2rpx solid #fff;
+		background-color: #f0f0f0;
+		margin-right: -10rpx;
+	}
+
+	.tiny-avatar:last-child {
+		margin-right: 0;
+	}
+
+	.silent-avatar {
+		border: 2rpx solid #FF8C00 !important;
+		background-color: #fff;
+	}
+
+	.view-count-txt {
+		font-size: 22rpx;
+		color: #999;
+		margin-left: 20rpx;
 	}
 
 	// ── 底部 ──

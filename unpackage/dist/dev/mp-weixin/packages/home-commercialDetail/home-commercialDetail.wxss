@@ -381,7 +381,7 @@
 		transform: scale(0.97);
 }
 .interest-icon.data-v-8303b14f {
-		font-size: 32rpx;
+		font-size: 28rpx;
 }
 
 	/* ==================== 感兴趣成功弹窗 ==================== */
@@ -569,6 +569,33 @@
 		font-size: 28rpx;
 		font-weight: bold;
 		color: #333;
+}
+.view-count-wrap.data-v-8303b14f {
+		display: flex;
+		align-items: center;
+		margin-left: 20rpx;
+		background: #f0f0f0;
+		padding: 1rpx 16rpx;
+		border-radius: 30rpx;
+}
+
+	/* 注意：这里不要嵌套在 .view-count-wrap 里面 */
+.view-count-wrap .total-num.data-v-8303b14f {
+		font-size: 24rpx;
+		color: #333;
+		font-weight: bold;
+		margin-left: 6rpx;
+}
+
+	/* --- 优化：静默用户头像样式 --- */
+.silent-avatar.data-v-8303b14f {
+		border: 2rpx solid #FF6A00 !important;
+		background-color: #FFF5EE;
+}
+
+	/* 留痕模块卡片触发样式 */
+.viewer-module-card.data-v-8303b14f:active {
+		background-color: #fafafa;
 }
 .title-count.data-v-8303b14f {
 		font-size: 24rpx;

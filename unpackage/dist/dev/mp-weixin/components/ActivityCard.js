@@ -152,6 +152,12 @@ const _sfc_main = {
         url: `/pages/my-active-manage/my-active-manage?item=${encodeURIComponent(JSON.stringify(props.activity))}&mode=${mode}`
       });
     };
+    const handleViewTrace = () => {
+      const hasSilent = props.activity.hasSilentLoginUser || 0;
+      common_vendor.index.navigateTo({
+        url: `/packages/user-view-trace/user-view-trace?id=${props.activity.id}&type=activity&hasSilent=${hasSilent}`
+      });
+    };
     const showOwnerMoreActions = () => {
       const itemList = [];
       const availableActions = {};
@@ -175,7 +181,7 @@ const _sfc_main = {
             availableActions[tappedItem]();
         },
         fail: (res) => {
-          common_vendor.index.__f__("log", "at components/ActivityCard.vue:327", res.errMsg);
+          common_vendor.index.__f__("log", "at components/ActivityCard.vue:362", res.errMsg);
         }
       });
     };
@@ -216,6 +222,7 @@ const _sfc_main = {
       });
     };
     return (_ctx, _cache) => {
+      var _a, _b;
       return common_vendor.e({
         a: isOwner.value
       }, isOwner.value ? common_vendor.e({
@@ -318,29 +325,45 @@ const _sfc_main = {
         }),
         P: common_vendor.t(__props.activity.commonCount || 0),
         Q: common_vendor.o(handleCardClick),
-        R: common_vendor.p({
+        R: __props.activity.isReadTrace === 1 && (((_a = __props.activity.targetViews) == null ? void 0 : _a.length) > 0 || __props.activity.hasSilentLoginUser === 1)
+      }, __props.activity.isReadTrace === 1 && (((_b = __props.activity.targetViews) == null ? void 0 : _b.length) > 0 || __props.activity.hasSilentLoginUser === 1) ? common_vendor.e({
+        S: common_vendor.f((__props.activity.targetViews || []).slice(0, __props.activity.hasSilentLoginUser === 1 ? 7 : 8), (viewer, vIdx, i0) => {
+          var _a2;
+          return {
+            a: ((_a2 = viewer.memberUser) == null ? void 0 : _a2.avatar) || "/static/icon/default-avatar.png",
+            b: vIdx
+          };
+        }),
+        T: __props.activity.hasSilentLoginUser === 1
+      }, __props.activity.hasSilentLoginUser === 1 ? {} : {}, {
+        U: common_vendor.t(__props.activity.targetViewNum || 0),
+        V: common_vendor.p({
+          type: "right",
+          size: "12",
+          color: "#ccc"
+        }),
+        W: common_vendor.o(handleViewTrace)
+      }) : {}, {
+        X: common_vendor.p({
           type: "contact-filled",
           size: "16",
           color: "#FF6B00"
         }),
-        S: common_vendor.t(__props.activity.memberUser.nickname || "主办方"),
-        T: common_vendor.p({
+        Y: common_vendor.t(__props.activity.memberUser.nickname || "主办方"),
+        Z: common_vendor.p({
           type: isFavorite.value ? "heart-filled" : "heart",
           size: "16",
           color: "#FF6B00"
         }),
-        U: common_vendor.t(isFavorite.value ? "已收藏" : "收藏"),
-        V: common_vendor.o(toggleFavorite),
-        W: loading.value,
-        X: !isOwner.value
-      }, !isOwner.value ? {
-        Y: isRegistrationDisabled.value ? 1 : "",
-        Z: common_vendor.o(handleRegisterClick)
-      } : {}, {
-        aa: common_vendor.sr(smartGuidePopupRef, "f73ae0ce-12", {
+        aa: common_vendor.t(isFavorite.value ? "已收藏" : "收藏"),
+        ab: common_vendor.o(toggleFavorite),
+        ac: loading.value,
+        ad: isRegistrationDisabled.value ? 1 : "",
+        ae: common_vendor.o(handleRegisterClick),
+        af: common_vendor.sr(smartGuidePopupRef, "f73ae0ce-13", {
           "k": "smartGuidePopupRef"
         }),
-        ab: common_vendor.p({
+        ag: common_vendor.p({
           scenario: 3
         })
       });

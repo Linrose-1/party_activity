@@ -108,7 +108,7 @@
 					<!-- 模块：职业背景 (动态) -->
 					<view class="form-card">
 						<view class="card-header-row">
-							<view class="card-title">组织/机构/职务</view>
+							<view class="card-title">组织/机构，职务/荣誉</view>
 							<view v-if="professionsList.length < 3" class="add-text-btn" @click="addProfession">
 								<uni-icons type="plusempty" size="14" color="#FF8700"></uni-icons> 添加
 							</view>
@@ -121,14 +121,14 @@
 									@click="removeProfession(index)">删除</view>
 							</view>
 
-							<uni-forms-item label="组织机构" label-width="70px">
+							<uni-forms-item label="组织/机构" label-width="70px">
 								<uni-easyinput v-model="item.associationName" placeholder="请填写各类组织/机构,如商会协会等"
 									:inputBorder="false" class="custom-input" />
 							</uni-forms-item>
 
 							<view class="divider"></view>
 
-							<uni-forms-item label="担任职务" label-width="70px">
+							<uni-forms-item label="职务/荣誉" label-width="70px">
 								<uni-easyinput v-model="item.professionalTitle" placeholder="如会长/副会长/秘书长/理事/会员等"
 									:inputBorder="false" class="custom-input" />
 							</uni-forms-item>
@@ -234,7 +234,7 @@
 			<view v-if="currentTab === 1">
 				<view class="form-card info-card">
 					<view class="info-header">
-						<text class="info-title">什么是数字标签？</text>
+						<text class="info-title">数字标签</text>
 						<uni-icons type="info" size="24" color="#FF8700"></uni-icons>
 					</view>
 					<view class="info-body">
@@ -259,7 +259,7 @@
 					</view>
 					<button class="label-btn" @click="goToLabelEditPage">
 						<uni-icons type="compose" color="#fff" size="18" style="margin-right: 12rpx;"></uni-icons>
-						前往编辑数字标签（自我评分）
+						前往编辑数字标签（自我评价）
 					</button>
 				</view>
 
@@ -277,7 +277,8 @@
 		watch
 	} from 'vue';
 	import {
-		onBackPress
+		onBackPress,
+		onLoad
 	} from '@dcloudio/uni-app';
 	import request from '../../utils/request.js';
 	import uploadFile from '../../utils/upload.js';
@@ -286,7 +287,7 @@
 
 	// --- 1. 响应式状态定义 ---
 	const currentTab = ref(0);
-	const tabItems = ['基本信息', '数字标签'];
+	const tabItems = ['基本信息', '数字评价'];
 	const initialDataState = ref('');
 	const userId = ref(uni.getStorageSync('userId'));
 
@@ -410,6 +411,15 @@
 	const isIdVerified = computed(() => {
 		// 如果 idCard 存在且不为空字符串，则视为已实名
 		return !!(form.value.idCard && form.value.idCard.trim() !== '');
+	});
+
+	onLoad((options) => {
+		// 关键点：URL传过来的 options.currentTab 是字符串 "1"
+		if (options && options.currentTab) {
+			// 使用 parseInt 或 Number 强制转换类型
+			currentTab.value = parseInt(options.currentTab);
+			console.log('当前激活的Tab已切换为:', currentTab.value);
+		}
 	});
 
 

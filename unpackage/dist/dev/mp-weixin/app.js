@@ -92,6 +92,7 @@ if (!Math) {
   "./packages/my-friendInvitionone/my-friendInvitionone.js";
   "./packages/my-shareList/my-shareList.js";
   "./packages/my-circleList/my-circleList.js";
+  "./packages/silent-view-trace/silent-view-trace.js";
 }
 const _sfc_main = {
   data() {

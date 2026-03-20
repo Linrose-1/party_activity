@@ -2,6 +2,10 @@
 	<view class="custom-fab-container" v-if="show">
 		<!-- 展开后的菜单项 -->
 		<view class="fab-menu" :class="{ 'menu-active': isExpand }">
+			<view class="menu-item" @click="handleAction('SHARE')">
+				<view class="item-icon bg-orange"><uni-icons type="redo-filled" size="20" color="#fff" /></view>
+				<text class="item-text">智能分享</text>
+			</view>
 			<view class="menu-item" @click="handleAction(0)">
 				<view class="item-icon bg-blue"><uni-icons type="personadd-filled" size="20" color="#fff" /></view>
 				<text class="item-text">收下数字名片</text>
@@ -36,26 +40,33 @@
 		}
 	});
 
+	const emit = defineEmits(['shareClick']);
+
 	const isExpand = ref(false);
 
-	const handleAction = (index) => {
-		const paths = [
-			'/packages/my-friendInvitation/my-friendInvitation?currentTab=1',
-			'/packages/my-edit/my-edit',
-			'/pages/home/home'
-		];
-		const target = paths[index];
-
-		if (target.includes('home')) {
-			uni.switchTab({
-				url: target
-			});
-		} else {
-			uni.navigateTo({
-				url: target
-			});
-		}
+	const handleAction = (type, index) => {
 		isExpand.value = false;
+
+		if (type === 'SHARE') {
+			// 通知父组件打开分享逻辑
+			emit('shareClick');
+		} else {
+			const paths = [
+				'/packages/my-shareList/my-shareList',
+				'/packages/my-edit/my-edit',
+				'/pages/home/home'
+			];
+			const target = paths[index];
+			if (target.includes('home')) {
+				uni.switchTab({
+					url: target
+				});
+			} else {
+				uni.navigateTo({
+					url: target
+				});
+			}
+		}
 	};
 </script>
 
@@ -152,6 +163,9 @@
 	}
 
 	/* 图标背景色 */
+	.bg-orange{
+		background: linear-gradient(135deg, #ffaa00 0%, #fee526 100%);
+	}
 	.bg-blue {
 		background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
 	}

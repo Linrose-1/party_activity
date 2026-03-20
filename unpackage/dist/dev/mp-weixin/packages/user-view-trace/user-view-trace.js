@@ -18,10 +18,12 @@ const _sfc_main = {
   setup(__props) {
     const targetId = common_vendor.ref(null);
     const targetType = common_vendor.ref("post");
+    const hasSilent = common_vendor.ref(false);
     const list = common_vendor.ref([]);
     const pageNo = common_vendor.ref(1);
     const loadingStatus = common_vendor.ref("more");
     common_vendor.onLoad((options) => {
+      common_vendor.index.__f__("log", "at packages/user-view-trace/user-view-trace.vue:86", "options", options);
       targetId.value = options.id;
       if (options.type) {
         targetType.value = options.type;
@@ -34,6 +36,9 @@ const _sfc_main = {
       common_vendor.index.setNavigationBarTitle({
         title: titleMap[targetType.value] || "浏览记录"
       });
+      if (options.hasSilent == 1) {
+        hasSilent.value = true;
+      }
       loadData(true);
     });
     common_vendor.onReachBottom(() => {
@@ -79,7 +84,7 @@ const _sfc_main = {
         }
       } catch (e) {
         loadingStatus.value = "more";
-        common_vendor.index.__f__("error", "at packages/user-view-trace/user-view-trace.vue:137", "加载留痕数据失败:", e);
+        common_vendor.index.__f__("error", "at packages/user-view-trace/user-view-trace.vue:162", "加载留痕数据失败:", e);
       }
     };
     const goCard = (user) => {
@@ -87,6 +92,11 @@ const _sfc_main = {
         return;
       common_vendor.index.navigateTo({
         url: `/packages/applicationBusinessCard/applicationBusinessCard?id=${user.id}&name=${encodeURIComponent(user.nickname || "")}&avatar=${encodeURIComponent(user.avatar || "")}`
+      });
+    };
+    const goSilentList = () => {
+      common_vendor.index.navigateTo({
+        url: `/packages/silent-view-trace/silent-view-trace?id=${targetId.value}&type=${targetType.value}`
       });
     };
     const getAssociationJob = (user) => {
@@ -116,7 +126,7 @@ const _sfc_main = {
     return (_ctx, _cache) => {
       return common_vendor.e({
         a: list.value.length > 0
-      }, list.value.length > 0 ? {
+      }, list.value.length > 0 ? common_vendor.e({
         b: common_vendor.f(list.value, (item, k0, i0) => {
           var _a, _b, _c;
           return common_vendor.e({
@@ -150,16 +160,24 @@ const _sfc_main = {
           type: "right",
           size: "16",
           color: "#ccc"
-        })
+        }),
+        e: hasSilent.value
+      }, hasSilent.value ? {
+        f: common_vendor.p({
+          type: "right",
+          size: "16",
+          color: "#FF6A00"
+        }),
+        g: common_vendor.o(goSilentList)
       } : {}, {
-        e: list.value.length === 0 && loadingStatus.value === "noMore"
-      }, list.value.length === 0 && loadingStatus.value === "noMore" ? {
-        f: common_assets._imports_0$5
+        h: list.value.length === 0 && !hasSilent.value && loadingStatus.value === "noMore"
+      }, list.value.length === 0 && !hasSilent.value && loadingStatus.value === "noMore" ? {
+        i: common_assets._imports_0$5
       } : {}, {
-        g: common_vendor.p({
+        j: common_vendor.p({
           status: loadingStatus.value
         })
-      });
+      }) : {});
     };
   }
 };

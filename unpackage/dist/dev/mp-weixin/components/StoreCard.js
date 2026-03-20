@@ -83,6 +83,12 @@ const _sfc_main = {
         url: `/packages/shop-detail/shop-detail?id=${props.store.id}`
       });
     };
+    const handleViewTrace = () => {
+      const hasSilent = props.store.hasSilentLoginUser || 0;
+      common_vendor.index.navigateTo({
+        url: `/packages/user-view-trace/user-view-trace?id=${props.store.id}&type=store&hasSilent=${hasSilent}`
+      });
+    };
     const handleEditStore = () => {
       emit("edit-store", props.store);
     };
@@ -96,6 +102,7 @@ const _sfc_main = {
       });
     };
     return (_ctx, _cache) => {
+      var _a, _b;
       return common_vendor.e({
         a: coverImage.value,
         b: __props.mode === "browse"
@@ -156,7 +163,26 @@ const _sfc_main = {
         C: common_vendor.o(handleViewDetail),
         D: common_vendor.o(handleEditStore)
       } : {}, {
-        E: common_vendor.o(handleCardClick)
+        E: __props.mode === "browse" && __props.store.isReadTrace === 1 && (((_a = __props.store.targetViews) == null ? void 0 : _a.length) > 0 || __props.store.hasSilentLoginUser === 1)
+      }, __props.mode === "browse" && __props.store.isReadTrace === 1 && (((_b = __props.store.targetViews) == null ? void 0 : _b.length) > 0 || __props.store.hasSilentLoginUser === 1) ? common_vendor.e({
+        F: common_vendor.f((__props.store.targetViews || []).slice(0, __props.store.hasSilentLoginUser === 1 ? 7 : 8), (viewer, vIdx, i0) => {
+          var _a2;
+          return {
+            a: ((_a2 = viewer.memberUser) == null ? void 0 : _a2.avatar) || "/static/icon/default-avatar.png",
+            b: vIdx
+          };
+        }),
+        G: __props.store.hasSilentLoginUser === 1
+      }, __props.store.hasSilentLoginUser === 1 ? {} : {}, {
+        H: common_vendor.t(__props.store.targetViewNum || 0),
+        I: common_vendor.p({
+          type: "right",
+          size: "12",
+          color: "#ccc"
+        }),
+        J: common_vendor.o(handleViewTrace)
+      }) : {}, {
+        K: common_vendor.o(handleCardClick)
       });
     };
   }

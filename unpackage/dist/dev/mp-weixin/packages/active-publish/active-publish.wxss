@@ -1,5 +1,25 @@
 /* 水平间距 */
 /* 水平间距 */
+/* 优化：主滚动容器底部间距，确保不被操作栏遮挡 */
+.main-scroll.data-v-5d3444db {
+  padding-bottom: 200rpx;
+}
+
+/* 优化：表单项间距，防止键盘弹起时太挤 */
+.data-v-5d3444db .uni-forms-item {
+  margin-bottom: 30rpx !important;
+}
+
+/* 解决 textarea 在某些机型下的层级穿透问题 */
+.native-textarea.data-v-5d3444db {
+  width: 100%;
+  font-size: 14px;
+  color: #333;
+  padding: 10px 0;
+  min-height: 80rpx;
+  line-height: 1.5;
+  z-index: 1;
+}
 .page.data-v-5d3444db {
   min-height: 100vh;
   background-color: #f5f7fa;
@@ -181,6 +201,22 @@
   transform: translateY(-50%);
   pointer-events: none;
 }
+.time-preview-box.data-v-5d3444db {
+  margin-top: 16rpx;
+  background-color: #FFF5EE;
+  border-radius: 12rpx;
+  padding: 12rpx 20rpx;
+  display: flex;
+  align-items: center;
+  border: 1rpx solid rgba(255, 111, 0, 0.1);
+}
+.time-preview-box .time-text.data-v-5d3444db {
+  font-size: 24rpx;
+  color: #FF6F00;
+  margin-left: 10rpx;
+  font-weight: 500;
+  line-height: 1.4;
+}
 .row-inputs.data-v-5d3444db {
   display: flex;
   gap: 24rpx;
@@ -314,14 +350,6 @@
   font-size: 14px;
   color: #333;
   width: 100%;
-}
-.native-textarea.data-v-5d3444db {
-  width: 100%;
-  font-size: 14px;
-  color: #333;
-  padding: 10px 0;
-  min-height: 40px;
-  line-height: 1.5;
 }
 .data-v-5d3444db .input-placeholder {
   color: #999;

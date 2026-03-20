@@ -77,7 +77,7 @@ const _sfc_main = {
           special
         };
       } catch (error) {
-        common_vendor.index.__f__("error", "at packages/shop-detail/shop-detail.vue:360", "[营业时间] 解析失败:", error);
+        common_vendor.index.__f__("error", "at packages/shop-detail/shop-detail.vue:373", "[营业时间] 解析失败:", error);
         return {
           regular: [{
             label: "营业时间",
@@ -108,7 +108,7 @@ const _sfc_main = {
       });
       isLoading.value = false;
       if (error) {
-        common_vendor.index.__f__("error", "at packages/shop-detail/shop-detail.vue:404", "[详情] 获取失败:", error);
+        common_vendor.index.__f__("error", "at packages/shop-detail/shop-detail.vue:417", "[详情] 获取失败:", error);
         common_vendor.index.showToast({
           title: error,
           icon: "none"
@@ -116,7 +116,7 @@ const _sfc_main = {
         return;
       }
       storeDetail.value = data;
-      common_vendor.index.__f__("log", "at packages/shop-detail/shop-detail.vue:413", "[详情] 数据:", storeDetail.value);
+      common_vendor.index.__f__("log", "at packages/shop-detail/shop-detail.vue:426", "[详情] 数据:", storeDetail.value);
       if (data.checkContribution === 1) {
         setTimeout(() => {
           if (pointsPopup.value) {
@@ -325,8 +325,9 @@ const _sfc_main = {
       });
     };
     const goToTraceList = () => {
+      const hasSilent = storeDetail.value.hasSilentLoginUser || 0;
       common_vendor.index.navigateTo({
-        url: "/packages/user-view-trace/user-view-trace?id=" + storeDetail.value.id + "&type=store"
+        url: `/packages/user-view-trace/user-view-trace?id=${storeDetail.value.id}&type=store&hasSilent=${hasSilent}`
       });
     };
     const goToCommentPage = () => {
@@ -439,37 +440,47 @@ const _sfc_main = {
         })
       }, {
         E: common_vendor.o(openMap),
-        F: storeDetail.value.isReadTrace === 1 && viewerTotal.value > 0
-      }, storeDetail.value.isReadTrace === 1 && viewerTotal.value > 0 ? common_vendor.e({
-        G: common_vendor.t(viewerTotal.value),
+        F: storeDetail.value && storeDetail.value.isReadTrace === 1 && (viewerTotal.value > 0 || storeDetail.value.hasSilentLoginUser === 1)
+      }, storeDetail.value && storeDetail.value.isReadTrace === 1 && (viewerTotal.value > 0 || storeDetail.value.hasSilentLoginUser === 1) ? common_vendor.e({
+        G: storeDetail.value.targetViewNum > 0
+      }, storeDetail.value.targetViewNum > 0 ? {
         H: common_vendor.p({
+          type: "eye",
+          size: "16",
+          color: "#333"
+        }),
+        I: common_vendor.t(storeDetail.value.targetViewNum)
+      } : {}, {
+        J: common_vendor.p({
           type: "right",
           size: "14",
           color: "#999"
         }),
-        I: common_vendor.f(viewerList.value, (item, k0, i0) => {
+        K: common_vendor.f(viewerList.value, (item, k0, i0) => {
+          var _a;
           return {
-            a: item.memberUser && item.memberUser.avatar ? item.memberUser.avatar : "/static/icon/default-avatar.png",
+            a: ((_a = item.memberUser) == null ? void 0 : _a.avatar) || "/static/icon/default-avatar.png",
             b: item.id
           };
         }),
-        J: viewerTotal.value > 7
+        L: storeDetail.value.hasSilentLoginUser === 1
+      }, storeDetail.value.hasSilentLoginUser === 1 ? {} : {}, {
+        M: viewerTotal.value > 7
       }, viewerTotal.value > 7 ? {} : {}, {
-        K: common_vendor.t(viewerTotal.value),
-        L: common_vendor.o(goToTraceList)
+        N: common_vendor.o(goToTraceList)
       }) : {}, {
-        M: commentTotal.value > 0
+        O: commentTotal.value > 0
       }, commentTotal.value > 0 ? {
-        N: common_vendor.t(commentTotal.value)
+        P: common_vendor.t(commentTotal.value)
       } : {}, {
-        O: common_vendor.p({
+        Q: common_vendor.p({
           type: "right",
           size: "14",
           color: "#999"
         }),
-        P: commentPreviewList.value.length > 0
+        R: commentPreviewList.value.length > 0
       }, commentPreviewList.value.length > 0 ? {
-        Q: common_vendor.f(commentPreviewList.value, (c, k0, i0) => {
+        S: common_vendor.f(commentPreviewList.value, (c, k0, i0) => {
           return {
             a: common_vendor.t(c.anonymous === 1 ? "匿名商友" : c.memberUserBaseVO && c.memberUserBaseVO.nickname ? c.memberUserBaseVO.nickname : "商友"),
             b: common_vendor.t(c.content),
@@ -477,22 +488,22 @@ const _sfc_main = {
           };
         })
       } : {
-        R: common_vendor.p({
+        T: common_vendor.p({
           type: "chatbubble",
           size: "18",
           color: "#ccc"
         })
       }, {
-        S: common_vendor.o(goToCommentPage),
-        T: storeActivityTotal.value > 0
+        U: common_vendor.o(goToCommentPage),
+        V: storeActivityTotal.value > 0
       }, storeActivityTotal.value > 0 ? {
-        U: common_vendor.t(storeActivityTotal.value),
-        V: common_vendor.p({
+        W: common_vendor.t(storeActivityTotal.value),
+        X: common_vendor.p({
           type: "right",
           size: "14",
           color: "#999"
         }),
-        W: common_vendor.f(storeActivityPreviewList.value, (item, k0, i0) => {
+        Y: common_vendor.f(storeActivityPreviewList.value, (item, k0, i0) => {
           return {
             a: item.coverImageUrl || item.activityCoverImageUrl || "/static/icon/default-activity.png",
             b: common_vendor.t(item.activityTitle),
@@ -502,41 +513,41 @@ const _sfc_main = {
             f: item.id
           };
         }),
-        X: common_vendor.o(goToStoreActivityList)
+        Z: common_vendor.o(goToStoreActivityList)
       } : {}, {
-        Y: common_vendor.p({
+        aa: common_vendor.p({
           type: storeDetail.value.userLikeStr === "like" ? "hand-up-filled" : "hand-up",
           size: "22",
           color: storeDetail.value.userLikeStr === "like" ? "#FF6B00" : "#666"
         }),
-        Z: common_vendor.t(storeDetail.value.likesCount || 0),
-        aa: storeDetail.value.userLikeStr === "like" ? 1 : "",
-        ab: common_vendor.o(($event) => toggleAction("like")),
-        ac: common_vendor.p({
+        ab: common_vendor.t(storeDetail.value.likesCount || 0),
+        ac: storeDetail.value.userLikeStr === "like" ? 1 : "",
+        ad: common_vendor.o(($event) => toggleAction("like")),
+        ae: common_vendor.p({
           type: storeDetail.value.userLikeStr === "dislike" ? "hand-down-filled" : "hand-down",
           size: "22",
           color: storeDetail.value.userLikeStr === "dislike" ? "#3498db" : "#666"
         }),
-        ad: common_vendor.t(storeDetail.value.dislikesCount || 0),
-        ae: storeDetail.value.userLikeStr === "dislike" ? 1 : "",
-        af: common_vendor.o(($event) => toggleAction("dislike")),
-        ag: common_vendor.p({
+        af: common_vendor.t(storeDetail.value.dislikesCount || 0),
+        ag: storeDetail.value.userLikeStr === "dislike" ? 1 : "",
+        ah: common_vendor.o(($event) => toggleAction("dislike")),
+        ai: common_vendor.p({
           type: "map-filled",
           color: "#FF6B00",
           size: "20"
         }),
-        ah: common_vendor.o((...args) => common_vendor.unref(openNavigation) && common_vendor.unref(openNavigation)(...args)),
-        ai: common_vendor.p({
+        aj: common_vendor.o((...args) => common_vendor.unref(openNavigation) && common_vendor.unref(openNavigation)(...args)),
+        ak: common_vendor.p({
           type: "phone-filled",
           color: "#fff",
           size: "20"
         }),
-        aj: common_vendor.o(callPhone),
-        ak: common_vendor.sr(pointsPopup, "4c71c098-11", {
+        al: common_vendor.o(callPhone),
+        am: common_vendor.sr(pointsPopup, "4c71c098-12", {
           "k": "pointsPopup"
         })
       }) : {
-        al: common_vendor.p({
+        an: common_vendor.p({
           type: "spinner-cycle",
           size: "30",
           color: "#999"

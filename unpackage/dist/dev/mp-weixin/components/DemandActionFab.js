@@ -16,59 +16,71 @@ const _sfc_main = {
       default: true
     }
   },
-  setup(__props) {
+  emits: ["shareClick"],
+  setup(__props, { emit: __emit }) {
+    const emit = __emit;
     const isExpand = common_vendor.ref(false);
-    const handleAction = (index) => {
-      const paths = [
-        "/packages/my-friendInvitation/my-friendInvitation?currentTab=1",
-        "/packages/my-edit/my-edit",
-        "/pages/home/home"
-      ];
-      const target = paths[index];
-      if (target.includes("home")) {
-        common_vendor.index.switchTab({
-          url: target
-        });
-      } else {
-        common_vendor.index.navigateTo({
-          url: target
-        });
-      }
+    const handleAction = (type, index) => {
       isExpand.value = false;
+      if (type === "SHARE") {
+        emit("shareClick");
+      } else {
+        const paths = [
+          "/packages/my-shareList/my-shareList",
+          "/packages/my-edit/my-edit",
+          "/pages/home/home"
+        ];
+        const target = paths[index];
+        if (target.includes("home")) {
+          common_vendor.index.switchTab({
+            url: target
+          });
+        } else {
+          common_vendor.index.navigateTo({
+            url: target
+          });
+        }
+      }
     };
     return (_ctx, _cache) => {
       return common_vendor.e({
         a: __props.show
       }, __props.show ? common_vendor.e({
         b: common_vendor.p({
+          type: "redo-filled",
+          size: "20",
+          color: "#fff"
+        }),
+        c: common_vendor.o(($event) => handleAction("SHARE")),
+        d: common_vendor.p({
           type: "personadd-filled",
           size: "20",
           color: "#fff"
         }),
-        c: common_vendor.o(($event) => handleAction(0)),
-        d: common_vendor.p({
+        e: common_vendor.o(($event) => handleAction(0)),
+        f: common_vendor.p({
           type: "compose",
           size: "20",
           color: "#fff"
         }),
-        e: common_vendor.o(($event) => handleAction(1)),
-        f: common_vendor.p({
+        g: common_vendor.o(($event) => handleAction(1)),
+        h: common_vendor.p({
           type: "paperplane-filled",
           size: "20",
           color: "#fff"
         }),
-        g: common_vendor.o(($event) => handleAction(2)),
-        h: isExpand.value ? 1 : "",
-        i: !isExpand.value
+        i: common_vendor.o(($event) => handleAction(2)),
+        j: isExpand.value ? 1 : "",
+        k: !isExpand.value
       }, !isExpand.value ? {} : {
-        j: common_vendor.p({
+        l: common_vendor.p({
           type: "closeempty",
           size: "24",
           color: "#fff"
         })
       }, {
-        k: isExpand.value ? 1 : "",
-        l: common_vendor.o(($event) => isExpand.value = !isExpand.value)
+        m: isExpand.value ? 1 : "",
+        n: common_vendor.o(($event) => isExpand.value = !isExpand.value)
       }) : {});
     };
   }

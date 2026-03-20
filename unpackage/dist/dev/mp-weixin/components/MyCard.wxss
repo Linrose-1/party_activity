@@ -234,7 +234,6 @@
 }
 .professional-section .social-group .social-label.data-v-0262bca8 {
   color: #A37E4A;
-  width: 100rpx;
   flex-shrink: 0;
   font-size: 26rpx;
 }
@@ -575,7 +574,6 @@
 }
 .social-group-item .social-label.data-v-0262bca8 {
   color: #A37E4A;
-  width: 100rpx;
   flex-shrink: 0;
 }
 .social-group-item .social-value.data-v-0262bca8 {

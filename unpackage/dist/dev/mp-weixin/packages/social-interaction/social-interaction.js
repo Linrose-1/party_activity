@@ -74,9 +74,9 @@ const _sfc_main = {
           size: "24",
           color: "#fff"
         }),
-        l: common_vendor.unref(utils_unread.unreadState).businessCount > 0
-      }, common_vendor.unref(utils_unread.unreadState).businessCount > 0 ? {
-        m: common_vendor.t(common_vendor.unref(utils_unread.unreadState).businessCount > 99 ? "99+" : common_vendor.unref(utils_unread.unreadState).businessCount)
+        l: common_vendor.unref(utils_unread.unreadState).businessOpCommentCount > 0
+      }, common_vendor.unref(utils_unread.unreadState).businessOpCommentCount > 0 ? {
+        m: common_vendor.t(common_vendor.unref(utils_unread.unreadState).businessOpCommentCount > 99 ? "99+" : common_vendor.unref(utils_unread.unreadState).businessOpCommentCount)
       } : {}, {
         n: common_vendor.p({
           type: "right",

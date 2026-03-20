@@ -44,7 +44,7 @@
 						<view class="card-icon-wrap"><text class="icon-emboss">🎯</text></view>
 						<view class="card-info">
 							<text class="c-title">摇一摇 附近友聚</text>
-							<text class="c-desc">精准定位 即时商机</text>
+							<text class="c-desc">就近连接 即时商机</text>
 						</view>
 					</view>
 
@@ -52,7 +52,7 @@
 						<view class="card-icon-wrap"><text class="icon-emboss">🗓️</text></view>
 						<view class="card-info">
 							<text class="c-title">自定义 访友搜索</text>
-							<text class="c-desc">跨城出差 提前布局</text>
+							<text class="c-desc">跨城商聚 智慧访友</text>
 						</view>
 					</view>
 				</view>

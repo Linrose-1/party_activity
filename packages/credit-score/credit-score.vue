@@ -110,14 +110,14 @@
 
 						<!-- 3. 商友互动 -->
 						<view class="rule-detail-item">
-							<view class="detail-label">3. 商友互动（最高200分）</view>
+							<view class="detail-label">3. 商友赞踩（最高200分）</view>
 							<view class="detail-desc">获赞数 × 2分（上限200分）；被踩数 × -5分（不设下限）。</view>
 						</view>
 
 						<!-- 4. 数字身份 -->
 						<view class="rule-detail-item">
-							<view class="detail-label">4. 数字身份（最高100分）</view>
-							<view class="detail-desc">采用商友评分雷达图的综合评分映射。</view>
+							<view class="detail-label">4. 数字评价（最高100分）</view>
+							<view class="detail-desc">该评分为数字评价统计映射。</view>
 						</view>
 
 						<!-- 5. 基础信息 -->
@@ -231,21 +231,21 @@
 		},
 		{
 			key: 'interactionScore',
-			label: '商友点评',
+			label: '商友赞踩',
 			icon: 'chat-filled',
 			max: 200,
-			url: null, // ✨ 不跳转
+			// url: '/packages/user-reviews/user-reviews', 
+			url: null, 
 			tip: '查看说明',
-			infoText: '该评分为商友互动点评（赞踩）统计映射' // ✨ 说明文字
+			infoText: '该评分为商友赞踩统计映射' // ✨ 说明文字
 		},
 		{
 			key: 'digitalIdentityScore',
-			label: '数字身份',
+			label: '数字评价',
 			icon: 'person-filled',
 			max: 100,
-			url: null, // ✨ 不跳转
-			tip: '查看说明',
-			infoText: '该评分为数字标签评分统计雷达图映射' // ✨ 说明文字
+			url:'/packages/my-edit/my-edit?currentTab=1',
+			tip: '前往评价',
 		},
 		{
 			key: 'basicInfoScore',

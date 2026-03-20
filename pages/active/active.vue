@@ -170,10 +170,17 @@
 				});
 			}
 		});
+
+		//监听全局刷新需求 (发布成功或报名成功时触发)
+		uni.$on('refreshActivityList', () => {
+			console.log('收到刷新信号，执行静默刷新');
+			silentRefresh();
+		});
 	});
 
 	onUnmounted(() => {
 		uni.$off('activityInteractionChanged');
+		uni.$off('refreshActivityList');
 	});
 
 
@@ -205,8 +212,8 @@
 	onPullDownRefresh(async () => {
 		await initializePage();
 		uni.stopPullDownRefresh();
-		
-		fetchGlobalUnread(); 
+
+		fetchGlobalUnread();
 	});
 
 	/**
@@ -220,6 +227,17 @@
 
 
 	// ─── 核心数据方法 ───
+
+	// 3. 核心逻辑：静默刷新函数
+	const silentRefresh = async () => {
+		// 不像 initializePage 那样清空 activitiesData.value = []
+		// 而是直接请求第一页，请求回来后再替换，这样用户视觉上不会感到闪烁
+		pageNo.value = 1;
+		hasMore.value = true;
+
+		// 调用获取列表函数，isLoadMore 传 false 表示覆盖第一页
+		await getActiveList(false);
+	};
 
 	/**
 	 * 精准更新本地列表中指定 ID 的聚会字段

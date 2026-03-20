@@ -68,6 +68,24 @@ const _sfc_main = {
         newApplyCount.value = data.total;
       }
     };
+    const formatCompanyInfo = (item) => {
+      var _a, _b;
+      const companyRaw = item.companyName || "";
+      const positionRaw = item.positionTitle || "";
+      const companies = companyRaw.split(/[,，丨]/);
+      const positions = positionRaw.split(/[,，丨]/);
+      const company = ((_a = companies[0]) == null ? void 0 : _a.trim()) || "";
+      const position = ((_b = positions[0]) == null ? void 0 : _b.trim()) || "";
+      if (company && position)
+        return `${company} · ${position}`;
+      return company || position || "暂无公司信息";
+    };
+    const formatTimestamp = (ts) => {
+      if (!ts)
+        return "";
+      const d = new Date(Number(ts));
+      return `${d.getFullYear()}-${(d.getMonth() + 1).toString().padStart(2, "0")}-${d.getDate().toString().padStart(2, "0")}`;
+    };
     const openApplyPopup = () => applyPopupRef.value.open(newApplyList.value);
     const handleAuditSuccess = () => {
       getNewApplyList();
@@ -154,11 +172,15 @@ const _sfc_main = {
             g: friend.classmateFlag === 1
           }, friend.classmateFlag === 1 ? {} : {}) : {}, {
             h: "cee902af-3-" + i0,
-            i: common_vendor.t(friend.companyName || "暂无公司信息"),
-            j: "cee902af-4-" + i0,
-            k: common_vendor.o(($event) => confirmDeleteFriend(friend), friend.id),
-            l: friend.id,
-            m: common_vendor.o(($event) => navigateToBusinessCard(friend), friend.id)
+            i: common_vendor.t(formatCompanyInfo(friend)),
+            j: friend.followTime || friend.createTime
+          }, friend.followTime || friend.createTime ? {
+            k: common_vendor.t(formatTimestamp(friend.followTime || friend.createTime))
+          } : {}, {
+            l: "cee902af-4-" + i0,
+            m: common_vendor.o(($event) => confirmDeleteFriend(friend), friend.id),
+            n: friend.id,
+            o: common_vendor.o(($event) => navigateToBusinessCard(friend), friend.id)
           });
         }),
         o: common_vendor.p({
@@ -171,13 +193,16 @@ const _sfc_main = {
           size: "18",
           color: "#4cd964"
         }),
-        q: common_vendor.p({
+        q: circleFriendList.value.length > 0
+      }, circleFriendList.value.length > 0 ? {
+        r: common_vendor.p({
           status: circleLoadStatus.value
-        }),
-        r: common_vendor.sr(applyPopupRef, "cee902af-6", {
+        })
+      } : {}, {
+        s: common_vendor.sr(applyPopupRef, "cee902af-6", {
           "k": "applyPopupRef"
         }),
-        s: common_vendor.o(handleAuditSuccess)
+        t: common_vendor.o(handleAuditSuccess)
       });
     };
   }

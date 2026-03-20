@@ -200,17 +200,16 @@
 						@click.stop="handleViewTrace(post)">
 						<view class="view-avatar-row">
 
-							<!-- 这里的 src 你可以之后替换为正式的图标地址 -->
-							<image v-if="post.hasSilentUser"
-								src="https://img.gofor.club/post/20251231/1gcYJWmdcqe0de467fbd77b15cffaa30eb05468f5f7f_1767178458259.png"
-								class="tiny-avatar silent-avatar" mode="aspectFill" />
-
 							<!-- 渲染普通真实用户头像 (如果有静默用户，切片数量减1，保证总数不多于8个) -->
 							<template v-for="(viewer, vIdx) in post.viewers.slice(0, post.hasSilentUser ? 7 : 8)"
 								:key="vIdx">
 								<image v-if="viewer.memberUser" :src="viewer.memberUser.avatar || defaultAvatarUrl"
 									class="tiny-avatar" mode="aspectFill" />
 							</template>
+
+							<image v-if="post.hasSilentUser"
+								src="https://img.gofor.club/post/20251231/1gcYJWmdcqe0de467fbd77b15cffaa30eb05468f5f7f_1767178458259.png"
+								class="tiny-avatar silent-avatar" mode="aspectFill" />
 
 							<text class="view-count-txt">
 								等{{ post.viewNum }}位商友看过
@@ -1070,7 +1069,10 @@
 					viewNum: item.targetViewNum || 0, // 总浏览人数
 					viewers: item.targetViews ?
 						item.targetViews.filter(v => v && v.memberUser) : [],
-					hasSilentUser: item.hasSilentLoginUser === 1
+					// 1. 用于模板 v-if 判断 (Boolean)
+					hasSilentUser: item.hasSilentLoginUser === 1,
+					// 2. 用于跳转传参 (Number) - 显式保存这个原始字段
+					hasSilentLoginUser: item.hasSilentLoginUser || 0
 				}
 			});
 
@@ -1307,7 +1309,7 @@
 		switch (item.type) {
 			case 'friend':
 				uni.navigateTo({
-					url: '/packages/my-friendInvitation/my-friendInvitation?currentTab=1'
+					url: '/packages/my-circleList/my-circleList'
 				});
 				break;
 			case 'points':
@@ -1667,9 +1669,14 @@
 	 * [方法] 点击浏览记录区域跳转到详情页
 	 */
 	const handleViewTrace = (post) => {
-		// 跳转到之前做好的浏览记录详情页
+		// 现在这里能拿到值了，因为我们在 mappedData 里补齐了
+		const hasSilent = post.hasSilentLoginUser || 0;
+
+		// 打印日志核对
+		console.log(`🚀 [首页点击留痕] ID: ${post.id}, hasSilent: ${hasSilent}`);
+
 		uni.navigateTo({
-			url: `/packages/user-view-trace/user-view-trace?id=${post.id}`
+			url: `/packages/user-view-trace/user-view-trace?id=${post.id}&type=post&hasSilent=${hasSilent}`
 		});
 	};
 

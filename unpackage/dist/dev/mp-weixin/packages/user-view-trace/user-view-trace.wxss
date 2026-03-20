@@ -90,6 +90,19 @@
 		font-size: 22rpx;
 		color: #999;
 }
+.silent-border.data-v-e21cc623 {
+		border: 2rpx solid #FF6A00 !important;
+}
+.u-tag-intent.data-v-e21cc623 {
+		font-size: 20rpx;
+		background: #FF6A00;
+		color: #fff;
+		padding: 2rpx 12rpx;
+		border-radius: 6rpx;
+}
+.silent-bg.data-v-e21cc623 {
+		background-color: #FFF5EE !important;
+}
 
 	/* 空状态样式 */
 .empty-box.data-v-e21cc623 {
@@ -105,4 +118,27 @@
 		height: 200rpx;
 		margin-bottom: 20rpx;
 		opacity: 0.5;
+}
+.silent-entry-card.data-v-e21cc623 {
+		margin-top: 10rpx;
+}
+.silent-item.data-v-e21cc623 {
+		border: 2rpx dashed #FF6A00;
+		background: #FFF9F5;
+}
+.silent-avatar-border.data-v-e21cc623 {
+		border: 2rpx solid #FF6A00;
+}
+.u-tag.data-v-e21cc623 {
+		font-size: 20rpx;
+		background: #FF6A00;
+		color: #fff;
+		padding: 2rpx 12rpx;
+		border-radius: 6rpx;
+		margin-left: 10rpx;
+}
+.u-desc.data-v-e21cc623 {
+		font-size: 24rpx;
+		color: #999;
+		margin-top: 8rpx;
 }

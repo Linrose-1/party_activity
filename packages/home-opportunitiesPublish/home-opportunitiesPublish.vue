@@ -100,7 +100,7 @@
 						<!-- 选中「其他合作」(value='4') 时显示自定义输入框 -->
 						<view v-if="form.partnerTypes.includes('4')" class="other-type-input-wrap animate-fade">
 							<input v-model="form.partnerTypeOther" class="other-type-input"
-								placeholder="请输入您的精准需求（最多20字）" maxlength="20" />
+								placeholder="请输入您的精准需求（最多20字）" maxlength="40" />
 						</view>
 					</view>
 
