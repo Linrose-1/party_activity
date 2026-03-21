@@ -5,15 +5,11 @@ const utils_unread = require("../../utils/unread.js");
 const utils_user = require("../../utils/user.js");
 if (!Array) {
   const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
-  const _easycom_uni_collapse_item2 = common_vendor.resolveComponent("uni-collapse-item");
-  const _easycom_uni_collapse2 = common_vendor.resolveComponent("uni-collapse");
-  (_easycom_uni_icons2 + _easycom_uni_collapse_item2 + _easycom_uni_collapse2)();
+  _easycom_uni_icons2();
 }
 const _easycom_uni_icons = () => "../../uni_modules/uni-icons/components/uni-icons/uni-icons.js";
-const _easycom_uni_collapse_item = () => "../../uni_modules/uni-collapse/components/uni-collapse-item/uni-collapse-item.js";
-const _easycom_uni_collapse = () => "../../uni_modules/uni-collapse/components/uni-collapse/uni-collapse.js";
 if (!Math) {
-  (_easycom_uni_icons + _easycom_uni_collapse_item + _easycom_uni_collapse + ActivityCard + SmartGuidePopup)();
+  (_easycom_uni_icons + ActivityCard + SmartGuidePopup)();
 }
 const ActivityCard = () => "../../components/ActivityCard.js";
 const SmartGuidePopup = () => "../../components/SmartGuidePopup.js";
@@ -57,7 +53,7 @@ const _sfc_main = {
         }
       });
       common_vendor.index.$on("refreshActivityList", () => {
-        common_vendor.index.__f__("log", "at pages/active/active.vue:176", "收到刷新信号，执行静默刷新");
+        common_vendor.index.__f__("log", "at pages/active/active.vue:158", "收到刷新信号，执行静默刷新");
         silentRefresh();
       });
     });
@@ -73,6 +69,7 @@ const _sfc_main = {
       }
     });
     common_vendor.onPullDownRefresh(async () => {
+      resetFilters();
       await initializePage();
       common_vendor.index.stopPullDownRefresh();
       utils_unread.fetchGlobalUnread();
@@ -157,7 +154,7 @@ const _sfc_main = {
         ]);
         await getActiveList(false);
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/active/active.vue:335", "[聚会列表] 初始化失败:", error);
+        common_vendor.index.__f__("error", "at pages/active/active.vue:318", "[聚会列表] 初始化失败:", error);
         common_vendor.index.showToast({
           title: "数据加载失败",
           icon: "none"
@@ -179,7 +176,7 @@ const _sfc_main = {
         }
       });
       if (error) {
-        common_vendor.index.__f__("error", "at pages/active/active.vue:361", "[轮播图] 获取失败:", error);
+        common_vendor.index.__f__("error", "at pages/active/active.vue:344", "[轮播图] 获取失败:", error);
         bannerList.value = [];
         return;
       }
@@ -195,7 +192,7 @@ const _sfc_main = {
         }
       });
       if (error) {
-        common_vendor.index.__f__("error", "at pages/active/active.vue:382", "[类型列表] 获取失败:", error);
+        common_vendor.index.__f__("error", "at pages/active/active.vue:365", "[类型列表] 获取失败:", error);
         throw new Error("获取类型失败");
       }
       typeList.value = data || [];
@@ -206,7 +203,7 @@ const _sfc_main = {
         error
       } = await utils_request.request("/app-api/member/activity/status-list");
       if (error) {
-        common_vendor.index.__f__("error", "at pages/active/active.vue:397", "[状态列表] 获取失败:", error);
+        common_vendor.index.__f__("error", "at pages/active/active.vue:380", "[状态列表] 获取失败:", error);
         throw new Error("获取状态失败");
       }
       statusList.value = data || [];
@@ -260,11 +257,54 @@ const _sfc_main = {
         }
         utils_unread.fetchGlobalUnread();
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/active/active.vue:463", "[聚会列表] 请求异常:", error);
+        common_vendor.index.__f__("error", "at pages/active/active.vue:446", "[聚会列表] 请求异常:", error);
         hasMore.value = false;
       } finally {
         loading.value = false;
       }
+    };
+    const handleTopScan = () => {
+      common_vendor.index.__f__("log", "at pages/active/active.vue:459", "🚀 准备扫码...");
+      common_vendor.index.scanCode({
+        // 1. 【关键】不要写 scanType: ['qrCode']，直接去掉这个参数
+        // 或者写成 ['qrCode', 'barCode', 'datamatrix', 'pdf417']，但建议直接删掉
+        onlyFromCamera: true,
+        success: (res) => {
+          common_vendor.index.__f__("log", "at pages/active/active.vue:466", "✅ 扫码原始结果:", res);
+          let targetPath = res.path;
+          if (targetPath) {
+            const finalUrl = targetPath.startsWith("/") ? targetPath : "/" + targetPath;
+            common_vendor.index.__f__("log", "at pages/active/active.vue:475", "🔗 目标跳转路径:", finalUrl);
+            common_vendor.index.navigateTo({
+              url: finalUrl,
+              fail: (err) => {
+                common_vendor.index.__f__("error", "at pages/active/active.vue:480", "❌ 跳转失败:", err);
+                common_vendor.index.showModal({
+                  title: "跳转失败",
+                  content: "路径可能未配置：" + finalUrl,
+                  showCancel: false
+                });
+              }
+            });
+          } else {
+            common_vendor.index.showModal({
+              title: "提示",
+              content: "此码不是有效的核销小程序码\n解析内容：" + (res.result || "空"),
+              showCancel: false
+            });
+          }
+        },
+        fail: (err) => {
+          common_vendor.index.__f__("error", "at pages/active/active.vue:498", "❌ 扫码过程出错/取消:", err);
+        }
+      });
+    };
+    const selectType = (index) => {
+      typeIndex.value = index;
+      selectedCategory.value = index === 0 ? "" : typeList.value[index - 1].value;
+    };
+    const selectStatus = (index) => {
+      statusIndex.value = index;
     };
     const resetFilters = () => {
       searchKeyword.value = "";
@@ -272,18 +312,6 @@ const _sfc_main = {
       selectedCategory.value = "";
       statusIndex.value = 0;
       selectedLocationInfo.value = null;
-      common_vendor.index.showToast({
-        title: "筛选已重置",
-        icon: "none"
-      });
-    };
-    const bindTypePickerChange = (e) => {
-      const newIndex = Number(e.detail.value);
-      typeIndex.value = newIndex;
-      selectedCategory.value = newIndex === 0 ? "" : typeList.value[newIndex - 1].value;
-    };
-    const bindStatusPickerChange = (e) => {
-      statusIndex.value = e.detail.value;
     };
     const openMapToChooseLocation = () => {
       common_vendor.index.chooseLocation({
@@ -366,46 +394,53 @@ const _sfc_main = {
     });
     return (_ctx, _cache) => {
       return common_vendor.e({
-        a: common_vendor.p({
-          type: "search",
-          size: "18",
-          color: "rgba(255, 255, 255, 0.7)"
+        a: common_vendor.t(selectedLocationInfo.value ? selectedLocationInfo.value.name || "已选位置" : "选择位置"),
+        b: common_vendor.p({
+          type: "bottom",
+          size: "12",
+          color: "#333"
         }),
-        b: searchKeyword.value,
-        c: common_vendor.o(($event) => searchKeyword.value = $event.detail.value),
-        d: bannerList.value.length > 0
+        c: common_vendor.o(openMapToChooseLocation),
+        d: common_vendor.p({
+          type: "search",
+          size: "16",
+          color: "#999"
+        }),
+        e: searchKeyword.value,
+        f: common_vendor.o(($event) => searchKeyword.value = $event.detail.value),
+        g: common_vendor.p({
+          type: "scan",
+          size: "26",
+          color: "#FF6B00"
+        }),
+        h: common_vendor.o(handleTopScan),
+        i: bannerList.value.length > 0
       }, bannerList.value.length > 0 ? {
-        e: common_vendor.f(bannerList.value, (banner, k0, i0) => {
-          return common_vendor.e({
+        j: common_vendor.f(bannerList.value, (banner, k0, i0) => {
+          return {
             a: banner.imageUrl,
-            b: banner.title
-          }, banner.title ? {
-            c: common_vendor.t(banner.title)
-          } : {}, {
-            d: banner.id,
-            e: common_vendor.o(($event) => handleBannerClick(banner), banner.id)
-          });
+            b: banner.id,
+            c: common_vendor.o(($event) => handleBannerClick(banner), banner.id)
+          };
         })
       } : {}, {
-        f: common_vendor.o(resetFilters),
-        g: common_vendor.t(typePickerRange.value[typeIndex.value]),
-        h: common_vendor.o(bindTypePickerChange),
-        i: typeIndex.value,
-        j: typePickerRange.value,
-        k: common_vendor.t(statusPickerRange.value[statusIndex.value]),
-        l: common_vendor.o(bindStatusPickerChange),
-        m: statusIndex.value,
-        n: statusPickerRange.value,
-        o: selectedLocationInfo.value
-      }, selectedLocationInfo.value ? {
-        p: common_vendor.t(selectedLocationInfo.value.address || selectedLocationInfo.value.name)
-      } : {}, {
-        q: common_vendor.o(openMapToChooseLocation),
-        r: common_vendor.p({
-          title: "聚会筛选",
-          open: true
+        k: common_vendor.f(typePickerRange.value, (item, index, i0) => {
+          return {
+            a: common_vendor.t(item),
+            b: "type" + index,
+            c: typeIndex.value === index ? 1 : "",
+            d: common_vendor.o(($event) => selectType(index), "type" + index)
+          };
         }),
-        s: common_vendor.f(activitiesData.value, (activity, index, i0) => {
+        l: common_vendor.f(statusPickerRange.value, (item, index, i0) => {
+          return {
+            a: common_vendor.t(item),
+            b: "status" + index,
+            c: statusIndex.value === index ? 1 : "",
+            d: common_vendor.o(($event) => selectStatus(index), "status" + index)
+          };
+        }),
+        m: common_vendor.f(activitiesData.value, (activity, k0, i0) => {
           return {
             a: activity.id,
             b: common_vendor.o(handleFavoriteChange, activity.id),
@@ -417,20 +452,27 @@ const _sfc_main = {
             })
           };
         }),
-        t: !hasMore.value && activitiesData.value.length > 0
+        n: !hasMore.value && activitiesData.value.length > 0
       }, !hasMore.value && activitiesData.value.length > 0 ? {} : {}, {
-        v: !loading.value && activitiesData.value.length === 0
-      }, !loading.value && activitiesData.value.length === 0 ? {} : {}, {
-        w: common_vendor.p({
+        o: !loading.value && activitiesData.value.length === 0
+      }, !loading.value && activitiesData.value.length === 0 ? {
+        p: common_vendor.p({
+          type: "info",
+          size: "50",
+          color: "#ddd"
+        }),
+        q: common_vendor.o(resetFilters)
+      } : {}, {
+        r: common_vendor.p({
           type: "plus",
           size: "18",
           color: "white"
         }),
-        x: common_vendor.o(publishActivity),
-        y: common_vendor.sr(smartGuidePopupRef, "12e513cf-5", {
+        s: common_vendor.o(publishActivity),
+        t: common_vendor.sr(smartGuidePopupRef, "12e513cf-6", {
           "k": "smartGuidePopupRef"
         }),
-        z: common_vendor.p({
+        v: common_vendor.p({
           scenario: 3
         })
       });

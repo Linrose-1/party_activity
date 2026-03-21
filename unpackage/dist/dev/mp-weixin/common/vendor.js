@@ -8786,6 +8786,12 @@ const subPackages = [
         style: {
           navigationBarTitleText: "意向用户列表"
         }
+      },
+      {
+        path: "active-verify/active-verify",
+        style: {
+          navigationBarTitleText: "聚会核销"
+        }
       }
     ]
   }

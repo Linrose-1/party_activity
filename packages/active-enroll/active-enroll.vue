@@ -121,12 +121,39 @@
 		<!-- 第三步：完成报名 -->
 		<view v-if="currentStep === 3" class="result-page">
 			<view class="status-box">
-				<icon v-if="activityDetail?.joinStatus === 2" type="success" size="60" color="#4caf50" />
-				<icon v-else type="waiting" size="60" color="#FF62B1" />
+				<icon v-if="activityDetail?.joinStatus === 2" type="success" size="26" color="#4caf50" />
+				<icon v-else type="waiting" size="26" color="#FF62B1" />
 				<text class="result-title">{{ activityDetail?.joinStatus === 2 ? '报名成功' : '报名已提交，等待确认' }}</text>
 				<text class="result-desc">
 					{{ activityDetail?.joinStatus === 2 ? '期待您的准时参与！' : '您的申请已提交给组织者，审核结果将通过消息通知。' }}
 				</text>
+			</view>
+
+			<!-- 核销码门票卡片 -->
+			<view v-if="activityDetail?.joinStatus === 2 && verifyQrCodeBase64" class="verify-ticket-container">
+				<view class="ticket-top">
+					<text class="ticket-title">参会凭证</text>
+					<view class="ticket-dashed-line"></view>
+				</view>
+
+				<view class="ticket-body" @click="previewVerifyQrCode">
+					<view class="qr-wrapper">
+						<image :src="verifyQrCodeBase64" class="main-qr-img" mode="aspectFit" />
+						<view class="qr-mask">
+							<uni-icons type="search" size="24" color="#fff"></uni-icons>
+							<text>点击放大出示</text>
+						</view>
+					</view>
+					<text class="qr-sub-hint">签到时请向组织者出示此码</text>
+				</view>
+
+				<view class="ticket-footer">
+					<text>NO. {{ activityId }}-{{ loggedInUserId }}</text>
+				</view>
+
+				<!-- 装饰用的圆孔（门票剪裁感） -->
+				<view class="hole hole-left"></view>
+				<view class="hole hole-right"></view>
 			</view>
 
 			<view class="section-card">
@@ -182,6 +209,8 @@
 	const isUserVerified = ref(true); // 默认为 true，避免页面闪烁
 
 	const smartGuidePopupRef = ref(null);
+
+	const verifyQrCodeBase64 = ref('');
 
 	// 检查用户实名认证状态的函数
 	const checkUserVerificationStatus = async () => {
@@ -343,6 +372,10 @@
 		}
 	}, {
 		deep: true
+	});
+
+	watch(() => activityDetail.value?.joinStatus, (newVal) => {
+		if (newVal === 2) getVerifyQrCode();
 	});
 
 	/**
@@ -521,6 +554,27 @@
 				icon: 'none'
 			});
 		}
+	};
+
+	// 在获取详情成功且 joinStatus === 2 (已报名) 时调用
+	const getVerifyQrCode = async () => {
+		const userId = uni.getStorageSync('userId');
+		const {
+			data,
+			error
+		} = await request('/app-api/member/social-user/wxa-qrcode', {
+			method: 'POST',
+			data: {
+				// 使用缩写以防长度超标：a代表activityId, u代表joinUserId
+				scene: `a=${activityId.value}&u=${userId}`,
+				path: "packages/active-verify/active-verify", // 新的核销页面路径
+				width: 430,
+				autoColor: false,
+				checkPath: false,
+				hyaline: true
+			}
+		});
+		if (data) verifyQrCodeBase64.value = `data:image/png;base64,${data}`;
 	};
 
 
@@ -751,6 +805,24 @@
 		}
 	};
 
+	/**
+	 * 预览并放大核销码
+	 */
+	const previewVerifyQrCode = () => {
+		if (!verifyQrCodeBase64.value) return;
+
+		uni.previewImage({
+			urls: [verifyQrCodeBase64.value],
+			current: verifyQrCodeBase64.value,
+			longPressActions: {
+				itemList: ['发送给朋友', '保存图片', '收藏'],
+				success: function(data) {
+					console.log('选中了第' + (data.tapIndex + 1) + '个按钮,第' + (data.index + 1) + '张图片');
+				}
+			}
+		});
+	};
+
 	const generateTicketNumber = () => {
 		if (!ticketNumber.value) {
 			const letters = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
@@ -857,6 +929,113 @@
 		.step-text {
 			font-size: 24rpx;
 			color: #999;
+		}
+	}
+
+	/* --- 核销码门票卡片样式 --- */
+	.verify-ticket-container {
+		background: #fff;
+		margin: 40rpx 30rpx;
+		border-radius: 24rpx;
+		position: relative;
+		box-shadow: 0 10rpx 40rpx rgba(255, 98, 177, 0.15);
+		overflow: hidden;
+		border: 1rpx solid rgba(255, 98, 177, 0.1);
+
+		.ticket-top {
+			padding: 30rpx;
+			text-align: center;
+
+			.ticket-title {
+				font-size: 28rpx;
+				font-weight: bold;
+				color: #FF62B1;
+				letter-spacing: 4rpx;
+			}
+		}
+
+		.ticket-dashed-line {
+			margin-top: 20rpx;
+			border-top: 2rpx dashed #eee;
+			position: relative;
+		}
+
+		.ticket-body {
+			padding: 40rpx 0;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+
+			.qr-wrapper {
+				position: relative;
+				width: 340rpx;
+				height: 340rpx;
+				padding: 10rpx;
+				background: #fff;
+				border: 2rpx solid #f9f9f9;
+				border-radius: 16rpx;
+
+				.main-qr-img {
+					width: 100%;
+					height: 100%;
+				}
+
+				.qr-mask {
+					position: absolute;
+					bottom: 0;
+					left: 0;
+					right: 0;
+					background: rgba(0, 0, 0, 0.3);
+					height: 60rpx;
+					display: flex;
+					align-items: center;
+					justify-content: center;
+					gap: 8rpx;
+					color: #fff;
+					font-size: 20rpx;
+					border-bottom-left-radius: 16rpx;
+					border-bottom-right-radius: 16rpx;
+				}
+			}
+
+			.qr-sub-hint {
+				margin-top: 30rpx;
+				font-size: 24rpx;
+				color: #999;
+			}
+		}
+
+		.ticket-footer {
+			background: #fafafa;
+			padding: 20rpx;
+			text-align: center;
+			font-size: 20rpx;
+			color: #ccc;
+			font-family: monospace;
+		}
+
+		/* 左右两边的圆型缺口 */
+		.hole {
+			width: 30rpx;
+			height: 30rpx;
+			background: #f8f8f8;
+			/* 必须与背景色一致 */
+			border-radius: 50%;
+			position: absolute;
+			top: 85rpx;
+			/* 对应虚线位置 */
+			z-index: 2;
+			border: 1rpx solid rgba(255, 98, 177, 0.05);
+		}
+
+		.hole-left {
+			left: -15rpx;
+			box-shadow: inset -4rpx 0 6rpx rgba(0, 0, 0, 0.02);
+		}
+
+		.hole-right {
+			right: -15rpx;
+			box-shadow: inset 4rpx 0 6rpx rgba(0, 0, 0, 0.02);
 		}
 	}
 

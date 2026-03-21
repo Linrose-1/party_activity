@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "聚会核销",
+  "usingComponents": {
+    "uni-icons": "../../uni_modules/uni-icons/components/uni-icons/uni-icons"
+  }
+}

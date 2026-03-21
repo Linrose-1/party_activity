@@ -41,12 +41,19 @@ const _sfc_main = {
     });
     const formattedDate = common_vendor.computed(() => {
       if (!props.activity.startDatetime)
-        return "时间待定";
+        return "待定";
       const date = new Date(props.activity.startDatetime);
       const pad = (n) => n.toString().padStart(2, "0");
-      return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
+      return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())} 开始`;
     });
-    const formattedDistance = common_vendor.computed(() => {
+    const formattedRegDate = common_vendor.computed(() => {
+      if (!props.activity.registrationStartDatetime)
+        return "待定";
+      const date = new Date(props.activity.registrationStartDatetime);
+      const pad = (n) => n.toString().padStart(2, "0");
+      return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())} 开始`;
+    });
+    common_vendor.computed(() => {
       if (typeof props.activity.distance === "number") {
         return `${props.activity.distance.toFixed(2)} km`;
       }
@@ -181,7 +188,7 @@ const _sfc_main = {
             availableActions[tappedItem]();
         },
         fail: (res) => {
-          common_vendor.index.__f__("log", "at components/ActivityCard.vue:362", res.errMsg);
+          common_vendor.index.__f__("log", "at components/ActivityCard.vue:352", res.errMsg);
         }
       });
     };
@@ -267,103 +274,76 @@ const _sfc_main = {
         })
       }) : {}, {
         q: __props.activity.coverImageUrl,
-        r: __props.activity.statusStr
+        r: __props.activity.tags && __props.activity.tags.length > 0
+      }, __props.activity.tags && __props.activity.tags.length > 0 ? {
+        s: common_vendor.t(__props.activity.tags[0])
+      } : {}, {
+        t: __props.activity.statusStr
       }, __props.activity.statusStr ? {
-        s: common_vendor.t(__props.activity.statusStr),
-        t: common_vendor.n(getStatusClass(__props.activity.statusStr))
+        v: common_vendor.t(__props.activity.statusStr),
+        w: common_vendor.n(getStatusClass(__props.activity.statusStr))
       } : {}, {
-        v: common_vendor.t(__props.activity.activityTitle),
-        w: common_vendor.p({
-          type: "calendar",
-          size: "16",
-          color: "#FF6B00"
-        }),
-        x: common_vendor.t(formattedDate.value),
-        y: common_vendor.p({
-          type: "location",
-          size: "16",
-          color: "#FF6B00"
-        }),
-        z: common_vendor.t(__props.activity.locationAddress || "线上聚会"),
-        A: common_vendor.t(__props.activity.joinCount || 0),
-        B: common_vendor.t(__props.activity.totalSlots || "不限"),
-        C: formattedDistance.value
-      }, formattedDistance.value ? {
-        D: common_vendor.p({
-          type: "paperplane-filled",
-          size: "16",
-          color: "#FF6B00"
-        }),
-        E: common_vendor.t(formattedDistance.value)
-      } : {}, {
-        F: common_vendor.f(__props.activity.tags, (tag, index, i0) => {
-          return {
-            a: common_vendor.t(tag),
-            b: index
-          };
-        }),
-        G: common_vendor.p({
-          type: __props.activity.userLikeStr === "like" ? "hand-up-filled" : "hand-up",
-          size: "18",
-          color: __props.activity.userLikeStr === "like" ? "#e74c3c" : "#666"
-        }),
-        H: common_vendor.t(__props.activity.likesCount || 0),
-        I: __props.activity.userLikeStr === "like" ? 1 : "",
-        J: common_vendor.o(($event) => handleAction("like")),
-        K: common_vendor.p({
-          type: __props.activity.userLikeStr === "dislike" ? "hand-down-filled" : "hand-down",
-          size: "18",
-          color: __props.activity.userLikeStr === "dislike" ? "#3498db" : "#666"
-        }),
-        L: common_vendor.t(__props.activity.dislikesCount || 0),
-        M: __props.activity.userLikeStr === "dislike" ? 1 : "",
-        N: common_vendor.o(($event) => handleAction("dislike")),
-        O: common_vendor.p({
-          type: "chatbubble",
-          size: "18",
-          color: "#666"
-        }),
-        P: common_vendor.t(__props.activity.commonCount || 0),
-        Q: common_vendor.o(handleCardClick),
-        R: __props.activity.isReadTrace === 1 && (((_a = __props.activity.targetViews) == null ? void 0 : _a.length) > 0 || __props.activity.hasSilentLoginUser === 1)
+        x: __props.activity.memberUser.avatar,
+        y: common_vendor.t(__props.activity.memberUser.nickname || "主办方"),
+        z: common_vendor.t(__props.activity.activityTitle),
+        A: common_vendor.t(formattedDate.value),
+        B: common_vendor.t(formattedRegDate.value),
+        C: common_vendor.t(__props.activity.locationAddress || "线上聚会"),
+        D: common_vendor.o(handleCardClick),
+        E: __props.activity.isReadTrace === 1 && (((_a = __props.activity.targetViews) == null ? void 0 : _a.length) > 0 || __props.activity.hasSilentLoginUser === 1)
       }, __props.activity.isReadTrace === 1 && (((_b = __props.activity.targetViews) == null ? void 0 : _b.length) > 0 || __props.activity.hasSilentLoginUser === 1) ? common_vendor.e({
-        S: common_vendor.f((__props.activity.targetViews || []).slice(0, __props.activity.hasSilentLoginUser === 1 ? 7 : 8), (viewer, vIdx, i0) => {
+        F: common_vendor.f((__props.activity.targetViews || []).slice(0, __props.activity.hasSilentLoginUser === 1 ? 7 : 8), (viewer, vIdx, i0) => {
           var _a2;
           return {
             a: ((_a2 = viewer.memberUser) == null ? void 0 : _a2.avatar) || "/static/icon/default-avatar.png",
             b: vIdx
           };
         }),
-        T: __props.activity.hasSilentLoginUser === 1
+        G: __props.activity.hasSilentLoginUser === 1
       }, __props.activity.hasSilentLoginUser === 1 ? {} : {}, {
-        U: common_vendor.t(__props.activity.targetViewNum || 0),
-        V: common_vendor.p({
+        H: common_vendor.t(__props.activity.targetViewNum || 0),
+        I: common_vendor.p({
           type: "right",
           size: "12",
           color: "#ccc"
         }),
-        W: common_vendor.o(handleViewTrace)
+        J: common_vendor.o(handleViewTrace)
       }) : {}, {
-        X: common_vendor.p({
-          type: "contact-filled",
-          size: "16",
-          color: "#FF6B00"
+        K: common_vendor.p({
+          type: __props.activity.userLikeStr === "like" ? "hand-up-filled" : "hand-up",
+          size: "18",
+          color: __props.activity.userLikeStr === "like" ? "#FF6B00" : "#888"
         }),
-        Y: common_vendor.t(__props.activity.memberUser.nickname || "主办方"),
-        Z: common_vendor.p({
+        L: common_vendor.t(__props.activity.likesCount || 0),
+        M: __props.activity.userLikeStr === "like" ? 1 : "",
+        N: common_vendor.o(($event) => handleAction("like")),
+        O: common_vendor.p({
+          type: __props.activity.userLikeStr === "dislike" ? "hand-down-filled" : "hand-down",
+          size: "18",
+          color: __props.activity.userLikeStr === "dislike" ? "#3498db" : "#888"
+        }),
+        P: common_vendor.t(__props.activity.dislikesCount || 0),
+        Q: __props.activity.userLikeStr === "dislike" ? 1 : "",
+        R: common_vendor.o(($event) => handleAction("dislike")),
+        S: common_vendor.p({
+          type: "chatbubble",
+          size: "18",
+          color: "#888"
+        }),
+        T: common_vendor.t(__props.activity.commonCount || 0),
+        U: common_vendor.p({
           type: isFavorite.value ? "heart-filled" : "heart",
           size: "16",
           color: "#FF6B00"
         }),
-        aa: common_vendor.t(isFavorite.value ? "已收藏" : "收藏"),
-        ab: common_vendor.o(toggleFavorite),
-        ac: loading.value,
-        ad: isRegistrationDisabled.value ? 1 : "",
-        ae: common_vendor.o(handleRegisterClick),
-        af: common_vendor.sr(smartGuidePopupRef, "f73ae0ce-13", {
+        V: common_vendor.t(isFavorite.value ? "已收" : "收藏"),
+        W: common_vendor.o(toggleFavorite),
+        X: isRegistrationDisabled.value ? 1 : "",
+        Y: common_vendor.o(handleRegisterClick),
+        Z: common_vendor.sr(smartGuidePopupRef, "f73ae0ce-9", {
           "k": "smartGuidePopupRef"
         }),
-        ag: common_vendor.p({
+        aa: common_vendor.p({
           scenario: 3
         })
       });

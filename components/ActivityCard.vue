@@ -1,152 +1,135 @@
 <template>
 	<view class="activity-card">
-		<view @click="handleCardClick">
-
-			<!-- ========== 发布者操作栏：封面正上方，仅本人发布的聚会显示 ========== -->
-			<!-- 完全对齐「我的聚会」原始按钮组逻辑，从右向左排布 -->
-			<view v-if="isOwner" class="owner-action-bar" @click.stop>
-
-				<!-- 更多（最左）：内含 参会名单 / 取消聚会（限状态） / 修改编辑 -->
-				<view class="owner-btn" @click.stop="showOwnerMoreActions">
-					<uni-icons type="more-filled" size="14" color="#FF6B00" />
-					<text>更多</text>
-				</view>
-
-				<view class="owner-divider" />
-
-				<!-- 处理退款（取消状态才显示） -->
-				<view v-if="activity.statusStr === '活动取消' || activity.statusStr === '聚会取消'"
-					class="owner-btn owner-btn--danger" @click.stop="handleManageRefunds('all')">
-					<uni-icons type="wallet" size="14" color="#f56c6c" />
-					<text class="danger-text">处理退款</text>
-				</view>
-				<view v-if="activity.statusStr === '活动取消' || activity.statusStr === '聚会取消'" class="owner-divider" />
-
-				<!-- 报名商友（始终显示）：带待确认红点 -->
-				<view class="owner-btn" @click.stop="goToRegisteredUsers">
-					<uni-icons type="person-filled" size="14" color="#FF6B00" />
-					<text>报名确认</text>
-					<!-- 红点：当有待确认人数时显示 -->
-					<view v-if="activity.pendingConfirmCount > 0" class="owner-badge">
-						{{ activity.pendingConfirmCount }}
-					</view>
-				</view>
-
-				<!-- 处理申请（最右，最醒目，有待处理才显示） -->
-				<template v-if="activity.paddingReturnCount > 0">
-					<view class="owner-divider" />
-					<view class="owner-btn owner-btn--alert" @click.stop="handleManageRefunds('individual')">
-						<uni-icons type="notification-filled" size="14" color="#fff" />
-						<text>处理申请</text>
-						<view class="owner-badge owner-badge--white">{{ activity.paddingReturnCount }}</view>
-					</view>
-				</template>
-
+		<!-- ========== 1. 发布者操作栏（保持原样） ========== -->
+		<view v-if="isOwner" class="owner-action-bar" @click.stop>
+			<view class="owner-btn" @click.stop="showOwnerMoreActions">
+				<uni-icons type="more-filled" size="14" color="#FF6B00" />
+				<text>更多</text>
 			</view>
+			<view class="owner-divider" />
+			<view v-if="activity.statusStr === '活动取消' || activity.statusStr === '聚会取消'"
+				class="owner-btn owner-btn--danger" @click.stop="handleManageRefunds('all')">
+				<uni-icons type="wallet" size="14" color="#f56c6c" />
+				<text class="danger-text">处理退款</text>
+			</view>
+			<view v-if="activity.statusStr === '活动取消' || activity.statusStr === '聚会取消'" class="owner-divider" />
+			<view class="owner-btn" @click.stop="goToRegisteredUsers">
+				<uni-icons type="person-filled" size="14" color="#FF6B00" />
+				<text>报名确认</text>
+				<view v-if="activity.pendingConfirmCount > 0" class="owner-badge">
+					{{ activity.pendingConfirmCount }}
+				</view>
+			</view>
+			<template v-if="activity.paddingReturnCount > 0">
+				<view class="owner-divider" />
+				<view class="owner-btn owner-btn--alert" @click.stop="handleManageRefunds('individual')">
+					<uni-icons type="notification-filled" size="14" color="#fff" />
+					<text>处理申请</text>
+					<view class="owner-badge owner-badge--white">{{ activity.paddingReturnCount }}</view>
+				</view>
+			</template>
+		</view>
 
-			<!-- ========== 封面图 ========== -->
+		<view @click="handleCardClick">
+			<!-- ========== 2. 封面区域：整合标题、Tag、组织者 ========== -->
 			<view class="card-cover-wrapper">
 				<image :src="activity.coverImageUrl" class="activity-image" mode="aspectFill" />
-				<view v-if="activity.statusStr" :class="['status-tag', getStatusClass(activity.statusStr)]">
-					{{ activity.statusStr }}
-				</view>
-			</view>
 
-			<!-- ========== 卡片内容 ========== -->
-			<view class="activity-header">
-				<text class="activity-title">{{ activity.activityTitle }}</text>
-			</view>
-
-			<view class="activity-info">
-				<uni-icons type="calendar" size="16" color="#FF6B00" />
-				<text>{{ formattedDate }}</text>
-			</view>
-
-			<view class="activity-info">
-				<uni-icons type="location" size="16" color="#FF6B00" />
-				<text>{{ activity.locationAddress || '线上聚会' }}</text>
-			</view>
-
-			<view class="activity-stats">
-				<view class="participants">
-					{{ activity.joinCount || 0 }}/{{ activity.totalSlots || '不限' }} 人参与
-				</view>
-				<view v-if="formattedDistance" class="activity-distance">
-					<uni-icons type="paperplane-filled" size="16" color="#FF6B00" />
-					<text>{{ formattedDistance }}</text>
-				</view>
-			</view>
-
-			<!-- 标签 + 互动数 -->
-			<view class="activity-tags-row">
-				<view class="activity-tags">
-					<view v-for="(tag, index) in activity.tags" :key="index" class="tag">{{ tag }}</view>
-				</view>
-				<view class="activity-interactions">
-					<view class="interaction-btn" :class="{ active: activity.userLikeStr === 'like' }"
-						@click.stop="handleAction('like')">
-						<uni-icons :type="activity.userLikeStr === 'like' ? 'hand-up-filled' : 'hand-up'" size="18"
-							:color="activity.userLikeStr === 'like' ? '#e74c3c' : '#666'" />
-						<text>{{ activity.likesCount || 0 }}</text>
+				<!-- 左上角 Tag -->
+				<view class="tags-stack">
+					<!-- 聚会类型标签 -->
+					<view class="tag-overlay" v-if="activity.tags && activity.tags.length > 0">
+						{{ activity.tags[0] }}
 					</view>
-					<view class="interaction-btn" :class="{ active: activity.userLikeStr === 'dislike' }"
-						@click.stop="handleAction('dislike')">
-						<uni-icons :type="activity.userLikeStr === 'dislike' ? 'hand-down-filled' : 'hand-down'"
-							size="18" :color="activity.userLikeStr === 'dislike' ? '#3498db' : '#666'" />
-						<text>{{ activity.dislikesCount || 0 }}</text>
+
+					<!-- 聚会状态标签（移到了堆叠容器内） -->
+					<view v-if="activity.statusStr" :class="['status-tag', getStatusClass(activity.statusStr)]">
+						{{ activity.statusStr }}
 					</view>
-					<view class="interaction-btn">
-						<uni-icons type="chatbubble" size="18" color="#666" />
-						<text>{{ activity.commonCount || 0 }}</text>
-					</view>
+				</view>
+
+				<!-- 右上角 组织者（毛玻璃效果） -->
+				<view class="organizer-overlay">
+					<image :src="activity.memberUser.avatar" class="org-avatar" mode="aspectFill" />
+					<text class="org-nickname">{{ activity.memberUser.nickname || '主办方' }}</text>
+				</view>
+
+				<!-- 底部标题遮罩：渐变阴影，文字最多两行 -->
+				<view class="title-blur-box">
+					<text class="activity-title">{{ activity.activityTitle }}</text>
+				</view>
+			</view>
+
+			<!-- ========== 3. 基本信息：文字标签化 ========== -->
+			<view class="info-content">
+				<view class="info-item">
+					<text class="info-label">聚会时间：</text>
+					<text class="info-text">{{ formattedDate }}</text>
+				</view>
+				<view class="info-item">
+					<text class="info-label">报名时间：</text>
+					<text class="info-text">{{ formattedRegDate }}</text>
+				</view>
+				<view class="info-item">
+					<text class="info-label">聚会地点：</text>
+					<text class="info-text text-ellipsis">{{ activity.locationAddress || '线上聚会' }}</text>
 				</view>
 			</view>
 		</view>
 
-		<!-- 聚会卡片：新增阅读留痕区域 -->
+		<!-- ========== 4. 阅读留痕（按钮组上方） ========== -->
 		<view class="post-view-trace"
 			v-if="activity.isReadTrace === 1 && (activity.targetViews?.length > 0 || activity.hasSilentLoginUser === 1)"
 			@click.stop="handleViewTrace">
 			<view class="view-avatar-row">
-				<!-- 渲染普通用户头像 (如果有静默用户，切片留出一个位置给静默头像) -->
 				<template
 					v-for="(viewer, vIdx) in (activity.targetViews || []).slice(0, activity.hasSilentLoginUser === 1 ? 7 : 8)"
 					:key="vIdx">
 					<image :src="viewer.memberUser?.avatar || '/static/icon/default-avatar.png'" class="tiny-avatar"
 						mode="aspectFill" />
 				</template>
-
-				<!-- 静默用户标识头像 -->
 				<image v-if="activity.hasSilentLoginUser === 1"
 					src="https://img.gofor.club/post/20251231/1gcYJWmdcqe0de467fbd77b15cffaa30eb05468f5f7f_1767178458259.png"
 					class="tiny-avatar silent-avatar" mode="aspectFill" />
-
-				<text class="view-count-txt">
-					等{{ activity.targetViewNum || 0 }}位商友看过
-				</text>
+				<text class="view-count-txt">等{{ activity.targetViewNum || 0 }}位商友看过</text>
 			</view>
 			<uni-icons type="right" size="12" color="#ccc" />
 		</view>
 
-		<!-- ========== 底部：组织者 + 收藏/报名 ========== -->
-		<view class="activity-footer">
-			<view class="organizer">
-				<uni-icons type="contact-filled" size="16" color="#FF6B00" />
-				<text>{{ activity.memberUser.nickname || '主办方' }}</text>
+		<!-- ========== 5. 底部：互动数 + 按钮（合并为一行） ========== -->
+		<view class="card-footer">
+			<view class="activity-interactions">
+				<view class="interaction-btn" @click.stop="handleAction('like')">
+					<uni-icons :type="activity.userLikeStr === 'like' ? 'hand-up-filled' : 'hand-up'" size="18"
+						:color="activity.userLikeStr === 'like' ? '#FF6B00' : '#888'" />
+					<text :class="{ active: activity.userLikeStr === 'like' }">{{ activity.likesCount || 0 }}</text>
+				</view>
+				<view class="interaction-btn" @click.stop="handleAction('dislike')">
+					<uni-icons :type="activity.userLikeStr === 'dislike' ? 'hand-down-filled' : 'hand-down'" size="18"
+						:color="activity.userLikeStr === 'dislike' ? '#3498db' : '#888'" />
+					<text
+						:class="{ 'active-dislike': activity.userLikeStr === 'dislike' }">{{ activity.dislikesCount || 0 }}</text>
+				</view>
+				<view class="interaction-btn">
+					<uni-icons type="chatbubble" size="18" color="#888" />
+					<text>{{ activity.commonCount || 0 }}</text>
+				</view>
 			</view>
+
 			<view class="action-buttons">
-				<button class="btn btn-favorite" @click.stop="toggleFavorite" :disabled="loading">
+				<view class="btn-mini btn-favorite" @click.stop="toggleFavorite">
 					<uni-icons :type="isFavorite ? 'heart-filled' : 'heart'" size="16" color="#FF6B00" />
-					<text>{{ isFavorite ? '已收藏' : '收藏' }}</text>
-				</button>
-				<!-- 本人发布的聚会不显示报名按钮 -->
-				<button class="btn btn-primary" :class="{ 'btn-disabled': isRegistrationDisabled }"
-					@click.stop="handleRegisterClick">报名</button>
+					<text>{{ isFavorite ? '已收' : '收藏' }}</text>
+				</view>
+				<view class="btn-mini btn-primary" :class="{ 'btn-disabled': isRegistrationDisabled }"
+					@click.stop="handleRegisterClick">
+					立即报名
+				</view>
 			</view>
 		</view>
-	</view>
 
-	<SmartGuidePopup ref="smartGuidePopupRef" :scenario="3" />
+		<SmartGuidePopup ref="smartGuidePopupRef" :scenario="3" />
+	</view>
 </template>
 
 <script setup>
@@ -196,10 +179,17 @@
 
 	// ── 格式化 ──
 	const formattedDate = computed(() => {
-		if (!props.activity.startDatetime) return '时间待定';
+		if (!props.activity.startDatetime) return '待定';
 		const date = new Date(props.activity.startDatetime);
 		const pad = n => n.toString().padStart(2, '0');
-		return `${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
+		return `${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())} 开始`;
+	});
+
+	const formattedRegDate = computed(() => {
+		if (!props.activity.registrationStartDatetime) return '待定';
+		const date = new Date(props.activity.registrationStartDatetime);
+		const pad = n => n.toString().padStart(2, '0');
+		return `${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())} 开始`
 	});
 
 	const formattedDistance = computed(() => {
@@ -410,121 +400,69 @@
 		background: white;
 		border-radius: 24rpx;
 		box-shadow: 0 4rpx 24rpx rgba(0, 0, 0, 0.05);
-		padding: 32rpx;
-		margin: 32rpx auto;
+		padding: 24rpx;
+		margin: 24rpx auto;
 		position: relative;
 		overflow: hidden;
 	}
 
-	// ── 【核心】发布者操作栏：封面正上方，从右向左排布 ──
+	/* ── 发布者操作栏 ── */
 	.owner-action-bar {
 		display: flex;
-		flex-direction: row-reverse; // 从右向左
+		flex-direction: row-reverse;
 		align-items: center;
 		background: #fff8f3;
 		border: 1rpx solid #ffe0c8;
-		border-radius: 16rpx;
+		border-radius: 12rpx;
 		padding: 0 8rpx;
 		margin-bottom: 20rpx;
-		height: 68rpx;
+		height: 60rpx;
 	}
 
 	.owner-btn {
 		position: relative;
 		display: flex;
 		align-items: center;
-		gap: 6rpx;
-		padding: 10rpx 18rpx;
-		border-radius: 12rpx;
-		position: relative;
-		flex-shrink: 0;
-
-		&:active {
-			background: rgba(255, 107, 0, 0.1);
-		}
+		gap: 4rpx;
+		padding: 0 16rpx;
 
 		text {
-			font-size: 24rpx;
+			font-size: 22rpx;
 			color: $primary;
 			font-weight: 500;
 		}
 
-		// 橙色高亮变体（处理申请）
 		&--alert {
-			background: linear-gradient(135deg, #FF6B00, #FF8C00);
-			border-radius: 14rpx;
-			margin-left: 4rpx;
+			background: linear-gradient(135deg, $primary, #FF8C00);
+			border-radius: 10rpx;
 
 			text {
 				color: #fff;
 			}
-
-			&:active {
-				opacity: 0.88;
-			}
 		}
-	}
-
-	// 红点徽标通用样式
-	.owner-badge {
-		position: absolute;
-		// 稍微向右上偏移，使其悬浮在图标/文字边缘
-		top: 0rpx;
-		right: 4rpx;
-		background: #f56c6c;
-		color: #fff;
-		font-size: 18rpx;
-		height: 28rpx;
-		min-width: 28rpx;
-		line-height: 28rpx;
-		text-align: center;
-		border-radius: 14rpx;
-		padding: 0 6rpx;
-		border: 2rpx solid #fff8f3; // 使用操作栏的背景色作为边框，产生“镂空”感
-		box-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.1);
-		font-weight: bold;
-		z-index: 10;
-
-		// 如果是处理申请里的白色背景红点
-		&--white {
-			background: #fff;
-			color: $primary;
-			border-color: $primary;
-		}
-	}
-
-	.danger-text {
-		color: #f56c6c !important;
 	}
 
 	.owner-divider {
 		width: 1rpx;
-		height: 28rpx;
+		height: 24rpx;
 		background: #f0d4c0;
-		flex-shrink: 0;
 	}
 
-	// 红点徽标
 	.owner-badge {
 		position: absolute;
-		top: 4rpx;
-		right: 4rpx;
+		top: -6rpx;
+		right: 0;
 		background: #f56c6c;
 		color: #fff;
-		font-size: 18rpx;
-		height: 26rpx;
-		min-width: 26rpx;
-		line-height: 26rpx;
+		font-size: 16rpx;
+		height: 24rpx;
+		min-width: 24rpx;
+		line-height: 24rpx;
 		text-align: center;
-		border-radius: 13rpx;
-		padding: 0 5rpx;
+		border-radius: 12rpx;
+		padding: 0 4rpx;
 		border: 2rpx solid #fff8f3;
 
-		&--orange {
-			background: $primary;
-		}
-
-		// 白色版（用于深色按钮上）
 		&--white {
 			background: #fff;
 			color: $primary;
@@ -532,158 +470,152 @@
 		}
 	}
 
-	// ── 封面图 ──
+	/* ── 封面区重构 ── */
 	.card-cover-wrapper {
 		position: relative;
-		margin-bottom: 30rpx;
+		border-radius: 16rpx;
+		overflow: hidden;
+		margin-bottom: 20rpx;
 	}
 
 	.activity-image {
 		width: 100%;
-		aspect-ratio: 5 / 4;
-		border-radius: 16rpx;
-		box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.1);
+		aspect-ratio: 5 / 3.2;
 		display: block;
 	}
 
-	.status-tag {
+	.organizer-overlay {
 		position: absolute;
 		top: 16rpx;
 		right: 16rpx;
-		font-size: 22rpx;
-		padding: 6rpx 18rpx;
-		border-radius: 20rpx;
-		font-weight: 600;
-		color: #fff;
-		backdrop-filter: blur(4px);
-
-		&.enrolled,
-		&.ongoing {
-			background: rgba(39, 174, 96, 0.85);
-		}
-
-		&.upcoming {
-			background: rgba(250, 140, 22, 0.85);
-		}
-
-		&.ended {
-			background: rgba(144, 147, 153, 0.85);
-		}
-
-		&.refund_pending {
-			background: rgba(64, 158, 255, 0.85);
-		}
-
-		&.canceled {
-			background: rgba(245, 108, 108, 0.85);
-		}
-	}
-
-	// ── 内容区 ──
-	.activity-header {
-		display: flex;
-		justify-content: space-between;
-		align-items: flex-start;
-		gap: 20rpx;
-		margin-bottom: 24rpx;
-	}
-
-	.activity-title {
-		font-size: 36rpx;
-		font-weight: 600;
-		color: #1c1e21;
-		flex: 1;
-	}
-
-	.activity-info {
+		background: rgba(255, 255, 255, 0.7);
+		backdrop-filter: blur(8px);
+		padding: 4rpx 12rpx;
+		border-radius: 30rpx;
 		display: flex;
 		align-items: center;
-		margin-bottom: 24rpx;
-		color: #606770;
-		font-size: 28rpx;
+		gap: 8rpx;
 
-		text {
-			margin-left: 16rpx;
+		.org-avatar {
+			width: 32rpx;
+			height: 32rpx;
+			border-radius: 50%;
 		}
-	}
 
-	.activity-stats {
-		display: flex;
-		justify-content: space-between;
-		margin-bottom: 30rpx;
-		font-size: 26rpx;
-		color: #65676b;
-	}
-
-	.participants {
-		background: #f0f2f5;
-		padding: 6rpx 20rpx;
-		border-radius: 20rpx;
-	}
-
-	.activity-distance {
-		display: flex;
-		align-items: center;
-		color: $primary;
-		font-weight: 500;
-
-		text {
-			margin-left: 8rpx;
-		}
-	}
-
-	.activity-tags-row {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		margin-bottom: 30rpx;
-		gap: 16rpx;
-	}
-
-	.activity-tags {
-		display: flex;
-		gap: 16rpx;
-		flex-wrap: wrap;
-		flex: 1;
-		min-width: 0;
-	}
-
-	.tag {
-		background: #fff0e5;
-		color: $primary;
-		padding: 8rpx 20rpx;
-		border-radius: 8rpx;
-		font-size: 24rpx;
-		border: 2rpx solid #ffdcc7;
-		white-space: nowrap;
-	}
-
-	.activity-interactions {
-		display: flex;
-		align-items: center;
-		gap: 24rpx;
-		flex-shrink: 0;
-	}
-
-	.interaction-btn {
-		display: flex;
-		align-items: center;
-		gap: 6rpx;
-		color: #666;
-		font-size: 26rpx;
-
-		&.active {
+		.org-nickname {
+			font-size: 18rpx;
+			color: #333;
 			font-weight: bold;
 		}
 	}
 
+	.tags-stack {
+		position: absolute;
+		top: 20rpx;
+		left: 20rpx;
+		display: flex;
+		flex-direction: column;
+		/* 垂直排列 */
+		align-items: flex-start;
+		/* 左对齐 */
+		gap: 12rpx;
+		/* 两个标签之间的间距 */
+		z-index: 10;
+	}
+
+	/* 聚会类型标签 - 修改为 static（由父容器控制位置） */
+	.tag-overlay {
+		background: rgba($primary, 0.95);
+		color: #fff;
+		font-size: 24rpx;
+		padding: 6rpx 20rpx;
+		border-radius: 10rpx;
+		font-weight: bold;
+		box-shadow: 0 4rpx 10rpx rgba(0, 0, 0, 0.2);
+	}
+
+	.status-tag {
+		font-size: 18rpx;
+		padding: 4rpx 12rpx;
+		border-radius: 8rpx;
+		color: #fff;
+		font-weight: bold;
+		z-index: 2;
+
+		&.enrolled {
+			background: #52c41a;
+		}
+
+		&.upcoming {
+			background: $primary;
+		}
+
+		&.ended,
+		&.canceled {
+			background: #999;
+		}
+	}
+
+	.title-blur-box {
+		position: absolute;
+		bottom: 0;
+		left: 0;
+		right: 0;
+		background: rgba(255, 255, 255, 0.7);
+		/* 70% 白底 */
+		// backdrop-filter: blur(20px);
+		/* 强模糊 */
+		-webkit-backdrop-filter: blur(60px);
+		padding: 24rpx 24rpx 20rpx;
+		border-top: 1rpx solid rgba(255, 255, 255, 0.4);
+		border-radius: 20rpx 20rpx 0 0;
+
+
+		.activity-title {
+			color: #000;
+			font-size: 30rpx;
+			font-weight: 900;
+			line-height: 1.4;
+			display: -webkit-box;
+			-webkit-box-orient: vertical;
+			-webkit-line-clamp: 2;
+			overflow: hidden;
+		}
+	}
+
+	/* ── 基本信息 ── */
+	.info-content {
+		padding: 0 4rpx;
+		margin-bottom: 20rpx;
+
+		.info-item {
+			display: flex;
+			margin-bottom: 8rpx;
+			font-size: 24rpx;
+			line-height: 1.4;
+		}
+
+		.info-label {
+			color: $primary;
+			flex-shrink: 0;
+			font-weight: 500;
+		}
+
+		.info-text {
+			color: #666;
+			flex: 1;
+		}
+	}
+
+	/* ── 阅读留痕 ── */
 	.post-view-trace {
-		margin-top: 24rpx;
-		padding: 20rpx 0;
-		border-top: 1rpx solid #f8f8f8;
+		padding: 16rpx 0;
+		border-top: 1rpx solid #f5f5f5;
+		border-bottom: 1rpx solid #f5f5f5;
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
+		margin-bottom: 20rpx;
 	}
 
 	.view-avatar-row {
@@ -692,91 +624,83 @@
 	}
 
 	.tiny-avatar {
-		width: 36rpx;
-		height: 36rpx;
+		width: 32rpx;
+		height: 32rpx;
 		border-radius: 50%;
 		border: 2rpx solid #fff;
-		background-color: #f0f0f0;
-		margin-right: -10rpx;
-	}
-
-	.tiny-avatar:last-child {
-		margin-right: 0;
+		margin-right: -8rpx;
 	}
 
 	.silent-avatar {
-		border: 2rpx solid #FF8C00 !important;
-		background-color: #fff;
+		border: 2rpx solid $primary !important;
+		background: #fff;
 	}
 
 	.view-count-txt {
-		font-size: 22rpx;
+		font-size: 20rpx;
 		color: #999;
 		margin-left: 20rpx;
 	}
 
-	// ── 底部 ──
-	.activity-footer {
+	/* ── 底部操作行 ── */
+	.card-footer {
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		margin-top: 30rpx;
-		padding-top: 24rpx;
-		border-top: 2rpx solid #f0f2f5;
 	}
 
-	.organizer {
+	.activity-interactions {
 		display: flex;
-		align-items: center;
-		font-size: 28rpx;
-		color: #606770;
+		gap: 24rpx;
 
-		text {
-			margin-left: 10rpx;
+		.interaction-btn {
+			display: flex;
+			align-items: center;
+			gap: 4rpx;
+			font-size: 24rpx;
+			color: #888;
+
+			.active {
+				color: $primary;
+				font-weight: bold;
+			}
 		}
 	}
 
 	.action-buttons {
 		display: flex;
-		gap: 24rpx;
+		gap: 16rpx;
 	}
 
-	.btn {
-		padding: 4rpx 24rpx;
-		border-radius: 12rpx;
-		font-weight: 500;
-		font-size: 28rpx;
-		border: none;
+	.btn-mini {
+		height: 56rpx;
+		padding: 0 20rpx;
+		border-radius: 28rpx;
+		font-size: 24rpx;
 		display: flex;
 		align-items: center;
-
-		text {
-			margin-left: 10rpx;
-		}
+		font-weight: bold;
 	}
 
 	.btn-primary {
-		background: linear-gradient(135deg, #FF6B00 0%, #FF8C00 100%);
-		color: white;
+		background: linear-gradient(to right, $primary, #FF8C00);
+		color: #fff;
 
 		&.btn-disabled {
-			background: #DCDFE6 !important; // 灰色背景
-			color: #FFFFFF !important;
-			border: none;
-
-			// 移除点击态效果
-			&:active {
-				opacity: 1;
-			}
+			background: #eee !important;
+			color: #ccc;
 		}
 	}
 
 	.btn-favorite {
-		background: #ffe7d8;
+		background: #fff1e8;
 		color: $primary;
+		gap: 6rpx;
+	}
 
-		&:active {
-			opacity: 0.9;
-		}
+	.text-ellipsis {
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
 	}
 </style>

@@ -93,6 +93,7 @@ if (!Math) {
   "./packages/my-shareList/my-shareList.js";
   "./packages/my-circleList/my-circleList.js";
   "./packages/silent-view-trace/silent-view-trace.js";
+  "./packages/active-verify/active-verify.js";
 }
 const _sfc_main = {
   data() {

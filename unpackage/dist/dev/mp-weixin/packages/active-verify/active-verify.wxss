@@ -1,0 +1,115 @@
+/* 水平间距 */
+/* 水平间距 */
+.verify-page.data-v-2d1f06c9 {
+  min-height: 100vh;
+  background: #f8f8f8;
+  padding: 30rpx;
+}
+.header-status.data-v-2d1f06c9 {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  margin-bottom: 30rpx;
+  font-size: 26rpx;
+  color: #666;
+}
+.info-card.data-v-2d1f06c9 {
+  background: #fff;
+  border-radius: 24rpx;
+  padding: 30rpx;
+  margin-bottom: 30rpx;
+}
+.section-title.data-v-2d1f06c9 {
+  font-size: 24rpx;
+  color: #999;
+  margin-bottom: 20rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+  padding-bottom: 10rpx;
+}
+.activity-box.data-v-2d1f06c9 {
+  display: flex;
+  gap: 20rpx;
+}
+.activity-box .cover.data-v-2d1f06c9 {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 12rpx;
+}
+.activity-box .title.data-v-2d1f06c9 {
+  font-weight: bold;
+  font-size: 30rpx;
+  display: block;
+}
+.activity-box .time.data-v-2d1f06c9 {
+  font-size: 24rpx;
+  color: #FF62B1;
+  margin-top: 10rpx;
+}
+.user-box.data-v-2d1f06c9 {
+  display: flex;
+  align-items: center;
+  gap: 30rpx;
+  padding: 20rpx 0;
+  border-bottom: 1rpx solid #f9f9f9;
+}
+.user-box .avatar.data-v-2d1f06c9 {
+  width: 100rpx;
+  height: 100rpx;
+  border-radius: 50%;
+}
+.user-box .name.data-v-2d1f06c9 {
+  font-size: 32rpx;
+  font-weight: bold;
+  display: block;
+}
+.user-box .phone.data-v-2d1f06c9 {
+  font-size: 24rpx;
+  color: #666;
+}
+.user-box .company.data-v-2d1f06c9 {
+  font-size: 22rpx;
+  color: #999;
+}
+.status-row.data-v-2d1f06c9 {
+  display: flex;
+  justify-content: space-between;
+  padding: 20rpx 0;
+  font-size: 28rpx;
+}
+.status-row .label.data-v-2d1f06c9 {
+  color: #666;
+}
+.status-row .status-val.data-v-2d1f06c9 {
+  font-weight: bold;
+}
+.status-row .success.data-v-2d1f06c9 {
+  color: #52c41a;
+}
+.status-row .warn.data-v-2d1f06c9 {
+  color: #ff4d4f;
+}
+.action-footer.data-v-2d1f06c9 {
+  position: fixed;
+  bottom: 50rpx;
+  left: 30rpx;
+  right: 30rpx;
+  display: flex;
+  gap: 20rpx;
+}
+.btn-cancel.data-v-2d1f06c9 {
+  flex: 1;
+  border-radius: 50rpx;
+  font-size: 30rpx;
+  background: #eee;
+}
+.btn-confirm.data-v-2d1f06c9 {
+  flex: 2;
+  border-radius: 50rpx;
+  font-size: 30rpx;
+  background: #FF62B1;
+  color: #fff;
+  border: none;
+}
+.btn-confirm[disabled].data-v-2d1f06c9 {
+  background: #ccc;
+}

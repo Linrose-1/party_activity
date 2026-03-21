@@ -664,6 +664,13 @@
 				{
 					"navigationBarTitleText" : "意向用户列表"
 				}
+			},
+			{
+				"path" : "active-verify/active-verify",
+				"style" : 
+				{
+					"navigationBarTitleText" : "聚会核销"
+				}
 			}
 			// 如果还有其他页面要放进这个分包，继续在这里加
 		]

@@ -1,88 +1,71 @@
 <template>
 	<view class="container">
-		<!-- 顶部搜索栏 -->
-		<view class="header">
-			<view class="search-bar">
-				<uni-icons type="search" size="18" color="rgba(255, 255, 255, 0.7)" />
-				<input type="text" placeholder="搜索聚会" placeholder-class="placeholder" v-model="searchKeyword"
-					:placeholder-style="'color: white; opacity: 0.7;'" />
+		<!-- 1. 顶部吸顶：位置 + 搜索 -->
+		<view class="fixed-header">
+			<view class="search-location-bar">
+				<!-- 左侧：手动位置选择 -->
+				<view class="location-trigger" @click="openMapToChooseLocation">
+					<text
+						class="city-text">{{ selectedLocationInfo ? (selectedLocationInfo.name || '已选位置') : '选择位置' }}</text>
+					<uni-icons type="bottom" size="12" color="#333"></uni-icons>
+				</view>
+				<!-- 中间：搜索框 -->
+				<view class="search-box">
+					<uni-icons type="search" size="16" color="#999"></uni-icons>
+					<input class="search-input" type="text" placeholder="搜索聚会主题..." v-model="searchKeyword" />
+				</view>
+				<!--右侧：扫码核销入口 -->
+				<view class="scan-trigger" @click="handleTopScan">
+					<uni-icons type="scan" size="26" color="#FF6B00"></uni-icons>
+				</view>
 			</view>
 		</view>
 
-		<!-- 轮播图 -->
+		<view class="header-placeholder" style="height: 100rpx;"></view>
+
+		<!-- 3. 轮播图 -->
 		<view v-if="bannerList.length > 0" class="swiper-section">
-			<swiper class="swiper" circular :indicator-dots="true" :autoplay="true" :interval="3000" :duration="500">
+			<swiper class="swiper" circular indicator-dots autoplay :interval="3000" :duration="500">
 				<swiper-item v-for="banner in bannerList" :key="banner.id" @click="handleBannerClick(banner)">
-					<view class="swiper-item">
-						<image :src="banner.imageUrl" mode="aspectFill" class="swiper-image"></image>
-						<view v-if="banner.title" class="swiper-title">{{ banner.title }}</view>
-					</view>
+					<image :src="banner.imageUrl" mode="aspectFill" class="swiper-image"></image>
 				</swiper-item>
 			</swiper>
 		</view>
 
-		<!-- 筛选区域 -->
-		<uni-collapse>
-			<uni-collapse-item title="聚会筛选" :open="true" class="collapse-title">
-				<view class="filters">
-					<view class="filter-header">
-						<!-- 修复：<button> → <view>，避免 WXSS &::after 编译报错 -->
-						<view class="reset-btn register-btn" @click="resetFilters">重置筛选</view>
-					</view>
-
-					<!-- 选择类型 -->
-					<view class="uni-list">
-						<view class="uni-list-cell">
-							<view class="uni-list-cell-left register-btn">选择类型</view>
-							<view class="uni-list-cell-db">
-								<picker @change="bindTypePickerChange" :value="typeIndex" :range="typePickerRange">
-									<view class="uni-input">{{ typePickerRange[typeIndex] }}</view>
-								</picker>
-							</view>
-						</view>
-					</view>
-
-					<!-- 选择状态 -->
-					<view class="uni-list">
-						<view class="uni-list-cell">
-							<view class="uni-list-cell-left register-btn">选择状态</view>
-							<view class="uni-list-cell-db">
-								<picker @change="bindStatusPickerChange" :value="statusIndex"
-									:range="statusPickerRange">
-									<view class="uni-input">{{ statusPickerRange[statusIndex] }}</view>
-								</picker>
-							</view>
-						</view>
-					</view>
-
-					<!-- 选择位置 -->
-					<view class="uni-list">
-						<view class="uni-list-cell">
-							<view class="uni-list-cell-left register-btn">选择位置</view>
-							<view class="uni-list-cell-db">
-								<view @click="openMapToChooseLocation" class="uni-input">
-									<text
-										v-if="selectedLocationInfo">{{ selectedLocationInfo.address || selectedLocationInfo.name }}</text>
-									<text v-else class="placeholder">点击选择位置</text>
-									<text class="arrow">></text>
-								</view>
-							</view>
-						</view>
-					</view>
+		<view class="filter-rows-container">
+			<!-- 第一行：选择类型 -->
+			<scroll-view scroll-x class="filter-row-scroll">
+				<view class="tabs-line">
+					<text class="row-label">类型：</text>
+					<view v-for="(item, index) in typePickerRange" :key="'type'+index" class="tab-pill"
+						:class="{ active: typeIndex === index }" @click="selectType(index)">{{ item }}</view>
 				</view>
-			</uni-collapse-item>
-		</uni-collapse>
+			</scroll-view>
 
-		<!-- 聚会列表 -->
+			<!-- 第二行：选择状态 -->
+			<scroll-view scroll-x class="filter-row-scroll">
+				<view class="tabs-line">
+					<text class="row-label">状态：</text>
+					<view v-for="(item, index) in statusPickerRange" :key="'status'+index" class="tab-pill"
+						:class="{ active: statusIndex === index }" @click="selectStatus(index)">{{ item }}</view>
+				</view>
+			</scroll-view>
+		</view>
+
+		<!-- 4. 聚会列表 -->
 		<view class="activity-list">
-			<ActivityCard v-for="(activity, index) in activitiesData" :key="activity.id" :activity="activity"
-				:is-login="isLogin" @updateFavoriteStatus="handleFavoriteChange" @updateLikeStatus="handleLikeChange" />
+			<ActivityCard v-for="activity in activitiesData" :key="activity.id" :activity="activity" :is-login="isLogin"
+				@updateFavoriteStatus="handleFavoriteChange" @updateLikeStatus="handleLikeChange" />
 		</view>
 
 		<view v-if="!hasMore && activitiesData.length > 0" class="no-more-content">暂无更多聚会</view>
-		<view v-if="!loading && activitiesData.length === 0" class="no-more-content">暂无聚会，快去发布一个吧！</view>
+		<view v-if="!loading && activitiesData.length === 0" class="empty-state">
+			<uni-icons type="info" size="50" color="#ddd" />
+			<text>当前筛选下暂无聚会</text>
+			<view class="reset-link" @click="resetFilters">重置筛选条件</view>
+		</view>
 
-		<!-- 底部操作栏 -->
+		<!-- 底部发起按钮 -->
 		<view class="action-bar">
 			<view class="action-btn register-btn" @click="publishActivity">
 				<uni-icons type="plus" size="18" color="white" />
@@ -90,7 +73,6 @@
 			</view>
 		</view>
 	</view>
-
 	<SmartGuidePopup ref="smartGuidePopupRef" :scenario="3" />
 </template>
 
@@ -210,6 +192,7 @@
 	 * 下拉刷新：强制完整重新加载
 	 */
 	onPullDownRefresh(async () => {
+		resetFilters();
 		await initializePage();
 		uni.stopPullDownRefresh();
 
@@ -469,6 +452,65 @@
 
 
 	// ─── 事件处理器 ───
+	/**
+	 * 顶部扫码逻辑
+	 */
+	const handleTopScan = () => {
+		console.log('🚀 准备扫码...');
+
+		uni.scanCode({
+			// 1. 【关键】不要写 scanType: ['qrCode']，直接去掉这个参数
+			// 或者写成 ['qrCode', 'barCode', 'datamatrix', 'pdf417']，但建议直接删掉
+			onlyFromCamera: true,
+			success: (res) => {
+				console.log('✅ 扫码原始结果:', res);
+
+				// 2. 优先从 res.path 获取路径（小程序码专有字段）
+				let targetPath = res.path;
+
+				// 3. 兜底判断
+				if (targetPath) {
+					// 确保路径以 / 开头，否则 navigateTo 会失效
+					const finalUrl = targetPath.startsWith('/') ? targetPath : '/' + targetPath;
+					console.log('🔗 目标跳转路径:', finalUrl);
+
+					uni.navigateTo({
+						url: finalUrl,
+						fail: (err) => {
+							console.error('❌ 跳转失败:', err);
+							uni.showModal({
+								title: '跳转失败',
+								content: '路径可能未配置：' + finalUrl,
+								showCancel: false
+							});
+						}
+					});
+				} else {
+					// 如果扫的是普通二维码，res.path 是空的，结果在 res.result 里
+					uni.showModal({
+						title: '提示',
+						content: '此码不是有效的核销小程序码\n解析内容：' + (res.result || '空'),
+						showCancel: false
+					});
+				}
+			},
+			fail: (err) => {
+				console.error('❌ 扫码过程出错/取消:', err);
+			}
+		});
+	};
+	/**
+	 * 优化：手动选择类型和状态
+	 */
+	const selectType = (index) => {
+		typeIndex.value = index;
+		selectedCategory.value = index === 0 ? '' : typeList.value[index - 1].value;
+	};
+
+	const selectStatus = (index) => {
+		statusIndex.value = index;
+	};
+
 
 	/**
 	 * 重置所有筛选条件
@@ -480,10 +522,6 @@
 		selectedCategory.value = '';
 		statusIndex.value = 0;
 		selectedLocationInfo.value = null;
-		uni.showToast({
-			title: '筛选已重置',
-			icon: 'none'
-		});
 	};
 
 	/**
@@ -612,162 +650,259 @@
 </script>
 
 <style lang="scss" scoped>
+	$primary: #FF6B00;
+
 	.container {
 		background-color: #f8f9fa;
 		padding-bottom: 120rpx;
 		min-height: 100vh;
 	}
 
-	/* ── 顶部搜索栏 ── */
-	.header {
-		position: sticky;
-		top: 0;
-		background: linear-gradient(135deg, #FF6B00 0%, #FF8C00 100%);
-		color: white;
-		padding: 30rpx 32rpx;
-		box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.1);
-		z-index: 100;
-	}
-
-	.search-bar {
-		display: flex;
-		background: rgba(255, 255, 255, 0.2);
-		border-radius: 40rpx;
-		padding: 10rpx 30rpx;
-		align-items: center;
-		border: 1rpx solid rgba(255, 255, 255, 0.3);
-		box-shadow: inset 0 2rpx 6rpx rgba(0, 0, 0, 0.1);
-		transition: background 0.3s, box-shadow 0.3s;
-
-		&:focus-within {
-			background: rgba(255, 255, 255, 0.3);
-			box-shadow: inset 0 2rpx 8rpx rgba(0, 0, 0, 0.15);
-		}
-
-		input {
-			flex: 1;
-			border: none;
-			background: transparent;
-			color: white;
-			font-size: 28rpx;
-			margin-left: 16rpx;
-			height: 50rpx;
-		}
-	}
-
-	/* ── 轮播图 ── */
-	.swiper-section {
-		margin: 20rpx 32rpx;
-		border-radius: 16rpx;
-		overflow: hidden;
-		box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.05);
-	}
-
-	.swiper {
-		height: 300rpx;
-	}
-
-	.swiper-item {
-		position: relative;
-		width: 100%;
-		height: 100%;
-	}
-
-	.swiper-image {
-		width: 100%;
-		height: 100%;
-	}
-
-	.swiper-title {
-		position: absolute;
+	/* 1. 顶部固定区域 */
+	.fixed-header {
+		position: fixed;
 		top: 0;
 		left: 0;
 		right: 0;
-		bottom: 0;
+		background: #fff;
+		z-index: 100;
+		box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+	}
+
+	.search-location-bar {
 		display: flex;
 		align-items: center;
-		justify-content: center;
-		color: white;
-		font-size: 36rpx;
-		font-weight: bold;
-		text-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.5);
-		pointer-events: none;
-	}
+		padding: 20rpx 24rpx; // 稍微缩小左右间距
+		gap: 16rpx; // 统一间距
 
-	/* ── 筛选区域 ── */
-	.collapse-title {
-		color: #FF6B00;
-	}
-
-	.filters {
-		padding: 0 32rpx;
-		background: white;
-		border-bottom: 2rpx solid #eee;
-	}
-
-	.filter-header {
-		display: flex;
-		justify-content: flex-end;
-		margin-bottom: 20rpx;
-	}
-
-	/* 修复：改为 view，消除 button 默认样式和 &::after 编译问题 */
-	.reset-btn {
-		background-color: #f0f0f0;
-		color: #666;
-		border: 1rpx solid #e0e0e0;
-		padding: 8rpx 20rpx;
-		font-size: 24rpx;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		border-radius: 8rpx;
-		margin-right: 40rpx;
-	}
-
-	.uni-list {
-		margin: 15rpx auto;
-
-		.uni-list-cell {
+		.location-trigger {
 			display: flex;
 			align-items: center;
+			gap: 4rpx;
+			max-width: 140rpx; // 稍微收窄一点，给中间留空间
+
+			.city-text {
+				font-size: 26rpx;
+				font-weight: bold;
+				white-space: nowrap;
+				overflow: hidden;
+				text-overflow: ellipsis;
+			}
 		}
 
-		.uni-list-cell-left {
-			padding: 10rpx;
-			border-radius: 10rpx;
-			flex-shrink: 0;
-		}
-
-		.uni-list-cell-db {
-			margin-left: 10rpx;
-			padding: 10rpx;
-			background-color: #FFF0E5;
+		.search-box {
 			flex: 1;
-			min-width: 0;
+			background: #f5f5f5;
+			border-radius: 30rpx;
+			padding: 12rpx 24rpx;
+			display: flex;
+			align-items: center;
 
-			.uni-input {
+			.search-input {
+				flex: 1;
+				font-size: 26rpx;
 				margin-left: 10rpx;
-				display: flex;
-				align-items: center;
-				width: 100%;
+			}
+		}
 
-				text,
-				.placeholder {
-					white-space: nowrap;
-					overflow: hidden;
-					text-overflow: ellipsis;
-				}
+		.scan-trigger {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			padding: 10rpx; // 增加点击区域
+			transition: transform 0.1s;
 
-				.arrow {
-					color: #999;
-					font-size: 32rpx;
-					margin-left: auto;
-					padding: 0 10rpx;
-				}
+			&:active {
+				transform: scale(0.9); // 点击缩放反馈
+				opacity: 0.8;
 			}
 		}
 	}
+
+	/* 2. 吸顶标签筛选 */
+	.fixed-header {
+		position: fixed;
+		top: 0;
+		left: 0;
+		right: 0;
+		background: #fff;
+		z-index: 100;
+	}
+
+	/* 新的双行筛选容器 */
+	.filter-rows-container {
+		background: #fff;
+		padding: 10rpx 0 20rpx;
+		margin-bottom: 10rpx;
+
+		/* --- 核心吸顶代码 --- */
+		position: sticky;
+		/* 开启粘性布局 */
+		top: 100rpx;
+		/* 这里的 100rpx 必须等于 .header-placeholder 的高度 */
+		z-index: 99;
+		/* 确保在列表内容上方，但在 fixed-header (z-index: 100) 下方 */
+		box-shadow: 0 4rpx 10rpx rgba(0, 0, 0, 0.02);
+		/* 吸顶时增加一点微弱投影，区分内容 */
+		/* ------------------ */
+
+		.filter-row-scroll {
+			width: 100%;
+			white-space: nowrap;
+			margin-bottom: 16rpx;
+
+			&:last-child {
+				margin-bottom: 0;
+			}
+		}
+
+		.tabs-line {
+			display: flex;
+			align-items: center;
+			padding: 0 30rpx;
+		}
+
+		.row-label {
+			font-size: 24rpx;
+			color: #999;
+			margin-right: 10rpx;
+			flex-shrink: 0;
+		}
+
+		.tab-pill {
+			display: inline-block;
+			padding: 8rpx 24rpx;
+			background: #f5f5f5;
+			border-radius: 30rpx;
+			font-size: 24rpx;
+			color: #666;
+			margin-right: 16rpx;
+			transition: all 0.2s;
+			border: 1rpx solid transparent;
+
+			&.active {
+				background: #fff0e5;
+				color: $primary;
+				border-color: $primary;
+				font-weight: bold;
+			}
+		}
+	}
+
+	.header-placeholder {
+		height: 180rpx;
+	}
+
+	// 动态占位高度
+
+	.swiper-section {
+		margin: 20rpx 30rpx;
+		border-radius: 16rpx;
+		overflow: hidden;
+		height: 260rpx;
+
+		.swiper {
+			height: 100%;
+		}
+
+		.swiper-image {
+			width: 100%;
+			height: 100%;
+		}
+	}
+
+	.activity-list {
+		padding: 10rpx 30rpx;
+	}
+
+	.empty-state {
+		padding: 100rpx 0;
+		text-align: center;
+		color: #999;
+		font-size: 26rpx;
+
+		.reset-link {
+			color: $primary;
+			margin-top: 20rpx;
+			text-decoration: underline;
+		}
+	}
+
+
+	/* ── 筛选区域 ── */
+	// .collapse-title {
+	// 	color: #FF6B00;
+	// }
+
+	// .filters {
+	// 	padding: 0 32rpx;
+	// 	background: white;
+	// 	border-bottom: 2rpx solid #eee;
+	// }
+
+	// .filter-header {
+	// 	display: flex;
+	// 	justify-content: flex-end;
+	// 	margin-bottom: 20rpx;
+	// }
+
+	// /* 修复：改为 view，消除 button 默认样式和 &::after 编译问题 */
+	// .reset-btn {
+	// 	background-color: #f0f0f0;
+	// 	color: #666;
+	// 	border: 1rpx solid #e0e0e0;
+	// 	padding: 8rpx 20rpx;
+	// 	font-size: 24rpx;
+	// 	display: flex;
+	// 	align-items: center;
+	// 	justify-content: center;
+	// 	border-radius: 8rpx;
+	// 	margin-right: 40rpx;
+	// }
+
+	// .uni-list {
+	// 	margin: 15rpx auto;
+
+	// 	.uni-list-cell {
+	// 		display: flex;
+	// 		align-items: center;
+	// 	}
+
+	// 	.uni-list-cell-left {
+	// 		padding: 10rpx;
+	// 		border-radius: 10rpx;
+	// 		flex-shrink: 0;
+	// 	}
+
+	// 	.uni-list-cell-db {
+	// 		margin-left: 10rpx;
+	// 		padding: 10rpx;
+	// 		background-color: #FFF0E5;
+	// 		flex: 1;
+	// 		min-width: 0;
+
+	// 		.uni-input {
+	// 			margin-left: 10rpx;
+	// 			display: flex;
+	// 			align-items: center;
+	// 			width: 100%;
+
+	// 			text,
+	// 			.placeholder {
+	// 				white-space: nowrap;
+	// 				overflow: hidden;
+	// 				text-overflow: ellipsis;
+	// 			}
+
+	// 			.arrow {
+	// 				color: #999;
+	// 				font-size: 32rpx;
+	// 				margin-left: auto;
+	// 				padding: 0 10rpx;
+	// 			}
+	// 		}
+	// 	}
+	// }
 
 	/* ── 聚会列表 ── */
 	.activity-list {
