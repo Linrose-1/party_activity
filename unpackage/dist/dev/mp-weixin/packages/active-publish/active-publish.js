@@ -1182,7 +1182,7 @@ const _sfc_main = {
           mode: "tag",
           modelValue: form.value.requireInviteCode
         }),
-        bc: common_vendor.t(form.value.requireInviteCode === 1 ? "开启后，系统将自动生成邀请码，用户需凭码报名" : "任何人看到聚会后均可直接填写资料报名"),
+        bc: common_vendor.t(form.value.requireInviteCode === 1 ? "开启后，系统将自动生成邀请码，用户需凭码报名" : "任何人看到聚会后均可直接填写资料报名。聚会发布成功后，聚会详情页面可复制邀请码，邀请专属参会者。"),
         bd: common_vendor.p({
           label: "聚会邀请码 (报名准入)",
           required: true

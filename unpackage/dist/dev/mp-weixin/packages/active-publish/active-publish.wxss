@@ -422,12 +422,11 @@
   background: rgba(255, 111, 0, 0.08);
 }
 .subsection-title.data-v-5d3444db {
-  font-size: 30rpx;
+  font-size: 28rpx;
   font-weight: bold;
   color: #333333;
   margin: 20rpx 0;
   padding-left: 10rpx;
-  border-left: 6rpx solid #FF6F00;
 }
 .native-input-wrapper.data-v-5d3444db {
   border: 1px solid #dcdfe6;

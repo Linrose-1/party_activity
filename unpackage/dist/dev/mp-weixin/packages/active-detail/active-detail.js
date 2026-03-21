@@ -33,13 +33,19 @@ const _sfc_main = {
     const showTimelineGuide = common_vendor.ref(false);
     const isActionBarHidden = common_vendor.ref(false);
     const pointsPopup = common_vendor.ref(null);
+    const currentMeetingInviteCode = common_vendor.ref("");
     common_vendor.onLoad((options) => {
+      common_vendor.index.__f__("log", "at packages/active-detail/active-detail.vue:408", "📥 [详情页-接收] URL参数为:", options);
       if (options && options.inviteCode) {
         common_vendor.index.setStorageSync("pendingInviteCode", options.inviteCode);
       }
+      if (options.meetingInviteCode) {
+        currentMeetingInviteCode.value = options.meetingInviteCode;
+        common_vendor.index.__f__("log", "at packages/active-detail/active-detail.vue:415", "✅ [详情页] 暂存收到的邀请码:", currentMeetingInviteCode.value);
+      }
       loggedInUserId.value = common_vendor.index.getStorageSync("userId");
       if (!options.id) {
-        common_vendor.index.__f__("error", "at packages/active-detail/active-detail.vue:409", "[聚会详情] 缺少聚会ID");
+        common_vendor.index.__f__("error", "at packages/active-detail/active-detail.vue:421", "[聚会详情] 缺少聚会ID");
         common_vendor.index.showToast({
           title: "加载聚会详情失败，缺少ID",
           icon: "none"
@@ -54,7 +60,7 @@ const _sfc_main = {
         const sharerId = options.sharerId;
         const bizId = options.id;
         if (sharerId === loggedInUserId.value) {
-          common_vendor.index.__f__("log", "at packages/active-detail/active-detail.vue:429", "[分享加分] 本人点击，跳过");
+          common_vendor.index.__f__("log", "at packages/active-detail/active-detail.vue:441", "[分享加分] 本人点击，跳过");
         } else if (loggedInUserId.value && bizId) {
           triggerShareHitApi(sharerId, bizId);
         } else if (bizId) {
@@ -227,7 +233,7 @@ const _sfc_main = {
           }, 500);
         }
       } else {
-        common_vendor.index.__f__("error", "at packages/active-detail/active-detail.vue:684", "[聚会详情] 获取失败:", result ? result.error : "无返回");
+        common_vendor.index.__f__("error", "at packages/active-detail/active-detail.vue:696", "[聚会详情] 获取失败:", result ? result.error : "无返回");
       }
     };
     const getParticipantList = async () => {
@@ -245,7 +251,7 @@ const _sfc_main = {
         }
       });
       if (error) {
-        common_vendor.index.__f__("error", "at packages/active-detail/active-detail.vue:707", "[报名列表] 获取失败:", error);
+        common_vendor.index.__f__("error", "at packages/active-detail/active-detail.vue:719", "[报名列表] 获取失败:", error);
         return;
       }
       if (data && data.list) {
@@ -399,8 +405,10 @@ const _sfc_main = {
         });
         return;
       }
+      common_vendor.index.__f__("log", "at packages/active-detail/active-detail.vue:956", "🔗 [详情页-准备跳转] 携带的值是:", currentMeetingInviteCode.value);
       common_vendor.index.navigateTo({
-        url: "/packages/active-enroll/active-enroll?id=" + activityId.value
+        // 关键点：将 currentMeetingInviteCode 拼接到跳转路径后面
+        url: `/packages/active-enroll/active-enroll?id=${activityId.value}&meetingInviteCode=${currentMeetingInviteCode.value}`
       });
     };
     const navigateToSponsorDetail = (item) => {
@@ -452,9 +460,9 @@ const _sfc_main = {
         }
       });
       if (error) {
-        common_vendor.index.__f__("error", "at packages/active-detail/active-detail.vue:1023", "[分享加分] 接口失败:", error);
+        common_vendor.index.__f__("error", "at packages/active-detail/active-detail.vue:1042", "[分享加分] 接口失败:", error);
       } else {
-        common_vendor.index.__f__("log", "at packages/active-detail/active-detail.vue:1025", "[分享加分] 成功触发, sharerId:", sharerId);
+        common_vendor.index.__f__("log", "at packages/active-detail/active-detail.vue:1044", "[分享加分] 成功触发, sharerId:", sharerId);
       }
     };
     common_vendor.onShareAppMessage(() => {
@@ -474,6 +482,7 @@ const _sfc_main = {
         sharePath += `&inviteCode=${inviteCode}`;
       if (activeInviteCode)
         sharePath += `&meetingInviteCode=${activeInviteCode}`;
+      common_vendor.index.__f__("log", "at packages/active-detail/active-detail.vue:1074", "🚀 [详情页-分享中] 生成的完整路径为:", sharePath);
       return {
         title: finalTitle,
         path: sharePath,
@@ -528,7 +537,7 @@ const _sfc_main = {
       }, showLimitSlotsTip.value ? {
         k: common_vendor.p({
           type: "info-filled",
-          color: "#e6a23c",
+          color: "#FF62B1",
           size: "16"
         }),
         l: common_vendor.t(activityDetail.value.limitSlots)
@@ -539,7 +548,7 @@ const _sfc_main = {
         p: common_vendor.t(formattedRegistrationTimes.value.end),
         q: common_vendor.t(activityDetail.value.locationAddress),
         r: common_vendor.o(openLocationMap),
-        s: common_vendor.t(activityDetail.value.activityLocation),
+        s: common_vendor.t(activityDetail.value.activityLocation || "未公开地点"),
         t: isOrganizer.value && activityDetail.value.inviteCode
       }, isOrganizer.value && activityDetail.value.inviteCode ? {
         v: common_vendor.t(activityDetail.value.inviteCode),
@@ -555,22 +564,12 @@ const _sfc_main = {
         C: isContentLocked.value
       }, isContentLocked.value ? {
         D: common_vendor.p({
-          type: "locked-filled",
-          size: "30",
-          color: "#FF62B1"
-        })
-      } : {
-        E: common_vendor.t(activityDetail.value.activityDescription)
-      }, {
-        F: isContentLocked.value
-      }, isContentLocked.value ? {
-        G: common_vendor.p({
           type: "eye-slash-filled",
           size: "30",
           color: "#FF62B1"
         })
       } : {
-        H: common_vendor.f(activityDetail.value.memberActivitySessionList, (item, index, i0) => {
+        E: common_vendor.f(activityDetail.value.memberActivitySessionList, (item, index, i0) => {
           return common_vendor.e({
             a: index !== activityDetail.value.memberActivitySessionList.length - 1
           }, index !== activityDetail.value.memberActivitySessionList.length - 1 ? {} : {}, {
@@ -580,9 +579,19 @@ const _sfc_main = {
           });
         })
       }, {
+        F: isContentLocked.value
+      }, isContentLocked.value ? {
+        G: common_vendor.p({
+          type: "locked-filled",
+          size: "30",
+          color: "#FF62B1"
+        })
+      } : {
+        H: common_vendor.t(activityDetail.value.activityDescription)
+      }, {
         I: activityDetail.value.memberUser.avatar,
         J: common_vendor.t(activityDetail.value.memberUser.nickname),
-        K: common_vendor.t(activityDetail.value.organizerContactPhone),
+        K: common_vendor.t(activityDetail.value.organizerContactPhone || "未公开联系方式"),
         L: common_vendor.o(($event) => navigateToBusinessCard(activityDetail.value.memberUser, true)),
         M: activityDetail.value.memberStoreRespVO
       }, activityDetail.value.memberStoreRespVO ? common_vendor.e({
@@ -648,7 +657,7 @@ const _sfc_main = {
         ai: common_vendor.p({
           type: "right",
           size: "14",
-          color: "#999"
+          color: "#FF62B1"
         }),
         aj: common_vendor.o(goToTraceList),
         ak: common_vendor.f(viewerList.value, (item, k0, i0) => {
@@ -669,7 +678,7 @@ const _sfc_main = {
         ap: common_vendor.p({
           type: "right",
           size: "14",
-          color: "#999"
+          color: "#FF62B1"
         }),
         aq: commentPreviewList.value.length > 0
       }, commentPreviewList.value.length > 0 ? {

@@ -28,8 +28,8 @@
 		</view>
 
 		<!-- 最低起聚名额提示 -->
-		<view v-if="showLimitSlotsTip" class="limit-slots-tip">
-			<uni-icons type="info-filled" color="#e6a23c" size="16" style="margin-right: 10rpx;"></uni-icons>
+		<view v-if="showLimitSlotsTip" class="limit-slots-tip theme-tip">
+			<uni-icons type="info-filled" color="#FF62B1" size="16" style="margin-right: 10rpx;"></uni-icons>
 			<text>当前报名人数未达到最低起聚名额 ({{ activityDetail.limitSlots }}人)，聚会可能被取消。</text>
 		</view>
 
@@ -55,13 +55,18 @@
 				</view>
 				<view class="info-item">
 					<text class="info-label">聚会地点：</text>
-					<text class="info-value">{{ activityDetail.activityLocation }}</text>
+					<text class="info-value">{{ activityDetail.activityLocation || "未公开地点"}}</text>
 				</view>
-				<view class="info-item" v-if="isOrganizer && activityDetail.inviteCode">
+				<view class="info-item invite-item-block" v-if="isOrganizer && activityDetail.inviteCode">
 					<text class="info-label">邀请码：</text>
-					<text class="info-value theme-text"
-						style="font-weight: bold; font-size: 32rpx;">{{ activityDetail.inviteCode }}</text>
-					<text class="copy-tag" @click="copyInviteCode">复制</text>
+					<view class="invite-content-box">
+						<view class="code-line">
+							<text class="info-value theme-text bold-code">{{ activityDetail.inviteCode }}</text>
+							<text class="copy-tag theme-copy-btn" @click="copyInviteCode">复制</text>
+						</view>
+						<!-- 【说明】 -->
+						<text class="invite-usage-hint">(请复制专属邀请码发给受邀人员完成邀约)</text>
+					</view>
 				</view>
 			</view>
 
@@ -87,22 +92,10 @@
 
 		<!-- 3. 聚会介绍与环节 -->
 		<view class="event-content">
-			<view class="content-section">
-				<view class="section-header-row">
-					<view class="header-mark"></view>
-					<text class="section-title">聚会介绍</text>
-				</view>
-				<view v-if="isContentLocked" class="private-mask">
-					<uni-icons type="locked-filled" size="30" color="#FF62B1"></uni-icons>
-					<text class="mask-text">非公开内容，需获取聚会邀请码报名之后才可查看信息内容</text>
-				</view>
-				<view v-else class="event-description-text">{{ activityDetail.activityDescription }}</view>
-			</view>
-
 			<view class="content-section" style="margin-top: 40rpx;">
 				<view class="section-header-row">
-						<view class="header-mark"></view>
-						<text class="section-title">聚会内容</text>
+					<view class="header-mark"></view>
+					<text class="section-title">聚会内容</text>
 				</view>
 				<!-- 隐私遮罩 -->
 				<view v-if="isContentLocked" class="private-mask">
@@ -124,6 +117,17 @@
 					</view>
 				</view>
 			</view>
+			<view class="content-section">
+				<view class="section-header-row">
+					<view class="header-mark"></view>
+					<text class="section-title">聚会介绍</text>
+				</view>
+				<view v-if="isContentLocked" class="private-mask">
+					<uni-icons type="locked-filled" size="30" color="#FF62B1"></uni-icons>
+					<text class="mask-text">非公开内容，需获取聚会邀请码报名之后才可查看信息内容</text>
+				</view>
+				<view v-else class="event-description-text">{{ activityDetail.activityDescription }}</view>
+			</view>
 		</view>
 
 		<!-- 4. 组织者 -->
@@ -138,7 +142,7 @@
 				</view>
 				<view>
 					<view class="organizer-name">{{ activityDetail.memberUser.nickname }}</view>
-					<view class="organizer-company">联系电话: {{ activityDetail.organizerContactPhone }}</view>
+					<view class="organizer-company">联系电话: {{ activityDetail.organizerContactPhone || "未公开联系方式" }}</view>
 				</view>
 			</view>
 		</view>
@@ -236,7 +240,7 @@
 				</view>
 				<view class="right-more">
 					<text>详情</text>
-					<uni-icons type="right" size="14" color="#999"></uni-icons>
+					<uni-icons type="right" size="14" color="#FF62B1"></uni-icons>
 				</view>
 			</view>
 			<view class="viewer-content" @click="goToTraceList">
@@ -264,7 +268,7 @@
 				</view>
 				<view class="right-more">
 					<text>查看全部</text>
-					<uni-icons type="right" size="14" color="#999"></uni-icons>
+					<uni-icons type="right" size="14" color="#FF62B1"></uni-icons>
 				</view>
 			</view>
 			<view class="preview-list" v-if="commentPreviewList.length > 0">
@@ -394,13 +398,21 @@
 	// ─── 贡分弹窗 ───
 	const pointsPopup = ref(null);
 
+	// 用来暂存 URL 传来的码
+	const currentMeetingInviteCode = ref('');
+
 
 	// ─── 生命周期 ───
 
 	onLoad((options) => {
+		console.log('📥 [详情页-接收] URL参数为:', options);
 		// 落地页邀请码：暂存供后续注册流程使用
 		if (options && options.inviteCode) {
 			uni.setStorageSync('pendingInviteCode', options.inviteCode);
+		}
+		if (options.meetingInviteCode) {
+			currentMeetingInviteCode.value = options.meetingInviteCode;
+			console.log('✅ [详情页] 暂存收到的邀请码:', currentMeetingInviteCode.value);
 		}
 
 		loggedInUserId.value = uni.getStorageSync('userId');
@@ -936,8 +948,15 @@
 			});
 			return;
 		}
+
+		// 从缓存或 URL 重新获取聚会码
+		// const mCode = uni.getStorageSync('temp_meeting_code') || '';
+
+		// 【调试输出】
+		console.log('🔗 [详情页-准备跳转] 携带的值是:', currentMeetingInviteCode.value);
 		uni.navigateTo({
-			url: '/packages/active-enroll/active-enroll?id=' + activityId.value
+			// 关键点：将 currentMeetingInviteCode 拼接到跳转路径后面
+			url: `/packages/active-enroll/active-enroll?id=${activityId.value}&meetingInviteCode=${currentMeetingInviteCode.value}`
 		});
 	};
 
@@ -1052,6 +1071,8 @@
 		// 【逻辑实现】拼接聚会专属验证码
 		if (activeInviteCode) sharePath += `&meetingInviteCode=${activeInviteCode}`;
 
+		console.log('🚀 [详情页-分享中] 生成的完整路径为:', sharePath);
+
 		return {
 			title: finalTitle,
 			path: sharePath,
@@ -1149,6 +1170,53 @@
 		border-radius: 8rpx;
 	}
 
+	.invite-item-block {
+		align-items: flex-start !important; // 让“邀请码：”标签与内容顶部对齐
+
+		.invite-content-box {
+			flex: 1;
+			display: flex;
+			flex-direction: column;
+		}
+
+		.code-line {
+			display: flex;
+			align-items: center;
+		}
+
+		.bold-code {
+			font-size: 34rpx;
+			font-weight: 800;
+			letter-spacing: 2rpx;
+		}
+
+		/* 复制按钮 - 主色调重构 */
+		.theme-copy-btn {
+			font-size: 22rpx;
+			color: $theme-color;
+			background: rgba($theme-color, 0.1);
+			border: 1rpx solid rgba($theme-color, 0.3);
+			padding: 4rpx 20rpx;
+			border-radius: 30rpx;
+			margin-left: 24rpx;
+			font-weight: bold;
+
+			&:active {
+				background: rgba($theme-color, 0.2);
+				transform: scale(0.95);
+			}
+		}
+
+		/* 邀请码下方提示语 */
+		.invite-usage-hint {
+			font-size: 22rpx;
+			color: #999;
+			margin-top: 10rpx;
+			line-height: 1.4;
+		}
+	}
+
+
 	/* ── 基础信息重构 ── */
 	.event-header {
 		background: #fff;
@@ -1169,7 +1237,7 @@
 
 			.info-item {
 				display: flex;
-				margin-bottom: 16rpx;
+				margin-bottom: 24rpx;
 				line-height: 1.5;
 
 				.info-label {
@@ -1208,14 +1276,14 @@
 		font-weight: bold;
 	}
 
-	.limit-slots-tip {
-		background-color: #fdf6ec;
-		color: #e6a23c;
-		padding: 20rpx 30rpx;
-		font-size: 26rpx;
-		display: flex;
-		align-items: center;
-	}
+	// .limit-slots-tip {
+	// 	background-color: #fdf6ec;
+	// 	color: #e6a23c;
+	// 	padding: 20rpx 30rpx;
+	// 	font-size: 26rpx;
+	// 	display: flex;
+	// 	align-items: center;
+	// }
 
 	/* ── 通用卡片 ── */
 	.event-header,
@@ -1335,6 +1403,19 @@
 		text-align: justify;
 		white-space: pre-wrap;
 		word-break: break-all;
+	}
+
+	/* 1. 最低起聚名额提示 - 主色调重构 */
+	.limit-slots-tip.theme-tip {
+		background-color: rgba($theme-color, 0.05); // 极浅的主题背景
+		color: $theme-color; // 主题色文字
+		border: 1rpx solid rgba($theme-color, 0.1); // 淡淡的边框线
+		padding: 20rpx 30rpx;
+		font-size: 24rpx;
+		display: flex;
+		align-items: center;
+		margin: 24rpx;
+		border-radius: 12rpx;
 	}
 
 	/* ── 时间轴 ── */
@@ -1475,9 +1556,14 @@
 
 	.business-name {
 		font-weight: bold;
-		font-size: 28rpx;
+		font-size: 32rpx;
 		display: block;
 		margin-bottom: 6rpx;
+	}
+
+	.meta-line {
+		font-size: 26rpx;
+		color: #888888;
 	}
 
 	/* ── 参与用户 ── */
@@ -1701,7 +1787,7 @@
 
 		text {
 			font-size: 24rpx;
-			color: #999;
+			color: $theme-color;
 			margin-right: 4rpx;
 		}
 	}
@@ -2106,7 +2192,6 @@
 	.info-item {
 		.copy-tag {
 			font-size: 22rpx;
-			color: #999;
 			background: #f0f0f0;
 			padding: 4rpx 16rpx;
 			border-radius: 20rpx;

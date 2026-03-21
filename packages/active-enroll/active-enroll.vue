@@ -267,6 +267,14 @@
 
 	onLoad((options) => {
 		// checkUserVerificationStatus();
+		console.log('📥 [报名页-接收] 收到参数:', options);
+
+		if (options.meetingInviteCode) {
+			// 核心：将收到的码赋值给验证变量
+			verifiedInviteCode.value = options.meetingInviteCode;
+			console.log('✅ [报名页] 邀请码已透传并自动验证成功:', verifiedInviteCode.value);
+		}
+
 		const storageUserId = uni.getStorageSync('userId');
 		loggedInUserId.value = storageUserId;
 
@@ -275,9 +283,9 @@
 		if (options.id) {
 			activityId.value = options.id;
 			// 现在 getActiveDetail 会处理所有逻辑
-			if (options.meetingInviteCode) {
-				verifiedInviteCode.value = options.meetingInviteCode;
-			}
+			// if (options.meetingInviteCode) {
+			// 	verifiedInviteCode.value = options.meetingInviteCode;
+			// }
 			getActiveDetail();
 		} else {
 			console.error('未接收到聚会ID！');
@@ -539,6 +547,10 @@
 				console.log('getActiveDetail result:', data);
 
 				activityDetail.value = data; // 先赋值，后续逻辑依赖它
+
+				// 【调试输出】
+				console.log('🕵️ [报名页] 身份判定 - 是否本人:', isOrganizer.value);
+				console.log('🕵️ [报名页] 状态判定 - 已验证码:', verifiedInviteCode.value);
 
 
 				// 【核心优化逻辑】
