@@ -43,7 +43,8 @@
 					</view>
 
 					<!-- 聚会状态标签（移到了堆叠容器内） -->
-					<view v-if="activity.statusStr" :class="['status-tag', getStatusClass(activity.statusStr)]">
+					<view v-if="activity.statusStr" class="status-tag"
+						:style="{ backgroundColor: getStatusColor(activity.status) }">
 						{{ activity.statusStr }}
 					</view>
 				</view>
@@ -121,9 +122,10 @@
 					<uni-icons :type="isFavorite ? 'heart-filled' : 'heart'" size="16" color="#FF6B00" />
 					<text>{{ isFavorite ? '已收' : '收藏' }}</text>
 				</view>
+				<!-- 按钮显示逻辑：根据 joinStatus 判断 -->
 				<view class="btn-mini btn-primary" :class="{ 'btn-disabled': isRegistrationDisabled }"
 					@click.stop="handleRegisterClick">
-					立即报名
+					{{ activity.joinStatus > 0 ? '聚会核销码' : '立即报名' }}
 				</view>
 			</view>
 		</view>
@@ -199,17 +201,22 @@
 		return null;
 	});
 
-	const getStatusClass = (statusStr) => {
-		const classMap = {
-			'已取消': 'canceled',
-			'未开始': 'upcoming',
-			'报名中': 'enrolled',
-			'即将开始': 'upcoming',
-			'进行中': 'ongoing',
-			'已结束': 'ended',
-			'待退款': 'refund_pending'
+	/**
+	 * 获取状态对应的颜色 (对齐详情页颜色表)
+	 * @param {number} status 状态码
+	 */
+	const getStatusColor = (status) => {
+		const colorMap = {
+			0: '#909399', // 已取消
+			1: '#f9ae3d', // 未开始
+			2: '#FF62B1', // 正在报名中 (主题色)
+			3: '#007aff', // 即将开始
+			4: '#dd524d', // 进行中
+			5: '#8f8f94', // 已结束
+			6: '#e6a23c', // 待退款
 		};
-		return classMap[statusStr] || '';
+		// 如果后端没给 status 码，默认给个灰色
+		return colorMap[status] || '#999';
 	};
 
 	// ── 普通互动 ──
@@ -535,25 +542,17 @@
 	}
 
 	.status-tag {
-		font-size: 18rpx;
-		padding: 4rpx 12rpx;
-		border-radius: 8rpx;
+		position: absolute;
+		bottom: 130rpx;
+		right: 20rpx;
+		font-size: 22rpx;
+		padding: 6rpx 20rpx;
+		border-radius: 10rpx;
 		color: #fff;
 		font-weight: bold;
-		z-index: 2;
-
-		&.enrolled {
-			background: #52c41a;
-		}
-
-		&.upcoming {
-			background: $primary;
-		}
-
-		&.ended,
-		&.canceled {
-			background: #999;
-		}
+		z-index: 5;
+		/* 增加一个微弱阴影让颜色更立体 */
+		box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.1);
 	}
 
 	.title-blur-box {

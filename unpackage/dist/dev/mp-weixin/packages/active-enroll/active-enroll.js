@@ -6,164 +6,75 @@ const utils_user = require("../../utils/user.js");
 if (!Array) {
   const _easycom_uni_easyinput2 = common_vendor.resolveComponent("uni-easyinput");
   const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
+  const _easycom_uni_load_more2 = common_vendor.resolveComponent("uni-load-more");
   const _easycom_uni_popup2 = common_vendor.resolveComponent("uni-popup");
-  (_easycom_uni_easyinput2 + _easycom_uni_icons2 + _easycom_uni_popup2)();
+  (_easycom_uni_easyinput2 + _easycom_uni_icons2 + _easycom_uni_load_more2 + _easycom_uni_popup2)();
 }
 const _easycom_uni_easyinput = () => "../../uni_modules/uni-easyinput/components/uni-easyinput/uni-easyinput.js";
 const _easycom_uni_icons = () => "../../uni_modules/uni-icons/components/uni-icons/uni-icons.js";
+const _easycom_uni_load_more = () => "../../uni_modules/uni-load-more/components/uni-load-more/uni-load-more.js";
 const _easycom_uni_popup = () => "../../uni_modules/uni-popup/components/uni-popup/uni-popup.js";
 if (!Math) {
-  (_easycom_uni_easyinput + _easycom_uni_icons + _easycom_uni_popup + SmartGuidePopup)();
+  (_easycom_uni_easyinput + _easycom_uni_icons + _easycom_uni_load_more + _easycom_uni_popup + SmartGuidePopup)();
 }
 const SmartGuidePopup = () => "../../components/SmartGuidePopup.js";
 const FORM_CACHE_KEY = "active_enroll_form_cache";
 const _sfc_main = {
   __name: "active-enroll",
   setup(__props) {
-    common_vendor.ref(true);
-    const smartGuidePopupRef = common_vendor.ref(null);
-    const verifyQrCodeBase64 = common_vendor.ref("");
+    const getFormattedNow = () => {
+      const now = /* @__PURE__ */ new Date();
+      const pad = (n) => n.toString().padStart(2, "0");
+      return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+    };
+    const formatRangeTime = (start, end) => {
+      const format = (timestamp) => {
+        if (!timestamp)
+          return "";
+        const date = new Date(timestamp);
+        const pad = (n) => n.toString().padStart(2, "0");
+        return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
+      };
+      return start && end ? `${format(start)} - ${format(end)}` : "时间待定";
+    };
+    const generateTicketNumber = () => {
+      const letters = "ABCDEFGHJKLMNPQRSTUVWXYZ";
+      const randomLetter = letters[Math.floor(Math.random() * letters.length)];
+      const randomNumbers = Math.floor(1e5 + Math.random() * 9e5);
+      return `TK${randomLetter}${randomNumbers}`;
+    };
     const currentStep = common_vendor.ref(1);
+    common_vendor.ref(false);
+    common_vendor.ref(true);
+    const agreedToTerms = common_vendor.ref(false);
+    const currentDate = common_vendor.ref(getFormattedNow());
+    common_vendor.ref(generateTicketNumber());
+    const activityId = common_vendor.ref(null);
+    const activityDetail = common_vendor.ref(null);
+    const loggedInUserId = common_vendor.ref(null);
+    const verifyQrCodeBase64 = common_vendor.ref("");
+    const inputInviteCode = common_vendor.ref("");
+    const verifiedInviteCode = common_vendor.ref("");
     const formData = common_vendor.reactive({
       userName: "",
       userPhone: "",
       contactAddress: "",
       remark: "",
       paymentScreenshotUrl: ""
-      // 用于存储上传后的真实网络URL
     });
-    const loggedInUserId = common_vendor.ref(null);
-    const activityId = common_vendor.ref(null);
-    const activityDetail = common_vendor.ref(null);
-    const agreedToTerms = common_vendor.ref(false);
-    const ticketNumber = common_vendor.ref("");
+    const smartGuidePopupRef = common_vendor.ref(null);
     const invitePopup = common_vendor.ref(null);
-    const inputInviteCode = common_vendor.ref("");
-    const verifiedInviteCode = common_vendor.ref("");
-    const fetchAndPrefillUserInfo = async () => {
-      try {
-        const {
-          data,
-          error
-        } = await utils_request.request("/app-api/member/user/get", {
-          method: "GET"
-        });
-        if (!error && data) {
-          if (!formData.userName) {
-            formData.userName = data.realName || data.nickname || "";
-          }
-          if (!formData.userPhone) {
-            formData.userPhone = data.mobile || "";
-          }
-          if (!formData.contactAddress) {
-            formData.contactAddress = data.companyName || "";
-          }
-          common_vendor.index.__f__("log", "at packages/active-enroll/active-enroll.vue:290", "✅ 已根据用户资料自动预填报名信息");
-        }
-      } catch (e) {
-        common_vendor.index.__f__("error", "at packages/active-enroll/active-enroll.vue:293", "自动预填信息失败:", e);
-      }
-    };
-    common_vendor.onLoad((options) => {
-      common_vendor.index.__f__("log", "at packages/active-enroll/active-enroll.vue:299", "📥 [报名页-接收] 收到参数:", options);
-      if (options.meetingInviteCode) {
-        verifiedInviteCode.value = options.meetingInviteCode;
-        common_vendor.index.__f__("log", "at packages/active-enroll/active-enroll.vue:304", "✅ [报名页] 邀请码已透传并自动验证成功:", verifiedInviteCode.value);
-      }
-      const storageUserId = common_vendor.index.getStorageSync("userId");
-      loggedInUserId.value = storageUserId;
-      common_vendor.index.__f__("log", "at packages/active-enroll/active-enroll.vue:310", "当前登录用户ID:", loggedInUserId.value);
-      if (options.id) {
-        activityId.value = options.id;
-        getActiveDetail();
-      } else {
-        common_vendor.index.__f__("error", "at packages/active-enroll/active-enroll.vue:320", "未接收到聚会ID！");
-        common_vendor.index.showToast({
-          title: "加载聚会详情失败，缺少ID",
-          icon: "none"
-        });
-        setTimeout(() => common_vendor.index.navigateBack(), 1500);
-      }
-      let hasCache = false;
-      try {
-        const cachedData = common_vendor.index.getStorageSync(FORM_CACHE_KEY);
-        if (cachedData) {
-          const parsedData = JSON.parse(cachedData);
-          formData.userName = parsedData.userName || "";
-          formData.userPhone = parsedData.userPhone || "";
-          formData.contactAddress = parsedData.contactAddress || "";
-          formData.remark = parsedData.remark || "";
-          formData.paymentScreenshotUrl = parsedData.paymentScreenshotUrl || "";
-          common_vendor.index.__f__("log", "at packages/active-enroll/active-enroll.vue:343", "已恢复上次未提交的报名信息");
-          hasCache = true;
-        }
-      } catch (e) {
-        common_vendor.index.__f__("error", "at packages/active-enroll/active-enroll.vue:348", "读取缓存失败", e);
-      }
-      if (!hasCache) {
-        fetchAndPrefillUserInfo();
-      }
-    });
-    common_vendor.onReady(() => {
-      var _a;
-      if (utils_user.isScenario3User()) {
-        (_a = smartGuidePopupRef.value) == null ? void 0 : _a.open();
-      }
-    });
-    common_vendor.watch(formData, (newVal) => {
-      try {
-        common_vendor.index.setStorageSync(FORM_CACHE_KEY, JSON.stringify(newVal));
-      } catch (e) {
-        common_vendor.index.__f__("error", "at packages/active-enroll/active-enroll.vue:371", "保存缓存失败", e);
-      }
-    }, {
-      deep: true
-    });
-    common_vendor.watch(() => {
-      var _a;
-      return (_a = activityDetail.value) == null ? void 0 : _a.joinStatus;
-    }, (newVal) => {
-      if (newVal === 2)
-        getVerifyQrCode();
-    });
+    const isQrLoading = common_vendor.ref(false);
+    const qrLoadError = common_vendor.ref(false);
     const isOrganizer = common_vendor.computed(() => {
-      if (!loggedInUserId.value || !activityDetail.value || !activityDetail.value.memberUser) {
+      var _a;
+      if (!loggedInUserId.value || !((_a = activityDetail.value) == null ? void 0 : _a.memberUser))
         return false;
-      }
       return Number(loggedInUserId.value) === Number(activityDetail.value.memberUser.id);
     });
-    const toggleAgreement = () => {
-      agreedToTerms.value = !agreedToTerms.value;
-    };
-    const navigateToAgreement = () => {
-      common_vendor.index.navigateTo({
-        url: "/pages/user-agreement/user-agreement"
-      });
-    };
-    const cancelInvite = () => {
-      common_vendor.index.navigateBack();
-    };
-    const currentDate = (/* @__PURE__ */ new Date()).toLocaleString("zh-CN", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit"
-    }).replace(/\//g, "-");
-    const formatRangeTime = (start, end) => {
-      const format = (timestamp) => {
-        if (!timestamp)
-          return "";
-        const date = new Date(timestamp);
-        return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, "0")}-${date.getDate().toString().padStart(2, "0")} ${date.getHours().toString().padStart(2, "0")}:${date.getMinutes().toString().padStart(2, "0")}`;
-      };
-      return `${format(start)} - ${format(end)}`;
-    };
-    common_vendor.computed(() => {
-      if (!activityDetail.value)
-        return "待定";
-      return formatRangeTime(activityDetail.value.registrationStartDatetime, activityDetail.value.registrationEndDatetime);
+    const step1ButtonText = common_vendor.computed(() => {
+      var _a;
+      return ((_a = activityDetail.value) == null ? void 0 : _a.registrationFee) === 0 ? "提交报名" : "下一步：支付报名费";
     });
     const isQueuing = common_vendor.computed(() => {
       if (!activityDetail.value)
@@ -172,81 +83,52 @@ const _sfc_main = {
     });
     const canSubmitStep1 = common_vendor.computed(() => {
       const baseValid = formData.userName.trim() && /^1[3-9]\d{9}$/.test(formData.userPhone);
-      if (isQueuing.value) {
-        return baseValid && formData.remark.trim();
-      }
-      return baseValid;
+      return isQueuing.value ? baseValid && formData.remark.trim() : baseValid;
     });
-    const confirmSignup = () => {
-      if (!canSubmitStep1.value) {
-        if (!formData.userName.trim()) {
-          common_vendor.index.showToast({
-            title: "请输入姓名",
-            icon: "none"
-          });
-          return;
-        }
-        if (!/^1[3-9]\d{9}$/.test(formData.userPhone)) {
-          common_vendor.index.showToast({
-            title: "请输入有效的手机号",
-            icon: "none"
-          });
-          return;
-        }
-        if (isQueuing.value && !formData.remark.trim()) {
-          common_vendor.index.showToast({
-            title: "报名已满，请填写申请理由",
-            icon: "none"
-          });
-          return;
-        }
+    common_vendor.computed(() => {
+      if (!activityDetail.value)
+        return "待定";
+      return formatRangeTime(activityDetail.value.registrationStartDatetime, activityDetail.value.registrationEndDatetime);
+    });
+    const getActiveDetail = async () => {
+      if (!activityId.value)
         return;
-      }
-      if (activityDetail.value && activityDetail.value.registrationFee === 0) {
-        common_vendor.index.__f__("log", "at packages/active-enroll/active-enroll.vue:476", "免费活动，直接提交报名");
-        joinActivity();
-      } else {
-        common_vendor.index.__f__("log", "at packages/active-enroll/active-enroll.vue:480", "收费活动，进入支付步骤");
-        currentStep.value = 2;
-      }
-    };
-    const chooseImage = () => {
-      common_vendor.index.chooseImage({
-        count: 1,
-        sizeType: ["compressed"],
-        sourceType: ["album", "camera"],
-        success: async (res) => {
-          const file = res.tempFiles[0];
-          const maxSize = 5 * 1024 * 1024;
-          if (file.size > maxSize) {
-            return common_vendor.index.showToast({
-              title: "文件大小不能超过5MB",
-              icon: "none"
-            });
+      common_vendor.index.showLoading({
+        title: "加载中...",
+        mask: true
+      });
+      try {
+        const result = await utils_request.request("/app-api/member/activity/get", {
+          method: "GET",
+          data: {
+            id: activityId.value
           }
-          common_vendor.index.showLoading({
-            title: "上传中...",
-            mask: true
-          });
-          const result = await utils_upload.uploadFile(file, {
-            directory: "payment-proof"
-          });
-          common_vendor.index.hideLoading();
-          if (result.data) {
-            formData.paymentScreenshotUrl = result.data;
-            common_vendor.index.showToast({
-              title: "上传成功",
-              icon: "success"
-            });
+        });
+        common_vendor.index.hideLoading();
+        if (result && !result.error) {
+          const data = result.data;
+          activityDetail.value = data;
+          if (data.requireInviteCode === 1 && data.joinStatus === 0 && !verifiedInviteCode.value && !isOrganizer.value) {
+            invitePopup.value.open();
+          }
+          if (data.joinStatus === 1 || data.joinStatus === 2) {
+            if (data.memberActivityJoinResp) {
+              formData.userName = data.memberActivityJoinResp.userName || "";
+              formData.userPhone = data.memberActivityJoinResp.userPhone || "";
+              formData.paymentScreenshotUrl = data.memberActivityJoinResp.paymentScreenshotUrl || "";
+            }
+            currentStep.value = 3;
           } else {
-            common_vendor.index.__f__("error", "at packages/active-enroll/active-enroll.vue:524", "上传失败:", result.error);
-            common_vendor.index.showToast({
-              title: result.error || "上传失败",
-              icon: "none"
-            });
+            currentStep.value = 1;
           }
         }
-      });
+      } catch (e) {
+        common_vendor.index.hideLoading();
+        common_vendor.index.showToast({
+          title: "网络异常",
+          icon: "none"
+        });
+      }
     };
     const verifyInviteCode = () => {
       if (!inputInviteCode.value)
@@ -269,124 +151,56 @@ const _sfc_main = {
       }
     };
     const getVerifyQrCode = async () => {
-      const userId = common_vendor.index.getStorageSync("userId");
-      const {
-        data,
-        error
-      } = await utils_request.request("/app-api/member/social-user/wxa-qrcode", {
-        method: "POST",
-        data: {
-          // 使用缩写以防长度超标：a代表activityId, u代表joinUserId
-          scene: `a=${activityId.value}&u=${userId}`,
-          path: "packages/active-verify/active-verify",
-          // 新的核销页面路径
-          width: 430,
-          autoColor: false,
-          checkPath: false,
-          hyaline: true
-        }
-      });
-      if (data)
-        verifyQrCodeBase64.value = `data:image/png;base64,${data}`;
-    };
-    const getActiveDetail = async () => {
       if (!activityId.value)
         return;
-      common_vendor.index.showLoading({
-        title: "加载中...",
-        mask: true
-      });
+      const userId = common_vendor.index.getStorageSync("userId");
+      isQrLoading.value = true;
+      qrLoadError.value = false;
       try {
-        const result = await utils_request.request("/app-api/member/activity/get", {
-          method: "GET",
+        const {
+          data,
+          error
+        } = await utils_request.request("/app-api/member/social-user/wxa-qrcode", {
+          method: "POST",
           data: {
-            id: activityId.value
+            scene: `a=${activityId.value}&u=${userId}`,
+            path: "packages/active-verify/active-verify",
+            width: 430,
+            checkPath: false,
+            hyaline: true
           }
         });
-        common_vendor.index.hideLoading();
-        if (result && !result.error) {
-          const data = result.data;
-          common_vendor.index.__f__("log", "at packages/active-enroll/active-enroll.vue:601", "getActiveDetail result:", data);
-          activityDetail.value = data;
-          common_vendor.index.__f__("log", "at packages/active-enroll/active-enroll.vue:606", "🕵️ [报名页] 身份判定 - 是否本人:", isOrganizer.value);
-          common_vendor.index.__f__("log", "at packages/active-enroll/active-enroll.vue:607", "🕵️ [报名页] 状态判定 - 已验证码:", verifiedInviteCode.value);
-          if (activityDetail.value.requireInviteCode === 1 && activityDetail.value.joinStatus === 0 && !verifiedInviteCode.value && !isOrganizer.value) {
-            invitePopup.value.open();
-          }
-          let status = 0;
-          if (data.joinStatus !== void 0) {
-            status = data.joinStatus;
-          } else if (data.memberActivityJoinResp) {
-            status = 2;
-          }
-          common_vendor.index.__f__("log", "at packages/active-enroll/active-enroll.vue:641", "当前报名状态 joinStatus:", status);
-          if (status === 2) {
-            common_vendor.index.__f__("log", "at packages/active-enroll/active-enroll.vue:645", "状态：已报名，跳转成功页");
-            ticketNumber.value = generateTicketNumber();
-            if (data.memberActivityJoinResp) {
-              formData.userName = data.memberActivityJoinResp.userName || "";
-              formData.userPhone = data.memberActivityJoinResp.userPhone || "";
-              formData.paymentScreenshotUrl = data.memberActivityJoinResp.paymentScreenshotUrl || "";
-            }
-            currentStep.value = 3;
-          } else if (status === 1) {
-            common_vendor.index.__f__("log", "at packages/active-enroll/active-enroll.vue:658", "状态：待确认，跳转等待页");
-            if (data.memberActivityJoinResp) {
-              formData.userName = data.memberActivityJoinResp.userName || "";
-              formData.userPhone = data.memberActivityJoinResp.userPhone || "";
-            }
-            currentStep.value = 3;
-          } else {
-            common_vendor.index.__f__("log", "at packages/active-enroll/active-enroll.vue:669", "状态：未报名，进入填写页");
-            currentStep.value = 1;
-          }
+        if (!error && data) {
+          verifyQrCodeBase64.value = `data:image/png;base64,${data}`;
         } else {
-          common_vendor.index.__f__("log", "at packages/active-enroll/active-enroll.vue:673", "请求失败:", result ? result.error : "无返回结果");
-          common_vendor.index.showToast({
-            title: result.error || "获取聚会信息失败",
-            icon: "none"
-          });
+          qrLoadError.value = true;
         }
       } catch (e) {
-        common_vendor.index.hideLoading();
-        common_vendor.index.__f__("error", "at packages/active-enroll/active-enroll.vue:681", "获取聚会详情时发生异常:", e);
-        common_vendor.index.showToast({
-          title: "网络异常，请稍后重试",
-          icon: "none"
-        });
+        qrLoadError.value = true;
+      } finally {
+        isQrLoading.value = false;
       }
     };
     const joinActivity = async () => {
-      const isFree = activityDetail.value && activityDetail.value.registrationFee === 0;
+      var _a, _b;
+      const isFree = ((_a = activityDetail.value) == null ? void 0 : _a.registrationFee) === 0;
       if (!isFree) {
-        if (!formData.paymentScreenshotUrl) {
-          common_vendor.index.showToast({
+        if (!formData.paymentScreenshotUrl)
+          return common_vendor.index.showToast({
             title: "请上传付款截图",
             icon: "none"
           });
-          return;
-        }
-        if (!agreedToTerms.value) {
-          common_vendor.index.showToast({
-            title: "请先阅读并同意用户协议",
+        if (!agreedToTerms.value)
+          return common_vendor.index.showToast({
+            title: "请先同意用户协议",
             icon: "none"
           });
-          return;
-        }
       }
       common_vendor.index.showLoading({
         title: "提交中...",
         mask: true
       });
       const userId = common_vendor.index.getStorageSync("userId");
-      if (!userId) {
-        common_vendor.index.hideLoading();
-        common_vendor.index.showToast({
-          title: "无法获取用户信息，请重新登录",
-          icon: "none"
-        });
-        return;
-      }
       const params = {
         activityId: activityId.value,
         userId,
@@ -396,6 +210,7 @@ const _sfc_main = {
         userPhone: formData.userPhone,
         contactAddress: formData.contactAddress,
         remark: formData.remark,
+        // 如果是本人，传详情里的码；否则传校验过的码
         inviteCode: isOrganizer.value ? activityDetail.value.inviteCode || "" : verifiedInviteCode.value
       };
       const result = await utils_request.request("/app-api/member/activity-join/join-activity", {
@@ -408,59 +223,125 @@ const _sfc_main = {
           title: "报名成功！",
           icon: "success"
         });
-        common_vendor.index.removeStorageSync(FORM_CACHE_KEY);
+        const dynamicKey = FORM_CACHE_KEY + "_" + activityId.value;
+        common_vendor.index.removeStorageSync(dynamicKey);
         common_vendor.index.$emit("refreshActivityList");
+        currentDate.value = getFormattedNow();
         await getActiveDetail();
       } else {
-        const error = result.error;
         common_vendor.index.showToast({
-          title: (typeof error === "string" ? error : error.msg) || "报名失败，请重试",
+          title: ((_b = result.error) == null ? void 0 : _b.msg) || "报名失败",
           icon: "none"
         });
       }
     };
+    const fetchAndPrefillUserInfo = async () => {
+      try {
+        const {
+          data,
+          error
+        } = await utils_request.request("/app-api/member/user/get", {
+          method: "GET"
+        });
+        if (!error && data) {
+          if (!formData.userName)
+            formData.userName = data.realName || data.nickname || "";
+          if (!formData.userPhone)
+            formData.userPhone = data.mobile || "";
+          if (!formData.contactAddress)
+            formData.contactAddress = data.companyName || "";
+          common_vendor.index.__f__("log", "at packages/active-enroll/active-enroll.vue:531", "✅ 个人资料自动补全完成");
+        }
+      } catch (e) {
+      }
+    };
+    const chooseImage = () => {
+      common_vendor.index.chooseImage({
+        count: 1,
+        sizeType: ["compressed"],
+        success: async (res) => {
+          common_vendor.index.showLoading({
+            title: "上传中..."
+          });
+          const result = await utils_upload.uploadFile(res.tempFiles[0], {
+            directory: "payment-proof"
+          });
+          common_vendor.index.hideLoading();
+          if (result.data)
+            formData.paymentScreenshotUrl = result.data;
+        }
+      });
+    };
     const previewQrCode = () => {
-      if (activityDetail.value && activityDetail.value.organizerPaymentQrCodeUrl) {
+      var _a;
+      if ((_a = activityDetail.value) == null ? void 0 : _a.organizerPaymentQrCodeUrl) {
         common_vendor.index.previewImage({
-          // uni.previewImage 需要一个 URL 数组
-          urls: [activityDetail.value.organizerPaymentQrCodeUrl],
-          // 指定当前要显示的图片，因为只有一个，所以就是它自己
-          current: activityDetail.value.organizerPaymentQrCodeUrl
+          urls: [activityDetail.value.organizerPaymentQrCodeUrl]
         });
       }
     };
     const previewVerifyQrCode = () => {
-      if (!verifyQrCodeBase64.value)
-        return;
-      common_vendor.index.previewImage({
-        urls: [verifyQrCodeBase64.value],
-        current: verifyQrCodeBase64.value,
-        longPressActions: {
-          itemList: ["发送给朋友", "保存图片", "收藏"],
-          success: function(data) {
-            common_vendor.index.__f__("log", "at packages/active-enroll/active-enroll.vue:820", "选中了第" + (data.tapIndex + 1) + "个按钮,第" + (data.index + 1) + "张图片");
-          }
-        }
-      });
-    };
-    const generateTicketNumber = () => {
-      if (!ticketNumber.value) {
-        const letters = "ABCDEFGHJKLMNPQRSTUVWXYZ";
-        const randomLetter = letters[Math.floor(Math.random() * letters.length)];
-        const randomNumbers = Math.floor(1e5 + Math.random() * 9e5);
-        ticketNumber.value = `TK${randomLetter}${randomNumbers}`;
+      if (verifyQrCodeBase64.value) {
+        common_vendor.index.previewImage({
+          urls: [verifyQrCodeBase64.value]
+        });
       }
-      return ticketNumber.value;
     };
-    const step1ButtonText = common_vendor.computed(() => {
-      if (activityDetail.value && activityDetail.value.registrationFee === 0) {
-        return "提交报名";
-      }
-      return "下一步：支付报名费";
+    const toggleAgreement = () => agreedToTerms.value = !agreedToTerms.value;
+    const navigateToAgreement = () => common_vendor.index.navigateTo({
+      url: "/pages/user-agreement/user-agreement"
     });
-    const backToHome = () => {
-      common_vendor.index.navigateBack();
-    };
+    const cancelInvite = () => common_vendor.index.navigateBack();
+    const confirmSignup = () => canSubmitStep1.value && (activityDetail.value.registrationFee === 0 ? joinActivity() : currentStep.value = 2);
+    const backToHome = () => common_vendor.index.navigateBack();
+    common_vendor.onLoad((options) => {
+      common_vendor.index.__f__("log", "at packages/active-enroll/active-enroll.vue:584", "📥 [报名页-接收] 参数:", options);
+      if (options.meetingInviteCode) {
+        verifiedInviteCode.value = options.meetingInviteCode;
+      }
+      activityId.value = options.id;
+      loggedInUserId.value = common_vendor.index.getStorageSync("userId");
+      if (!activityId.value) {
+        common_vendor.index.showToast({
+          title: "缺少ID",
+          icon: "none"
+        });
+        return setTimeout(() => common_vendor.index.navigateBack(), 1500);
+      }
+      getActiveDetail();
+      const dynamicKey = FORM_CACHE_KEY + "_" + activityId.value;
+      const cachedData = common_vendor.index.getStorageSync(dynamicKey);
+      if (cachedData) {
+        try {
+          const parsed = JSON.parse(cachedData);
+          Object.assign(formData, parsed);
+          common_vendor.index.__f__("log", "at packages/active-enroll/active-enroll.vue:614", "📝 已恢复本聚会的专属草稿");
+        } catch (e) {
+          common_vendor.index.__f__("error", "at packages/active-enroll/active-enroll.vue:616", "解析草稿失败");
+        }
+      }
+      fetchAndPrefillUserInfo();
+    });
+    common_vendor.onReady(() => {
+      var _a;
+      if (utils_user.isScenario3User())
+        (_a = smartGuidePopupRef.value) == null ? void 0 : _a.open();
+    });
+    common_vendor.watch(formData, (newVal) => {
+      if (activityId.value) {
+        const dynamicKey = FORM_CACHE_KEY + "_" + activityId.value;
+        common_vendor.index.setStorageSync(dynamicKey, JSON.stringify(newVal));
+      }
+    }, {
+      deep: true
+    });
+    common_vendor.watch(() => {
+      var _a;
+      return (_a = activityDetail.value) == null ? void 0 : _a.joinStatus;
+    }, (newVal) => {
+      if (newVal === 2)
+        getVerifyQrCode();
+    });
     return (_ctx, _cache) => {
       var _a, _b, _c, _d, _e, _f, _g;
       return common_vendor.e({
@@ -542,35 +423,56 @@ const _sfc_main = {
         M: common_vendor.t(((_c = activityDetail.value) == null ? void 0 : _c.joinStatus) === 2 ? "报名成功" : "报名已提交，等待确认"),
         N: common_vendor.t(((_d = activityDetail.value) == null ? void 0 : _d.joinStatus) === 2 ? "期待您的准时参与！" : "您的申请已提交给组织者，审核结果将通过消息通知。"),
         O: ((_e = activityDetail.value) == null ? void 0 : _e.joinStatus) === 2 && verifyQrCodeBase64.value
-      }, ((_f = activityDetail.value) == null ? void 0 : _f.joinStatus) === 2 && verifyQrCodeBase64.value ? {
-        P: verifyQrCodeBase64.value,
+      }, ((_f = activityDetail.value) == null ? void 0 : _f.joinStatus) === 2 && verifyQrCodeBase64.value ? common_vendor.e({
+        P: isQrLoading.value
+      }, isQrLoading.value ? {
         Q: common_vendor.p({
+          status: "loading",
+          iconSize: 20,
+          color: "#FF62B1",
+          contentText: {
+            contentrefresh: "正在生成核销码..."
+          }
+        })
+      } : qrLoadError.value ? {
+        S: common_vendor.p({
+          type: "refresh-filled",
+          size: "30",
+          color: "#999"
+        }),
+        T: common_vendor.o(getVerifyQrCode)
+      } : verifyQrCodeBase64.value ? {
+        V: verifyQrCodeBase64.value,
+        W: common_vendor.p({
           type: "search",
           size: "24",
           color: "#fff"
-        }),
-        R: common_vendor.o(previewVerifyQrCode),
-        S: common_vendor.t(activityId.value),
-        T: common_vendor.t(loggedInUserId.value)
+        })
       } : {}, {
-        U: common_vendor.t((_g = activityDetail.value) == null ? void 0 : _g.activityTitle),
-        V: common_vendor.t(common_vendor.unref(currentDate)),
-        W: common_vendor.o(backToHome)
+        R: qrLoadError.value,
+        U: verifyQrCodeBase64.value,
+        X: common_vendor.o(previewVerifyQrCode),
+        Y: common_vendor.t(activityId.value),
+        Z: common_vendor.t(loggedInUserId.value)
       }) : {}, {
-        X: inputInviteCode.value,
-        Y: common_vendor.o(($event) => inputInviteCode.value = $event.detail.value),
-        Z: common_vendor.o(cancelInvite),
-        aa: common_vendor.o(verifyInviteCode),
-        ab: common_vendor.sr(invitePopup, "3a3637dc-6", {
+        aa: common_vendor.t((_g = activityDetail.value) == null ? void 0 : _g.activityTitle),
+        ab: common_vendor.t(currentDate.value),
+        ac: common_vendor.o(backToHome)
+      }) : {}, {
+        ad: inputInviteCode.value,
+        ae: common_vendor.o(($event) => inputInviteCode.value = $event.detail.value),
+        af: common_vendor.o(cancelInvite),
+        ag: common_vendor.o(verifyInviteCode),
+        ah: common_vendor.sr(invitePopup, "3a3637dc-8", {
           "k": "invitePopup"
         }),
-        ac: common_vendor.p({
+        ai: common_vendor.p({
           ["mask-click"]: false
         }),
-        ad: common_vendor.sr(smartGuidePopupRef, "3a3637dc-7", {
+        aj: common_vendor.sr(smartGuidePopupRef, "3a3637dc-9", {
           "k": "smartGuidePopupRef"
         }),
-        ae: common_vendor.p({
+        ak: common_vendor.p({
           scenario: 3
         })
       });

@@ -548,7 +548,7 @@
 			{
 				"path": "user-view-trace/user-view-trace",
 				"style": {
-					"navigationBarTitleText": "商机浏览记录"
+					"navigationBarTitleText": "浏览记录"
 				}
 			},
 			{

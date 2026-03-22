@@ -264,38 +264,49 @@ const _sfc_main = {
       }
     };
     const handleTopScan = () => {
-      common_vendor.index.__f__("log", "at pages/active/active.vue:459", "🚀 准备扫码...");
+      if (!isLogin.value) {
+        utils_user.checkLoginGuard("请先登录后再进行核销操作");
+        return;
+      }
       common_vendor.index.scanCode({
-        // 1. 【关键】不要写 scanType: ['qrCode']，直接去掉这个参数
-        // 或者写成 ['qrCode', 'barCode', 'datamatrix', 'pdf417']，但建议直接删掉
         onlyFromCamera: true,
         success: (res) => {
-          common_vendor.index.__f__("log", "at pages/active/active.vue:466", "✅ 扫码原始结果:", res);
-          let targetPath = res.path;
-          if (targetPath) {
-            const finalUrl = targetPath.startsWith("/") ? targetPath : "/" + targetPath;
-            common_vendor.index.__f__("log", "at pages/active/active.vue:475", "🔗 目标跳转路径:", finalUrl);
-            common_vendor.index.navigateTo({
-              url: finalUrl,
-              fail: (err) => {
-                common_vendor.index.__f__("error", "at pages/active/active.vue:480", "❌ 跳转失败:", err);
-                common_vendor.index.showModal({
-                  title: "跳转失败",
-                  content: "路径可能未配置：" + finalUrl,
-                  showCancel: false
-                });
+          common_vendor.index.__f__("log", "at pages/active/active.vue:467", "🔵 [第一步] 原始数据:", res.path);
+          let rawPath = res.path || res.result || "";
+          if (rawPath) {
+            let url = rawPath.startsWith("/") ? rawPath : "/" + rawPath;
+            if (url.includes("scene=")) {
+              let sceneContent = url.split("scene=")[1];
+              const decodedScene = decodeURIComponent(sceneContent);
+              common_vendor.index.__f__("log", "at pages/active/active.vue:481", "🌈 [解码后数据]:", decodedScene);
+              const params = {};
+              decodedScene.split("&").forEach((item) => {
+                const [k, v] = item.split("=");
+                if (k === "a")
+                  params.activityId = v;
+                if (k === "u")
+                  params.joinUserId = v;
+              });
+              if (params.activityId && params.joinUserId) {
+                url = `/packages/active-verify/active-verify?activityId=${params.activityId}&joinUserId=${params.joinUserId}`;
+              } else {
+                common_vendor.index.__f__("error", "at pages/active/active.vue:495", "❌ 解析后的参数缺失:", params);
               }
-            });
-          } else {
-            common_vendor.index.showModal({
-              title: "提示",
-              content: "此码不是有效的核销小程序码\n解析内容：" + (res.result || "空"),
-              showCancel: false
-            });
+            }
+            setTimeout(() => {
+              common_vendor.index.__f__("log", "at pages/active/active.vue:501", "🚀 [第二步] 最终跳转 URL:", url);
+              common_vendor.index.navigateTo({
+                url,
+                fail: (err) => {
+                  common_vendor.index.showModal({
+                    title: "跳转失败",
+                    content: err.errMsg,
+                    showCancel: false
+                  });
+                }
+              });
+            }, 300);
           }
-        },
-        fail: (err) => {
-          common_vendor.index.__f__("error", "at pages/active/active.vue:498", "❌ 扫码过程出错/取消:", err);
         }
       });
     };

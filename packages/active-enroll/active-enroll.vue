@@ -138,11 +138,26 @@
 
 				<view class="ticket-body" @click="previewVerifyQrCode">
 					<view class="qr-wrapper">
-						<image :src="verifyQrCodeBase64" class="main-qr-img" mode="aspectFit" />
-						<view class="qr-mask">
-							<uni-icons type="search" size="24" color="#fff"></uni-icons>
-							<text>点击放大出示</text>
+						<!-- 1. 加载中状态 -->
+						<view v-if="isQrLoading" class="qr-status-box">
+							<uni-load-more status="loading" :iconSize="20" color="#FF62B1"
+								:contentText="{contentrefresh: '正在生成核销码...'}"></uni-load-more>
 						</view>
+
+						<!-- 2. 加载失败状态 -->
+						<view v-else-if="qrLoadError" class="qr-status-box" @click.stop="getVerifyQrCode">
+							<uni-icons type="refresh-filled" size="30" color="#999"></uni-icons>
+							<text class="error-txt">生成失败，点击重试</text>
+						</view>
+
+						<!-- 3. 正常显示 -->
+						<block v-else-if="verifyQrCodeBase64">
+							<image :src="verifyQrCodeBase64" class="main-qr-img" mode="aspectFit" />
+							<view class="qr-mask">
+								<uni-icons type="search" size="24" color="#fff"></uni-icons>
+								<text>点击放大出示</text>
+							</view>
+						</block>
 					</view>
 					<text class="qr-sub-hint">签到时请向组织者出示此码</text>
 				</view>
@@ -192,13 +207,12 @@
 		ref,
 		computed,
 		reactive,
-		onMounted,
 		watch
 	} from 'vue';
 	import {
 		onLoad,
 		onReady
-	} from '@dcloudio/uni-app'
+	} from '@dcloudio/uni-app';
 	import request from '../../utils/request.js';
 	import uploadFile from '../../utils/upload.js';
 	import {
@@ -206,341 +220,186 @@
 	} from '@/utils/user.js';
 	import SmartGuidePopup from '@/components/SmartGuidePopup.vue';
 
-	const isUserVerified = ref(true); // 默认为 true，避免页面闪烁
+	// =========================================================
+	// 1. 工具函数 (必须放在最顶部，供变量初始化使用)
+	// =========================================================
 
-	const smartGuidePopupRef = ref(null);
+	/**
+	 * 全平台通用：获取当前格式化时间 (YYYY-MM-DD HH:mm:ss)
+	 */
+	const getFormattedNow = () => {
+		const now = new Date();
+		const pad = (n) => n.toString().padStart(2, '0');
+		return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+	};
 
-	const verifyQrCodeBase64 = ref('');
-
-	// 检查用户实名认证状态的函数
-	const checkUserVerificationStatus = async () => {
-		const {
-			data,
-			error
-		} = await request('/app-api/member/user/get', {
-			method: 'GET'
-		});
-		if (!error && data) {
-			// 如果 idCard 字段为空或 null，则视为未实名
-			isUserVerified.value = !!data.idCard;
-		} else {
-			// 获取用户信息失败，也按未认证处理，但这里我们先假设已认证，避免不必要的打扰
-			// 真正的拦截会在提交时由后端完成
-			isUserVerified.value = false; // 或者根据业务需要设为 false
-			console.log('获取用户信息失败，无法确认实名状态。');
+	/**
+	 * 全平台通用：格式化时间段展示
+	 */
+	const formatRangeTime = (start, end) => {
+		const format = (timestamp) => {
+			if (!timestamp) return '';
+			const date = new Date(timestamp);
+			const pad = (n) => n.toString().padStart(2, '0');
+			return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
 		}
+		return start && end ? `${format(start)} - ${format(end)}` : '时间待定';
 	};
 
-	// 跳转到实名认证页面的函数
-	const goToAuthPage = () => {
-		uni.navigateTo({
-			url: '/packages/my-auth/my-auth'
-		});
+	/**
+	 * 生成前端模拟报名号
+	 */
+	const generateTicketNumber = () => {
+		const letters = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+		const randomLetter = letters[Math.floor(Math.random() * letters.length)];
+		const randomNumbers = Math.floor(100000 + Math.random() * 900000);
+		return `TK${randomLetter}${randomNumbers}`;
 	};
 
-	const currentStep = ref(1);
+	// =========================================================
+	// 2. 响应式变量声明
+	// =========================================================
 
+	// 状态管理
+	const currentStep = ref(1); // 当前步骤：1信息、2支付、3结果
+	const isLoading = ref(false);
+	const isUserVerified = ref(true);
+	const agreedToTerms = ref(false);
+	const currentDate = ref(getFormattedNow()); // 提交时间
+	const ticketNumber = ref(generateTicketNumber());
+
+	// 数据存储
+	const activityId = ref(null);
+	const activityDetail = ref(null);
+	const loggedInUserId = ref(null);
+	const verifyQrCodeBase64 = ref(''); // 核销码图片
+	const inputInviteCode = ref(''); // 用户输入的邀请码
+	const verifiedInviteCode = ref(''); // 校验通过或URL自带的邀请码
+
+	// 表单对象
 	const formData = reactive({
 		userName: '',
 		userPhone: '',
 		contactAddress: '',
 		remark: '',
-		paymentScreenshotUrl: '' // 用于存储上传后的真实网络URL
+		paymentScreenshotUrl: ''
 	});
 
-	const loggedInUserId = ref(null);
-	const activityId = ref(null);
-	const activityDetail = ref(null);
-
-	const agreedToTerms = ref(false);
-
-	const ticketNumber = ref('');
-
+	// UI 引用
+	const smartGuidePopupRef = ref(null);
 	const invitePopup = ref(null);
-	const inputInviteCode = ref('');
-	const verifiedInviteCode = ref(''); // 已验证通过的码
 
-	// 定义缓存 Key
 	const FORM_CACHE_KEY = 'active_enroll_form_cache';
 
-	/**
-	 * 获取当前用户资料并预填表单
-	 */
-	const fetchAndPrefillUserInfo = async () => {
-		try {
-			const {
-				data,
-				error
-			} = await request('/app-api/member/user/get', {
-				method: 'GET'
-			});
+	const isQrLoading = ref(false); // 是否正在加载二维码
+	const qrLoadError = ref(false); // 是否加载失败
 
-			if (!error && data) {
-				// 只有当表单对应字段为空时才进行填充，避免覆盖用户的手动输入（如果缓存恢复了数据的话）
-				if (!formData.userName) {
-					formData.userName = data.realName || data.nickname || '';
-				}
-				if (!formData.userPhone) {
-					formData.userPhone = data.mobile || '';
-				}
-				if (!formData.contactAddress) {
-					// 将用户的公司名称填充到“所在公司/机构/组织”字段
-					formData.contactAddress = data.companyName || '';
-				}
-				console.log('✅ 已根据用户资料自动预填报名信息');
-			}
-		} catch (e) {
-			console.error('自动预填信息失败:', e);
-		}
-	};
-
-	onLoad((options) => {
-		// checkUserVerificationStatus();
-		console.log('📥 [报名页-接收] 收到参数:', options);
-
-		if (options.meetingInviteCode) {
-			// 核心：将收到的码赋值给验证变量
-			verifiedInviteCode.value = options.meetingInviteCode;
-			console.log('✅ [报名页] 邀请码已透传并自动验证成功:', verifiedInviteCode.value);
-		}
-
-		const storageUserId = uni.getStorageSync('userId');
-		loggedInUserId.value = storageUserId;
-
-		console.log('当前登录用户ID:', loggedInUserId.value);
-
-		if (options.id) {
-			activityId.value = options.id;
-			// 现在 getActiveDetail 会处理所有逻辑
-			// if (options.meetingInviteCode) {
-			// 	verifiedInviteCode.value = options.meetingInviteCode;
-			// }
-			getActiveDetail();
-		} else {
-			console.error('未接收到聚会ID！');
-			uni.showToast({
-				title: '加载聚会详情失败，缺少ID',
-				icon: 'none'
-			});
-			// 如果没有ID，直接返回，避免后续执行
-			setTimeout(() => uni.navigateBack(), 1500);
-		}
-
-		let hasCache = false;
-
-		// 尝试恢复缓存的表单数据
-		try {
-			const cachedData = uni.getStorageSync(FORM_CACHE_KEY);
-			if (cachedData) {
-				const parsedData = JSON.parse(cachedData);
-				// 逐个字段恢复，避免覆盖 formData 的响应式引用
-				formData.userName = parsedData.userName || '';
-				formData.userPhone = parsedData.userPhone || '';
-				formData.contactAddress = parsedData.contactAddress || '';
-				formData.remark = parsedData.remark || '';
-				formData.paymentScreenshotUrl = parsedData.paymentScreenshotUrl || '';
-
-				console.log('已恢复上次未提交的报名信息');
-
-				hasCache = true;
-			}
-		} catch (e) {
-			console.error('读取缓存失败', e);
-		}
-
-		if (!hasCache) {
-			fetchAndPrefillUserInfo();
-		}
-	});
-
-	onReady(() => {
-		// 页面加载完了，用户可以开始写内容了，此时弹出引导
-		if (isScenario3User()) {
-			smartGuidePopupRef.value?.open();
-		}
-	});
-
-	// 监听 formData 变化，实时写入缓存
-	// deep: true 确保监听对象内部属性的变化
-	watch(formData, (newVal) => {
-		// 使用防抖或者是简单的直接保存（uni.setStorage 是异步的，setStorageSync 是同步的）
-		// 考虑到输入频率，可以用一个简单的防抖，或者直接保存（数据量小影响不大）
-		try {
-			uni.setStorageSync(FORM_CACHE_KEY, JSON.stringify(newVal));
-		} catch (e) {
-			console.error('保存缓存失败', e);
-		}
-	}, {
-		deep: true
-	});
-
-	watch(() => activityDetail.value?.joinStatus, (newVal) => {
-		if (newVal === 2) getVerifyQrCode();
-	});
+	// =========================================================
+	// 3. 计算属性
+	// =========================================================
 
 	/**
-	 * 计算属性：判断当前用户是否为组织者本人
+	 * 判断当前用户是否为组织者本人 (用于免邀、管理权限)
 	 */
 	const isOrganizer = computed(() => {
-		// 增加严谨的空值判断
-		if (!loggedInUserId.value || !activityDetail.value || !activityDetail.value.memberUser) {
-			return false;
-		}
-		// 统一转为 Number 进行比较，防止字符串和数字类型不匹配
+		if (!loggedInUserId.value || !activityDetail.value?.memberUser) return false;
 		return Number(loggedInUserId.value) === Number(activityDetail.value.memberUser.id);
 	});
 
-	// 切换协议勾选状态的方法
-	const toggleAgreement = () => {
-		agreedToTerms.value = !agreedToTerms.value;
-	};
+	/**
+	 * 报名按钮文案
+	 */
+	const step1ButtonText = computed(() => {
+		return activityDetail.value?.registrationFee === 0 ? '提交报名' : '下一步：支付报名费';
+	});
 
-	// 跳转到用户协议页面的方法
-	const navigateToAgreement = () => {
-		uni.navigateTo({
-			url: '/pages/user-agreement/user-agreement'
-		});
-	};
+	/**
+	 * 是否处于名额满额排队状态
+	 */
+	const isQueuing = computed(() => {
+		if (!activityDetail.value) return false;
+		return (activityDetail.value.joinCount || 0) >= activityDetail.value.totalSlots;
+	});
 
-	const cancelInvite = () => {
-		uni.navigateBack();
-	};
+	/**
+	 * 步骤1校验
+	 */
+	const canSubmitStep1 = computed(() => {
+		const baseValid = formData.userName.trim() && /^1[3-9]\d{9}$/.test(formData.userPhone);
+		return isQueuing.value ? (baseValid && formData.remark.trim()) : baseValid;
+	});
 
-	const currentDate = new Date().toLocaleString('zh-CN', {
-		year: 'numeric',
-		month: '2-digit',
-		day: '2-digit',
-		hour: '2-digit',
-		minute: '2-digit',
-		second: '2-digit',
-	}).replace(/\//g, '-');
-
-	const formatRangeTime = (start, end) => {
-		const format = (timestamp) => {
-			if (!timestamp) return '';
-			const date = new Date(timestamp);
-			return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')} ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
-		}
-		return `${format(start)} - ${format(end)}`;
-	}
-
-	// 【新增】用于报名时间的计算属性
+	/**
+	 * 报名时间格式化
+	 */
 	const formattedRegistrationTime = computed(() => {
 		if (!activityDetail.value) return '待定';
 		return formatRangeTime(activityDetail.value.registrationStartDatetime, activityDetail.value
 			.registrationEndDatetime);
 	});
 
-	const isQueuing = computed(() => {
-		if (!activityDetail.value) return false;
-		return (activityDetail.value.joinCount || 0) >= activityDetail.value.totalSlots;
-	});
+	// =========================================================
+	// 4. 业务功能函数
+	// =========================================================
 
-	const canSubmitStep1 = computed(() => {
-		const baseValid = formData.userName.trim() && /^1[3-9]\d{9}$/.test(formData.userPhone);
-		if (isQueuing.value) {
-			return baseValid && formData.remark.trim();
-		}
-		return baseValid;
-	});
-
-	const confirmSignup = () => {
-		if (!canSubmitStep1.value) {
-			if (!formData.userName.trim()) {
-				uni.showToast({
-					title: '请输入姓名',
-					icon: 'none'
-				});
-				return;
-			}
-			if (!/^1[3-9]\d{9}$/.test(formData.userPhone)) {
-				uni.showToast({
-					title: '请输入有效的手机号',
-					icon: 'none'
-				});
-				return;
-			}
-			if (isQueuing.value && !formData.remark.trim()) {
-				uni.showToast({
-					title: '报名已满，请填写申请理由',
-					icon: 'none'
-				});
-				return;
-			}
-			return;
-		}
-
-		// 判断活动是否免费
-		if (activityDetail.value && activityDetail.value.registrationFee === 0) {
-			// 如果是免费活动，直接调用提交方法
-			console.log('免费活动，直接提交报名');
-			joinActivity();
-		} else {
-			// 如果是收费活动，按原逻辑进入第二步
-			console.log('收费活动，进入支付步骤');
-			currentStep.value = 2;
-		}
-
-	};
-
-	const chooseImage = () => {
-		uni.chooseImage({
-			count: 1,
-			sizeType: ['compressed'],
-			sourceType: ['album', 'camera'],
-			success: async (res) => {
-				const file = res.tempFiles[0];
-
-				// (可选) 文件大小校验
-				const maxSize = 5 * 1024 * 1024; // 5MB
-				if (file.size > maxSize) {
-					return uni.showToast({
-						title: '文件大小不能超过5MB',
-						icon: 'none'
-					});
-				}
-
-				uni.showLoading({
-					title: '上传中...',
-					mask: true
-				});
-
-				// 【关键】直接调用导入的 uploadFile 工具函数
-				// 为付款凭证指定一个清晰的目录名，方便后端管理
-				const result = await uploadFile(file, {
-					directory: 'payment-proof'
-				});
-
-				uni.hideLoading();
-
-				if (result.data) {
-					// 上传成功，将返回的真实URL赋值给 formData
-					formData.paymentScreenshotUrl = result.data;
-					uni.showToast({
-						title: '上传成功',
-						icon: 'success'
-					});
-				} else {
-					console.error("上传失败:", result.error);
-					uni.showToast({
-						title: result.error || '上传失败',
-						icon: 'none'
-					});
-				}
-			}
+	/**
+	 * 获取聚会详情及报名状态
+	 */
+	const getActiveDetail = async () => {
+		if (!activityId.value) return;
+		uni.showLoading({
+			title: '加载中...',
+			mask: true
 		});
+		try {
+			const result = await request('/app-api/member/activity/get', {
+				method: 'GET',
+				data: {
+					id: activityId.value
+				}
+			});
+			uni.hideLoading();
+
+			if (result && !result.error) {
+				const data = result.data;
+				activityDetail.value = data;
+
+				// 【核心拦截逻辑】：是否需要邀请码？
+				// 条件：配置了邀请码 且 未报名 且 URL里没有透传 且 不是本人
+				if (data.requireInviteCode === 1 && data.joinStatus === 0 && !verifiedInviteCode.value && !
+					isOrganizer.value) {
+					invitePopup.value.open();
+				}
+
+				// 根据 joinStatus 决定显示哪个步骤 (0: 未报, 1: 待确, 2: 已报)
+				if (data.joinStatus === 1 || data.joinStatus === 2) {
+					if (data.memberActivityJoinResp) {
+						formData.userName = data.memberActivityJoinResp.userName || '';
+						formData.userPhone = data.memberActivityJoinResp.userPhone || '';
+						formData.paymentScreenshotUrl = data.memberActivityJoinResp.paymentScreenshotUrl || '';
+					}
+					currentStep.value = 3;
+				} else {
+					currentStep.value = 1;
+				}
+			}
+		} catch (e) {
+			uni.hideLoading();
+			uni.showToast({
+				title: '网络异常',
+				icon: 'none'
+			});
+		}
 	};
 
 	/**
-	 * 验证邀请码
+	 * 校验邀请码
 	 */
 	const verifyInviteCode = () => {
 		if (!inputInviteCode.value) return uni.showToast({
 			title: '请输入邀请码',
 			icon: 'none'
 		});
-
-		// 简单的本地校验（如果后端没给专门接口，直接比对详情里的 inviteCode）
 		if (inputInviteCode.value === activityDetail.value.inviteCode) {
 			verifiedInviteCode.value = inputInviteCode.value;
 			invitePopup.value.close();
@@ -556,171 +415,64 @@
 		}
 	};
 
-	// 在获取详情成功且 joinStatus === 2 (已报名) 时调用
+	/**
+	 * 生成参会核销码 (小程序码)
+	 */
 	const getVerifyQrCode = async () => {
-		const userId = uni.getStorageSync('userId');
-		const {
-			data,
-			error
-		} = await request('/app-api/member/social-user/wxa-qrcode', {
-			method: 'POST',
-			data: {
-				// 使用缩写以防长度超标：a代表activityId, u代表joinUserId
-				scene: `a=${activityId.value}&u=${userId}`,
-				path: "packages/active-verify/active-verify", // 新的核销页面路径
-				width: 430,
-				autoColor: false,
-				checkPath: false,
-				hyaline: true
-			}
-		});
-		if (data) verifyQrCodeBase64.value = `data:image/png;base64,${data}`;
-	};
-
-
-	const getActiveDetail = async () => {
 		if (!activityId.value) return;
 
-		uni.showLoading({
-			title: '加载中...',
-			mask: true
-		});
+		const userId = uni.getStorageSync('userId');
+		isQrLoading.value = true;
+		qrLoadError.value = false;
 
 		try {
-			const result = await request('/app-api/member/activity/get', {
-				method: 'GET',
+			const {
+				data,
+				error
+			} = await request('/app-api/member/social-user/wxa-qrcode', {
+				method: 'POST',
 				data: {
-					id: activityId.value
+					scene: `a=${activityId.value}&u=${userId}`,
+					path: "packages/active-verify/active-verify",
+					width: 430,
+					checkPath: false,
+					hyaline: true
 				}
 			});
 
-			uni.hideLoading();
-
-			if (result && !result.error) {
-				const data = result.data;
-				console.log('getActiveDetail result:', data);
-
-				activityDetail.value = data; // 先赋值，后续逻辑依赖它
-
-				// 【调试输出】
-				console.log('🕵️ [报名页] 身份判定 - 是否本人:', isOrganizer.value);
-				console.log('🕵️ [报名页] 状态判定 - 已验证码:', verifiedInviteCode.value);
-
-
-				// 【核心优化逻辑】
-				// 满足以下全部条件才弹出邀请码框：
-				// 1. 后端配置需要邀请码 (requireInviteCode === 1)
-				// 2. 当前用户还没报名 (joinStatus === 0)
-				// 3. URL里没带自动验证码 (!verifiedInviteCode.value)
-				// 4. 【新增】当前用户不是组织者本人 (!isOrganizer.value)
-
-				if (activityDetail.value.requireInviteCode === 1 &&
-					activityDetail.value.joinStatus === 0 &&
-					!verifiedInviteCode.value &&
-					!isOrganizer.value) { // <-- 关键拦截：如果是本人，直接跳过弹窗
-
-					invitePopup.value.open();
-				}
-
-				// 获取 joinStatus，如果没有则默认为 0 (未报名)
-				// 注意：有些后端可能放在 data.joinStatus，也可能放在 data.memberActivityJoinResp.joinStatus
-				// 根据你的描述是 activity/get 接口直接返回，假设在 data 根层级，或者你需要确认一下层级
-				// 这里假设字段在 data.joinStatus (如果是在 memberActivityJoinResp 里，请改为 data.memberActivityJoinResp?.joinStatus)
-				// 补充：根据之前的代码结构，已报名信息在 memberActivityJoinResp 里，建议优先检查那里，或者根目录
-
-				// 假设 joinStatus 在 data 根目录下 (根据你提供的接口描述)
-				// 同时也兼容旧逻辑 (检查 memberActivityJoinResp)
-				let status = 0;
-				if (data.joinStatus !== undefined) {
-					status = data.joinStatus;
-				} else if (data.memberActivityJoinResp) {
-					// 兼容旧数据的推断逻辑
-					status = 2; // 有 resp 视为已报名/待确认，具体细分可能看后端旧字段
-				}
-
-				console.log('当前报名状态 joinStatus:', status);
-
-				if (status === 2) {
-					// === 2 已报名 (报名成功) ===
-					console.log('状态：已报名，跳转成功页');
-					ticketNumber.value = generateTicketNumber(); // 或从后端取
-
-					// 预填信息
-					if (data.memberActivityJoinResp) {
-						formData.userName = data.memberActivityJoinResp.userName || '';
-						formData.userPhone = data.memberActivityJoinResp.userPhone || '';
-						formData.paymentScreenshotUrl = data.memberActivityJoinResp.paymentScreenshotUrl || '';
-					}
-					currentStep.value = 3;
-
-				} else if (status === 1) {
-					// === 1 待确认 (新增逻辑) ===
-					console.log('状态：待确认，跳转等待页');
-					// 也可以复用步骤3的界面，只是文案不同
-					// 预填信息
-					if (data.memberActivityJoinResp) {
-						formData.userName = data.memberActivityJoinResp.userName || '';
-						formData.userPhone = data.memberActivityJoinResp.userPhone || '';
-					}
-					currentStep.value = 3; // 复用结果页
-
-				} else {
-					// === 0 未报名 ===
-					console.log('状态：未报名，进入填写页');
-					currentStep.value = 1;
-				}
+			if (!error && data) {
+				verifyQrCodeBase64.value = `data:image/png;base64,${data}`;
 			} else {
-				console.log('请求失败:', result ? result.error : '无返回结果');
-				uni.showToast({
-					title: result.error || '获取聚会信息失败',
-					icon: 'none'
-				});
+				qrLoadError.value = true;
 			}
 		} catch (e) {
-			uni.hideLoading();
-			console.error('获取聚会详情时发生异常:', e);
-			uni.showToast({
-				title: '网络异常，请稍后重试',
-				icon: 'none'
-			});
+			qrLoadError.value = true;
+		} finally {
+			isQrLoading.value = false;
 		}
 	};
 
+	/**
+	 * 提交报名信息
+	 */
 	const joinActivity = async () => {
-		// 判断活动是否免费，以便跳过支付相关的验证
-		const isFree = activityDetail.value && activityDetail.value.registrationFee === 0;
-		// 只有在收费活动时，才执行以下验证
+		const isFree = activityDetail.value?.registrationFee === 0;
 		if (!isFree) {
-			if (!formData.paymentScreenshotUrl) {
-				uni.showToast({
-					title: '请上传付款截图',
-					icon: 'none'
-				});
-				return;
-			}
-			if (!agreedToTerms.value) {
-				uni.showToast({
-					title: '请先阅读并同意用户协议',
-					icon: 'none'
-				});
-				return;
-			}
+			if (!formData.paymentScreenshotUrl) return uni.showToast({
+				title: '请上传付款截图',
+				icon: 'none'
+			});
+			if (!agreedToTerms.value) return uni.showToast({
+				title: '请先同意用户协议',
+				icon: 'none'
+			});
 		}
 
 		uni.showLoading({
 			title: '提交中...',
 			mask: true
 		});
-
 		const userId = uni.getStorageSync('userId');
-		if (!userId) {
-			uni.hideLoading();
-			uni.showToast({
-				title: '无法获取用户信息，请重新登录',
-				icon: 'none'
-			});
-			return;
-		}
 
 		const params = {
 			activityId: activityId.value,
@@ -731,6 +483,7 @@
 			userPhone: formData.userPhone,
 			contactAddress: formData.contactAddress,
 			remark: formData.remark,
+			// 如果是本人，传详情里的码；否则传校验过的码
 			inviteCode: isOrganizer.value ? (activityDetail.value.inviteCode || '') : verifiedInviteCode.value
 		};
 
@@ -742,107 +495,155 @@
 		uni.hideLoading();
 
 		if (result && !result.error) {
-			// 报名成功
 			uni.showToast({
 				title: '报名成功！',
 				icon: 'success'
 			});
+			const dynamicKey = FORM_CACHE_KEY + '_' + activityId.value;
+			uni.removeStorageSync(dynamicKey);
 
-			// 提交成功，清除缓存
-			uni.removeStorageSync(FORM_CACHE_KEY);
-
-			// 通知列表页刷新（这样列表里的报名人数、状态才会更新）
 			uni.$emit('refreshActivityList');
-
+			currentDate.value = getFormattedNow();
 			await getActiveDetail();
 		} else {
-			// 报名失败，处理错误
-			const error = result.error;
-
-			// 判断是否是 453 未实名错误
-			// if (typeof error === 'object' && error !== null && error.code === 453) {
-			// 	// 弹出提示框引导用户去认证
-			// 	uni.showModal({
-			// 		title: '认证提醒',
-			// 		content: error.msg || '报名聚会需要先完成实名认证，是否现在就去认证？',
-			// 		confirmText: '去认证',
-			// 		cancelText: '取消',
-			// 		success: (res) => {
-			// 			if (res.confirm) {
-			// 				// 用户确认，跳转到实名认证页面
-			// 				uni.navigateTo({
-			// 					url: '/packages/my-auth/my-auth'
-			// 				});
-			// 			}
-			// 		}
-			// 	});
-			// } else {
-			// 	// 其他所有类型的错误
-			// 	uni.showToast({
-			// 		title: (typeof error === 'string' ? error : error.msg) || '报名失败，请重试',
-			// 		icon: 'none'
-			// 	});
-			// }
 			uni.showToast({
-				title: (typeof error === 'string' ? error : error.msg) || '报名失败，请重试',
+				title: result.error?.msg || '报名失败',
 				icon: 'none'
 			});
 		}
 	};
 
 	/**
-	 * ==================== 预览二维码 ====================
+	 * 自动预填用户信息
 	 */
-	const previewQrCode = () => {
-		// 确保 activityDetail 和其中的 URL 存在，防止报错
-		if (activityDetail.value && activityDetail.value.organizerPaymentQrCodeUrl) {
-			uni.previewImage({
-				// uni.previewImage 需要一个 URL 数组
-				urls: [activityDetail.value.organizerPaymentQrCodeUrl],
-				// 指定当前要显示的图片，因为只有一个，所以就是它自己
-				current: activityDetail.value.organizerPaymentQrCodeUrl
+	const fetchAndPrefillUserInfo = async () => {
+		try {
+			const {
+				data,
+				error
+			} = await request('/app-api/member/user/get', {
+				method: 'GET'
 			});
-		}
+			if (!error && data) {
+				if (!formData.userName) formData.userName = data.realName || data.nickname || '';
+				if (!formData.userPhone) formData.userPhone = data.mobile || '';
+				if (!formData.contactAddress) formData.contactAddress = data.companyName || '';
+				console.log('✅ 个人资料自动补全完成');
+			}
+		} catch (e) {}
 	};
 
-	/**
-	 * 预览并放大核销码
-	 */
-	const previewVerifyQrCode = () => {
-		if (!verifyQrCodeBase64.value) return;
-
-		uni.previewImage({
-			urls: [verifyQrCodeBase64.value],
-			current: verifyQrCodeBase64.value,
-			longPressActions: {
-				itemList: ['发送给朋友', '保存图片', '收藏'],
-				success: function(data) {
-					console.log('选中了第' + (data.tapIndex + 1) + '个按钮,第' + (data.index + 1) + '张图片');
-				}
+	// --- 交互辅助 ---
+	const chooseImage = () => {
+		uni.chooseImage({
+			count: 1,
+			sizeType: ['compressed'],
+			success: async (res) => {
+				uni.showLoading({
+					title: '上传中...'
+				});
+				const result = await uploadFile(res.tempFiles[0], {
+					directory: 'payment-proof'
+				});
+				uni.hideLoading();
+				if (result.data) formData.paymentScreenshotUrl = result.data;
 			}
 		});
 	};
 
-	const generateTicketNumber = () => {
-		if (!ticketNumber.value) {
-			const letters = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
-			const randomLetter = letters[Math.floor(Math.random() * letters.length)];
-			const randomNumbers = Math.floor(100000 + Math.random() * 900000);
-			ticketNumber.value = `TK${randomLetter}${randomNumbers}`;
+	const previewQrCode = () => {
+		if (activityDetail.value?.organizerPaymentQrCodeUrl) {
+			uni.previewImage({
+				urls: [activityDetail.value.organizerPaymentQrCodeUrl]
+			});
 		}
-		return ticketNumber.value;
 	};
 
-	const step1ButtonText = computed(() => {
-		if (activityDetail.value && activityDetail.value.registrationFee === 0) {
-			return '提交报名';
+	const previewVerifyQrCode = () => {
+		if (verifyQrCodeBase64.value) {
+			uni.previewImage({
+				urls: [verifyQrCodeBase64.value]
+			});
 		}
-		return '下一步：支付报名费';
+	};
+
+	const toggleAgreement = () => agreedToTerms.value = !agreedToTerms.value;
+	const navigateToAgreement = () => uni.navigateTo({
+		url: '/pages/user-agreement/user-agreement'
+	});
+	const cancelInvite = () => uni.navigateBack();
+	const confirmSignup = () => canSubmitStep1.value && (activityDetail.value.registrationFee === 0 ? joinActivity() :
+		currentStep.value = 2);
+	const backToHome = () => uni.navigateBack();
+
+	// =========================================================
+	// 5. 生命周期钩子
+	// =========================================================
+
+	onLoad((options) => {
+		console.log('📥 [报名页-接收] 参数:', options);
+
+		// 1. 处理邀请码 (URL 传参优先级最高)
+		if (options.meetingInviteCode) {
+			verifiedInviteCode.value = options.meetingInviteCode;
+		}
+
+		// 2. 基本参数初始化
+		activityId.value = options.id;
+		loggedInUserId.value = uni.getStorageSync('userId');
+
+		if (!activityId.value) {
+			uni.showToast({
+				title: '缺少ID',
+				icon: 'none'
+			});
+			return setTimeout(() => uni.navigateBack(), 1500);
+		}
+
+		// 3. 加载详情
+		getActiveDetail();
+
+		// 4. 逻辑解耦，确保预填始终有机会执行
+		// 第一步：先尝试恢复草稿（用户之前填了一半的内容）
+		const dynamicKey = FORM_CACHE_KEY + '_' + activityId.value;
+		const cachedData = uni.getStorageSync(dynamicKey);
+		if (cachedData) {
+			try {
+				const parsed = JSON.parse(cachedData);
+				Object.assign(formData, parsed);
+				console.log('📝 已恢复本聚会的专属草稿');
+			} catch (e) {
+				console.error('解析草稿失败');
+			}
+		}
+
+		// 第二步：无论有没有草稿，都调用预填接口
+		// 该接口内部会判断：如果字段为空才填，如果不为空（说明草稿里有）则不覆盖
+		fetchAndPrefillUserInfo();
 	});
 
-	const backToHome = () => {
-		uni.navigateBack();
-	};
+	onReady(() => {
+		if (isScenario3User()) smartGuidePopupRef.value?.open();
+	});
+
+	// =========================================================
+	// 6. 监听器
+	// =========================================================
+
+	// 监听表单并存入缓存
+	watch(formData, (newVal) => {
+		if (activityId.value) {
+			const dynamicKey = FORM_CACHE_KEY + '_' + activityId.value;
+			uni.setStorageSync(dynamicKey, JSON.stringify(newVal));
+		}
+	}, {
+		deep: true
+	});
+
+	// 报名成功后(状态变为2)，自动获取核销码
+	watch(() => activityDetail.value?.joinStatus, (newVal) => {
+		if (newVal === 2) getVerifyQrCode();
+	});
 </script>
 
 
@@ -1064,6 +865,28 @@
 		.hole-right {
 			right: -15rpx;
 			box-shadow: inset 4rpx 0 6rpx rgba(0, 0, 0, 0.02);
+		}
+	}
+
+	/* 核销码状态容器（加载中和失败） */
+	.qr-status-box {
+		width: 100%;
+		height: 100%;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		background: #fcfcfc;
+
+		.error-txt {
+			font-size: 24rpx;
+			color: #999;
+			margin-top: 10rpx;
+		}
+
+		:deep(.uni-load-more__text) {
+			font-size: 22rpx !important;
+			color: #FF62B1 !important;
 		}
 	}
 

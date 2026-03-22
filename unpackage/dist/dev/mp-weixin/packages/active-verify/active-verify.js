@@ -18,33 +18,34 @@ const _sfc_main = {
     const participantInfo = common_vendor.ref(null);
     const isVerifying = common_vendor.ref(false);
     common_vendor.onLoad(async (options) => {
-      if (options.scene) {
+      common_vendor.index.__f__("log", "at packages/active-verify/active-verify.vue:77", "📥 [核销页收到参数]:", options);
+      if (options.activityId && options.joinUserId) {
+        activityId.value = options.activityId;
+        joinUserId.value = options.joinUserId;
+      } else if (options.scene) {
         const scene = decodeURIComponent(options.scene);
         const params = {};
         scene.split("&").forEach((v) => {
           const [key, val] = v.split("=");
           params[key] = val;
         });
-        activityId.value = params.a;
-        joinUserId.value = params.u;
-      } else {
-        activityId.value = options.activityId;
-        joinUserId.value = options.joinUserId;
+        activityId.value = params.a || params.activityId;
+        joinUserId.value = params.u || params.joinUserId;
       }
       if (!activityId.value || !joinUserId.value) {
         common_vendor.index.showModal({
-          title: "参数错误",
-          content: "无法识别核销信息",
-          showCancel: false
+          title: "识别失败",
+          content: "核销凭证数据丢失，请重新扫码",
+          showCancel: false,
+          success: () => common_vendor.index.navigateBack()
         });
         return;
       }
       loadData();
     });
     const loadData = async () => {
-      var _a, _b;
       common_vendor.index.showLoading({
-        title: "信息获取中..."
+        title: "拉取核销资料..."
       });
       const [actRes, joinRes] = await Promise.all([
         utils_request.request("/app-api/member/activity/get", {
@@ -56,8 +57,8 @@ const _sfc_main = {
         utils_request.request("/app-api/member/activity-join/list", {
           method: "GET",
           data: {
-            activityId: activityId.value,
-            userId: joinUserId.value,
+            activityId: String(activityId.value),
+            userId: String(joinUserId.value),
             pageNo: 1,
             pageSize: 1
           }
@@ -66,12 +67,13 @@ const _sfc_main = {
       common_vendor.index.hideLoading();
       if (actRes.data)
         activityInfo.value = actRes.data;
-      if (((_b = (_a = joinRes.data) == null ? void 0 : _a.list) == null ? void 0 : _b.length) > 0) {
+      if (joinRes.data && joinRes.data.list && joinRes.data.list.length > 0) {
         participantInfo.value = joinRes.data.list[0];
+        common_vendor.index.__f__("log", "at packages/active-verify/active-verify.vue:140", "✅ 获取到报名商友信息:", participantInfo.value);
       } else {
         common_vendor.index.showModal({
-          title: "提示",
-          content: "未查询到该用户的报名记录",
+          title: "无法核销",
+          content: "未查询到该用户的报名记录，请核实该商友是否已在此聚会报名。",
           showCancel: false
         });
       }
@@ -80,12 +82,16 @@ const _sfc_main = {
       if (!activityInfo.value)
         return "";
       const d = new Date(activityInfo.value.startDatetime);
-      return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()} ${d.getHours()}:${d.getMinutes()}`;
+      const pad = (n) => n.toString().padStart(2, "0");
+      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
     });
     const handleConfirmVerify = async () => {
+      const showName = participantInfo.value.memberUser.realName || participantInfo.value.memberUser.nickname || "商友";
       common_vendor.index.showModal({
-        title: "确认核销",
-        content: `确认已核对商友【${participantInfo.value.userName}】身份并签到？`,
+        title: "身份核对确认",
+        content: `已确认商友【${showName}】到场？
+核销后将无法撤回。`,
+        confirmColor: "#FF62B1",
         success: async (res) => {
           if (!res.confirm)
             return;
@@ -103,9 +109,9 @@ const _sfc_main = {
               title: "核销成功",
               icon: "success"
             });
-            setTimeout(() => loadData(), 1e3);
+            setTimeout(() => loadData(), 800);
           } else {
-            const errMsg = result.error.msg || result.error || "核销失败";
+            const errMsg = typeof result.error === "object" ? result.error.msg || "核销请求失败" : result.error;
             common_vendor.index.showModal({
               title: "核销失败",
               content: errMsg,
@@ -130,14 +136,14 @@ const _sfc_main = {
         d: common_vendor.t(activityInfo.value.activityTitle),
         e: common_vendor.t(formattedActivityTime.value),
         f: participantInfo.value.memberUser.avatar,
-        g: common_vendor.t(participantInfo.value.userName || participantInfo.value.memberUser.nickname),
-        h: common_vendor.t(participantInfo.value.userPhone),
-        i: common_vendor.t(participantInfo.value.contactAddress || "未填写公司"),
-        j: common_vendor.t(participantInfo.value.paymentStatusStr),
-        k: common_vendor.n(participantInfo.value.paymentStatus === "2" ? "success" : "warn"),
-        l: common_vendor.t(participantInfo.value.isVerified === 1 ? "✅ 已核销" : "❌ 未核销"),
+        g: common_vendor.t(participantInfo.value.memberUser.realName || participantInfo.value.memberUser.nickname),
+        h: common_vendor.t(participantInfo.value.memberUser.mobile),
+        i: common_vendor.t(participantInfo.value.paymentStatusStr),
+        j: common_vendor.n(participantInfo.value.paymentStatus === "2" ? "success" : "warn"),
+        k: common_vendor.t(participantInfo.value.isVerified === 1 ? "✅ 已核销" : "❌ 未核销"),
+        l: common_vendor.n(participantInfo.value.isVerified === 1 ? "success" : "warn"),
         m: common_vendor.o(goBack),
-        n: common_vendor.t(participantInfo.value.isVerified === 1 ? "此码已核销" : "确认核销签到"),
+        n: common_vendor.t(participantInfo.value.isVerified === 1 ? "此码已完成核销" : "确认核销签到"),
         o: isVerifying.value || participantInfo.value.isVerified === 1,
         p: common_vendor.o(handleConfirmVerify)
       } : {});

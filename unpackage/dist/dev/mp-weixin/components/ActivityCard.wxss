@@ -127,21 +127,17 @@
   box-shadow: 0 4rpx 10rpx rgba(0, 0, 0, 0.2);
 }
 .status-tag.data-v-f73ae0ce {
-  font-size: 18rpx;
-  padding: 4rpx 12rpx;
-  border-radius: 8rpx;
+  position: absolute;
+  bottom: 130rpx;
+  right: 20rpx;
+  font-size: 22rpx;
+  padding: 6rpx 20rpx;
+  border-radius: 10rpx;
   color: #fff;
   font-weight: bold;
-  z-index: 2;
-}
-.status-tag.enrolled.data-v-f73ae0ce {
-  background: #52c41a;
-}
-.status-tag.upcoming.data-v-f73ae0ce {
-  background: #FF6B00;
-}
-.status-tag.ended.data-v-f73ae0ce, .status-tag.canceled.data-v-f73ae0ce {
-  background: #999;
+  z-index: 5;
+  /* 增加一个微弱阴影让颜色更立体 */
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.1);
 }
 .title-blur-box.data-v-f73ae0ce {
   position: absolute;

@@ -71,7 +71,7 @@
 			</view>
 
 			<view class="event-stats">
-				<view class="stat-item">
+				<view class="stat-item" @click="viewAllUsers">
 					<view class="stat-value">{{ participantTotal || 0 }}</view>
 					<view class="stat-label">已报名</view>
 				</view>
@@ -307,10 +307,11 @@
 		<!-- 12. 底部操作栏 -->
 		<view class="action-bar" v-if="!isActionBarHidden">
 			<view class="action-btn share-btn" @click="openSharePopup">
-				<text>🔗 聚会分享</text>
+				<text>🔗 智能分享</text>
 			</view>
-			<view class="action-btn register-btn" :class="{ 'disabled': !isRegistrationActive }" @click="register">
-				<text>➕ 立即报名</text>
+			<view class="action-btn register-btn"
+				:class="{ 'disabled': !isRegistrationActive && activityDetail.joinStatus === 0 }" @click="register">
+				<text>{{ activityDetail.joinStatus > 0 ? '🎫 聚会核销码' : '➕ 立即报名' }}</text>
 			</view>
 		</view>
 
@@ -517,7 +518,8 @@
 	 */
 	const isRegistrationActive = computed(() => {
 		if (!activityDetail.value) return false;
-		return activityDetail.value.status === 2;
+		// 状态 2: 报名中, 状态 4: 进行中
+		return [2, 4].includes(activityDetail.value.status);
 	});
 
 	/**
@@ -1583,7 +1585,7 @@
 
 	.view-all-link {
 		font-size: 24rpx;
-		color: #3a7bd5;
+		color: $theme-color;
 	}
 
 	.avatar-group {

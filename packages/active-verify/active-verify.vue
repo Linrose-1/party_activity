@@ -5,27 +5,29 @@
 			<text>请核对商友报名信息并确认到场</text>
 		</view>
 
-		<!-- 1. 聚会信息卡片 -->
+		<!-- 1. 待核销聚会信息 -->
 		<view class="info-card">
 			<view class="section-title">待核销聚会</view>
 			<view class="activity-box">
 				<image :src="activityInfo.coverImageUrl" mode="aspectFill" class="cover" />
 				<view class="details">
 					<text class="title">{{ activityInfo.activityTitle }}</text>
-					<text class="time">{{ formattedActivityTime }}</text>
+					<text class="time">聚会时间：{{ formattedActivityTime }}</text>
 				</view>
 			</view>
 		</view>
 
-		<!-- 2. 商友信息卡片 -->
+		<!-- 2. 报名商友信息 -->
 		<view class="info-card">
-			<view class="section-title">报名商友信息</view>
+			<view class="section-title">报名商友资料</view>
 			<view class="user-box">
 				<image :src="participantInfo.memberUser.avatar" mode="aspectFill" class="avatar" />
 				<view class="user-meta">
-					<text class="name">{{ participantInfo.userName || participantInfo.memberUser.nickname }}</text>
-					<text class="phone">{{ participantInfo.userPhone }}</text>
-					<text class="company">{{ participantInfo.contactAddress || '未填写公司' }}</text>
+					<!-- 【优化】显示真实姓名或昵称 -->
+					<text
+						class="name">{{ participantInfo.memberUser.realName || participantInfo.memberUser.nickname }}</text>
+					<!-- 【优化】显示手机号 -->
+					<text class="phone">联系电话：{{ participantInfo.memberUser.mobile }}</text>
 				</view>
 			</view>
 
@@ -37,16 +39,19 @@
 			</view>
 			<view class="status-row">
 				<text class="label">是否核销</text>
-				<text class="status-val">{{ participantInfo.isVerified === 1 ? '✅ 已核销' : '❌ 未核销' }}</text>
+				<!-- 根据 isVerified 判断 -->
+				<text class="status-val" :class="participantInfo.isVerified === 1 ? 'success' : 'warn'">
+					{{ participantInfo.isVerified === 1 ? '✅ 已核销' : '❌ 未核销' }}
+				</text>
 			</view>
 		</view>
 
 		<!-- 3. 操作按钮 -->
 		<view class="action-footer">
-			<button class="btn-cancel" @click="goBack">取消</button>
+			<button class="btn-cancel" @click="goBack">返回</button>
 			<button class="btn-confirm" :disabled="isVerifying || participantInfo.isVerified === 1"
 				@click="handleConfirmVerify">
-				{{ participantInfo.isVerified === 1 ? '此码已核销' : '确认核销签到' }}
+				{{ participantInfo.isVerified === 1 ? '此码已完成核销' : '确认核销签到' }}
 			</button>
 		</view>
 	</view>
@@ -69,26 +74,32 @@
 	const isVerifying = ref(false);
 
 	onLoad(async (options) => {
-		// 解析 Scene 参数 (a=activityId, u=joinUserId)
-		if (options.scene) {
+		console.log('📥 [核销页收到参数]:', options);
+
+		// 1. 尝试从普通参数中获取 (activityId / joinUserId)
+		if (options.activityId && options.joinUserId) {
+			activityId.value = options.activityId;
+			joinUserId.value = options.joinUserId;
+		}
+		// 2. 尝试从 scene 字符串中获取 (兼容扫码直连)
+		else if (options.scene) {
 			const scene = decodeURIComponent(options.scene);
 			const params = {};
 			scene.split('&').forEach(v => {
 				const [key, val] = v.split('=');
 				params[key] = val;
 			});
-			activityId.value = params.a;
-			joinUserId.value = params.u;
-		} else {
-			activityId.value = options.activityId;
-			joinUserId.value = options.joinUserId;
+			activityId.value = params.a || params.activityId;
+			joinUserId.value = params.u || params.joinUserId;
 		}
 
+		// 3. 终极校验
 		if (!activityId.value || !joinUserId.value) {
 			uni.showModal({
-				title: '参数错误',
-				content: '无法识别核销信息',
-				showCancel: false
+				title: '识别失败',
+				content: '核销凭证数据丢失，请重新扫码',
+				showCancel: false,
+				success: () => uni.navigateBack()
 			});
 			return;
 		}
@@ -98,7 +109,7 @@
 
 	const loadData = async () => {
 		uni.showLoading({
-			title: '信息获取中...'
+			title: '拉取核销资料...'
 		});
 
 		// 并发获取：聚会详情 + 该用户的报名记录
@@ -112,8 +123,8 @@
 			request('/app-api/member/activity-join/list', {
 				method: 'GET',
 				data: {
-					activityId: activityId.value,
-					userId: joinUserId.value,
+					activityId: String(activityId.value),
+					userId: String(joinUserId.value),
 					pageNo: 1,
 					pageSize: 1
 				}
@@ -123,12 +134,14 @@
 		uni.hideLoading();
 
 		if (actRes.data) activityInfo.value = actRes.data;
-		if (joinRes.data?.list?.length > 0) {
+
+		if (joinRes.data && joinRes.data.list && joinRes.data.list.length > 0) {
 			participantInfo.value = joinRes.data.list[0];
+			console.log('✅ 获取到报名商友信息:', participantInfo.value);
 		} else {
 			uni.showModal({
-				title: '提示',
-				content: '未查询到该用户的报名记录',
+				title: '无法核销',
+				content: '未查询到该用户的报名记录，请核实该商友是否已在此聚会报名。',
 				showCancel: false
 			});
 		}
@@ -137,16 +150,22 @@
 	const formattedActivityTime = computed(() => {
 		if (!activityInfo.value) return '';
 		const d = new Date(activityInfo.value.startDatetime);
-		return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()} ${d.getHours()}:${d.getMinutes()}`;
+		const pad = n => n.toString().padStart(2, '0');
+		return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
 	});
 
 	/**
 	 * 确认核销操作
 	 */
 	const handleConfirmVerify = async () => {
+		// 【修复】从 memberUser 中正确提取显示名称
+		const showName = participantInfo.value.memberUser.realName || participantInfo.value.memberUser.nickname ||
+			'商友';
+
 		uni.showModal({
-			title: '确认核销',
-			content: `确认已核对商友【${participantInfo.value.userName}】身份并签到？`,
+			title: '身份核对确认',
+			content: `已确认商友【${showName}】到场？\n核销后将无法撤回。`,
+			confirmColor: '#FF62B1',
 			success: async (res) => {
 				if (!res.confirm) return;
 
@@ -165,10 +184,12 @@
 						title: '核销成功',
 						icon: 'success'
 					});
-					setTimeout(() => loadData(), 1000); // 刷新当前页状态
+					// 核销成功后延迟刷新页面状态
+					setTimeout(() => loadData(), 800);
 				} else {
-					// 详细显示你列出的错误原因
-					const errMsg = result.error.msg || result.error || '核销失败';
+					// 处理业务层返回的错误提示（如：只有组织者能核销、已核销等）
+					const errMsg = typeof result.error === 'object' ? (result.error.msg || '核销请求失败') :
+						result.error;
 					uni.showModal({
 						title: '核销失败',
 						content: errMsg,
@@ -190,15 +211,20 @@
 		min-height: 100vh;
 		background: #f8f8f8;
 		padding: 30rpx;
+		padding-bottom: 180rpx;
 	}
 
 	.header-status {
 		display: flex;
 		align-items: center;
-		gap: 10rpx;
+		gap: 12rpx;
 		margin-bottom: 30rpx;
+		padding: 20rpx;
+		background: rgba($theme, 0.05);
+		border-radius: 12rpx;
 		font-size: 26rpx;
-		color: #666;
+		color: $theme;
+		font-weight: 500;
 	}
 
 	.info-card {
@@ -206,36 +232,44 @@
 		border-radius: 24rpx;
 		padding: 30rpx;
 		margin-bottom: 30rpx;
+		box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.02);
 	}
 
 	.section-title {
 		font-size: 24rpx;
 		color: #999;
-		margin-bottom: 20rpx;
+		margin-bottom: 24rpx;
 		border-bottom: 1rpx solid #f0f0f0;
-		padding-bottom: 10rpx;
+		padding-bottom: 12rpx;
+		font-weight: bold;
 	}
 
 	.activity-box {
 		display: flex;
-		gap: 20rpx;
+		gap: 24rpx;
 
 		.cover {
 			width: 120rpx;
 			height: 120rpx;
 			border-radius: 12rpx;
+			flex-shrink: 0;
 		}
 
-		.title {
-			font-weight: bold;
-			font-size: 30rpx;
-			display: block;
-		}
+		.details {
+			flex: 1;
 
-		.time {
-			font-size: 24rpx;
-			color: $theme;
-			margin-top: 10rpx;
+			.title {
+				font-weight: bold;
+				font-size: 30rpx;
+				color: #333;
+				display: block;
+				margin-bottom: 8rpx;
+			}
+
+			.time {
+				font-size: 24rpx;
+				color: #888;
+			}
 		}
 	}
 
@@ -243,40 +277,47 @@
 		display: flex;
 		align-items: center;
 		gap: 30rpx;
-		padding: 20rpx 0;
+		padding: 24rpx 0;
 		border-bottom: 1rpx solid #f9f9f9;
 
 		.avatar {
-			width: 100rpx;
-			height: 100rpx;
-			border-radius: 50%;
+			width: 110rpx;
+			height: 110rpx;
+			border-radius: 55rpx;
+			border: 4rpx solid rgba($theme, 0.1);
 		}
 
-		.name {
-			font-size: 32rpx;
-			font-weight: bold;
-			display: block;
-		}
+		.user-meta {
+			flex: 1;
 
-		.phone {
-			font-size: 24rpx;
-			color: #666;
-		}
+			.name {
+				font-size: 34rpx;
+				font-weight: 800;
+				color: #333;
+				display: block;
+				margin-bottom: 10rpx;
+			}
 
-		.company {
-			font-size: 22rpx;
-			color: #999;
+			.phone {
+				font-size: 26rpx;
+				color: #666;
+			}
 		}
 	}
 
 	.status-row {
 		display: flex;
 		justify-content: space-between;
-		padding: 20rpx 0;
+		padding: 24rpx 0;
 		font-size: 28rpx;
+		border-bottom: 1rpx solid #fafafa;
+
+		&:last-child {
+			border-bottom: none;
+		}
 
 		.label {
-			color: #666;
+			color: #888;
 		}
 
 		.status-val {
@@ -294,30 +335,45 @@
 
 	.action-footer {
 		position: fixed;
-		bottom: 50rpx;
-		left: 30rpx;
-		right: 30rpx;
+		bottom: 0;
+		left: 0;
+		right: 0;
+		background: #fff;
+		padding: 30rpx 40rpx;
+		padding-bottom: calc(30rpx + env(safe-area-inset-bottom));
+		box-shadow: 0 -10rpx 30rpx rgba(0, 0, 0, 0.05);
 		display: flex;
-		gap: 20rpx;
+		gap: 24rpx;
 	}
 
 	.btn-cancel {
 		flex: 1;
 		border-radius: 50rpx;
 		font-size: 30rpx;
-		background: #eee;
+		background: #f5f5f5;
+		color: #666;
+		border: none;
 	}
 
 	.btn-confirm {
 		flex: 2;
 		border-radius: 50rpx;
 		font-size: 30rpx;
-		background: $theme;
+		font-weight: bold;
+		background: linear-gradient(to right, $theme, #ff8dc4);
 		color: #fff;
 		border: none;
+		box-shadow: 0 8rpx 20rpx rgba($theme, 0.3);
+		transition: opacity 0.2s;
+
+		&:active {
+			opacity: 0.8;
+		}
 
 		&[disabled] {
-			background: #ccc;
+			background: #dcdcdc;
+			color: #fff;
+			box-shadow: none;
 		}
 	}
 </style>

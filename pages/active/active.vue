@@ -453,49 +453,64 @@
 
 	// ─── 事件处理器 ───
 	/**
-	 * 顶部扫码逻辑
+	 * 顶部扫码逻辑 - 针对 Android 日志精准修复
 	 */
 	const handleTopScan = () => {
-		console.log('🚀 准备扫码...');
+		if (!isLogin.value) {
+			checkLoginGuard('请先登录后再进行核销操作');
+			return;
+		}
 
 		uni.scanCode({
-			// 1. 【关键】不要写 scanType: ['qrCode']，直接去掉这个参数
-			// 或者写成 ['qrCode', 'barCode', 'datamatrix', 'pdf417']，但建议直接删掉
 			onlyFromCamera: true,
 			success: (res) => {
-				console.log('✅ 扫码原始结果:', res);
+				console.log('🔵 [第一步] 原始数据:', res.path);
 
-				// 2. 优先从 res.path 获取路径（小程序码专有字段）
-				let targetPath = res.path;
+				let rawPath = res.path || res.result || '';
+				if (rawPath) {
+					// 1. 统一格式：确保以 / 开头
+					let url = rawPath.startsWith('/') ? rawPath : '/' + rawPath;
 
-				// 3. 兜底判断
-				if (targetPath) {
-					// 确保路径以 / 开头，否则 navigateTo 会失效
-					const finalUrl = targetPath.startsWith('/') ? targetPath : '/' + targetPath;
-					console.log('🔗 目标跳转路径:', finalUrl);
+					// 2. 【核心修复】深度解析 scene 参数
+					if (url.includes('scene=')) {
+						// 提取 scene 后的全部内容，并进行全平台通用的 URL 解码
+						let sceneContent = url.split('scene=')[1];
 
-					uni.navigateTo({
-						url: finalUrl,
-						fail: (err) => {
-							console.error('❌ 跳转失败:', err);
-							uni.showModal({
-								title: '跳转失败',
-								content: '路径可能未配置：' + finalUrl,
-								showCancel: false
-							});
+						// 【关键步骤】解码！把 %3D 转回 =，把 %26 转回 &
+						const decodedScene = decodeURIComponent(sceneContent);
+						console.log('🌈 [解码后数据]:', decodedScene); // 应显示 a=20794&u=247
+
+						const params = {};
+						decodedScene.split('&').forEach(item => {
+							const [k, v] = item.split('=');
+							if (k === 'a') params.activityId = v;
+							if (k === 'u') params.joinUserId = v;
+						});
+
+						// 3. 重新组装成标准路径，确保参数不再是 undefined
+						if (params.activityId && params.joinUserId) {
+							url =
+								`/packages/active-verify/active-verify?activityId=${params.activityId}&joinUserId=${params.joinUserId}`;
+						} else {
+							console.error('❌ 解析后的参数缺失:', params);
 						}
-					});
-				} else {
-					// 如果扫的是普通二维码，res.path 是空的，结果在 res.result 里
-					uni.showModal({
-						title: '提示',
-						content: '此码不是有效的核销小程序码\n解析内容：' + (res.result || '空'),
-						showCancel: false
-					});
+					}
+
+					// 4. 延迟跳转，确保相机已完全销毁
+					setTimeout(() => {
+						console.log('🚀 [第二步] 最终跳转 URL:', url);
+						uni.navigateTo({
+							url: url,
+							fail: (err) => {
+								uni.showModal({
+									title: '跳转失败',
+									content: err.errMsg,
+									showCancel: false
+								});
+							}
+						});
+					}, 300);
 				}
-			},
-			fail: (err) => {
-				console.error('❌ 扫码过程出错/取消:', err);
 			}
 		});
 	};

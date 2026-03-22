@@ -40,7 +40,7 @@
 						class="u-avatar silent-avatar-border" mode="aspectFill"></image>
 					<view class="u-info">
 						<view class="u-top">
-							<text class="u-name">商友 (潜在意向)</text>
+							<text class="u-name">潜在商友</text>
 							<text class="u-tag">意向访客</text>
 						</view>
 						<view class="u-desc">点击查看通过分享进入的潜在商友列表</view>

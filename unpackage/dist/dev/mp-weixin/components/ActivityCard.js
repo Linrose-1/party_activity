@@ -59,17 +59,24 @@ const _sfc_main = {
       }
       return null;
     });
-    const getStatusClass = (statusStr) => {
-      const classMap = {
-        "已取消": "canceled",
-        "未开始": "upcoming",
-        "报名中": "enrolled",
-        "即将开始": "upcoming",
-        "进行中": "ongoing",
-        "已结束": "ended",
-        "待退款": "refund_pending"
+    const getStatusColor = (status) => {
+      const colorMap = {
+        0: "#909399",
+        // 已取消
+        1: "#f9ae3d",
+        // 未开始
+        2: "#FF62B1",
+        // 正在报名中 (主题色)
+        3: "#007aff",
+        // 即将开始
+        4: "#dd524d",
+        // 进行中
+        5: "#8f8f94",
+        // 已结束
+        6: "#e6a23c"
+        // 待退款
       };
-      return classMap[statusStr] || "";
+      return colorMap[status] || "#999";
     };
     const handleAction = async (clickedAction) => {
       if (!await utils_user.checkLoginGuard())
@@ -188,7 +195,7 @@ const _sfc_main = {
             availableActions[tappedItem]();
         },
         fail: (res) => {
-          common_vendor.index.__f__("log", "at components/ActivityCard.vue:352", res.errMsg);
+          common_vendor.index.__f__("log", "at components/ActivityCard.vue:359", res.errMsg);
         }
       });
     };
@@ -281,7 +288,7 @@ const _sfc_main = {
         t: __props.activity.statusStr
       }, __props.activity.statusStr ? {
         v: common_vendor.t(__props.activity.statusStr),
-        w: common_vendor.n(getStatusClass(__props.activity.statusStr))
+        w: getStatusColor(__props.activity.status)
       } : {}, {
         x: __props.activity.memberUser.avatar,
         y: common_vendor.t(__props.activity.memberUser.nickname || "主办方"),
@@ -338,12 +345,13 @@ const _sfc_main = {
         }),
         V: common_vendor.t(isFavorite.value ? "已收" : "收藏"),
         W: common_vendor.o(toggleFavorite),
-        X: isRegistrationDisabled.value ? 1 : "",
-        Y: common_vendor.o(handleRegisterClick),
-        Z: common_vendor.sr(smartGuidePopupRef, "f73ae0ce-9", {
+        X: common_vendor.t(__props.activity.joinStatus > 0 ? "聚会核销码" : "立即报名"),
+        Y: isRegistrationDisabled.value ? 1 : "",
+        Z: common_vendor.o(handleRegisterClick),
+        aa: common_vendor.sr(smartGuidePopupRef, "f73ae0ce-9", {
           "k": "smartGuidePopupRef"
         }),
-        aa: common_vendor.p({
+        ab: common_vendor.p({
           scenario: 3
         })
       });
