@@ -301,7 +301,7 @@
 			<view class="form-bottom">
 				<text>— 到底啦，请发起聚会吧 —</text>
 			</view>
-			<view style="height: 140rpx;"></view>
+			<!-- <view style="height: 140rpx;"></view> -->
 		</view>
 
 		<!-- ============ 底部操作栏 ============ -->

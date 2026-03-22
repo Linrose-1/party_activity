@@ -74,6 +74,34 @@
   color: #999;
 }
 
+/* ==================== [补全] 结果页状态样式 ==================== */
+.result-page.data-v-3a3637dc {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40rpx 0;
+}
+.result-page .status-box.data-v-3a3637dc {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+.result-page .status-box .result-title.data-v-3a3637dc {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #333;
+  margin-top: 30rpx;
+}
+.result-page .status-box .result-desc.data-v-3a3637dc {
+  font-size: 26rpx;
+  color: #999;
+  text-align: center;
+  padding: 0 60rpx;
+  margin-top: 16rpx;
+  line-height: 1.6;
+}
+
 /* --- 核销码门票卡片样式 --- */
 .verify-ticket-container.data-v-3a3637dc {
   background: #fff;
@@ -83,7 +111,6 @@
   box-shadow: 0 10rpx 40rpx rgba(255, 98, 177, 0.15);
   overflow: hidden;
   border: 1rpx solid rgba(255, 98, 177, 0.1);
-  /* 左右两边的圆型缺口 */
 }
 .verify-ticket-container .ticket-top.data-v-3a3637dc {
   padding: 30rpx;
@@ -152,11 +179,9 @@
   width: 30rpx;
   height: 30rpx;
   background: #f8f8f8;
-  /* 必须与背景色一致 */
   border-radius: 50%;
   position: absolute;
   top: 85rpx;
-  /* 对应虚线位置 */
   z-index: 2;
   border: 1rpx solid rgba(255, 98, 177, 0.05);
 }
@@ -279,6 +304,46 @@
   display: block;
 }
 
+/* ==================== [补全] 协议与风险提示样式 ==================== */
+.agreement-box.data-v-3a3637dc {
+  margin-top: 40rpx;
+}
+.agreement-box .checkbox-row.data-v-3a3637dc {
+  display: flex;
+  align-items: center;
+  margin-bottom: 30rpx;
+}
+.agreement-box .checkbox-row .agree-txt.data-v-3a3637dc {
+  font-size: 26rpx;
+  color: #666;
+  margin-left: 12rpx;
+}
+.agreement-box .checkbox-row .agree-txt .link.data-v-3a3637dc {
+  color: #FF62B1;
+  font-weight: bold;
+  text-decoration: underline;
+}
+.agreement-box .risk-card.data-v-3a3637dc {
+  background-color: #fcfcfc;
+  padding: 24rpx;
+  border-radius: 16rpx;
+  border: 1rpx solid #f0f0f0;
+}
+.agreement-box .risk-card .risk-title.data-v-3a3637dc {
+  font-size: 24rpx;
+  font-weight: bold;
+  color: #444;
+  display: block;
+  margin-bottom: 12rpx;
+  text-align: center;
+}
+.agreement-box .risk-card .risk-desc.data-v-3a3637dc {
+  font-size: 22rpx;
+  color: #999;
+  line-height: 1.6;
+  text-align: justify;
+}
+
 /* 按钮 */
 .action-btn.data-v-3a3637dc {
   width: 100%;
@@ -303,7 +368,7 @@
   border: 2rpx solid #FF62B1;
 }
 
-/* 邀请码弹窗 */
+/* 邀请码弹窗保持原样... */
 .invite-modal.data-v-3a3637dc {
   width: 600rpx;
   background: #fff;

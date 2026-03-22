@@ -932,6 +932,37 @@
 		}
 	}
 
+	/* ==================== [补全] 结果页状态样式 ==================== */
+	.result-page {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		padding: 40rpx 0;
+
+		.status-box {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			margin-bottom: 20rpx;
+
+			.result-title {
+				font-size: 36rpx;
+				font-weight: bold;
+				color: #333;
+				margin-top: 30rpx;
+			}
+
+			.result-desc {
+				font-size: 26rpx;
+				color: #999;
+				text-align: center;
+				padding: 0 60rpx;
+				margin-top: 16rpx;
+				line-height: 1.6;
+			}
+		}
+	}
+
 	/* --- 核销码门票卡片样式 --- */
 	.verify-ticket-container {
 		background: #fff;
@@ -1014,16 +1045,13 @@
 			font-family: monospace;
 		}
 
-		/* 左右两边的圆型缺口 */
 		.hole {
 			width: 30rpx;
 			height: 30rpx;
 			background: #f8f8f8;
-			/* 必须与背景色一致 */
 			border-radius: 50%;
 			position: absolute;
 			top: 85rpx;
-			/* 对应虚线位置 */
 			z-index: 2;
 			border: 1rpx solid rgba(255, 98, 177, 0.05);
 		}
@@ -1164,6 +1192,52 @@
 		display: block;
 	}
 
+	/* ==================== [补全] 协议与风险提示样式 ==================== */
+	.agreement-box {
+		margin-top: 40rpx;
+
+		.checkbox-row {
+			display: flex;
+			align-items: center;
+			margin-bottom: 30rpx;
+
+			.agree-txt {
+				font-size: 26rpx;
+				color: #666;
+				margin-left: 12rpx;
+
+				.link {
+					color: $theme-color;
+					font-weight: bold;
+					text-decoration: underline;
+				}
+			}
+		}
+
+		.risk-card {
+			background-color: #fcfcfc;
+			padding: 24rpx;
+			border-radius: 16rpx;
+			border: 1rpx solid #f0f0f0;
+
+			.risk-title {
+				font-size: 24rpx;
+				font-weight: bold;
+				color: #444;
+				display: block;
+				margin-bottom: 12rpx;
+				text-align: center;
+			}
+
+			.risk-desc {
+				font-size: 22rpx;
+				color: #999;
+				line-height: 1.6;
+				text-align: justify;
+			}
+		}
+	}
+
 	/* 按钮 */
 	.action-btn {
 		width: 100%;
@@ -1190,7 +1264,7 @@
 		}
 	}
 
-	/* 邀请码弹窗 */
+	/* 邀请码弹窗保持原样... */
 	.invite-modal {
 		width: 600rpx;
 		background: #fff;
