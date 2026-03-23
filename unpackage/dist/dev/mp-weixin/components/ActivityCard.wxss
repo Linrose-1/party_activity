@@ -232,6 +232,10 @@
   font-size: 24rpx;
   color: #888;
 }
+.activity-interactions .interaction-btn.data-v-f73ae0ce:active {
+  opacity: 0.7;
+  transform: scale(0.9);
+}
 .activity-interactions .interaction-btn .active.data-v-f73ae0ce {
   color: #FF6B00;
   font-weight: bold;

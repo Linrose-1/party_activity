@@ -275,6 +275,9 @@
 	const verifyQrCodeBase64 = ref(''); // 核销码图片
 	const inputInviteCode = ref(''); // 用户输入的邀请码
 	const verifiedInviteCode = ref(''); // 校验通过或URL自带的邀请码
+	const receivedExCode = ref(''); // 存储从 URL 接收到的专属码
+	const receivedInviteCode = ref('');
+	const receivedExclusiveInviteCode = ref('');
 
 	// 表单对象
 	const formData = reactive({
@@ -297,6 +300,17 @@
 	// =========================================================
 	// 3. 计算属性
 	// =========================================================
+	/**
+	 * 判断是否免支付 (核心逻辑)
+	 */
+	const isActuallyFree = computed(() => {
+		// 1. 聚会本身费用为 0
+		const isFeeZero = activityDetail.value?.registrationFee === 0;
+		// 2. 或者：拥有专属免单码
+		const hasExCode = !!receivedExclusiveInviteCode.value;
+
+		return isFeeZero || hasExCode;
+	});
 
 	/**
 	 * 判断当前用户是否为组织者本人 (用于免邀、管理权限)
@@ -310,7 +324,7 @@
 	 * 报名按钮文案
 	 */
 	const step1ButtonText = computed(() => {
-		return activityDetail.value?.registrationFee === 0 ? '提交报名' : '下一步：支付报名费';
+		return isActuallyFree.value ? '立即免费报名' : '下一步：支付报名费';
 	});
 
 	/**
@@ -364,10 +378,13 @@
 				const data = result.data;
 				activityDetail.value = data;
 
-				// 【核心拦截逻辑】：是否需要邀请码？
-				// 条件：配置了邀请码 且 未报名 且 URL里没有透传 且 不是本人
-				if (data.requireInviteCode === 1 && data.joinStatus === 0 && !verifiedInviteCode.value && !
-					isOrganizer.value) {
+				const isVerified = verifiedInviteCode.value || receivedExclusiveInviteCode.value;
+
+				if (data.requireInviteCode === 1 &&
+					data.joinStatus === 0 &&
+					!isVerified && // <-- 这里是关键：如果已经有任何一种码了，就不弹窗
+					!isOrganizer.value) {
+
 					invitePopup.value.open();
 				}
 
@@ -456,16 +473,22 @@
 	 * 提交报名信息
 	 */
 	const joinActivity = async () => {
-		const isFree = activityDetail.value?.registrationFee === 0;
-		if (!isFree) {
-			if (!formData.paymentScreenshotUrl) return uni.showToast({
-				title: '请上传付款截图',
-				icon: 'none'
-			});
-			if (!agreedToTerms.value) return uni.showToast({
-				title: '请先同意用户协议',
-				icon: 'none'
-			});
+		if (!isActuallyFree.value) {
+			// 只有在真正需要付费时，才检查截图和协议
+			if (!formData.paymentScreenshotUrl) {
+				uni.showToast({
+					title: '请上传付款截图',
+					icon: 'none'
+				});
+				return;
+			}
+			if (!agreedToTerms.value) {
+				uni.showToast({
+					title: '请先同意用户协议',
+					icon: 'none'
+				});
+				return;
+			}
 		}
 
 		uni.showLoading({
@@ -483,8 +506,11 @@
 			userPhone: formData.userPhone,
 			contactAddress: formData.contactAddress,
 			remark: formData.remark,
-			// 如果是本人，传详情里的码；否则传校验过的码
-			inviteCode: isOrganizer.value ? (activityDetail.value.inviteCode || '') : verifiedInviteCode.value
+			// 普通邀请码：如果是组织者本人就传他自己的码，否则传收到的码
+			inviteCode: isOrganizer.value ? (activityDetail.value.inviteCode || '') : receivedInviteCode.value,
+
+			// 专属邀请码：传收到的码（如果有的话）
+			exclusiveInviteCode: receivedExclusiveInviteCode.value
 		};
 
 		const result = await request('/app-api/member/activity-join/join-activity', {
@@ -572,8 +598,18 @@
 		url: '/pages/user-agreement/user-agreement'
 	});
 	const cancelInvite = () => uni.navigateBack();
-	const confirmSignup = () => canSubmitStep1.value && (activityDetail.value.registrationFee === 0 ? joinActivity() :
-		currentStep.value = 2);
+	const confirmSignup = () => {
+		if (!canSubmitStep1.value) return;
+
+		// 【核心修改】使用 isActuallyFree 判定
+		if (isActuallyFree.value) {
+			// 如果免单（包括专属码情况），直接提交，不跳到第二步
+			joinActivity();
+		} else {
+			// 否则进入第二步：支付和上传凭证
+			currentStep.value = 2;
+		}
+	};
 	const backToHome = () => uni.navigateBack();
 
 	// =========================================================
@@ -582,10 +618,16 @@
 
 	onLoad((options) => {
 		console.log('📥 [报名页-接收] 参数:', options);
-
-		// 1. 处理邀请码 (URL 传参优先级最高)
-		if (options.meetingInviteCode) {
-			verifiedInviteCode.value = options.meetingInviteCode;
+		// 接收普通邀请码
+		if (options.inviteCode) {
+			receivedInviteCode.value = options.inviteCode;
+			// 兼容之前的逻辑：将其赋值给已验证变量，防止弹窗
+			verifiedInviteCode.value = options.inviteCode;
+		}
+		// 接收专属免费码
+		if (options.exclusiveInviteCode) {
+			receivedExclusiveInviteCode.value = options.exclusiveInviteCode;
+			console.log('✅ [报名页] 收到专属免单码，准予免码通行');
 		}
 
 		// 2. 基本参数初始化

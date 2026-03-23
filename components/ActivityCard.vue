@@ -111,7 +111,7 @@
 					<text
 						:class="{ 'active-dislike': activity.userLikeStr === 'dislike' }">{{ activity.dislikesCount || 0 }}</text>
 				</view>
-				<view class="interaction-btn">
+				<view class="interaction-btn" @click.stop="goToComment">
 					<uni-icons type="chatbubble" size="18" color="#888" />
 					<text>{{ activity.commonCount || 0 }}</text>
 				</view>
@@ -324,6 +324,19 @@
 		const hasSilent = props.activity.hasSilentLoginUser || 0;
 		uni.navigateTo({
 			url: `/packages/user-view-trace/user-view-trace?id=${props.activity.id}&type=activity&hasSilent=${hasSilent}`
+		});
+	};
+
+	/**
+	 * 跳转到评论页面
+	 */
+	const goToComment = async () => {
+		// 1. 登录校验
+		if (!await checkLoginGuard('登录后才能查看和发表评论，是否立即登录？')) return;
+
+		// 2. 跳转到公共评论页，携带类型 activity 和 聚会 ID
+		uni.navigateTo({
+			url: `/packages/comment-page/comment-page?id=${props.activity.id}&type=activity`
 		});
 	};
 
@@ -658,6 +671,11 @@
 			gap: 4rpx;
 			font-size: 24rpx;
 			color: #888;
+
+			&:active {
+				opacity: 0.7;
+				transform: scale(0.9);
+			}
 
 			.active {
 				color: $primary;

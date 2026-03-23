@@ -68,6 +68,25 @@
 						<text class="invite-usage-hint">(请复制专属邀请码发给受邀人员完成邀约)</text>
 					</view>
 				</view>
+				<view class="info-item invite-item-block exclusive-block"
+					v-if="isOrganizer && activityDetail.exclusiveInviteCode">
+					<text class="info-label">专属码：</text>
+					<view class="invite-content-box">
+						<view class="code-line">
+							<!-- 逻辑：根据 isExclusiveVisible 判断显示明文还是星号 -->
+							<text class="info-value theme-text bold-code">
+								{{ isExclusiveVisible ? activityDetail.exclusiveInviteCode : '**********' }}
+							</text>
+							<view class="eye-btn" @click="isExclusiveVisible = !isExclusiveVisible">
+								<uni-icons :type="isExclusiveVisible ? 'eye-filled' : 'eye-slash-filled'" size="20"
+									color="#FF62B1" />
+							</view>
+							<text v-if="isExclusiveVisible" class="copy-tag theme-copy-btn"
+								@click="copyExclusiveCode">复制</text>
+						</view>
+						<text class="invite-usage-hint warning-hint">此为专属免费码。转发给商友后，对方可免支付报名（AA聚会亦有效），请谨慎分享！</text>
+					</view>
+				</view>
 			</view>
 
 			<view class="event-stats">
@@ -326,10 +345,35 @@
 				</view>
 
 				<!-- 发起人专属：携带邀请码开关 -->
-				<view class="share-option-row" v-if="isOrganizer && activityDetail.requireInviteCode === 1">
-					<text class="option-label">携带邀请码分享 (受邀人无感报名)</text>
-					<switch :checked="includeInviteCodeInShare" @change="toggleShareInviteCode" color="#FF62B1"
-						style="transform:scale(0.8)" />
+				<view class="share-option-group"
+					v-if="isOrganizer && (activityDetail.requireInviteCode === 1 || activityDetail.exclusiveInviteCode)">
+					<view class="option-header">携带码设置 (单选)：</view>
+
+					<radio-group @change="handleShareTypeChange">
+						<!-- 1. 不携带 -->
+						<label class="share-radio-item">
+							<radio value="NONE" :checked="shareCodeType === 'NONE'" color="#FF62B1" />
+							<text>不携带任何邀请码</text>
+						</label>
+
+						<!-- 2. 普通邀请码 -->
+						<label class="share-radio-item" v-if="activityDetail.requireInviteCode === 1">
+							<radio value="STANDARD" :checked="shareCodeType === 'STANDARD'" color="#FF62B1" />
+							<view class="radio-txt-box">
+								<text>携带聚会邀请码</text>
+								<text class="sub-hint">受邀人需输入此码，且仍需支付报名费</text>
+							</view>
+						</label>
+
+						<!-- 3. 专属免费码 -->
+						<label class="share-radio-item" v-if="activityDetail.exclusiveInviteCode">
+							<radio value="EXCLUSIVE" :checked="shareCodeType === 'EXCLUSIVE'" color="#FF62B1" />
+							<view class="radio-txt-box">
+								<text class="warning-text">携带专属免费邀请码</text>
+								<text class="sub-hint">受邀人可直接免单报名成功，请谨慎！</text>
+							</view>
+						</label>
+					</radio-group>
 				</view>
 
 				<view class="share-channels">
@@ -374,6 +418,8 @@
 	const sponsorList = ref([]);
 	const loggedInUserId = ref(null);
 	const includeInviteCodeInShare = ref(true);
+	const currentStandardCode = ref(''); // 用来保存 URL 传进来的普通邀请码
+	const currentExclusiveCode = ref(''); // 用来保存 URL 传进来的专属免费码
 
 	// ─── 报名用户 ───
 	const participantList = ref([]);
@@ -395,6 +441,8 @@
 	const customShareTitle = ref('');
 	const showTimelineGuide = ref(false);
 	const isActionBarHidden = ref(false);
+	const isExclusiveVisible = ref(false);
+	const shareCodeType = ref('STANDARD');
 
 	// ─── 贡分弹窗 ───
 	const pointsPopup = ref(null);
@@ -407,13 +455,14 @@
 
 	onLoad((options) => {
 		console.log('📥 [详情页-接收] URL参数为:', options);
-		// 落地页邀请码：暂存供后续注册流程使用
-		if (options && options.inviteCode) {
-			uni.setStorageSync('pendingInviteCode', options.inviteCode);
+		// 1. 捕获普通邀请码
+		if (options.inviteCode) {
+			currentStandardCode.value = options.inviteCode;
 		}
-		if (options.meetingInviteCode) {
-			currentMeetingInviteCode.value = options.meetingInviteCode;
-			console.log('✅ [详情页] 暂存收到的邀请码:', currentMeetingInviteCode.value);
+
+		// 2. 捕获专属免费码
+		if (options.exclusiveInviteCode) {
+			currentExclusiveCode.value = options.exclusiveInviteCode;
 		}
 
 		loggedInUserId.value = uni.getStorageSync('userId');
@@ -472,6 +521,19 @@
 
 
 	// ─── 计算属性 ───
+	const handleShareTypeChange = (e) => {
+		shareCodeType.value = e.detail.value;
+	};
+
+	const copyExclusiveCode = () => {
+		uni.setClipboardData({
+			data: activityDetail.value.exclusiveInviteCode,
+			success: () => uni.showToast({
+				title: '专属码已复制',
+				icon: 'none'
+			})
+		});
+	};
 
 	/**
 	 * 判断内容是否被锁定（非公开聚会且未获得详情数据）
@@ -951,14 +1013,16 @@
 			return;
 		}
 
-		// 从缓存或 URL 重新获取聚会码
-		// const mCode = uni.getStorageSync('temp_meeting_code') || '';
+		const inv = currentStandardCode.value || '';
+		const exc = currentExclusiveCode.value || '';
 
-		// 【调试输出】
-		console.log('🔗 [详情页-准备跳转] 携带的值是:', currentMeetingInviteCode.value);
+		console.log('🔗 [详情页 -> 报名页] 携带参数:', {
+			inv,
+			exc
+		});
+
 		uni.navigateTo({
-			// 关键点：将 currentMeetingInviteCode 拼接到跳转路径后面
-			url: `/packages/active-enroll/active-enroll?id=${activityId.value}&meetingInviteCode=${currentMeetingInviteCode.value}`
+			url: `/packages/active-enroll/active-enroll?id=${activityId.value}&inviteCode=${inv}&exclusiveInviteCode=${exc}`
 		});
 	};
 
@@ -1057,23 +1121,28 @@
 	onShareAppMessage(() => {
 		closeSharePopup();
 		const sharerId = uni.getStorageSync('userId');
-		const inviteCode = getInviteCode(); // 基础邀请码
-
-		// 如果是组织者且勾选了携带聚会邀请码
-		let activeInviteCode = '';
-		if (isOrganizer.value && includeInviteCodeInShare.value) {
-			activeInviteCode = activityDetail.value.inviteCode;
-		}
+		const globalInviteCode = getInviteCode(); // 用户的系统分销码
 
 		const finalTitle = customShareTitle.value || activityDetail.value?.activityTitle || '邀请你参加聚会';
 
+		// 基础路径
 		let sharePath = `/packages/active-detail/active-detail?id=${activityId.value}`;
-		if (sharerId) sharePath += `&sharerId=${sharerId}`;
-		if (inviteCode) sharePath += `&inviteCode=${inviteCode}`;
-		// 【逻辑实现】拼接聚会专属验证码
-		if (activeInviteCode) sharePath += `&meetingInviteCode=${activeInviteCode}`;
 
-		console.log('🚀 [详情页-分享中] 生成的完整路径为:', sharePath);
+		// 【核心逻辑：二选一】
+		// 根据单选框 shareCodeType 的值，决定拼接哪一个业务码
+		if (shareCodeType.value === 'STANDARD') {
+			// 普通邀请码 -> 传给 inviteCode
+			sharePath += `&inviteCode=${activityDetail.value.inviteCode}`;
+		} else if (shareCodeType.value === 'EXCLUSIVE') {
+			// 专属免费码 -> 传给 exclusiveInviteCode
+			sharePath += `&exclusiveInviteCode=${activityDetail.value.exclusiveInviteCode}`;
+		}
+
+		// 拼接分销和操作者信息
+		if (sharerId) sharePath += `&sharerId=${sharerId}`;
+		if (globalInviteCode) sharePath += `&c=${globalInviteCode}`;
+
+		console.log('🚀 [详情页-分享中] 最终生成的路径:', sharePath);
 
 		return {
 			title: finalTitle,
@@ -1215,6 +1284,67 @@
 			color: #999;
 			margin-top: 10rpx;
 			line-height: 1.4;
+		}
+	}
+
+
+	/* 专属码特殊样式 */
+	.exclusive-block {
+		margin-top: 10rpx;
+		background: rgba($theme-color, 0.02);
+		padding: 16rpx;
+		border-radius: 12rpx;
+
+		.code-line {
+			display: flex;
+			align-items: center;
+
+			.eye-btn {
+				padding: 0 20rpx;
+			}
+		}
+
+		.warning-hint {
+			color: #ff4d4f !important;
+			font-weight: bold;
+		}
+	}
+
+	/* 分享弹窗单选组 */
+	.share-option-group {
+		padding: 30rpx;
+		background: #fdfdfd;
+		border-radius: 16rpx;
+		margin-bottom: 30rpx;
+
+		.option-header {
+			font-size: 26rpx;
+			color: #666;
+			margin-bottom: 20rpx;
+		}
+
+		.share-radio-item {
+			display: flex;
+			align-items: flex-start;
+			padding: 20rpx 0;
+			border-bottom: 1rpx solid #f5f5f5;
+
+			.radio-txt-box {
+				margin-left: 20rpx;
+				display: flex;
+				flex-direction: column;
+
+				.warning-text {
+					color: #FF62B1;
+					font-weight: bold;
+				}
+
+				.sub-hint {
+					font-size: 22rpx;
+					color: #999;
+					margin-top: 6rpx;
+				}
+			}
 		}
 	}
 

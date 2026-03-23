@@ -172,6 +172,13 @@ const _sfc_main = {
         url: `/packages/user-view-trace/user-view-trace?id=${props.activity.id}&type=activity&hasSilent=${hasSilent}`
       });
     };
+    const goToComment = async () => {
+      if (!await utils_user.checkLoginGuard("登录后才能查看和发表评论，是否立即登录？"))
+        return;
+      common_vendor.index.navigateTo({
+        url: `/packages/comment-page/comment-page?id=${props.activity.id}&type=activity`
+      });
+    };
     const showOwnerMoreActions = () => {
       const itemList = [];
       const availableActions = {};
@@ -195,7 +202,7 @@ const _sfc_main = {
             availableActions[tappedItem]();
         },
         fail: (res) => {
-          common_vendor.index.__f__("log", "at components/ActivityCard.vue:359", res.errMsg);
+          common_vendor.index.__f__("log", "at components/ActivityCard.vue:372", res.errMsg);
         }
       });
     };
@@ -338,20 +345,21 @@ const _sfc_main = {
           color: "#888"
         }),
         T: common_vendor.t(__props.activity.commonCount || 0),
-        U: common_vendor.p({
+        U: common_vendor.o(goToComment),
+        V: common_vendor.p({
           type: isFavorite.value ? "heart-filled" : "heart",
           size: "16",
           color: "#FF6B00"
         }),
-        V: common_vendor.t(isFavorite.value ? "已收" : "收藏"),
-        W: common_vendor.o(toggleFavorite),
-        X: common_vendor.t(__props.activity.joinStatus > 0 ? "聚会核销码" : "立即报名"),
-        Y: isRegistrationDisabled.value ? 1 : "",
-        Z: common_vendor.o(handleRegisterClick),
-        aa: common_vendor.sr(smartGuidePopupRef, "f73ae0ce-9", {
+        W: common_vendor.t(isFavorite.value ? "已收" : "收藏"),
+        X: common_vendor.o(toggleFavorite),
+        Y: common_vendor.t(__props.activity.joinStatus > 0 ? "聚会核销码" : "立即报名"),
+        Z: isRegistrationDisabled.value ? 1 : "",
+        aa: common_vendor.o(handleRegisterClick),
+        ab: common_vendor.sr(smartGuidePopupRef, "f73ae0ce-9", {
           "k": "smartGuidePopupRef"
         }),
-        ab: common_vendor.p({
+        ac: common_vendor.p({
           scenario: 3
         })
       });

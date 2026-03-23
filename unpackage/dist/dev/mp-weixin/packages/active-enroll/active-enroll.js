@@ -55,6 +55,9 @@ const _sfc_main = {
     const verifyQrCodeBase64 = common_vendor.ref("");
     const inputInviteCode = common_vendor.ref("");
     const verifiedInviteCode = common_vendor.ref("");
+    common_vendor.ref("");
+    const receivedInviteCode = common_vendor.ref("");
+    const receivedExclusiveInviteCode = common_vendor.ref("");
     const formData = common_vendor.reactive({
       userName: "",
       userPhone: "",
@@ -66,6 +69,12 @@ const _sfc_main = {
     const invitePopup = common_vendor.ref(null);
     const isQrLoading = common_vendor.ref(false);
     const qrLoadError = common_vendor.ref(false);
+    const isActuallyFree = common_vendor.computed(() => {
+      var _a;
+      const isFeeZero = ((_a = activityDetail.value) == null ? void 0 : _a.registrationFee) === 0;
+      const hasExCode = !!receivedExclusiveInviteCode.value;
+      return isFeeZero || hasExCode;
+    });
     const isOrganizer = common_vendor.computed(() => {
       var _a;
       if (!loggedInUserId.value || !((_a = activityDetail.value) == null ? void 0 : _a.memberUser))
@@ -73,8 +82,7 @@ const _sfc_main = {
       return Number(loggedInUserId.value) === Number(activityDetail.value.memberUser.id);
     });
     const step1ButtonText = common_vendor.computed(() => {
-      var _a;
-      return ((_a = activityDetail.value) == null ? void 0 : _a.registrationFee) === 0 ? "提交报名" : "下一步：支付报名费";
+      return isActuallyFree.value ? "立即免费报名" : "下一步：支付报名费";
     });
     const isQueuing = common_vendor.computed(() => {
       if (!activityDetail.value)
@@ -108,7 +116,9 @@ const _sfc_main = {
         if (result && !result.error) {
           const data = result.data;
           activityDetail.value = data;
-          if (data.requireInviteCode === 1 && data.joinStatus === 0 && !verifiedInviteCode.value && !isOrganizer.value) {
+          const isVerified = verifiedInviteCode.value || receivedExclusiveInviteCode.value;
+          if (data.requireInviteCode === 1 && data.joinStatus === 0 && !isVerified && // <-- 这里是关键：如果已经有任何一种码了，就不弹窗
+          !isOrganizer.value) {
             invitePopup.value.open();
           }
           if (data.joinStatus === 1 || data.joinStatus === 2) {
@@ -182,19 +192,22 @@ const _sfc_main = {
       }
     };
     const joinActivity = async () => {
-      var _a, _b;
-      const isFree = ((_a = activityDetail.value) == null ? void 0 : _a.registrationFee) === 0;
-      if (!isFree) {
-        if (!formData.paymentScreenshotUrl)
-          return common_vendor.index.showToast({
+      var _a;
+      if (!isActuallyFree.value) {
+        if (!formData.paymentScreenshotUrl) {
+          common_vendor.index.showToast({
             title: "请上传付款截图",
             icon: "none"
           });
-        if (!agreedToTerms.value)
-          return common_vendor.index.showToast({
+          return;
+        }
+        if (!agreedToTerms.value) {
+          common_vendor.index.showToast({
             title: "请先同意用户协议",
             icon: "none"
           });
+          return;
+        }
       }
       common_vendor.index.showLoading({
         title: "提交中...",
@@ -210,8 +223,10 @@ const _sfc_main = {
         userPhone: formData.userPhone,
         contactAddress: formData.contactAddress,
         remark: formData.remark,
-        // 如果是本人，传详情里的码；否则传校验过的码
-        inviteCode: isOrganizer.value ? activityDetail.value.inviteCode || "" : verifiedInviteCode.value
+        // 普通邀请码：如果是组织者本人就传他自己的码，否则传收到的码
+        inviteCode: isOrganizer.value ? activityDetail.value.inviteCode || "" : receivedInviteCode.value,
+        // 专属邀请码：传收到的码（如果有的话）
+        exclusiveInviteCode: receivedExclusiveInviteCode.value
       };
       const result = await utils_request.request("/app-api/member/activity-join/join-activity", {
         method: "POST",
@@ -230,7 +245,7 @@ const _sfc_main = {
         await getActiveDetail();
       } else {
         common_vendor.index.showToast({
-          title: ((_b = result.error) == null ? void 0 : _b.msg) || "报名失败",
+          title: ((_a = result.error) == null ? void 0 : _a.msg) || "报名失败",
           icon: "none"
         });
       }
@@ -250,7 +265,7 @@ const _sfc_main = {
             formData.userPhone = data.mobile || "";
           if (!formData.contactAddress)
             formData.contactAddress = data.companyName || "";
-          common_vendor.index.__f__("log", "at packages/active-enroll/active-enroll.vue:531", "✅ 个人资料自动补全完成");
+          common_vendor.index.__f__("log", "at packages/active-enroll/active-enroll.vue:557", "✅ 个人资料自动补全完成");
         }
       } catch (e) {
       }
@@ -292,12 +307,25 @@ const _sfc_main = {
       url: "/pages/user-agreement/user-agreement"
     });
     const cancelInvite = () => common_vendor.index.navigateBack();
-    const confirmSignup = () => canSubmitStep1.value && (activityDetail.value.registrationFee === 0 ? joinActivity() : currentStep.value = 2);
+    const confirmSignup = () => {
+      if (!canSubmitStep1.value)
+        return;
+      if (isActuallyFree.value) {
+        joinActivity();
+      } else {
+        currentStep.value = 2;
+      }
+    };
     const backToHome = () => common_vendor.index.navigateBack();
     common_vendor.onLoad((options) => {
-      common_vendor.index.__f__("log", "at packages/active-enroll/active-enroll.vue:584", "📥 [报名页-接收] 参数:", options);
-      if (options.meetingInviteCode) {
-        verifiedInviteCode.value = options.meetingInviteCode;
+      common_vendor.index.__f__("log", "at packages/active-enroll/active-enroll.vue:620", "📥 [报名页-接收] 参数:", options);
+      if (options.inviteCode) {
+        receivedInviteCode.value = options.inviteCode;
+        verifiedInviteCode.value = options.inviteCode;
+      }
+      if (options.exclusiveInviteCode) {
+        receivedExclusiveInviteCode.value = options.exclusiveInviteCode;
+        common_vendor.index.__f__("log", "at packages/active-enroll/active-enroll.vue:630", "✅ [报名页] 收到专属免单码，准予免码通行");
       }
       activityId.value = options.id;
       loggedInUserId.value = common_vendor.index.getStorageSync("userId");
@@ -315,9 +343,9 @@ const _sfc_main = {
         try {
           const parsed = JSON.parse(cachedData);
           Object.assign(formData, parsed);
-          common_vendor.index.__f__("log", "at packages/active-enroll/active-enroll.vue:614", "📝 已恢复本聚会的专属草稿");
+          common_vendor.index.__f__("log", "at packages/active-enroll/active-enroll.vue:656", "📝 已恢复本聚会的专属草稿");
         } catch (e) {
-          common_vendor.index.__f__("error", "at packages/active-enroll/active-enroll.vue:616", "解析草稿失败");
+          common_vendor.index.__f__("error", "at packages/active-enroll/active-enroll.vue:658", "解析草稿失败");
         }
       }
       fetchAndPrefillUserInfo();
