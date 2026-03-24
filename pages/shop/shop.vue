@@ -136,6 +136,7 @@
 	}]);
 	const bannerList = ref([]);
 	const displayAddress = ref('');
+	const isManualLocation = ref(false);
 
 	// ─── 计算属性 ───
 
@@ -257,8 +258,11 @@
 
 				displayAddress.value = newAddress;
 				userLocation.value = newLocation;
+				isManualLocation.value = true; // 【关键】标记为手动选址
+
 				uni.setStorageSync('userLocation', newLocation);
 				uni.setStorageSync('displayAddress', newAddress);
+				uni.setStorageSync('isManualLocation', true); // 持久化标记
 
 				handleRefresh();
 			},
@@ -607,31 +611,34 @@
 	 *   只在位置发生明显变化时（超过 500 米）才整体刷新列表
 	 */
 	onShow(async () => {
-		// 1. 先读缓存，让用户立即看到上次的地址
+		// 1. 读缓存
 		const storedLocation = uni.getStorageSync('userLocation');
 		const storedAddress = uni.getStorageSync('displayAddress');
+		// 同时读出手选标记
+		isManualLocation.value = uni.getStorageSync('isManualLocation') || false;
+
 		if (storedLocation) userLocation.value = storedLocation;
 		if (storedAddress) displayAddress.value = storedAddress;
 
-		// 2. 列表为空时才整体加载（首次进入 / 被清空后）
+		// 2. 列表为空时加载
 		if (allStores.value.length === 0) {
 			handleRefresh();
 		}
 
-		// 3. 后台静默重新定位
-		// 只有位置发生明显变化（超过 500 米）才整体刷新，避免从详情页返回时回顶
+		// 3. 【核心修复】后台静默定位
+		// 如果是手动选址模式，绝对不要执行自动刷新逻辑
+		if (isManualLocation.value) {
+			console.log('[onShow] 当前为手动选址模式，跳过自动GPS纠偏');
+			return;
+		}
+
 		getCurrentLocation().then(newLoc => {
 			if (!newLoc) return;
-
 			const oldLoc = userLocation.value;
 			if (oldLoc && isSameLocation(oldLoc, newLoc, 500)) {
-				// 位置没有明显变化，不刷新列表，保持当前滚动位置
-				console.log('[onShow] 位置未明显变化，跳过刷新');
 				return;
 			}
-
-			// 位置发生明显变化（如用户换了城市），才整体刷新
-			console.log('[onShow] 位置变化超过 500m，刷新列表');
+			console.log('[onShow] GPS位置变化，执行自动刷新');
 			handleRefresh();
 		});
 	});
