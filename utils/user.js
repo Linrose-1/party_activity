@@ -242,16 +242,68 @@ export async function globalSilentLogin() {
 
 /**
  * @description 判断用户是否属于“情况3”：已登录、已绑手机号、但资料未完善
- * @returns {boolean} true=属于情况3，需要弹窗
  */
 export function isScenario3User() {
-	// ======= 测试专用：强制开启情况3 =======
-	// return true;
-	// =====================================
-
-	//原有逻辑
 	const userInfo = getCachedUserInfo();
 	const token = uni.getStorageSync('token');
-	return !!(token && userInfo && userInfo.mobile && userInfo.isComplete !== 1);
-	
+
+	// 优化点：使用 != 1 兼容字符串 "1" 和数字 1，并确保字段存在
+	return !!(token && userInfo && userInfo.mobile && userInfo.isComplete != 1);
+}
+
+/**
+ * @description 从后端拉取最新的用户信息并同步到本地缓存
+ * @returns {Promise<object|null>} 最新的用户信息或 null
+ */
+export async function syncUserInfo() {
+	const {
+		data,
+		error
+	} = await request('/app-api/member/user/get', {
+		method: 'GET'
+	});
+
+	if (!error && data) {
+		console.log('🔄 [User] 正在同步用户信息到缓存...', data);
+		uni.setStorageSync('userInfo', JSON.stringify(data));
+		uni.setStorageSync('userId', data.id); // 顺便同步一下userId确保一致
+		return data;
+	}
+	return null;
+}
+
+// src/utils/user.js
+
+
+/**
+ * @description 尝试触发完善资料提醒（带频控）
+ * 逻辑：
+ * 1. 先进行本地静态检查 (isScenario3User)
+ * 2. 如果本地校验通过，再请求后端频控接口打卡
+ * 3. 只有接口返回成功（data为true），才允许前端弹窗
+ * @returns {Promise<boolean>} 是否允许显示弹窗
+ */
+export async function canShowProfileRemind() {
+	// 1. 本地预检：如果资料已经完善了，不需要提醒
+	if (!isScenario3User()) {
+		return false;
+	}
+
+	// 2. 调用后端频控接口（每天限2次）
+	const {
+		data,
+		error
+	} = await request('/app-api/member/user/profile-remind', {
+		method: 'POST'
+	});
+
+	// 3. 逻辑判断：
+	// 如果有 error，说明可能接口报错或者已经超过了今日次数 (msg: "已超过当日提醒次数")
+	if (error) {
+		console.warn('今日提醒额度已满或接口异常，不再弹窗:', error);
+		return false;
+	}
+
+	// 4. 返回后端给出的布尔值结果
+	return !!data;
 }

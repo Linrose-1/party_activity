@@ -42,7 +42,7 @@ const _sfc_main = {
     const activities = common_vendor.ref([]);
     const businesses = common_vendor.ref([]);
     const resetState = () => {
-      common_vendor.index.__f__("log", "at packages/location/location.vue:149", "页面状态已重置");
+      common_vendor.index.__f__("log", "at packages/location/location.vue:150", "页面状态已重置");
       shaken.value = false;
       loading.value = false;
       activities.value = [];
@@ -60,11 +60,11 @@ const _sfc_main = {
       if (loading.value)
         return;
       currentTab.value = e.currentIndex;
-      common_vendor.index.__f__("log", "at packages/location/location.vue:172", "🔥点击切换tab！当前 Tab 索引为:", currentTab.value);
+      common_vendor.index.__f__("log", "at packages/location/location.vue:173", "🔥点击切换tab！当前 Tab 索引为:", currentTab.value);
     };
     const triggerShakeSequence = () => {
       const savedTabIndex = currentTab.value;
-      common_vendor.index.__f__("log", "at packages/location/location.vue:179", "🔥 摇一摇触发！当前 Tab 索引为:", savedTabIndex);
+      common_vendor.index.__f__("log", "at packages/location/location.vue:180", "🔥 摇一摇触发！当前 Tab 索引为:", savedTabIndex);
       lockShake();
       if (shakeAudioContext) {
         shakeAudioContext.stop();
@@ -95,7 +95,7 @@ const _sfc_main = {
               getNearbyBusinesses(true)
             ]);
           } catch (error) {
-            common_vendor.index.__f__("error", "at packages/location/location.vue:221", "加载错误:", error);
+            common_vendor.index.__f__("error", "at packages/location/location.vue:222", "加载错误:", error);
           } finally {
             loading.value = false;
             if (currentTab.value !== savedTabIndex) {
@@ -234,7 +234,7 @@ const _sfc_main = {
       const name = user.nickname || "匿名用户";
       const avatarUrl = user.avatar || defaultAvatar;
       const url = `/packages/applicationBusinessCard/applicationBusinessCard?id=${user.id}&name=${encodeURIComponent(name)}&avatar=${encodeURIComponent(avatarUrl)}`;
-      common_vendor.index.__f__("log", "at packages/location/location.vue:399", "从摇一摇页跳转，URL:", url);
+      common_vendor.index.__f__("log", "at packages/location/location.vue:400", "从摇一摇页跳转，URL:", url);
       common_vendor.index.navigateTo({
         url
       });
@@ -262,13 +262,14 @@ const _sfc_main = {
     common_vendor.onLoad((options) => {
       resetState();
       if (options.autoShake === "true") {
-        common_vendor.index.__f__("log", "at packages/location/location.vue:448", "onLoad: 接收到自动摇一摇指令");
+        common_vendor.index.__f__("log", "at packages/location/location.vue:449", "onLoad: 接收到自动摇一摇指令");
         autoShakeOnLoad.value = true;
       }
     });
-    common_vendor.onReady(() => {
+    common_vendor.onReady(async () => {
       var _a;
-      if (utils_user.isScenario3User()) {
+      const shouldShow = await utils_user.canShowProfileRemind();
+      if (shouldShow) {
         (_a = smartGuidePopupRef.value) == null ? void 0 : _a.open();
       }
     });
@@ -279,7 +280,7 @@ const _sfc_main = {
         shakeAudioContext.src = "https://img.gofor.club/wechat_shake.mp3";
       }
       if (autoShakeOnLoad.value) {
-        common_vendor.index.__f__("log", "at packages/location/location.vue:472", "onShow: 执行自动摇一摇流程");
+        common_vendor.index.__f__("log", "at packages/location/location.vue:475", "onShow: 执行自动摇一摇流程");
         resetState();
         triggerShakeSequence();
         autoShakeOnLoad.value = false;
@@ -303,13 +304,13 @@ const _sfc_main = {
       switch (currentTab.value) {
         case 0:
           if (businessLoadingStatus.value === "more") {
-            common_vendor.index.__f__("log", "at packages/location/location.vue:508", "触底加载更多商友...");
+            common_vendor.index.__f__("log", "at packages/location/location.vue:511", "触底加载更多商友...");
             getNearbyBusinesses();
           }
           break;
         case 1:
           if (activityLoadingStatus.value === "more") {
-            common_vendor.index.__f__("log", "at packages/location/location.vue:515", "触底加载更多聚会...");
+            common_vendor.index.__f__("log", "at packages/location/location.vue:518", "触底加载更多聚会...");
             getNearbyActivities();
           }
           break;

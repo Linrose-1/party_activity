@@ -496,40 +496,41 @@
 		},
 		// 第 2 行
 		{
-			name: '我的推荐',
-			desc: '查看您的推荐聚店信息',
-			icon: '../../static/icon/推荐.png',
-			path: '/pages/my-shopRecommend/my-shopRecommend'
-		},
-		{
-			name: '我的聚店',
-			desc: '查看您的所有聚店信息',
-			icon: '../../static/icon/店铺.png',
-			path: '/pages/my-shop/my-shop'
-		},
-		// 第 3 行
-		{
 			name: '我的收藏',
-			desc: '查看您收藏的聚会和商机',
+			desc: '查看商机聚会收藏',
 			icon: '../../static/icon/收藏.png',
 			path: '/packages/my-collection/my-collection'
 		},
 		{
 			name: '我的关注',
-			desc: '查看您关注的商友信息',
+			desc: '查看商友互关信息',
 			icon: '../../static/icon/加关注.png',
 			path: '/pages/my-follow/my-follow'
 		},
+		// 第 3 行
+		{
+			name: '推荐聚店',
+			desc: '管理您的推荐聚店',
+			icon: '../../static/icon/推荐.png',
+			path: '/pages/my-shopRecommend/my-shopRecommend'
+		},
+		{
+			name: '自荐聚店',
+			desc: '管理您的自荐聚店',
+			icon: '../../static/icon/店铺.png',
+			path: '/pages/my-shop/my-shop'
+		},
+
 		// 第 4 行
 		{
 			name: '我的订单',
-			desc: '查看您的所有支付订单信息',
+			desc: '查看您的订单信息',
 			icon: '../../static/icon/订单.png',
 			path: '/pages/my-order/my-order'
 		},
 		{
 			name: '我的企业',
-			desc: '查看您创建发布的企业',
+			desc: '查看您的企业信息',
 			icon: '../../static/icon/认证企业.png',
 			path: '/packages/enterprise-list/enterprise-list',
 			highlight: true
@@ -542,7 +543,7 @@
 		}, // 新增
 		{
 			name: '评论中心',
-			desc: '查看评论信息 ',
+			desc: '管理所有评论信息 ',
 			icon: '../../static/icon/我的评论.png',
 			path: '/packages/comment-center/comment-center',
 			highlight: true
@@ -557,28 +558,28 @@
 
 		{
 			name: '资源匹配',
-			desc: '智能匹配供需资源对应的商友',
+			desc: '即时匹配供需资源',
 			icon: '../../static/icon/资源匹配.png',
 			path: '/packages/resource-match/resource-match',
 			highlight: true
 		}, // 新增
 		{
 			name: '智能营销',
-			desc: '智能匹配商友资源',
+			desc: 'IP&品牌智能传播',
 			icon: '../../static/icon/广告投放2.0.png',
 			path: null
 		},
 		// 第 6 行
 		{
 			name: '系统共建',
-			desc: '提供您对本平台的建议',
+			desc: '共建系统共享价值',
 			icon: '../../static/icon/系统建议.png',
 			path: '/packages/my-systemConstruction/my-systemConstruction',
 			highlight: true
 		},
 		{
 			name: '用户协议',
-			desc: '查看用户协议、隐私协议等',
+			desc: '查看平台用户协议',
 			icon: '../../static/icon/protocols.png',
 			path: '/pages/user-agreement/user-agreement'
 		},
@@ -594,7 +595,7 @@
 		// 单独成行
 		{
 			name: '平台认证',
-			desc: '通过认证，开启更多功能',
+			desc: '通过认证解锁更多功能',
 			icon: '../../static/icon/平台认证.png',
 			path: '/packages/my-auth/my-auth',
 			fullWidth: true

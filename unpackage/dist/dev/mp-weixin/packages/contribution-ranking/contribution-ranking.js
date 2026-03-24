@@ -22,9 +22,10 @@ const _sfc_main = {
     const loading = common_vendor.ref(false);
     const menuRef = common_vendor.ref(null);
     const smartGuidePopupRef = common_vendor.ref(null);
-    common_vendor.onReady(() => {
+    common_vendor.onReady(async () => {
       var _a;
-      if (utils_user.isScenario3User()) {
+      const shouldShow = await utils_user.canShowProfileRemind();
+      if (shouldShow) {
         (_a = smartGuidePopupRef.value) == null ? void 0 : _a.open();
       }
     });

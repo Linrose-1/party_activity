@@ -156,9 +156,10 @@ const _sfc_main = {
         menus: ["shareAppMessage", "shareTimeline"]
       });
     });
-    common_vendor.onReady(() => {
+    common_vendor.onReady(async () => {
       var _a;
-      if (utils_user.isScenario3User()) {
+      const shouldShow = await utils_user.canShowProfileRemind();
+      if (shouldShow) {
         (_a = smartGuidePopupRef.value) == null ? void 0 : _a.open();
       }
     });
@@ -174,7 +175,7 @@ const _sfc_main = {
     const saveDraft = (data) => {
       if (data.title || data.content || data.tags.length > 0 || data.images.length > 0) {
         common_vendor.index.setStorageSync(DRAFT_KEY, JSON.stringify(data));
-        common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:449", "📝 草稿已自动保存");
+        common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:451", "📝 草稿已自动保存");
       }
     };
     const checkDraft = () => {
@@ -198,7 +199,7 @@ const _sfc_main = {
     };
     const clearDraft = () => {
       common_vendor.index.removeStorageSync(DRAFT_KEY);
-      common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:478", "🧹 草稿已清除");
+      common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:480", "🧹 草稿已清除");
     };
     const fetchOpportunityDetail = async (id) => {
       common_vendor.index.showLoading({
@@ -246,7 +247,7 @@ const _sfc_main = {
               form.investmentResource = inv["资源类型"] || "";
               form.investmentEquity = inv["股权比例"] || "";
             } catch (e) {
-              common_vendor.index.__f__("error", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:536", "解析 expectedInvestment 失败:", e);
+              common_vendor.index.__f__("error", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:538", "解析 expectedInvestment 失败:", e);
             }
           }
         }
@@ -279,9 +280,9 @@ const _sfc_main = {
         quotaBusiness.value = typeof res1.data === "number" ? res1.data : 0;
         quotaPartner.value = typeof res2.data === "number" ? res2.data : 0;
         isQuotaLoaded.value = true;
-        common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:576", `权益加载完成: 商机=${quotaBusiness.value}, 猎伙=${quotaPartner.value}`);
+        common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:578", `权益加载完成: 商机=${quotaBusiness.value}, 猎伙=${quotaPartner.value}`);
       } catch (e) {
-        common_vendor.index.__f__("error", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:578", "获取权益失败", e);
+        common_vendor.index.__f__("error", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:580", "获取权益失败", e);
       }
     };
     const hasLiehuoPermission = () => {
@@ -440,9 +441,9 @@ const _sfc_main = {
             type
           }
         });
-        common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:789", `标签历史 "${tagName}" 已记录`);
+        common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:791", `标签历史 "${tagName}" 已记录`);
       } catch (error) {
-        common_vendor.index.__f__("error", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:791", "记录标签历史失败:", error);
+        common_vendor.index.__f__("error", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:793", "记录标签历史失败:", error);
       }
     }
     common_vendor.watch(() => form.tagInput, (newValue) => {
@@ -476,7 +477,7 @@ const _sfc_main = {
         const suggestions = data.list.map((item) => item.name);
         tagSuggestions.value = [...new Set(suggestions)];
       } catch (e) {
-        common_vendor.index.__f__("error", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:832", "获取标签建议失败:", e);
+        common_vendor.index.__f__("error", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:834", "获取标签建议失败:", e);
         tagSuggestions.value = [];
       }
     }
@@ -513,7 +514,7 @@ const _sfc_main = {
             if (result.data)
               successfulUrls.push(result.data);
             else
-              common_vendor.index.__f__("error", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:874", "上传失败:", result.error);
+              common_vendor.index.__f__("error", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:876", "上传失败:", result.error);
           });
           form.images.push(...successfulUrls);
           if (successfulUrls.length < validFiles.length) {
@@ -568,7 +569,7 @@ const _sfc_main = {
           }
         },
         fail: (err) => {
-          common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:985", "取消选择视频");
+          common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:987", "取消选择视频");
         }
       });
     }
@@ -597,11 +598,11 @@ const _sfc_main = {
             src: tempFilePath,
             cropScale: "4:3",
             success: (cropRes) => {
-              common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:1019", "裁剪成功:", cropRes.tempFilePath);
+              common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:1021", "裁剪成功:", cropRes.tempFilePath);
               uploadCoverToCloud(cropRes.tempFilePath);
             },
             fail: (err) => {
-              common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:1023", "用户取消裁剪或失败:", err);
+              common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:1025", "用户取消裁剪或失败:", err);
             }
           });
         }
@@ -672,7 +673,7 @@ const _sfc_main = {
           text: item.enterpriseName,
           value: item.id
         }));
-        common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:1123", "✅ 可用发布身份企业数:", myEnterprises.value.length);
+        common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:1125", "✅ 可用发布身份企业数:", myEnterprises.value.length);
       }
     };
     const handleIdentityChange = (e) => {

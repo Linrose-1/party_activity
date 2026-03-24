@@ -142,12 +142,45 @@ async function globalSilentLogin() {
 function isScenario3User() {
   const userInfo = getCachedUserInfo();
   const token = common_vendor.index.getStorageSync("token");
-  return !!(token && userInfo && userInfo.mobile && userInfo.isComplete !== 1);
+  return !!(token && userInfo && userInfo.mobile && userInfo.isComplete != 1);
 }
+async function syncUserInfo() {
+  const {
+    data,
+    error
+  } = await utils_request.request("/app-api/member/user/get", {
+    method: "GET"
+  });
+  if (!error && data) {
+    common_vendor.index.__f__("log", "at utils/user.js:267", "🔄 [User] 正在同步用户信息到缓存...", data);
+    common_vendor.index.setStorageSync("userInfo", JSON.stringify(data));
+    common_vendor.index.setStorageSync("userId", data.id);
+    return data;
+  }
+  return null;
+}
+async function canShowProfileRemind() {
+  if (!isScenario3User()) {
+    return false;
+  }
+  const {
+    data,
+    error
+  } = await utils_request.request("/app-api/member/user/profile-remind", {
+    method: "POST"
+  });
+  if (error) {
+    common_vendor.index.__f__("warn", "at utils/user.js:303", "今日提醒额度已满或接口异常，不再弹窗:", error);
+    return false;
+  }
+  return !!data;
+}
+exports.canShowProfileRemind = canShowProfileRemind;
 exports.checkLoginGuard = checkLoginGuard;
 exports.getCachedUserInfo = getCachedUserInfo;
 exports.getInviteCode = getInviteCode;
 exports.globalSilentLogin = globalSilentLogin;
 exports.isScenario3User = isScenario3User;
 exports.isUserFullyLoggedIn = isUserFullyLoggedIn;
+exports.syncUserInfo = syncUserInfo;
 //# sourceMappingURL=../../.sourcemap/mp-weixin/utils/user.js.map

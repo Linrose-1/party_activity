@@ -1,5 +1,9 @@
 /* 水平间距 */
 /* 水平间距 */
+page.data-v-132afe13 {
+  height: 100%;
+  overflow: hidden;
+}
 .premium-header.data-v-132afe13 {
   background: linear-gradient(135deg, #FF6F00 0%, #FF5500 50%, #FF8C00 100%);
   height: 280rpx;
@@ -129,7 +133,12 @@
 }
 .six-degrees-container.data-v-132afe13 {
   background-color: #FFF5F0;
-  min-height: 100vh;
+  /* 必须是固定高度，不能是 min-height */
+  height: 100vh;
+  /* 确保宽度正确 */
+  width: 100%;
+  /* 解决部分系统下的内边距计算问题 */
+  box-sizing: border-box;
 }
 .premium-header.data-v-132afe13 {
   background-color: #1A1A1A;

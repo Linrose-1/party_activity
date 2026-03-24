@@ -282,7 +282,9 @@
 	} from '@dcloudio/uni-app';
 	import request from '../../utils/request.js';
 	import uploadFile from '../../utils/upload.js';
-
+	import {
+		syncUserInfo
+	} from '@/utils/user.js';
 	import UserScoreBoard from '@/components/UserScoreBoard.vue';
 
 	// --- 1. 响应式状态定义 ---
@@ -1379,6 +1381,12 @@
 					icon: 'none'
 				});
 			}
+
+			// =======================================
+			// 资料更新成功，立即同步最新的用户信息到缓存
+			// 这样回到上一页或切换 Tab 时，isScenario3User() 就能拿到最新的 isComplete = 1
+			await syncUserInfo();
+			// ==========================================
 
 			// 标记保存成功
 			uni.hideLoading();

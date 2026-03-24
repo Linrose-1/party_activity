@@ -31,7 +31,7 @@ const _sfc_main = {
           });
           handleRefresh();
         } catch (e) {
-          common_vendor.index.__f__("error", "at pages/my-active-registeredUser/my-active-registeredUser.vue:111", "解析聚会信息失败", e);
+          common_vendor.index.__f__("error", "at pages/my-active-registeredUser/my-active-registeredUser.vue:123", "解析聚会信息失败", e);
           common_vendor.index.showToast({
             title: "加载聚会信息失败",
             icon: "none"
@@ -42,9 +42,8 @@ const _sfc_main = {
     const getRegisteredUsers = async () => {
       if (loading.value)
         return;
-      if (pageNo.value > 1 && !hasMore.value) {
+      if (pageNo.value > 1 && !hasMore.value)
         return;
-      }
       loading.value = true;
       const params = {
         activityId: activityInfo.value.id,
@@ -59,9 +58,7 @@ const _sfc_main = {
         data: params
       });
       loading.value = false;
-      if (refreshing.value) {
-        refreshing.value = false;
-      }
+      refreshing.value = false;
       if (error) {
         common_vendor.index.showToast({
           title: error || "加载失败",
@@ -73,14 +70,11 @@ const _sfc_main = {
         const newList = data.list;
         userList.value = pageNo.value === 1 ? newList : [...userList.value, ...newList];
         hasMore.value = userList.value.length < data.total;
-        if (hasMore.value) {
+        if (hasMore.value)
           pageNo.value++;
-        }
       }
     };
     const onRefresh = () => {
-      if (refreshing.value)
-        return;
       refreshing.value = true;
       handleRefresh();
     };
@@ -91,9 +85,8 @@ const _sfc_main = {
       getRegisteredUsers();
     };
     const onReachBottom = () => {
-      if (hasMore.value && !loading.value) {
+      if (hasMore.value && !loading.value)
         getRegisteredUsers();
-      }
     };
     const handleConfirm = (item) => {
       common_vendor.index.showModal({
@@ -115,12 +108,12 @@ const _sfc_main = {
               }
             });
             common_vendor.index.hideLoading();
-            if (error) {
+            if (error)
               common_vendor.index.showToast({
                 title: error,
                 icon: "none"
               });
-            } else {
+            else {
               common_vendor.index.showToast({
                 title: "确认成功",
                 icon: "success"
@@ -133,14 +126,15 @@ const _sfc_main = {
     };
     const handleReject = (item) => {
       common_vendor.index.showModal({
-        title: `即将驳回用户“${item.memberUser.nickname}”的报名申请。`,
+        title: `驳回报名申请`,
         content: "",
         editable: true,
         placeholderText: "请输入驳回原因（必填）",
         confirmColor: "#FF7900",
         success: async (res) => {
+          var _a;
           if (res.confirm) {
-            if (!res.content || res.content.trim() === "") {
+            if (!((_a = res.content) == null ? void 0 : _a.trim())) {
               common_vendor.index.showToast({
                 title: "驳回原因不能为空",
                 icon: "none"
@@ -160,12 +154,12 @@ const _sfc_main = {
               }
             });
             common_vendor.index.hideLoading();
-            if (error) {
+            if (error)
               common_vendor.index.showToast({
                 title: error,
                 icon: "none"
               });
-            } else {
+            else {
               common_vendor.index.showToast({
                 title: "驳回成功",
                 icon: "success"
@@ -177,23 +171,18 @@ const _sfc_main = {
       });
     };
     const previewImage = (url) => {
-      if (!url)
-        return;
-      common_vendor.index.previewImage({
-        urls: [url],
-        current: url
-      });
+      if (url)
+        common_vendor.index.previewImage({
+          urls: [url],
+          current: url
+        });
     };
     const formatTime = (timestamp) => {
       if (!timestamp)
         return "时间待定";
       const date = new Date(timestamp);
-      const Y = date.getFullYear();
-      const M = (date.getMonth() + 1).toString().padStart(2, "0");
-      const D = date.getDate().toString().padStart(2, "0");
-      const h = date.getHours().toString().padStart(2, "0");
-      const m = date.getMinutes().toString().padStart(2, "0");
-      return `${Y}-${M}-${D} ${h}:${m}`;
+      const pad = (n) => n.toString().padStart(2, "0");
+      return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
     };
     const getStatusClass = (statusStr) => {
       const classMap = {
@@ -234,57 +223,64 @@ const _sfc_main = {
           return common_vendor.e({
             a: item.memberUser.avatar || "/static/default-avatar.png",
             b: common_vendor.t(item.memberUser.nickname || "匿名用户"),
-            c: common_vendor.t(formatTime(item.registeredAt)),
-            d: common_vendor.t(item.paymentStatusStr),
-            e: common_vendor.n(getStatusClass(item.paymentStatusStr))
-          }, activityInfo.value.registrationFee > 0 ? common_vendor.e({
-            f: item.paymentScreenshotUrl
+            c: item.isFreeJoin === 1
+          }, item.isFreeJoin === 1 ? {} : {}, {
+            d: common_vendor.t(formatTime(item.registeredAt)),
+            e: common_vendor.t(item.paymentStatusStr),
+            f: common_vendor.n(getStatusClass(item.paymentStatusStr)),
+            g: activityInfo.value.registrationFee > 0 && item.isFreeJoin !== 1
+          }, activityInfo.value.registrationFee > 0 && item.isFreeJoin !== 1 ? common_vendor.e({
+            h: item.paymentScreenshotUrl
           }, item.paymentScreenshotUrl ? {
-            g: item.paymentScreenshotUrl,
-            h: common_vendor.o(($event) => previewImage(item.paymentScreenshotUrl), item.id)
+            i: item.paymentScreenshotUrl,
+            j: common_vendor.o(($event) => previewImage(item.paymentScreenshotUrl), item.id)
           } : {}) : {}, {
-            i: item.rejectMsg
+            k: item.paymentStatusStr === "已支付"
+          }, item.paymentStatusStr === "已支付" ? {
+            l: common_vendor.t(item.isVerified === 1 ? "✅ 已核销签到" : "⏳ 待核销"),
+            m: common_vendor.n(item.isVerified === 1 ? "v-done" : "v-wait")
+          } : {}, {
+            n: item.rejectMsg
           }, item.rejectMsg ? {
-            j: "90acde2c-3-" + i0,
-            k: common_vendor.p({
+            o: "90acde2c-3-" + i0,
+            p: common_vendor.p({
               type: "info-filled",
               size: "16",
               color: "#f56c6c"
             }),
-            l: common_vendor.t(item.rejectMsg)
+            q: common_vendor.t(item.rejectMsg)
           } : {}, {
-            m: item.paymentStatusStr === "待确定"
+            r: item.paymentStatusStr === "待确定"
           }, item.paymentStatusStr === "待确定" ? {
-            n: common_vendor.o(($event) => handleReject(item), item.id),
-            o: common_vendor.o(($event) => handleConfirm(item), item.id)
+            s: common_vendor.o(($event) => handleReject(item), item.id),
+            t: common_vendor.o(($event) => handleConfirm(item), item.id)
           } : {}, {
-            p: item.id
+            v: item.id
           });
-        }),
-        j: activityInfo.value.registrationFee > 0
+        })
       } : !loading.value ? {
-        l: common_vendor.p({
+        k: common_vendor.p({
           type: "staff-filled",
           size: "60",
           color: "#c8c9cc"
         })
       } : {}, {
-        k: !loading.value,
-        m: loading.value && userList.value.length > 0
+        j: !loading.value,
+        l: loading.value && userList.value.length > 0
       }, loading.value && userList.value.length > 0 ? {
-        n: common_vendor.p({
+        m: common_vendor.p({
           status: "loading"
         })
       } : {}, {
-        o: !hasMore.value && userList.value.length > 0
+        n: !hasMore.value && userList.value.length > 0
       }, !hasMore.value && userList.value.length > 0 ? {
-        p: common_vendor.p({
+        o: common_vendor.p({
           status: "noMore"
         })
       } : {}, {
-        q: refreshing.value,
-        r: common_vendor.o(onRefresh),
-        s: common_vendor.o(onReachBottom)
+        p: refreshing.value,
+        q: common_vendor.o(onRefresh),
+        r: common_vendor.o(onReachBottom)
       });
     };
   }

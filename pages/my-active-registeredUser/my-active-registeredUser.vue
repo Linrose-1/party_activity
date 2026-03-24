@@ -27,7 +27,11 @@
 						<image class="avatar" :src="item.memberUser.avatar || '/static/default-avatar.png'"
 							mode="aspectFill"></image>
 						<view class="user-info">
-							<text class="nickname">{{ item.memberUser.nickname || '匿名用户' }}</text>
+							<view class="name-row">
+								<text class="nickname">{{ item.memberUser.nickname || '匿名用户' }}</text>
+								<!-- 【优化】显示专属免费标签 -->
+								<text v-if="item.isFreeJoin === 1" class="free-badge">专属免费</text>
+							</view>
 							<text class="time">报名于: {{ formatTime(item.registeredAt) }}</text>
 						</view>
 						<view :class="['status-tag', getStatusClass(item.paymentStatusStr)]">
@@ -36,7 +40,8 @@
 					</view>
 
 					<!-- 卡片中部: 付款凭证 -->
-					<template v-if="activityInfo.registrationFee > 0">
+					<!-- 【优化】逻辑：如果是收费聚会 且 不是通过专属码免费加入的，才显示凭证区域 -->
+					<template v-if="activityInfo.registrationFee > 0 && item.isFreeJoin !== 1">
 						<view v-if="item.paymentScreenshotUrl" class="payment-proof">
 							<text class="proof-label">付款凭证:</text>
 							<image class="proof-image" :src="item.paymentScreenshotUrl" mode="aspectFit"
@@ -47,7 +52,15 @@
 						</view>
 					</template>
 
-					<!-- 【新增】驳回原因显示 -->
+					<!-- 【优化】增加核销状态显示：仅在已支付/已确定的情况下显示 -->
+					<view v-if="item.paymentStatusStr === '已支付'" class="verify-status-row">
+						<text class="v-label">到场核销：</text>
+						<text :class="item.isVerified === 1 ? 'v-done' : 'v-wait'">
+							{{ item.isVerified === 1 ? '✅ 已核销签到' : '⏳ 待核销' }}
+						</text>
+					</view>
+
+					<!-- 驳回原因显示 -->
 					<view v-if="item.rejectMsg" class="rejection-reason">
 						<uni-icons type="info-filled" size="16" color="#f56c6c"></uni-icons>
 						<text class="reason-label">驳回原因:</text>
@@ -68,7 +81,7 @@
 				<text class="empty-text">还没有用户报名哦</text>
 			</view>
 
-			<!-- 加载更多 -->
+			<!-- 加载状态 -->
 			<view v-if="loading && userList.length > 0" class="loading-more">
 				<uni-load-more status="loading"></uni-load-more>
 			</view>
@@ -81,7 +94,6 @@
 </template>
 
 <script setup>
-	// ... script 部分无任何变化 ...
 	import {
 		ref
 	} from 'vue';
@@ -119,9 +131,8 @@
 
 	const getRegisteredUsers = async () => {
 		if (loading.value) return;
-		if (pageNo.value > 1 && !hasMore.value) {
-			return;
-		}
+		if (pageNo.value > 1 && !hasMore.value) return;
+
 		loading.value = true;
 		const params = {
 			activityId: activityInfo.value.id,
@@ -136,9 +147,8 @@
 			data: params
 		});
 		loading.value = false;
-		if (refreshing.value) {
-			refreshing.value = false;
-		}
+		refreshing.value = false;
+
 		if (error) {
 			uni.showToast({
 				title: error || '加载失败',
@@ -150,14 +160,11 @@
 			const newList = data.list;
 			userList.value = pageNo.value === 1 ? newList : [...userList.value, ...newList];
 			hasMore.value = userList.value.length < data.total;
-			if (hasMore.value) {
-				pageNo.value++;
-			}
+			if (hasMore.value) pageNo.value++;
 		}
 	};
 
 	const onRefresh = () => {
-		if (refreshing.value) return;
 		refreshing.value = true;
 		handleRefresh();
 	};
@@ -170,9 +177,7 @@
 	};
 
 	const onReachBottom = () => {
-		if (hasMore.value && !loading.value) {
-			getRegisteredUsers();
-		}
+		if (hasMore.value && !loading.value) getRegisteredUsers();
 	};
 
 	const handleConfirm = (item) => {
@@ -195,12 +200,11 @@
 						}
 					});
 					uni.hideLoading();
-					if (error) {
-						uni.showToast({
-							title: error,
-							icon: 'none'
-						});
-					} else {
+					if (error) uni.showToast({
+						title: error,
+						icon: 'none'
+					});
+					else {
 						uni.showToast({
 							title: '确认成功',
 							icon: 'success'
@@ -214,14 +218,14 @@
 
 	const handleReject = (item) => {
 		uni.showModal({
-			title: `即将驳回用户“${item.memberUser.nickname}”的报名申请。`,
+			title: `驳回报名申请`,
 			content: '',
 			editable: true,
 			placeholderText: '请输入驳回原因（必填）',
 			confirmColor: '#FF7900',
 			success: async (res) => {
 				if (res.confirm) {
-					if (!res.content || res.content.trim() === '') {
+					if (!res.content?.trim()) {
 						uni.showToast({
 							title: '驳回原因不能为空',
 							icon: 'none'
@@ -241,12 +245,11 @@
 						}
 					});
 					uni.hideLoading();
-					if (error) {
-						uni.showToast({
-							title: error,
-							icon: 'none'
-						});
-					} else {
+					if (error) uni.showToast({
+						title: error,
+						icon: 'none'
+					});
+					else {
 						uni.showToast({
 							title: '驳回成功',
 							icon: 'success'
@@ -259,8 +262,7 @@
 	};
 
 	const previewImage = (url) => {
-		if (!url) return;
-		uni.previewImage({
+		if (url) uni.previewImage({
 			urls: [url],
 			current: url
 		});
@@ -269,12 +271,8 @@
 	const formatTime = (timestamp) => {
 		if (!timestamp) return '时间待定';
 		const date = new Date(timestamp);
-		const Y = date.getFullYear();
-		const M = (date.getMonth() + 1).toString().padStart(2, '0');
-		const D = date.getDate().toString().padStart(2, '0');
-		const h = date.getHours().toString().padStart(2, '0');
-		const m = date.getMinutes().toString().padStart(2, '0');
-		return `${Y}-${M}-${D} ${h}:${m}`;
+		const pad = n => n.toString().padStart(2, '0');
+		return `${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
 	};
 
 	const getStatusClass = (statusStr) => {
@@ -283,14 +281,13 @@
 			'已支付': 'status-confirmed',
 			'已驳回': 'status-rejected',
 			'替补': 'status-substitute',
-			'已退款': 'status-refunded',
+			'已退款': 'status-refunded'
 		};
 		return classMap[statusStr] || 'status-default';
 	};
 </script>
 
 <style lang="scss" scoped>
-	// ... .page-container 到 .payment-proof-empty 样式无变化 ...
 	.page-container {
 		display: flex;
 		flex-direction: column;
@@ -314,11 +311,6 @@
 				font-weight: 600;
 				color: #303133;
 				margin-left: 12rpx;
-				overflow: hidden;
-				text-overflow: ellipsis;
-				display: -webkit-box;
-				-webkit-line-clamp: 2;
-				-webkit-box-orient: vertical;
 			}
 		}
 
@@ -327,10 +319,7 @@
 			align-items: center;
 			font-size: 26rpx;
 			color: #606266;
-
-			&:not(:last-child) {
-				margin-bottom: 12rpx;
-			}
+			margin-bottom: 12rpx;
 
 			.info-text {
 				margin-left: 12rpx;
@@ -347,8 +336,7 @@
 		padding: 0 24rpx 24rpx;
 	}
 
-	.user-card,
-	.empty-state {
+	.user-card {
 		background-color: #fff;
 		border-radius: 16rpx;
 		margin-bottom: 24rpx;
@@ -379,19 +367,33 @@
 		min-width: 0;
 	}
 
+	.name-row {
+		display: flex;
+		align-items: center;
+		gap: 12rpx;
+		margin-bottom: 6rpx;
+	}
+
 	.nickname {
 		font-size: 30rpx;
-		font-weight: 600;
+		font-weight: 700;
 		color: #303133;
-		white-space: nowrap;
-		overflow: hidden;
-		text-overflow: ellipsis;
+	}
+
+	/* 专属免费标签样式 */
+	.free-badge {
+		font-size: 20rpx;
+		color: #FF62B1;
+		background: rgba(255, 98, 177, 0.1);
+		padding: 2rpx 12rpx;
+		border-radius: 6rpx;
+		font-weight: bold;
+		border: 1rpx solid rgba(255, 98, 177, 0.2);
 	}
 
 	.time {
 		font-size: 24rpx;
 		color: #909399;
-		margin-top: 8rpx;
 	}
 
 	.status-tag {
@@ -400,7 +402,6 @@
 		border-radius: 8rpx;
 		white-space: nowrap;
 		font-weight: 500;
-		margin-left: 16rpx;
 
 		&.status-pending {
 			background-color: #fdf6ec;
@@ -434,51 +435,71 @@
 			font-size: 28rpx;
 			color: #606266;
 			margin-right: 20rpx;
-			line-height: 1.5;
 		}
 
 		.proof-image {
 			width: 160rpx;
 			height: 160rpx;
 			border-radius: 12rpx;
-			background-color: #f5f5f5;
 			border: 1rpx solid #eee;
-			transition: transform 0.2s;
-
-			&:active {
-				transform: scale(0.95);
-			}
 		}
 	}
 
 	.payment-proof-empty {
-		padding: 40rpx 0;
-		font-size: 28rpx;
-		color: #909399;
+		padding: 30rpx 0;
+		font-size: 26rpx;
+		color: #bbb;
 		text-align: center;
+		font-style: italic;
 	}
 
-	/* 【新增】驳回原因样式 */
+	/* 核销状态显示样式 */
+	.verify-status-row {
+		padding: 20rpx;
+		background-color: #f9f9f9;
+		border-radius: 12rpx;
+		margin-top: 20rpx;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+
+		.v-label {
+			font-size: 26rpx;
+			color: #666;
+		}
+
+		.v-done {
+			font-size: 26rpx;
+			color: #67c23a;
+			font-weight: bold;
+		}
+
+		.v-wait {
+			font-size: 26rpx;
+			color: #FF7900;
+			font-weight: bold;
+		}
+	}
+
 	.rejection-reason {
 		display: flex;
 		align-items: flex-start;
 		background-color: #fef0f0;
 		padding: 16rpx 20rpx;
 		border-radius: 12rpx;
-		margin-top: 10rpx;
+		margin-top: 20rpx;
 
 		.reason-label {
 			font-size: 26rpx;
 			font-weight: 600;
 			color: #f56c6c;
 			margin: 0 10rpx;
-			flex-shrink: 0; // 防止标签换行
+			flex-shrink: 0;
 		}
 
 		.reason-text {
 			font-size: 26rpx;
 			color: #f56c6c;
-			line-height: 1.5;
 			flex: 1;
 		}
 	}
@@ -487,35 +508,31 @@
 		display: flex;
 		justify-content: flex-end;
 		gap: 20rpx;
-		padding-top: 20rpx;
-		margin-top: 20rpx; // 调整与上方内容的间距
+		padding-top: 24rpx;
+		margin-top: 24rpx;
 		border-top: 1rpx solid #f0f2f5;
 	}
 
 	.btn {
 		margin: 0;
-		padding: 0 32rpx;
-		height: 64rpx;
-		line-height: 64rpx;
-		border-radius: 32rpx;
+		padding: 0 40rpx;
+		height: 68rpx;
+		line-height: 68rpx;
+		border-radius: 34rpx;
 		font-size: 26rpx;
-		font-weight: 500;
-		border: 1px solid transparent;
-
-		&::after {
-			border: none;
-		}
+		font-weight: bold;
 
 		&-reject {
 			background-color: #fff;
 			color: #f56c6c;
-			border-color: #f56c6c;
+			border: 1px solid #f56c6c;
 		}
 
 		&-confirm {
 			background: linear-gradient(135deg, #FF9500, #FF7900);
 			color: #fff;
 			border: none;
+			box-shadow: 0 4rpx 12rpx rgba(255, 121, 0, 0.2);
 		}
 	}
 
@@ -523,15 +540,13 @@
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		justify-content: center;
 		padding: 100rpx 0;
 		color: #909399;
-		margin: 0 24rpx;
-	}
 
-	.empty-text {
-		font-size: 28rpx;
-		margin-top: 20rpx;
+		.empty-text {
+			font-size: 28rpx;
+			margin-top: 20rpx;
+		}
 	}
 
 	.loading-more {

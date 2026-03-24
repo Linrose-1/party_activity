@@ -97,7 +97,6 @@
 .exclusive-block.data-v-9217aa1c {
   margin-top: 10rpx;
   background: rgba(255, 98, 177, 0.02);
-  padding: 16rpx;
   border-radius: 12rpx;
 }
 .exclusive-block .code-line.data-v-9217aa1c {
@@ -294,6 +293,19 @@
   font-size: 32rpx;
   font-weight: 800;
   color: #FF62B1;
+}
+.section-header-row .click-hint.data-v-9217aa1c {
+  margin-left: auto;
+  /* 关键：自动推到最右边 */
+  font-size: 24rpx;
+  color: #FF62B1;
+  font-weight: bold;
+  letter-spacing: 2rpx;
+  /* 让 >>> 更有间隔感 */
+  opacity: 0.8;
+}
+.section-header-row .click-hint.data-v-9217aa1c:active {
+  opacity: 1;
 }
 .event-description-text.data-v-9217aa1c {
   font-size: 28rpx;
@@ -835,11 +847,11 @@
   justify-content: center;
 }
 .action-bar .action-btn.share-btn.data-v-9217aa1c {
-  background: linear-gradient(to right, #ffafd7, #FF62B1);
+  background: linear-gradient(135deg, #4facfe, #00f2fe);
   color: #fff;
 }
 .action-bar .action-btn.register-btn.data-v-9217aa1c {
-  background: linear-gradient(to right, #FF8C00, #FF6B00);
+  background: linear-gradient(to right, #ffafd7, #FF62B1);
   color: #fff;
 }
 .action-bar .action-btn.register-btn.disabled.data-v-9217aa1c {

@@ -133,11 +133,14 @@ const _sfc_main = {
             id: props.activity.id,
             newFollowFlag: isFavorite.value ? 1 : 0
           });
-          if (utils_user.isScenario3User()) {
-            setTimeout(() => {
-              var _a;
-              (_a = smartGuidePopupRef.value) == null ? void 0 : _a.open();
-            }, 1e3);
+          if (isFavorite.value) {
+            const shouldPop = await utils_user.canShowProfileRemind();
+            if (shouldPop) {
+              setTimeout(() => {
+                var _a;
+                (_a = smartGuidePopupRef.value) == null ? void 0 : _a.open();
+              }, 1e3);
+            }
           }
         } else {
           isFavorite.value = original;
@@ -202,7 +205,7 @@ const _sfc_main = {
             availableActions[tappedItem]();
         },
         fail: (res) => {
-          common_vendor.index.__f__("log", "at components/ActivityCard.vue:372", res.errMsg);
+          common_vendor.index.__f__("log", "at components/ActivityCard.vue:376", res.errMsg);
         }
       });
     };

@@ -104,7 +104,7 @@ const _sfc_main = {
       return paidLevels.includes(member.value);
     });
     common_vendor.onMounted(() => {
-      common_vendor.index.__f__("log", "at pages/home/home.vue:441", "首页 onMounted: 开始监听 postUpdated 事件");
+      common_vendor.index.__f__("log", "at pages/home/home.vue:442", "首页 onMounted: 开始监听 postUpdated 事件");
       common_vendor.index.$on("postUpdated", handlePostUpdate);
       common_vendor.index.$on("userFollowStatusChanged", handleUserFollowStatusChange);
       common_vendor.index.$on("postInteractionChanged", handlePostInteractionChange);
@@ -116,7 +116,7 @@ const _sfc_main = {
       }, 2e3);
     });
     common_vendor.onUnmounted(() => {
-      common_vendor.index.__f__("log", "at pages/home/home.vue:460", "首页 onUnmounted: 移除 postUpdated 事件监听");
+      common_vendor.index.__f__("log", "at pages/home/home.vue:461", "首页 onUnmounted: 移除 postUpdated 事件监听");
       common_vendor.index.$off("postUpdated", handlePostUpdate);
       common_vendor.index.$off("userFollowStatusChanged", handleUserFollowStatusChange);
       common_vendor.index.$off("postInteractionChanged", handlePostInteractionChange);
@@ -132,7 +132,7 @@ const _sfc_main = {
       let currentUserId = common_vendor.index.getStorageSync("userId");
       if (isInitialLoad.value) {
         if (!currentUserId) {
-          common_vendor.index.__f__("log", "at pages/home/home.vue:488", "检测到未登录，开始静默登录流程...");
+          common_vendor.index.__f__("log", "at pages/home/home.vue:489", "检测到未登录，开始静默登录流程...");
           await performSilentLogin();
         }
         isPageReady.value = true;
@@ -141,7 +141,7 @@ const _sfc_main = {
       }
       const currentUserIsLogin = !!currentUserId;
       if (isInitialLoad.value || isLogin.value !== currentUserIsLogin || postList.value.length === 0) {
-        common_vendor.index.__f__("log", "at pages/home/home.vue:517", "触发刷新: 首次加载或登录状态变更");
+        common_vendor.index.__f__("log", "at pages/home/home.vue:518", "触发刷新: 首次加载或登录状态变更");
         loggedInUserId.value = currentUserId;
         isLogin.value = currentUserIsLogin;
         if (isLogin.value) {
@@ -152,7 +152,7 @@ const _sfc_main = {
         getBusinessOpportunitiesList(true);
         isInitialLoad.value = false;
       } else {
-        common_vendor.index.__f__("log", "at pages/home/home.vue:535", "从详情页返回，不刷新列表，保持滚动位置。");
+        common_vendor.index.__f__("log", "at pages/home/home.vue:536", "从详情页返回，不刷新列表，保持滚动位置。");
       }
       common_vendor.index.showShareMenu({
         // withShareTicket: true,
@@ -214,7 +214,7 @@ const _sfc_main = {
       };
     });
     const handlePostUpdate = () => {
-      common_vendor.index.__f__("log", "at pages/home/home.vue:620", "postUpdated 触发，但已通过精准事件同步数据，跳过全量刷新");
+      common_vendor.index.__f__("log", "at pages/home/home.vue:621", "postUpdated 触发，但已通过精准事件同步数据，跳过全量刷新");
     };
     const handleVideoPlay = (videoId) => {
       if (!isPageActive.value) {
@@ -231,7 +231,7 @@ const _sfc_main = {
       }
       currentPlayingVideoId.value = videoId;
       shouldResumePlayback.value = true;
-      common_vendor.index.__f__("log", "at pages/home/home.vue:651", `视频 ${videoId} 确认播放`);
+      common_vendor.index.__f__("log", "at pages/home/home.vue:652", `视频 ${videoId} 确认播放`);
     };
     const handleVideoPause = () => {
       currentPlayingVideoId.value = null;
@@ -269,19 +269,19 @@ const _sfc_main = {
         });
         if (!error && data && data.length > 0) {
           swiperList.value = data;
-          common_vendor.index.__f__("log", "at pages/home/home.vue:714", "✅ 轮播口号加载完成");
+          common_vendor.index.__f__("log", "at pages/home/home.vue:715", "✅ 轮播口号加载完成");
         } else {
           swiperList.value = [defaultSlide];
         }
       } catch (e) {
         swiperList.value = [defaultSlide];
-        common_vendor.index.__f__("error", "at pages/home/home.vue:722", "获取轮播数据异常", e);
+        common_vendor.index.__f__("error", "at pages/home/home.vue:723", "获取轮播数据异常", e);
       }
     };
     const handleSwiperItemClick = (item, index) => {
       const isLastItem = index === swiperList.value.length - 1;
       if (item.id === 0 || isLastItem) {
-        common_vendor.index.__f__("log", "at pages/home/home.vue:738", "💡 点击了平台官方展示项，跳转到平台介绍页");
+        common_vendor.index.__f__("log", "at pages/home/home.vue:739", "💡 点击了平台官方展示项，跳转到平台介绍页");
         goToPlatformIntro();
         return;
       }
@@ -291,7 +291,7 @@ const _sfc_main = {
         const displayName = item.realName || item.nickname || item.homeTitle || "商友圈";
         const avatarUrl = item.avatar || "";
         const url = `/packages/my-friendList/my-friendList?userId=${item.id}&userName=${encodeURIComponent(displayName)}&avatar=${encodeURIComponent(avatarUrl)}`;
-        common_vendor.index.__f__("log", "at pages/home/home.vue:758", `🚀 准备进入 [${displayName}] 的圈子，头像地址:`, avatarUrl);
+        common_vendor.index.__f__("log", "at pages/home/home.vue:759", `🚀 准备进入 [${displayName}] 的圈子，头像地址:`, avatarUrl);
         common_vendor.index.navigateTo({
           url
         });
@@ -364,7 +364,7 @@ const _sfc_main = {
           scrollBarData.value = list;
         }
       } catch (e) {
-        common_vendor.index.__f__("error", "at pages/home/home.vue:858", "获取滚动条数据失败", e);
+        common_vendor.index.__f__("error", "at pages/home/home.vue:859", "获取滚动条数据失败", e);
       }
     };
     const performSilentLogin = async () => {
@@ -389,18 +389,18 @@ const _sfc_main = {
           data: payload
         });
         if (!error && data && data.accessToken) {
-          common_vendor.index.__f__("log", "at pages/home/home.vue:897", "✅ 静默登录成功!", data);
+          common_vendor.index.__f__("log", "at pages/home/home.vue:898", "✅ 静默登录成功!", data);
           common_vendor.index.setStorageSync("token", data.accessToken);
           common_vendor.index.setStorageSync("userId", data.userId);
           if (pendingInviteCode) {
-            common_vendor.index.__f__("log", "at pages/home/home.vue:904", `🔗 [自动加圈] 检测到邀请码 ${pendingInviteCode}，正在执行圈友绑定...`);
+            common_vendor.index.__f__("log", "at pages/home/home.vue:905", `🔗 [自动加圈] 检测到邀请码 ${pendingInviteCode}，正在执行圈友绑定...`);
             const bindRes = await utils_request.request(`/app-api/member/user/friend/bind-friend/${pendingInviteCode}`, {
               method: "POST"
             });
             if (!bindRes.error) {
-              common_vendor.index.__f__("log", "at pages/home/home.vue:911", "✅ [自动加圈] 圈友关系绑定成功");
+              common_vendor.index.__f__("log", "at pages/home/home.vue:912", "✅ [自动加圈] 圈友关系绑定成功");
             } else {
-              common_vendor.index.__f__("warn", "at pages/home/home.vue:913", "❌ [自动加圈] 绑定失败:", bindRes.error);
+              common_vendor.index.__f__("warn", "at pages/home/home.vue:914", "❌ [自动加圈] 绑定失败:", bindRes.error);
             }
           }
           isLogin.value = true;
@@ -411,10 +411,10 @@ const _sfc_main = {
             common_vendor.index.removeStorageSync("pendingInviteCode");
           }
         } else {
-          common_vendor.index.__f__("log", "at pages/home/home.vue:931", "静默登录未成功 (可能是非新用户需手机号或接口异常):", error);
+          common_vendor.index.__f__("log", "at pages/home/home.vue:932", "静默登录未成功 (可能是非新用户需手机号或接口异常):", error);
         }
       } catch (e) {
-        common_vendor.index.__f__("error", "at pages/home/home.vue:934", "静默登录流程异常:", e);
+        common_vendor.index.__f__("error", "at pages/home/home.vue:935", "静默登录流程异常:", e);
       }
     };
     const fetchCurrentUserInfo = async () => {
@@ -425,11 +425,11 @@ const _sfc_main = {
         method: "GET"
       });
       if (error) {
-        common_vendor.index.__f__("error", "at pages/home/home.vue:946", "首页实时获取用户信息失败:", error);
+        common_vendor.index.__f__("error", "at pages/home/home.vue:947", "首页实时获取用户信息失败:", error);
         currentUserInfo.value = utils_user.getCachedUserInfo();
       } else {
         currentUserInfo.value = data;
-        common_vendor.index.__f__("log", "at pages/home/home.vue:951", "首页实时获取用户信息成功:", currentUserInfo.value);
+        common_vendor.index.__f__("log", "at pages/home/home.vue:952", "首页实时获取用户信息成功:", currentUserInfo.value);
         common_vendor.index.setStorageSync("userInfo", JSON.stringify(data));
       }
     };
@@ -466,7 +466,7 @@ const _sfc_main = {
         if (error || !apiData || !apiData.list) {
           loadingStatus.value = error ? "more" : "noMore";
           if (error.includes("信息绑定")) {
-            common_vendor.index.__f__("warn", "at pages/home/home.vue:997", "捕获到业务限制：需绑定信息");
+            common_vendor.index.__f__("warn", "at pages/home/home.vue:998", "捕获到业务限制：需绑定信息");
             await utils_user.checkLoginGuard();
             return;
           }
@@ -551,7 +551,7 @@ const _sfc_main = {
           utils_unread.fetchGlobalUnread();
         }
       } catch (err) {
-        common_vendor.index.__f__("error", "at pages/home/home.vue:1099", "getBusinessOpportunitiesList 逻辑异常:", err);
+        common_vendor.index.__f__("error", "at pages/home/home.vue:1100", "getBusinessOpportunitiesList 逻辑异常:", err);
         loadingStatus.value = "more";
         common_vendor.index.showToast({
           title: "页面逻辑异常，请稍后重试",
@@ -658,7 +658,7 @@ const _sfc_main = {
       }
     };
     const handleUserFollowStatusChange = (data) => {
-      common_vendor.index.__f__("log", "at pages/home/home.vue:1388", "接收到关注状态变更:", data);
+      common_vendor.index.__f__("log", "at pages/home/home.vue:1389", "接收到关注状态变更:", data);
       if (!data || !data.userId)
         return;
       postList.value.forEach((post) => {
@@ -668,7 +668,7 @@ const _sfc_main = {
       });
     };
     const handlePostInteractionChange = (data) => {
-      common_vendor.index.__f__("log", "at pages/home/home.vue:1403", "接收到帖子互动变更:", data);
+      common_vendor.index.__f__("log", "at pages/home/home.vue:1404", "接收到帖子互动变更:", data);
       if (!data || !data.postId)
         return;
       const targetPost = postList.value.find((p) => String(p.id) === String(data.postId));
@@ -688,11 +688,11 @@ const _sfc_main = {
           }
         }
       } else {
-        common_vendor.index.__f__("warn", "at pages/home/home.vue:1431", `未在当前列表中找到 ID 为 ${data.postId} 的帖子，跳过更新`);
+        common_vendor.index.__f__("warn", "at pages/home/home.vue:1432", `未在当前列表中找到 ID 为 ${data.postId} 的帖子，跳过更新`);
       }
     };
     const handleUserInfoChange = async () => {
-      common_vendor.index.__f__("log", "at pages/home/home.vue:1439", "收到用户信息变更通知，刷新首页配置");
+      common_vendor.index.__f__("log", "at pages/home/home.vue:1440", "收到用户信息变更通知，刷新首页配置");
       await fetchCurrentUserInfo();
     };
     const toggleAction = async (post, clickedAction) => {
@@ -796,11 +796,14 @@ const _sfc_main = {
             title: newStatus ? successMsg.add : successMsg.remove,
             icon: "none"
           });
-          if (utils_user.isScenario3User()) {
-            setTimeout(() => {
-              var _a;
-              (_a = smartGuidePopupRef.value) == null ? void 0 : _a.open();
-            }, 1e3);
+          if (newStatus) {
+            const shouldPop = await utils_user.canShowProfileRemind();
+            if (shouldPop) {
+              setTimeout(() => {
+                var _a;
+                (_a = smartGuidePopupRef.value) == null ? void 0 : _a.open();
+              }, 1e3);
+            }
           }
         }
       } catch (err) {
@@ -851,7 +854,7 @@ const _sfc_main = {
     };
     const deletePost = (postToDelete) => {
       if (!isPageActive.value) {
-        common_vendor.index.__f__("log", "at pages/home/home.vue:1622", "拦截到误触：页面不活跃，不执行删除逻辑");
+        common_vendor.index.__f__("log", "at pages/home/home.vue:1625", "拦截到误触：页面不活跃，不执行删除逻辑");
         return;
       }
       common_vendor.index.showModal({
@@ -892,7 +895,7 @@ const _sfc_main = {
     };
     const handleViewTrace = (post) => {
       const hasSilent = post.hasSilentLoginUser || 0;
-      common_vendor.index.__f__("log", "at pages/home/home.vue:1676", `🚀 [首页点击留痕] ID: ${post.id}, hasSilent: ${hasSilent}`);
+      common_vendor.index.__f__("log", "at pages/home/home.vue:1679", `🚀 [首页点击留痕] ID: ${post.id}, hasSilent: ${hasSilent}`);
       common_vendor.index.navigateTo({
         url: `/packages/user-view-trace/user-view-trace?id=${post.id}&type=post&hasSilent=${hasSilent}`
       });

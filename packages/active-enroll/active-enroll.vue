@@ -301,15 +301,15 @@
 	// 3. 计算属性
 	// =========================================================
 	/**
-	 * 判断是否免支付 (核心逻辑)
+	 * 核心判定：当前报名是否免费
 	 */
 	const isActuallyFree = computed(() => {
-		// 1. 聚会本身费用为 0
-		const isFeeZero = activityDetail.value?.registrationFee === 0;
-		// 2. 或者：拥有专属免单码
-		const hasExCode = !!receivedExclusiveInviteCode.value;
+		// 1. 聚会本身 0 元
+		if (activityDetail.value?.registrationFee === 0) return true;
+		// 2. 刚才经过后端鉴定后的专属码变量有值
+		if (receivedExclusiveInviteCode.value) return true;
 
-		return isFeeZero || hasExCode;
+		return false;
 	});
 
 	/**
@@ -410,23 +410,69 @@
 	};
 
 	/**
-	 * 校验邀请码
+	 * 验证用户手动输入的邀请码 (通过后端接口鉴定)
 	 */
-	const verifyInviteCode = () => {
-		if (!inputInviteCode.value) return uni.showToast({
+	const verifyInviteCode = async () => {
+		const input = inputInviteCode.value.trim();
+		if (!input) return uni.showToast({
 			title: '请输入邀请码',
 			icon: 'none'
 		});
-		if (inputInviteCode.value === activityDetail.value.inviteCode) {
-			verifiedInviteCode.value = inputInviteCode.value;
-			invitePopup.value.close();
-			uni.showToast({
-				title: '验证通过',
-				icon: 'success'
+
+		uni.showLoading({
+			title: '正在校验...',
+			mask: true
+		});
+
+		try {
+			const {
+				data,
+				error
+			} = await request('/app-api/member/activity/check-code', {
+				method: 'POST',
+				data: {
+					activityId: activityId.value,
+					inviteCode: input
+				}
 			});
-		} else {
+
+			uni.hideLoading();
+
+			if (error) {
+				// 后端返回“邀请码无效”等错误信息
+				uni.showToast({
+					title: error.msg || '邀请码无效',
+					icon: 'none'
+				});
+				return;
+			}
+
+			// 接口返回逻辑：true=专属(免费), false=普通(需付费)
+			if (data === true) {
+				// 1. 鉴定为专属免费码
+				receivedExclusiveInviteCode.value = input; // 存入专属码变量
+				verifiedInviteCode.value = input; // 标记已验证通过
+				uni.showToast({
+					title: '专属免付费特权已开启',
+					icon: 'none'
+				});
+			} else {
+				// 2. 鉴定为普通邀请码
+				receivedExclusiveInviteCode.value = ''; // 确保不是免费模式
+				verifiedInviteCode.value = input; // 标记已验证通过
+				uni.showToast({
+					title: '验证通过',
+					icon: 'success'
+				});
+			}
+
+			// 验证通过，关闭弹窗，用户可以看到表单了
+			invitePopup.value.close();
+
+		} catch (e) {
+			uni.hideLoading();
 			uni.showToast({
-				title: '邀请码错误',
+				title: '系统校验失败',
 				icon: 'none'
 			});
 		}
@@ -506,10 +552,7 @@
 			userPhone: formData.userPhone,
 			contactAddress: formData.contactAddress,
 			remark: formData.remark,
-			// 普通邀请码：如果是组织者本人就传他自己的码，否则传收到的码
-			inviteCode: isOrganizer.value ? (activityDetail.value.inviteCode || '') : receivedInviteCode.value,
-
-			// 专属邀请码：传收到的码（如果有的话）
+			inviteCode: receivedExclusiveInviteCode.value ? '' : verifiedInviteCode.value,
 			exclusiveInviteCode: receivedExclusiveInviteCode.value
 		};
 
@@ -616,51 +659,86 @@
 	// 5. 生命周期钩子
 	// =========================================================
 
-	onLoad((options) => {
+	onLoad(async (options) => {
 		console.log('📥 [报名页-接收] 参数:', options);
-		// 接收普通邀请码
-		if (options.inviteCode) {
-			receivedInviteCode.value = options.inviteCode;
-			// 兼容之前的逻辑：将其赋值给已验证变量，防止弹窗
-			verifiedInviteCode.value = options.inviteCode;
-		}
-		// 接收专属免费码
-		if (options.exclusiveInviteCode) {
-			receivedExclusiveInviteCode.value = options.exclusiveInviteCode;
-			console.log('✅ [报名页] 收到专属免单码，准予免码通行');
-		}
 
-		// 2. 基本参数初始化
+		// 1. 【优先级最高】：初始化基本参数
+		// 必须先拿到 ID，后续的接口和缓存 Key 都要用到它
 		activityId.value = options.id;
 		loggedInUserId.value = uni.getStorageSync('userId');
 
 		if (!activityId.value) {
 			uni.showToast({
-				title: '缺少ID',
+				title: '缺少聚会ID',
 				icon: 'none'
 			});
 			return setTimeout(() => uni.navigateBack(), 1500);
 		}
 
-		// 3. 加载详情
+		// 2. 【核心逻辑】：自动化验证邀请码 (从 URL 链接进入的情况)
+		// 无论是普通码还是专属码，统一通过新接口校验其“属性”
+		const autoCode = options.exclusiveInviteCode || options.inviteCode;
+		if (autoCode) {
+			uni.showLoading({
+				title: '凭证验证中...'
+			});
+			try {
+				const {
+					data,
+					error
+				} = await request('/app-api/member/activity/check-code', {
+					method: 'POST',
+					data: {
+						activityId: activityId.value,
+						inviteCode: autoCode
+					}
+				});
+
+				if (!error) {
+					// 标记为已验证，防止 getActiveDetail 再次弹窗
+					verifiedInviteCode.value = autoCode;
+
+					if (data === true) {
+						// 鉴定为专属免单码
+						receivedExclusiveInviteCode.value = autoCode;
+						console.log('💎 链接凭证鉴定成功：专属免单特权已激活');
+					} else {
+						// 鉴定为普通邀请码
+						console.log('✅ 链接凭证鉴定成功：普通邀请码');
+					}
+				} else {
+					console.warn('❌ 链接中的邀请码无效:', error.msg);
+					// 如果无效，清空变量，后续 getActiveDetail 会正常弹窗让用户重新输入
+					verifiedInviteCode.value = '';
+				}
+			} catch (e) {
+				console.error('校验接口异常', e);
+			} finally {
+				uni.hideLoading();
+			}
+		}
+
+		// 3. 加载聚会详情 (包含 joinStatus 判断，进入步骤 1 或 步骤 3)
 		getActiveDetail();
 
-		// 4. 逻辑解耦，确保预填始终有机会执行
-		// 第一步：先尝试恢复草稿（用户之前填了一半的内容）
+		// 4. 表单数据处理 (逻辑解耦)
+
+		// 第一步：尝试恢复该聚会的专属草稿
 		const dynamicKey = FORM_CACHE_KEY + '_' + activityId.value;
 		const cachedData = uni.getStorageSync(dynamicKey);
 		if (cachedData) {
 			try {
 				const parsed = JSON.parse(cachedData);
+				// 使用 Object.assign 确保响应式不丢失
 				Object.assign(formData, parsed);
 				console.log('📝 已恢复本聚会的专属草稿');
 			} catch (e) {
-				console.error('解析草稿失败');
+				console.error('解析草稿失败', e);
 			}
 		}
 
-		// 第二步：无论有没有草稿，都调用预填接口
-		// 该接口内部会判断：如果字段为空才填，如果不为空（说明草稿里有）则不覆盖
+		// 第二步：智能补全个人资料
+		// 如果草稿里没值，就用个人资料填补；如果草稿里有值，fetchAndPrefillUserInfo 内部判断后不会覆盖
 		fetchAndPrefillUserInfo();
 	});
 

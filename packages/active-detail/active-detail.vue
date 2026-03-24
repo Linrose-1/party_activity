@@ -98,7 +98,7 @@
 					<view class="stat-value">{{ activityDetail.totalSlots }}</view>
 					<view class="stat-label">总名额</view>
 				</view>
-				<view class="stat-item">
+				<view class="stat-item" @click="register">
 					<view class="stat-value">
 						<text
 							v-if="[1, 3].includes(activityDetail.activityFunds)">¥{{ activityDetail.registrationFee }}</text>
@@ -154,6 +154,7 @@
 			<view class="section-header-row">
 				<view class="header-mark"></view>
 				<text class="section-title">聚会组织者</text>
+				<text class="click-hint">>>></text>
 			</view>
 			<view class="organizer-info" @click="navigateToBusinessCard(activityDetail.memberUser, true)">
 				<view class="organizer-avatar-wrap">
@@ -172,6 +173,7 @@
 			<view class="section-header-row">
 				<view class="header-mark"></view>
 				<text class="section-title">聚会聚店</text>
+				<text class="click-hint">>>></text>
 			</view>
 			<view class="business-info">
 				<view class="business-logo">
@@ -226,7 +228,7 @@
 		<!-- 8. 赞助单位 -->
 		<view class="sponsor-section" v-if="sponsorList && sponsorList.length > 0">
 			<view class="section-header-row">
-				<view class="left-box">
+				<view class="section-header-row">
 					<view class="header-mark"></view>
 					<text class="section-title">赞助单位</text>
 					<text class="count-tag">({{ sponsorList.length }})</text>
@@ -1292,7 +1294,6 @@
 	.exclusive-block {
 		margin-top: 10rpx;
 		background: rgba($theme-color, 0.02);
-		padding: 16rpx;
 		border-radius: 12rpx;
 
 		.code-line {
@@ -1525,6 +1526,21 @@
 			font-size: 32rpx;
 			font-weight: 800; // 粗体
 			color: $theme-color; // 主题色
+		}
+
+		.click-hint {
+			margin-left: auto;
+			/* 关键：自动推到最右边 */
+			font-size: 24rpx;
+			color: $theme-color;
+			font-weight: bold;
+			letter-spacing: 2rpx;
+			/* 让 >>> 更有间隔感 */
+			opacity: 0.8;
+
+			&:active {
+				opacity: 1;
+			}
 		}
 	}
 
@@ -2137,12 +2153,12 @@
 			justify-content: center;
 
 			&.share-btn {
-				background: linear-gradient(to right, lighten($theme-color, 15%), $theme-color);
+				background: linear-gradient(135deg, #4facfe, #00f2fe);
 				color: #fff;
 			}
 
 			&.register-btn {
-				background: linear-gradient(to right, #FF8C00, #FF6B00);
+				background: linear-gradient(to right, lighten($theme-color, 15%), $theme-color);
 				color: #fff;
 
 				&.disabled {

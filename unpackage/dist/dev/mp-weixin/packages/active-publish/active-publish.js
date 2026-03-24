@@ -151,9 +151,10 @@ const _sfc_main = {
         associatedStoreName.value = shop.storeName;
       });
     });
-    common_vendor.onReady(() => {
+    common_vendor.onReady(async () => {
       var _a;
-      if (utils_user.isScenario3User()) {
+      const shouldShow = await utils_user.canShowProfileRemind();
+      if (shouldShow) {
         (_a = smartGuidePopupRef.value) == null ? void 0 : _a.open();
       }
     });
@@ -291,7 +292,7 @@ const _sfc_main = {
           }
         }
       } catch (e) {
-        common_vendor.index.__f__("error", "at packages/active-publish/active-publish.vue:681", "获取用户实名状态失败:", e);
+        common_vendor.index.__f__("error", "at packages/active-publish/active-publish.vue:684", "获取用户实名状态失败:", e);
         isUserVerified.value = true;
       }
     };
@@ -325,15 +326,15 @@ const _sfc_main = {
     const openMapToChooseLocation = () => {
       common_vendor.index.chooseLocation({
         success: (res) => {
-          common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:730", "📍 地图选择成功:", res);
+          common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:733", "📍 地图选择成功:", res);
           form.value.locationAddress = res.address;
           form.value.latitude = res.latitude;
           form.value.longitude = res.longitude;
           form.value.activityLocation = res.name || res.address;
-          common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:741", "✅ 地址已同步到表单");
+          common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:744", "✅ 地址已同步到表单");
         },
         fail: (err) => {
-          common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:744", "地图打开失败或取消", err);
+          common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:747", "地图打开失败或取消", err);
         }
       });
     };
@@ -354,7 +355,7 @@ const _sfc_main = {
               processUpload(cropRes.tempFilePath);
             },
             fail: (err) => {
-              common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:768", "用户取消裁剪或失败:", err);
+              common_vendor.index.__f__("log", "at packages/active-publish/active-publish.vue:771", "用户取消裁剪或失败:", err);
             }
           });
         }
@@ -644,7 +645,7 @@ const _sfc_main = {
         remainingQuota.value = typeof data === "number" ? data : 0;
         isQuotaLoaded.value = true;
       } catch (e) {
-        common_vendor.index.__f__("error", "at packages/active-publish/active-publish.vue:1116", "获取权益网络异常", e);
+        common_vendor.index.__f__("error", "at packages/active-publish/active-publish.vue:1119", "获取权益网络异常", e);
       }
     };
     const showQuotaExceededModal = () => {
@@ -808,7 +809,7 @@ const _sfc_main = {
           })
         });
       } catch (e) {
-        common_vendor.index.__f__("error", "at packages/active-publish/active-publish.vue:1288", "发布失败:", e);
+        common_vendor.index.__f__("error", "at packages/active-publish/active-publish.vue:1291", "发布失败:", e);
         const errMsg = e.message || String(e) || "系统异常，请稍后重试";
         const isAuthError = errMsg.includes("实名") || errMsg.includes("认证") || errMsg.includes("idCert");
         common_vendor.index.showModal({

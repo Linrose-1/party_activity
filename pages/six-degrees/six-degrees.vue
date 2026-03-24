@@ -1,6 +1,7 @@
 <template>
 	<scroll-view class="six-degrees-container" scroll-y="true" @refresherrefresh="onPullDownRefresh"
-		:refresher-enabled="true" :refresher-triggered="refreshing" enable-back-to-top="true">
+		:refresher-enabled="true" :refresher-triggered="refreshing" :enable-back-to-top="true" :scroll-anchoring="true"
+		refresher-threshold="80">
 		<!-- 沉浸式头部 -->
 		<view class="premium-header">
 			<!-- 背景装饰：独立出来并设置裁剪 -->
@@ -155,7 +156,8 @@
 	import request from '@/utils/request.js';
 	import {
 		checkLoginGuard,
-		isScenario3User
+		isScenario3User,
+		canShowProfileRemind
 	} from '@/utils/user.js';
 
 	import AvatarLongPressMenu from '@/components/AvatarLongPressMenu.vue';
@@ -417,11 +419,18 @@
 	 * 下拉刷新
 	 */
 	const onPullDownRefresh = async () => {
-		refreshing.value = true; // 开始刷新，显示刷新动画
-		await fetchRecommendUsers(true); // 传入true表示刷新模式
-		refreshing.value = false; // 停止刷新，隐藏刷新动画
+		refreshing.value = true;
+		// 此时可以顺便更新用户信息，确保本地 isComplete 是准的
+		await Promise.all([
+			fetchRecommendUsers(true),
+			// 这里不需要特意 updateCurrentUserInfo，
+			// 因为下面的 canShowProfileRemind 内部会进行逻辑判断
+		]);
+		refreshing.value = false;
 
-		if (isScenario3User()) {
+		// 【核心修改】：改为异步判定提醒额度
+		const shouldShow = await canShowProfileRemind();
+		if (shouldShow) {
 			setTimeout(() => {
 				smartGuidePopupRef.value?.open();
 			}, 500);
@@ -433,7 +442,8 @@
 		if (isFirstShow.value || recommendUsers.value.length === 0) {
 			console.log('首次加载或列表为空，执行刷新');
 			await fetchRecommendUsers();
-			isFirstShow.value = false; // 加载完后关闭标志位
+			refreshing.value = false;
+			isFirstShow.value = false;
 		} else {
 			console.log('从其他页面返回，保持当前列表不刷新');
 		}
@@ -448,6 +458,11 @@
 	$text-sub: #8E8E93;
 
 	$dark-bg: #1A1A1A;
+
+	page {
+		height: 100%;
+		overflow: hidden;
+	}
 
 	.premium-header {
 		background: linear-gradient(135deg, #FF6F00 0%, #FF5500 50%, #FF8C00 100%);
@@ -597,7 +612,12 @@
 
 	.six-degrees-container {
 		background-color: #FFF5F0;
-		min-height: 100vh;
+		/* 必须是固定高度，不能是 min-height */
+		height: 100vh;
+		/* 确保宽度正确 */
+		width: 100%;
+		/* 解决部分系统下的内边距计算问题 */
+		box-sizing: border-box;
 	}
 
 	.premium-header {

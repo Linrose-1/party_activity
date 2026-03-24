@@ -144,7 +144,8 @@
 	import request from '../utils/request.js';
 	import {
 		checkLoginGuard,
-		isScenario3User
+		isScenario3User,
+		canShowProfileRemind
 	} from '../utils/user.js';
 	import SmartGuidePopup from '@/components/SmartGuidePopup.vue';
 
@@ -273,11 +274,14 @@
 					newFollowFlag: isFavorite.value ? 1 : 0
 				});
 
-				if (isScenario3User()) {
-					// 延迟一秒弹出，避免跟上面的 Toast 提示重叠，体验更好
-					setTimeout(() => {
-						smartGuidePopupRef.value?.open();
-					}, 1000);
+				if (isFavorite.value) {
+					const shouldPop = await canShowProfileRemind();
+					if (shouldPop) {
+						// 延迟一秒弹出，避免跟上面的 Toast 提示重叠
+						setTimeout(() => {
+							smartGuidePopupRef.value?.open();
+						}, 1000);
+					}
 				}
 			} else {
 				isFavorite.value = original;

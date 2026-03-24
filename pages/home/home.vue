@@ -278,7 +278,8 @@
 		getInviteCode,
 		getCachedUserInfo,
 		checkLoginGuard,
-		isScenario3User
+		isScenario3User,
+		canShowProfileRemind
 	} from '../../utils/user.js';
 	import {
 		fetchGlobalUnread
@@ -1560,11 +1561,13 @@
 					title: newStatus ? successMsg.add : successMsg.remove,
 					icon: 'none'
 				});
-				if (isScenario3User()) {
-					// 延迟一秒弹出，避免跟上面的 Toast 提示重叠，体验更好
-					setTimeout(() => {
-						smartGuidePopupRef.value?.open();
-					}, 1000);
+				if (newStatus) { // 只有在“新增关注/收藏”时才尝试提醒，取消时不提醒
+					const shouldPop = await canShowProfileRemind();
+					if (shouldPop) {
+						setTimeout(() => {
+							smartGuidePopupRef.value?.open();
+						}, 1000);
+					}
 				}
 			}
 		} catch (err) {

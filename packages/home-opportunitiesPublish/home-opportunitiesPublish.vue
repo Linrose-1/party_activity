@@ -245,7 +245,7 @@
 			</button>
 		</view>
 	</view>
-	
+
 	<SmartGuidePopup ref="smartGuidePopupRef" :scenario="3" />
 </template>
 
@@ -269,7 +269,8 @@
 	import {
 		getInviteCode,
 		getCachedUserInfo,
-		isScenario3User
+		isScenario3User,
+		canShowProfileRemind
 	} from '../../utils/user.js';
 	import SmartGuidePopup from '@/components/SmartGuidePopup.vue';
 
@@ -297,7 +298,7 @@
 		investmentResource: '', // 预期投入-资源类型
 		investmentEquity: '', // 预期投入-股权比例
 	});
-	
+
 	const smartGuidePopupRef = ref(null);
 
 	const isEditMode = ref(false); // 标记是否为编辑模式
@@ -420,12 +421,13 @@
 			menus: ["shareAppMessage", "shareTimeline"]
 		});
 	});
-	
-	onReady(() => {
-	    // 页面加载完了，用户可以开始写内容了，此时弹出引导
-	    if (isScenario3User()) {
-	        smartGuidePopupRef.value?.open();
-	    }
+
+	onReady(async () => {
+		// 页面加载完了，用户可以开始写内容了，此时弹出引导
+		const shouldShow = await canShowProfileRemind();
+		if (shouldShow) {
+			smartGuidePopupRef.value?.open();
+		}
 	});
 
 	// --- 草稿功能 ---

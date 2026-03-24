@@ -3,6 +3,7 @@ const common_vendor = require("../../common/vendor.js");
 const common_assets = require("../../common/assets.js");
 const utils_request = require("../../utils/request.js");
 const utils_upload = require("../../utils/upload.js");
+const utils_user = require("../../utils/user.js");
 if (!Array) {
   const _easycom_uni_segmented_control2 = common_vendor.resolveComponent("uni-segmented-control");
   const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
@@ -149,7 +150,7 @@ const _sfc_main = {
     common_vendor.onLoad((options) => {
       if (options && options.currentTab) {
         currentTab.value = parseInt(options.currentTab);
-        common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:421", "当前激活的Tab已切换为:", currentTab.value);
+        common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:423", "当前激活的Tab已切换为:", currentTab.value);
       }
     });
     const watchAndSanitize = (target, key = null) => {
@@ -196,9 +197,9 @@ const _sfc_main = {
         };
         try {
           common_vendor.index.setStorageSync(DRAFT_KEY, JSON.stringify(draftData));
-          common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:488", "✅ [自动保存] 资料已写入缓存", (/* @__PURE__ */ new Date()).toLocaleTimeString());
+          common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:490", "✅ [自动保存] 资料已写入缓存", (/* @__PURE__ */ new Date()).toLocaleTimeString());
         } catch (e) {
-          common_vendor.index.__f__("error", "at packages/my-edit/my-edit.vue:490", "保存缓存失败", e);
+          common_vendor.index.__f__("error", "at packages/my-edit/my-edit.vue:492", "保存缓存失败", e);
         }
       }, 1e3);
     }, {
@@ -331,9 +332,9 @@ const _sfc_main = {
           color: "#1890FF"
         });
         radarDatasets.value = newDatasets;
-        common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:667", "✅ 统计数据加载完毕，索引已固定：[0]自我, [1]商友, [2]综合");
+        common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:669", "✅ 统计数据加载完毕，索引已固定：[0]自我, [1]商友, [2]综合");
       } catch (e) {
-        common_vendor.index.__f__("error", "at packages/my-edit/my-edit.vue:670", "获取统计数据异常", e);
+        common_vendor.index.__f__("error", "at packages/my-edit/my-edit.vue:672", "获取统计数据异常", e);
       }
     };
     const getAreaTreeData = async () => {
@@ -342,7 +343,7 @@ const _sfc_main = {
         error
       } = await Api.getAreaTree();
       if (error) {
-        common_vendor.index.__f__("error", "at packages/my-edit/my-edit.vue:737", "获取地区树失败:", error);
+        common_vendor.index.__f__("error", "at packages/my-edit/my-edit.vue:739", "获取地区树失败:", error);
       } else {
         areaTree.value = data || [];
       }
@@ -390,7 +391,7 @@ const _sfc_main = {
         finalName = lastNodeText;
       }
       companyAndIndustryList.value[index].industryName = finalName;
-      common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:800", `第 ${index + 1} 组行业选择结果:`, finalName);
+      common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:802", `第 ${index + 1} 组行业选择结果:`, finalName);
     };
     const getIndustryTreeData = async () => {
       const {
@@ -398,10 +399,10 @@ const _sfc_main = {
         error
       } = await Api.getIndustryTree();
       if (error) {
-        common_vendor.index.__f__("error", "at packages/my-edit/my-edit.vue:809", "获取行业树失败:", error);
+        common_vendor.index.__f__("error", "at packages/my-edit/my-edit.vue:811", "获取行业树失败:", error);
       } else {
         industryTree.value = processIndustryTree(data || []);
-        common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:813", "处理后的行业树:", industryTree.value);
+        common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:815", "处理后的行业树:", industryTree.value);
       }
     };
     function findPathById(tree, targetId) {
@@ -529,14 +530,14 @@ const _sfc_main = {
       }
       setTimeout(() => {
         isDataLoaded.value = true;
-        common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:1018", "✅ [系统状态] 数据初始化完成，开始监听修改...");
+        common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:1020", "✅ [系统状态] 数据初始化完成，开始监听修改...");
         checkAndRestoreDraft();
       }, 500);
     };
     const checkAndRestoreDraft = () => {
       const draftStr = common_vendor.index.getStorageSync(DRAFT_KEY);
       if (!draftStr) {
-        common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:1029", "📭 [缓存检查] 无本地草稿");
+        common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:1031", "📭 [缓存检查] 无本地草稿");
         return;
       }
       common_vendor.index.showModal({
@@ -652,7 +653,7 @@ const _sfc_main = {
             src: tempFilePath,
             cropScale: "1:1",
             success: (cropRes) => uploadAvatar(cropRes.tempFilePath),
-            fail: (err) => common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:1165", "用户取消裁剪或裁剪失败:", err)
+            fail: (err) => common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:1167", "用户取消裁剪或裁剪失败:", err)
           });
         }
       });
@@ -691,11 +692,11 @@ const _sfc_main = {
             src: tempFilePath,
             cropScale: "1:1",
             success: (cropRes) => {
-              common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:1217", "二维码裁剪成功");
+              common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:1219", "二维码裁剪成功");
               uploadQrCode(cropRes.tempFilePath);
             },
             fail: (err) => {
-              common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:1221", "取消裁剪或失败:", err);
+              common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:1223", "取消裁剪或失败:", err);
             }
           });
         }
@@ -775,11 +776,12 @@ const _sfc_main = {
             icon: "none"
           });
         }
+        await utils_user.syncUserInfo();
         common_vendor.index.hideLoading();
         common_vendor.index.removeStorageSync(DRAFT_KEY);
-        common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:1386", "🧹 [提交成功] 草稿已清除");
+        common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:1394", "🧹 [提交成功] 草稿已清除");
         const isFilled = checkIsAllDimensionsFilled(payload);
-        common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:1392", "维度检查结果:", isFilled);
+        common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:1400", "维度检查结果:", isFilled);
         if (isFilled) {
           try {
             const {
@@ -789,7 +791,7 @@ const _sfc_main = {
               method: "POST"
             });
             if (!rewardError && rewardMsg) {
-              common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:1406", "✅ 触发奖励弹窗, 后端返回:", rewardMsg);
+              common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:1414", "✅ 触发奖励弹窗, 后端返回:", rewardMsg);
               await new Promise((resolve) => {
                 common_vendor.index.showModal({
                   title: "恭喜获得奖励",
@@ -803,7 +805,7 @@ const _sfc_main = {
               });
             }
           } catch (e) {
-            common_vendor.index.__f__("error", "at packages/my-edit/my-edit.vue:1422", "奖励接口调用异常:", e);
+            common_vendor.index.__f__("error", "at packages/my-edit/my-edit.vue:1430", "奖励接口调用异常:", e);
           }
         }
         common_vendor.index.showModal({
@@ -821,7 +823,7 @@ const _sfc_main = {
           }
         });
       }).catch((err) => {
-        common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:1443", "表单验证未通过：", err);
+        common_vendor.index.__f__("log", "at packages/my-edit/my-edit.vue:1451", "表单验证未通过：", err);
       });
     };
     const handleAutoPost = async () => {

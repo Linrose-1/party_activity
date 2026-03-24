@@ -227,9 +227,14 @@ const _sfc_main = {
     };
     const onPullDownRefresh = async () => {
       refreshing.value = true;
-      await fetchRecommendUsers(true);
+      await Promise.all([
+        fetchRecommendUsers(true)
+        // 这里不需要特意 updateCurrentUserInfo，
+        // 因为下面的 canShowProfileRemind 内部会进行逻辑判断
+      ]);
       refreshing.value = false;
-      if (utils_user.isScenario3User()) {
+      const shouldShow = await utils_user.canShowProfileRemind();
+      if (shouldShow) {
         setTimeout(() => {
           var _a;
           (_a = smartGuidePopupRef.value) == null ? void 0 : _a.open();
@@ -238,11 +243,12 @@ const _sfc_main = {
     };
     common_vendor.onShow(async () => {
       if (isFirstShow.value || recommendUsers.value.length === 0) {
-        common_vendor.index.__f__("log", "at pages/six-degrees/six-degrees.vue:434", "首次加载或列表为空，执行刷新");
+        common_vendor.index.__f__("log", "at pages/six-degrees/six-degrees.vue:443", "首次加载或列表为空，执行刷新");
         await fetchRecommendUsers();
+        refreshing.value = false;
         isFirstShow.value = false;
       } else {
-        common_vendor.index.__f__("log", "at pages/six-degrees/six-degrees.vue:438", "从其他页面返回，保持当前列表不刷新");
+        common_vendor.index.__f__("log", "at pages/six-degrees/six-degrees.vue:448", "从其他页面返回，保持当前列表不刷新");
       }
     });
     return (_ctx, _cache) => {
