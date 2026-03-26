@@ -1,5 +1,6 @@
 /* 水平间距 */
 /* 水平间距 */
+/* 自定义全局主题色变量 */
 .auth-page.data-v-c22bdff0 {
   min-height: 100vh;
   background-color: #F7F8FA;

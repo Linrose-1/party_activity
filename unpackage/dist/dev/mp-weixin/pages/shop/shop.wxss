@@ -1,11 +1,12 @@
 /* 水平间距 */
 /* 水平间距 */
+/* 自定义全局主题色变量 */
 /* ── 页面容器 ── */
 .app {
   display: flex;
   flex-direction: column;
   height: 100vh;
-  background-color: #f5f5f5;
+  background-color: #f8f9fa;
 }
 
 /* ── 顶部固定区域 ── */
@@ -48,7 +49,7 @@
 }
 .search-btn-text {
   font-size: 28rpx;
-  color: #FF6B00;
+  color: #FF62B1;
   font-weight: 500;
 }
 
@@ -121,10 +122,10 @@
   box-shadow: 0 4rpx 10rpx rgba(0, 0, 0, 0.1);
 }
 .share-bg {
-  background: linear-gradient(135deg, #4facfe, #00f2fe);
+  background: linear-gradient(135deg, #29CFFE, #00f2fe);
 }
 .join-bg {
-  background: linear-gradient(135deg, #FF8C00, #FF6B00);
+  background: linear-gradient(to right, #FF62B1, #FF85C1);
 }
 
 /* ── 吸顶筛选栏 ── */
@@ -161,8 +162,9 @@
   border: none;
 }
 .filter-btn.active {
-  background: #FF6B00;
-  color: #fff;
+  background: rgba(255, 98, 177, 0.1);
+  color: #FF62B1;
+  border-color: #FF62B1;
   font-weight: 500;
 }
 

@@ -11,26 +11,48 @@
 				</swiper-item>
 			</swiper>
 
-			<!-- 无封面图时的占位 -->
-			<view v-else class="banner-placeholder">
-				<uni-icons type="image" size="40" color="#ccc"></uni-icons>
+			<!-- 1. 左上角：聚会类型 (从原左下角移来) -->
+			<view class="tags-overlay-top" v-if="activityDetail.tags && activityDetail.tags.length > 0">
+				<text class="event-cover-tag">{{ activityDetail.tags.join(' · ') }}</text>
 			</view>
 
-			<!-- 【优化】聚会状态标签 - 移至右上角 -->
+			<!-- 2. 右下角：用户的报名状态 -->
+			<view class="join-status-overlay">
+				<view class="status-pill" :class="'join-status-' + activityDetail.joinStatus">
+					<uni-icons :type="joinStatusInfo.icon" size="14" color="#fff"></uni-icons>
+					<text>{{ joinStatusInfo.text }}</text>
+				</view>
+			</view>
+
+			<!-- 3. 左下角：赞助商迷你缩略区 -->
+			<view class="sponsor-mini-card" v-if="sponsorList && sponsorList.length > 0" @click.stop="goToSponsorList">
+				<!-- 赞助商列表容器：自动显示 1 个或 2 个 -->
+				<view class="sponsor-mini-list">
+					<view class="sp-mini-item" v-for="(item, index) in sponsorList.slice(0, 2)" :key="item.id">
+						<image :src="item.logoUrl || '/static/images/default-avatar.png'" class="sp-mini-logo"
+							mode="aspectFill" />
+						<text class="sp-mini-name">{{ item.sponsorName }}</text>
+					</view>
+				</view>
+
+				<!-- 引导标识：位于所有赞助商下方 -->
+				<view class="sp-mini-more-box">
+					<text class="sp-mini-more">>>></text>
+				</view>
+			</view>
+
+			<!-- 原有的聚会状态标签 (移至右上角) 保持逻辑 -->
 			<view v-if="statusInfo.text" class="status-tag" :style="{ backgroundColor: statusInfo.color }">
 				{{ statusInfo.text }}
-			</view>
-
-			<!-- 标签浮层（左下角） -->
-			<view class="tags-overlay" v-if="activityDetail.tags && activityDetail.tags.length > 0">
-				<text class="event-cover-text">{{ activityDetail.tags.join(' · ') }}</text>
 			</view>
 		</view>
 
 		<!-- 最低起聚名额提示 -->
-		<view v-if="showLimitSlotsTip" class="limit-slots-tip theme-tip">
-			<uni-icons type="info-filled" color="#FF62B1" size="16" style="margin-right: 10rpx;"></uni-icons>
-			<text>当前报名人数未达到最低起聚名额 ({{ activityDetail.limitSlots }}人)，聚会可能被取消。</text>
+		<view v-if="limitSlotsInfo" class="limit-slots-tip"
+			:style="{ color: limitSlotsInfo.color, backgroundColor: limitSlotsInfo.bgColor, borderColor: limitSlotsInfo.color }">
+			<uni-icons :type="limitSlotsInfo.isReached ? 'checkbox-filled' : 'info-filled'"
+				:color="limitSlotsInfo.color" size="16" style="margin-right: 10rpx;"></uni-icons>
+			<text>{{ limitSlotsInfo.text }}</text>
 		</view>
 
 		<!-- 2. 聚会基础信息区 -->
@@ -56,6 +78,13 @@
 				<view class="info-item">
 					<text class="info-label">聚会地点：</text>
 					<text class="info-value">{{ activityDetail.activityLocation || "未公开地点"}}</text>
+				</view>
+				<view class="info-item" v-if="activityDetail.memberStoreRespVO">
+					<text class="info-label">本次聚店：</text>
+					<text class="info-value nav-link clickable-venue"
+						@click="navigateToStoreDetail(activityDetail.memberStoreRespVO)">
+						{{ activityDetail.memberStoreRespVO.storeName }}
+					</text>
 				</view>
 				<view class="info-item invite-item-block" v-if="isOrganizer && activityDetail.inviteCode">
 					<text class="info-label">邀请码：</text>
@@ -92,7 +121,7 @@
 			<view class="event-stats">
 				<view class="stat-item" @click="viewAllUsers">
 					<view class="stat-value">{{ participantTotal || 0 }}</view>
-					<view class="stat-label">已报名</view>
+					<view class="stat-label underlined">已报名</view>
 				</view>
 				<view class="stat-item">
 					<view class="stat-value">{{ activityDetail.totalSlots }}</view>
@@ -104,7 +133,7 @@
 							v-if="[1, 3].includes(activityDetail.activityFunds)">¥{{ activityDetail.registrationFee }}</text>
 						<text v-else-if="activityDetail.activityFunds === 2">免费</text>
 					</view>
-					<view class="stat-label">报名费</view>
+					<view class="stat-label underlined">报名费</view>
 				</view>
 			</view>
 		</view>
@@ -168,7 +197,7 @@
 		</view>
 
 		<!-- 5. 聚店信息 -->
-		<view v-if="activityDetail.memberStoreRespVO" class="business-section"
+		<!-- <view v-if="activityDetail.memberStoreRespVO" class="business-section"
 			@click="navigateToStoreDetail(activityDetail.memberStoreRespVO)">
 			<view class="section-header-row">
 				<view class="header-mark"></view>
@@ -189,7 +218,7 @@
 					</view>
 				</view>
 			</view>
-		</view>
+		</view> -->
 
 		<!-- 6. 贡分说明 -->
 		<view class="organizer-section">
@@ -203,13 +232,13 @@
 		</view>
 
 		<!-- 7. 参与用户 -->
-		<view class="participants-section">
+		<!-- <view class="participants-section">
 			<view class="participants-header">
 				<view class="section-header-row">
 					<view class="header-mark"></view>
 					<text class="section-title">参与用户</text>
 				</view>
-				<view v-if="participantTotal > 0" class="view-all-link" @click="viewAllUsers">查看全部 ></view>
+				<view v-if="participantTotal > 0" class="view-all-link" @click="viewAllUsers">>>></view>
 			</view>
 			<view v-if="participantList.length > 0" class="participants-body">
 				<view class="avatar-group">
@@ -223,7 +252,7 @@
 				</view>
 			</view>
 			<view v-else class="no-participants">暂无用户报名</view>
-		</view>
+		</view> -->
 
 		<!-- 8. 赞助单位 -->
 		<view class="sponsor-section" v-if="sponsorList && sponsorList.length > 0">
@@ -259,10 +288,11 @@
 						<text class="total-num">{{ activityDetail.targetViewNum }}</text>
 					</view>
 				</view>
-				<view class="right-more">
+				<view v-if="activityDetail.targetViewNum > 0" class="view-all-link" @click="goToTraceList">>>></view>
+				<!-- <view class="right-more">
 					<text>详情</text>
 					<uni-icons type="right" size="14" color="#FF62B1"></uni-icons>
-				</view>
+				</view> -->
 			</view>
 			<view class="viewer-content" @click="goToTraceList">
 				<view class="avatar-stack">
@@ -287,10 +317,12 @@
 					<text class="section-title">商友评论</text>
 					<text class="title-count" v-if="commentTotal > 0">{{ commentTotal }}</text>
 				</view>
-				<view class="right-more">
+				<view v-if="commentTotal > 0" class="view-all-link" @click="goToCommentPage">>>></view>
+
+				<!-- <view class="right-more">
 					<text>查看全部</text>
 					<uni-icons type="right" size="14" color="#FF62B1"></uni-icons>
-				</view>
+				</view> -->
 			</view>
 			<view class="preview-list" v-if="commentPreviewList.length > 0">
 				<view class="preview-item" v-for="c in commentPreviewList" :key="c.id">
@@ -523,6 +555,32 @@
 
 
 	// ─── 计算属性 ───
+	/**
+	 * 优化起聚名额提示逻辑
+	 */
+	const limitSlotsInfo = computed(() => {
+		if (!activityDetail.value || !activityDetail.value.limitSlots) return null;
+
+		// 获取当前人数和目标人数
+		const currentCount = Number(participantTotal.value || activityDetail.value.joinCount || 0);
+		const targetCount = Number(activityDetail.value.limitSlots);
+
+		// 仅在"未开始(1)"或"报名中(2)"状态下提示
+		const inRelevantStatus = [1, 2].includes(activityDetail.value.status);
+		if (!inRelevantStatus) return null;
+
+		const isReached = currentCount >= targetCount;
+
+		return {
+			isReached,
+			text: isReached ?
+				`该聚会已达到起聚人数（${targetCount}人），聚会将如期进行！` : `该聚会未达到起聚人数（${targetCount}人），聚会可能会被取消，敬请咨询聚会发起人。`,
+			// 达到显示绿色，未达到显示主题色（粉色）
+			color: isReached ? '#1FD6FE' : '#FF62B1',
+			bgColor: isReached ? 'rgba(79, 172, 254, 0.08)' : 'rgba(255, 98, 177, 0.08)'
+		};
+	});
+
 	const handleShareTypeChange = (e) => {
 		shareCodeType.value = e.detail.value;
 	};
@@ -536,6 +594,37 @@
 			})
 		});
 	};
+
+	// 1. 用户的报名状态信息计算
+	const joinStatusInfo = computed(() => {
+		// 关键修复：显式判断数值，防止 0 被当作 null 处理
+		// 逻辑：如果存在 activityDetail 且 joinStatus 不为 null/undefined，取原值，否则默认为 0
+		const status = (activityDetail.value && activityDetail.value.joinStatus !== null && activityDetail.value
+				.joinStatus !== undefined) ?
+			activityDetail.value.joinStatus :
+			0;
+
+		const map = {
+			0: {
+				text: '未报名',
+				icon: 'info',
+				color: '#999'
+			},
+			1: {
+				text: '待确认',
+				icon: 'auth',
+				color: '#f39c12'
+			},
+			2: {
+				text: '已报名',
+				icon: 'checkbox-filled',
+				color: '#2ecc71'
+			}
+		};
+
+		// 如果返回的状态码不在 0,1,2 范围内，兜底返回 0 的配置
+		return map[status] || map[0];
+	});
 
 	/**
 	 * 判断内容是否被锁定（非公开聚会且未获得详情数据）
@@ -985,7 +1074,7 @@
 			});
 			return;
 		}
-		let url = '/pages/activity-participants/activity-participants?id=' + activityId.value;
+		let url = '/packages/activity-participants/activity-participants?id=' + activityId.value;
 		if (isOrganizer.value) url += '&isOrganizer=1';
 		uni.navigateTo({
 			url
@@ -998,6 +1087,15 @@
 	const goToCommentPage = () => {
 		uni.navigateTo({
 			url: '/packages/comment-page/comment-page?id=' + activityId.value + '&type=activity'
+		});
+	};
+
+	// 2. 跳转到赞助商列表页
+	const goToSponsorList = () => {
+		// 将整个赞助商列表序列化传递
+		const sponsorData = encodeURIComponent(JSON.stringify(sponsorList.value));
+		uni.navigateTo({
+			url: `/packages/sponsor-list/sponsor-list?data=${sponsorData}&activityId=${activityId.value}`
 		});
 	};
 
@@ -1214,6 +1312,139 @@
 		}
 	}
 
+	.banner-section {
+		position: relative;
+		overflow: hidden;
+
+		/* 1. 左上角类型标签 */
+		.tags-overlay-top {
+			position: absolute;
+			top: 30rpx;
+			left: 30rpx;
+			z-index: 10;
+
+			.event-cover-tag {
+				background-color: rgba($theme-color, 0.9);
+				color: #fff;
+				font-size: 22rpx;
+				padding: 6rpx 18rpx;
+				border-radius: 8rpx;
+				font-weight: bold;
+			}
+		}
+
+		/* 2. 右下角报名状态 */
+		.join-status-overlay {
+			position: absolute;
+			bottom: 30rpx;
+			right: 30rpx;
+			z-index: 10;
+
+			.status-pill {
+				display: flex;
+				align-items: center;
+				gap: 8rpx;
+				padding: 10rpx 24rpx;
+				border-radius: 40rpx;
+				color: #fff;
+				font-size: 24rpx;
+				font-weight: bold;
+				box-shadow: 0 4rpx 10rpx rgba(0, 0, 0, 0.2);
+
+				&.join-status-0 {
+					background: rgba(0, 0, 0, 0.5);
+				}
+
+				// 未报名
+				&.join-status-1 {
+					background: #f39c12;
+				}
+
+				// 待确认
+				&.join-status-2 {
+					background: #2ecc71;
+				}
+
+				// 已报名
+			}
+		}
+
+		/* 3. 左下角赞助商迷你区 (磨砂效果) */
+		.sponsor-mini-card {
+			position: absolute;
+			bottom: 20rpx;
+			left: 20rpx;
+			z-index: 10;
+			/* 宽度固定，高度随内容自适应 */
+			width: 150rpx;
+			padding: 16rpx 0rpx;
+			border-radius: 20rpx;
+			background: rgba(255, 255, 255, 0.45); // 稍微提高一点亮白度
+			backdrop-filter: blur(15px);
+			-webkit-backdrop-filter: blur(15px);
+			border: 1rpx solid rgba(255, 255, 255, 0.3);
+			display: flex;
+			flex-direction: column; // 整体竖排
+			box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.1);
+
+			.sponsor-mini-list {
+				display: flex;
+				flex-direction: column; // 赞助商项竖着排
+				gap: 16rpx;
+			}
+
+			.sp-mini-item {
+				display: flex;
+				flex-direction: column; // Logo 和 名称也竖着排
+				align-items: center; // 居中对齐
+				justify-content: center;
+				text-align: center;
+
+				.sp-mini-logo {
+					width: 64rpx; // 稍微增大一点 Logo，因为现在是单列
+					height: 64rpx;
+					border-radius: 50%;
+					background: #fff;
+					border: 2rpx solid rgba(255, 255, 255, 0.8);
+					margin-bottom: 6rpx;
+				}
+
+				.sp-mini-name {
+					font-size: 18rpx;
+					color: #000;
+					font-weight: bold;
+					width: 100%;
+					white-space: nowrap;
+					overflow: hidden;
+					text-overflow: ellipsis;
+					line-height: 1.2;
+				}
+			}
+
+			.sp-mini-more-box {
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				margin-top: 12rpx;
+				padding-top: 8rpx;
+				border-top: 1rpx solid rgba(255, 255, 255, 0.2); // 增加一条若有若无的分割线
+
+				.sp-mini-more {
+					font-size: 20rpx;
+					color: $theme-color; // 主题粉色
+					font-weight: 900;
+					line-height: 1;
+					letter-spacing: 2rpx; // 让 >>> 更舒展
+				}
+			}
+
+			&:active {
+				opacity: 0.9;
+				transform: scale(0.96);
+			}
+		}
+	}
+
 	.banner-swiper,
 	.banner-image {
 		width: 100%;
@@ -1362,7 +1593,7 @@
 			font-weight: bold;
 			margin-bottom: 30rpx;
 			display: block;
-			color: #333;
+			color: #FF62B1;
 		}
 
 		.info-list {
@@ -1386,7 +1617,7 @@
 					flex: 1;
 
 					&.highlight {
-						color: #ff1a3c;
+						color: #FF62B1;
 						font-weight: 500;
 					}
 
@@ -1447,6 +1678,50 @@
 		color: #666;
 		margin: 10rpx 0;
 		gap: 10rpx;
+	}
+
+	/* 1. 起聚名额提示框样式 */
+	.limit-slots-tip {
+		padding: 20rpx 30rpx;
+		font-size: 24rpx;
+		display: flex;
+		align-items: center;
+		margin: 24rpx;
+		border-radius: 12rpx;
+		border: 1rpx solid; // 颜色通过内联 style 控制
+		line-height: 1.4;
+	}
+
+	/* 2. 聚店名称下划线 */
+	.clickable-venue {
+		text-decoration: underline;
+		font-weight: bold;
+		/* 继承 nav-link 的颜色，通常为蓝色或主题色 */
+	}
+
+	/* 3. 统计项文字下划线 */
+	.stat-label.underlined {
+		display: inline-block;
+		position: relative;
+		padding-bottom: 4rpx;
+
+		&::after {
+			content: '';
+			position: absolute;
+			left: 10%;
+			right: 10%;
+			bottom: 0;
+			height: 2rpx;
+			background-color: $theme-color; // 使用主题粉色下划线
+			opacity: 0.6;
+		}
+	}
+
+	/* 调整 stat-item 点击反馈 */
+	.stat-item {
+		&:active {
+			opacity: 0.7;
+		}
 	}
 
 	.event-stats {

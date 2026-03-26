@@ -1,5 +1,6 @@
 /* 水平间距 */
 /* 水平间距 */
+/* 自定义全局主题色变量 */
 .refund-apply-page.data-v-0198e019 {
   background-color: #f5f7fa;
   min-height: 100vh;

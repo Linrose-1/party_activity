@@ -1,6 +1,7 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
 const utils_request = require("../../utils/request.js");
+const utils_user = require("../../utils/user.js");
 if (!Array) {
   const _easycom_uni_easyinput2 = common_vendor.resolveComponent("uni-easyinput");
   const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
@@ -11,9 +12,10 @@ const _easycom_uni_easyinput = () => "../../uni_modules/uni-easyinput/components
 const _easycom_uni_icons = () => "../../uni_modules/uni-icons/components/uni-icons/uni-icons.js";
 const _easycom_uni_load_more = () => "../../uni_modules/uni-load-more/components/uni-load-more/uni-load-more.js";
 if (!Math) {
-  (_easycom_uni_easyinput + _easycom_uni_icons + _easycom_uni_load_more + CircleApplyPopup)();
+  (_easycom_uni_easyinput + _easycom_uni_icons + _easycom_uni_load_more + AvatarLongPressMenu + CircleApplyPopup)();
 }
 const CircleApplyPopup = () => "../../components/CircleApplyPopup.js";
+const AvatarLongPressMenu = () => "../../components/AvatarLongPressMenu.js";
 const _sfc_main = {
   __name: "my-circleList",
   setup(__props) {
@@ -24,6 +26,7 @@ const _sfc_main = {
     const circleAddInitiator = common_vendor.ref(0);
     const newApplyList = common_vendor.ref([]);
     const newApplyCount = common_vendor.ref(0);
+    const avatarMenuRef = common_vendor.ref(null);
     const applyPopupRef = common_vendor.ref(null);
     const fetchCircleList = async (isRefresh = false) => {
       if (circleLoadStatus.value === "loading")
@@ -119,6 +122,17 @@ const _sfc_main = {
     const navigateToBusinessCard = (user) => common_vendor.index.navigateTo({
       url: `/packages/applicationBusinessCard/applicationBusinessCard?id=${user.id}&name=${encodeURIComponent(user.nickname || user.realName)}&avatar=${encodeURIComponent(user.avatar || "")}&fromShare=1`
     });
+    const handleAvatarClick = async (friend) => {
+      if (!await utils_user.checkLoginGuard())
+        return;
+      const userParams = {
+        id: friend.id,
+        name: friend.realName || friend.nickname || "圈友",
+        avatar: friend.avatar || "",
+        isEnterpriseSource: false
+      };
+      avatarMenuRef.value.open(userParams);
+    };
     common_vendor.onMounted(() => {
       fetchCircleList(true);
       getNewApplyList();
@@ -160,27 +174,28 @@ const _sfc_main = {
         n: common_vendor.f(circleFriendList.value, (friend, k0, i0) => {
           return common_vendor.e({
             a: friend.avatar || "/static/images/default-avatar.png",
-            b: common_vendor.t(friend.realName || friend.nickname || "匿名用户"),
-            c: friend.fellowTownspeopleCityFlag === 1 || friend.peerFlag === 1 || friend.classmateFlag === 1 || friend.friendParentFlag === 1
+            b: common_vendor.o(($event) => handleAvatarClick(friend), friend.id),
+            c: common_vendor.t(friend.realName || friend.nickname || "匿名用户"),
+            d: friend.fellowTownspeopleCityFlag === 1 || friend.peerFlag === 1 || friend.classmateFlag === 1 || friend.friendParentFlag === 1
           }, friend.fellowTownspeopleCityFlag === 1 || friend.peerFlag === 1 || friend.classmateFlag === 1 || friend.friendParentFlag === 1 ? common_vendor.e({
-            d: friend.friendParentFlag === 1
+            e: friend.friendParentFlag === 1
           }, friend.friendParentFlag === 1 ? {} : {}, {
-            e: friend.fellowTownspeopleCityFlag === 1
+            f: friend.fellowTownspeopleCityFlag === 1
           }, friend.fellowTownspeopleCityFlag === 1 ? {} : {}, {
-            f: friend.peerFlag === 1
+            g: friend.peerFlag === 1
           }, friend.peerFlag === 1 ? {} : {}, {
-            g: friend.classmateFlag === 1
+            h: friend.classmateFlag === 1
           }, friend.classmateFlag === 1 ? {} : {}) : {}, {
-            h: "cee902af-3-" + i0,
-            i: common_vendor.t(formatCompanyInfo(friend)),
-            j: friend.followTime || friend.createTime
+            i: "cee902af-3-" + i0,
+            j: common_vendor.t(formatCompanyInfo(friend)),
+            k: friend.followTime || friend.createTime
           }, friend.followTime || friend.createTime ? {
-            k: common_vendor.t(formatTimestamp(friend.followTime || friend.createTime))
+            l: common_vendor.t(formatTimestamp(friend.followTime || friend.createTime))
           } : {}, {
-            l: "cee902af-4-" + i0,
-            m: common_vendor.o(($event) => confirmDeleteFriend(friend), friend.id),
-            n: friend.id,
-            o: common_vendor.o(($event) => navigateToBusinessCard(friend), friend.id)
+            m: "cee902af-4-" + i0,
+            n: common_vendor.o(($event) => confirmDeleteFriend(friend), friend.id),
+            o: friend.id,
+            p: common_vendor.o(($event) => navigateToBusinessCard(friend), friend.id)
           });
         }),
         o: common_vendor.p({
@@ -199,10 +214,13 @@ const _sfc_main = {
           status: circleLoadStatus.value
         })
       } : {}, {
-        s: common_vendor.sr(applyPopupRef, "cee902af-6", {
+        s: common_vendor.sr(avatarMenuRef, "cee902af-6", {
+          "k": "avatarMenuRef"
+        }),
+        t: common_vendor.sr(applyPopupRef, "cee902af-7", {
           "k": "applyPopupRef"
         }),
-        t: common_vendor.o(handleAuditSuccess)
+        v: common_vendor.o(handleAuditSuccess)
       });
     };
   }

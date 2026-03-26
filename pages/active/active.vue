@@ -16,7 +16,7 @@
 				</view>
 				<!--右侧：扫码核销入口 -->
 				<view class="scan-trigger" @click="handleTopScan">
-					<uni-icons type="scan" size="26" color="#FF6B00"></uni-icons>
+					<uni-icons type="scan" size="26" :color="PRIMARY_COLOR"></uni-icons>
 				</view>
 			</view>
 		</view>
@@ -112,6 +112,9 @@
 	const isLogin = ref(false);
 	const bannerList = ref([]);
 	const smartGuidePopupRef = ref(null);
+	
+	const PRIMARY_COLOR = '#FF62B1'; 
+	const SECONDARY_COLOR = '#29CFFE';
 
 	// ─── 筛选条件 ───
 	const searchKeyword = ref('');
@@ -665,7 +668,7 @@
 </script>
 
 <style lang="scss" scoped>
-	$primary: #FF6B00;
+	$primary: $gofor-primary;
 
 	.container {
 		background-color: #f8f9fa;
@@ -796,9 +799,9 @@
 			border: 1rpx solid transparent;
 
 			&.active {
-				background: #fff0e5;
-				color: $primary;
-				border-color: $primary;
+				background: rgba($gofor-primary, 0.1);
+				color: $gofor-primary;
+				border-color: $gofor-primary;
 				font-weight: bold;
 			}
 		}
@@ -837,7 +840,7 @@
 		font-size: 26rpx;
 
 		.reset-link {
-			color: $primary;
+			color: $gofor-primary;
 			margin-top: 20rpx;
 			text-decoration: underline;
 		}
@@ -961,7 +964,8 @@
 	}
 
 	.register-btn {
-		background: linear-gradient(to right, #FF8C00, #FF6B00);
+		background: $gofor-primary-gradient;
 		color: white;
+		box-shadow: 0 6rpx 16rpx rgba($gofor-primary, 0.3);
 	}
 </style>

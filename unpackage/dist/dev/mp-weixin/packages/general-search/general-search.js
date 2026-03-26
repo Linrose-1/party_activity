@@ -335,7 +335,7 @@ const _sfc_main = {
             b: common_vendor.t(user.nickname),
             c: user.idCert === 1
           }, user.idCert === 1 ? {
-            d: "797ccd59-23-" + i0,
+            d: "1dc848cd-23-" + i0,
             e: common_vendor.p({
               type: "auth-filled",
               size: "12",
@@ -390,6 +390,6 @@ const _sfc_main = {
     };
   }
 };
-const MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["__scopeId", "data-v-797ccd59"]]);
+const MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["__scopeId", "data-v-1dc848cd"]]);
 wx.createPage(MiniProgramPage);
-//# sourceMappingURL=../../../.sourcemap/mp-weixin/pages/general-search/general-search.js.map
+//# sourceMappingURL=../../../.sourcemap/mp-weixin/packages/general-search/general-search.js.map

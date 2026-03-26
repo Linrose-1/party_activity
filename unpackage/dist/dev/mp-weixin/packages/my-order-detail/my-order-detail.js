@@ -61,9 +61,9 @@ const _sfc_main = {
         if (error)
           throw new Error(error);
         detail.value = data;
-        common_vendor.index.__f__("log", "at pages/my-order-detail/my-order-detail.vue:169", "订单详情数据:", data);
+        common_vendor.index.__f__("log", "at packages/my-order-detail/my-order-detail.vue:169", "订单详情数据:", data);
       } catch (e) {
-        common_vendor.index.__f__("error", "at pages/my-order-detail/my-order-detail.vue:171", "获取详情失败", e);
+        common_vendor.index.__f__("error", "at packages/my-order-detail/my-order-detail.vue:171", "获取详情失败", e);
         loadError.value = true;
       } finally {
         isLoading.value = false;
@@ -225,6 +225,6 @@ const _sfc_main = {
     };
   }
 };
-const MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["__scopeId", "data-v-fc3d86e7"]]);
+const MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["__scopeId", "data-v-2fc408a2"]]);
 wx.createPage(MiniProgramPage);
-//# sourceMappingURL=../../../.sourcemap/mp-weixin/pages/my-order-detail/my-order-detail.js.map
+//# sourceMappingURL=../../../.sourcemap/mp-weixin/packages/my-order-detail/my-order-detail.js.map

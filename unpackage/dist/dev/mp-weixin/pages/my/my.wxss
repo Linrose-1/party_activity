@@ -144,8 +144,8 @@
 		grid-template-columns: repeat(5, 1fr);
 		gap: 10rpx;
 		/* 可以适当减小间距以容纳更多项 */
-		margin-top: 30rpx;
-		padding-top: 30rpx;
+		margin-top: 10rpx;
+		padding-top: 10rpx;
 		border-top: 1rpx solid rgba(255, 255, 255, 0.2);
 }
 .account-item.data-v-2f1ef635 {
@@ -546,3 +546,50 @@
 		box-shadow: 0 2rpx 8rpx rgba(255, 77, 79, 0.3);
 		z-index: 10;
 }
+
+	/* --- 元数据行：存放眼睛和ID --- */
+.user-meta-row.data-v-2f1ef635 {
+		display: flex;
+		justify-content: space-between;
+		/* 左右分布 */
+		align-items: center;
+		margin-top: 20rpx;
+		width: 100%;
+}
+
+	/* 左侧眼睛开关 */
+.eye-toggle-inline.data-v-2f1ef635 {
+		display: flex;
+		align-items: center;
+		background-color: rgba(0, 0, 0, 0.1);
+		padding: 4rpx 12rpx;
+		border-radius: 8rpx;
+		transition: background-color 0.2s;
+}
+.eye-toggle-inline.data-v-2f1ef635:active {
+		background-color: rgba(0, 0, 0, 0.2);
+}
+.eye-label-text.data-v-2f1ef635 {
+		font-size: 20rpx;
+		color: rgba(255, 255, 255, 0.7);
+		margin-left: 8rpx;
+}
+
+	/* 右侧ID显示（修正原有样式，去掉 align-self） */
+.user-id-display.data-v-2f1ef635 {
+		font-size: 22rpx;
+		color: rgba(255, 255, 255, 0.7);
+		background-color: rgba(0, 0, 0, 0.1);
+		padding: 4rpx 16rpx;
+		border-radius: 10rpx;
+		display: inline-flex;
+		align-items: center;
+}
+
+	/* 账户区域容器（去掉绝对定位的 padding） */
+	/* .account-container {
+		width: 100%;
+		margin-top: 20rpx;
+		padding-top: 30rpx;
+		border-top: 1rpx solid rgba(255, 255, 255, 0.2);
+	} */

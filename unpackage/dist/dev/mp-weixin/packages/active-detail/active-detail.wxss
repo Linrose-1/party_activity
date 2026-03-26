@@ -1,5 +1,6 @@
 /* 水平间距 */
 /* 水平间距 */
+/* 自定义全局主题色变量 */
 .user-select-text.data-v-9217aa1c {
   user-select: text;
   -webkit-user-select: text;
@@ -27,6 +28,119 @@
   font-weight: bold;
   box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
   z-index: 20;
+}
+.banner-section.data-v-9217aa1c {
+  position: relative;
+  overflow: hidden;
+  /* 1. 左上角类型标签 */
+  /* 2. 右下角报名状态 */
+  /* 3. 左下角赞助商迷你区 (磨砂效果) */
+}
+.banner-section .tags-overlay-top.data-v-9217aa1c {
+  position: absolute;
+  top: 30rpx;
+  left: 30rpx;
+  z-index: 10;
+}
+.banner-section .tags-overlay-top .event-cover-tag.data-v-9217aa1c {
+  background-color: rgba(255, 98, 177, 0.9);
+  color: #fff;
+  font-size: 22rpx;
+  padding: 6rpx 18rpx;
+  border-radius: 8rpx;
+  font-weight: bold;
+}
+.banner-section .join-status-overlay.data-v-9217aa1c {
+  position: absolute;
+  bottom: 30rpx;
+  right: 30rpx;
+  z-index: 10;
+}
+.banner-section .join-status-overlay .status-pill.data-v-9217aa1c {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  padding: 10rpx 24rpx;
+  border-radius: 40rpx;
+  color: #fff;
+  font-size: 24rpx;
+  font-weight: bold;
+  box-shadow: 0 4rpx 10rpx rgba(0, 0, 0, 0.2);
+}
+.banner-section .join-status-overlay .status-pill.join-status-0.data-v-9217aa1c {
+  background: rgba(0, 0, 0, 0.5);
+}
+.banner-section .join-status-overlay .status-pill.join-status-1.data-v-9217aa1c {
+  background: #f39c12;
+}
+.banner-section .join-status-overlay .status-pill.join-status-2.data-v-9217aa1c {
+  background: #2ecc71;
+}
+.banner-section .sponsor-mini-card.data-v-9217aa1c {
+  position: absolute;
+  bottom: 20rpx;
+  left: 20rpx;
+  z-index: 10;
+  /* 宽度固定，高度随内容自适应 */
+  width: 150rpx;
+  padding: 16rpx 0rpx;
+  border-radius: 20rpx;
+  background: rgba(255, 255, 255, 0.45);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border: 1rpx solid rgba(255, 255, 255, 0.3);
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.1);
+}
+.banner-section .sponsor-mini-card .sponsor-mini-list.data-v-9217aa1c {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
+.banner-section .sponsor-mini-card .sp-mini-item.data-v-9217aa1c {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+.banner-section .sponsor-mini-card .sp-mini-item .sp-mini-logo.data-v-9217aa1c {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: 50%;
+  background: #fff;
+  border: 2rpx solid rgba(255, 255, 255, 0.8);
+  margin-bottom: 6rpx;
+}
+.banner-section .sponsor-mini-card .sp-mini-item .sp-mini-name.data-v-9217aa1c {
+  font-size: 18rpx;
+  color: #000;
+  font-weight: bold;
+  width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
+}
+.banner-section .sponsor-mini-card .sp-mini-more-box.data-v-9217aa1c {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 12rpx;
+  padding-top: 8rpx;
+  border-top: 1rpx solid rgba(255, 255, 255, 0.2);
+}
+.banner-section .sponsor-mini-card .sp-mini-more-box .sp-mini-more.data-v-9217aa1c {
+  font-size: 20rpx;
+  color: #FF62B1;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: 2rpx;
+}
+.banner-section .sponsor-mini-card.data-v-9217aa1c:active {
+  opacity: 0.9;
+  transform: scale(0.96);
 }
 .banner-swiper.data-v-9217aa1c,
 .banner-image.data-v-9217aa1c {
@@ -156,7 +270,7 @@
   font-weight: bold;
   margin-bottom: 30rpx;
   display: block;
-  color: #333;
+  color: #FF62B1;
 }
 .event-header .info-list.data-v-9217aa1c {
   margin-bottom: 30rpx;
@@ -178,7 +292,7 @@
   flex: 1;
 }
 .event-header .info-list .info-item .info-value.highlight.data-v-9217aa1c {
-  color: #ff1a3c;
+  color: #FF62B1;
   font-weight: 500;
 }
 .event-header .info-list .info-item .info-value.nav-link.data-v-9217aa1c {
@@ -224,6 +338,47 @@
   color: #666;
   margin: 10rpx 0;
   gap: 10rpx;
+}
+
+/* 1. 起聚名额提示框样式 */
+.limit-slots-tip.data-v-9217aa1c {
+  padding: 20rpx 30rpx;
+  font-size: 24rpx;
+  display: flex;
+  align-items: center;
+  margin: 24rpx;
+  border-radius: 12rpx;
+  border: 1rpx solid;
+  line-height: 1.4;
+}
+
+/* 2. 聚店名称下划线 */
+.clickable-venue.data-v-9217aa1c {
+  text-decoration: underline;
+  font-weight: bold;
+  /* 继承 nav-link 的颜色，通常为蓝色或主题色 */
+}
+
+/* 3. 统计项文字下划线 */
+.stat-label.underlined.data-v-9217aa1c {
+  display: inline-block;
+  position: relative;
+  padding-bottom: 4rpx;
+}
+.stat-label.underlined.data-v-9217aa1c::after {
+  content: "";
+  position: absolute;
+  left: 10%;
+  right: 10%;
+  bottom: 0;
+  height: 2rpx;
+  background-color: #FF62B1;
+  opacity: 0.6;
+}
+
+/* 调整 stat-item 点击反馈 */
+.stat-item.data-v-9217aa1c:active {
+  opacity: 0.7;
 }
 .event-stats.data-v-9217aa1c {
   display: flex;

@@ -27,6 +27,11 @@ const _sfc_main = {
     const userInfo = common_vendor.ref({});
     const isLogin = common_vendor.ref(false);
     const creditScore = common_vendor.ref(null);
+    const isAccountVisible = common_vendor.ref(common_vendor.index.getStorageSync("isAccountVisible") || false);
+    const toggleAccountVisible = () => {
+      isAccountVisible.value = !isAccountVisible.value;
+      common_vendor.index.setStorageSync("isAccountVisible", isAccountVisible.value);
+    };
     const unreadData = common_vendor.ref({
       total: 0,
       // 总未读
@@ -69,7 +74,7 @@ const _sfc_main = {
           }
         }
       } catch (e) {
-        common_vendor.index.__f__("error", "at pages/my/my.vue:220", "获取未读数失败", e);
+        common_vendor.index.__f__("error", "at pages/my/my.vue:240", "获取未读数失败", e);
       }
     };
     const checkLoginStatusAndFetchData = () => {
@@ -101,15 +106,15 @@ const _sfc_main = {
         });
         if (!error && data) {
           userInfo.value = data;
-          common_vendor.index.__f__("log", "at pages/my/my.vue:259", "getUserInfo userInfo:", userInfo.value);
+          common_vendor.index.__f__("log", "at pages/my/my.vue:279", "getUserInfo userInfo:", userInfo.value);
           getCreditScore();
         } else {
-          common_vendor.index.__f__("log", "at pages/my/my.vue:263", "获取用户信息失败:", error);
+          common_vendor.index.__f__("log", "at pages/my/my.vue:283", "获取用户信息失败:", error);
           isLogin.value = false;
           userInfo.value = {};
         }
       } catch (err) {
-        common_vendor.index.__f__("log", "at pages/my/my.vue:269", "请求异常:", err);
+        common_vendor.index.__f__("log", "at pages/my/my.vue:289", "请求异常:", err);
         isLogin.value = false;
         userInfo.value = {};
       }
@@ -124,24 +129,34 @@ const _sfc_main = {
         });
         if (!error && data) {
           creditScore.value = data.totalScore || null;
-          common_vendor.index.__f__("log", "at pages/my/my.vue:286", "getCreditScore:", creditScore.value);
+          common_vendor.index.__f__("log", "at pages/my/my.vue:306", "getCreditScore:", creditScore.value);
         }
       } catch (err) {
-        common_vendor.index.__f__("log", "at pages/my/my.vue:289", "获取信用分失败:", err);
+        common_vendor.index.__f__("log", "at pages/my/my.vue:309", "获取信用分失败:", err);
       }
     };
     const accountList = common_vendor.computed(() => {
       const user = userInfo.value;
       return [
+        // {
+        // 	value: user.activityCount || 0,
+        // 	label: '我的聚会',
+        // 	path: '/packages/my-active/my-active'
+        // },
+        // {
+        // 	value: user.postCount || 0,
+        // 	label: '我的商机',
+        // 	path: '/packages/my-opportunity/my-opportunity'
+        // },
         {
-          value: user.activityCount || 0,
-          label: "我的聚会",
-          path: "/packages/my-active/my-active"
+          value: user.shareCount || 0,
+          label: "我的商友",
+          path: "/packages/my-shareList/my-shareList"
         },
         {
-          value: user.postCount || 0,
-          label: "我的商机",
-          path: "/packages/my-opportunity/my-opportunity"
+          value: user.friendCount || 0,
+          label: "我的圈友",
+          path: "/packages/my-circleList/my-circleList"
         },
         {
           value: user.currExperience || 0,
@@ -292,20 +307,32 @@ const _sfc_main = {
     };
     const featureList = common_vendor.ref([
       // 第 1 行
+      // {
+      // 	name: '我的商友',
+      // 	desc: '查看我邀请的商友列表',
+      // 	icon: '../../static/icon/商友邀请.png', // 建议换一个列表图标
+      // 	path: '/packages/my-shareList/my-shareList',
+      // 	highlight: true
+      // },
+      // {
+      // 	name: '我的圈友',
+      // 	desc: '管理您的互圈人脉',
+      // 	icon: '../../static/icon/社交互动.png', // 建议换一个圈子图标
+      // 	path: '/packages/my-circleList/my-circleList',
+      // 	highlight: true
+      // },
       {
-        name: "我的商友",
-        desc: "查看我邀请的商友列表",
-        icon: "../../static/icon/商友邀请.png",
-        // 建议换一个列表图标
-        path: "/packages/my-shareList/my-shareList",
+        name: "我的聚会",
+        desc: "管理您的聚会资源",
+        icon: "../../static/icon/聚会.png",
+        path: "/packages/my-active/my-active",
         highlight: true
       },
       {
-        name: "我的圈友",
-        desc: "管理您的互圈人脉",
-        icon: "../../static/icon/社交互动.png",
-        // 建议换一个圈子图标
-        path: "/packages/my-circleList/my-circleList",
+        name: "我的商机",
+        desc: "管理您的商机帖子",
+        icon: "../../static/icon/商机S.png",
+        path: "/packages/my-opportunity/my-opportunity",
         highlight: true
       },
       // 第 2 行
@@ -432,10 +459,10 @@ const _sfc_main = {
         common_vendor.index.makePhoneCall({
           phoneNumber: item.phone,
           success: () => {
-            common_vendor.index.__f__("log", "at pages/my/my.vue:621", "拨打电话成功");
+            common_vendor.index.__f__("log", "at pages/my/my.vue:666", "拨打电话成功");
           },
           fail: (err) => {
-            common_vendor.index.__f__("log", "at pages/my/my.vue:624", "拨打电话失败:", err);
+            common_vendor.index.__f__("log", "at pages/my/my.vue:669", "拨打电话失败:", err);
           }
         });
         return;
@@ -516,32 +543,39 @@ const _sfc_main = {
         m: common_vendor.t(userProfessionalTitleDisplay.value),
         n: common_vendor.t(userCompanyAndPositionDisplay.value),
         o: common_vendor.t(userInfo.value.parentName || "无"),
-        p: userInfo.value.id
+        p: common_vendor.p({
+          type: isAccountVisible.value ? "eye-filled" : "eye-slash-filled",
+          size: "18",
+          color: "rgba(255, 255, 255, 0.7)"
+        }),
+        q: common_vendor.t(isAccountVisible.value ? "已显" : "已隐"),
+        r: common_vendor.o(toggleAccountVisible),
+        s: userInfo.value.id
       }, userInfo.value.id ? {
-        q: common_vendor.t(userInfo.value.countryStr ? userInfo.value.countryStr + " · " : ""),
-        r: common_vendor.t(userInfo.value.virtualId)
+        t: common_vendor.t(userInfo.value.countryStr ? userInfo.value.countryStr + " · " : ""),
+        v: common_vendor.t(userInfo.value.virtualId)
       } : {}, {
-        s: common_vendor.o(onViewAccountDetail),
-        t: common_vendor.f(accountList.value, (item, k0, i0) => {
+        w: common_vendor.o(onViewAccountDetail),
+        x: common_vendor.f(accountList.value, (item, k0, i0) => {
           return {
-            a: common_vendor.t(item.value),
+            a: common_vendor.t(isAccountVisible.value ? item.value : "--"),
             b: common_vendor.t(item.label),
             c: item.label,
             d: common_vendor.o(($event) => navigateToAccountDetail(item), item.label)
           };
         })
       }) : {
-        v: common_vendor.p({
+        y: common_vendor.p({
           type: "person-filled",
           size: "30",
           color: "#FF8C00"
         }),
-        w: common_vendor.o(handleLoginClick)
+        z: common_vendor.o(handleLoginClick)
       }, {
-        x: isLogin.value && userInfo.value && userInfo.value.topUpLevel && userInfo.value.topUpLevel.isExpirySoon
+        A: isLogin.value && userInfo.value && userInfo.value.topUpLevel && userInfo.value.topUpLevel.isExpirySoon
       }, isLogin.value && userInfo.value && userInfo.value.topUpLevel && userInfo.value.topUpLevel.isExpirySoon ? {
-        y: common_vendor.o(goToMemberRecharge),
-        z: common_vendor.p({
+        B: common_vendor.o(goToMemberRecharge),
+        C: common_vendor.p({
           ["show-icon"]: true,
           scrollable: true,
           speed: 50,
@@ -550,7 +584,7 @@ const _sfc_main = {
           text: `温馨提示：您的会员将于 ${formatDate((_a = userInfo.value.topUpLevel) == null ? void 0 : _a.expirationTime)} 到期，距离到期还有 ${(_b = userInfo.value.topUpLevel) == null ? void 0 : _b.daysUntilExpiry} 天，可以到用户中心进行会员续期充值或者升级会员`
         })
       } : {}, {
-        A: common_vendor.f(coreFeatures.value, (item, k0, i0) => {
+        D: common_vendor.f(coreFeatures.value, (item, k0, i0) => {
           return common_vendor.e({
             a: common_vendor.t(item.name),
             b: item.icon,
@@ -563,7 +597,7 @@ const _sfc_main = {
             g: common_vendor.o(($event) => navigateToCoreFeature(item), item.name)
           });
         }),
-        B: common_vendor.f(featureList.value, (item, k0, i0) => {
+        E: common_vendor.f(featureList.value, (item, k0, i0) => {
           return common_vendor.e({
             a: item.icon,
             b: item.name === "评论中心" && unreadData.value.activity + unreadData.value.business + unreadData.value.store > 0

@@ -1,5 +1,6 @@
 /* 水平间距 */
 /* 水平间距 */
+/* 自定义全局主题色变量 */
 .menu-card.data-v-5571075f {
   width: 620rpx;
   background-color: #fff;
@@ -71,32 +72,36 @@
   background: rgba(255, 255, 255, 0.3);
 }
 
-/* 信用分胶囊：紧凑且圆润 */
-.mini-credit-capsule.data-v-5571075f {
+/* 信用信息行容器 */
+.credit-info-row.data-v-5571075f {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+  margin-top: 16rpx;
+}
+
+/* 独立胶囊通用样式 */
+.mini-capsule.data-v-5571075f {
   display: inline-flex;
-  /* 关键：不占满行 */
   align-items: center;
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.15);
+  /* 稍微提高一点透明度，让边界更清晰 */
   padding: 6rpx 18rpx;
   border-radius: 40rpx;
-  margin-top: 16rpx;
-  gap: 8rpx;
-  border: 1rpx solid rgba(255, 255, 255, 0.15);
+  gap: 6rpx;
+  border: 1rpx solid rgba(255, 255, 255, 0.2);
   width: -webkit-fit-content;
   width: fit-content;
-  /* 兼容性写法，确保只包围文字 */
+  transition: background 0.2s;
 }
-.mini-credit-capsule .credit-text.data-v-5571075f {
+.mini-capsule .capsule-text.data-v-5571075f {
   font-size: 20rpx;
   color: #fff;
-  font-weight: bold;
+  font-weight: 500;
+  line-height: 1;
 }
-.mini-credit-capsule .score-text.data-v-5571075f {
-  font-size: 20rpx;
-  color: rgba(255, 255, 255, 0.9);
-}
-.mini-credit-capsule.data-v-5571075f:active {
-  background: rgba(255, 255, 255, 0.25);
+.mini-capsule.data-v-5571075f:active {
+  background: rgba(255, 255, 255, 0.3);
 }
 .close-icon.data-v-5571075f {
   position: absolute;

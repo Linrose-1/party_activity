@@ -1,5 +1,6 @@
 /* 水平间距 */
 /* 水平间距 */
+/* 自定义全局主题色变量 */
 .match-container.data-v-52394c29 {
   background-color: #F8F9FB;
   min-height: 100vh;

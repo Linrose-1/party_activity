@@ -23,12 +23,19 @@
 						</view>
 
 						<!-- 第二行：信用信息胶囊 (紧凑型布局) -->
-						<view class="mini-credit-capsule" v-if="creditLevel || totalScore">
-							<uni-icons type="vip-filled" size="12" color="#fff"></uni-icons>
-							<text class="credit-text" @click.stop="handleAction('navToCredit')">{{ creditLevel }} |
-							</text>
-							<text class="score-text">猩友信用：{{ totalScore }}分</text>
-							<uni-icons type="right" size="10" color="rgba(255,255,255,0.7)"></uni-icons>
+						<view class="credit-info-row" v-if="creditLevel || totalScore">
+							<!-- 胶囊 1：信用等级 -->
+							<view class="mini-capsule" v-if="creditLevel" @click.stop="handleAction('navToCredit')">
+								<uni-icons type="vip-filled" size="12" color="#fff"></uni-icons>
+								<text class="capsule-text">{{ creditLevel }}</text>
+								<!-- <uni-icons type="right" size="10" color="rgba(255,255,255,0.7)"></uni-icons> -->
+							</view>
+
+							<!-- 胶囊 2：信用分数 -->
+							<view class="mini-capsule" v-if="totalScore">
+								<text class="capsule-text">猩友信用：{{ totalScore }}分</text>
+								<!-- <uni-icons type="right" size="10" color="rgba(255,255,255,0.7)"></uni-icons> -->
+							</view>
 						</view>
 
 						<!-- 兜底文案 -->
@@ -334,33 +341,36 @@
 		}
 	}
 
-	/* 信用分胶囊：紧凑且圆润 */
-	.mini-credit-capsule {
+	/* 信用信息行容器 */
+	.credit-info-row {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 12rpx;
+		margin-top: 16rpx;
+	}
+
+	/* 独立胶囊通用样式 */
+	.mini-capsule {
 		display: inline-flex;
-		/* 关键：不占满行 */
 		align-items: center;
-		background: rgba(255, 255, 255, 0.12);
+		background: rgba(255, 255, 255, 0.15);
+		/* 稍微提高一点透明度，让边界更清晰 */
 		padding: 6rpx 18rpx;
 		border-radius: 40rpx;
-		margin-top: 16rpx;
-		gap: 8rpx;
-		border: 1rpx solid rgba(255, 255, 255, 0.15);
+		gap: 6rpx;
+		border: 1rpx solid rgba(255, 255, 255, 0.2);
 		width: fit-content;
-		/* 兼容性写法，确保只包围文字 */
+		transition: background 0.2s;
 
-		.credit-text {
+		.capsule-text {
 			font-size: 20rpx;
 			color: #fff;
-			font-weight: bold;
-		}
-
-		.score-text {
-			font-size: 20rpx;
-			color: rgba(255, 255, 255, 0.9);
+			font-weight: 500;
+			line-height: 1;
 		}
 
 		&:active {
-			background: rgba(255, 255, 255, 0.25);
+			background: rgba(255, 255, 255, 0.3);
 		}
 	}
 

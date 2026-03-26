@@ -1,5 +1,6 @@
 /* 水平间距 */
 /* 水平间距 */
+/* 自定义全局主题色变量 */
 .store-card.data-v-8cae2ec5 {
   background-color: #fff;
   border-radius: 24rpx;
@@ -51,7 +52,7 @@
   color: #999;
 }
 .card-interaction-row .mini-interaction.active.data-v-8cae2ec5 {
-  color: #ff6b00;
+  color: #FF62B1;
 }
 .card-interaction-row .mini-interaction text.data-v-8cae2ec5 {
   line-height: 1;
@@ -106,7 +107,7 @@
 }
 .price-info .price-value.data-v-8cae2ec5 {
   font-size: 28rpx;
-  color: #ff6b00;
+  color: #FF62B1;
   font-weight: bold;
 }
 .card-footer.data-v-8cae2ec5 {
@@ -125,12 +126,12 @@
   font-weight: 500;
 }
 .btn.btn-primary-light.data-v-8cae2ec5 {
-  background-color: #fff5ec;
-  color: #ff6b00;
+  background-color: rgba(255, 98, 177, 0.08);
+  color: #FF62B1;
 }
 .btn.btn-outline.data-v-8cae2ec5 {
-  border: 1rpx solid #ff6b00;
-  color: #ff6b00;
+  border: 1rpx solid #FF62B1;
+  color: #FF62B1;
 }
 
 /* ── 阅读留痕 ── */
@@ -155,7 +156,7 @@
   margin-right: -10rpx;
 }
 .view-avatar-row .silent-avatar.data-v-8cae2ec5 {
-  border-color: #FF8C00 !important;
+  border-color: #FF62B1 !important;
 }
 .view-avatar-row .view-count-txt.data-v-8cae2ec5 {
   font-size: 22rpx;
@@ -168,16 +169,16 @@
   border-radius: 8rpx;
 }
 .status-badge.status-normal.data-v-8cae2ec5 {
-  background: #e8f7ee;
-  color: #27ae60;
+  background: rgba(46, 204, 113, 0.1);
+  color: #2ecc71;
 }
 .status-badge.status-pending.data-v-8cae2ec5 {
-  background: #fff8e6;
+  background: rgba(243, 156, 18, 0.1);
   color: #f39c12;
 }
 .status-badge.status-failed.data-v-8cae2ec5 {
-  background: #fff0f0;
-  color: #e74c3c;
+  background: rgba(245, 108, 108, 0.1);
+  color: #f56c6c;
 }
 .helper-tag.data-v-8cae2ec5 {
   margin-top: 10rpx;

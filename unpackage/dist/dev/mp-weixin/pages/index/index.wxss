@@ -1,5 +1,6 @@
 /* 水平间距 */
 /* 水平间距 */
+/* 自定义全局主题色变量 */
 /* --- 1. 页面整体布局 --- */
 .login-container.data-v-1cf27b2a {
   display: flex;

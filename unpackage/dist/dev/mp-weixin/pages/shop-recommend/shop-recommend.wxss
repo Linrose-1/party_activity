@@ -1,5 +1,6 @@
 /* 水平间距 */
 /* 水平间距 */
+/* 自定义全局主题色变量 */
 /* 使用 SCSS 变量 */
 .container {
   background-color: #f8f8f8;

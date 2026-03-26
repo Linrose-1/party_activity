@@ -107,7 +107,7 @@
 
 	</view>
 
-	<AddCircleConfirmPopup ref="addCirclePopup" />
+	<AddCircleConfirmPopup ref="addCirclePopup" @success="onSocialActionSuccess" />
 	<InviteCircleConfirmPopup ref="inviteCirclePopup" @success="onSocialActionSuccess" />
 
 	<ShareTypePopup ref="shareTypePopupRef" @selectMode="handleShareTypeSelect" @change="onShareTypePopupChange" />
@@ -1269,32 +1269,77 @@
 	/**
 	 * [方法] 处理：加入TA圈 (申请入圈)
 	 */
-	const handleAddCircle = () => {
+	const handleAddCircle = async () => {
+		// 1. 守卫拦截：确保用户已登录且完善资料
+		if (!await checkLoginGuard()) return;
+
+		// 2. 检查目标用户信息是否已加载
+		if (!userInfo.value || !userInfo.value.id) {
+			return uni.showToast({
+				title: '用户信息加载中',
+				icon: 'none'
+			});
+		}
+
+		// 3. 构造组件需要的标准数据
 		const user = {
 			id: userInfo.value.id,
-			name: userInfo.value.realName || userInfo.value.nickname
+			name: userInfo.value.realName || userInfo.value.nickname,
+			avatar: userInfo.value.avatar
 		};
-		addCirclePopup.value.open(user);
+
+		console.log('🚀 准备调起 [加入TA圈] 弹窗:', user);
+
+		// 4. 调用组件
+		if (addCirclePopup.value) {
+			addCirclePopup.value.open(user);
+		} else {
+			console.error('❌ 未找到 addCirclePopup 实例');
+		}
 	};
 
 	/**
 	 * [方法] 处理：邀入我圈 (邀请入圈)
 	 */
-	const handleInviteCircle = () => {
+	const handleInviteCircle = async () => {
+		// 1. 守卫拦截
+		if (!await checkLoginGuard()) return;
+
+		if (!userInfo.value || !userInfo.value.id) return;
+
 		const user = {
 			id: userInfo.value.id,
-			name: userInfo.value.realName || userInfo.value.nickname
+			name: userInfo.value.realName || userInfo.value.nickname,
+			avatar: userInfo.value.avatar
 		};
-		inviteCirclePopup.value.open(user);
+
+		console.log('🚀 准备调起 [邀入我圈] 弹窗:', user);
+
+		if (inviteCirclePopup.value) {
+			inviteCirclePopup.value.open(user);
+		} else {
+			console.error('❌ 未找到 inviteCirclePopup 实例');
+		}
 	};
 
 	/**
 	 * [方法] 社交操作成功后的回调
 	 */
 	const onSocialActionSuccess = (targetId) => {
-		console.log('社交操作成功，目标用户ID:', targetId);
-		// 可根据业务需求在此处刷新用户信息或更新本地状态
-		// initializePage(fromShare.value); 
+		console.log('✅ 收到社交成功通知，目标ID:', targetId);
+
+		// 1. 立即弹出提示（双重保险）
+		uni.showToast({
+			title: '操作已成功',
+			icon: 'success'
+		});
+
+		// 2. 【核心】重新初始化页面数据，刷新 isFriend 状态
+		// 只有刷新了数据，底部的按钮才会从“加入TA圈”变成“已互圈”
+		initializePage(fromShare.value);
+
+		// 3. 通知全局（如果有其他地方引用了好友列表）
+		uni.$emit('refreshFriendList');
 	};
 
 	/**
@@ -1682,5 +1727,9 @@
 			display: block;
 			margin-bottom: 10rpx;
 		}
+	}
+	
+	::v-deep .uni-popup {
+	    z-index: 2000 !important;
 	}
 </style>

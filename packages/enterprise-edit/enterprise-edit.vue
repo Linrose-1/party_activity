@@ -18,9 +18,21 @@
 			<!-- 步骤1：企业基本信息 -->
 			<view v-if="currentStep === 1" class="step-content">
 				<view class="section-card">
-					<view class="group-title">营业执照信息</view>
+					<view class="group-title">企业信息</view>
 					<uni-forms ref="formStep1" :modelValue="form" :rules="rules" label-position="top"
 						label-width="100%">
+						<uni-forms-item label="企业LOGO" required>
+							<view class="logo-uploader enterprise-logo-style"
+								@click="handleImageUpload('enterpriseLogo', 'ent_logo')">
+								<image v-if="form.enterpriseLogo" :src="form.enterpriseLogo" mode="aspectFill"
+									class="logo-preview" />
+								<view v-else class="upload-placeholder">
+									<uni-icons type="camera-filled" size="30" color="#FF8600"></uni-icons>
+									<text>上传企业LOGO</text>
+								</view>
+							</view>
+							<view class="upload-tip">用于工商资质展示</view>
+						</uni-forms-item>
 						<uni-forms-item label="企业名称" name="enterpriseName" required>
 							<uni-easyinput v-model="form.enterpriseName" placeholder="请与营业执照保持一致" :inputBorder="false"
 								class="custom-input" />
@@ -55,7 +67,7 @@
 			<!-- 步骤2：品牌与展示 -->
 			<view v-if="currentStep === 2" class="step-content">
 				<view class="section-card">
-					<view class="group-title">品牌视觉形象</view>
+					<view class="group-title">品牌信息</view>
 					<uni-forms label-position="top" label-width="100%">
 						<uni-forms-item label="品牌Logo (建议圆形)" required>
 							<view class="logo-uploader" @click="handleImageUpload('logoUrl', 'logo')">
@@ -65,6 +77,10 @@
 									<text>上传Logo</text>
 								</view>
 							</view>
+						</uni-forms-item>
+						<uni-forms-item label="品牌名称" required>
+							<uni-easyinput v-model="form.brandName" placeholder="例如：猩聚社" :inputBorder="false"
+								class="custom-input" />
 						</uni-forms-item>
 						<uni-forms-item label="品牌标语 (Slogan)">
 							<uni-easyinput v-model="form.brandSlogan" placeholder="一句话描述您的品牌" :inputBorder="false"
@@ -82,8 +98,8 @@
 						</uni-forms-item>
 
 						<view class="group-title m-t-30">品牌介绍</view>
-						<uni-forms-item label="简短介绍 (150字内)" required>
-							<uni-easyinput type="textarea" v-model="form.shortIntro" maxlength="150"
+						<uni-forms-item label="简短介绍" required>
+							<uni-easyinput type="textarea" v-model="form.shortIntro" maxlength="3000"
 								placeholder="介绍一下您的企业核心业务和愿景..." class="custom-textarea" />
 						</uni-forms-item>
 						<uni-forms-item label="所属行业" name="industryFirst">
@@ -136,7 +152,7 @@
 					</view>
 
 					<!-- 3. 联系方式 -->
-					<view class="group-title m-t-30">联系方式</view>
+					<view class="group-title m-t-30">品牌联系</view>
 					<uni-forms label-position="top" label-width="100%">
 						<uni-forms-item label="客服电话">
 							<uni-easyinput v-model="form.customerServicePhone" placeholder="400-123-4567"
@@ -275,6 +291,9 @@
 	} from '@dcloudio/uni-app';
 	import request from '@/utils/request.js';
 	import uploadFile from '@/utils/upload.js';
+	import {
+		syncUserInfo
+	} from '@/utils/user.js';
 	// import DragUploader from '@/components/DragUploader.vue'; // 九图组件
 
 	// ==========================================
@@ -332,7 +351,7 @@
 	// 2. 页面状态与表单定义
 	// ==========================================
 	const currentStep = ref(1); // 当前步数 (1-4)
-	const stepTitles = ['基本信息', '品牌展示', '联系入口', '内容资产'];
+	const stepTitles = ['企业信息', '品牌展示', '联系入口', '内容资产'];
 	const enterpriseId = ref(null); // 后端返回的主键 ID
 	const isEditMode = ref(false); // 是否是从列表页进入的编辑模式
 	const industryTree = ref([]); // 格式化后的行业树
@@ -348,6 +367,8 @@
 	const form = reactive({
 		id: null,
 		enterpriseName: '',
+		enterpriseLogo: '',
+		brandName: '',
 		creditCode: '',
 		enterpriseType: '',
 		legalPerson: '',
@@ -428,10 +449,51 @@
 		}
 	};
 
+	/**
+	 * 【优化后】实名认证检查 (实时接口版)
+	 */
+	const checkRealName = async () => {
+		uni.showLoading({
+			title: '验证身份中...',
+			mask: true
+		});
+
+		// 1. 调用你封装好的同步方法，它会请求 /app-api/member/user/get 并更新缓存
+		const userInfo = await syncUserInfo();
+		uni.hideLoading();
+
+		// 2. 判定逻辑：如果获取失败（接口挂了）或者 idCert 不等于 1
+		if (!userInfo || userInfo.idCert !== 1) {
+			uni.showModal({
+				title: '实名认证提醒',
+				content: '创建企业需要先完成实名认证，是否立即前往？',
+				confirmText: '去认证',
+				cancelText: '取消',
+				confirmColor: '#FF8600',
+				success: (res) => {
+					if (res.confirm) {
+						uni.navigateTo({
+							url: '/packages/my-auth/my-auth'
+						});
+					}
+				}
+			});
+			return false;
+		}
+
+		// 3. 校验通过
+		return true;
+	};
+
 	// ==========================================
 	// 3. 生命周期钩子
 	// ==========================================
 	onLoad(async (options) => {
+		if (!options.id) {
+			await checkRealName();
+			// 这里不需要 return，让用户继续看表单
+		}
+
 		// 如果 URL 携带 id，说明是编辑模式
 		if (options.id) {
 			isEditMode.value = true;
@@ -492,6 +554,8 @@
 	 * 逻辑基本复用 handleStepProcess 的前半部分，但不做步骤加法
 	 */
 	const saveCurrentProgressSilence = async () => {
+		if (!isEditMode.value && !checkRealName()) return;
+
 		// 序列化当前已有的列表数据
 		form.brandImages = brandImageList.value.join(',');
 		form.offlineStores = JSON.stringify(offlineStores.value);
@@ -849,6 +913,15 @@
 	 * 分步提交逻辑 (保存并继续)
 	 */
 	const handleStepProcess = async () => {
+		if (currentStep.value === 1 && !isEditMode.value) {
+			const isVerified = await checkRealName();
+			if (!isVerified) {
+				// 如果没实名，checkRealName 已经弹过窗了，这里直接 return 终止提交逻辑即可
+				return;
+			}
+		}
+
+
 		// 序列化复杂数据
 		form.brandImages = brandImageList.value.join(',');
 		form.offlineStores = JSON.stringify(offlineStores.value);
@@ -1464,5 +1537,20 @@
 		font-weight: bold !important;
 		color: #333 !important;
 		margin-bottom: 16rpx !important;
+	}
+
+	.enterprise-logo-style {
+		border-radius: 16rpx !important;
+		/* 区别于品牌Logo的圆形 */
+		width: 200rpx !important;
+		height: 200rpx !important;
+		margin: 0 !important;
+		/* 不居中，左对齐更符合表单习惯 */
+	}
+
+	.upload-tip {
+		font-size: 22rpx;
+		color: #999;
+		margin-top: 10rpx;
 	}
 </style>

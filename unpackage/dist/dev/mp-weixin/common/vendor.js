@@ -7299,7 +7299,7 @@ function initOnError() {
 function initRuntimeSocketService() {
   const hosts = "192.168.144.182,127.0.0.1";
   const port = "8090";
-  const id = "mp-weixin_WQZwET";
+  const id = "mp-weixin__81PAl";
   const lazy = typeof swan !== "undefined";
   let restoreError = lazy ? () => {
   } : initOnError();
@@ -8345,12 +8345,6 @@ const pages = [
     }
   },
   {
-    path: "pages/activity-participants/activity-participants",
-    style: {
-      navigationBarTitleText: "报名用户"
-    }
-  },
-  {
     path: "pages/my-edit-label/my-edit-label",
     style: {
       navigationBarTitleText: "数字标签"
@@ -8399,12 +8393,6 @@ const pages = [
     }
   },
   {
-    path: "pages/general-search/general-search",
-    style: {
-      navigationBarTitleText: "普通搜索"
-    }
-  },
-  {
     path: "pages/shop-apply/shop-apply",
     style: {
       navigationBarTitleText: "申请上榜"
@@ -8423,12 +8411,6 @@ const pages = [
     }
   },
   {
-    path: "pages/my-order-detail/my-order-detail",
-    style: {
-      navigationBarTitleText: "订单详情"
-    }
-  },
-  {
     path: "pages/sponsor-detail/sponsor-detail",
     style: {
       navigationBarTitleText: "赞助信息详情"
@@ -8439,6 +8421,24 @@ const subPackages = [
   {
     root: "packages",
     pages: [
+      {
+        path: "general-search/general-search",
+        style: {
+          navigationBarTitleText: "普通搜索"
+        }
+      },
+      {
+        path: "my-order-detail/my-order-detail",
+        style: {
+          navigationBarTitleText: "订单详情"
+        }
+      },
+      {
+        path: "activity-participants/activity-participants",
+        style: {
+          navigationBarTitleText: "报名用户"
+        }
+      },
       {
         path: "my-account-informationDetails/my-account-informationDetails",
         style: {
@@ -8791,6 +8791,12 @@ const subPackages = [
         path: "active-verify/active-verify",
         style: {
           navigationBarTitleText: "聚会核销"
+        }
+      },
+      {
+        path: "sponsor-list/sponsor-list",
+        style: {
+          navigationBarTitleText: "赞助商列表"
         }
       }
     ]

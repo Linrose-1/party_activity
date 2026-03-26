@@ -731,22 +731,52 @@ const _sfc_main = {
         url: "/pages/home/home"
       });
     };
-    const handleAddCircle = () => {
+    const handleAddCircle = async () => {
+      if (!await utils_user.checkLoginGuard())
+        return;
+      if (!userInfo.value || !userInfo.value.id) {
+        return common_vendor.index.showToast({
+          title: "用户信息加载中",
+          icon: "none"
+        });
+      }
       const user = {
         id: userInfo.value.id,
-        name: userInfo.value.realName || userInfo.value.nickname
+        name: userInfo.value.realName || userInfo.value.nickname,
+        avatar: userInfo.value.avatar
       };
-      addCirclePopup.value.open(user);
+      common_vendor.index.__f__("log", "at packages/my-businessCard/my-businessCard.vue:1291", "🚀 准备调起 [加入TA圈] 弹窗:", user);
+      if (addCirclePopup.value) {
+        addCirclePopup.value.open(user);
+      } else {
+        common_vendor.index.__f__("error", "at packages/my-businessCard/my-businessCard.vue:1297", "❌ 未找到 addCirclePopup 实例");
+      }
     };
-    const handleInviteCircle = () => {
+    const handleInviteCircle = async () => {
+      if (!await utils_user.checkLoginGuard())
+        return;
+      if (!userInfo.value || !userInfo.value.id)
+        return;
       const user = {
         id: userInfo.value.id,
-        name: userInfo.value.realName || userInfo.value.nickname
+        name: userInfo.value.realName || userInfo.value.nickname,
+        avatar: userInfo.value.avatar
       };
-      inviteCirclePopup.value.open(user);
+      common_vendor.index.__f__("log", "at packages/my-businessCard/my-businessCard.vue:1316", "🚀 准备调起 [邀入我圈] 弹窗:", user);
+      if (inviteCirclePopup.value) {
+        inviteCirclePopup.value.open(user);
+      } else {
+        common_vendor.index.__f__("error", "at packages/my-businessCard/my-businessCard.vue:1321", "❌ 未找到 inviteCirclePopup 实例");
+      }
     };
     const onSocialActionSuccess = (targetId) => {
-      common_vendor.index.__f__("log", "at packages/my-businessCard/my-businessCard.vue:1295", "社交操作成功，目标用户ID:", targetId);
+      common_vendor.index.__f__("log", "at packages/my-businessCard/my-businessCard.vue:1329", "✅ 收到社交成功通知，目标ID:", targetId);
+      common_vendor.index.showToast({
+        title: "操作已成功",
+        icon: "success"
+      });
+      initializePage(fromShare.value);
+      common_vendor.index.$emit("refreshFriendList");
     };
     return (_ctx, _cache) => {
       return common_vendor.e({
@@ -856,23 +886,24 @@ const _sfc_main = {
         O: common_vendor.sr(addCirclePopup, "34d71473-8", {
           "k": "addCirclePopup"
         }),
-        P: common_vendor.sr(inviteCirclePopup, "34d71473-9", {
+        P: common_vendor.o(onSocialActionSuccess),
+        Q: common_vendor.sr(inviteCirclePopup, "34d71473-9", {
           "k": "inviteCirclePopup"
         }),
-        Q: common_vendor.o(onSocialActionSuccess),
-        R: common_vendor.sr(shareTypePopupRef, "34d71473-10", {
+        R: common_vendor.o(onSocialActionSuccess),
+        S: common_vendor.sr(shareTypePopupRef, "34d71473-10", {
           "k": "shareTypePopupRef"
         }),
-        S: common_vendor.o(handleShareTypeSelect),
-        T: common_vendor.o(onShareTypePopupChange),
-        U: userStatus.value !== "GUEST" && userStatus.value !== "SELF"
+        T: common_vendor.o(handleShareTypeSelect),
+        U: common_vendor.o(onShareTypePopupChange),
+        V: userStatus.value !== "GUEST" && userStatus.value !== "SELF"
       }, userStatus.value !== "GUEST" && userStatus.value !== "SELF" ? {
-        V: common_vendor.o(openShareTypePopup)
+        W: common_vendor.o(openShareTypePopup)
       } : {}, {
-        W: common_vendor.sr(guidePopupRef, "34d71473-12", {
+        X: common_vendor.sr(guidePopupRef, "34d71473-12", {
           "k": "guidePopupRef"
         }),
-        X: common_vendor.p({
+        Y: common_vendor.p({
           scenario: guideScenario.value
         })
       });

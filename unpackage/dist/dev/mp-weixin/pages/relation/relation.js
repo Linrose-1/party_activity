@@ -52,9 +52,10 @@ const _sfc_main = {
       return "请选择拟访友时段";
     });
     const isListEmpty = common_vendor.computed(() => userList.value.length === 0 && loadingStatus.value !== "loading");
-    common_vendor.onReady(() => {
+    common_vendor.onReady(async () => {
       var _a;
-      if (utils_user.isScenario3User()) {
+      const shouldShow = await utils_user.canShowProfileRemind();
+      if (shouldShow) {
         (_a = smartGuidePopupRef.value) == null ? void 0 : _a.open();
       }
     });

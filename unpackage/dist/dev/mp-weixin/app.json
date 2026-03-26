@@ -15,7 +15,6 @@
     "pages/my-shop/my-shop",
     "pages/my-shopRecommend/my-shopRecommend",
     "pages/login/login",
-    "pages/activity-participants/activity-participants",
     "pages/my-edit-label/my-edit-label",
     "pages/my-active-registeredUser/my-active-registeredUser",
     "pages/my-active-secondRegistration/my-active-secondRegistration",
@@ -24,17 +23,18 @@
     "pages/my-order/my-order",
     "pages/relation/relation",
     "pages/six-degrees/six-degrees",
-    "pages/general-search/general-search",
     "pages/shop-apply/shop-apply",
     "pages/my-systemSuggestions/my-systemSuggestions",
     "pages/platform-intro/platform-intro",
-    "pages/my-order-detail/my-order-detail",
     "pages/sponsor-detail/sponsor-detail"
   ],
   "subPackages": [
     {
       "root": "packages",
       "pages": [
+        "general-search/general-search",
+        "my-order-detail/my-order-detail",
+        "activity-participants/activity-participants",
         "my-account-informationDetails/my-account-informationDetails",
         "my-account/my-account",
         "home-opportunitiesPublish/home-opportunitiesPublish",
@@ -93,7 +93,8 @@
         "my-shareList/my-shareList",
         "my-circleList/my-circleList",
         "silent-view-trace/silent-view-trace",
-        "active-verify/active-verify"
+        "active-verify/active-verify",
+        "sponsor-list/sponsor-list"
       ]
     }
   ],

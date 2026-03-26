@@ -14,6 +14,7 @@ if (!Math) {
 const ActivityCard = () => "../../components/ActivityCard.js";
 const SmartGuidePopup = () => "../../components/SmartGuidePopup.js";
 const pageSize = 10;
+const PRIMARY_COLOR = "#FF62B1";
 const _sfc_main = {
   __name: "active",
   setup(__props) {
@@ -53,7 +54,7 @@ const _sfc_main = {
         }
       });
       common_vendor.index.$on("refreshActivityList", () => {
-        common_vendor.index.__f__("log", "at pages/active/active.vue:158", "收到刷新信号，执行静默刷新");
+        common_vendor.index.__f__("log", "at pages/active/active.vue:161", "收到刷新信号，执行静默刷新");
         silentRefresh();
       });
     });
@@ -154,7 +155,7 @@ const _sfc_main = {
         ]);
         await getActiveList(false);
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/active/active.vue:318", "[聚会列表] 初始化失败:", error);
+        common_vendor.index.__f__("error", "at pages/active/active.vue:321", "[聚会列表] 初始化失败:", error);
         common_vendor.index.showToast({
           title: "数据加载失败",
           icon: "none"
@@ -176,7 +177,7 @@ const _sfc_main = {
         }
       });
       if (error) {
-        common_vendor.index.__f__("error", "at pages/active/active.vue:344", "[轮播图] 获取失败:", error);
+        common_vendor.index.__f__("error", "at pages/active/active.vue:347", "[轮播图] 获取失败:", error);
         bannerList.value = [];
         return;
       }
@@ -192,7 +193,7 @@ const _sfc_main = {
         }
       });
       if (error) {
-        common_vendor.index.__f__("error", "at pages/active/active.vue:365", "[类型列表] 获取失败:", error);
+        common_vendor.index.__f__("error", "at pages/active/active.vue:368", "[类型列表] 获取失败:", error);
         throw new Error("获取类型失败");
       }
       typeList.value = data || [];
@@ -203,7 +204,7 @@ const _sfc_main = {
         error
       } = await utils_request.request("/app-api/member/activity/status-list");
       if (error) {
-        common_vendor.index.__f__("error", "at pages/active/active.vue:380", "[状态列表] 获取失败:", error);
+        common_vendor.index.__f__("error", "at pages/active/active.vue:383", "[状态列表] 获取失败:", error);
         throw new Error("获取状态失败");
       }
       statusList.value = data || [];
@@ -257,7 +258,7 @@ const _sfc_main = {
         }
         utils_unread.fetchGlobalUnread();
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/active/active.vue:446", "[聚会列表] 请求异常:", error);
+        common_vendor.index.__f__("error", "at pages/active/active.vue:449", "[聚会列表] 请求异常:", error);
         hasMore.value = false;
       } finally {
         loading.value = false;
@@ -271,14 +272,14 @@ const _sfc_main = {
       common_vendor.index.scanCode({
         onlyFromCamera: true,
         success: (res) => {
-          common_vendor.index.__f__("log", "at pages/active/active.vue:467", "🔵 [第一步] 原始数据:", res.path);
+          common_vendor.index.__f__("log", "at pages/active/active.vue:470", "🔵 [第一步] 原始数据:", res.path);
           let rawPath = res.path || res.result || "";
           if (rawPath) {
             let url = rawPath.startsWith("/") ? rawPath : "/" + rawPath;
             if (url.includes("scene=")) {
               let sceneContent = url.split("scene=")[1];
               const decodedScene = decodeURIComponent(sceneContent);
-              common_vendor.index.__f__("log", "at pages/active/active.vue:481", "🌈 [解码后数据]:", decodedScene);
+              common_vendor.index.__f__("log", "at pages/active/active.vue:484", "🌈 [解码后数据]:", decodedScene);
               const params = {};
               decodedScene.split("&").forEach((item) => {
                 const [k, v] = item.split("=");
@@ -290,11 +291,11 @@ const _sfc_main = {
               if (params.activityId && params.joinUserId) {
                 url = `/packages/active-verify/active-verify?activityId=${params.activityId}&joinUserId=${params.joinUserId}`;
               } else {
-                common_vendor.index.__f__("error", "at pages/active/active.vue:495", "❌ 解析后的参数缺失:", params);
+                common_vendor.index.__f__("error", "at pages/active/active.vue:498", "❌ 解析后的参数缺失:", params);
               }
             }
             setTimeout(() => {
-              common_vendor.index.__f__("log", "at pages/active/active.vue:501", "🚀 [第二步] 最终跳转 URL:", url);
+              common_vendor.index.__f__("log", "at pages/active/active.vue:504", "🚀 [第二步] 最终跳转 URL:", url);
               common_vendor.index.navigateTo({
                 url,
                 fail: (err) => {
@@ -422,7 +423,7 @@ const _sfc_main = {
         g: common_vendor.p({
           type: "scan",
           size: "26",
-          color: "#FF6B00"
+          color: PRIMARY_COLOR
         }),
         h: common_vendor.o(handleTopScan),
         i: bannerList.value.length > 0

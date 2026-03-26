@@ -109,7 +109,8 @@
 	import request from '@/utils/request.js';
 	import {
 		checkLoginGuard,
-		isScenario3User
+		isScenario3User,
+		canShowProfileRemind
 	} from '@/utils/user.js';
 	import SmartGuidePopup from '@/components/SmartGuidePopup.vue';
 
@@ -154,9 +155,11 @@
 
 	const isListEmpty = computed(() => userList.value.length === 0 && loadingStatus.value !== 'loading');
 
-	onReady(() => {
-		// 页面加载完了，用户可以开始写内容了，此时弹出引导
-		if (isScenario3User()) {
+	onReady(async () => {
+		// 异步检查后端频控
+		const shouldShow = await canShowProfileRemind();
+		if (shouldShow) {
+			// 只有后端允许（每日2次内）且用户资料未完善，才弹窗
 			smartGuidePopupRef.value?.open();
 		}
 	});

@@ -79,7 +79,7 @@ const _sfc_main = {
     };
     const goToDetail = (item) => {
       common_vendor.index.navigateTo({
-        url: `/pages/my-order-detail/my-order-detail?id=${item.id}`
+        url: `/packages/my-order-detail/my-order-detail?id=${item.id}`
       });
     };
     const handleRepay = async (item) => {

@@ -1,5 +1,6 @@
 /* 水平间距 */
 /* 水平间距 */
+/* 自定义全局主题色变量 */
 .edit-container.data-v-657c9911 {
   background-color: #F7F8FA;
   min-height: 100vh;
@@ -474,4 +475,17 @@
   font-weight: bold !important;
   color: #333 !important;
   margin-bottom: 16rpx !important;
+}
+.enterprise-logo-style.data-v-657c9911 {
+  border-radius: 16rpx !important;
+  /* 区别于品牌Logo的圆形 */
+  width: 200rpx !important;
+  height: 200rpx !important;
+  margin: 0 !important;
+  /* 不居中，左对齐更符合表单习惯 */
+}
+.upload-tip.data-v-657c9911 {
+  font-size: 22rpx;
+  color: #999;
+  margin-top: 10rpx;
 }

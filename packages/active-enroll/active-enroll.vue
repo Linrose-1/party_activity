@@ -216,7 +216,8 @@
 	import request from '../../utils/request.js';
 	import uploadFile from '../../utils/upload.js';
 	import {
-		isScenario3User
+		isScenario3User,
+		canShowProfileRemind
 	} from '@/utils/user.js';
 	import SmartGuidePopup from '@/components/SmartGuidePopup.vue';
 
@@ -742,8 +743,13 @@
 		fetchAndPrefillUserInfo();
 	});
 
-	onReady(() => {
-		if (isScenario3User()) smartGuidePopupRef.value?.open();
+	onReady(async () => {
+		// 异步检查后端频控
+		const shouldShow = await canShowProfileRemind();
+		if (shouldShow) {
+			// 只有后端允许（每日2次内）且用户资料未完善，才弹窗
+			smartGuidePopupRef.value?.open();
+		}
 	});
 
 	// =========================================================

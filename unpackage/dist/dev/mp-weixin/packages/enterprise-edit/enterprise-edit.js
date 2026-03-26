@@ -2,29 +2,30 @@
 const common_vendor = require("../../common/vendor.js");
 const utils_request = require("../../utils/request.js");
 const utils_upload = require("../../utils/upload.js");
+const utils_user = require("../../utils/user.js");
 if (!Array) {
-  const _easycom_uni_easyinput2 = common_vendor.resolveComponent("uni-easyinput");
+  const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
   const _easycom_uni_forms_item2 = common_vendor.resolveComponent("uni-forms-item");
+  const _easycom_uni_easyinput2 = common_vendor.resolveComponent("uni-easyinput");
   const _easycom_uni_data_select2 = common_vendor.resolveComponent("uni-data-select");
   const _easycom_uni_datetime_picker2 = common_vendor.resolveComponent("uni-datetime-picker");
   const _easycom_uni_forms2 = common_vendor.resolveComponent("uni-forms");
-  const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
   const _easycom_uni_data_picker2 = common_vendor.resolveComponent("uni-data-picker");
   const _easycom_DragImageUploader2 = common_vendor.resolveComponent("DragImageUploader");
   const _easycom_uni_popup2 = common_vendor.resolveComponent("uni-popup");
-  (_easycom_uni_easyinput2 + _easycom_uni_forms_item2 + _easycom_uni_data_select2 + _easycom_uni_datetime_picker2 + _easycom_uni_forms2 + _easycom_uni_icons2 + _easycom_uni_data_picker2 + _easycom_DragImageUploader2 + _easycom_uni_popup2)();
+  (_easycom_uni_icons2 + _easycom_uni_forms_item2 + _easycom_uni_easyinput2 + _easycom_uni_data_select2 + _easycom_uni_datetime_picker2 + _easycom_uni_forms2 + _easycom_uni_data_picker2 + _easycom_DragImageUploader2 + _easycom_uni_popup2)();
 }
-const _easycom_uni_easyinput = () => "../../uni_modules/uni-easyinput/components/uni-easyinput/uni-easyinput.js";
+const _easycom_uni_icons = () => "../../uni_modules/uni-icons/components/uni-icons/uni-icons.js";
 const _easycom_uni_forms_item = () => "../../uni_modules/uni-forms/components/uni-forms-item/uni-forms-item.js";
+const _easycom_uni_easyinput = () => "../../uni_modules/uni-easyinput/components/uni-easyinput/uni-easyinput.js";
 const _easycom_uni_data_select = () => "../../uni_modules/uni-data-select/components/uni-data-select/uni-data-select.js";
 const _easycom_uni_datetime_picker = () => "../../uni_modules/uni-datetime-picker/components/uni-datetime-picker/uni-datetime-picker.js";
 const _easycom_uni_forms = () => "../../uni_modules/uni-forms/components/uni-forms/uni-forms.js";
-const _easycom_uni_icons = () => "../../uni_modules/uni-icons/components/uni-icons/uni-icons.js";
 const _easycom_uni_data_picker = () => "../../uni_modules/uni-data-picker/components/uni-data-picker/uni-data-picker.js";
 const _easycom_DragImageUploader = () => "../../components/DragImageUploader/DragImageUploader.js";
 const _easycom_uni_popup = () => "../../uni_modules/uni-popup/components/uni-popup/uni-popup.js";
 if (!Math) {
-  (_easycom_uni_easyinput + _easycom_uni_forms_item + _easycom_uni_data_select + _easycom_uni_datetime_picker + _easycom_uni_forms + _easycom_uni_icons + _easycom_uni_data_picker + _easycom_DragImageUploader + _easycom_uni_popup)();
+  (_easycom_uni_icons + _easycom_uni_forms_item + _easycom_uni_easyinput + _easycom_uni_data_select + _easycom_uni_datetime_picker + _easycom_uni_forms + _easycom_uni_data_picker + _easycom_DragImageUploader + _easycom_uni_popup)();
 }
 const _sfc_main = {
   __name: "enterprise-edit",
@@ -77,7 +78,7 @@ const _sfc_main = {
       })
     };
     const currentStep = common_vendor.ref(1);
-    const stepTitles = ["基本信息", "品牌展示", "联系入口", "内容资产"];
+    const stepTitles = ["企业信息", "品牌展示", "联系入口", "内容资产"];
     const enterpriseId = common_vendor.ref(null);
     const isEditMode = common_vendor.ref(false);
     const industryTree = common_vendor.ref([]);
@@ -89,6 +90,8 @@ const _sfc_main = {
     const form = common_vendor.reactive({
       id: null,
       enterpriseName: "",
+      enterpriseLogo: "",
+      brandName: "",
       creditCode: "",
       enterpriseType: "",
       legalPerson: "",
@@ -144,7 +147,36 @@ const _sfc_main = {
         }]
       }
     };
+    const checkRealName = async () => {
+      common_vendor.index.showLoading({
+        title: "验证身份中...",
+        mask: true
+      });
+      const userInfo = await utils_user.syncUserInfo();
+      common_vendor.index.hideLoading();
+      if (!userInfo || userInfo.idCert !== 1) {
+        common_vendor.index.showModal({
+          title: "实名认证提醒",
+          content: "创建企业需要先完成实名认证，是否立即前往？",
+          confirmText: "去认证",
+          cancelText: "取消",
+          confirmColor: "#FF8600",
+          success: (res) => {
+            if (res.confirm) {
+              common_vendor.index.navigateTo({
+                url: "/packages/my-auth/my-auth"
+              });
+            }
+          }
+        });
+        return false;
+      }
+      return true;
+    };
     common_vendor.onLoad(async (options) => {
+      if (!options.id) {
+        await checkRealName();
+      }
       if (options.id) {
         isEditMode.value = true;
         enterpriseId.value = options.id;
@@ -168,7 +200,7 @@ const _sfc_main = {
       try {
         await saveCurrentProgressSilence();
       } catch (e) {
-        common_vendor.index.__f__("warn", "at packages/enterprise-edit/enterprise-edit.vue:475", "静默保存失败:", e);
+        common_vendor.index.__f__("warn", "at packages/enterprise-edit/enterprise-edit.vue:537", "静默保存失败:", e);
       }
       currentStep.value = targetStep;
       common_vendor.nextTick$1(() => {
@@ -179,6 +211,8 @@ const _sfc_main = {
       });
     };
     const saveCurrentProgressSilence = async () => {
+      if (!isEditMode.value && !checkRealName())
+        return;
       form.brandImages = brandImageList.value.join(",");
       form.offlineStores = JSON.stringify(offlineStores.value);
       form.onlineStores = JSON.stringify(onlineStores.value);
@@ -218,9 +252,9 @@ const _sfc_main = {
             value: item.label
           }));
         }
-        common_vendor.index.__f__("log", "at packages/enterprise-edit/enterprise-edit.vue:545", "✅ 字典数据加载成功");
+        common_vendor.index.__f__("log", "at packages/enterprise-edit/enterprise-edit.vue:609", "✅ 字典数据加载成功");
       } catch (e) {
-        common_vendor.index.__f__("error", "at packages/enterprise-edit/enterprise-edit.vue:547", "❌ 加载字典失败", e);
+        common_vendor.index.__f__("error", "at packages/enterprise-edit/enterprise-edit.vue:611", "❌ 加载字典失败", e);
       }
     };
     const fetchIndustryTree = async () => {
@@ -231,7 +265,7 @@ const _sfc_main = {
       if (data) {
         industryTree.value = processTree(data);
       } else if (error) {
-        common_vendor.index.__f__("error", "at packages/enterprise-edit/enterprise-edit.vue:562", "获取行业树失败:", error);
+        common_vendor.index.__f__("error", "at packages/enterprise-edit/enterprise-edit.vue:626", "获取行业树失败:", error);
       }
     };
     const processTree = (tree) => {
@@ -264,7 +298,7 @@ const _sfc_main = {
     };
     const onIndustryChange = (e) => {
       const nodes = e.detail.value;
-      common_vendor.index.__f__("log", "at packages/enterprise-edit/enterprise-edit.vue:603", "📦 原始选择节点:", nodes);
+      common_vendor.index.__f__("log", "at packages/enterprise-edit/enterprise-edit.vue:667", "📦 原始选择节点:", nodes);
       if (nodes && nodes.length > 0) {
         const level1Name = nodes[0].text || nodes[0].name;
         const level2Name = nodes[1] ? nodes[1].text || nodes[1].name : "";
@@ -277,7 +311,7 @@ const _sfc_main = {
           form.industrySecond = level2Name;
           industryLabel.value = level2Name || level1Name;
         }
-        common_vendor.index.__f__("log", "at packages/enterprise-edit/enterprise-edit.vue:620", "✅ 最终存储结果:", form.industryFirst, form.industrySecond);
+        common_vendor.index.__f__("log", "at packages/enterprise-edit/enterprise-edit.vue:684", "✅ 最终存储结果:", form.industryFirst, form.industrySecond);
       }
     };
     const fetchEnterpriseDetail = async (id) => {
@@ -311,7 +345,7 @@ const _sfc_main = {
         else if (Array.isArray(data.offlineStores))
           offlineStores.value = data.offlineStores;
       } catch (e) {
-        common_vendor.index.__f__("error", "at packages/enterprise-edit/enterprise-edit.vue:662", "数据格式转换失败:", e);
+        common_vendor.index.__f__("error", "at packages/enterprise-edit/enterprise-edit.vue:726", "数据格式转换失败:", e);
       }
     };
     const handleImageUpload = (field, dir) => {
@@ -400,7 +434,7 @@ const _sfc_main = {
           }
         },
         fail: (err) => {
-          common_vendor.index.__f__("log", "at packages/enterprise-edit/enterprise-edit.vue:766", "用户取消视频选择", err);
+          common_vendor.index.__f__("log", "at packages/enterprise-edit/enterprise-edit.vue:830", "用户取消视频选择", err);
         }
       });
     };
@@ -461,11 +495,17 @@ const _sfc_main = {
           });
         },
         fail: (err) => {
-          common_vendor.index.__f__("log", "at packages/enterprise-edit/enterprise-edit.vue:843", "用户取消了位置选择");
+          common_vendor.index.__f__("log", "at packages/enterprise-edit/enterprise-edit.vue:907", "用户取消了位置选择");
         }
       });
     };
     const handleStepProcess = async () => {
+      if (currentStep.value === 1 && !isEditMode.value) {
+        const isVerified = await checkRealName();
+        if (!isVerified) {
+          return;
+        }
+      }
       form.brandImages = brandImageList.value.join(",");
       form.offlineStores = JSON.stringify(offlineStores.value);
       form.onlineStores = JSON.stringify(onlineStores.value);
@@ -537,140 +577,165 @@ const _sfc_main = {
           });
         }),
         b: currentStep.value === 1
-      }, currentStep.value === 1 ? {
-        c: common_vendor.o(($event) => form.enterpriseName = $event),
-        d: common_vendor.p({
+      }, currentStep.value === 1 ? common_vendor.e({
+        c: form.enterpriseLogo
+      }, form.enterpriseLogo ? {
+        d: form.enterpriseLogo
+      } : {
+        e: common_vendor.p({
+          type: "camera-filled",
+          size: "30",
+          color: "#FF8600"
+        })
+      }, {
+        f: common_vendor.o(($event) => handleImageUpload("enterpriseLogo", "ent_logo")),
+        g: common_vendor.p({
+          label: "企业LOGO",
+          required: true
+        }),
+        h: common_vendor.o(($event) => form.enterpriseName = $event),
+        i: common_vendor.p({
           placeholder: "请与营业执照保持一致",
           inputBorder: false,
           modelValue: form.enterpriseName
         }),
-        e: common_vendor.p({
+        j: common_vendor.p({
           label: "企业名称",
           name: "enterpriseName",
           required: true
         }),
-        f: common_vendor.o(($event) => form.creditCode = $event),
-        g: common_vendor.p({
+        k: common_vendor.o(($event) => form.creditCode = $event),
+        l: common_vendor.p({
           placeholder: "18位统一社会信用代码",
           inputBorder: false,
           modelValue: form.creditCode
         }),
-        h: common_vendor.p({
+        m: common_vendor.p({
           label: "统一社会信用代码",
           name: "creditCode",
           required: true
         }),
-        i: common_vendor.o(($event) => form.enterpriseType = $event),
-        j: common_vendor.p({
+        n: common_vendor.o(($event) => form.enterpriseType = $event),
+        o: common_vendor.p({
           localdata: typeOptions.value,
           placeholder: "请选择企业类型",
           modelValue: form.enterpriseType
         }),
-        k: common_vendor.p({
+        p: common_vendor.p({
           label: "企业类型",
           name: "enterpriseType"
         }),
-        l: common_vendor.o(($event) => form.legalPerson = $event),
-        m: common_vendor.p({
+        q: common_vendor.o(($event) => form.legalPerson = $event),
+        r: common_vendor.p({
           placeholder: "请输入姓名",
           inputBorder: false,
           modelValue: form.legalPerson
         }),
-        n: common_vendor.p({
+        s: common_vendor.p({
           label: "法定代表人",
           name: "legalPerson"
         }),
-        o: common_vendor.o(($event) => form.establishDate = $event),
-        p: common_vendor.p({
+        t: common_vendor.o(($event) => form.establishDate = $event),
+        v: common_vendor.p({
           type: "date",
           modelValue: form.establishDate
         }),
-        q: common_vendor.p({
+        w: common_vendor.p({
           label: "成立日期",
           name: "establishDate"
         }),
-        r: common_vendor.o(($event) => form.officePhone = $event),
-        s: common_vendor.p({
+        x: common_vendor.o(($event) => form.officePhone = $event),
+        y: common_vendor.p({
           placeholder: "例如：021-12345678",
           inputBorder: false,
           modelValue: form.officePhone
         }),
-        t: common_vendor.p({
+        z: common_vendor.p({
           label: "联系电话",
           name: "officePhone"
         }),
-        v: common_vendor.o(($event) => form.officialEmail = $event),
-        w: common_vendor.p({
+        A: common_vendor.o(($event) => form.officialEmail = $event),
+        B: common_vendor.p({
           placeholder: "contact@abc.com",
           inputBorder: false,
           modelValue: form.officialEmail
         }),
-        x: common_vendor.p({
+        C: common_vendor.p({
           label: "联系邮箱",
           name: "officialEmail"
         }),
-        y: common_vendor.sr("formStep1", "657c9911-0"),
-        z: common_vendor.p({
+        D: common_vendor.sr("formStep1", "657c9911-0"),
+        E: common_vendor.p({
           modelValue: form,
           rules,
           ["label-position"]: "top",
           ["label-width"]: "100%"
         })
-      } : {}, {
-        A: currentStep.value === 2
+      }) : {}, {
+        F: currentStep.value === 2
       }, currentStep.value === 2 ? common_vendor.e({
-        B: form.logoUrl
+        G: form.logoUrl
       }, form.logoUrl ? {
-        C: form.logoUrl
+        H: form.logoUrl
       } : {
-        D: common_vendor.p({
+        I: common_vendor.p({
           type: "camera-filled",
           size: "34",
           color: "#FF8600"
         })
       }, {
-        E: common_vendor.o(($event) => handleImageUpload("logoUrl", "logo")),
-        F: common_vendor.p({
+        J: common_vendor.o(($event) => handleImageUpload("logoUrl", "logo")),
+        K: common_vendor.p({
           label: "品牌Logo (建议圆形)",
           required: true
         }),
-        G: common_vendor.o(($event) => form.brandSlogan = $event),
-        H: common_vendor.p({
+        L: common_vendor.o(($event) => form.brandName = $event),
+        M: common_vendor.p({
+          placeholder: "例如：猩聚社",
+          inputBorder: false,
+          modelValue: form.brandName
+        }),
+        N: common_vendor.p({
+          label: "品牌名称",
+          required: true
+        }),
+        O: common_vendor.o(($event) => form.brandSlogan = $event),
+        P: common_vendor.p({
           placeholder: "一句话描述您的品牌",
           inputBorder: false,
           modelValue: form.brandSlogan
         }),
-        I: common_vendor.p({
+        Q: common_vendor.p({
           label: "品牌标语 (Slogan)"
         }),
-        J: form.backgroundUrl
+        R: form.backgroundUrl
       }, form.backgroundUrl ? {
-        K: form.backgroundUrl
+        S: form.backgroundUrl
       } : {
-        L: common_vendor.p({
+        T: common_vendor.p({
           type: "image",
           size: "30",
           color: "#999"
         })
       }, {
-        M: common_vendor.o(($event) => handleImageUpload("backgroundUrl", "bg")),
-        N: common_vendor.p({
+        U: common_vendor.o(($event) => handleImageUpload("backgroundUrl", "bg")),
+        V: common_vendor.p({
           label: "品牌背景图 (选传)"
         }),
-        O: common_vendor.o(($event) => form.shortIntro = $event),
-        P: common_vendor.p({
+        W: common_vendor.o(($event) => form.shortIntro = $event),
+        X: common_vendor.p({
           type: "textarea",
-          maxlength: "150",
+          maxlength: "3000",
           placeholder: "介绍一下您的企业核心业务和愿景...",
           modelValue: form.shortIntro
         }),
-        Q: common_vendor.p({
-          label: "简短介绍 (150字内)",
+        Y: common_vendor.p({
+          label: "简短介绍",
           required: true
         }),
-        R: common_vendor.o(onIndustryChange),
-        S: common_vendor.o(($event) => industryLabel.value = $event),
-        T: common_vendor.p({
+        Z: common_vendor.o(onIndustryChange),
+        aa: common_vendor.o(($event) => industryLabel.value = $event),
+        ab: common_vendor.p({
           placeholder: "请选择行业",
           ["popup-title"]: "请选择行业",
           localdata: industryTree.value,
@@ -680,115 +745,115 @@ const _sfc_main = {
           },
           modelValue: industryLabel.value
         }),
-        U: common_vendor.p({
+        ac: common_vendor.p({
           label: "所属行业",
           name: "industryFirst"
         }),
-        V: common_vendor.p({
+        ad: common_vendor.p({
           ["label-position"]: "top",
           ["label-width"]: "100%"
         })
       }) : {}, {
-        W: currentStep.value === 3
+        ae: currentStep.value === 3
       }, currentStep.value === 3 ? common_vendor.e({
-        X: common_vendor.o(($event) => form.officialWebsite = $event),
-        Y: common_vendor.p({
+        af: common_vendor.o(($event) => form.officialWebsite = $event),
+        ag: common_vendor.p({
           placeholder: "https://www.abc.com",
           inputBorder: false,
           modelValue: form.officialWebsite
         }),
-        Z: common_vendor.p({
+        ah: common_vendor.p({
           label: "官方网站链接"
         }),
-        aa: common_vendor.p({
+        ai: common_vendor.p({
           ["label-position"]: "top",
           ["label-width"]: "100%"
         }),
-        ab: common_vendor.o(($event) => form.wechatMpName = $event),
-        ac: common_vendor.p({
+        aj: common_vendor.o(($event) => form.wechatMpName = $event),
+        ak: common_vendor.p({
           placeholder: "名称：ABC科技",
           inputBorder: false,
           modelValue: form.wechatMpName
         }),
-        ad: form.wechatMpQrcode
+        al: form.wechatMpQrcode
       }, form.wechatMpQrcode ? {
-        ae: form.wechatMpQrcode
+        am: form.wechatMpQrcode
       } : {
-        af: common_vendor.p({
+        an: common_vendor.p({
           type: "qrcode",
           size: "24",
           color: "#999"
         })
       }, {
-        ag: common_vendor.o(($event) => handleImageUpload("wechatMpQrcode", "qrcode")),
-        ah: common_vendor.o(($event) => form.videoAccount = $event),
-        ai: common_vendor.p({
+        ao: common_vendor.o(($event) => handleImageUpload("wechatMpQrcode", "qrcode")),
+        ap: common_vendor.o(($event) => form.videoAccount = $event),
+        aq: common_vendor.p({
           placeholder: "视频号链接或ID",
           inputBorder: false,
           modelValue: form.videoAccount
         }),
-        aj: form.videoAccountQrcode
+        ar: form.videoAccountQrcode
       }, form.videoAccountQrcode ? {
-        ak: form.videoAccountQrcode
+        as: form.videoAccountQrcode
       } : {
-        al: common_vendor.p({
+        at: common_vendor.p({
           type: "videocam",
           size: "24",
           color: "#999"
         })
       }, {
-        am: common_vendor.o(($event) => handleImageUpload("videoAccountQrcode", "qrcode")),
-        an: common_vendor.o(($event) => form.customerServicePhone = $event),
-        ao: common_vendor.p({
+        av: common_vendor.o(($event) => handleImageUpload("videoAccountQrcode", "qrcode")),
+        aw: common_vendor.o(($event) => form.customerServicePhone = $event),
+        ax: common_vendor.p({
           placeholder: "400-123-4567",
           inputBorder: false,
           modelValue: form.customerServicePhone
         }),
-        ap: common_vendor.p({
+        ay: common_vendor.p({
           label: "客服电话"
         }),
-        aq: common_vendor.o(($event) => form.businessCooperation = $event),
-        ar: common_vendor.p({
+        az: common_vendor.o(($event) => form.businessCooperation = $event),
+        aA: common_vendor.p({
           placeholder: "例如：王经理 13800138000",
           inputBorder: false,
           modelValue: form.businessCooperation
         }),
-        as: common_vendor.p({
+        aB: common_vendor.p({
           label: "商务合作"
         }),
-        at: common_vendor.o(($event) => form.afterSaleEmail = $event),
-        av: common_vendor.p({
+        aC: common_vendor.o(($event) => form.afterSaleEmail = $event),
+        aD: common_vendor.p({
           placeholder: "service@abc.com",
           inputBorder: false,
           modelValue: form.afterSaleEmail
         }),
-        aw: common_vendor.p({
+        aE: common_vendor.p({
           label: "售后支持邮箱"
         }),
-        ax: common_vendor.p({
+        aF: common_vendor.p({
           ["label-position"]: "top",
           ["label-width"]: "100%"
         }),
-        ay: common_vendor.f(onlineStores.value, (item, index, i0) => {
+        aG: common_vendor.f(onlineStores.value, (item, index, i0) => {
           return {
             a: common_vendor.t(index + 1),
-            b: "657c9911-40-" + i0,
+            b: "657c9911-44-" + i0,
             c: common_vendor.o(($event) => onlineStores.value.splice(index, 1), "online-" + index),
-            d: "657c9911-41-" + i0,
+            d: "657c9911-45-" + i0,
             e: common_vendor.o(($event) => item.platform = $event, "online-" + index),
             f: common_vendor.p({
               localdata: platformOptions.value,
               placeholder: "选择平台",
               modelValue: item.platform
             }),
-            g: "657c9911-42-" + i0,
+            g: "657c9911-46-" + i0,
             h: common_vendor.o(($event) => item.name = $event, "online-" + index),
             i: common_vendor.p({
               placeholder: "店铺显示名称",
               inputBorder: false,
               modelValue: item.name
             }),
-            j: "657c9911-43-" + i0,
+            j: "657c9911-47-" + i0,
             k: common_vendor.o(($event) => item.link = $event, "online-" + index),
             l: common_vendor.p({
               placeholder: "店铺链接/小程序路径",
@@ -798,92 +863,92 @@ const _sfc_main = {
             m: "online-" + index
           };
         }),
-        az: common_vendor.p({
+        aH: common_vendor.p({
           type: "trash-filled",
           size: "18",
           color: "#ff4d4f"
         }),
-        aA: common_vendor.p({
+        aI: common_vendor.p({
           type: "plusempty",
           size: "16",
           color: "#FF8600"
         }),
-        aB: common_vendor.o(($event) => onlineStores.value.push({
+        aJ: common_vendor.o(($event) => onlineStores.value.push({
           platform: "美团",
           name: "",
           link: ""
         })),
-        aC: common_vendor.f(offlineStores.value, (item, index, i0) => {
+        aK: common_vendor.f(offlineStores.value, (item, index, i0) => {
           return {
             a: common_vendor.t(index + 1),
-            b: "657c9911-45-" + i0,
+            b: "657c9911-49-" + i0,
             c: common_vendor.o(($event) => offlineStores.value.splice(index, 1), "offline-" + index),
             d: common_vendor.t(item.name),
             e: common_vendor.t(item.address),
             f: "offline-" + index
           };
         }),
-        aD: common_vendor.p({
+        aL: common_vendor.p({
           type: "trash-filled",
           size: "18",
           color: "#ff4d4f"
         }),
-        aE: common_vendor.p({
+        aM: common_vendor.p({
           type: "location-filled",
           size: "16",
           color: "#FF8600"
         }),
-        aF: common_vendor.o(handleChooseLocation)
+        aN: common_vendor.o(handleChooseLocation)
       }) : {}, {
-        aG: currentStep.value === 4
+        aO: currentStep.value === 4
       }, currentStep.value === 4 ? common_vendor.e({
-        aH: common_vendor.o(handleUploadGallery),
-        aI: common_vendor.o(($event) => brandImageList.value = $event),
-        aJ: common_vendor.p({
+        aP: common_vendor.o(handleUploadGallery),
+        aQ: common_vendor.o(($event) => brandImageList.value = $event),
+        aR: common_vendor.p({
           maxCount: 9,
           modelValue: brandImageList.value
         }),
-        aK: !form.videoUrl
+        aS: !form.videoUrl
       }, !form.videoUrl ? {
-        aL: common_vendor.p({
+        aT: common_vendor.p({
           type: "videocam-filled",
           size: "40",
           color: "#FF8600"
         }),
-        aM: common_vendor.o(handleVideoUpload)
+        aU: common_vendor.o(handleVideoUpload)
       } : common_vendor.e({
-        aN: form.videoUrl,
-        aO: common_vendor.p({
+        aV: form.videoUrl,
+        aW: common_vendor.p({
           type: "trash",
           size: "16",
           color: "#fff"
         }),
-        aP: common_vendor.o(deleteVideo),
-        aQ: form.videoCoverUrl
+        aX: common_vendor.o(deleteVideo),
+        aY: form.videoCoverUrl
       }, form.videoCoverUrl ? {
-        aR: form.videoCoverUrl
+        aZ: form.videoCoverUrl
       } : {
-        aS: common_vendor.p({
+        ba: common_vendor.p({
           type: "image",
           size: "24",
           color: "#999"
         })
       }, {
-        aT: common_vendor.o(handleChooseVideoCover)
+        bb: common_vendor.o(handleChooseVideoCover)
       })) : {}, {
-        aU: currentStep.value > 1
+        bc: currentStep.value > 1
       }, currentStep.value > 1 ? {
-        aV: common_vendor.o(($event) => currentStep.value--)
+        bd: common_vendor.o(($event) => currentStep.value--)
       } : {}, {
-        aW: common_vendor.t(currentStep.value === 4 ? isEditMode.value ? "提交修改" : "确认发布" : "保存并继续"),
-        aX: common_vendor.o(handleStepProcess),
-        aY: common_vendor.t(isEditMode.value ? "修改成功" : "发布成功"),
-        aZ: common_vendor.o(goCard),
-        ba: common_vendor.o(goList),
-        bb: common_vendor.sr(successPopup, "657c9911-51", {
+        be: common_vendor.t(currentStep.value === 4 ? isEditMode.value ? "提交修改" : "确认发布" : "保存并继续"),
+        bf: common_vendor.o(handleStepProcess),
+        bg: common_vendor.t(isEditMode.value ? "修改成功" : "发布成功"),
+        bh: common_vendor.o(goCard),
+        bi: common_vendor.o(goList),
+        bj: common_vendor.sr(successPopup, "657c9911-55", {
           "k": "successPopup"
         }),
-        bc: common_vendor.p({
+        bk: common_vendor.p({
           ["mask-click"]: false
         })
       });

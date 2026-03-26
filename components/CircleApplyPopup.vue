@@ -28,7 +28,8 @@
 					<view v-for="(item, index) in list" :key="item.id" class="apply-card">
 						<view class="user-info">
 							<image :src="item.avatar || '/static/images/default-avatar.png'" class="avatar"
-								mode="aspectFill"></image>
+								mode="aspectFill" @click.stop="handleAvatarClick(item)">
+							</image>
 							<view class="info-content">
 								<view class="name-row">
 									<text class="name">{{ item.realName || item.nickname }}</text>
@@ -75,6 +76,8 @@
 			</scroll-view>
 		</view>
 	</uni-popup>
+
+	<AvatarLongPressMenu ref="avatarMenuRef" />
 </template>
 
 <script setup>
@@ -82,8 +85,13 @@
 		ref
 	} from 'vue';
 	import request from '@/utils/request.js';
+	import {
+		checkLoginGuard
+	} from '@/utils/user.js'; // 引入登录守卫
+	import AvatarLongPressMenu from '@/components/AvatarLongPressMenu.vue';
 
 	const popup = ref(null);
+	const avatarMenuRef = ref(null);
 	const list = ref([]);
 	const currentTab = ref(0); // 默认 Tab 0 (申请入我圈)
 	const pageNo = ref(1);
@@ -110,6 +118,27 @@
 
 	const close = () => {
 		popup.value.close();
+	};
+
+	/**
+	 * 处理头像点击
+	 * 允许用户在审批前先查看对方的详细背景
+	 */
+	const handleAvatarClick = async (item) => {
+		// 1. 权限拦截
+		if (!await checkLoginGuard()) return;
+
+		// 2. 构造数据传给弹窗
+		// 注意：item.id 是用户的 ID，item.fid 是关系记录的 ID
+		const userParams = {
+			id: item.id,
+			name: item.realName || item.nickname || '用户',
+			avatar: item.avatar || '',
+			isEnterpriseSource: false
+		};
+
+		// 3. 打开弹窗
+		avatarMenuRef.value.open(userParams);
 	};
 
 	// 切换 Tab

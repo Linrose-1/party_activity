@@ -2,6 +2,7 @@
   "component": true,
   "usingComponents": {
     "uni-icons": "../uni_modules/uni-icons/components/uni-icons/uni-icons",
-    "smart-guide-popup": "./SmartGuidePopup"
+    "smart-guide-popup": "./SmartGuidePopup",
+    "avatar-long-press-menu": "./AvatarLongPressMenu"
   }
 }

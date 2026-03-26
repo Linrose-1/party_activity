@@ -9,6 +9,8 @@ const _easycom_uni_icons = () => "../uni_modules/uni-icons/components/uni-icons/
 if (!Math) {
   _easycom_uni_icons();
 }
+const PRIMARY_COLOR = "#FF62B1";
+const SECONDARY_COLOR = "#29CFFE";
 const _sfc_main = {
   __name: "StoreCard",
   props: {
@@ -110,7 +112,7 @@ const _sfc_main = {
         c: common_vendor.p({
           type: __props.store.userLikeStr === "like" ? "hand-up-filled" : "hand-up",
           size: "14",
-          color: __props.store.userLikeStr === "like" ? "#ff6b00" : "#999"
+          color: __props.store.userLikeStr === "like" ? PRIMARY_COLOR : "#999"
         }),
         d: common_vendor.t(__props.store.likesCount || 0),
         e: __props.store.userLikeStr === "like" ? 1 : "",
@@ -118,7 +120,7 @@ const _sfc_main = {
         g: common_vendor.p({
           type: __props.store.userLikeStr === "dislike" ? "hand-down-filled" : "hand-down",
           size: "14",
-          color: __props.store.userLikeStr === "dislike" ? "#3498db" : "#999"
+          color: __props.store.userLikeStr === "dislike" ? SECONDARY_COLOR : "#999"
         }),
         h: common_vendor.t(__props.store.dislikesCount || 0),
         i: __props.store.userLikeStr === "dislike" ? 1 : "",

@@ -70,9 +70,9 @@
 							<uni-icons type="contact" size="16" color="#FF6A00"></uni-icons>
 							<text>名片</text>
 						</view>
-						<!-- 复制联系方式 -->
+						<!-- 复制方式 -->
 						<view class="action-btn contact-btn" :class="{ 'no-contact': !item.mobile }"
-							@click="copyContact(item)">
+							@click="handleContact(item)"> <!-- 这里从 copyContact 改为 handleContact -->
 							<uni-icons type="phone-filled" size="16" :color="item.mobile ? '#fff' : '#ccc'"></uni-icons>
 							<text>{{ item.mobile ? '联系' : '未留' }}</text>
 						</view>
@@ -269,11 +269,12 @@
 		});
 	};
 
+
 	/**
-	 * 复制联系方式（手机号）
+	 * 联系商友：直接拨打电话
 	 * @param {object} item
 	 */
-	const copyContact = (item) => {
+	const handleContact = (item) => {
 		if (!item.mobile) {
 			uni.showToast({
 				title: '该用户暂未留下联系方式',
@@ -281,20 +282,20 @@
 			});
 			return;
 		}
+
 		markAsRead(item.id);
-		uni.setClipboardData({
-			data: item.mobile,
-			success: () => {
-				uni.showToast({
-					title: '联系方式已复制',
-					icon: 'success'
-				});
-			},
-			fail: () => {
-				uni.showToast({
-					title: '复制失败，请手动记录',
-					icon: 'none'
-				});
+
+		uni.showModal({
+			title: '联系商友',
+			content: `是否立即致电商友：${item.nickname}？\n(${item.mobile})`,
+			confirmText: '呼叫',
+			confirmColor: '#1890FF',
+			success: (res) => {
+				if (res.confirm) {
+					uni.makePhoneCall({
+						phoneNumber: item.mobile
+					});
+				}
 			}
 		});
 	};

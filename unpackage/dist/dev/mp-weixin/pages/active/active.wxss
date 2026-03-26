@@ -1,5 +1,6 @@
 /* 水平间距 */
 /* 水平间距 */
+/* 自定义全局主题色变量 */
 .container.data-v-12e513cf {
   background-color: #f8f9fa;
   padding-bottom: 120rpx;
@@ -118,9 +119,9 @@
   border: 1rpx solid transparent;
 }
 .filter-rows-container .tab-pill.active.data-v-12e513cf {
-  background: #fff0e5;
-  color: #FF6B00;
-  border-color: #FF6B00;
+  background: rgba(255, 98, 177, 0.1);
+  color: #FF62B1;
+  border-color: #FF62B1;
   font-weight: bold;
 }
 .header-placeholder.data-v-12e513cf {
@@ -149,7 +150,7 @@
   font-size: 26rpx;
 }
 .empty-state .reset-link.data-v-12e513cf {
-  color: #FF6B00;
+  color: #FF62B1;
   margin-top: 20rpx;
   text-decoration: underline;
 }
@@ -193,6 +194,7 @@
   margin-left: 12rpx;
 }
 .register-btn.data-v-12e513cf {
-  background: linear-gradient(to right, #FF8C00, #FF6B00);
+  background: linear-gradient(to right, #FF62B1, #FF85C1);
   color: white;
+  box-shadow: 0 6rpx 16rpx rgba(255, 98, 177, 0.3);
 }

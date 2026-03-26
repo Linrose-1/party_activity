@@ -44,18 +44,30 @@
 						</view>
 					</view>
 
-					<text v-if="userInfo.id" class="user-id-display">
-						<!-- 如果有国家信息，显示国家并加一个分隔点 -->
-						{{ userInfo.countryStr ? userInfo.countryStr + ' · ' : '' }}ID: {{ userInfo.virtualId }}
-					</text>
+					<view class="user-meta-row">
+						<!-- 左侧：小眼睛开关 -->
+						<view class="eye-toggle-inline" @tap.stop="toggleAccountVisible">
+							<uni-icons :type="isAccountVisible ? 'eye-filled' : 'eye-slash-filled'" size="18"
+								color="rgba(255, 255, 255, 0.7)">
+							</uni-icons>
+							<text class="eye-label-text">{{ isAccountVisible ? '已显' : '已隐' }}</text>
+						</view>
+
+						<!-- 右侧：ID 显示 -->
+						<text v-if="userInfo.id" class="user-id-display">
+							{{ userInfo.countryStr ? userInfo.countryStr + ' · ' : '' }}ID: {{ userInfo.virtualId }}
+						</text>
+					</view>
 				</view>
 
 				<!-- 【优化 3】账户信息网格，现在会有 5 项 -->
-				<view class="account-grid">
-					<view class="account-item" v-for="item in accountList" :key="item.label"
-						@tap.stop="navigateToAccountDetail(item)">
-						<view class="account-value">{{ item.value }}</view>
-						<view class="account-label">{{ item.label }}</view>
+				<view class="account-container">
+					<view class="account-grid">
+						<view class="account-item" v-for="item in accountList" :key="item.label"
+							@tap.stop="navigateToAccountDetail(item)">
+							<view class="account-value">{{ isAccountVisible ? item.value : '--' }}</view>
+							<view class="account-label">{{ item.label }}</view>
+						</view>
 					</view>
 				</view>
 			</template>
@@ -174,6 +186,14 @@
 	const userInfo = ref({})
 	const isLogin = ref(false);
 	const creditScore = ref(null); // 猩球信用分
+	// 控制账户资产是否可见的状态，默认从本地缓存读取或默认为 false (隐藏)
+	const isAccountVisible = ref(uni.getStorageSync('isAccountVisible') || false);
+
+	//切换显示/隐藏资产的方法
+	const toggleAccountVisible = () => {
+		isAccountVisible.value = !isAccountVisible.value;
+		uni.setStorageSync('isAccountVisible', isAccountVisible.value);
+	};
 
 	const unreadData = ref({
 		total: 0, // 总未读
@@ -293,15 +313,26 @@
 	// 使用 computed 创建动态的账户信息列表
 	const accountList = computed(() => {
 		const user = userInfo.value;
-		return [{
-				value: user.activityCount || 0,
-				label: '我的聚会',
-				path: '/packages/my-active/my-active'
+		return [
+			// {
+			// 	value: user.activityCount || 0,
+			// 	label: '我的聚会',
+			// 	path: '/packages/my-active/my-active'
+			// },
+			// {
+			// 	value: user.postCount || 0,
+			// 	label: '我的商机',
+			// 	path: '/packages/my-opportunity/my-opportunity'
+			// },
+			{
+				value: user.shareCount || 0,
+				label: '我的商友',
+				path: '/packages/my-shareList/my-shareList'
 			},
 			{
-				value: user.postCount || 0,
-				label: '我的商机',
-				path: '/packages/my-opportunity/my-opportunity'
+				value: user.friendCount || 0,
+				label: '我的圈友',
+				path: '/packages/my-circleList/my-circleList'
 			},
 			{
 				value: user.currExperience || 0,
@@ -480,18 +511,32 @@
 
 	const featureList = ref([
 		// 第 1 行
+		// {
+		// 	name: '我的商友',
+		// 	desc: '查看我邀请的商友列表',
+		// 	icon: '../../static/icon/商友邀请.png', // 建议换一个列表图标
+		// 	path: '/packages/my-shareList/my-shareList',
+		// 	highlight: true
+		// },
+		// {
+		// 	name: '我的圈友',
+		// 	desc: '管理您的互圈人脉',
+		// 	icon: '../../static/icon/社交互动.png', // 建议换一个圈子图标
+		// 	path: '/packages/my-circleList/my-circleList',
+		// 	highlight: true
+		// },
 		{
-			name: '我的商友',
-			desc: '查看我邀请的商友列表',
-			icon: '../../static/icon/商友邀请.png', // 建议换一个列表图标
-			path: '/packages/my-shareList/my-shareList',
+			name: '我的聚会',
+			desc: '管理您的聚会资源',
+			icon: '../../static/icon/聚会.png',
+			path: '/packages/my-active/my-active',
 			highlight: true
 		},
 		{
-			name: '我的圈友',
-			desc: '管理您的互圈人脉',
-			icon: '../../static/icon/社交互动.png', // 建议换一个圈子图标
-			path: '/packages/my-circleList/my-circleList',
+			name: '我的商机',
+			desc: '管理您的商机帖子',
+			icon: '../../static/icon/商机S.png',
+			path: '/packages/my-opportunity/my-opportunity',
 			highlight: true
 		},
 		// 第 2 行
@@ -1022,8 +1067,8 @@
 		grid-template-columns: repeat(5, 1fr);
 		gap: 10rpx;
 		/* 可以适当减小间距以容纳更多项 */
-		margin-top: 30rpx;
-		padding-top: 30rpx;
+		margin-top: 10rpx;
+		padding-top: 10rpx;
 		border-top: 1rpx solid rgba(255, 255, 255, 0.2);
 	}
 
@@ -1442,4 +1487,53 @@
 		box-shadow: 0 2rpx 8rpx rgba(255, 77, 79, 0.3);
 		z-index: 10;
 	}
+
+	/* --- 元数据行：存放眼睛和ID --- */
+	.user-meta-row {
+		display: flex;
+		justify-content: space-between;
+		/* 左右分布 */
+		align-items: center;
+		margin-top: 20rpx;
+		width: 100%;
+	}
+
+	/* 左侧眼睛开关 */
+	.eye-toggle-inline {
+		display: flex;
+		align-items: center;
+		background-color: rgba(0, 0, 0, 0.1);
+		padding: 4rpx 12rpx;
+		border-radius: 8rpx;
+		transition: background-color 0.2s;
+	}
+
+	.eye-toggle-inline:active {
+		background-color: rgba(0, 0, 0, 0.2);
+	}
+
+	.eye-label-text {
+		font-size: 20rpx;
+		color: rgba(255, 255, 255, 0.7);
+		margin-left: 8rpx;
+	}
+
+	/* 右侧ID显示（修正原有样式，去掉 align-self） */
+	.user-id-display {
+		font-size: 22rpx;
+		color: rgba(255, 255, 255, 0.7);
+		background-color: rgba(0, 0, 0, 0.1);
+		padding: 4rpx 16rpx;
+		border-radius: 10rpx;
+		display: inline-flex;
+		align-items: center;
+	}
+
+	/* 账户区域容器（去掉绝对定位的 padding） */
+	/* .account-container {
+		width: 100%;
+		margin-top: 20rpx;
+		padding-top: 30rpx;
+		border-top: 1rpx solid rgba(255, 255, 255, 0.2);
+	} */
 </style>

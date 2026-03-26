@@ -697,14 +697,15 @@
 </script>
 
 <style lang="scss">
-	$primary: #FF6B00;
+	$primary: $gofor-primary;
+	$secondary: $gofor-secondary;
 
 	/* ── 页面容器 ── */
 	.app {
 		display: flex;
 		flex-direction: column;
 		height: 100vh;
-		background-color: #f5f5f5;
+		background-color: #f8f9fa;
 	}
 
 	/* ── 顶部固定区域 ── */
@@ -833,11 +834,11 @@
 	}
 
 	.share-bg {
-		background: linear-gradient(135deg, #4facfe, #00f2fe);
+		background: $gofor-secondary-gradient;
 	}
 
 	.join-bg {
-		background: linear-gradient(135deg, #FF8C00, $primary);
+		background: $gofor-primary-gradient;
 	}
 
 	/* ── 吸顶筛选栏 ── */
@@ -877,8 +878,9 @@
 		}
 
 		&.active {
-			background: $primary;
-			color: #fff;
+			background: rgba($primary, 0.1);
+			color: $primary;
+			border-color: $primary;
 			font-weight: 500;
 		}
 	}

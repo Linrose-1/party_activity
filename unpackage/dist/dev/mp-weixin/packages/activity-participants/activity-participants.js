@@ -32,7 +32,7 @@ const _sfc_main = {
       }
       if (options.isOrganizer && options.isOrganizer === "1") {
         isOrganizer.value = true;
-        common_vendor.index.__f__("log", "at pages/activity-participants/activity-participants.vue:56", "✅ [报名列表页] 当前用户是组织者，可以免费查看所有报名者名片。");
+        common_vendor.index.__f__("log", "at packages/activity-participants/activity-participants.vue:56", "✅ [报名列表页] 当前用户是组织者，可以免费查看所有报名者名片。");
       }
     });
     common_vendor.onReachBottom(() => {
@@ -135,6 +135,6 @@ const _sfc_main = {
     };
   }
 };
-const MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["__scopeId", "data-v-d6800723"]]);
+const MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["__scopeId", "data-v-d6a72b1d"]]);
 wx.createPage(MiniProgramPage);
-//# sourceMappingURL=../../../.sourcemap/mp-weixin/pages/activity-participants/activity-participants.js.map
+//# sourceMappingURL=../../../.sourcemap/mp-weixin/packages/activity-participants/activity-participants.js.map

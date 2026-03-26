@@ -1,5 +1,6 @@
 /* 水平间距 */
 /* 水平间距 */
+/* 自定义全局主题色变量 */
 .contact-container.data-v-828940d1 {
   min-height: 100vh;
   background-color: #f8f9fb;

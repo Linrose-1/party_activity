@@ -1,5 +1,6 @@
 /* 水平间距 */
 /* 水平间距 */
+/* 自定义全局主题色变量 */
 page.data-v-132afe13 {
   height: 100%;
   overflow: hidden;
@@ -469,4 +470,94 @@ page.data-v-132afe13 {
   padding: 60rpx;
   color: #999;
   font-size: 24rpx;
+}
+
+/* --- 人脉银行优化样式 --- */
+.bank-section.data-v-132afe13 {
+  margin-bottom: 40rpx;
+  /* 标题样式继承自 .tools-section 或在此统一定义 */
+}
+.bank-section .section-header.data-v-132afe13 {
+  margin-bottom: 24rpx;
+}
+.bank-section .section-header .section-title.data-v-132afe13 {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #1A1A1A;
+  /* 与智能工具标题一致 */
+}
+.bank-section .bank-list.data-v-132afe13 {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+.bank-section .bank-horizontal-card.data-v-132afe13 {
+  background: #FFFFFF;
+  border-radius: 24rpx;
+  padding: 24rpx 30rpx;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.04);
+  position: relative;
+  transition: all 0.2s ease;
+  /* 红点标记：位于图标右上角 */
+}
+.bank-section .bank-horizontal-card.data-v-132afe13:active {
+  transform: scale(0.98);
+  background-color: #FAFAFA;
+}
+.bank-section .bank-horizontal-card .card-left.data-v-132afe13 {
+  margin-right: 24rpx;
+  position: relative;
+}
+.bank-section .bank-horizontal-card .bank-icon-box.data-v-132afe13 {
+  width: 84rpx;
+  height: 84rpx;
+  border-radius: 20rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.bank-section .bank-horizontal-card .bank-icon-box.share-bg.data-v-132afe13 {
+  background: linear-gradient(135deg, #FF81BF, #FF67B3);
+}
+.bank-section .bank-horizontal-card .bank-icon-box.circle-bg.data-v-132afe13 {
+  background: linear-gradient(135deg, #0DE7FE, #1DD9FE);
+}
+.bank-section .bank-horizontal-card .card-right.data-v-132afe13 {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+.bank-section .bank-horizontal-card .card-right .b-title.data-v-132afe13 {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #2D2D2D;
+  margin-bottom: 4rpx;
+}
+.bank-section .bank-horizontal-card .card-right .b-desc.data-v-132afe13 {
+  font-size: 22rpx;
+  color: #8E8E93;
+}
+.bank-section .bank-horizontal-card .red-dot-badge.data-v-132afe13 {
+  position: absolute;
+  top: -12rpx;
+  right: -12rpx;
+  background-color: #FF4D4F;
+  color: #FFFFFF;
+  font-size: 20rpx;
+  font-weight: bold;
+  min-width: 34rpx;
+  height: 34rpx;
+  line-height: 30rpx;
+  /* 微调文字垂直居中 */
+  border-radius: 17rpx;
+  text-align: center;
+  padding: 0 8rpx;
+  border: 3rpx solid #FFFFFF;
+  box-shadow: 0 4rpx 8rpx rgba(255, 77, 79, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
 }

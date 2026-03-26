@@ -136,7 +136,7 @@ const _sfc_main = {
         url: `/packages/applicationBusinessCard/applicationBusinessCard?id=${item.userId}&name=${encodeURIComponent(item.nickname)}&avatar=${encodeURIComponent(item.avatar)}`
       });
     };
-    const copyContact = (item) => {
+    const handleContact = (item) => {
       if (!item.mobile) {
         common_vendor.index.showToast({
           title: "该用户暂未留下联系方式",
@@ -145,19 +145,18 @@ const _sfc_main = {
         return;
       }
       markAsRead(item.id);
-      common_vendor.index.setClipboardData({
-        data: item.mobile,
-        success: () => {
-          common_vendor.index.showToast({
-            title: "联系方式已复制",
-            icon: "success"
-          });
-        },
-        fail: () => {
-          common_vendor.index.showToast({
-            title: "复制失败，请手动记录",
-            icon: "none"
-          });
+      common_vendor.index.showModal({
+        title: "联系商友",
+        content: `是否立即致电商友：${item.nickname}？
+(${item.mobile})`,
+        confirmText: "呼叫",
+        confirmColor: "#1890FF",
+        success: (res) => {
+          if (res.confirm) {
+            common_vendor.index.makePhoneCall({
+              phoneNumber: item.mobile
+            });
+          }
         }
       });
     };
@@ -240,7 +239,7 @@ const _sfc_main = {
             }),
             k: common_vendor.t(item.mobile ? "联系" : "未留"),
             l: !item.mobile ? 1 : "",
-            m: common_vendor.o(($event) => copyContact(item), item.id),
+            m: common_vendor.o(($event) => handleContact(item), item.id),
             n: common_vendor.o(() => {
             }, item.id),
             o: item.id,

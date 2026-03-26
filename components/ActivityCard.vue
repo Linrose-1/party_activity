@@ -3,18 +3,18 @@
 		<!-- ========== 1. 发布者操作栏（保持原样） ========== -->
 		<view v-if="isOwner" class="owner-action-bar" @click.stop>
 			<view class="owner-btn" @click.stop="showOwnerMoreActions">
-				<uni-icons type="more-filled" size="14" color="#FF6B00" />
+				<uni-icons type="more-filled" size="14" :color="PRIMARY_COLOR" />
 				<text>更多</text>
 			</view>
 			<view class="owner-divider" />
 			<view v-if="activity.statusStr === '活动取消' || activity.statusStr === '聚会取消'"
 				class="owner-btn owner-btn--danger" @click.stop="handleManageRefunds('all')">
-				<uni-icons type="wallet" size="14" color="#f56c6c" />
+				<uni-icons type="wallet" size="14" :color="PRIMARY_COLOR" />
 				<text class="danger-text">处理退款</text>
 			</view>
 			<view v-if="activity.statusStr === '活动取消' || activity.statusStr === '聚会取消'" class="owner-divider" />
 			<view class="owner-btn" @click.stop="goToRegisteredUsers">
-				<uni-icons type="person-filled" size="14" color="#FF6B00" />
+				<uni-icons type="person-filled" size="14" :color="PRIMARY_COLOR" />
 				<text>报名确认</text>
 				<view v-if="activity.pendingConfirmCount > 0" class="owner-badge">
 					{{ activity.pendingConfirmCount }}
@@ -50,7 +50,7 @@
 				</view>
 
 				<!-- 右上角 组织者（毛玻璃效果） -->
-				<view class="organizer-overlay">
+				<view class="organizer-overlay" @click.stop="handleOrganizerAvatarClick">
 					<image :src="activity.memberUser.avatar" class="org-avatar" mode="aspectFill" />
 					<text class="org-nickname">{{ activity.memberUser.nickname || '主办方' }}</text>
 				</view>
@@ -102,12 +102,12 @@
 			<view class="activity-interactions">
 				<view class="interaction-btn" @click.stop="handleAction('like')">
 					<uni-icons :type="activity.userLikeStr === 'like' ? 'hand-up-filled' : 'hand-up'" size="18"
-						:color="activity.userLikeStr === 'like' ? '#FF6B00' : '#888'" />
+						:color="activity.userLikeStr === 'like' ? PRIMARY_COLOR : '#888'" />
 					<text :class="{ active: activity.userLikeStr === 'like' }">{{ activity.likesCount || 0 }}</text>
 				</view>
 				<view class="interaction-btn" @click.stop="handleAction('dislike')">
 					<uni-icons :type="activity.userLikeStr === 'dislike' ? 'hand-down-filled' : 'hand-down'" size="18"
-						:color="activity.userLikeStr === 'dislike' ? '#3498db' : '#888'" />
+						:color="activity.userLikeStr === 'dislike' ? SECONDARY_COLOR : '#888'" />
 					<text
 						:class="{ 'active-dislike': activity.userLikeStr === 'dislike' }">{{ activity.dislikesCount || 0 }}</text>
 				</view>
@@ -119,7 +119,7 @@
 
 			<view class="action-buttons">
 				<view class="btn-mini btn-favorite" @click.stop="toggleFavorite">
-					<uni-icons :type="isFavorite ? 'heart-filled' : 'heart'" size="16" color="#FF6B00" />
+					<uni-icons :type="isFavorite ? 'heart-filled' : 'heart'" size="16" :color="PRIMARY_COLOR" />
 					<text>{{ isFavorite ? '已收' : '收藏' }}</text>
 				</view>
 				<!-- 按钮显示逻辑：根据 joinStatus 判断 -->
@@ -131,6 +131,8 @@
 		</view>
 
 		<SmartGuidePopup ref="smartGuidePopupRef" :scenario="3" />
+		
+		<AvatarLongPressMenu ref="avatarMenuRef" />
 	</view>
 </template>
 
@@ -148,6 +150,7 @@
 		canShowProfileRemind
 	} from '../utils/user.js';
 	import SmartGuidePopup from '@/components/SmartGuidePopup.vue';
+	import AvatarLongPressMenu from '@/components/AvatarLongPressMenu.vue';
 
 	const props = defineProps({
 		activity: {
@@ -166,6 +169,10 @@
 
 	const isFavorite = ref(props.activity.followFlag === 1);
 	const loading = ref(false);
+	const avatarMenuRef = ref(null);
+
+	const PRIMARY_COLOR = '#FF62B1';
+	const SECONDARY_COLOR = '#29CFFE';
 
 	// ── 判断是否本人发布 ──
 	// memberUser.id 与本地存储的 userId 对比，用 == 兼容类型不一致
@@ -208,15 +215,14 @@
 	 */
 	const getStatusColor = (status) => {
 		const colorMap = {
-			0: '#909399', // 已取消
-			1: '#f9ae3d', // 未开始
-			2: '#FF62B1', // 正在报名中 (主题色)
-			3: '#007aff', // 即将开始
-			4: '#dd524d', // 进行中
-			5: '#8f8f94', // 已结束
-			6: '#e6a23c', // 待退款
+			0: '#909399', // 已取消 - 灰色
+			1: '#f39c12', // 未开始 - 警示黄
+			2: '#FF62B1', // 正在报名中 - 主题粉
+			3: '#29CFFE', // 即将开始 - 天蓝色
+			4: '#dd524d', // 进行中 - 红色
+			5: '#8f8f94', // 已结束 - 深灰
+			6: '#e6a23c', // 待退款 - 橙色
 		};
-		// 如果后端没给 status 码，默认给个灰色
 		return colorMap[status] || '#999';
 	};
 
@@ -322,6 +328,29 @@
 	};
 
 	/**
+	 * 触发组织者头像菜单
+	 */
+	const handleOrganizerAvatarClick = async () => {
+		// 1. 权限卫士检查
+		if (!await checkLoginGuard()) return;
+
+		// 2. 构造菜单需要的数据格式（参考你首页的逻辑）
+		const organizer = props.activity.memberUser;
+		const menuUserData = {
+			id: organizer.id,
+			name: organizer.nickname || '组织者',
+			avatar: organizer.avatar || '/static/icon/default-avatar.png',
+			managerId: organizer.id, // 对于个人发布，管理ID就是他自己
+			isEnterpriseSource: false, // 聚会目前看基本是个人发布
+			// 如果后端有返回实名/认证信息，也可以加上
+			isIdVerified: organizer.idCert === 1
+		};
+
+		// 3. 打开菜单
+		avatarMenuRef.value.open(menuUserData);
+	};
+
+	/**
 	 * 跳转到浏览记录，携带 hasSilent 参数
 	 */
 	const handleViewTrace = () => {
@@ -418,7 +447,10 @@
 </script>
 
 <style lang="scss" scoped>
-	$primary: #FF6B00;
+	// @import "@/common/theme.scss";
+	/* 引用全局变量 */
+	$primary: $gofor-primary;
+	// $primary: #FF6B00;
 
 	.activity-card {
 		background: white;
@@ -435,8 +467,8 @@
 		display: flex;
 		flex-direction: row-reverse;
 		align-items: center;
-		background: #fff8f3;
-		border: 1rpx solid #ffe0c8;
+		background: rgba($gofor-primary, 0.05); // 浅粉底
+		border: 1rpx solid rgba($gofor-primary, 0.1); // 淡淡的粉色边框
 		border-radius: 12rpx;
 		padding: 0 8rpx;
 		margin-bottom: 20rpx;
@@ -452,12 +484,12 @@
 
 		text {
 			font-size: 22rpx;
-			color: $primary;
+			color: $gofor-primary; // 使用主题粉
 			font-weight: 500;
 		}
 
 		&--alert {
-			background: linear-gradient(135deg, $primary, #FF8C00);
+			background: $gofor-primary-gradient; // 使用粉色渐变
 			border-radius: 10rpx;
 
 			text {
@@ -476,7 +508,7 @@
 		position: absolute;
 		top: -6rpx;
 		right: 0;
-		background: #f56c6c;
+		background: $gofor-danger;
 		color: #fff;
 		font-size: 16rpx;
 		height: 24rpx;
@@ -489,8 +521,8 @@
 
 		&--white {
 			background: #fff;
-			color: $primary;
-			border-color: $primary;
+			color: $gofor-primary;
+			border-color: $gofor-primary;
 		}
 	}
 
@@ -549,7 +581,7 @@
 
 	/* 聚会类型标签 - 修改为 static（由父容器控制位置） */
 	.tag-overlay {
-		background: rgba($primary, 0.95);
+		background: rgba($gofor-primary, 0.95);
 		color: #fff;
 		font-size: 24rpx;
 		padding: 6rpx 20rpx;
@@ -612,7 +644,7 @@
 		}
 
 		.info-label {
-			color: $primary;
+			color: $gofor-primary;
 			flex-shrink: 0;
 			font-weight: 500;
 		}
@@ -648,7 +680,7 @@
 	}
 
 	.silent-avatar {
-		border: 2rpx solid $primary !important;
+		border: 2rpx solid $gofor-primary !important;
 		background: #fff;
 	}
 
@@ -682,7 +714,7 @@
 			}
 
 			.active {
-				color: $primary;
+				color: $gofor-primary;
 				font-weight: bold;
 			}
 		}
@@ -704,7 +736,7 @@
 	}
 
 	.btn-primary {
-		background: linear-gradient(to right, $primary, #FF8C00);
+		background: $gofor-primary-gradient;
 		color: #fff;
 
 		&.btn-disabled {
@@ -715,7 +747,7 @@
 
 	.btn-favorite {
 		background: #fff1e8;
-		color: $primary;
+		background: rgba($gofor-primary, 0.08);
 		gap: 6rpx;
 	}
 

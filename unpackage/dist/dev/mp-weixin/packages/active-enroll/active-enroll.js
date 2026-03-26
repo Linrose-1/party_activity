@@ -299,7 +299,7 @@ const _sfc_main = {
             formData.userPhone = data.mobile || "";
           if (!formData.contactAddress)
             formData.contactAddress = data.companyName || "";
-          common_vendor.index.__f__("log", "at packages/active-enroll/active-enroll.vue:600", "✅ 个人资料自动补全完成");
+          common_vendor.index.__f__("log", "at packages/active-enroll/active-enroll.vue:601", "✅ 个人资料自动补全完成");
         }
       } catch (e) {
       }
@@ -352,7 +352,7 @@ const _sfc_main = {
     };
     const backToHome = () => common_vendor.index.navigateBack();
     common_vendor.onLoad(async (options) => {
-      common_vendor.index.__f__("log", "at packages/active-enroll/active-enroll.vue:663", "📥 [报名页-接收] 参数:", options);
+      common_vendor.index.__f__("log", "at packages/active-enroll/active-enroll.vue:664", "📥 [报名页-接收] 参数:", options);
       activityId.value = options.id;
       loggedInUserId.value = common_vendor.index.getStorageSync("userId");
       if (!activityId.value) {
@@ -382,16 +382,16 @@ const _sfc_main = {
             verifiedInviteCode.value = autoCode;
             if (data === true) {
               receivedExclusiveInviteCode.value = autoCode;
-              common_vendor.index.__f__("log", "at packages/active-enroll/active-enroll.vue:704", "💎 链接凭证鉴定成功：专属免单特权已激活");
+              common_vendor.index.__f__("log", "at packages/active-enroll/active-enroll.vue:705", "💎 链接凭证鉴定成功：专属免单特权已激活");
             } else {
-              common_vendor.index.__f__("log", "at packages/active-enroll/active-enroll.vue:707", "✅ 链接凭证鉴定成功：普通邀请码");
+              common_vendor.index.__f__("log", "at packages/active-enroll/active-enroll.vue:708", "✅ 链接凭证鉴定成功：普通邀请码");
             }
           } else {
-            common_vendor.index.__f__("warn", "at packages/active-enroll/active-enroll.vue:710", "❌ 链接中的邀请码无效:", error.msg);
+            common_vendor.index.__f__("warn", "at packages/active-enroll/active-enroll.vue:711", "❌ 链接中的邀请码无效:", error.msg);
             verifiedInviteCode.value = "";
           }
         } catch (e) {
-          common_vendor.index.__f__("error", "at packages/active-enroll/active-enroll.vue:715", "校验接口异常", e);
+          common_vendor.index.__f__("error", "at packages/active-enroll/active-enroll.vue:716", "校验接口异常", e);
         } finally {
           common_vendor.index.hideLoading();
         }
@@ -403,17 +403,19 @@ const _sfc_main = {
         try {
           const parsed = JSON.parse(cachedData);
           Object.assign(formData, parsed);
-          common_vendor.index.__f__("log", "at packages/active-enroll/active-enroll.vue:734", "📝 已恢复本聚会的专属草稿");
+          common_vendor.index.__f__("log", "at packages/active-enroll/active-enroll.vue:735", "📝 已恢复本聚会的专属草稿");
         } catch (e) {
-          common_vendor.index.__f__("error", "at packages/active-enroll/active-enroll.vue:736", "解析草稿失败", e);
+          common_vendor.index.__f__("error", "at packages/active-enroll/active-enroll.vue:737", "解析草稿失败", e);
         }
       }
       fetchAndPrefillUserInfo();
     });
-    common_vendor.onReady(() => {
+    common_vendor.onReady(async () => {
       var _a;
-      if (utils_user.isScenario3User())
+      const shouldShow = await utils_user.canShowProfileRemind();
+      if (shouldShow) {
         (_a = smartGuidePopupRef.value) == null ? void 0 : _a.open();
+      }
     });
     common_vendor.watch(formData, (newVal) => {
       if (activityId.value) {

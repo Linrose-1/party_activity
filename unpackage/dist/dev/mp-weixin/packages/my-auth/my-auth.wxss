@@ -1,5 +1,6 @@
 /* 水平间距 */
 /* 水平间距 */
+/* 自定义全局主题色变量 */
 .container.data-v-de1a68b5 {
   padding: 20rpx;
   background-color: #f5f5f5;

@@ -190,12 +190,12 @@
 				"navigationBarTitleText": "登录"
 			}
 		},
-		{
-			"path": "pages/activity-participants/activity-participants",
-			"style": {
-				"navigationBarTitleText": "报名用户"
-			}
-		},
+		// {
+		// 	"path": "pages/activity-participants/activity-participants",
+		// 	"style": {
+		// 		"navigationBarTitleText": "报名用户"
+		// 	}
+		// },
 		{
 			"path": "pages/my-edit-label/my-edit-label",
 			"style": {
@@ -256,12 +256,12 @@
 				"navigationBarTitleText": "六度人脉"
 			}
 		},
-		{
-			"path": "pages/general-search/general-search",
-			"style": {
-				"navigationBarTitleText": "普通搜索"
-			}
-		},
+		// {
+		// 	"path": "pages/general-search/general-search",
+		// 	"style": {
+		// 		"navigationBarTitleText": "普通搜索"
+		// 	}
+		// },
 		{
 			"path": "pages/shop-apply/shop-apply",
 			"style": {
@@ -286,12 +286,12 @@
 				"navigationBarTitleText": "平台详情"
 			}
 		},
-		{
-			"path": "pages/my-order-detail/my-order-detail",
-			"style": {
-				"navigationBarTitleText": "订单详情"
-			}
-		},
+		// {
+		// 	"path": "pages/my-order-detail/my-order-detail",
+		// 	"style": {
+		// 		"navigationBarTitleText": "订单详情"
+		// 	}
+		// },
 		{
 			"path": "pages/sponsor-detail/sponsor-detail",
 			"style": {
@@ -305,6 +305,24 @@
 		// "independent": true ,
 		"pages": [
 			// 分包内的页面列表，路径是相对于 'root' 的
+			{
+				"path": "general-search/general-search",
+				"style": {
+					"navigationBarTitleText": "普通搜索"
+				}
+			},
+			{
+				"path": "my-order-detail/my-order-detail",
+				"style": {
+					"navigationBarTitleText": "订单详情"
+				}
+			},
+			{
+				"path": "activity-participants/activity-participants",
+				"style": {
+					"navigationBarTitleText": "报名用户"
+				}
+			},
 			{
 				"path": "my-account-informationDetails/my-account-informationDetails",
 				"style": {
@@ -671,6 +689,13 @@
 				{
 					"navigationBarTitleText" : "聚会核销"
 				}
+			},
+			{
+				"path" : "sponsor-list/sponsor-list",
+				"style" : 
+				{
+					"navigationBarTitleText" : "赞助商列表"
+				}
 			}
 			// 如果还有其他页面要放进这个分包，继续在这里加
 		]
@@ -699,12 +724,6 @@
 				"iconPath": "/static/tabbar/location.png",
 				"selectedIconPath": "/static/tabbar/location-active.png"
 			},
-			// {
-			// 	"pagePath": "pages/relation/relation",
-			// 	"text": "六度人脉",
-			// 	"iconPath": "/static/tabbar/location.png",
-			// 	"selectedIconPath": "/static/tabbar/location-active.png"
-			// },
 			{
 				"pagePath": "pages/shop/shop",
 				"text": "聚店",

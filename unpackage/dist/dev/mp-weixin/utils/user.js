@@ -180,7 +180,6 @@ exports.checkLoginGuard = checkLoginGuard;
 exports.getCachedUserInfo = getCachedUserInfo;
 exports.getInviteCode = getInviteCode;
 exports.globalSilentLogin = globalSilentLogin;
-exports.isScenario3User = isScenario3User;
 exports.isUserFullyLoggedIn = isUserFullyLoggedIn;
 exports.syncUserInfo = syncUserInfo;
 //# sourceMappingURL=../../.sourcemap/mp-weixin/utils/user.js.map

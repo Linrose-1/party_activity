@@ -1,6 +1,7 @@
 "use strict";
 const common_vendor = require("../common/vendor.js");
 const utils_request = require("../utils/request.js");
+const utils_user = require("../utils/user.js");
 if (!Array) {
   const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
   const _easycom_uni_load_more2 = common_vendor.resolveComponent("uni-load-more");
@@ -11,14 +12,16 @@ const _easycom_uni_icons = () => "../uni_modules/uni-icons/components/uni-icons/
 const _easycom_uni_load_more = () => "../uni_modules/uni-load-more/components/uni-load-more/uni-load-more.js";
 const _easycom_uni_popup = () => "../uni_modules/uni-popup/components/uni-popup/uni-popup.js";
 if (!Math) {
-  (_easycom_uni_icons + _easycom_uni_load_more + _easycom_uni_popup)();
+  (_easycom_uni_icons + _easycom_uni_load_more + _easycom_uni_popup + AvatarLongPressMenu)();
 }
+const AvatarLongPressMenu = () => "./AvatarLongPressMenu.js";
 const pageSize = 10;
 const _sfc_main = {
   __name: "CircleApplyPopup",
   emits: ["refresh"],
   setup(__props, { expose: __expose, emit: __emit }) {
     const popup = common_vendor.ref(null);
+    const avatarMenuRef = common_vendor.ref(null);
     const list = common_vendor.ref([]);
     const currentTab = common_vendor.ref(0);
     const pageNo = common_vendor.ref(1);
@@ -34,6 +37,17 @@ const _sfc_main = {
     };
     const close = () => {
       popup.value.close();
+    };
+    const handleAvatarClick = async (item) => {
+      if (!await utils_user.checkLoginGuard())
+        return;
+      const userParams = {
+        id: item.id,
+        name: item.realName || item.nickname || "用户",
+        avatar: item.avatar || "",
+        isEnterpriseSource: false
+      };
+      avatarMenuRef.value.open(userParams);
     };
     const switchTab = (tabIndex) => {
       if (currentTab.value === tabIndex)
@@ -78,7 +92,7 @@ const _sfc_main = {
           loadingStatus.value = "noMore";
         }
       } catch (e) {
-        common_vendor.index.__f__("error", "at components/CircleApplyPopup.vue:161", e);
+        common_vendor.index.__f__("error", "at components/CircleApplyPopup.vue:190", e);
         loadingStatus.value = "more";
       } finally {
         loading.value = false;
@@ -165,22 +179,23 @@ const _sfc_main = {
         i: common_vendor.f(list.value, (item, index, i0) => {
           return common_vendor.e({
             a: item.avatar || "/static/images/default-avatar.png",
-            b: common_vendor.t(item.realName || item.nickname),
-            c: common_vendor.t(formatTime(item.createTime)),
-            d: common_vendor.t(item.companyName || "暂无公司"),
-            e: item.positionTitle
+            b: common_vendor.o(($event) => handleAvatarClick(item), item.id),
+            c: common_vendor.t(item.realName || item.nickname),
+            d: common_vendor.t(formatTime(item.createTime)),
+            e: common_vendor.t(item.companyName || "暂无公司"),
+            f: item.positionTitle
           }, item.positionTitle ? {
-            f: common_vendor.t(item.positionTitle)
+            g: common_vendor.t(item.positionTitle)
           } : {}, {
-            g: item.fellowTownspeopleFlag === 1
+            h: item.fellowTownspeopleFlag === 1
           }, item.fellowTownspeopleFlag === 1 ? {} : {}, {
-            h: item.peerFlag === 1
+            i: item.peerFlag === 1
           }, item.peerFlag === 1 ? {} : {}, {
-            i: item.classmateFlag === 1
+            j: item.classmateFlag === 1
           }, item.classmateFlag === 1 ? {} : {}, {
-            j: common_vendor.o(($event) => handleAudit(item, false), item.id),
-            k: common_vendor.o(($event) => handleAudit(item, true), item.id),
-            l: item.id
+            k: common_vendor.o(($event) => handleAudit(item, false), item.id),
+            l: common_vendor.o(($event) => handleAudit(item, true), item.id),
+            m: item.id
           });
         }),
         j: common_vendor.t(currentTab.value === 0 ? "申请加入您的圈子" : "邀请您加入TA的圈子"),
@@ -206,6 +221,9 @@ const _sfc_main = {
         s: common_vendor.p({
           type: "bottom",
           ["background-color"]: "#f5f7fa"
+        }),
+        t: common_vendor.sr(avatarMenuRef, "8f869322-4", {
+          "k": "avatarMenuRef"
         })
       });
     };

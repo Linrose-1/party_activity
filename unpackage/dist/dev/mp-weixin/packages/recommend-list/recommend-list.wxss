@@ -1,5 +1,6 @@
 /* 水平间距 */
 /* 水平间距 */
+/* 自定义全局主题色变量 */
 .recommend-list-page.data-v-6e53aa0e {
   background-color: #1A1A1A;
   min-height: 100vh;

@@ -28,7 +28,8 @@
 			<view class="friend-card" v-for="friend in circleFriendList" :key="friend.id"
 				@click="navigateToBusinessCard(friend)">
 				<image class="friend-avatar" :src="friend.avatar || '/static/images/default-avatar.png'"
-					mode="aspectFill"></image>
+					mode="aspectFill" @click.stop="handleAvatarClick(friend)">
+				</image>
 				<view class="friend-info">
 					<view class="info-header">
 						<text class="friend-name">{{ friend.realName || friend.nickname || '匿名用户' }}</text>
@@ -65,6 +66,9 @@
 		</view>
 		<uni-load-more :status="circleLoadStatus" v-if="circleFriendList.length > 0"></uni-load-more>
 
+		<AvatarLongPressMenu ref="avatarMenuRef" />
+
+
 		<CircleApplyPopup ref="applyPopupRef" @refresh="handleAuditSuccess" />
 	</view>
 </template>
@@ -79,7 +83,11 @@
 		onReachBottom
 	} from '@dcloudio/uni-app';
 	import request from '@/utils/request.js';
+	import {
+		checkLoginGuard
+	} from '@/utils/user.js'; // 引入登录守卫
 	import CircleApplyPopup from '@/components/CircleApplyPopup.vue';
+	import AvatarLongPressMenu from '@/components/AvatarLongPressMenu.vue';
 
 	// --- 状态变量 ---
 	const circleFriendList = ref([]);
@@ -89,6 +97,7 @@
 	const circleAddInitiator = ref(0);
 	const newApplyList = ref([]);
 	const newApplyCount = ref(0);
+	const avatarMenuRef = ref(null);
 	const applyPopupRef = ref(null);
 
 	// --- 数据获取 ---
@@ -203,6 +212,25 @@
 	const navigateToBusinessCard = (user) => uni.navigateTo({
 		url: `/packages/applicationBusinessCard/applicationBusinessCard?id=${user.id}&name=${encodeURIComponent(user.nickname || user.realName)}&avatar=${encodeURIComponent(user.avatar || '')}&fromShare=1`
 	});
+
+	/**
+	 * 【核心优化】处理头像点击
+	 */
+	const handleAvatarClick = async (friend) => {
+		// 1. 权限拦截
+		if (!await checkLoginGuard()) return;
+
+		// 2. 构造基础数据传给弹窗
+		const userParams = {
+			id: friend.id,
+			name: friend.realName || friend.nickname || '圈友',
+			avatar: friend.avatar || '',
+			isEnterpriseSource: false
+		};
+
+		// 3. 打开弹窗 (组件内部会自动请求信用分、会员等级等数据)
+		avatarMenuRef.value.open(userParams);
+	};
 
 	onMounted(() => {
 		fetchCircleList(true);

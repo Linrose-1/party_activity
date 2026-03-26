@@ -7,39 +7,36 @@
 		</view>
 
 		<view class="form-wrapper">
-			<!-- 1. 头像和昵称 -->
-			<view class="profile-section">
-				<!-- 头像选择按钮，居中显示 -->
+			<!-- 1. 头像和昵称：老用户隐藏 -->
+			<view class="profile-section" v-if="!isOldUser">
 				<button class="avatar-wrapper" open-type="chooseAvatar" @chooseavatar="onChooseAvatar">
 					<image class="avatar" :src="avatarUrl || '/static/images/default-avatar.png'"></image>
 				</button>
-				<text class="avatar-hint">点击上传头像(首次登录需要填写)</text>
+				<text class="avatar-hint">点击上传头像(首次登录必填)</text>
 
-				<!-- 昵称输入框 -->
 				<view class="form-item nickName-item">
-					<uni-icons type="person-filled" size="22" color="#FF7600"></uni-icons>
+					<uni-icons type="person-filled" size="22" :color="PRIMARY_COLOR"></uni-icons>
 					<text class="label">用户名</text>
-					<input class="input" type="nickName" placeholder="请输入昵称(首次登录需要填写)" v-model="nickName" />
+					<input class="input" type="nickName" placeholder="请输入昵称(首次登录必填)" v-model="nickName" />
 				</view>
 			</view>
 
-			<!-- 2. 手机号 -->
+			<!-- 2. 手机号：新老用户都需要，因为需要重新获取加密 code 登录 -->
 			<view class="form-item">
-				<uni-icons type="phone-filled" size="22" color="#FF7600"></uni-icons>
+				<uni-icons type="phone-filled" size="22" :color="PRIMARY_COLOR"></uni-icons>
 				<text class="label">手机号</text>
 				<button v-if="!phoneCode" class="get-phone-btn" open-type="getPhoneNumber"
 					@getphonenumber="getPhoneNumber">
 					手机号快捷登录
 				</button>
-				<text v-else class="input-display">已授权</text>
+				<text v-else class="input-display" style="color: #4CAF50;">已完成手机授权</text>
 			</view>
 
-			<!-- 3. 邀请码 -->
-			<view class="form-item" v-if="!hasParent">
-				<uni-icons type="paperplane-filled" size="22" color="#FF7600"></uni-icons>
+			<!-- 3. 邀请码：老用户且已有上级时隐藏 -->
+			<view class="form-item" v-if="!isOldUser && !hasParent">
+				<uni-icons type="paperplane-filled" size="22" :color="PRIMARY_COLOR"></uni-icons>
 				<text class="label">邀请码</text>
-				<input v-model="inviteCode" class="input" type="text" placeholder="请输入邀请码(首次登录需要填写)"
-					placeholder-class="placeholder" />
+				<input v-model="inviteCode" class="input" type="text" placeholder="请输入邀请码(首次登录必填)" />
 			</view>
 		</view>
 
@@ -78,6 +75,7 @@
 	} from '../../utils/user.js';
 
 	// --- 1. 状态管理 ---
+	const isOldUser = ref(false); // 是否为已绑定手机号的老用户
 	const loginCode = ref(''); // uni.login 获取的登录凭证
 	const phoneCode = ref(''); // 微信手机号授权凭证
 	const nickName = ref(null); // 用户昵称，可由用户输入或授权填充
@@ -89,12 +87,16 @@
 
 	// --- 2. 计算属性 ---
 	const isLoginDisabled = computed(() => {
-		// 登录按钮的可用条件：
-		// 1. 必须有头像 (avatarUrl)
-		// 2. 必须有手机号凭证 (phoneCode)
-		// 3. 必须有昵称且不为空 (nickName)
-		// 4. 必须同意协议 (agreed)
-		return !avatarUrl.value || !phoneCode.value || !nickName.value || !nickName.value.trim() || !agreed.value;
+		// 基础条件：必须同意协议
+		if (!agreed.value) return true;
+
+		if (isOldUser.value) {
+			// 老用户：只需要授权手机号（phoneCode）即可登录
+			return !phoneCode.value;
+		} else {
+			// 新用户：头像、昵称、手机号 缺一不可
+			return !avatarUrl.value || !phoneCode.value || !nickName.value || !nickName.value.trim();
+		}
 	});
 
 	// --- 3. 生命周期钩子 ---
@@ -263,34 +265,56 @@
 	};
 
 	// --- 5. 核心登录逻辑 ---
-
 	/**
-	 * 专门用于绑定前的静默登录补救函数
-	 * 返回 true 表示成功拿到 Token，false 表示失败
+	 * 登录前置预检：静默登录 + 获取用户信息
+	 * 判断用户是否为已注册手机号的老用户
 	 */
 	const performSilentLoginForBind = async () => {
 		try {
 			const loginRes = await uni.login({
 				provider: 'weixin'
 			});
-			if (loginRes.code) {
-				const silentResult = await request('/app-api/member/auth/weixin-mini-app-login', {
-					method: 'POST',
-					data: {
-						loginCode: loginRes.code,
-						state: 'default',
-						shardCode: inviteCode.value // 尝试带上邀请码，虽然主要是为了拿 Token
-					}
+			if (!loginRes.code) return false;
+
+			// 1. 执行静默登录拿 Token
+			const silentResult = await request('/app-api/member/auth/weixin-mini-app-login', {
+				method: 'POST',
+				data: {
+					loginCode: loginRes.code,
+					state: 'default',
+					shardCode: inviteCode.value
+				}
+			});
+
+			if (silentResult.data && silentResult.data.accessToken) {
+				uni.setStorageSync('token', silentResult.data.accessToken);
+				uni.setStorageSync('userId', silentResult.data.userId);
+
+				// 2. 【核心优化】：获取用户信息，检查是否绑定了手机号
+				const {
+					data: userInfo
+				} = await request('/app-api/member/user/get', {
+					method: 'GET'
 				});
-				if (silentResult.data && silentResult.data.accessToken) {
-					uni.setStorageSync('token', silentResult.data.accessToken);
-					uni.setStorageSync('userId', silentResult.data.userId);
-					console.log('✅ 登录前置补救成功，Token 已更新');
+
+				if (userInfo) {
+					// 如果有手机号，判定为老用户
+					if (userInfo.mobile) {
+						isOldUser.value = true;
+						nickName.value = userInfo.nickname;
+						avatarUrl.value = userInfo.avatar;
+						console.log('✨ [检测] 该用户为老用户，已跳过资料填写');
+					}
+
+					// 检查是否有上级
+					if (userInfo.parentId) {
+						hasParent.value = true;
+					}
 					return true;
 				}
 			}
 		} catch (e) {
-			console.error('前置补救异常:', e);
+			console.error('前置预检异常:', e);
 		}
 		return false;
 	};
@@ -298,77 +322,28 @@
 	 * @description 处理一键登录
 	 */
 	const handleLogin = async () => {
-		// 1. 前端校验
-		if (isLoginDisabled.value) {
-			if (!phoneCode.value) {
-				return uni.showToast({
-					title: '请授权手机号',
-					icon: 'none'
-				});
-			} else if (!agreed.value) {
-				return uni.showToast({
-					title: '请同意协议',
-					icon: 'none'
-				});
-			}
-			return;
-		}
-
-		// 二次校验（防止 computed 没更新）
-		if (!avatarUrl.value) {
-			return uni.showToast({
-				title: '请上传头像',
-				icon: 'none'
-			});
-		}
-		if (!nickName.value || !nickName.value.trim()) {
-			return uni.showToast({
-				title: '请输入昵称',
-				icon: 'none'
-			});
-		}
+		if (isLoginDisabled.value) return;
 
 		uni.showLoading({
 			title: '正在登录...'
 		});
 
-		let token = uni.getStorageSync('token');
-
-		// 如果没有 Token，或者我们想确保万无一失，直接执行一次静默登录流程
-		if (!token) {
-			console.log('检测到无 Token，正在执行登录前置补救...');
-			const loginSuccess = await performSilentLoginForBind();
-			if (!loginSuccess) {
-				uni.hideLoading();
-				return uni.showToast({
-					title: '登录初始化失败，请重试',
-					icon: 'none'
-				});
-			}
-			// 补救成功后，更新 token 变量
-			token = uni.getStorageSync('token');
-		}
-
 		try {
-			// 2. 准备提交给后端的数据
 			const payload = {
-				// loginCode: loginCode.value, // 注释掉，使用 phoneCode
 				phoneCode: phoneCode.value,
-				telephone: "", // 后端要求字段，微信授权模式下传空字符串
+				telephone: "",
 				nickName: nickName.value,
 				avatar: avatarUrl.value,
 				shardCode: inviteCode.value,
 			};
-			console.log('🚀 准备提交的登录数据:', payload);
 
-			// 3. 发起绑定请求
+			// 无论是新老用户，统一调用 bind/info 接口（后端会处理：老用户更新信息，新用户创建绑定）
 			const loginResult = await request('/app-api/member/auth/bind/info', {
 				method: 'POST',
 				data: payload
 			});
-			// 只判断是否有 error。只要没有 error，哪怕 data 是 true 也是成功。
+
 			if (loginResult.error) {
-				// 特殊处理453错误码
 				if (loginResult.error.code === 453) {
 					uni.showToast({
 						title: loginResult.error.msg,
@@ -376,178 +351,35 @@
 						duration: 3000
 					});
 				} else {
-					// 抛出后端返回的具体错误信息
-					throw new Error(loginResult.error.msg || '登录失败，请重试');
+					throw new Error(loginResult.error.msg || '登录失败');
 				}
-				// 重新获取 code 防止下次失败
-				// getLoginCode();
 				return;
 			}
 
-			console.log('✅ 绑定成功 (后端返回:', loginResult.data, ')');
-			// 4. 登录成功后的处理
-			// 如果后端返回了新的 token (万一改回去)，则更新；否则保持静默登录的 token
-			if (loginResult.data && typeof loginResult.data === 'object' && loginResult.data.accessToken) {
-				const {
-					accessToken,
-					userId
-				} = loginResult.data;
-				uni.setStorageSync('token', accessToken);
-				uni.setStorageSync('userId', userId);
-			}
-
-			// 5. 同步用户信息
-			await fetchAndCacheUserInfo();
-
-			// 6. 处理分享奖励
-			const currentUserId = uni.getStorageSync('userId');
-			if (currentUserId) {
-				await handlePendingShareReward(currentUserId);
-			}
-
-			// console.log('🧹 [登录页] 绑定完成，清除本地 Token/UserId 以触发首页静默登录刷新');
-			// uni.removeStorageSync('token');
-			// uni.removeStorageSync('userId');
-
-			//清理storage缓存
-			uni.clearStorage()
-			//微信登录重新获取换绑openid用户的token
-			performSilentLogin()
+			// 成功后的清理与重定向
+			uni.clearStorage();
+			await performSilentLogin(); // 重新获取正式 Token
 
 			uni.hideLoading();
 			uni.showToast({
-				title: '登录成功',
-				icon: 'success',
-				duration: 2000
+				title: isOldUser.value ? '欢迎回来' : '登录成功',
+				icon: 'success'
 			});
-			// 7. 跳转首页
+
 			setTimeout(() => {
 				uni.switchTab({
 					url: '/pages/home/home'
 				});
-			}, 2000);
+			}, 1500);
 
 		} catch (error) {
 			uni.hideLoading();
-			console.error('登录流程异常:', error);
 			uni.showToast({
 				title: error.message || '系统异常',
 				icon: 'none'
 			});
-			// getLoginCode();
 		}
 	};
-	// const handleLogin = async () => {
-	// 	if (!avatarUrl.value) {
-	// 		return uni.showToast({
-	// 			title: '请上传头像',
-	// 			icon: 'none'
-	// 		});
-	// 	}
-	// 	if (!nickName.value || !nickName.value.trim()) {
-	// 		return uni.showToast({
-	// 			title: '请输入昵称',
-	// 			icon: 'none'
-	// 		});
-	// 	}
-	// 	if (!phoneCode.value) {
-	// 		return uni.showToast({
-	// 			title: '请授权手机号',
-	// 			icon: 'none'
-	// 		});
-	// 	}
-	// 	if (!agreed.value) {
-	// 		return uni.showToast({
-	// 			title: '请同意协议',
-	// 			icon: 'none'
-	// 		});
-	// 	}
-
-	// 	uni.showLoading({
-	// 		title: '正在登录...'
-	// 	});
-
-	// 	try {
-	// 		// 准备提交给后端的数据
-	// 		const payload = {
-	// 			// loginCode: loginCode.value,
-	// 			phoneCode: phoneCode.value,
-	// 			nickName: nickName.value,
-	// 			avatar: avatarUrl.value, // 将获取到的头像URL加入
-	// 			shardCode: inviteCode.value,
-	// 			// state: 'default'
-	// 		};
-	// 		console.log('🚀 准备提交的登录数据:', payload);
-
-	// 		// 发起登录请求
-	// 		const loginResult = await request('/app-api/member/auth/bind/info', {
-	// 			method: 'POST',
-	// 			data: payload
-	// 		});
-
-	// 		// 【修正逻辑】：只要 error 为空，或者 data 为 true，都视为成功
-	// 		if (loginResult.error) {
-	// 			// 特殊处理453错误码
-	// 			if (loginResult.error.code === 453) {
-	// 				uni.showToast({
-	// 					title: loginResult.error.msg,
-	// 					icon: 'none',
-	// 					duration: 3000
-	// 				});
-	// 			} else {
-	// 				// 其他错误才抛出异常
-	// 				throw new Error(loginResult.error.msg || '登录失败，请重试');
-	// 			}
-	// 			getLoginCode();
-	// 			return;
-	// 		}
-
-	// 		// --- 下面是成功后的逻辑 ---
-
-	// 		// 注意：后端现在返回的是 true，不一定包含 accessToken
-	// 		// 如果返回了 data 对象且有 accessToken，我们就更新；如果没有，就继续用之前的
-	// 		if (loginResult.data && typeof loginResult.data === 'object' && loginResult.data.accessToken) {
-	// 			const {
-	// 				accessToken,
-	// 				userId
-	// 			} = loginResult.data;
-	// 			uni.setStorageSync('token', accessToken);
-	// 			uni.setStorageSync('userId', userId);
-	// 		} else {
-	// 			console.log('接口返回 true，继续使用现有 Token');
-	// 		}
-
-	// 		// 紧接着获取并存储完整的用户信息
-	// 		await fetchAndCacheUserInfo();
-
-	// 		// 检查并处理分享奖励
-	// 		// 注意：这里需要 userId，如果上面没返回，从缓存取
-	// 		const currentUserId = uni.getStorageSync('userId');
-	// 		if (currentUserId) {
-	// 			await handlePendingShareReward(currentUserId);
-	// 		}
-
-	// 		uni.hideLoading();
-	// 		uni.showToast({
-	// 			title: '登录成功',
-	// 			icon: 'success'
-	// 		});
-
-	// 		// 跳转到首页
-	// 		uni.switchTab({
-	// 			url: '/pages/home/home'
-	// 		});
-
-	// 	} catch (error) {
-	// 		uni.hideLoading();
-	// 		console.error('登录流程异常:', error);
-	// 		uni.showToast({
-	// 			title: error.message,
-	// 			icon: 'none'
-	// 		});
-	// 		getLoginCode(); // 登录失败后，重新获取 code 以便重试
-	// 	}
-	// };
 
 	/**
 	 * @description 登录成功后，获取并缓存完整的用户信息

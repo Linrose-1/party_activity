@@ -14,14 +14,14 @@
 					<view class="mini-interaction" :class="{ active: store.userLikeStr === 'like' }"
 						@click.stop="handleAction('like')">
 						<uni-icons :type="store.userLikeStr === 'like' ? 'hand-up-filled' : 'hand-up'" size="14"
-							:color="store.userLikeStr === 'like' ? '#ff6b00' : '#999'" />
+							:color="store.userLikeStr === 'like' ? PRIMARY_COLOR : '#999'" />
 						<text>{{ store.likesCount || 0 }}</text>
 					</view>
 					<!-- 点踩 -->
 					<view class="mini-interaction" :class="{ active: store.userLikeStr === 'dislike' }"
 						@click.stop="handleAction('dislike')">
 						<uni-icons :type="store.userLikeStr === 'dislike' ? 'hand-down-filled' : 'hand-down'" size="14"
-							:color="store.userLikeStr === 'dislike' ? '#3498db' : '#999'" />
+							:color="store.userLikeStr === 'dislike' ? SECONDARY_COLOR : '#999'" />
 						<text>{{ store.dislikesCount || 0 }}</text>
 					</view>
 					<!-- 评论数 (补回) -->
@@ -119,6 +119,9 @@
 	});
 
 	const emit = defineEmits(['click-card', 'update-like', 'edit-store']);
+
+	const PRIMARY_COLOR = '#FF62B1';
+	const SECONDARY_COLOR = '#29CFFE';
 
 	// ─── 计算属性 ───
 
@@ -241,7 +244,8 @@
 </script>
 
 <style lang="scss" scoped>
-	$primary: #ff6b00;
+	$primary: $gofor-primary;
+	$secondary: $gofor-secondary;
 
 	.store-card {
 		background-color: #fff;
@@ -386,7 +390,7 @@
 		font-weight: 500;
 
 		&.btn-primary-light {
-			background-color: #fff5ec;
+			background-color: rgba($primary, 0.08);
 			color: $primary;
 		}
 
@@ -420,7 +424,7 @@
 		}
 
 		.silent-avatar {
-			border-color: #FF8C00 !important;
+			border-color: $primary !important;
 		}
 
 		.view-count-txt {
@@ -436,18 +440,18 @@
 		border-radius: 8rpx;
 
 		&.status-normal {
-			background: #e8f7ee;
-			color: #27ae60;
+			background: rgba($gofor-success, 0.1);
+			color: $gofor-success;
 		}
 
 		&.status-pending {
-			background: #fff8e6;
-			color: #f39c12;
+			background: rgba($gofor-warning, 0.1);
+			color: $gofor-warning;
 		}
 
 		&.status-failed {
-			background: #fff0f0;
-			color: #e74c3c;
+			background: rgba($gofor-danger, 0.1);
+			color: $gofor-danger;
 		}
 	}
 

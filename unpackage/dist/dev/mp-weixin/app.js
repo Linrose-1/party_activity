@@ -20,7 +20,6 @@ if (!Math) {
   "./pages/my-shop/my-shop.js";
   "./pages/my-shopRecommend/my-shopRecommend.js";
   "./pages/login/login.js";
-  "./pages/activity-participants/activity-participants.js";
   "./pages/my-edit-label/my-edit-label.js";
   "./pages/my-active-registeredUser/my-active-registeredUser.js";
   "./pages/my-active-secondRegistration/my-active-secondRegistration.js";
@@ -29,12 +28,13 @@ if (!Math) {
   "./pages/my-order/my-order.js";
   "./pages/relation/relation.js";
   "./pages/six-degrees/six-degrees.js";
-  "./pages/general-search/general-search.js";
   "./pages/shop-apply/shop-apply.js";
   "./pages/my-systemSuggestions/my-systemSuggestions.js";
   "./pages/platform-intro/platform-intro.js";
-  "./pages/my-order-detail/my-order-detail.js";
   "./pages/sponsor-detail/sponsor-detail.js";
+  "./packages/general-search/general-search.js";
+  "./packages/my-order-detail/my-order-detail.js";
+  "./packages/activity-participants/activity-participants.js";
   "./packages/my-account-informationDetails/my-account-informationDetails.js";
   "./packages/my-account/my-account.js";
   "./packages/home-opportunitiesPublish/home-opportunitiesPublish.js";
@@ -94,6 +94,7 @@ if (!Math) {
   "./packages/my-circleList/my-circleList.js";
   "./packages/silent-view-trace/silent-view-trace.js";
   "./packages/active-verify/active-verify.js";
+  "./packages/sponsor-list/sponsor-list.js";
 }
 const _sfc_main = {
   data() {

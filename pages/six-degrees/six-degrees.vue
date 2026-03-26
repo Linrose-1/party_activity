@@ -35,6 +35,52 @@
 		</view>
 
 		<view class="scroll-content">
+			<!--人脉银行模块 -->
+			<view class="bank-section">
+				<!-- 标题样式与智能工具完全一致 -->
+				<view class="section-header">
+					<text class="section-title">人脉银行</text>
+				</view>
+
+				<view class="bank-list">
+					<!-- 商友人脉 -->
+					<view class="bank-horizontal-card" @click="goToShareList">
+						<view class="card-left">
+							<view class="bank-icon-box share-bg">
+								<uni-icons type="staff-filled" size="24" color="#FFF"></uni-icons>
+								<!-- 未读数：inviteUserCount -->
+								<view class="red-dot-badge" v-if="unreadData.inviteUserCount > 0">
+									{{ unreadData.inviteUserCount > 99 ? '99+' : unreadData.inviteUserCount }}
+								</view>
+							</view>
+						</view>
+						<view class="card-right">
+							<text class="b-title">商友人脉</text>
+							<text class="b-desc">管理我直接邀请的商友</text>
+						</view>
+						<uni-icons type="right" size="14" color="#CCC"></uni-icons>
+					</view>
+
+					<!-- 圈友人脉 -->
+					<view class="bank-horizontal-card" @click="goToCircleList">
+						<view class="card-left">
+							<view class="bank-icon-box circle-bg">
+								<uni-icons type="auth-filled" size="24" color="#FFF"></uni-icons>
+								<!-- 未读数：friendApplyCount + friendInviteCount -->
+								<view class="red-dot-badge"
+									v-if="(unreadData.friendApplyCount + unreadData.friendInviteCount) > 0">
+									{{ (unreadData.friendApplyCount + unreadData.friendInviteCount) > 99 ? '99+' : (unreadData.friendApplyCount + unreadData.friendInviteCount) }}
+								</view>
+							</view>
+						</view>
+						<view class="card-right">
+							<text class="b-title">圈友人脉</text>
+							<text class="b-desc">管理互圈的人脉商机资源</text>
+						</view>
+						<uni-icons type="right" size="14" color="#CCC"></uni-icons>
+					</view>
+				</view>
+			</view>
 			<!-- 智能工具 -->
 			<view class="tools-section">
 				<view class="section-header">
@@ -176,6 +222,13 @@
 	const refreshing = ref(false);
 	const isFirstShow = ref(true);
 
+	const unreadData = ref({
+		inviteUserCount: 0, // 邀请用户未读
+		friendApplyCount: 0, // 申请入圈未读
+		friendInviteCount: 0 // 邀请进圈未读
+	});
+
+
 	// 付费档位配置
 	const tiers = [{
 			id: 1,
@@ -266,6 +319,48 @@
 			url: `/packages/applicationBusinessCard/applicationBusinessCard?id=${user.id}&name=${encodeURIComponent(user.name)}&avatar=${encodeURIComponent(avatarUrl)}`
 		});
 	};
+
+	// 跳转方法
+	const goToShareList = async () => {
+		if (!await checkLoginGuard()) return;
+		uni.navigateTo({
+			url: '/packages/my-shareList/my-shareList'
+		});
+	};
+
+	const goToCircleList = async () => {
+		if (!await checkLoginGuard()) return;
+		uni.navigateTo({
+			url: '/packages/my-circleList/my-circleList'
+		});
+	};
+
+
+	/**
+	 * 获取未读消息数
+	 */
+	const fetchUnreadCount = async () => {
+		// 只有登录了才请求
+		const token = uni.getStorageSync('token');
+		if (!token) return;
+
+		const {
+			data,
+			error
+		} = await request('/app-api/member/user/unread-count', {
+			method: 'GET'
+		});
+
+		if (!error && data) {
+			unreadData.value = {
+				...unreadData.value,
+				inviteUserCount: data.inviteUserCount || 0,
+				friendApplyCount: data.friendApplyCount || 0,
+				friendInviteCount: data.friendInviteCount || 0
+			};
+		}
+	};
+
 
 	/**
 	 * 获取智能推荐列表
@@ -383,7 +478,7 @@
 
 	const handleSearch = () => {
 		uni.navigateTo({
-			url: '/pages/general-search/general-search?keyword=' + encodeURIComponent(searchKeyword.value)
+			url: '/packages/general-search/general-search?keyword=' + encodeURIComponent(searchKeyword.value)
 		});
 	};
 
@@ -438,6 +533,7 @@
 	};
 
 	onShow(async () => {
+		fetchUnreadCount();
 		// 2. 只有在首次进入，或者列表为空时才主动刷新
 		if (isFirstShow.value || recommendUsers.value.length === 0) {
 			console.log('首次加载或列表为空，执行刷新');
@@ -1003,5 +1099,108 @@
 		padding: 60rpx;
 		color: #999;
 		font-size: 24rpx;
+	}
+
+	/* --- 人脉银行优化样式 --- */
+	.bank-section {
+		margin-bottom: 40rpx;
+
+		/* 标题样式继承自 .tools-section 或在此统一定义 */
+		.section-header {
+			margin-bottom: 24rpx;
+
+			.section-title {
+				font-size: 32rpx;
+				font-weight: 700;
+				color: #1A1A1A;
+				/* 与智能工具标题一致 */
+			}
+		}
+
+		.bank-list {
+			display: flex;
+			flex-direction: column;
+			gap: 20rpx;
+		}
+
+		.bank-horizontal-card {
+			background: #FFFFFF;
+			border-radius: 24rpx;
+			padding: 24rpx 30rpx;
+			display: flex;
+			align-items: center;
+			box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.04);
+			position: relative;
+			transition: all 0.2s ease;
+
+			&:active {
+				transform: scale(0.98);
+				background-color: #FAFAFA;
+			}
+
+			.card-left {
+				margin-right: 24rpx;
+				position: relative;
+			}
+
+			.bank-icon-box {
+				width: 84rpx;
+				height: 84rpx;
+				border-radius: 20rpx;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+
+				&.share-bg {
+					background: linear-gradient(135deg, #FF81BF, #FF67B3);
+				}
+
+				&.circle-bg {
+					background: linear-gradient(135deg, #0DE7FE, #1DD9FE);
+				}
+			}
+
+			.card-right {
+				flex: 1;
+				display: flex;
+				flex-direction: column;
+
+				.b-title {
+					font-size: 30rpx;
+					font-weight: 700;
+					color: #2D2D2D;
+					margin-bottom: 4rpx;
+				}
+
+				.b-desc {
+					font-size: 22rpx;
+					color: #8E8E93;
+				}
+			}
+
+			/* 红点标记：位于图标右上角 */
+			.red-dot-badge {
+				position: absolute;
+				top: -12rpx;
+				right: -12rpx;
+				background-color: #FF4D4F;
+				color: #FFFFFF;
+				font-size: 20rpx;
+				font-weight: bold;
+				min-width: 34rpx;
+				height: 34rpx;
+				line-height: 30rpx;
+				/* 微调文字垂直居中 */
+				border-radius: 17rpx;
+				text-align: center;
+				padding: 0 8rpx;
+				border: 3rpx solid #FFFFFF;
+				box-shadow: 0 4rpx 8rpx rgba(255, 77, 79, 0.3);
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				z-index: 10;
+			}
+		}
 	}
 </style>

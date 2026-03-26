@@ -25,6 +25,14 @@ const _sfc_main = {
     const recommendUsers = common_vendor.ref([]);
     const refreshing = common_vendor.ref(false);
     const isFirstShow = common_vendor.ref(true);
+    const unreadData = common_vendor.ref({
+      inviteUserCount: 0,
+      // 邀请用户未读
+      friendApplyCount: 0,
+      // 申请入圈未读
+      friendInviteCount: 0
+      // 邀请进圈未读
+    });
     const tiers = [
       {
         id: 1,
@@ -99,6 +107,39 @@ const _sfc_main = {
       common_vendor.index.navigateTo({
         url: `/packages/applicationBusinessCard/applicationBusinessCard?id=${user.id}&name=${encodeURIComponent(user.name)}&avatar=${encodeURIComponent(avatarUrl)}`
       });
+    };
+    const goToShareList = async () => {
+      if (!await utils_user.checkLoginGuard())
+        return;
+      common_vendor.index.navigateTo({
+        url: "/packages/my-shareList/my-shareList"
+      });
+    };
+    const goToCircleList = async () => {
+      if (!await utils_user.checkLoginGuard())
+        return;
+      common_vendor.index.navigateTo({
+        url: "/packages/my-circleList/my-circleList"
+      });
+    };
+    const fetchUnreadCount = async () => {
+      const token = common_vendor.index.getStorageSync("token");
+      if (!token)
+        return;
+      const {
+        data,
+        error
+      } = await utils_request.request("/app-api/member/user/unread-count", {
+        method: "GET"
+      });
+      if (!error && data) {
+        unreadData.value = {
+          ...unreadData.value,
+          inviteUserCount: data.inviteUserCount || 0,
+          friendApplyCount: data.friendApplyCount || 0,
+          friendInviteCount: data.friendInviteCount || 0
+        };
+      }
     };
     const fetchRecommendUsers = async (isRefresh = false) => {
       if (!isRefresh) {
@@ -198,7 +239,7 @@ const _sfc_main = {
     };
     const handleSearch = () => {
       common_vendor.index.navigateTo({
-        url: "/pages/general-search/general-search?keyword=" + encodeURIComponent(searchKeyword.value)
+        url: "/packages/general-search/general-search?keyword=" + encodeURIComponent(searchKeyword.value)
       });
     };
     const goToShakePage = () => {
@@ -242,13 +283,14 @@ const _sfc_main = {
       }
     };
     common_vendor.onShow(async () => {
+      fetchUnreadCount();
       if (isFirstShow.value || recommendUsers.value.length === 0) {
-        common_vendor.index.__f__("log", "at pages/six-degrees/six-degrees.vue:443", "首次加载或列表为空，执行刷新");
+        common_vendor.index.__f__("log", "at pages/six-degrees/six-degrees.vue:539", "首次加载或列表为空，执行刷新");
         await fetchRecommendUsers();
         refreshing.value = false;
         isFirstShow.value = false;
       } else {
-        common_vendor.index.__f__("log", "at pages/six-degrees/six-degrees.vue:448", "从其他页面返回，保持当前列表不刷新");
+        common_vendor.index.__f__("log", "at pages/six-degrees/six-degrees.vue:544", "从其他页面返回，保持当前列表不刷新");
       }
     });
     return (_ctx, _cache) => {
@@ -262,9 +304,39 @@ const _sfc_main = {
         c: searchKeyword.value,
         d: common_vendor.o(($event) => searchKeyword.value = $event.detail.value),
         e: common_vendor.o(handleSearch),
-        f: common_vendor.o(goToShakePage),
-        g: common_vendor.o(goToCustomVisitPage),
-        h: common_vendor.f(recommendUsers.value, (user, index, i0) => {
+        f: common_vendor.p({
+          type: "staff-filled",
+          size: "24",
+          color: "#FFF"
+        }),
+        g: unreadData.value.inviteUserCount > 0
+      }, unreadData.value.inviteUserCount > 0 ? {
+        h: common_vendor.t(unreadData.value.inviteUserCount > 99 ? "99+" : unreadData.value.inviteUserCount)
+      } : {}, {
+        i: common_vendor.p({
+          type: "right",
+          size: "14",
+          color: "#CCC"
+        }),
+        j: common_vendor.o(goToShareList),
+        k: common_vendor.p({
+          type: "auth-filled",
+          size: "24",
+          color: "#FFF"
+        }),
+        l: unreadData.value.friendApplyCount + unreadData.value.friendInviteCount > 0
+      }, unreadData.value.friendApplyCount + unreadData.value.friendInviteCount > 0 ? {
+        m: common_vendor.t(unreadData.value.friendApplyCount + unreadData.value.friendInviteCount > 99 ? "99+" : unreadData.value.friendApplyCount + unreadData.value.friendInviteCount)
+      } : {}, {
+        n: common_vendor.p({
+          type: "right",
+          size: "14",
+          color: "#CCC"
+        }),
+        o: common_vendor.o(goToCircleList),
+        p: common_vendor.o(goToShakePage),
+        q: common_vendor.o(goToCustomVisitPage),
+        r: common_vendor.f(recommendUsers.value, (user, index, i0) => {
           return common_vendor.e({
             a: user.avatar || "/static/images/default-avatar.png",
             b: common_vendor.o(($event) => handleAvatarClick(user), user.id),
@@ -279,9 +351,9 @@ const _sfc_main = {
             j: common_vendor.o(($event) => viewUserDetail(user), user.id)
           });
         }),
-        i: recommendUsers.value.length === 0
+        s: recommendUsers.value.length === 0
       }, recommendUsers.value.length === 0 ? {} : {}, {
-        j: common_vendor.f(tiers, (tier, k0, i0) => {
+        t: common_vendor.f(tiers, (tier, k0, i0) => {
           return common_vendor.e({
             a: tier.hot
           }, tier.hot ? {} : {}, {
@@ -293,23 +365,23 @@ const _sfc_main = {
             g: common_vendor.o(($event) => selectedTier.value = tier, tier.id)
           });
         }),
-        k: common_vendor.o(handleConsumeZhimi),
-        l: common_vendor.o(onPullDownRefresh),
-        m: refreshing.value,
-        n: common_vendor.sr(avatarMenuRef, "132afe13-1", {
+        v: common_vendor.o(handleConsumeZhimi),
+        w: common_vendor.o(onPullDownRefresh),
+        x: refreshing.value,
+        y: common_vendor.sr(avatarMenuRef, "132afe13-5", {
           "k": "avatarMenuRef"
         }),
-        o: common_vendor.o(handleMenuAction),
-        p: common_vendor.sr(addCirclePopup, "132afe13-2", {
+        z: common_vendor.o(handleMenuAction),
+        A: common_vendor.sr(addCirclePopup, "132afe13-6", {
           "k": "addCirclePopup"
         }),
-        q: common_vendor.sr(invitePopupRef, "132afe13-3", {
+        B: common_vendor.sr(invitePopupRef, "132afe13-7", {
           "k": "invitePopupRef"
         }),
-        r: common_vendor.sr(smartGuidePopupRef, "132afe13-4", {
+        C: common_vendor.sr(smartGuidePopupRef, "132afe13-8", {
           "k": "smartGuidePopupRef"
         }),
-        s: common_vendor.p({
+        D: common_vendor.p({
           scenario: 3
         })
       });
