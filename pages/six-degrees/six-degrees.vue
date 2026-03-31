@@ -197,13 +197,16 @@
 	} from 'vue';
 	import {
 		onLoad,
-		onShow
+		onShow,
+		onShareAppMessage, // 新增
+		onShareTimeline // 新增
 	} from '@dcloudio/uni-app';
 	import request from '@/utils/request.js';
 	import {
 		checkLoginGuard,
 		isScenario3User,
-		canShowProfileRemind
+		canShowProfileRemind,
+		getInviteCode 
 	} from '@/utils/user.js';
 
 	import AvatarLongPressMenu from '@/components/AvatarLongPressMenu.vue';
@@ -543,6 +546,54 @@
 		} else {
 			console.log('从其他页面返回，保持当前列表不刷新');
 		}
+
+		uni.showShareMenu({
+			menus: ['shareAppMessage', 'shareTimeline']
+		});
+	});
+
+	// ==========================================================
+	// --- 分享功能实现 ---
+	// ==========================================================
+
+	/**
+	 * 1. 分享给好友
+	 */
+	onShareAppMessage(() => {
+		// 获取当前登录用户的邀请码
+		const inviteCode = getInviteCode();
+
+		// 构造分享路径
+		let sharePath = '/pages/six-degrees/six-degrees';
+		if (inviteCode) {
+			sharePath += `?inviteCode=${inviteCode}`;
+		}
+
+		console.log('🚀 [六度人脉] 发起分享，路径:', sharePath);
+
+		return {
+			title: '六度人脉-六度时空，发现您的无限商机！',
+			path: sharePath,
+			imageUrl: 'https://img.gofor.club/logo_share.jpg' // 建议使用项目标准的分享图
+		};
+	});
+
+	/**
+	 * 2. 分享到朋友圈
+	 */
+	onShareTimeline(() => {
+		const inviteCode = getInviteCode();
+
+		let queryString = '';
+		if (inviteCode) {
+			queryString = `inviteCode=${inviteCode}`;
+		}
+
+		return {
+			title: '六度人脉：探索您的人脉网络，发现意想不到的连接',
+			query: queryString,
+			imageUrl: 'https://img.gofor.club/logo_share.jpg'
+		};
 	});
 </script>
 

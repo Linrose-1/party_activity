@@ -6,10 +6,13 @@
   flex-direction: column;
   height: 100vh;
   background: #f4f5f7;
+  /* 重点 5: 禁止页面整体滚动 */
+  overflow: hidden;
 }
 .privacy-notice.data-v-c723bf2a {
+  height: 80rpx;
+  /* 固定高度方便计算 */
   background: #fffbe6;
-  padding: 16rpx;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -19,20 +22,19 @@
   border-bottom: 1rpx solid #ffe58f;
   flex-shrink: 0;
 }
-
-/* scroll-view 撑满剩余高度 */
 .chat-list.data-v-c723bf2a {
-  flex: 1;
-  padding: 30rpx 30rpx 0;
+  width: 100%;
   box-sizing: border-box;
-  overflow: hidden;
 }
 .message-container.data-v-c723bf2a {
-  padding-bottom: 20rpx;
+  padding: 30rpx 30rpx 40rpx;
 }
 .message-group.data-v-c723bf2a {
   display: flex;
   margin-bottom: 40rpx;
+  /* 消息底部信息行（包含时间和删除） */
+  /* 精致删除按钮样式 */
+  /* 针对自己的消息（右侧）的排版调整 */
 }
 .message-group .user-avatar.data-v-c723bf2a {
   width: 84rpx;
@@ -53,7 +55,6 @@
   font-size: 24rpx;
   color: #999;
   margin-bottom: 8rpx;
-  margin-left: 4rpx;
 }
 .message-group .bubble.data-v-c723bf2a {
   background: #fff;
@@ -71,7 +72,59 @@
   font-size: 20rpx;
   color: #bbb;
   margin-top: 12rpx;
+  display: flex;
+  align-items: center;
+}
+.message-group .message-time .delete-link.data-v-c723bf2a {
+  margin-left: 20rpx;
+  color: #999;
+  text-decoration: underline;
+  padding: 4rpx 10rpx;
+}
+.message-group .message-info-row.data-v-c723bf2a {
+  display: flex;
+  align-items: center;
+  margin-top: 10rpx;
+  gap: 20rpx;
+}
+.message-group .message-time.data-v-c723bf2a {
+  font-size: 20rpx;
+  color: #bbb;
+}
+.message-group .delete-icon-btn.data-v-c723bf2a {
+  display: flex;
+  align-items: center;
+  background-color: rgba(255, 77, 79, 0.05);
+  padding: 4rpx 12rpx;
+  border-radius: 20rpx;
+  transition: all 0.2s;
+}
+.message-group .delete-icon-btn .delete-txt.data-v-c723bf2a {
+  font-size: 20rpx;
+  color: #ff4d4f;
   margin-left: 4rpx;
+  font-weight: 500;
+}
+.message-group .delete-icon-btn.data-v-c723bf2a:active {
+  background-color: rgba(255, 77, 79, 0.15);
+  transform: scale(0.9);
+}
+.message-group .is-me.data-v-c723bf2a {
+  flex-direction: row-reverse;
+}
+.message-group .is-me .message-info-row.data-v-c723bf2a {
+  flex-direction: row-reverse;
+}
+.message-group .is-me .message-content-box.data-v-c723bf2a {
+  align-items: flex-end;
+}
+.message-group .is-me .message-time.data-v-c723bf2a {
+  flex-direction: row-reverse;
+}
+.message-group .is-me .message-time .delete-link.data-v-c723bf2a {
+  margin-left: 0;
+  margin-right: 20rpx;
+  color: #ff4d4f;
 }
 .message-group.is-me.data-v-c723bf2a {
   flex-direction: row-reverse;
@@ -90,24 +143,16 @@
 .message-group.is-me .bubble .text-content.data-v-c723bf2a {
   color: #fff;
 }
-.message-group.is-me .message-time.data-v-c723bf2a,
-.message-group.is-me .user-name.data-v-c723bf2a {
-  margin-left: 0;
-  margin-right: 4rpx;
-}
-
-/* 输入栏：fixed 定位保持贴底 */
 .input-footer.data-v-c723bf2a {
   position: fixed;
   left: 0;
-  bottom: 0;
   width: 100%;
   background: #fff;
   padding: 20rpx 30rpx;
-  padding-bottom: calc(20rpx + env(safe-area-inset-bottom));
   box-sizing: border-box;
   border-top: 1rpx solid #eee;
   z-index: 100;
+  transition: bottom 0.1s linear;
 }
 .input-footer .input-wrapper.data-v-c723bf2a {
   display: flex;
@@ -118,11 +163,10 @@
   flex: 1;
   background: #f5f5f5;
   border-radius: 20rpx;
-  padding: 20rpx 30rpx;
+  padding: 18rpx 30rpx;
   font-size: 30rpx;
   max-height: 200rpx;
   min-height: 40rpx;
-  box-sizing: border-box;
 }
 .input-footer .send-btn.data-v-c723bf2a {
   background: #e0e0e0;
@@ -134,15 +178,10 @@
   border-radius: 40rpx;
   font-size: 28rpx;
   font-weight: bold;
-  transition: all 0.2s;
   flex-shrink: 0;
 }
 .input-footer .send-btn.active.data-v-c723bf2a {
   background: #FF730E;
-  box-shadow: 0 4rpx 10rpx rgba(255, 115, 14, 0.2);
-}
-.input-footer .send-btn.data-v-c723bf2a:active {
-  opacity: 0.8;
 }
 .empty-state.data-v-c723bf2a {
   padding-top: 300rpx;
@@ -151,5 +190,4 @@
   align-items: center;
   color: #ccc;
   font-size: 26rpx;
-  gap: 20rpx;
 }

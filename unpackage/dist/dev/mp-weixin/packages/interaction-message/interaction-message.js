@@ -19,22 +19,25 @@ const _sfc_main = {
     const isLoading = common_vendor.ref(false);
     const scrollTarget = common_vendor.ref("");
     const safeBottomHeight = common_vendor.ref(0);
-    const inputBarHeight = common_vendor.ref(60);
     const keyboardHeight = common_vendor.ref(0);
+    const windowHeight = common_vendor.ref(0);
+    const currentUserId = common_vendor.ref(common_vendor.index.getStorageSync("userId"));
+    const scrollHeight = common_vendor.computed(() => {
+      const footerHeight = keyboardHeight.value > 0 ? 60 : 60 + safeBottomHeight.value;
+      return `calc(${windowHeight.value}px - 80rpx - ${footerHeight}px - ${keyboardHeight.value}px)`;
+    });
     common_vendor.onLoad((options) => {
       var _a;
+      currentUserId.value = common_vendor.index.getStorageSync("userId");
       const sys = common_vendor.index.getSystemInfoSync();
+      windowHeight.value = sys.windowHeight;
       safeBottomHeight.value = ((_a = sys.safeAreaInsets) == null ? void 0 : _a.bottom) ?? 0;
-      inputBarHeight.value = 70 + safeBottomHeight.value;
       targetId.value = options.targetId;
       if (options.userId && options.userId !== "null" && options.userId !== "undefined") {
         viewUserId.value = options.userId;
       }
       common_vendor.index.onKeyboardHeightChange((res) => {
         keyboardHeight.value = res.height;
-        common_vendor.index.getSystemInfoSync();
-        const baseHeight = 70 + safeBottomHeight.value;
-        inputBarHeight.value = res.height > 0 ? baseHeight + res.height : baseHeight;
         if (res.height > 0) {
           scrollToBottom();
         }
@@ -44,13 +47,12 @@ const _sfc_main = {
     common_vendor.onUnload(() => {
       common_vendor.index.offKeyboardHeightChange();
     });
-    const onInputFocus = () => {
-      setTimeout(() => {
-        scrollToBottom();
-      }, 350);
+    const onInputFocus = (e) => {
+      keyboardHeight.value = e.detail.height || keyboardHeight.value;
+      scrollToBottom();
     };
     const onInputBlur = () => {
-      inputBarHeight.value = 70 + safeBottomHeight.value;
+      keyboardHeight.value = 0;
     };
     const fetchComments = async () => {
       isLoading.value = true;
@@ -60,9 +62,8 @@ const _sfc_main = {
         pageNo: 1,
         pageSize: 100
       };
-      if (viewUserId.value) {
+      if (viewUserId.value)
         queryParams.userId = viewUserId.value;
-      }
       const {
         data,
         error
@@ -117,24 +118,72 @@ const _sfc_main = {
         scrollTarget.value = "";
         setTimeout(() => {
           scrollTarget.value = "chat-bottom-anchor";
-        }, 100);
+        }, 150);
       });
+    };
+    const handleDeleteClick = (item) => {
+      common_vendor.index.__f__("log", "at packages/interaction-message/interaction-message.vue:210", "用户点击删除:", item.id);
+      common_vendor.index.vibrateShort();
+      common_vendor.index.showModal({
+        title: "删除留言",
+        content: "确定要删除这条信息吗？",
+        confirmText: "删除",
+        confirmColor: "#ff4d4f",
+        success: (res) => {
+          if (res.confirm) {
+            executeDeleteApi(item.id);
+          }
+        }
+      });
+    };
+    const executeDeleteApi = async (id) => {
+      if (!id)
+        return;
+      common_vendor.index.showLoading({
+        title: "正在删除...",
+        mask: true
+      });
+      try {
+        const {
+          error
+        } = await utils_request.request(`/app-api/member/comment/delete?id=${id}`, {
+          method: "DELETE"
+        });
+        common_vendor.index.hideLoading();
+        if (!error) {
+          common_vendor.index.showToast({
+            title: "已删除",
+            icon: "success"
+          });
+          await fetchComments();
+        } else {
+          common_vendor.index.showToast({
+            title: typeof error === "string" ? error : error.msg || "删除失败",
+            icon: "none"
+          });
+        }
+      } catch (e) {
+        common_vendor.index.hideLoading();
+        common_vendor.index.__f__("error", "at packages/interaction-message/interaction-message.vue:263", "删除异常:", e);
+        common_vendor.index.showToast({
+          title: "网络异常",
+          icon: "none"
+        });
+      }
     };
     const formatTime = (time) => {
       if (!time)
         return "";
       let date;
-      if (typeof time === "number") {
+      if (typeof time === "number")
         date = new Date(time);
-      } else if (typeof time === "string") {
+      else if (typeof time === "string") {
         const normalized = time.replace("T", " ").replace(/-/g, "/");
         date = new Date(normalized);
-        if (isNaN(date.getTime())) {
+        if (isNaN(date.getTime()))
           return time.replace("T", " ").substring(5, 16);
-        }
-      } else {
+      } else
         return "";
-      }
       const M = (date.getMonth() + 1).toString().padStart(2, "0");
       const D = date.getDate().toString().padStart(2, "0");
       const h = date.getHours().toString().padStart(2, "0");
@@ -150,15 +199,25 @@ const _sfc_main = {
         }),
         b: common_vendor.f(commentList.value, (item, k0, i0) => {
           var _a, _b;
-          return {
+          return common_vendor.e({
             a: ((_a = item.memberUserBaseVO) == null ? void 0 : _a.avatar) || "/static/icon/default-avatar.png",
             b: common_vendor.t(((_b = item.memberUserBaseVO) == null ? void 0 : _b.nickname) || "商友"),
             c: common_vendor.t(item.content),
             d: common_vendor.t(formatTime(item.createTime)),
-            e: item.id,
-            f: "msg-" + item.id,
-            g: item.owner === 1 ? 1 : ""
-          };
+            e: item.owner == 1 || item.userId == currentUserId.value
+          }, item.owner == 1 || item.userId == currentUserId.value ? {
+            f: "c723bf2a-1-" + i0,
+            g: common_vendor.p({
+              type: "trash",
+              size: "16",
+              color: "#ff4d4f"
+            }),
+            h: common_vendor.o(($event) => handleDeleteClick(item), item.id)
+          } : {}, {
+            i: item.id,
+            j: "msg-" + item.id,
+            k: item.owner == 1 || item.userId == currentUserId.value ? 1 : ""
+          });
         }),
         c: commentList.value.length === 0 && !isLoading.value
       }, commentList.value.length === 0 && !isLoading.value ? {
@@ -169,15 +228,15 @@ const _sfc_main = {
         })
       } : {}, {
         e: scrollTarget.value,
-        f: inputBarHeight.value + "px",
+        f: scrollHeight.value,
         g: common_vendor.o(onInputFocus),
         h: common_vendor.o(onInputBlur),
         i: content.value,
         j: common_vendor.o(($event) => content.value = $event.detail.value),
         k: content.value.trim() ? 1 : "",
         l: common_vendor.o(handleSend),
-        m: safeBottomHeight.value + "px",
-        n: common_vendor.o((...args) => _ctx.onInputBarLayout && _ctx.onInputBarLayout(...args))
+        m: keyboardHeight.value + "px",
+        n: keyboardHeight.value > 0 ? "10px" : safeBottomHeight.value + "px"
       });
     };
   }

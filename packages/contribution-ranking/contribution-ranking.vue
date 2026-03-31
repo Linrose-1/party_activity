@@ -97,12 +97,15 @@
 	} from 'vue';
 	import {
 		onPullDownRefresh,
-		onReady
+		onReady,
+		onShareAppMessage,
+		onShareTimeline
 	} from '@dcloudio/uni-app';
 	import request from '@/utils/request.js';
 	import {
 		isScenario3User,
-		canShowProfileRemind 
+		canShowProfileRemind,
+		getInviteCode
 	} from '@/utils/user.js';
 	import AvatarLongPressMenu from '@/components/AvatarLongPressMenu.vue';
 	import SmartGuidePopup from '@/components/SmartGuidePopup.vue';
@@ -202,6 +205,51 @@
 		if (type === 'viewCard') goCard(user);
 		// 其他加圈、链路逻辑保持组件原有实现
 	};
+
+	// ==========================================================
+	// --- 分享功能实现 ---
+	// ==========================================================
+
+	/**
+	 * 1. 分享给好友
+	 */
+	onShareAppMessage(() => {
+		const inviteCode = getInviteCode();
+		// 路径需根据 pages.json 中的实际路径配置
+		let sharePath = '/packages/contribution-ranking/contribution-ranking';
+
+		if (inviteCode) {
+			sharePath += `?inviteCode=${inviteCode}`;
+		}
+
+		console.log('🚀 [贡献榜] 发起分享，路径:', sharePath);
+
+		return {
+			title: '快来看看谁是猩球共建之星！猩球贡献榜火热发布 🏆',
+			path: sharePath,
+			imageUrl: 'https://img.gofor.club/logo_share.jpg'
+		};
+	});
+
+	/**
+	 * 2. 分享到朋友圈
+	 */
+	onShareTimeline(() => {
+		const inviteCode = getInviteCode();
+		let queryString = '';
+
+		if (inviteCode) {
+			queryString = `inviteCode=${inviteCode}`;
+		}
+
+		return {
+			title: '猩球贡献榜：致敬每一位为生态共建贡献力量的商友',
+			query: queryString,
+			imageUrl: 'https://img.gofor.club/logo_share.jpg'
+		};
+	});
+
+	// ==========================================================
 </script>
 
 <style scoped lang="scss">

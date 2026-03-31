@@ -285,13 +285,42 @@ const _sfc_main = {
     common_vendor.onShow(async () => {
       fetchUnreadCount();
       if (isFirstShow.value || recommendUsers.value.length === 0) {
-        common_vendor.index.__f__("log", "at pages/six-degrees/six-degrees.vue:539", "首次加载或列表为空，执行刷新");
+        common_vendor.index.__f__("log", "at pages/six-degrees/six-degrees.vue:542", "首次加载或列表为空，执行刷新");
         await fetchRecommendUsers();
         refreshing.value = false;
         isFirstShow.value = false;
       } else {
-        common_vendor.index.__f__("log", "at pages/six-degrees/six-degrees.vue:544", "从其他页面返回，保持当前列表不刷新");
+        common_vendor.index.__f__("log", "at pages/six-degrees/six-degrees.vue:547", "从其他页面返回，保持当前列表不刷新");
       }
+      common_vendor.index.showShareMenu({
+        menus: ["shareAppMessage", "shareTimeline"]
+      });
+    });
+    common_vendor.onShareAppMessage(() => {
+      const inviteCode = utils_user.getInviteCode();
+      let sharePath = "/pages/six-degrees/six-degrees";
+      if (inviteCode) {
+        sharePath += `?inviteCode=${inviteCode}`;
+      }
+      common_vendor.index.__f__("log", "at pages/six-degrees/six-degrees.vue:572", "🚀 [六度人脉] 发起分享，路径:", sharePath);
+      return {
+        title: "六度人脉-六度时空，发现您的无限商机！",
+        path: sharePath,
+        imageUrl: "https://img.gofor.club/logo_share.jpg"
+        // 建议使用项目标准的分享图
+      };
+    });
+    common_vendor.onShareTimeline(() => {
+      const inviteCode = utils_user.getInviteCode();
+      let queryString = "";
+      if (inviteCode) {
+        queryString = `inviteCode=${inviteCode}`;
+      }
+      return {
+        title: "六度人脉：探索您的人脉网络，发现意想不到的连接",
+        query: queryString,
+        imageUrl: "https://img.gofor.club/logo_share.jpg"
+      };
     });
     return (_ctx, _cache) => {
       return common_vendor.e({
@@ -389,5 +418,6 @@ const _sfc_main = {
   }
 };
 const MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["__scopeId", "data-v-132afe13"]]);
+_sfc_main.__runtimeHooks = 6;
 wx.createPage(MiniProgramPage);
 //# sourceMappingURL=../../../.sourcemap/mp-weixin/pages/six-degrees/six-degrees.js.map

@@ -154,7 +154,10 @@
 
 				<!-- ============================================================ -->
 				<view class="tags" v-if="post.tags && post.tags.length">
-					<view v-for="(tag, tagIndex) in post.tags" :key="tagIndex" class="tag">{{ tag }}</view>
+					<view v-for="(tag, tagIndex) in post.tags" :key="tagIndex" class="tag"
+						@click.stop="handleTagClick(tag)">
+						{{ tag }}
+					</view>
 				</view>
 
 				<view class="post-footer">
@@ -325,6 +328,7 @@
 	const postList = ref([]);
 	const activeTab = ref(1);
 	const searchQuery = ref('');
+	const selectedTag = ref('');
 
 	// 分页与加载状态
 	const pageNo = ref(1);
@@ -983,6 +987,14 @@
 
 	const getBusinessOpportunitiesList = async (isRefresh = false) => {
 		if (loadingStatus.value === 'loading' && !isRefresh) return;
+
+		if (isRefresh) {
+			uni.pageScrollTo({
+				scrollTop: 0,
+				duration: 300
+			});
+		}
+
 		loadingStatus.value = 'loading';
 
 		// if (isRefresh) {
@@ -1001,6 +1013,7 @@
 			tabIndex: activeTab.value,
 		};
 		if (searchQuery.value) params.searchKey = searchQuery.value;
+		if (selectedTag.value) params.tags = selectedTag.value;
 		if (activeTab.value === 2 && location.longitude && location.latitude) {
 			params.longitude = location.longitude;
 			params.latitude = location.latitude;
@@ -1154,9 +1167,41 @@
 		}
 	};
 
+	/**
+	 * [新增方法] 处理点击帖子标签
+	 * 逻辑：点击后将该标签填入搜索框，并作为 tags 参数发起搜索
+	 */
+	const handleTagClick = async (tag) => {
+		if (!await checkLoginGuard()) return;
+
+		selectedTag.value = tag;
+		searchQuery.value = tag;
+
+		// 1. 执行刷新逻辑
+		getBusinessOpportunitiesList(true);
+
+		// 2. 【核心优化】立刻回到页面顶部
+		uni.pageScrollTo({
+			scrollTop: 0,
+			duration: 300 // 滚动动画耗时，300ms 比较顺滑
+		});
+	};
+
+	/**
+	 * 优化原有的 handleSearch 方法
+	 * 逻辑：用户手动点击搜索按钮时，清空之前点击的标签筛选
+	 */
 	const handleSearch = async () => {
 		if (!await checkLoginGuard()) return;
+
+		selectedTag.value = '';
 		getBusinessOpportunitiesList(true);
+
+		// 【核心优化】回到页面顶部
+		uni.pageScrollTo({
+			scrollTop: 0,
+			duration: 300
+		});
 	};
 
 	const handleTabClick = async (tabIndex) => {
@@ -2656,6 +2701,11 @@
 		padding: 10rpx 24rpx;
 		border-radius: 40rpx;
 		font-size: 26rpx;
+	}
+
+	.tag:active {
+		transform: scale(0.92);
+		background-color: rgba(255, 106, 0, 0.2);
 	}
 
 	/* 3.3 卡片交互 */

@@ -1,6 +1,7 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
 const utils_request = require("../../utils/request.js");
+const utils_user = require("../../utils/user.js");
 if (!Array) {
   const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
   const _easycom_uni_load_more2 = common_vendor.resolveComponent("uni-load-more");
@@ -62,7 +63,7 @@ const _sfc_main = {
         loadStatus.value = list.value.length >= data.total ? "noMore" : "more";
       } catch (e) {
         loadStatus.value = "more";
-        common_vendor.index.__f__("error", "at packages/enterprise-list/enterprise-list.vue:200", "获取列表异常:", e);
+        common_vendor.index.__f__("error", "at packages/enterprise-list/enterprise-list.vue:205", "获取列表异常:", e);
       }
     };
     const getStatusConfig = (status) => {
@@ -188,6 +189,31 @@ const _sfc_main = {
         }
       });
     };
+    common_vendor.onShareAppMessage(() => {
+      const inviteCode = utils_user.getInviteCode();
+      let sharePath = "/packages/enterprise-list/enterprise-list";
+      if (inviteCode) {
+        sharePath += `?inviteCode=${inviteCode}`;
+      }
+      common_vendor.index.__f__("log", "at packages/enterprise-list/enterprise-list.vue:385", "🚀 [企业列表] 发起分享，路径:", sharePath);
+      return {
+        title: "开启您的商业版图，创建企业展示品牌实力！🏢",
+        path: sharePath,
+        imageUrl: "https://img.gofor.club/logo_share.jpg"
+      };
+    });
+    common_vendor.onShareTimeline(() => {
+      const inviteCode = utils_user.getInviteCode();
+      let queryString = "";
+      if (inviteCode) {
+        queryString = `inviteCode=${inviteCode}`;
+      }
+      return {
+        title: "猩聚社：创建企业名片，让更多商友发现合作机会",
+        query: queryString,
+        imageUrl: "https://img.gofor.club/logo_share.jpg"
+      };
+    });
     return (_ctx, _cache) => {
       return common_vendor.e({
         a: common_vendor.p({
@@ -293,5 +319,6 @@ const _sfc_main = {
   }
 };
 const MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["__scopeId", "data-v-378d963d"]]);
+_sfc_main.__runtimeHooks = 6;
 wx.createPage(MiniProgramPage);
 //# sourceMappingURL=../../../.sourcemap/mp-weixin/packages/enterprise-list/enterprise-list.js.map

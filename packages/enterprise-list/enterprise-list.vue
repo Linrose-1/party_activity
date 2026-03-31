@@ -118,9 +118,14 @@
 	import {
 		onPullDownRefresh,
 		onReachBottom,
-		onShow
+		onShow,
+		onShareAppMessage,
+		onShareTimeline
 	} from '@dcloudio/uni-app';
 	import request from '@/utils/request.js';
+	import {
+		getInviteCode
+	} from '@/utils/user.js';
 
 	// --- 状态数据定义 ---
 	const list = ref([]); // 存储企业列表
@@ -360,6 +365,51 @@
 			}
 		});
 	};
+
+	// ==========================================================
+	// --- 分享功能实现 ---
+	// ==========================================================
+
+	/**
+	 * 1. 分享给好友
+	 */
+	onShareAppMessage(() => {
+		const inviteCode = getInviteCode();
+		// 路径需根据 pages.json 中的实际路径配置
+		let sharePath = '/packages/enterprise-list/enterprise-list';
+
+		if (inviteCode) {
+			sharePath += `?inviteCode=${inviteCode}`;
+		}
+
+		console.log('🚀 [企业列表] 发起分享，路径:', sharePath);
+
+		return {
+			title: '开启您的商业版图，创建企业展示品牌实力！🏢',
+			path: sharePath,
+			imageUrl: 'https://img.gofor.club/logo_share.jpg'
+		};
+	});
+
+	/**
+	 * 2. 分享到朋友圈
+	 */
+	onShareTimeline(() => {
+		const inviteCode = getInviteCode();
+		let queryString = '';
+
+		if (inviteCode) {
+			queryString = `inviteCode=${inviteCode}`;
+		}
+
+		return {
+			title: '猩聚社：创建企业名片，让更多商友发现合作机会',
+			query: queryString,
+			imageUrl: 'https://img.gofor.club/logo_share.jpg'
+		};
+	});
+
+	// ==========================================================
 </script>
 
 <style scoped lang="scss">

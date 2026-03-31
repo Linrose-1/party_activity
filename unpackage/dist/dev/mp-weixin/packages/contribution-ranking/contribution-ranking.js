@@ -81,6 +81,31 @@ const _sfc_main = {
       if (type === "viewCard")
         goCard(user);
     };
+    common_vendor.onShareAppMessage(() => {
+      const inviteCode = utils_user.getInviteCode();
+      let sharePath = "/packages/contribution-ranking/contribution-ranking";
+      if (inviteCode) {
+        sharePath += `?inviteCode=${inviteCode}`;
+      }
+      common_vendor.index.__f__("log", "at packages/contribution-ranking/contribution-ranking.vue:225", "🚀 [贡献榜] 发起分享，路径:", sharePath);
+      return {
+        title: "快来看看谁是猩球共建之星！猩球贡献榜火热发布 🏆",
+        path: sharePath,
+        imageUrl: "https://img.gofor.club/logo_share.jpg"
+      };
+    });
+    common_vendor.onShareTimeline(() => {
+      const inviteCode = utils_user.getInviteCode();
+      let queryString = "";
+      if (inviteCode) {
+        queryString = `inviteCode=${inviteCode}`;
+      }
+      return {
+        title: "猩球贡献榜：致敬每一位为生态共建贡献力量的商友",
+        query: queryString,
+        imageUrl: "https://img.gofor.club/logo_share.jpg"
+      };
+    });
     return (_ctx, _cache) => {
       return common_vendor.e({
         a: topThree.value.length > 0
@@ -150,5 +175,6 @@ const _sfc_main = {
   }
 };
 const MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["__scopeId", "data-v-3c4f4856"]]);
+_sfc_main.__runtimeHooks = 6;
 wx.createPage(MiniProgramPage);
 //# sourceMappingURL=../../../.sourcemap/mp-weixin/packages/contribution-ranking/contribution-ranking.js.map

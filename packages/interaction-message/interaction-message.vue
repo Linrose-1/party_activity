@@ -1,29 +1,44 @@
 <template>
 	<view class="interaction-page">
 		<!-- 头部状态提示 -->
-		<view class="privacy-notice">
+		<view class="privacy-notice" id="header">
 			<uni-icons type="info" size="14" color="#FF730E"></uni-icons>
 			<text>一对一私密留言，仅您与商机发布者可见</text>
 		</view>
 
 		<!-- 聊天列表区 -->
+		<!-- 重点 1: padding-bottom 动态计算，确保最后一条消息在输入框上方 -->
 		<scroll-view class="chat-list" scroll-y :scroll-into-view="scrollTarget" :scroll-with-animation="true"
-			:style="{ paddingBottom: inputBarHeight + 'px' }">
-			<view class="message-container">
+			:style="{ height: scrollHeight }">
+			<view class="message-container" id="msg-container">
+				<!-- 找到 v-for 循环的消息组部分 -->
 				<view v-for="(item) in commentList" :key="item.id" :id="'msg-' + item.id" class="message-group"
-					:class="{ 'is-me': item.owner === 1 }">
+					:class="{ 'is-me': item.owner == 1 || item.userId == currentUserId }">
+
 					<image :src="item.memberUserBaseVO?.avatar || '/static/icon/default-avatar.png'" class="user-avatar"
 						mode="aspectFill" />
+
 					<view class="message-content-box">
 						<view class="user-name">{{ item.memberUserBaseVO?.nickname || '商友' }}</view>
+
 						<view class="bubble">
 							<text class="text-content">{{ item.content }}</text>
 						</view>
-						<view class="message-time">{{ formatTime(item.createTime) }}</view>
+
+						<view class="message-info-row">
+							<text class="message-time">{{ formatTime(item.createTime) }}</text>
+
+							<!-- 优化点：判断逻辑增强，使用精致的垃圾桶图标 -->
+							<view v-if="item.owner == 1 || item.userId == currentUserId" class="delete-icon-btn"
+								@click.stop="handleDeleteClick(item)">
+								<uni-icons type="trash" size="16" color="#ff4d4f"></uni-icons>
+								<text class="delete-txt">删除</text>
+							</view>
+						</view>
 					</view>
 				</view>
 				<!-- 底部锚点 -->
-				<view id="chat-bottom-anchor"></view>
+				<view id="chat-bottom-anchor" style="height: 1rpx;"></view>
 			</view>
 
 			<view v-if="commentList.length === 0 && !isLoading" class="empty-state">
@@ -33,7 +48,9 @@
 		</scroll-view>
 
 		<!-- 底部输入栏 -->
-		<view class="input-footer" :style="{ paddingBottom: safeBottomHeight + 'px' }" @layout="onInputBarLayout">
+		<!-- 重点 2: bottom 直接绑定键盘高度，paddingBottom 只有键盘收起时才显示安全区 -->
+		<view class="input-footer"
+			:style="{ bottom: keyboardHeight + 'px', paddingBottom: keyboardHeight > 0 ? '10px' : safeBottomHeight + 'px' }">
 			<view class="input-wrapper">
 				<textarea class="main-input" v-model="content" auto-height :adjust-position="false" :cursor-spacing="20"
 					placeholder="请输入您的留言..." maxlength="500" @focus="onInputFocus" @blur="onInputBlur" />
@@ -48,7 +65,8 @@
 <script setup>
 	import {
 		ref,
-		nextTick
+		nextTick,
+		computed
 	} from 'vue';
 	import {
 		onLoad,
@@ -61,39 +79,37 @@
 	const commentList = ref([]);
 	const content = ref('');
 	const isLoading = ref(false);
-
-	// 滚动锚点：通过切换 id 字符串来触发 scroll-view 滚动
 	const scrollTarget = ref('');
 
-	// 底部安全高度（iPhone 底部圆角区）
 	const safeBottomHeight = ref(0);
-
-	// 输入栏整体高度，用于给 scroll-view 预留空间，防止遮挡
-	const inputBarHeight = ref(60); // 先给一个默认值（px），onLayout 后会更新
-
-	// 键盘高度
 	const keyboardHeight = ref(0);
+	const windowHeight = ref(0);
+
+	const currentUserId = ref(uni.getStorageSync('userId'));
+
+	// 重点 3: 动态计算 scroll-view 的高度
+	// 公式：窗口高度 - 顶部提示高度 - 输入框高度 - 键盘高度
+	const scrollHeight = computed(() => {
+		// 预估输入框+间距约 60px
+		const footerHeight = keyboardHeight.value > 0 ? 60 : 60 + safeBottomHeight.value;
+		return `calc(${windowHeight.value}px - 80rpx - ${footerHeight}px - ${keyboardHeight.value}px)`;
+	});
 
 	onLoad((options) => {
+		currentUserId.value = uni.getStorageSync('userId');
+		
 		const sys = uni.getSystemInfoSync();
+		windowHeight.value = sys.windowHeight;
 		safeBottomHeight.value = sys.safeAreaInsets?.bottom ?? 0;
-
-		// 初始化输入栏高度预估（输入框本身约 50px + padding 约 20px + 安全区）
-		inputBarHeight.value = 70 + safeBottomHeight.value;
 
 		targetId.value = options.targetId;
 		if (options.userId && options.userId !== 'null' && options.userId !== 'undefined') {
 			viewUserId.value = options.userId;
 		}
 
-		// 监听键盘高度变化
+		// 重点 4: 监听键盘高度，手动同步到变量
 		uni.onKeyboardHeightChange(res => {
 			keyboardHeight.value = res.height;
-			// 键盘弹出时，追加键盘高度到 scroll-view 底部 padding，确保内容不被遮挡
-			const sys = uni.getSystemInfoSync();
-			const baseHeight = 70 + safeBottomHeight.value;
-			inputBarHeight.value = res.height > 0 ? baseHeight + res.height : baseHeight;
-			// 键盘弹出后滚动到底部
 			if (res.height > 0) {
 				scrollToBottom();
 			}
@@ -106,20 +122,16 @@
 		uni.offKeyboardHeightChange();
 	});
 
-	/** 键盘弹出时滚动到底部 */
-	const onInputFocus = () => {
-		// 延迟等待键盘动画完成
-		setTimeout(() => {
-			scrollToBottom();
-		}, 350);
+	const onInputFocus = (e) => {
+		// e.detail.height 也可以获取键盘高度
+		keyboardHeight.value = e.detail.height || keyboardHeight.value;
+		scrollToBottom();
 	};
 
 	const onInputBlur = () => {
-		// 键盘收起，恢复正常底部高度
-		inputBarHeight.value = 70 + safeBottomHeight.value;
+		keyboardHeight.value = 0;
 	};
 
-	/** 获取留言列表 */
 	const fetchComments = async () => {
 		isLoading.value = true;
 		const queryParams = {
@@ -128,9 +140,7 @@
 			pageNo: 1,
 			pageSize: 100
 		};
-		if (viewUserId.value) {
-			queryParams.userId = viewUserId.value;
-		}
+		if (viewUserId.value) queryParams.userId = viewUserId.value;
 
 		const {
 			data,
@@ -141,14 +151,12 @@
 		});
 
 		if (!error && data?.list) {
-			// 接口返回[新...旧]，反转为[旧...新]，最新消息在底部
 			commentList.value = [...data.list].reverse();
 			scrollToBottom();
 		}
 		isLoading.value = false;
 	};
 
-	/** 发送留言 */
 	const handleSend = async () => {
 		const text = content.value.trim();
 		if (!text) return;
@@ -179,7 +187,7 @@
 		uni.hideLoading();
 		if (!error) {
 			content.value = '';
-			await fetchComments(); // fetchComments 内部会调用 scrollToBottom
+			await fetchComments();
 		} else {
 			uni.showToast({
 				title: error || '发送失败',
@@ -188,35 +196,89 @@
 		}
 	};
 
-	/**
-	 * 滚动到底部
-	 * 核心：先清空 scrollTarget，再在下一帧 + setTimeout 后重新赋值
-	 * 这样 scroll-view 才能检测到值的变化并触发滚动
-	 */
 	const scrollToBottom = () => {
 		nextTick(() => {
 			scrollTarget.value = '';
 			setTimeout(() => {
 				scrollTarget.value = 'chat-bottom-anchor';
-			}, 100);
+			}, 150);
 		});
 	};
 
-	/** 格式化时间（兼容时间戳和字符串） */
+	// 2. 统一删除处理函数
+	const handleDeleteClick = (item) => {
+		console.log('用户点击删除:', item.id);
+
+		// 震动反馈
+		uni.vibrateShort();
+
+		uni.showModal({
+			title: '删除留言',
+			content: '确定要删除这条信息吗？',
+			confirmText: '删除',
+			confirmColor: '#ff4d4f',
+			success: (res) => {
+				if (res.confirm) {
+					executeDeleteApi(item.id);
+				}
+			}
+		});
+	};
+
+	/**
+	 * 真正执行删除接口
+	 */
+	const executeDeleteApi = async (id) => {
+		if (!id) return;
+
+		uni.showLoading({
+			title: '正在删除...',
+			mask: true
+		});
+
+		try {
+			const {
+				error
+			} = await request(`/app-api/member/comment/delete?id=${id}`, {
+				method: 'DELETE'
+			});
+
+			uni.hideLoading();
+
+			if (!error) {
+				uni.showToast({
+					title: '已删除',
+					icon: 'success'
+				});
+				// 刷新列表
+				await fetchComments();
+			} else {
+				uni.showToast({
+					title: typeof error === 'string' ? error : (error.msg || '删除失败'),
+					icon: 'none'
+				});
+			}
+		} catch (e) {
+			uni.hideLoading();
+			console.error('删除异常:', e);
+			uni.showToast({
+				title: '网络异常',
+				icon: 'none'
+			});
+		}
+	};
+
+
 	const formatTime = (time) => {
 		if (!time) return '';
 		let date;
-		if (typeof time === 'number') {
-			date = new Date(time);
-		} else if (typeof time === 'string') {
+		if (typeof time === 'number') date = new Date(time);
+		else if (typeof time === 'string') {
 			const normalized = time.replace('T', ' ').replace(/-/g, '/');
 			date = new Date(normalized);
-			if (isNaN(date.getTime())) {
-				return time.replace('T', ' ').substring(5, 16);
-			}
-		} else {
-			return '';
-		}
+			if (isNaN(date.getTime())) return time.replace('T', ' ').substring(5, 16);
+		} else return '';
+
 		const M = (date.getMonth() + 1).toString().padStart(2, '0');
 		const D = date.getDate().toString().padStart(2, '0');
 		const h = date.getHours().toString().padStart(2, '0');
@@ -233,11 +295,14 @@
 		flex-direction: column;
 		height: 100vh;
 		background: #f4f5f7;
+		/* 重点 5: 禁止页面整体滚动 */
+		overflow: hidden;
 	}
 
 	.privacy-notice {
+		height: 80rpx;
+		/* 固定高度方便计算 */
 		background: #fffbe6;
-		padding: 16rpx;
 		display: flex;
 		justify-content: center;
 		align-items: center;
@@ -245,22 +310,17 @@
 		font-size: 22rpx;
 		color: #ed6a0c;
 		border-bottom: 1rpx solid #ffe58f;
-		flex-shrink: 0; // 禁止被压缩
+		flex-shrink: 0;
 	}
 
-	/* scroll-view 撑满剩余高度 */
 	.chat-list {
-		flex: 1;
-		// 注意：padding-bottom 通过 :style 动态绑定，在这里只写左右上
-		padding: 30rpx 30rpx 0;
+		width: 100%;
+		// 高度由 computed 动态计算
 		box-sizing: border-box;
-		// 关键：overflow 让内容可以滚动
-		overflow: hidden;
 	}
 
 	.message-container {
-		// 给底部锚点留一个最小高度，确保最后一条消息不被输入栏遮住
-		padding-bottom: 20rpx;
+		padding: 30rpx 30rpx 40rpx;
 	}
 
 	.message-group {
@@ -288,7 +348,6 @@
 			font-size: 24rpx;
 			color: #999;
 			margin-bottom: 8rpx;
-			margin-left: 4rpx;
 		}
 
 		.bubble {
@@ -309,10 +368,76 @@
 			font-size: 20rpx;
 			color: #bbb;
 			margin-top: 12rpx;
-			margin-left: 4rpx;
+			display: flex;
+			align-items: center;
+
+			.delete-link {
+				margin-left: 20rpx;
+				color: #999;
+				text-decoration: underline;
+				padding: 4rpx 10rpx; // 增加点击区域
+			}
 		}
 
-		// 我的留言（右侧）
+		/* 消息底部信息行（包含时间和删除） */
+		.message-info-row {
+			display: flex;
+			align-items: center;
+			margin-top: 10rpx;
+			gap: 20rpx;
+		}
+
+		.message-time {
+			font-size: 20rpx;
+			color: #bbb;
+		}
+
+		/* 精致删除按钮样式 */
+		.delete-icon-btn {
+			display: flex;
+			align-items: center;
+			background-color: rgba(255, 77, 79, 0.05); // 极淡的红色背景
+			padding: 4rpx 12rpx;
+			border-radius: 20rpx;
+			transition: all 0.2s;
+
+			.delete-txt {
+				font-size: 20rpx;
+				color: #ff4d4f;
+				margin-left: 4rpx;
+				font-weight: 500;
+			}
+
+			&:active {
+				background-color: rgba(255, 77, 79, 0.15);
+				transform: scale(0.9);
+			}
+		}
+
+		/* 针对自己的消息（右侧）的排版调整 */
+		.is-me {
+			flex-direction: row-reverse;
+
+			.message-info-row {
+				flex-direction: row-reverse; // 让时间和删除按钮也反过来排
+			}
+
+			.message-content-box {
+				align-items: flex-end;
+			}
+		}
+
+		// 针对“我发送的”消息，删除按钮在时间前面或调整位置
+		.is-me .message-time {
+			flex-direction: row-reverse;
+
+			.delete-link {
+				margin-left: 0;
+				margin-right: 20rpx;
+				color: #ff4d4f; // 自己的删除按钮可以用红色，更醒目
+			}
+		}
+
 		&.is-me {
 			flex-direction: row-reverse;
 
@@ -333,28 +458,19 @@
 					color: #fff;
 				}
 			}
-
-			.message-time,
-			.user-name {
-				margin-left: 0;
-				margin-right: 4rpx;
-			}
 		}
 	}
 
-	/* 输入栏：fixed 定位保持贴底 */
 	.input-footer {
 		position: fixed;
 		left: 0;
-		bottom: 0;
 		width: 100%;
 		background: #fff;
 		padding: 20rpx 30rpx;
-		// padding-bottom 通过 :style 动态绑定，这里只写默认值
-		padding-bottom: calc(20rpx + env(safe-area-inset-bottom));
 		box-sizing: border-box;
 		border-top: 1rpx solid #eee;
 		z-index: 100;
+		transition: bottom 0.1s linear; // 稍微增加过渡让键盘动画更顺滑
 
 		.input-wrapper {
 			display: flex;
@@ -366,11 +482,10 @@
 			flex: 1;
 			background: #f5f5f5;
 			border-radius: 20rpx;
-			padding: 20rpx 30rpx;
+			padding: 18rpx 30rpx;
 			font-size: 30rpx;
 			max-height: 200rpx;
 			min-height: 40rpx;
-			box-sizing: border-box;
 		}
 
 		.send-btn {
@@ -383,16 +498,10 @@
 			border-radius: 40rpx;
 			font-size: 28rpx;
 			font-weight: bold;
-			transition: all 0.2s;
 			flex-shrink: 0;
 
 			&.active {
 				background: $gofor-primary;
-				box-shadow: 0 4rpx 10rpx rgba(255, 115, 14, 0.2);
-			}
-
-			&:active {
-				opacity: 0.8;
 			}
 		}
 	}
@@ -404,6 +513,5 @@
 		align-items: center;
 		color: #ccc;
 		font-size: 26rpx;
-		gap: 20rpx;
 	}
 </style>

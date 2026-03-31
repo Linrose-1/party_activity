@@ -131,6 +131,13 @@
 	} from 'vue';
 	// ‼️ 请确保此路径相对于您新文件的位置是正确的
 	import request from '../../utils/request.js';
+	import {
+		onShareAppMessage,
+		onShareTimeline
+	} from '@dcloudio/uni-app';
+	import {
+		getInviteCode
+	} from '../../utils/user.js';
 
 	// ======================= 数据状态 =======================
 	const userInfo = ref(null);
@@ -324,6 +331,48 @@
 		const D = date.getDate().toString().padStart(2, '0');
 		return `${Y}-${M}-${D}`;
 	};
+
+	// ==========================================================
+	// --- 分享功能实现 ---
+	// ==========================================================
+
+	/**
+	 * 1. 分享给好友
+	 */
+	onShareAppMessage(() => {
+		const inviteCode = getInviteCode();
+		let sharePath = '/packages/my-member/my-member'; // 假设该页面在 packages 目录下
+
+		if (inviteCode) {
+			sharePath += `?inviteCode=${inviteCode}`;
+		}
+
+		console.log('🚀 [会员中心] 发起分享，路径:', sharePath);
+
+		return {
+			title: '加入猩聚社，提升社交等级，开启您的商友人脉银行！',
+			path: sharePath,
+			imageUrl: 'https://img.gofor.club/logo_share.jpg'
+		};
+	});
+
+	/**
+	 * 2. 分享到朋友圈
+	 */
+	onShareTimeline(() => {
+		const inviteCode = getInviteCode();
+		let queryString = '';
+
+		if (inviteCode) {
+			queryString = `inviteCode=${inviteCode}`;
+		}
+
+		return {
+			title: '猩聚社会员体系：等级晋升，共创商机未来！',
+			query: queryString,
+			imageUrl: 'https://img.gofor.club/logo_share.jpg'
+		};
+	});
 </script>
 
 <style scoped>

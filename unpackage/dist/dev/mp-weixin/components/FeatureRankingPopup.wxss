@@ -29,14 +29,26 @@
   transform: translateY(-50%);
 }
 .ranking-content.data-v-315692cf {
+  /* 核心修复点 */
   flex: 1;
+  /* 占据中间剩余所有空间 */
+  height: 0;
+  /* 强制触发 flex 伸缩计算，使得 scroll-view 获得有效高度 */
+  min-height: 400rpx;
+  /* 保证即便内容很少，也有一个基础高度 */
   padding: 30rpx;
   box-sizing: border-box;
+  background-color: #fff;
 }
 .ranking-content .rich-text-wrapper.data-v-315692cf {
   font-size: 28rpx;
   color: #444;
   line-height: 1.6;
+  /* 确保图片不会撑破容器 */
+}
+.ranking-content .rich-text-wrapper.data-v-315692cf img {
+  max-width: 100%;
+  height: auto;
 }
 .ranking-content .rich-text-wrapper.data-v-315692cf h2,
 .ranking-content .rich-text-wrapper.data-v-315692cf h3 {

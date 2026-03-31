@@ -1,6 +1,7 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
 const utils_request = require("../../utils/request.js");
+const utils_user = require("../../utils/user.js");
 if (!Array) {
   const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
   const _easycom_uni_load_more2 = common_vendor.resolveComponent("uni-load-more");
@@ -145,6 +146,31 @@ const _sfc_main = {
       const D = date.getDate().toString().padStart(2, "0");
       return `${Y}-${M}-${D}`;
     };
+    common_vendor.onShareAppMessage(() => {
+      const inviteCode = utils_user.getInviteCode();
+      let sharePath = "/packages/my-member/my-member";
+      if (inviteCode) {
+        sharePath += `?inviteCode=${inviteCode}`;
+      }
+      common_vendor.index.__f__("log", "at packages/my-member/my-member.vue:350", "🚀 [会员中心] 发起分享，路径:", sharePath);
+      return {
+        title: "加入猩聚社，提升社交等级，开启您的商友人脉银行！",
+        path: sharePath,
+        imageUrl: "https://img.gofor.club/logo_share.jpg"
+      };
+    });
+    common_vendor.onShareTimeline(() => {
+      const inviteCode = utils_user.getInviteCode();
+      let queryString = "";
+      if (inviteCode) {
+        queryString = `inviteCode=${inviteCode}`;
+      }
+      return {
+        title: "猩聚社会员体系：等级晋升，共创商机未来！",
+        query: queryString,
+        imageUrl: "https://img.gofor.club/logo_share.jpg"
+      };
+    });
     return (_ctx, _cache) => {
       return common_vendor.e({
         a: userInfo.value
@@ -223,5 +249,6 @@ const _sfc_main = {
   }
 };
 const MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["__scopeId", "data-v-e6bd0326"]]);
+_sfc_main.__runtimeHooks = 6;
 wx.createPage(MiniProgramPage);
 //# sourceMappingURL=../../../.sourcemap/mp-weixin/packages/my-member/my-member.js.map

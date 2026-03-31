@@ -119,16 +119,29 @@
 	}
 
 	.ranking-content {
+		/* 核心修复点 */
 		flex: 1;
+		/* 占据中间剩余所有空间 */
+		height: 0;
+		/* 强制触发 flex 伸缩计算，使得 scroll-view 获得有效高度 */
+		min-height: 400rpx;
+		/* 保证即便内容很少，也有一个基础高度 */
+
 		padding: 30rpx;
 		box-sizing: border-box;
+		background-color: #fff;
 
 		.rich-text-wrapper {
 			font-size: 28rpx;
 			color: #444;
 			line-height: 1.6;
 
-			// 对富文本内部样式做一点简单的重置
+			/* 确保图片不会撑破容器 */
+			::v-deep img {
+				max-width: 100%;
+				height: auto;
+			}
+
 			::v-deep h2,
 			::v-deep h3 {
 				margin: 20rpx 0 10rpx;
