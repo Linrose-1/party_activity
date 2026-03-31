@@ -10,6 +10,8 @@
     "invite-circle-confirm-popup": "../../components/InviteCircleConfirmPopup",
     "scroll-points-popup": "../../components/ScrollPointsPopup",
     "zhimi-pay-popup": "../../components/ZhimiPayPopup",
-    "smart-guide-popup": "../../components/SmartGuidePopup"
+    "smart-guide-popup": "../../components/SmartGuidePopup",
+    "feature-ranking-popup": "../../components/FeatureRankingPopup",
+    "gongfen-to-zhimi-popup": "../../components/GongfenToZhimiPopup"
   }
 }

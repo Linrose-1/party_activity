@@ -95,6 +95,7 @@ if (!Math) {
   "./packages/silent-view-trace/silent-view-trace.js";
   "./packages/active-verify/active-verify.js";
   "./packages/sponsor-list/sponsor-list.js";
+  "./packages/interaction-message/interaction-message.js";
 }
 const _sfc_main = {
   data() {

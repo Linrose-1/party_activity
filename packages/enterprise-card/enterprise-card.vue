@@ -11,13 +11,13 @@
 				<!-- 卡片内部文字与Logo -->
 				<view class="card-inner">
 					<view class="card-header">
-						<!-- Logo 形状随设置动态切换：0圆 1方 2圆角 -->
-						<image :src="ent.logoUrl" mode="aspectFill" class="ent-logo"
+						<image :src="ent.enterpriseLogo || ent.logoUrl" mode="aspectFill" class="ent-logo"
 							:class="'logo-style-' + ent.cardLogoStyle" />
 						<view class="ent-title-area">
 							<text class="ent-name">{{ ent.enterpriseName }}</text>
+							<!-- 显隐控制：cardShowSlogan -->
 							<text class="ent-slogan"
-								v-if="ent.cardShowSlogan === 1">{{ ent.brandSlogan || '追求卓越，创造价值' }}</text>
+								v-if="ent.cardShowSlogan">{{ ent.brandSlogan || '追求卓越，创造价值' }}</text>
 						</view>
 					</view>
 
@@ -40,6 +40,13 @@
 					<view class="title-l">品牌介绍</view>
 					<view class="title-line"></view>
 				</view>
+				<view class="brand-identity-row">
+					<image :src="ent.logoUrl" mode="aspectFill" class="b-logo" />
+					<view class="b-info">
+						<text class="b-name">{{ ent.brandName || '未设置品牌名' }}</text>
+						<text class="b-tag">品牌/商号</text>
+					</view>
+				</view>
 				<text class="brand-bio">{{ ent.shortIntro || '暂无详细介绍' }}</text>
 				<view class="core-value" v-if="ent.coreValue">
 					<uni-icons type="star-filled" size="14" :color="ent.cardMainColor"></uni-icons>
@@ -48,7 +55,7 @@
 			</view>
 
 			<!-- 模块：联系我们 (一行一个列表布局) -->
-			<view class="content-section">
+			<view class="content-section" v-if="ent.cardShowContact">
 				<view class="section-header">
 					<view class="title-l">联系我们</view>
 					<view class="title-line"></view>
@@ -99,7 +106,7 @@
 			</view>
 
 			<!-- 模块：社交媒体 (公众号/视频号) -->
-			<view class="content-section">
+			<view class="content-section" v-if="ent.cardShowSocial">
 				<view class="section-header">
 					<view class="title-l">社交媒体</view>
 					<view class="title-line"></view>
@@ -132,8 +139,7 @@
 			</view>
 
 			<!-- 模块：门店入口 (线上+线下) -->
-			<view class="content-section"
-				>
+			<view class="content-section" v-if="ent.cardShowOnlineStore">
 				<view class="section-header">
 					<view class="title-l">门店入口</view>
 					<view class="title-line"></view>
@@ -344,27 +350,46 @@
 	 */
 	const handleApplySettings = async (newConfig) => {
 		uni.showLoading({
-			title: '保存中'
+			title: '正在同步配置...'
 		});
+
+		// 构造符合 API 文档的 payload
+		const payload = {
+			id: ent.value.id,
+			userId: ent.value.userId,
+			cardMainColor: newConfig.cardMainColor,
+			cardLogoStyle: newConfig.cardLogoStyle,
+			// 强制转换为 Boolean，确保后端接收正确
+			cardShowContact: !!newConfig.cardShowContact,
+			cardShowSocial: !!newConfig.cardShowSocial,
+			cardShowOnlineStore: !!newConfig.cardShowOnlineStore,
+			cardShowSlogan: !!newConfig.cardShowSlogan,
+			cardShowDetailAddress: !!newConfig.cardShowDetailAddress,
+			cardShowEstablishDate: !!newConfig.cardShowEstablishDate
+		};
+
 		const {
 			error
 		} = await request('/app-api/member/user-enterprise-info/update-card', {
 			method: 'PUT',
-			data: {
-				id: ent.value.id,
-				userId: ent.value.userId,
-				...newConfig
-			}
+			data: payload
 		});
+
 		uni.hideLoading();
 		if (!error) {
-			// 接口成功后同步更新本地 UI
+			// 成功后实时更新页面 state，触发 UI 刷新
 			ent.value = {
 				...ent.value,
-				...newConfig
+				...payload
 			};
 			uni.showToast({
-				title: '设置成功'
+				title: '名片定制已生效',
+				icon: 'success'
+			});
+		} else {
+			uni.showToast({
+				title: '保存失败: ' + error,
+				icon: 'none'
 			});
 		}
 	};
@@ -751,6 +776,47 @@
 
 			&::after {
 				border: none;
+			}
+		}
+	}
+
+	/* 品牌身份行设计 */
+	.brand-identity-row {
+		display: flex;
+		align-items: center;
+		background: #f8f9fb;
+		padding: 24rpx;
+		border-radius: 16rpx;
+		margin-bottom: 24rpx;
+		border: 1rpx solid #efefef;
+
+		.b-logo {
+			width: 90rpx;
+			height: 90rpx;
+			border-radius: 50%;
+			background: #fff;
+			margin-right: 20rpx;
+			border: 2rpx solid #eee;
+		}
+
+		.b-info {
+			flex: 1;
+
+			.b-name {
+				font-size: 32rpx;
+				font-weight: bold;
+				color: #333;
+				display: block;
+			}
+
+			.b-tag {
+				font-size: 20rpx;
+				color: var(--theme, #FF8600);
+				background: rgba(255, 134, 0, 0.1);
+				padding: 2rpx 12rpx;
+				border-radius: 4rpx;
+				margin-top: 4rpx;
+				display: inline-block;
 			}
 		}
 	}

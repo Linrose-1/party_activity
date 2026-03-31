@@ -41,31 +41,44 @@
 	});
 
 	const emit = defineEmits(['shareClick']);
-
 	const isExpand = ref(false);
 
-	const handleAction = (type, index) => {
+	const handleAction = (actionType) => {
+		// 1. 关闭菜单
 		isExpand.value = false;
 
-		if (type === 'SHARE') {
-			// 通知父组件打开分享逻辑
+		// 2. 处理分享逻辑
+		if (actionType === 'SHARE') {
 			emit('shareClick');
+			return;
+		}
+
+		// 3. 处理跳转逻辑 (此时 actionType 就是 0, 1, 2 这样的数字)
+		const paths = [
+			'/packages/my-shareList/my-shareList', // 对应索引 0
+			'/packages/my-edit/my-edit', // 对应索引 1
+			'/pages/home/home' // 对应索引 2
+		];
+
+		const target = paths[actionType];
+
+		// 安全检查：防止索引越界或找不到路径
+		if (!target) {
+			console.error('未找到对应的跳转路径，索引为:', actionType);
+			return;
+		}
+
+		// 4. 执行跳转
+		if (target.includes('home')) {
+			// TabBar 页面必须用 switchTab
+			uni.switchTab({
+				url: target
+			});
 		} else {
-			const paths = [
-				'/packages/my-shareList/my-shareList',
-				'/packages/my-edit/my-edit',
-				'/pages/home/home'
-			];
-			const target = paths[index];
-			if (target.includes('home')) {
-				uni.switchTab({
-					url: target
-				});
-			} else {
-				uni.navigateTo({
-					url: target
-				});
-			}
+			// 普通页面用 navigateTo
+			uni.navigateTo({
+				url: target
+			});
 		}
 	};
 </script>
@@ -163,9 +176,10 @@
 	}
 
 	/* 图标背景色 */
-	.bg-orange{
+	.bg-orange {
 		background: linear-gradient(135deg, #ffaa00 0%, #fee526 100%);
 	}
+
 	.bg-blue {
 		background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
 	}

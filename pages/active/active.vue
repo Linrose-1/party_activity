@@ -701,6 +701,7 @@
 
 			.city-text {
 				font-size: 26rpx;
+				color: $gofor-primary;
 				font-weight: bold;
 				white-space: nowrap;
 				overflow: hidden;
@@ -756,7 +757,7 @@
 		/* --- 核心吸顶代码 --- */
 		position: sticky;
 		/* 开启粘性布局 */
-		top: 100rpx;
+		top: 110rpx;
 		/* 这里的 100rpx 必须等于 .header-placeholder 的高度 */
 		z-index: 99;
 		/* 确保在列表内容上方，但在 fixed-header (z-index: 100) 下方 */

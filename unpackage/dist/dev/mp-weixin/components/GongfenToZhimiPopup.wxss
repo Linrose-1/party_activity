@@ -1,0 +1,92 @@
+/* 水平间距 */
+/* 水平间距 */
+/* 自定义全局主题色变量 */
+.convert-container.data-v-d014df9e {
+  width: 620rpx;
+  background: #fff;
+  border-radius: 32rpx;
+  overflow: hidden;
+}
+.convert-header.data-v-d014df9e {
+  background: linear-gradient(135deg, #FF730E, #FF8C00);
+  padding: 40rpx 30rpx;
+  text-align: center;
+}
+.convert-header .title.data-v-d014df9e {
+  color: #fff;
+  font-size: 36rpx;
+  font-weight: bold;
+}
+.convert-body.data-v-d014df9e {
+  padding: 40rpx 30rpx;
+}
+.congrats-section.data-v-d014df9e {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 40rpx;
+}
+.congrats-section .award-icon.data-v-d014df9e {
+  width: 120rpx;
+  height: 120rpx;
+  margin-bottom: 20rpx;
+}
+.congrats-section .congrats-text.data-v-d014df9e {
+  font-size: 28rpx;
+  color: #333;
+  line-height: 1.6;
+  text-align: center;
+}
+.congrats-section .congrats-text .highlight.data-v-d014df9e {
+  color: #FF730E;
+  font-size: 40rpx;
+  font-weight: bold;
+  margin: 0 10rpx;
+}
+.stats-grid.data-v-d014df9e {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20rpx;
+  background: #F8F9FA;
+  padding: 24rpx;
+  border-radius: 16rpx;
+}
+.stats-item.data-v-d014df9e {
+  display: flex;
+  flex-direction: column;
+}
+.stats-item .label.data-v-d014df9e {
+  font-size: 22rpx;
+  color: #999;
+  margin-bottom: 4rpx;
+}
+.stats-item .value.data-v-d014df9e {
+  font-size: 30rpx;
+  color: #333;
+  font-weight: bold;
+}
+.stats-item .value.sub.data-v-d014df9e {
+  color: #666;
+  font-size: 26rpx;
+}
+.nav-hint.data-v-d014df9e {
+  font-size: 22rpx;
+  color: #ccc;
+  text-align: center;
+  margin-top: 20rpx;
+}
+.convert-footer.data-v-d014df9e {
+  padding: 0 30rpx 40rpx;
+}
+.convert-footer .confirm-btn.data-v-d014df9e {
+  background: #FF730E;
+  color: #fff;
+  height: 88rpx;
+  line-height: 88rpx;
+  border-radius: 44rpx;
+  font-size: 32rpx;
+  font-weight: bold;
+}
+.convert-footer .confirm-btn.data-v-d014df9e::after {
+  border: none;
+}

@@ -212,7 +212,7 @@ const _sfc_main = {
       }, ent.value.backgroundUrl ? {
         c: ent.value.backgroundUrl
       } : {}, {
-        d: ent.value.logoUrl,
+        d: ent.value.enterpriseLogo || ent.value.logoUrl,
         e: common_vendor.t(ent.value.enterpriseName),
         f: ent.value.brandSlogan
       }, ent.value.brandSlogan ? {
@@ -231,44 +231,46 @@ const _sfc_main = {
         n: common_vendor.t(ent.value.officePhone || "暂无数据"),
         o: common_vendor.o(($event) => makePhoneCall(ent.value.officePhone)),
         p: common_vendor.t(ent.value.officialEmail || "暂无数据"),
-        q: common_vendor.t(ent.value.shortIntro || "暂无详细介绍"),
-        r: ent.value.coreValue
+        q: ent.value.logoUrl,
+        r: common_vendor.t(ent.value.brandName || "未设置品牌名"),
+        s: common_vendor.t(ent.value.shortIntro || "暂无详细介绍"),
+        t: ent.value.coreValue
       }, ent.value.coreValue ? {
-        s: common_vendor.t(ent.value.coreValue)
+        v: common_vendor.t(ent.value.coreValue)
       } : {}, {
-        t: common_vendor.t(industryText.value),
-        v: parsedTags.value.length
+        w: common_vendor.t(industryText.value),
+        x: parsedTags.value.length
       }, parsedTags.value.length ? {
-        w: common_vendor.f(parsedTags.value, (tag, index, i0) => {
+        y: common_vendor.f(parsedTags.value, (tag, index, i0) => {
           return {
             a: common_vendor.t(tag),
             b: index
           };
         })
       } : {}, {
-        x: ent.value.officialWebsite
+        z: ent.value.officialWebsite
       }, ent.value.officialWebsite ? {
-        y: common_vendor.t(ent.value.officialWebsite),
-        z: common_vendor.o(($event) => openStoreLink(ent.value.officialWebsite))
+        A: common_vendor.t(ent.value.officialWebsite),
+        B: common_vendor.o(($event) => openStoreLink(ent.value.officialWebsite))
       } : {}, {
-        A: ent.value.wechatMpName
+        C: ent.value.wechatMpName
       }, ent.value.wechatMpName ? {
-        B: common_vendor.t(ent.value.wechatMpName),
-        C: common_vendor.o(($event) => openQrPopup(ent.value.wechatMpQrcode, ent.value.wechatMpName))
+        D: common_vendor.t(ent.value.wechatMpName),
+        E: common_vendor.o(($event) => openQrPopup(ent.value.wechatMpQrcode, ent.value.wechatMpName))
       } : {}, {
-        D: ent.value.videoAccount
+        F: ent.value.videoAccount
       }, ent.value.videoAccount ? {
-        E: common_vendor.t(ent.value.videoAccount),
-        F: common_vendor.o(($event) => openQrPopup(ent.value.videoAccountQrcode, "官方视频号"))
+        G: common_vendor.t(ent.value.videoAccount),
+        H: common_vendor.o(($event) => openQrPopup(ent.value.videoAccountQrcode, "官方视频号"))
       } : {}, {
-        G: common_vendor.t(ent.value.customerServicePhone || "暂无数据"),
-        H: common_vendor.o(($event) => makePhoneCall(ent.value.customerServicePhone)),
-        I: common_vendor.t(ent.value.businessCooperation || "暂无数据"),
-        J: common_vendor.t(ent.value.afterSaleEmail || "暂无数据"),
-        K: onlineStores.value.length
+        I: common_vendor.t(ent.value.customerServicePhone || "暂无数据"),
+        J: common_vendor.o(($event) => makePhoneCall(ent.value.customerServicePhone)),
+        K: common_vendor.t(ent.value.businessCooperation || "暂无数据"),
+        L: common_vendor.t(ent.value.afterSaleEmail || "暂无数据"),
+        M: onlineStores.value.length
       }, onlineStores.value.length ? common_vendor.e({
-        L: common_vendor.t(onlineStores.value.length),
-        M: common_vendor.f(onlineStores.value, (store, index, i0) => {
+        N: common_vendor.t(onlineStores.value.length),
+        O: common_vendor.f(onlineStores.value, (store, index, i0) => {
           return {
             a: common_vendor.t(getStoreIcon(store.platform)),
             b: common_vendor.t(store.name),
@@ -278,15 +280,15 @@ const _sfc_main = {
             f: index < 3 || showAllStores.value
           };
         }),
-        N: onlineStores.value.length > 3
+        P: onlineStores.value.length > 3
       }, onlineStores.value.length > 3 ? {
-        O: common_vendor.t(showAllStores.value ? "收起全部" : "展开全部"),
-        P: common_vendor.o(($event) => showAllStores.value = !showAllStores.value)
+        Q: common_vendor.t(showAllStores.value ? "收起全部" : "展开全部"),
+        R: common_vendor.o(($event) => showAllStores.value = !showAllStores.value)
       } : {}) : {}, {
-        Q: offlineStores.value.length
+        S: offlineStores.value.length
       }, offlineStores.value.length ? {
-        R: common_vendor.t(offlineStores.value.length),
-        S: common_vendor.f(offlineStores.value, (store, index, i0) => {
+        T: common_vendor.t(offlineStores.value.length),
+        U: common_vendor.f(offlineStores.value, (store, index, i0) => {
           return {
             a: "9f5eb755-1-" + i0,
             b: common_vendor.t(store.name),
@@ -295,39 +297,34 @@ const _sfc_main = {
             e: "off-" + index
           };
         }),
-        T: common_vendor.p({
+        V: common_vendor.p({
           type: "location-filled",
           size: "24",
           color: "#FF8600"
         })
       } : {}, {
-        U: common_vendor.f(brandImageList.value, (img, index, i0) => {
+        W: common_vendor.f(brandImageList.value, (img, index, i0) => {
           return {
             a: index,
             b: img,
             c: common_vendor.o(($event) => previewImage(index), index)
           };
         }),
-        V: common_vendor.o(($event) => previewImage(0)),
-        W: ent.value.videoUrl
+        X: common_vendor.o(($event) => previewImage(0)),
+        Y: ent.value.videoUrl
       }, ent.value.videoUrl ? {
-        X: ent.value.videoUrl
+        Z: ent.value.videoUrl
       } : {}, {
-        Y: common_vendor.p({
-          type: "paperplane-filled",
-          size: "18",
-          color: "#fff"
-        }),
-        Z: common_vendor.o(goToCard),
-        aa: common_vendor.t(currentQrTitle.value),
-        ab: currentQrUrl.value,
-        ac: common_vendor.o(previewQrSingle),
-        ad: common_vendor.o(saveQrImage),
-        ae: common_vendor.o(closeQrPopup),
-        af: common_vendor.sr(qrPopup, "9f5eb755-3", {
+        aa: common_vendor.o(goToCard),
+        ab: common_vendor.t(currentQrTitle.value),
+        ac: currentQrUrl.value,
+        ad: common_vendor.o(previewQrSingle),
+        ae: common_vendor.o(saveQrImage),
+        af: common_vendor.o(closeQrPopup),
+        ag: common_vendor.sr(qrPopup, "9f5eb755-2", {
           "k": "qrPopup"
         }),
-        ag: common_vendor.p({
+        ah: common_vendor.p({
           type: "center"
         })
       }) : {});

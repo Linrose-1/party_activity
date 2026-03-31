@@ -17,19 +17,38 @@
 
 				<view class="form-card">
 					<!-- 1. 发布身份选择：增加 :disabled="isEditMode" -->
+					<!-- 1. 发布身份选择 -->
 					<view class="form-group">
 						<view class="form-label">发布身份</view>
-						<radio-group @change="handleIdentityChange" class="radio-group-container">
-							<label class="radio-item">
-								<radio value="0" :checked="form.isEnterprise === 0" :disabled="isEditMode"
-									color="#FF6A00" />
-								<text :style="{color: isEditMode ? '#999' : '#333'}">个人身份</text>
-							</label>
-							<label class="radio-item">
-								<radio value="1" :checked="form.isEnterprise === 1" :disabled="isEditMode"
-									color="#FF6A00" />
-								<text :style="{color: isEditMode ? '#999' : '#333'}">企业/品牌身份</text>
-							</label>
+						<radio-group @change="handleIdentityChange" class="identity-radio-group">
+							<!-- 个人身份：isEnterprise 为 0 -->
+							<view class="identity-item-wrap">
+								<label class="radio-item">
+									<radio value="0" :checked="form.isEnterprise === 0" :disabled="isEditMode"
+										color="#FF6A00" />
+									<text class="identity-name">个人身份</text>
+								</label>
+							</view>
+
+							<!-- 企业身份：isEnterprise 为 1 且 PublishType 为 0 -->
+							<view class="identity-item-wrap">
+								<label class="radio-item">
+									<radio value="1"
+										:checked="form.isEnterprise === 1 && form.enterprisePublishType === 0"
+										:disabled="isEditMode" color="#FF6A00" />
+									<text class="identity-name">企业身份</text>
+								</label>
+							</view>
+
+							<!-- 品牌身份：isEnterprise 为 1 且 PublishType 为 1 -->
+							<view class="identity-item-wrap">
+								<label class="radio-item">
+									<radio value="2"
+										:checked="form.isEnterprise === 1 && form.enterprisePublishType === 1"
+										:disabled="isEditMode" color="#FF6A00" />
+									<text class="identity-name">品牌身份</text>
+								</label>
+							</view>
 						</radio-group>
 					</view>
 
@@ -289,6 +308,7 @@
 		showProfile: true,
 		isReadTrace: 1,
 		isEnterprise: 0, // 0-个人, 1-企业
+		enterprisePublishType: 0,
 		userEnterpriseId: null, // 企业主键ID
 		// ===== 猎伙专属字段 =====
 		partnerTypes: [], // 猎伙类型（多选），提交时转为逗号分隔字符串
@@ -373,10 +393,17 @@
 
 	/** 根据当前选中的 topic 返回对应的剩余发布额度 */
 	const currentRemainingQuota = computed(() => {
-		if (form.topic === '创业猎伙' || form.topic === '商机分享+创业猎伙') {
-			return quotaPartner.value;
+		const bQ = quotaBusiness.value;
+		const pQ = quotaPartner.value;
+
+		if (form.topic === '商机分享+创业猎伙') {
+			// 混合模式：取商机和猎伙中较小的那个，只要有一个为0，就认为没免费额度了
+			return Math.min(bQ, pQ);
 		}
-		return quotaBusiness.value;
+		if (form.topic === '创业猎伙') {
+			return pQ;
+		}
+		return bQ;
 	});
 
 	// --- 生命周期钩子 ---
@@ -506,26 +533,39 @@
 			form.tags = data.tags || [];
 			form.showProfile = data.cardFlag;
 			form.isReadTrace = data.isReadTrace;
-			form.isEnterprise = data.isEnterprise;
+			form.isEnterprise = data.isEnterprise || 0;
+			form.enterprisePublishType = data.enterprisePublishType || 0;
 			form.userEnterpriseId = data.userEnterpriseId;
 
 			// 还原猎伙专属字段
-			if (data.postType == 1) {
-				// partnerTypes 接口返回逗号字符串，还原为数组
-				// 预设值：'1'求贤 '2'找合伙人 '3'寻资源 '4'其他；其余视为自定义文本
-				const PRESET_TYPES = ['1', '2', '3', '4'];
+			if (data.postType == 1 || data.postType == 2) {
+				// 预设的 ID 值：1-求贤, 2-众筹, 3-合伙, 5-寻资源
+				const PRESET_IDS = ['1', '2', '3', '5'];
+
 				if (data.partnerTypes) {
-					const allTypes = data.partnerTypes.split(',').filter(v => v);
-					const customTypes = allTypes.filter(v => !PRESET_TYPES.includes(v));
-					const presetTypes = allTypes.filter(v => PRESET_TYPES.includes(v));
-					if (customTypes.length > 0) {
-						if (!presetTypes.includes('4')) presetTypes.push('4');
-						form.partnerTypeOther = customTypes.join('、');
-					}
-					form.partnerTypes = presetTypes;
-				} else {
-					form.partnerTypes = [];
+					// 例如："其他合作1+1,5" -> ["其他合作1+1", "5"]
+					const rawParts = data.partnerTypes.split(',');
+					const selectedPresets = [];
+					let otherText = '';
+
+					rawParts.forEach(part => {
+						if (PRESET_IDS.includes(part)) {
+							// 如果是预设的数字 ID，直接加入选中数组
+							selectedPresets.push(part);
+						} else {
+							// 只要不是预设 ID，统统归类为「其他合作」的内容
+							if (!selectedPresets.includes('4')) selectedPresets.push('4');
+
+							// 处理文本：移除后端可能带有的“其他合作”前缀，提取用户真正输入的内容
+							// 例如 "其他合作1+1" -> "1+1"
+							otherText = part.replace(/^其他合作/, '');
+						}
+					});
+
+					form.partnerTypes = selectedPresets;
+					form.partnerTypeOther = otherText;
 				}
+
 				form.urgentLevel = data.urgentLevel || 1;
 				// expectedInvestment 为 JSON 字符串，还原各子字段
 				if (data.expectedInvestment) {
@@ -600,36 +640,75 @@
 		const {
 			data,
 			error
-		} = await request('/app-api/member/point-record/get-balance', {
+		} = await request('/app-api/member/user/get', {
 			method: 'GET'
 		});
-		if (!error && typeof data === 'number') return data;
+		if (!error && data) {
+			// 更新本地缓存，确保全局一致
+			uni.setStorageSync('userInfo', JSON.stringify(data));
+			return data.point || 0; // 返回智米数
+		}
 		return 0;
 	};
 
-	/**
-	 * 弹出升级会员引导弹窗（无权限时使用）
-	 * 提供「消耗智米发布」和「立即升级」两个选项
-	 */
+	/** 弹出升级引导 */
 	const showUpgradeModal = () => {
 		uni.showModal({
-			title: '🚀 解锁高级招募功能',
-			content: '升级为「白银会员」，即可发布猎伙，精准招募：核心合伙人、关键人才、稀缺资源',
-			cancelText: '消耗智米发布',
-			confirmText: '立即升级',
+			title: '🚀 开启高级招募',
+			content: '升级为白银会员可免费发布。当前亦可消耗智米单次发布。',
+			cancelText: '智米发布', // 限制4个字
+			confirmText: '立即升级', // 限制4个字
 			confirmColor: '#FF6A00',
 			success: async (res) => {
 				if (res.confirm) {
-					// 跳转到会员升级页
 					uni.navigateTo({
 						url: '/packages/recharge/recharge?type=membership'
 					});
-				} else {
-					// 用户选择消耗智米发布，进入智米支付流程
-					await handlePointPublishFlow();
+				} else if (res.cancel) {
+					// 执行智米扣费流程
+					await startPointPaymentFlow();
 				}
 			}
 		});
+	};
+
+	/** 智米扣费二次确认流程 */
+	const startPointPaymentFlow = async () => {
+		uni.showLoading({
+			title: '核验智米...',
+			mask: true
+		});
+		const balance = await fetchPointBalance();
+		uni.hideLoading();
+
+		const COST = 5;
+		if (balance >= COST) {
+			uni.showModal({
+				title: '确认支付',
+				content: `本次发布将消耗 ${COST} 智米，当前余额 ${balance}。`,
+				cancelText: '取消',
+				confirmText: '确认发布',
+				confirmColor: '#FF6A00',
+				success: (confirmRes) => {
+					if (confirmRes.confirm) {
+						usePointForPublish.value = true; // 标记已同意付钱
+						submitPost(); // 立即提交
+					}
+				}
+			});
+		} else {
+			uni.showModal({
+				title: '智米不足',
+				content: `发布猎伙需 ${COST} 智米，当前余额仅 ${balance}。`,
+				cancelText: '再看看',
+				confirmText: '去充值',
+				success: (res) => {
+					if (res.confirm) uni.navigateTo({
+						url: '/packages/recharge/recharge?type=point'
+					});
+				}
+			});
+		}
 	};
 
 	/**
@@ -648,16 +727,14 @@
 		const REQUIRED_POINTS = 20;
 
 		if (balance >= REQUIRED_POINTS) {
-			// 余额充足，二次确认
 			uni.showModal({
 				title: '确认消耗智米',
-				content: `发布猎伙需要消耗 ${REQUIRED_POINTS} 智米，当前余额：${balance} 智米。是否继续？`,
+				content: `发布猎伙需要消耗 ${REQUIRED_POINTS} 智米。`,
 				cancelText: '取消',
-				confirmText: '确认发布',
+				confirmText: '确认发布', // 【确保】：不超过4个字
 				confirmColor: '#FF6A00',
 				success: (res) => {
 					if (res.confirm) {
-						// 标记使用智米发布，进入正常发布流程
 						usePointForPublish.value = true;
 						submitPost();
 					}
@@ -689,26 +766,13 @@
 	 */
 	function topicChange(e) {
 		const newTopic = e.detail.value;
-
-		// 编辑模式不允许切换，直接返回
+		// 编辑模式不允许更改分类
 		if (isEditMode.value) return;
 
-		// 如果切换到商机分享或"商机分享+创业猎伙"，直接设置并重置智米标记
-		if (newTopic !== '创业猎伙' && newTopic !== '商机分享+创业猎伙') {
-			form.topic = newTopic;
-			usePointForPublish.value = false;
-			return;
-		}
-
-		// 切换到"创业猎伙"或"商机分享+创业猎伙"时检查权限
-		if (hasLiehuoPermission()) {
-			// 有权限，直接切换
-			form.topic = newTopic;
-		} else {
-			// 无权限，先切换 UI（让用户看到选中效果），再弹引导弹窗
-			form.topic = newTopic;
-			showUpgradeModal();
-		}
+		form.topic = newTopic;
+		// 切换时重置智米标记，由点击发布时重新判定
+		usePointForPublish.value = false;
+		console.log('分类已切换为:', newTopic);
 	}
 
 	/**
@@ -1084,24 +1148,33 @@
 
 	/**
 	 * 点击发布按钮的入口
-	 * 先检查额度，再做猎伙权限校验，最后进入表单校验与提交
 	 */
-	const handleSubmitClick = () => {
-		// 1. 额度检查
-		if (isQuotaLoaded.value && currentRemainingQuota.value == 0) {
-			showQuotaExceededModal();
+	const handleSubmitClick = async () => {
+		if (isEditMode.value) {
+			submitPost();
 			return;
 		}
 
-		// 2. 猎伙权限检查（非编辑模式、非已通过智米授权）
-		if (form.topic === '创业猎伙' && !isEditMode.value && !usePointForPublish.value) {
+		const isLiehuoRelated = form.topic === '创业猎伙' || form.topic === '商机分享+创业猎伙';
+
+		// 1. 如果涉及猎伙且用户还没决定用智米发
+		if (isLiehuoRelated && !usePointForPublish.value) {
 			if (!hasLiehuoPermission()) {
+				// 非白银会员，弹出引导
 				showUpgradeModal();
 				return;
 			}
 		}
 
-		// 3. 进入表单校验与提交
+		// 2. 额度检查：只有在【非智米发布】的情况下，才检查免费额度
+		if (!usePointForPublish.value) {
+			if (isQuotaLoaded.value && currentRemainingQuota.value <= 0) {
+				showQuotaExceededModal();
+				return;
+			}
+		}
+
+		// 3. 所有校验通过，进入最终表单校验与提交
 		submitPost();
 	};
 
@@ -1130,12 +1203,25 @@
 	 * 切换发布身份（个人/企业）
 	 */
 	const handleIdentityChange = (e) => {
-		const val = Number(e.detail.value);
-		form.isEnterprise = val;
-		if (val === 0) {
+		const val = e.detail.value; // 此时 radio 的 value 我们定义为 '0', '1', '2'
+
+		if (val === '0') {
+			// 个人身份
+			form.isEnterprise = 0;
+			form.enterprisePublishType = 0; // 重置
 			form.userEnterpriseId = null;
-		} else if (myEnterprises.value.length === 1) {
-			// 只有一家企业时自动选中
+		} else if (val === '1') {
+			// 企业身份
+			form.isEnterprise = 1;
+			form.enterprisePublishType = 0;
+		} else if (val === '2') {
+			// 品牌身份
+			form.isEnterprise = 1;
+			form.enterprisePublishType = 1;
+		}
+
+		// 如果只有一家企业，且选择了非个人身份，自动选中
+		if (form.isEnterprise === 1 && myEnterprises.value.length === 1) {
 			form.userEnterpriseId = myEnterprises.value[0].value;
 		}
 	};
@@ -1175,8 +1261,10 @@
 			icon: 'none'
 		});
 
+		const isLiehuoRelated = form.topic === '创业猎伙' || form.topic === '商机分享+创业猎伙';
+
 		// 猎伙专属字段校验
-		if (form.topic === '创业猎伙') {
+		if (isLiehuoRelated) {
 			if (form.partnerTypes.length === 0) return uni.showToast({
 				title: '请选择至少一个猎伙类型',
 				icon: 'none'
@@ -1215,6 +1303,7 @@
 			cardFlag: form.showProfile,
 			isReadTrace: form.isReadTrace,
 			isEnterprise: form.isEnterprise,
+			enterprisePublishType: form.isEnterprise === 1 ? form.enterprisePublishType : 0,
 			userEnterpriseId: form.userEnterpriseId || 0,
 			tags: form.tags,
 			status: 'active',
@@ -1865,9 +1954,11 @@
 	}
 
 	.submit-btn.disabled-btn {
-		background: #ccc;
-		color: #fff;
-		box-shadow: none;
+		background: #ccc !important;
+		color: #fff !important;
+		box-shadow: none !important;
+		/* 必须加上这一行，否则点击函数不执行 */
+		pointer-events: auto !important;
 	}
 
 	/* ==================== 媒体选择器和视频预览 ==================== */
@@ -2003,5 +2094,39 @@
 			opacity: 1;
 			transform: translateY(0);
 		}
+	}
+
+
+	/* 补充 */
+	.identity-radio-group {
+		display: flex;
+		flex-direction: column;
+		gap: 24rpx;
+		margin-top: 10rpx;
+	}
+
+	.identity-item-wrap {
+		display: flex;
+		flex-direction: column;
+		margin-bottom: 10rpx;
+	}
+
+	.identity-item-wrap .radio-item {
+		display: flex;
+		align-items: center;
+	}
+
+	.identity-item-wrap .identity-name {
+		font-size: 28rpx;
+		font-weight: bold;
+		margin-left: 12rpx;
+	}
+
+	.identity-item-wrap .identity-hint {
+		font-size: 22rpx;
+		color: #999;
+		margin-left: 54rpx;
+		margin-top: 4rpx;
+		line-height: 1.4;
 	}
 </style>

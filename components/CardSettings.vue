@@ -23,8 +23,8 @@
 					<text class="s-label">内容模块控制</text>
 					<view class="toggle-item" v-for="(label, key) in toggles" :key="key">
 						<text>{{ label }}</text>
-						<switch :checked="config[key] === 1" @change="e => config[key] = e.detail.value ? 1 : 0"
-							color="#FF8600" style="transform: scale(0.7);" />
+						<switch :checked="!!config[key]" @change="e => config[key] = e.detail.value" color="#FF8600"
+							style="transform: scale(0.7);" />
 					</view>
 				</view>
 			</scroll-view>
@@ -51,15 +51,21 @@
 		cardShowSlogan: '品牌标语',
 		cardShowContact: '联系方式',
 		cardShowSocial: '社交媒体',
-		cardShowOnlineStore: '线上线下门店',
-		cardShowDetailAddress: '显示详细地址'
+		cardShowOnlineStore: '门店入口',
+		// cardShowDetailAddress: '显示详细地址',
 	};
 
-	watch(() => props.modelValue, (v) => v && Object.assign(config, JSON.parse(JSON.stringify(v))), {
+	watch(() => props.modelValue, (v) => {
+		if (v) {
+			// 使用 JSON 实现深拷贝，确保操作不直接影响父组件原始数据
+			Object.assign(config, JSON.parse(JSON.stringify(v)));
+		}
+	}, {
 		immediate: true
 	});
 	const open = () => popup.value.open();
 	const apply = () => {
+		// 向父组件发送当前修改后的所有配置项
 		emit('apply', config);
 		popup.value.close();
 	};

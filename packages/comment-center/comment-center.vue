@@ -66,10 +66,11 @@
 				<view class="card-content">
 					<text>{{ item.content }}</text>
 				</view>
-				
+
 				<!-- 评论图片展示 -->
 				<view v-if="item.imageUrls && item.imageUrls.length > 0" class="comment-images">
-					<view v-for="(img, imgIndex) in item.imageUrls" :key="imgIndex" class="comment-image-item" @click="previewImage(item.imageUrls, imgIndex)">
+					<view v-for="(img, imgIndex) in item.imageUrls" :key="imgIndex" class="comment-image-item"
+						@click="previewImage(item.imageUrls, imgIndex)">
 						<image :src="img" mode="aspectFill" class="comment-image"></image>
 					</view>
 				</view>
@@ -198,13 +199,14 @@
 							}
 						}
 					}
-					
+
 					// 处理子评论的imageUrls
 					if (item.childrenList && Array.isArray(item.childrenList)) {
 						item.childrenList = item.childrenList.map(child => {
 							let childImageUrls = child.imageUrls || [];
 							if (Array.isArray(childImageUrls) && childImageUrls.length > 0) {
-								if (typeof childImageUrls[0] === 'string' && childImageUrls[0].startsWith('[')) {
+								if (typeof childImageUrls[0] === 'string' && childImageUrls[0]
+									.startsWith('[')) {
 									try {
 										childImageUrls = JSON.parse(childImageUrls[0]);
 									} catch (e) {
@@ -219,13 +221,13 @@
 							};
 						});
 					}
-					
+
 					return {
 						...item,
 						imageUrls: imageUrls
 					};
 				});
-				
+
 				commentList.value = isRefresh ? processedList : [...commentList.value, ...processedList];
 				total.value = data.total;
 				loadingStatus.value = commentList.value.length >= total.value ? 'noMore' : 'more';
@@ -281,17 +283,33 @@
 	// 通用跳转逻辑
 	const goToTarget = (item) => {
 		let url = '';
-		const id = item.targetId;
-		if (targetType.value === 'post') url = `/packages/home-commercialDetail/home-commercialDetail?id=${id}`;
-		else if (targetType.value === 'activity') url = `/packages/active-detail/active-detail?id=${id}`;
-		else if (targetType.value === 'store') url = `/packages/shop-detail/shop-detail?id=${id}`;
+		const targetId = item.targetId;
 
-		if (url) {
-			uni.navigateTo({
-				url: `${url}&commentId=${item.id}`
-			});
+		if (targetType.value === 'post') {
+			url = `/packages/home-commercialDetail/home-commercialDetail?id=${targetId}&commentId=${item.id}`;
+		} else if (targetType.value === 'activity') {
+			url = `/packages/comment-page/comment-page?id=${targetId}&type=activity&commentId=${item.id}`;
+		} else if (targetType.value === 'store') {
+			url = `/packages/comment-page/comment-page?id=${targetId}&type=store&commentId=${item.id}`;
 		}
+
+		if (url) uni.navigateTo({
+			url
+		});
 	};
+	// const goToTarget = (item) => {
+	// 	let url = '';
+	// 	const id = item.targetId;
+	// 	if (targetType.value === 'post') url = `/packages/home-commercialDetail/home-commercialDetail?id=${id}`;
+	// 	else if (targetType.value === 'activity') url = `/packages/active-detail/active-detail?id=${id}`;
+	// 	else if (targetType.value === 'store') url = `/packages/shop-detail/shop-detail?id=${id}`;
+
+	// 	if (url) {
+	// 		uni.navigateTo({
+	// 			url: `${url}&commentId=${item.id}`
+	// 		});
+	// 	}
+	// };
 
 	const formatTime = (str) => {
 		if (!str) return '';

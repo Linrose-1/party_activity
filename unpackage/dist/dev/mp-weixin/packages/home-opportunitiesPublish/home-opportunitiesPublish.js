@@ -35,6 +35,7 @@ const _sfc_main = {
       isReadTrace: 1,
       isEnterprise: 0,
       // 0-个人, 1-企业
+      enterprisePublishType: 0,
       userEnterpriseId: null,
       // 企业主键ID
       // ===== 猎伙专属字段 =====
@@ -113,10 +114,15 @@ const _sfc_main = {
       return "描述您的项目/商机、需求/经验分享。";
     });
     const currentRemainingQuota = common_vendor.computed(() => {
-      if (form.topic === "创业猎伙" || form.topic === "商机分享+创业猎伙") {
-        return quotaPartner.value;
+      const bQ = quotaBusiness.value;
+      const pQ = quotaPartner.value;
+      if (form.topic === "商机分享+创业猎伙") {
+        return Math.min(bQ, pQ);
       }
-      return quotaBusiness.value;
+      if (form.topic === "创业猎伙") {
+        return pQ;
+      }
+      return bQ;
     });
     common_vendor.onLoad(async (options) => {
       const token = common_vendor.index.getStorageSync("token");
@@ -175,7 +181,7 @@ const _sfc_main = {
     const saveDraft = (data) => {
       if (data.title || data.content || data.tags.length > 0 || data.images.length > 0) {
         common_vendor.index.setStorageSync(DRAFT_KEY, JSON.stringify(data));
-        common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:451", "📝 草稿已自动保存");
+        common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:478", "📝 草稿已自动保存");
       }
     };
     const checkDraft = () => {
@@ -199,7 +205,7 @@ const _sfc_main = {
     };
     const clearDraft = () => {
       common_vendor.index.removeStorageSync(DRAFT_KEY);
-      common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:480", "🧹 草稿已清除");
+      common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:507", "🧹 草稿已清除");
     };
     const fetchOpportunityDetail = async (id) => {
       common_vendor.index.showLoading({
@@ -222,22 +228,26 @@ const _sfc_main = {
         form.tags = data.tags || [];
         form.showProfile = data.cardFlag;
         form.isReadTrace = data.isReadTrace;
-        form.isEnterprise = data.isEnterprise;
+        form.isEnterprise = data.isEnterprise || 0;
+        form.enterprisePublishType = data.enterprisePublishType || 0;
         form.userEnterpriseId = data.userEnterpriseId;
-        if (data.postType == 1) {
-          const PRESET_TYPES = ["1", "2", "3", "4"];
+        if (data.postType == 1 || data.postType == 2) {
+          const PRESET_IDS = ["1", "2", "3", "5"];
           if (data.partnerTypes) {
-            const allTypes = data.partnerTypes.split(",").filter((v) => v);
-            const customTypes = allTypes.filter((v) => !PRESET_TYPES.includes(v));
-            const presetTypes = allTypes.filter((v) => PRESET_TYPES.includes(v));
-            if (customTypes.length > 0) {
-              if (!presetTypes.includes("4"))
-                presetTypes.push("4");
-              form.partnerTypeOther = customTypes.join("、");
-            }
-            form.partnerTypes = presetTypes;
-          } else {
-            form.partnerTypes = [];
+            const rawParts = data.partnerTypes.split(",");
+            const selectedPresets = [];
+            let otherText = "";
+            rawParts.forEach((part) => {
+              if (PRESET_IDS.includes(part)) {
+                selectedPresets.push(part);
+              } else {
+                if (!selectedPresets.includes("4"))
+                  selectedPresets.push("4");
+                otherText = part.replace(/^其他合作/, "");
+              }
+            });
+            form.partnerTypes = selectedPresets;
+            form.partnerTypeOther = otherText;
           }
           form.urgentLevel = data.urgentLevel || 1;
           if (data.expectedInvestment) {
@@ -247,7 +257,7 @@ const _sfc_main = {
               form.investmentResource = inv["资源类型"] || "";
               form.investmentEquity = inv["股权比例"] || "";
             } catch (e) {
-              common_vendor.index.__f__("error", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:538", "解析 expectedInvestment 失败:", e);
+              common_vendor.index.__f__("error", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:578", "解析 expectedInvestment 失败:", e);
             }
           }
         }
@@ -280,9 +290,9 @@ const _sfc_main = {
         quotaBusiness.value = typeof res1.data === "number" ? res1.data : 0;
         quotaPartner.value = typeof res2.data === "number" ? res2.data : 0;
         isQuotaLoaded.value = true;
-        common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:578", `权益加载完成: 商机=${quotaBusiness.value}, 猎伙=${quotaPartner.value}`);
+        common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:618", `权益加载完成: 商机=${quotaBusiness.value}, 猎伙=${quotaPartner.value}`);
       } catch (e) {
-        common_vendor.index.__f__("error", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:580", "获取权益失败", e);
+        common_vendor.index.__f__("error", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:620", "获取权益失败", e);
       }
     };
     const hasLiehuoPermission = () => {
@@ -293,48 +303,52 @@ const _sfc_main = {
       const {
         data,
         error
-      } = await utils_request.request("/app-api/member/point-record/get-balance", {
+      } = await utils_request.request("/app-api/member/user/get", {
         method: "GET"
       });
-      if (!error && typeof data === "number")
-        return data;
+      if (!error && data) {
+        common_vendor.index.setStorageSync("userInfo", JSON.stringify(data));
+        return data.point || 0;
+      }
       return 0;
     };
     const showUpgradeModal = () => {
       common_vendor.index.showModal({
-        title: "🚀 解锁高级招募功能",
-        content: "升级为「白银会员」，即可发布猎伙，精准招募：核心合伙人、关键人才、稀缺资源",
-        cancelText: "消耗智米发布",
+        title: "🚀 开启高级招募",
+        content: "升级为白银会员可免费发布。当前亦可消耗智米单次发布。",
+        cancelText: "智米发布",
+        // 限制4个字
         confirmText: "立即升级",
+        // 限制4个字
         confirmColor: "#FF6A00",
         success: async (res) => {
           if (res.confirm) {
             common_vendor.index.navigateTo({
               url: "/packages/recharge/recharge?type=membership"
             });
-          } else {
-            await handlePointPublishFlow();
+          } else if (res.cancel) {
+            await startPointPaymentFlow();
           }
         }
       });
     };
-    const handlePointPublishFlow = async () => {
+    const startPointPaymentFlow = async () => {
       common_vendor.index.showLoading({
-        title: "查询智米余额...",
+        title: "核验智米...",
         mask: true
       });
       const balance = await fetchPointBalance();
       common_vendor.index.hideLoading();
-      const REQUIRED_POINTS = 20;
-      if (balance >= REQUIRED_POINTS) {
+      const COST = 5;
+      if (balance >= COST) {
         common_vendor.index.showModal({
-          title: "确认消耗智米",
-          content: `发布猎伙需要消耗 ${REQUIRED_POINTS} 智米，当前余额：${balance} 智米。是否继续？`,
+          title: "确认支付",
+          content: `本次发布将消耗 ${COST} 智米，当前余额 ${balance}。`,
           cancelText: "取消",
           confirmText: "确认发布",
           confirmColor: "#FF6A00",
-          success: (res) => {
-            if (res.confirm) {
+          success: (confirmRes) => {
+            if (confirmRes.confirm) {
               usePointForPublish.value = true;
               submitPost();
             }
@@ -342,20 +356,15 @@ const _sfc_main = {
         });
       } else {
         common_vendor.index.showModal({
-          title: "💰 智米不足",
-          content: `发布猎伙需要消耗 ${REQUIRED_POINTS} 智米。
-当前余额：${balance} 智米
-
-请充值后再发布，让优质机会不被错过。`,
-          cancelText: "取消",
-          confirmText: "立即充值",
-          confirmColor: "#FF6A00",
+          title: "智米不足",
+          content: `发布猎伙需 ${COST} 智米，当前余额仅 ${balance}。`,
+          cancelText: "再看看",
+          confirmText: "去充值",
           success: (res) => {
-            if (res.confirm) {
+            if (res.confirm)
               common_vendor.index.navigateTo({
                 url: "/packages/recharge/recharge?type=point"
               });
-            }
           }
         });
       }
@@ -364,17 +373,9 @@ const _sfc_main = {
       const newTopic = e.detail.value;
       if (isEditMode.value)
         return;
-      if (newTopic !== "创业猎伙" && newTopic !== "商机分享+创业猎伙") {
-        form.topic = newTopic;
-        usePointForPublish.value = false;
-        return;
-      }
-      if (hasLiehuoPermission()) {
-        form.topic = newTopic;
-      } else {
-        form.topic = newTopic;
-        showUpgradeModal();
-      }
+      form.topic = newTopic;
+      usePointForPublish.value = false;
+      common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:775", "分类已切换为:", newTopic);
     }
     function togglePartnerType(value) {
       const idx = form.partnerTypes.indexOf(value);
@@ -441,9 +442,9 @@ const _sfc_main = {
             type
           }
         });
-        common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:791", `标签历史 "${tagName}" 已记录`);
+        common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:855", `标签历史 "${tagName}" 已记录`);
       } catch (error) {
-        common_vendor.index.__f__("error", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:793", "记录标签历史失败:", error);
+        common_vendor.index.__f__("error", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:857", "记录标签历史失败:", error);
       }
     }
     common_vendor.watch(() => form.tagInput, (newValue) => {
@@ -477,7 +478,7 @@ const _sfc_main = {
         const suggestions = data.list.map((item) => item.name);
         tagSuggestions.value = [...new Set(suggestions)];
       } catch (e) {
-        common_vendor.index.__f__("error", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:834", "获取标签建议失败:", e);
+        common_vendor.index.__f__("error", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:898", "获取标签建议失败:", e);
         tagSuggestions.value = [];
       }
     }
@@ -514,7 +515,7 @@ const _sfc_main = {
             if (result.data)
               successfulUrls.push(result.data);
             else
-              common_vendor.index.__f__("error", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:876", "上传失败:", result.error);
+              common_vendor.index.__f__("error", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:940", "上传失败:", result.error);
           });
           form.images.push(...successfulUrls);
           if (successfulUrls.length < validFiles.length) {
@@ -569,7 +570,7 @@ const _sfc_main = {
           }
         },
         fail: (err) => {
-          common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:987", "取消选择视频");
+          common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:1051", "取消选择视频");
         }
       });
     }
@@ -598,11 +599,11 @@ const _sfc_main = {
             src: tempFilePath,
             cropScale: "4:3",
             success: (cropRes) => {
-              common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:1021", "裁剪成功:", cropRes.tempFilePath);
+              common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:1085", "裁剪成功:", cropRes.tempFilePath);
               uploadCoverToCloud(cropRes.tempFilePath);
             },
             fail: (err) => {
-              common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:1025", "用户取消裁剪或失败:", err);
+              common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:1089", "用户取消裁剪或失败:", err);
             }
           });
         }
@@ -648,14 +649,21 @@ const _sfc_main = {
         }
       });
     };
-    const handleSubmitClick = () => {
-      if (isQuotaLoaded.value && currentRemainingQuota.value == 0) {
-        showQuotaExceededModal();
+    const handleSubmitClick = async () => {
+      if (isEditMode.value) {
+        submitPost();
         return;
       }
-      if (form.topic === "创业猎伙" && !isEditMode.value && !usePointForPublish.value) {
+      const isLiehuoRelated = form.topic === "创业猎伙" || form.topic === "商机分享+创业猎伙";
+      if (isLiehuoRelated && !usePointForPublish.value) {
         if (!hasLiehuoPermission()) {
           showUpgradeModal();
+          return;
+        }
+      }
+      if (!usePointForPublish.value) {
+        if (isQuotaLoaded.value && currentRemainingQuota.value <= 0) {
+          showQuotaExceededModal();
           return;
         }
       }
@@ -673,15 +681,23 @@ const _sfc_main = {
           text: item.enterpriseName,
           value: item.id
         }));
-        common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:1125", "✅ 可用发布身份企业数:", myEnterprises.value.length);
+        common_vendor.index.__f__("log", "at packages/home-opportunitiesPublish/home-opportunitiesPublish.vue:1198", "✅ 可用发布身份企业数:", myEnterprises.value.length);
       }
     };
     const handleIdentityChange = (e) => {
-      const val = Number(e.detail.value);
-      form.isEnterprise = val;
-      if (val === 0) {
+      const val = e.detail.value;
+      if (val === "0") {
+        form.isEnterprise = 0;
+        form.enterprisePublishType = 0;
         form.userEnterpriseId = null;
-      } else if (myEnterprises.value.length === 1) {
+      } else if (val === "1") {
+        form.isEnterprise = 1;
+        form.enterprisePublishType = 0;
+      } else if (val === "2") {
+        form.isEnterprise = 1;
+        form.enterprisePublishType = 1;
+      }
+      if (form.isEnterprise === 1 && myEnterprises.value.length === 1) {
         form.userEnterpriseId = myEnterprises.value[0].value;
       }
     };
@@ -715,7 +731,8 @@ const _sfc_main = {
           title: "请选择要发布的身份企业",
           icon: "none"
         });
-      if (form.topic === "创业猎伙") {
+      const isLiehuoRelated = form.topic === "创业猎伙" || form.topic === "商机分享+创业猎伙";
+      if (isLiehuoRelated) {
         if (form.partnerTypes.length === 0)
           return common_vendor.index.showToast({
             title: "请选择至少一个猎伙类型",
@@ -758,6 +775,7 @@ const _sfc_main = {
         cardFlag: form.showProfile,
         isReadTrace: form.isReadTrace,
         isEnterprise: form.isEnterprise,
+        enterprisePublishType: form.isEnterprise === 1 ? form.enterprisePublishType : 0,
         userEnterpriseId: form.userEnterpriseId || 0,
         tags: form.tags,
         status: "active",
@@ -866,10 +884,10 @@ const _sfc_main = {
         e: common_vendor.o(($event) => form.content = $event.detail.value),
         f: form.isEnterprise === 0,
         g: isEditMode.value,
-        h: isEditMode.value ? "#999" : "#333",
-        i: form.isEnterprise === 1,
-        j: isEditMode.value,
-        k: isEditMode.value ? "#999" : "#333",
+        h: form.isEnterprise === 1 && form.enterprisePublishType === 0,
+        i: isEditMode.value,
+        j: form.isEnterprise === 1 && form.enterprisePublishType === 1,
+        k: isEditMode.value,
         l: common_vendor.o(handleIdentityChange),
         m: form.isEnterprise === 1
       }, form.isEnterprise === 1 ? common_vendor.e({

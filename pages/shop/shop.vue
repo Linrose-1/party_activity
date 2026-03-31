@@ -731,6 +731,7 @@
 	}
 
 	.city-text {
+		color: $gofor-primary;
 		margin-right: 6rpx;
 		white-space: nowrap;
 		overflow: hidden;

@@ -348,41 +348,96 @@
 		color: #1890FF;
 }
 
-	/* ==================== 感兴趣按钮 ==================== */
+	/* ==================== 感兴趣 + 留言按钮区优化 ==================== */
 .interest-btn-wrap.data-v-8303b14f {
 		margin-top: 30rpx;
-		padding-top: 24rpx;
-		border-top: 2rpx solid #f0f0f0;
+		padding: 30rpx 40rpx;
+		border-top: 2rpx solid #f8f8f8;
 		display: flex;
 		justify-content: center;
+		align-items: center;
 }
-.interest-btn.data-v-8303b14f {
+
+	/* 当只有一个按钮时的默认样式：居中且较宽 */
+.interest-btn-wrap .interest-btn.data-v-8303b14f {
+		width: 480rpx;
+		/* 只有单个按钮时的宽度 */
+		height: 90rpx;
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		gap: 10rpx;
-		padding: 20rpx 80rpx;
+		gap: 12rpx;
 		border-radius: 50rpx;
 		font-size: 30rpx;
 		font-weight: bold;
 		background: linear-gradient(to right, #1890FF, #40a9ff);
 		color: #fff;
-		box-shadow: 0 6rpx 16rpx rgba(24, 144, 255, 0.3);
-		transition: all 0.2s;
+		box-shadow: 0 8rpx 20rpx rgba(24, 144, 255, 0.2);
+		transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
+
+	/* 当有两个按钮时的容器调整 */
+.interest-btn-wrap.double-btns.data-v-8303b14f {
+		gap: 24rpx;
+}
+
+	/* 当有两个按钮时，感兴趣按钮和留言按钮平分空间 */
+.interest-btn-wrap.double-btns .interest-btn.data-v-8303b14f,
+	.interest-btn-wrap.double-btns .message-action-btn.data-v-8303b14f {
+		flex: 1;
+		/* 关键：平分空间 */
+		width: auto;
+		/* 重置固定宽度 */
+		max-width: none;
+		height: 90rpx;
+}
+
+	/* 已感兴趣状态样式：变浅或变白 */
 .interest-btn.interested.data-v-8303b14f {
+		background: #fff !important;
+		color: #52c41a !important;
+		border: 2rpx solid #52c41a !important;
+		box-shadow: none !important;
+}
+
+	/* 留言按钮样式 */
+.message-action-btn.data-v-8303b14f {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 12rpx;
+		border-radius: 50rpx;
+		background: linear-gradient(to right, #FF730E, #FF8C00);
+		/* 主题橙 */
+		color: #fff;
+		font-size: 28rpx;
+		font-weight: bold;
+		box-shadow: 0 8rpx 20rpx rgba(255, 115, 14, 0.2);
+}
+.interest-btn.data-v-8303b14f:active,
+	.message-action-btn.data-v-8303b14f:active {
+		opacity: 0.8;
+		transform: scale(0.96);
+}
+.btn-text.data-v-8303b14f {
+		white-space: nowrap;
+}
+
+	/* .interest-btn.interested {
 		background: #fff;
 		color: #52c41a;
 		border: 2rpx solid #52c41a;
 		box-shadow: none;
-}
-.interest-btn.data-v-8303b14f:active {
+	}
+
+	.interest-btn:active {
 		opacity: 0.8;
 		transform: scale(0.97);
-}
-.interest-icon.data-v-8303b14f {
+	}
+
+	.interest-icon {
 		font-size: 28rpx;
-}
+	} */
 
 	/* ==================== 感兴趣成功弹窗 ==================== */
 .interest-modal-mask.data-v-8303b14f {

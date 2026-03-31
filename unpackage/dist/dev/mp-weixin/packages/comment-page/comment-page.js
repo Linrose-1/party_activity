@@ -23,6 +23,10 @@ const _sfc_main = {
     const replyToId = common_vendor.ref(0);
     const replyToName = common_vendor.ref("");
     const keyboardHeight = common_vendor.ref(0);
+    common_vendor.ref("");
+    const highlightId = common_vendor.ref(null);
+    const scrollTop = common_vendor.ref(0);
+    common_vendor.ref(0);
     const imageUrls = common_vendor.ref([]);
     const placeholderText = common_vendor.computed(
       () => replyToName.value ? `回复 @${replyToName.value}` : "友善评论，文明互动..."
@@ -37,7 +41,16 @@ const _sfc_main = {
       common_vendor.index.setNavigationBarTitle({
         title: titleMap[targetType.value] || "评论"
       });
-      fetchComments();
+      fetchComments().then(() => {
+        if (options.commentId) {
+          const id = Number(options.commentId);
+          highlightId.value = id;
+          setTimeout(() => {
+            highlightId.value = null;
+          }, 2e3);
+          scrollToComment(id);
+        }
+      });
       common_vendor.index.onKeyboardHeightChange((res) => {
         keyboardHeight.value = res.height;
       });
@@ -45,6 +58,24 @@ const _sfc_main = {
     common_vendor.onUnmounted(() => {
       common_vendor.index.offKeyboardHeightChange();
     });
+    const scrollToComment = (commentId) => {
+      common_vendor.nextTick$1(() => {
+        setTimeout(() => {
+          const query = common_vendor.index.createSelectorQuery();
+          query.select(".comment-scroll").boundingClientRect();
+          query.select(`#comment-${commentId}`).boundingClientRect();
+          query.exec((res) => {
+            if (res[0] && res[1]) {
+              const containerTop = res[0].top;
+              const itemTop = res[1].top;
+              const currentScrollTop = scrollTop.value;
+              const offset = itemTop - containerTop;
+              scrollTop.value = currentScrollTop + offset - 20;
+            }
+          });
+        }, 300);
+      });
+    };
     const fetchComments = async () => {
       const {
         data
@@ -68,12 +99,14 @@ const _sfc_main = {
         const avatar = isAnon ? "/static/icon/default-avatar.png" : (_b = c.memberUserBaseVO) == null ? void 0 : _b.avatar;
         let imageUrls2 = c.imageUrls || [];
         if (Array.isArray(imageUrls2) && imageUrls2.length > 0) {
-          if (typeof imageUrls2[0] === "string" && imageUrls2[0].startsWith('["') && imageUrls2[0].endsWith('"]')) {
+          if (typeof imageUrls2[0] === "string" && imageUrls2[0].startsWith('["') && imageUrls2[0].endsWith(
+            '"]'
+          )) {
             try {
               const parsed = JSON.parse(imageUrls2[0]);
               imageUrls2 = Array.isArray(parsed) ? parsed : imageUrls2;
             } catch (e) {
-              common_vendor.index.__f__("error", "at packages/comment-page/comment-page.vue:197", "解析imageUrls失败:", e);
+              common_vendor.index.__f__("error", "at packages/comment-page/comment-page.vue:260", "解析imageUrls失败:", e);
             }
           }
         }
@@ -223,7 +256,7 @@ const _sfc_main = {
             if (result.data)
               successfulUrls.push(result.data);
             else
-              common_vendor.index.__f__("error", "at packages/comment-page/comment-page.vue:386", "上传失败:", result.error);
+              common_vendor.index.__f__("error", "at packages/comment-page/comment-page.vue:449", "上传失败:", result.error);
           });
           imageUrls.value = successfulUrls;
           if (successfulUrls.length < validFiles.length) {
@@ -283,7 +316,9 @@ const _sfc_main = {
             p: common_vendor.o(($event) => deleteComment(comment.id), comment.id)
           } : {}, {
             q: comment.id,
-            r: comment.parentId !== 0 ? 1 : ""
+            r: `comment-${comment.id}`,
+            s: comment.parentId !== 0 ? 1 : "",
+            t: highlightId.value === comment.id ? 1 : ""
           });
         }),
         c: common_vendor.p({
@@ -299,36 +334,37 @@ const _sfc_main = {
         })
       }, {
         e: common_vendor.o((...args) => _ctx.onReachBottom && _ctx.onReachBottom(...args)),
-        f: common_vendor.p({
+        f: scrollTop.value,
+        g: common_vendor.p({
           type: isAnonymous.value ? "eye-slash-filled" : "eye-filled",
           size: "18",
           color: isAnonymous.value ? "#FF6A00" : "#999"
         }),
-        g: common_vendor.t(isAnonymous.value ? "匿名" : "显名"),
-        h: isAnonymous.value ? 1 : "",
-        i: common_vendor.o(($event) => isAnonymous.value = !isAnonymous.value),
-        j: placeholderText.value,
-        k: newCommentText.value,
-        l: common_vendor.o(($event) => newCommentText.value = $event.detail.value),
-        m: !imageUrls.value || imageUrls.value.length === 0
+        h: common_vendor.t(isAnonymous.value ? "匿名" : "显名"),
+        i: isAnonymous.value ? 1 : "",
+        j: common_vendor.o(($event) => isAnonymous.value = !isAnonymous.value),
+        k: placeholderText.value,
+        l: newCommentText.value,
+        m: common_vendor.o(($event) => newCommentText.value = $event.detail.value),
+        n: !imageUrls.value || imageUrls.value.length === 0
       }, !imageUrls.value || imageUrls.value.length === 0 ? {
-        n: common_vendor.p({
+        o: common_vendor.p({
           type: "image",
           size: "24",
           color: "#999"
         }),
-        o: common_vendor.o(handleChooseImage)
+        p: common_vendor.o(handleChooseImage)
       } : {}, {
-        p: common_vendor.p({
+        q: common_vendor.p({
           type: "paperplane-filled",
           size: "22",
           color: "#ffff7f"
         }),
-        q: newCommentText.value.trim().length > 0 || imageUrls.value && imageUrls.value.length > 0 ? 1 : "",
-        r: common_vendor.o(handleSend),
-        s: imageUrls.value && imageUrls.value.length > 0
+        r: newCommentText.value.trim().length > 0 || imageUrls.value && imageUrls.value.length > 0 ? 1 : "",
+        s: common_vendor.o(handleSend),
+        t: imageUrls.value && imageUrls.value.length > 0
       }, imageUrls.value && imageUrls.value.length > 0 ? {
-        t: common_vendor.f(imageUrls.value, (img, index, i0) => {
+        v: common_vendor.f(imageUrls.value, (img, index, i0) => {
           return {
             a: img,
             b: common_vendor.o(($event) => previewImage(imageUrls.value, index), index),
@@ -337,11 +373,11 @@ const _sfc_main = {
           };
         })
       } : {}, {
-        v: keyboardHeight.value + "px",
-        w: copyMenu.show
+        w: keyboardHeight.value + "px",
+        x: copyMenu.show
       }, copyMenu.show ? {
-        x: common_vendor.o(executeCopy),
-        y: common_vendor.o(($event) => copyMenu.show = false)
+        y: common_vendor.o(executeCopy),
+        z: common_vendor.o(($event) => copyMenu.show = false)
       } : {});
     };
   }

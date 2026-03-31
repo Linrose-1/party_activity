@@ -222,7 +222,7 @@
 		display: block;
 		line-height: 1;
 }
-	
+
 	/* 评论图片样式 */
 .comment-images.data-v-3a461f42 {
 		display: flex;
@@ -278,4 +278,18 @@
 		width: 240rpx;
 		height: 240rpx;
 		margin-bottom: 20rpx;
+}
+.is-highlight.data-v-3a461f42 {
+		animation: highlight-flash-3a461f42 2s ease-out forwards;
+}
+@keyframes highlight-flash-3a461f42 {
+0% {
+			background-color: #fff3e0;
+}
+60% {
+			background-color: #fff3e0;
+}
+100% {
+			background-color: #fff;
+}
 }

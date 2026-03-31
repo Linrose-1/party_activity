@@ -1,46 +1,49 @@
 <template>
 	<view class="comment-page">
 		<!-- 评论列表区域 -->
-		<scroll-view scroll-y class="comment-scroll" @scrolltolower="onReachBottom">
+		<scroll-view scroll-y class="comment-scroll" @scrolltolower="onReachBottom" :scroll-top="scrollTop"
+			:scroll-with-animation="true">
 			<view class="comment-list" v-if="comments.length > 0">
-								<view class="comment-item" v-for="comment in comments" :key="comment.id"
-									:class="{'is-reply': comment.parentId !== 0}">
-									<!-- 头像和内容行 -->
-									<view class="comment-header-row">
-										<image :src="comment.avatar" class="c-avatar" mode="aspectFill" @click="goUserCard(comment)"></image>
-				
-										<view class="c-body">
-											<view class="c-header">
-												<text class="c-name">{{ comment.user }}</text>
-												<text class="c-time">{{ comment.time }}</text>
-											</view>
-				
-											<view class="c-text" @longpress="handleLongPress(comment.text)">
-												<text v-if="comment.replyTo" class="reply-to">@{{ comment.replyTo }} </text>
-												{{ comment.text }}
-											</view>
-											
-											<!-- 评论图片展示 -->
-											<view v-if="comment.imageUrls && comment.imageUrls.length > 0" class="comment-images">
-												<view v-for="(img, imgIndex) in comment.imageUrls" :key="imgIndex" class="comment-image-item" @click="previewImage(comment.imageUrls, imgIndex)">
-													<image :src="img" mode="aspectFill" class="comment-image"></image>
-												</view>
-											</view>
-				
-											<view class="c-actions">
-												<view class="action-btn" @click="startReply(comment)">
-													<uni-icons type="chatbubble" size="14" color="#666"></uni-icons>
-													<text>回复</text>
-												</view>
-												<view v-if="loggedInUserId == comment.userId" class="action-btn delete"
-													@click="deleteComment(comment.id)">
-													<uni-icons type="trash" size="14" color="#999"></uni-icons>
-													<text>删除</text>
-												</view>
-											</view>
-										</view>
-									</view>
+				<view class="comment-item" v-for="comment in comments" :key="comment.id" :id="`comment-${comment.id}`"
+					:class="{'is-reply': comment.parentId !== 0, 'is-highlight': highlightId === comment.id}">
+					<!-- 头像和内容行 -->
+					<view class="comment-header-row">
+						<image :src="comment.avatar" class="c-avatar" mode="aspectFill" @click="goUserCard(comment)">
+						</image>
+
+						<view class="c-body">
+							<view class="c-header">
+								<text class="c-name">{{ comment.user }}</text>
+								<text class="c-time">{{ comment.time }}</text>
+							</view>
+
+							<view class="c-text" @longpress="handleLongPress(comment.text)">
+								<text v-if="comment.replyTo" class="reply-to">@{{ comment.replyTo }} </text>
+								{{ comment.text }}
+							</view>
+
+							<!-- 评论图片展示 -->
+							<view v-if="comment.imageUrls && comment.imageUrls.length > 0" class="comment-images">
+								<view v-for="(img, imgIndex) in comment.imageUrls" :key="imgIndex"
+									class="comment-image-item" @click="previewImage(comment.imageUrls, imgIndex)">
+									<image :src="img" mode="aspectFill" class="comment-image"></image>
 								</view>
+							</view>
+
+							<view class="c-actions">
+								<view class="action-btn" @click="startReply(comment)">
+									<uni-icons type="chatbubble" size="14" color="#666"></uni-icons>
+									<text>回复</text>
+								</view>
+								<view v-if="loggedInUserId == comment.userId" class="action-btn delete"
+									@click="deleteComment(comment.id)">
+									<uni-icons type="trash" size="14" color="#999"></uni-icons>
+									<text>删除</text>
+								</view>
+							</view>
+						</view>
+					</view>
+				</view>
 			</view>
 
 			<view v-else class="empty-holder">
@@ -65,14 +68,16 @@
 
 				<textarea auto-height maxlength="200" v-model="newCommentText" :placeholder="placeholderText"
 					:adjust-position="false" class="bar-textarea" cursor-spacing="10"></textarea>
-					
+
 				<!-- 图片上传按钮 -->
 				<view v-if="!imageUrls || imageUrls.length === 0" class="image-upload-btn" @click="handleChooseImage">
 					<uni-icons type="image" size="24" color="#999"></uni-icons>
 				</view>
-				
+
 				<!-- 发送按钮 -->
-				<view class="send-btn" :class="{ 'can-send': (newCommentText.trim().length > 0 || (imageUrls && imageUrls.length > 0)) }" @click="handleSend">
+				<view class="send-btn"
+					:class="{ 'can-send': (newCommentText.trim().length > 0 || (imageUrls && imageUrls.length > 0)) }"
+					@click="handleSend">
 					<uni-icons type="paperplane-filled" size="22" color="#ffff7f"></uni-icons>
 				</view>
 			</view>
@@ -80,7 +85,8 @@
 			<!-- 已选择的图片预览 -->
 			<view v-if="imageUrls && imageUrls.length > 0" class="selected-images-container">
 				<view v-for="(img, index) in imageUrls" :key="index" class="selected-image-item">
-					<image :src="img" mode="aspectFill" class="selected-image" @click="previewImage(imageUrls, index)"></image>
+					<image :src="img" mode="aspectFill" class="selected-image" @click="previewImage(imageUrls, index)">
+					</image>
 					<view class="remove-image" @click="removeImage(index)">×</view>
 				</view>
 				<view class="image-comment-hint">
@@ -101,7 +107,8 @@
 		ref,
 		reactive,
 		computed,
-		onUnmounted
+		onUnmounted,
+		nextTick
 	} from 'vue';
 	import {
 		onLoad
@@ -122,7 +129,12 @@
 	const replyToId = ref(0);
 	const replyToName = ref('');
 	const keyboardHeight = ref(0);
-	
+
+	const scrollToCommentId = ref(''); // scroll-into-view 绑定值
+	const highlightId = ref(null); // 高亮评论 id
+	const scrollTop = ref(0);
+	const scrollTopKey = ref(0); // 强制触发用
+
 	// 图片相关
 	const imageUrls = ref([]);
 
@@ -130,6 +142,24 @@
 		replyToName.value ? `回复 @${replyToName.value}` : '友善评论，文明互动...'
 	);
 
+	// onLoad((options) => {
+	// 	targetId.value = options.id;
+	// 	targetType.value = options.type;
+
+	// 	const titleMap = {
+	// 		'activity': '聚会评论',
+	// 		'store': '聚店评论'
+	// 	};
+	// 	uni.setNavigationBarTitle({
+	// 		title: titleMap[targetType.value] || '评论'
+	// 	});
+
+	// 	fetchComments();
+
+	// 	uni.onKeyboardHeightChange(res => {
+	// 		keyboardHeight.value = res.height;
+	// 	});
+	// });
 	onLoad((options) => {
 		targetId.value = options.id;
 		targetType.value = options.type;
@@ -142,7 +172,16 @@
 			title: titleMap[targetType.value] || '评论'
 		});
 
-		fetchComments();
+		fetchComments().then(() => {
+			if (options.commentId) {
+				const id = Number(options.commentId);
+				highlightId.value = id;
+				setTimeout(() => {
+					highlightId.value = null;
+				}, 2000);
+				scrollToComment(id);
+			}
+		});
 
 		uni.onKeyboardHeightChange(res => {
 			keyboardHeight.value = res.height;
@@ -152,6 +191,29 @@
 	onUnmounted(() => {
 		uni.offKeyboardHeightChange();
 	});
+
+	// 滚动到指定评论
+	const scrollToComment = (commentId) => {
+		nextTick(() => {
+			setTimeout(() => {
+				const query = uni.createSelectorQuery();
+				// 先查 scroll-view 容器的位置
+				query.select('.comment-scroll').boundingClientRect();
+				// 再查目标评论的位置
+				query.select(`#comment-${commentId}`).boundingClientRect();
+				query.exec((res) => {
+					if (res[0] && res[1]) {
+						const containerTop = res[0].top;
+						const itemTop = res[1].top;
+						// 当前 scrollTop + 目标相对容器的偏移
+						const currentScrollTop = scrollTop.value;
+						const offset = itemTop - containerTop;
+						scrollTop.value = currentScrollTop + offset - 20; // -20 留一点上边距
+					}
+				});
+			}, 300); // 等待列表渲染
+		});
+	};
 
 	/**
 	 * 获取评论列表并格式化为扁平结构
@@ -187,7 +249,8 @@
 			let imageUrls = c.imageUrls || [];
 			if (Array.isArray(imageUrls) && imageUrls.length > 0) {
 				// 检查是否是字符串格式而非数组格式
-				if (typeof imageUrls[0] === 'string' && imageUrls[0].startsWith('["') && imageUrls[0].endsWith('"]')) {
+				if (typeof imageUrls[0] === 'string' && imageUrls[0].startsWith('["') && imageUrls[0].endsWith(
+						'"]')) {
 					try {
 						// 尝试解析字符串格式的数组
 						const parsed = JSON.parse(imageUrls[0]);
@@ -352,7 +415,7 @@
 			}
 		});
 	};
-	
+
 	/**
 	 * 选择并上传图片（限制为1张，单张限5MB）
 	 */
@@ -397,7 +460,7 @@
 			},
 		});
 	};
-	
+
 	/**
 	 * 预览图片
 	 * @param {Array} urls - 图片URL数组
@@ -409,7 +472,7 @@
 			current: current
 		});
 	};
-	
+
 	/**
 	 * 删除已选择的图片
 	 * @param {Number} index - 图片索引
@@ -608,7 +671,7 @@
 		padding: 10rpx 0;
 		text-align: center;
 	}
-	
+
 	.selected-image-item {
 		position: relative;
 		width: 120rpx;
@@ -641,7 +704,7 @@
 		line-height: 1;
 		z-index: 2;
 	}
-	
+
 	.image-upload-btn {
 		display: flex;
 		align-items: center;
@@ -673,7 +736,7 @@
 		display: block;
 		line-height: 1;
 	}
-	
+
 	/* 评论图片样式 */
 	.comment-images {
 		display: flex;
@@ -681,7 +744,7 @@
 		gap: 10rpx;
 		margin: 10rpx 0;
 	}
-	
+
 	.comment-image-item {
 		width: 240rpx;
 		height: 240rpx;
@@ -689,7 +752,7 @@
 		overflow: hidden;
 		flex-shrink: 0;
 	}
-	
+
 	.comment-image {
 		width: 100%;
 		height: 100%;
@@ -734,5 +797,23 @@
 		width: 240rpx;
 		height: 240rpx;
 		margin-bottom: 20rpx;
+	}
+
+	.is-highlight {
+		animation: highlight-flash 2s ease-out forwards;
+	}
+
+	@keyframes highlight-flash {
+		0% {
+			background-color: #fff3e0;
+		}
+
+		60% {
+			background-color: #fff3e0;
+		}
+
+		100% {
+			background-color: #fff;
+		}
 	}
 </style>

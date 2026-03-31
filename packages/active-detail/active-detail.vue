@@ -1589,7 +1589,7 @@
 		border-radius: 20rpx;
 
 		.event-title {
-			font-size: 40rpx;
+			font-size: 36rpx;
 			font-weight: bold;
 			margin-bottom: 30rpx;
 			display: block;

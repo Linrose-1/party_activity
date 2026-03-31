@@ -152,7 +152,7 @@
   border-radius: 20rpx 20rpx 0 0;
 }
 .title-blur-box .activity-title.data-v-f73ae0ce {
-  color: #000;
+  color: #FF62B1;
   font-size: 30rpx;
   font-weight: 900;
   line-height: 1.4;

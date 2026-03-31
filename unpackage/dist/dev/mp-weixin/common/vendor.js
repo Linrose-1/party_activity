@@ -7297,9 +7297,9 @@ function initOnError() {
   };
 }
 function initRuntimeSocketService() {
-  const hosts = "192.168.144.182,127.0.0.1";
+  const hosts = "192.168.1.10,127.0.0.1";
   const port = "8090";
-  const id = "mp-weixin__81PAl";
+  const id = "mp-weixin_KW8G4Y";
   const lazy = typeof swan !== "undefined";
   let restoreError = lazy ? () => {
   } : initOnError();
@@ -8797,6 +8797,12 @@ const subPackages = [
         path: "sponsor-list/sponsor-list",
         style: {
           navigationBarTitleText: "赞助商列表"
+        }
+      },
+      {
+        path: "interaction-message/interaction-message",
+        style: {
+          navigationBarTitleText: "互动留言"
         }
       }
     ]

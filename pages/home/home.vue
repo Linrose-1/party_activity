@@ -252,6 +252,10 @@
 
 	<ScrollPointsPopup ref="scrollPointsPopup" />
 
+	<FeatureRankingPopup ref="featureRankingPopupRef" />
+
+	<GongfenToZhimiPopup ref="gongfenToZhimiPopupRef" />
+
 	<ZhimiPayPopup ref="payPopup" :price="10" content="定制功能需要支付10智米，请问是否同意支付开启该功能？"
 		api-path="/app-api/member/user/pay-business-friend-auth" @success="handlePaySuccess" />
 
@@ -292,6 +296,9 @@
 	import ScrollPointsPopup from '@/components/ScrollPointsPopup.vue';
 	import ZhimiPayPopup from '@/components/ZhimiPayPopup.vue';
 	import SmartGuidePopup from '@/components/SmartGuidePopup.vue';
+	import FeatureRankingPopup from '@/components/FeatureRankingPopup.vue';
+
+	import GongfenToZhimiPopup from '@/components/GongfenToZhimiPopup.vue';
 
 
 
@@ -354,6 +361,10 @@
 	const scrollPointsPopup = ref(null);
 
 	const payPopup = ref(null);
+
+	const featureRankingPopupRef = ref(null);
+
+	const gongfenToZhimiPopupRef = ref(null);
 
 	// 视频播放管理
 	const currentPlayingVideoId = ref(null); // 当前正在播放的视频ID
@@ -545,6 +556,12 @@
 		if (uni.getStorageSync('token')) {
 			fetchScrollBarData();
 			fetchSwiperData();
+
+			setTimeout(() => {
+				if (gongfenToZhimiPopupRef.value) {
+					gongfenToZhimiPopupRef.value.open(true); // true 表示自动尝试
+				}
+			}, 3000); // 3秒后尝试，避开刚进入时的加载动画
 		}
 	});
 
@@ -853,6 +870,15 @@
 					});
 				}
 
+				// 判断功能榜单是否有值（上新内容）
+				if (data.featureRanking) {
+					list.push({
+						type: 'featureRanking',
+						label: '功能榜单',
+						count: 'new' // 后端有值就显示 new 或者自定义文案
+					});
+				}
+
 				scrollBarData.value = list;
 			}
 		} catch (e) {
@@ -1025,15 +1051,35 @@
 
 				// 核心身份逻辑：判断是个人还是企业发布
 				const isEntPost = item.isEnterprise === 1 && item.enterpriseInfo;
+				const pubType = item.enterprisePublishType; // 0-企业, 1-品牌
+
+				let authorName = '';
+				let authorAvatar = '';
+
+				if (isEntPost) {
+					if (pubType === 1) {
+						// 1. 品牌发布：显示品牌名称和品牌Logo
+						authorName = item.enterpriseInfo.brandName || '未设置品牌名';
+						authorAvatar = item.enterpriseInfo.logoUrl || defaultAvatarUrl;
+					} else {
+						// 0. 企业发布：显示企业全称和企业Logo
+						authorName = item.enterpriseInfo.enterpriseName || '未设置企业名';
+						// 优先取 enterpriseLogo，如果没有则取 logoUrl
+						authorAvatar = item.enterpriseInfo.enterpriseLogo || item.enterpriseInfo.logoUrl ||
+							defaultAvatarUrl;
+					}
+				} else {
+					// 个人发布：显示个人昵称和个人头像
+					authorName = item.memberUser?.nickname || '商友';
+					authorAvatar = item.memberUser?.avatar || defaultAvatarUrl;
+				}
 
 				// 构建展示用的“作者”对象
 				const author = {
 					id: isEntPost ? item.enterpriseInfo.id : (item.memberUser?.id || item.userId),
 					managerId: item.userId,
-					name: isEntPost ? item.enterpriseInfo.enterpriseName : (item.memberUser
-						?.nickname || '商友'),
-					avatar: isEntPost ? item.enterpriseInfo.logoUrl : (item.memberUser?.avatar ||
-						defaultAvatarUrl),
+					name: authorName,
+					avatar: authorAvatar,
 					// 标记：该作者是否为企业主体
 					isEnterpriseSource: isEntPost,
 					// 认证标识判断
@@ -1308,6 +1354,12 @@
 	// 点击滚动条项的处理
 	const handleNoticeClick = (item) => {
 		switch (item.type) {
+			case 'featureRanking':
+				// 触发功能榜单弹窗
+				if (featureRankingPopupRef.value) {
+					featureRankingPopupRef.value.open();
+				}
+				break;
 			case 'friend':
 				uni.navigateTo({
 					url: '/packages/my-circleList/my-circleList'

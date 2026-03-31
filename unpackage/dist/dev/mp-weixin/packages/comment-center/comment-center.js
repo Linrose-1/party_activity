@@ -62,7 +62,7 @@ const _sfc_main = {
                 try {
                   imageUrls = JSON.parse(imageUrls[0]);
                 } catch (e) {
-                  common_vendor.index.__f__("warn", "at packages/comment-center/comment-center.vue:196", "解析imageUrls失败:", e);
+                  common_vendor.index.__f__("warn", "at packages/comment-center/comment-center.vue:197", "解析imageUrls失败:", e);
                   imageUrls = [];
                 }
               }
@@ -75,7 +75,7 @@ const _sfc_main = {
                     try {
                       childImageUrls = JSON.parse(childImageUrls[0]);
                     } catch (e) {
-                      common_vendor.index.__f__("warn", "at packages/comment-center/comment-center.vue:211", "解析子评论imageUrls失败:", e);
+                      common_vendor.index.__f__("warn", "at packages/comment-center/comment-center.vue:213", "解析子评论imageUrls失败:", e);
                       childImageUrls = [];
                     }
                   }
@@ -97,7 +97,7 @@ const _sfc_main = {
           pageNo.value++;
         }
       } catch (e) {
-        common_vendor.index.__f__("error", "at packages/comment-center/comment-center.vue:235", e);
+        common_vendor.index.__f__("error", "at packages/comment-center/comment-center.vue:237", e);
       } finally {
         if (isRefresh)
           common_vendor.index.stopPullDownRefresh();
@@ -143,18 +143,18 @@ const _sfc_main = {
     };
     const goToTarget = (item) => {
       let url = "";
-      const id = item.targetId;
-      if (targetType.value === "post")
-        url = `/packages/home-commercialDetail/home-commercialDetail?id=${id}`;
-      else if (targetType.value === "activity")
-        url = `/packages/active-detail/active-detail?id=${id}`;
-      else if (targetType.value === "store")
-        url = `/packages/shop-detail/shop-detail?id=${id}`;
-      if (url) {
-        common_vendor.index.navigateTo({
-          url: `${url}&commentId=${item.id}`
-        });
+      const targetId = item.targetId;
+      if (targetType.value === "post") {
+        url = `/packages/home-commercialDetail/home-commercialDetail?id=${targetId}&commentId=${item.id}`;
+      } else if (targetType.value === "activity") {
+        url = `/packages/comment-page/comment-page?id=${targetId}&type=activity&commentId=${item.id}`;
+      } else if (targetType.value === "store") {
+        url = `/packages/comment-page/comment-page?id=${targetId}&type=store&commentId=${item.id}`;
       }
+      if (url)
+        common_vendor.index.navigateTo({
+          url
+        });
     };
     const formatTime = (str) => {
       if (!str)

@@ -94,7 +94,8 @@
         "my-circleList/my-circleList",
         "silent-view-trace/silent-view-trace",
         "active-verify/active-verify",
-        "sponsor-list/sponsor-list"
+        "sponsor-list/sponsor-list",
+        "interaction-message/interaction-message"
       ]
     }
   ],

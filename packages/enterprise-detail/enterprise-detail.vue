@@ -7,7 +7,7 @@
 			<view class="bg-gradient" v-else></view>
 
 			<view class="header-content">
-				<image :src="ent.logoUrl" mode="aspectFill" class="main-logo" />
+				<image :src="ent.enterpriseLogo || ent.logoUrl" mode="aspectFill" class="main-logo" />
 				<text class="ent-name">{{ ent.enterpriseName }}</text>
 				<text class="ent-slogan" v-if="ent.brandSlogan">{{ ent.brandSlogan }}</text>
 			</view>
@@ -54,6 +54,13 @@
 			<view class="section-card">
 				<view class="section-title">
 					<text class="t-txt">▾ 品牌介绍</text>
+				</view>
+				<view class="brand-identity-header">
+					<image :src="ent.logoUrl" mode="aspectFill" class="brand-logo-img" />
+					<view class="brand-info-text">
+						<text class="brand-main-name">{{ ent.brandName || '未设置品牌名' }}</text>
+						<text class="brand-sub-tag">品牌/商标身份</text>
+					</view>
 				</view>
 				<view class="brand-intro">
 					<text class="intro-content">{{ ent.shortIntro || '暂无详细介绍' }}</text>
@@ -176,7 +183,6 @@
 		<!-- 8. 底部悬浮操作：查看名片 -->
 		<view class="footer-action">
 			<button class="card-btn" @click="goToCard">
-				<uni-icons type="paperplane-filled" size="18" color="#fff"></uni-icons>
 				<text>🚀 查看企业名片</text>
 			</button>
 		</view>
@@ -840,5 +846,47 @@
 
 	.flex-1 {
 		flex: 1;
+	}
+
+	.brand-identity-header {
+		display: flex;
+		align-items: center;
+		background-color: #f9f9f9;
+		padding: 20rpx;
+		border-radius: 16rpx;
+		margin-bottom: 24rpx;
+		border: 1rpx solid #efefef;
+
+		.brand-logo-img {
+			width: 100rpx;
+			height: 100rpx;
+			border-radius: 50%;
+			/* 品牌建议用圆形 */
+			background-color: #fff;
+			border: 2rpx solid #eee;
+			margin-right: 20rpx;
+		}
+
+		.brand-info-text {
+			flex: 1;
+
+			.brand-main-name {
+				font-size: 32rpx;
+				font-weight: bold;
+				color: #333;
+				display: block;
+			}
+
+			.brand-sub-tag {
+				font-size: 20rpx;
+				color: #FF8600;
+				/* 突出品牌身份 */
+				background: rgba(255, 134, 0, 0.1);
+				padding: 2rpx 10rpx;
+				border-radius: 4rpx;
+				margin-top: 4rpx;
+				display: inline-block;
+			}
+		}
 	}
 </style>

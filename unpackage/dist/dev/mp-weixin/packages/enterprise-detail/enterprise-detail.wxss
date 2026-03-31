@@ -321,3 +321,40 @@
 .flex-1.data-v-9f5eb755 {
   flex: 1;
 }
+.brand-identity-header.data-v-9f5eb755 {
+  display: flex;
+  align-items: center;
+  background-color: #f9f9f9;
+  padding: 20rpx;
+  border-radius: 16rpx;
+  margin-bottom: 24rpx;
+  border: 1rpx solid #efefef;
+}
+.brand-identity-header .brand-logo-img.data-v-9f5eb755 {
+  width: 100rpx;
+  height: 100rpx;
+  border-radius: 50%;
+  /* 品牌建议用圆形 */
+  background-color: #fff;
+  border: 2rpx solid #eee;
+  margin-right: 20rpx;
+}
+.brand-identity-header .brand-info-text.data-v-9f5eb755 {
+  flex: 1;
+}
+.brand-identity-header .brand-info-text .brand-main-name.data-v-9f5eb755 {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+  display: block;
+}
+.brand-identity-header .brand-info-text .brand-sub-tag.data-v-9f5eb755 {
+  font-size: 20rpx;
+  color: #FF8600;
+  /* 突出品牌身份 */
+  background: rgba(255, 134, 0, 0.1);
+  padding: 2rpx 10rpx;
+  border-radius: 4rpx;
+  margin-top: 4rpx;
+  display: inline-block;
+}

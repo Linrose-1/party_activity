@@ -151,17 +151,24 @@
 					</view>
 				</view>
 
-				<!-- ===== 感兴趣按钮（仅猎伙商机 && 非本人发布时显示）===== -->
+				<!-- ===== 感兴趣 + 留言按钮区 ===== -->
 				<view
 					v-if="(postDetail.postType == 1 || postDetail.postType == 2) && loggedInUserId && loggedInUserId !== postDetail.userId"
-					class="interest-btn-wrap">
+					class="interest-btn-wrap" :class="{ 'double-btns': postDetail.isInterested }">
+					<!-- 感兴趣按钮 -->
 					<view class="interest-btn" :class="{ 'interested': postDetail.isInterested }"
 						@click="toggleInterest">
 						<text class="interest-icon">{{ postDetail.isInterested ? '✅' : '🤝' }}</text>
-						<text style="font-size: 26rpx;">{{ postDetail.isInterested ? '已表达兴趣' : '感兴趣' }}</text>
+						<text class="btn-text">{{ postDetail.isInterested ? '已感兴趣' : '我感兴趣' }}</text>
+					</view>
+
+					<!-- 留言按钮：仅在已表达兴趣后显示 -->
+					<view v-if="postDetail.isInterested" class="message-action-btn" @click="goToHunterInteraction">
+						<uni-icons type="chat-filled" size="20" color="#fff"></uni-icons>
+						<text class="btn-text">互动留言</text>
 					</view>
 				</view>
-				<!-- ===== 感兴趣按钮 结束 ===== -->
+				<!-- ===== 感兴趣 + 留言按钮区 结束 ===== -->
 			</view>
 
 			<!-- 浏览留痕模块 -->
@@ -383,10 +390,11 @@
 
 	// ===== 猎伙紧急程度映射 =====
 	const partnerTypeMap = {
-		'1': '求贤',
-		'2': '找合伙人',
-		'3': '寻资源',
-		'4': '其他',
+		'1': '求贤若渴',
+		'2': '产品众筹',
+		'3': '项目合作',
+		'4': '其他合作',
+		'5': '寻找资源',
 	};
 
 	/**
@@ -636,15 +644,34 @@
 			if (result && !result.error && result.data) {
 				const item = result.data;
 				const isEnt = item.isEnterprise === 1 && item.enterpriseInfo;
+				const pubType = item.enterprisePublishType;
 
 				postDetail.id = item.id;
 				postDetail.userId = item.userId;
 				postDetail.isEnterpriseSource = !!isEnt;
 				postDetail.enterpriseId = isEnt ? item.enterpriseInfo.id : null;
-				postDetail.user = isEnt ? item.enterpriseInfo.enterpriseName : (item.memberUser?.nickname ||
-					'匿名用户');
-				postDetail.avatar = isEnt ? item.enterpriseInfo.logoUrl : (item.memberUser?.avatar ||
-					defaultAvatarUrl);
+
+				if (isEnt) {
+					if (pubType === 1) {
+						// 1. 品牌发布：显示品牌Logo和品牌名称
+						postDetail.user = item.enterpriseInfo.brandName || '未设置品牌名';
+						postDetail.avatar = item.enterpriseInfo.logoUrl || defaultAvatarUrl;
+					} else {
+						// 0. 企业发布：显示企业Logo和企业名称
+						postDetail.user = item.enterpriseInfo.enterpriseName || '未设置企业名';
+						postDetail.avatar = item.enterpriseInfo.enterpriseLogo || item.enterpriseInfo.logoUrl ||
+							defaultAvatarUrl;
+					}
+				} else {
+					// 个人发布逻辑保持不变
+					postDetail.user = item.memberUser?.nickname || '匿名用户';
+					postDetail.avatar = item.memberUser?.avatar || defaultAvatarUrl;
+				}
+
+				// postDetail.user = isEnt ? item.enterpriseInfo.enterpriseName : (item.memberUser?.nickname ||
+				// 	'匿名用户');
+				// postDetail.avatar = isEnt ? item.enterpriseInfo.logoUrl : (item.memberUser?.avatar ||
+				// 	defaultAvatarUrl);
 				postDetail.isEntVerified = isEnt && item.enterpriseInfo.status === 3;
 				postDetail.isIdVerified = !isEnt && item.memberUser?.idCert === 1;
 				postDetail.content = item.postContent;
@@ -819,6 +846,17 @@
 		closeInterestModal();
 		// 返回首页并切换到猎伙 Tab（tabIndex=4）
 		uni.navigateBack();
+	};
+
+	/** 
+	 * 跳转到猎伙一对一互动页面 
+	 */
+	const goToHunterInteraction = () => {
+		// 携带商机ID进入互动页
+		// 由于是意向人主动发起，不需要传对方userId，后端会自动识别当前登录人与发布者的关系
+		uni.navigateTo({
+			url: `/packages/interaction-message/interaction-message?targetId=${postDetail.id}`
+		});
 	};
 
 	// ===== 作者相关 =====
@@ -1893,31 +1931,84 @@
 		color: #1890FF;
 	}
 
-	/* ==================== 感兴趣按钮 ==================== */
+	/* ==================== 感兴趣 + 留言按钮区优化 ==================== */
 	.interest-btn-wrap {
 		margin-top: 30rpx;
-		padding-top: 24rpx;
-		border-top: 2rpx solid #f0f0f0;
+		padding: 30rpx 40rpx;
+		border-top: 2rpx solid #f8f8f8;
 		display: flex;
 		justify-content: center;
+		align-items: center;
 	}
 
-	.interest-btn {
+	/* 当只有一个按钮时的默认样式：居中且较宽 */
+	.interest-btn-wrap .interest-btn {
+		width: 480rpx;
+		/* 只有单个按钮时的宽度 */
+		height: 90rpx;
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		gap: 10rpx;
-		padding: 20rpx 80rpx;
+		gap: 12rpx;
 		border-radius: 50rpx;
 		font-size: 30rpx;
 		font-weight: bold;
 		background: linear-gradient(to right, #1890FF, #40a9ff);
 		color: #fff;
-		box-shadow: 0 6rpx 16rpx rgba(24, 144, 255, 0.3);
-		transition: all 0.2s;
+		box-shadow: 0 8rpx 20rpx rgba(24, 144, 255, 0.2);
+		transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 	}
 
+	/* 当有两个按钮时的容器调整 */
+	.interest-btn-wrap.double-btns {
+		gap: 24rpx;
+	}
+
+	/* 当有两个按钮时，感兴趣按钮和留言按钮平分空间 */
+	.interest-btn-wrap.double-btns .interest-btn,
+	.interest-btn-wrap.double-btns .message-action-btn {
+		flex: 1;
+		/* 关键：平分空间 */
+		width: auto;
+		/* 重置固定宽度 */
+		max-width: none;
+		height: 90rpx;
+	}
+
+	/* 已感兴趣状态样式：变浅或变白 */
 	.interest-btn.interested {
+		background: #fff !important;
+		color: #52c41a !important;
+		border: 2rpx solid #52c41a !important;
+		box-shadow: none !important;
+	}
+
+	/* 留言按钮样式 */
+	.message-action-btn {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 12rpx;
+		border-radius: 50rpx;
+		background: linear-gradient(to right, #FF730E, #FF8C00);
+		/* 主题橙 */
+		color: #fff;
+		font-size: 28rpx;
+		font-weight: bold;
+		box-shadow: 0 8rpx 20rpx rgba(255, 115, 14, 0.2);
+	}
+
+	.interest-btn:active,
+	.message-action-btn:active {
+		opacity: 0.8;
+		transform: scale(0.96);
+	}
+
+	.btn-text {
+		white-space: nowrap;
+	}
+
+	/* .interest-btn.interested {
 		background: #fff;
 		color: #52c41a;
 		border: 2rpx solid #52c41a;
@@ -1931,7 +2022,7 @@
 
 	.interest-icon {
 		font-size: 28rpx;
-	}
+	} */
 
 	/* ==================== 感兴趣成功弹窗 ==================== */
 	.interest-modal-mask {

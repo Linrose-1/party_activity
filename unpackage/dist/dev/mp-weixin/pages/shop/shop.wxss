@@ -29,6 +29,7 @@
   max-width: 160rpx;
 }
 .city-text {
+  color: #FF62B1;
   margin-right: 6rpx;
   white-space: nowrap;
   overflow: hidden;

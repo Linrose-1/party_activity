@@ -25,10 +25,14 @@ const _sfc_main = {
       cardShowSlogan: "品牌标语",
       cardShowContact: "联系方式",
       cardShowSocial: "社交媒体",
-      cardShowOnlineStore: "线上线下门店",
-      cardShowDetailAddress: "显示详细地址"
+      cardShowOnlineStore: "门店入口"
+      // cardShowDetailAddress: '显示详细地址',
     };
-    common_vendor.watch(() => props.modelValue, (v) => v && Object.assign(config, JSON.parse(JSON.stringify(v))), {
+    common_vendor.watch(() => props.modelValue, (v) => {
+      if (v) {
+        Object.assign(config, JSON.parse(JSON.stringify(v)));
+      }
+    }, {
       immediate: true
     });
     const open = () => popup.value.open();
@@ -66,8 +70,8 @@ const _sfc_main = {
         d: common_vendor.f(toggles, (label, key, i0) => {
           return {
             a: common_vendor.t(label),
-            b: config[key] === 1,
-            c: common_vendor.o((e) => config[key] = e.detail.value ? 1 : 0, key),
+            b: !!config[key],
+            c: common_vendor.o((e) => config[key] = e.detail.value, key),
             d: key
           };
         }),

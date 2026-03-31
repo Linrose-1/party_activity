@@ -20,26 +20,33 @@ const _sfc_main = {
   setup(__props, { emit: __emit }) {
     const emit = __emit;
     const isExpand = common_vendor.ref(false);
-    const handleAction = (type, index) => {
+    const handleAction = (actionType) => {
       isExpand.value = false;
-      if (type === "SHARE") {
+      if (actionType === "SHARE") {
         emit("shareClick");
+        return;
+      }
+      const paths = [
+        "/packages/my-shareList/my-shareList",
+        // 对应索引 0
+        "/packages/my-edit/my-edit",
+        // 对应索引 1
+        "/pages/home/home"
+        // 对应索引 2
+      ];
+      const target = paths[actionType];
+      if (!target) {
+        common_vendor.index.__f__("error", "at components/DemandActionFab.vue:67", "未找到对应的跳转路径，索引为:", actionType);
+        return;
+      }
+      if (target.includes("home")) {
+        common_vendor.index.switchTab({
+          url: target
+        });
       } else {
-        const paths = [
-          "/packages/my-shareList/my-shareList",
-          "/packages/my-edit/my-edit",
-          "/pages/home/home"
-        ];
-        const target = paths[index];
-        if (target.includes("home")) {
-          common_vendor.index.switchTab({
-            url: target
-          });
-        } else {
-          common_vendor.index.navigateTo({
-            url: target
-          });
-        }
+        common_vendor.index.navigateTo({
+          url: target
+        });
       }
     };
     return (_ctx, _cache) => {

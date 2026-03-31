@@ -696,6 +696,13 @@
 				{
 					"navigationBarTitleText" : "赞助商列表"
 				}
+			},
+			{
+				"path" : "interaction-message/interaction-message",
+				"style" : 
+				{
+					"navigationBarTitleText" : "互动留言"
+				}
 			}
 			// 如果还有其他页面要放进这个分包，继续在这里加
 		]

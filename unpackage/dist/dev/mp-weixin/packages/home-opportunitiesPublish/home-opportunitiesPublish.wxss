@@ -475,9 +475,11 @@
 		box-shadow: 0 6rpx 16rpx rgba(255, 106, 0, 0.3);
 }
 .submit-btn.disabled-btn.data-v-4f014bb0 {
-		background: #ccc;
-		color: #fff;
-		box-shadow: none;
+		background: #ccc !important;
+		color: #fff !important;
+		box-shadow: none !important;
+		/* 必须加上这一行，否则点击函数不执行 */
+		pointer-events: auto !important;
 }
 
 	/* ==================== 媒体选择器和视频预览 ==================== */
@@ -597,4 +599,34 @@ to {
 			opacity: 1;
 			transform: translateY(0);
 }
+}
+
+
+	/* 补充 */
+.identity-radio-group.data-v-4f014bb0 {
+		display: flex;
+		flex-direction: column;
+		gap: 24rpx;
+		margin-top: 10rpx;
+}
+.identity-item-wrap.data-v-4f014bb0 {
+		display: flex;
+		flex-direction: column;
+		margin-bottom: 10rpx;
+}
+.identity-item-wrap .radio-item.data-v-4f014bb0 {
+		display: flex;
+		align-items: center;
+}
+.identity-item-wrap .identity-name.data-v-4f014bb0 {
+		font-size: 28rpx;
+		font-weight: bold;
+		margin-left: 12rpx;
+}
+.identity-item-wrap .identity-hint.data-v-4f014bb0 {
+		font-size: 22rpx;
+		color: #999;
+		margin-left: 54rpx;
+		margin-top: 4rpx;
+		line-height: 1.4;
 }

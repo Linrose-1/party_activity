@@ -620,7 +620,7 @@
 
 
 		.activity-title {
-			color: #000;
+			color: $gofor-primary;
 			font-size: 30rpx;
 			font-weight: 900;
 			line-height: 1.4;
