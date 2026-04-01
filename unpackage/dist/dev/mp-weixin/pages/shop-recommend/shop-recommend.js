@@ -1,6 +1,7 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
 const utils_request = require("../../utils/request.js");
+const utils_user = require("../../utils/user.js");
 if (!Array) {
   const _component_uni_label = common_vendor.resolveComponent("uni-label");
   const _easycom_uni_easyinput2 = common_vendor.resolveComponent("uni-easyinput");
@@ -84,7 +85,7 @@ const _sfc_main = {
     const openMapToChooseLocation = () => {
       common_vendor.index.chooseLocation({
         success: (res) => {
-          common_vendor.index.__f__("log", "at pages/shop-recommend/shop-recommend.vue:166", "选择位置成功:", res);
+          common_vendor.index.__f__("log", "at pages/shop-recommend/shop-recommend.vue:171", "选择位置成功:", res);
           selectedLocationInfo.value = {
             name: res.name,
             address: res.address,
@@ -93,7 +94,7 @@ const _sfc_main = {
           };
         },
         fail: (err) => {
-          common_vendor.index.__f__("log", "at pages/shop-recommend/shop-recommend.vue:177", "选择位置失败:", err);
+          common_vendor.index.__f__("log", "at pages/shop-recommend/shop-recommend.vue:182", "选择位置失败:", err);
           if (!err.errMsg.includes("cancel")) {
             common_vendor.index.showToast({
               title: "选择位置失败",
@@ -104,6 +105,31 @@ const _sfc_main = {
       });
     };
     common_vendor.onLoad(() => {
+    });
+    common_vendor.onShareAppMessage(() => {
+      const inviteCode = utils_user.getInviteCode();
+      let sharePath = "/pages/shop-recommend/shop-recommend";
+      if (inviteCode) {
+        sharePath += `?inviteCode=${inviteCode}`;
+      }
+      common_vendor.index.__f__("log", "at pages/shop-recommend/shop-recommend.vue:214", "🚀 [推荐聚店] 发起分享，路径:", sharePath);
+      return {
+        title: "发现一家超赞的聚会店，快来跟我一起共建推荐！🏘️",
+        path: sharePath,
+        imageUrl: "https://img.gofor.club/logo_share.jpg"
+      };
+    });
+    common_vendor.onShareTimeline(() => {
+      const inviteCode = utils_user.getInviteCode();
+      let queryString = "";
+      if (inviteCode) {
+        queryString = `inviteCode=${inviteCode}`;
+      }
+      return {
+        title: "猩聚社：分享好店，共建优质商机空间",
+        query: queryString,
+        imageUrl: "https://img.gofor.club/logo_share.jpg"
+      };
     });
     return (_ctx, _cache) => {
       return common_vendor.e({
@@ -138,5 +164,6 @@ const _sfc_main = {
     };
   }
 };
+_sfc_main.__runtimeHooks = 6;
 wx.createPage(_sfc_main);
 //# sourceMappingURL=../../../.sourcemap/mp-weixin/pages/shop-recommend/shop-recommend.js.map

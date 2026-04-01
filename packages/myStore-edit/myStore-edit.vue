@@ -272,11 +272,15 @@
 		nextTick
 	} from 'vue';
 	import {
-		onLoad
+		onLoad,
+		onShareAppMessage,
+		onShareTimeline
 	} from '@dcloudio/uni-app';
 	import request from '../../utils/request.js';
-	// 【修改】您的项目可能是 upload.js，请确认文件名
 	import uploadFile from '../../utils/upload.js';
+	import {
+		getInviteCode
+	} from '@/utils/user.js';
 
 	const isLoading = ref(true);
 	const isSubmitting = ref(false);
@@ -944,6 +948,61 @@
 	// 		current: index
 	// 	});
 	// };
+
+	// ==========================================================
+	// --- 分享功能实现 ---
+	// ==========================================================
+
+	/**
+	 * 1. 分享给好友
+	 */
+	onShareAppMessage(() => {
+		const inviteCode = getInviteCode();
+		// 路径根据 pages.json 里的配置
+		let sharePath = '/packages/myStore-edit/myStore-edit';
+
+		// 如果是分享特定的店铺（编辑状态），可以带上 ID，如果是单纯邀请入驻，则不带
+		if (form.value.id) {
+			sharePath += `?id=${form.value.id}`;
+		}
+
+		const connector = sharePath.includes('?') ? '&' : '?';
+		if (inviteCode) {
+			sharePath += `${connector}inviteCode=${inviteCode}`;
+		}
+
+		console.log('🚀 [聚店编辑/入驻] 发起分享，路径:', sharePath);
+
+		return {
+			title: '诚邀入驻猩聚社聚店，开启您的商业增长新空间！🏘️',
+			path: sharePath,
+			imageUrl: coverImages.value[0] || 'https://img.gofor.club/logo_share.jpg' // 优先用店铺第一张图
+		};
+	});
+
+	/**
+	 * 2. 分享到朋友圈
+	 */
+	onShareTimeline(() => {
+		const inviteCode = getInviteCode();
+		let queryString = '';
+
+		if (form.value.id) {
+			queryString += `id=${form.value.id}&`;
+		}
+
+		if (inviteCode) {
+			queryString += `inviteCode=${inviteCode}`;
+		}
+
+		return {
+			title: '猩聚社聚店：商友连接，聚店聚商机！',
+			query: queryString,
+			imageUrl: coverImages.value[0] || 'https://img.gofor.club/logo_share.jpg'
+		};
+	});
+
+	// ==========================================================
 </script>
 
 

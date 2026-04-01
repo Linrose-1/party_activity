@@ -3,6 +3,7 @@ const common_vendor = require("../../common/vendor.js");
 const common_assets = require("../../common/assets.js");
 const utils_request = require("../../utils/request.js");
 const utils_upload = require("../../utils/upload.js");
+const utils_user = require("../../utils/user.js");
 if (!Array) {
   const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
   const _easycom_uni_easyinput2 = common_vendor.resolveComponent("uni-easyinput");
@@ -102,7 +103,7 @@ const _sfc_main = {
       }
       if (data && Array.isArray(data)) {
         categoryList.value = data;
-        common_vendor.index.__f__("log", "at packages/myStore-edit/myStore-edit.vue:381", "成功获取聚店类别:", categoryList.value);
+        common_vendor.index.__f__("log", "at packages/myStore-edit/myStore-edit.vue:385", "成功获取聚店类别:", categoryList.value);
       }
     };
     const getStoreDetails = async (storeId) => {
@@ -394,6 +395,39 @@ const _sfc_main = {
         setTimeout(() => common_vendor.index.navigateBack(), 1500);
       }
     };
+    common_vendor.onShareAppMessage(() => {
+      const inviteCode = utils_user.getInviteCode();
+      let sharePath = "/packages/myStore-edit/myStore-edit";
+      if (form.value.id) {
+        sharePath += `?id=${form.value.id}`;
+      }
+      const connector = sharePath.includes("?") ? "&" : "?";
+      if (inviteCode) {
+        sharePath += `${connector}inviteCode=${inviteCode}`;
+      }
+      common_vendor.index.__f__("log", "at packages/myStore-edit/myStore-edit.vue:974", "🚀 [聚店编辑/入驻] 发起分享，路径:", sharePath);
+      return {
+        title: "诚邀入驻猩聚社聚店，开启您的商业增长新空间！🏘️",
+        path: sharePath,
+        imageUrl: coverImages.value[0] || "https://img.gofor.club/logo_share.jpg"
+        // 优先用店铺第一张图
+      };
+    });
+    common_vendor.onShareTimeline(() => {
+      const inviteCode = utils_user.getInviteCode();
+      let queryString = "";
+      if (form.value.id) {
+        queryString += `id=${form.value.id}&`;
+      }
+      if (inviteCode) {
+        queryString += `inviteCode=${inviteCode}`;
+      }
+      return {
+        title: "猩聚社聚店：商友连接，聚店聚商机！",
+        query: queryString,
+        imageUrl: coverImages.value[0] || "https://img.gofor.club/logo_share.jpg"
+      };
+    });
     return (_ctx, _cache) => {
       return common_vendor.e({
         a: !isLoading.value
@@ -625,5 +659,6 @@ const _sfc_main = {
   }
 };
 const MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["__scopeId", "data-v-856a9ece"]]);
+_sfc_main.__runtimeHooks = 6;
 wx.createPage(MiniProgramPage);
 //# sourceMappingURL=../../../.sourcemap/mp-weixin/packages/myStore-edit/myStore-edit.js.map

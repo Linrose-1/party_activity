@@ -58,9 +58,14 @@
 		ref
 	} from 'vue'
 	import {
-		onLoad
+		onLoad,
+		onShareAppMessage,
+		onShareTimeline
 	} from '@dcloudio/uni-app'
 	import request from '../../utils/request.js';
+	import {
+		getInviteCode
+	} from '../../utils/user.js';
 
 	// 表单数据，移除了 address 字段，因为它由 selectedLocationInfo 管理
 	const form = ref({
@@ -105,7 +110,7 @@
 
 		// 3. 调用接口方法
 		const result = await storeRecommend();
-		
+
 		// 4. 隐藏加载提示
 		uni.hideLoading();
 
@@ -128,7 +133,7 @@
 			form.value.name = '';
 			form.value.reason = '';
 			selectedLocationInfo.value = null;
-			
+
 			// （可选）提交成功后延时1.5秒自动返回上一页
 			setTimeout(() => {
 				uni.navigateBack();
@@ -189,6 +194,51 @@
 	onLoad(() => {
 		// 可以在这里初始化数据
 	})
+
+	// ==========================================================
+	// --- 分享功能实现 ---
+	// ==========================================================
+
+	/**
+	 * 1. 分享给好友
+	 */
+	onShareAppMessage(() => {
+		const inviteCode = getInviteCode();
+		// 路径根据 pages.json 里的配置，通常是 /pages/shop-recommend/shop-recommend
+		let sharePath = '/pages/shop-recommend/shop-recommend';
+
+		if (inviteCode) {
+			sharePath += `?inviteCode=${inviteCode}`;
+		}
+
+		console.log('🚀 [推荐聚店] 发起分享，路径:', sharePath);
+
+		return {
+			title: '发现一家超赞的聚会店，快来跟我一起共建推荐！🏘️',
+			path: sharePath,
+			imageUrl: 'https://img.gofor.club/logo_share.jpg'
+		};
+	});
+
+	/**
+	 * 2. 分享到朋友圈
+	 */
+	onShareTimeline(() => {
+		const inviteCode = getInviteCode();
+		let queryString = '';
+
+		if (inviteCode) {
+			queryString = `inviteCode=${inviteCode}`;
+		}
+
+		return {
+			title: '猩聚社：分享好店，共建优质商机空间',
+			query: queryString,
+			imageUrl: 'https://img.gofor.club/logo_share.jpg'
+		};
+	});
+
+	// ==========================================================
 </script>
 
 <style lang="scss">
