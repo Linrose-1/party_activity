@@ -1,10 +1,10 @@
 <template>
 	<view class="comment-page">
 		<!-- 评论列表区域 -->
-		<scroll-view scroll-y class="comment-scroll" @scrolltolower="onReachBottom" :scroll-top="scrollTop"
-			:scroll-with-animation="true">
+		<scroll-view scroll-y class="comment-scroll" @scrolltolower="onReachBottom"
+			:scroll-into-view="scrollToCommentId" :scroll-with-animation="true">
 			<view class="comment-list" v-if="comments.length > 0">
-				<view class="comment-item" v-for="comment in comments" :key="comment.id" :id="`comment-${comment.id}`"
+				<view class="comment-item" v-for="comment in comments" :key="comment.id" :id="'comment-' + comment.id"
 					:class="{'is-reply': comment.parentId !== 0, 'is-highlight': highlightId === comment.id}">
 					<!-- 头像和内容行 -->
 					<view class="comment-header-row">
@@ -51,7 +51,7 @@
 				<text>抢个沙发，发表第一条评论吧！</text>
 			</view>
 
-			<view style="height: 160rpx;"></view>
+			<view :style="{ height: (keyboardHeight + 120) + 'px' }"></view>
 		</scroll-view>
 
 		<!-- 底部悬浮评论栏 -->
@@ -174,14 +174,26 @@
 
 		fetchComments().then(() => {
 			if (options.commentId) {
-				const id = Number(options.commentId);
-				highlightId.value = id;
+				const id = options.commentId;
+				highlightId.value = Number(id);
 				setTimeout(() => {
 					highlightId.value = null;
-				}, 2000);
-				scrollToComment(id);
+				}, 2500);
+
+				// 【核心修复】：双重异步定位
+				// 1. 先确保 ID 为空
+				scrollToCommentId.value = '';
+
+				nextTick(() => {
+					// 2. 延迟等待列表彻底完成布局计算
+					setTimeout(() => {
+						scrollToCommentId.value = 'comment-' + id;
+						console.log('✅ 已强制触发滚动定位:', scrollToCommentId.value);
+					}, 400); // 略微调高延迟到 400ms，避开页面进入动画
+				});
 			}
 		});
+
 
 		uni.onKeyboardHeightChange(res => {
 			keyboardHeight.value = res.height;
@@ -194,25 +206,7 @@
 
 	// 滚动到指定评论
 	const scrollToComment = (commentId) => {
-		nextTick(() => {
-			setTimeout(() => {
-				const query = uni.createSelectorQuery();
-				// 先查 scroll-view 容器的位置
-				query.select('.comment-scroll').boundingClientRect();
-				// 再查目标评论的位置
-				query.select(`#comment-${commentId}`).boundingClientRect();
-				query.exec((res) => {
-					if (res[0] && res[1]) {
-						const containerTop = res[0].top;
-						const itemTop = res[1].top;
-						// 当前 scrollTop + 目标相对容器的偏移
-						const currentScrollTop = scrollTop.value;
-						const offset = itemTop - containerTop;
-						scrollTop.value = currentScrollTop + offset - 20; // -20 留一点上边距
-					}
-				});
-			}, 300); // 等待列表渲染
-		});
+		scrollToCommentId.value = 'comment-' + commentId;
 	};
 
 	/**
@@ -485,6 +479,7 @@
 <style scoped>
 	.comment-page {
 		height: 100vh;
+		overflow: hidden;
 		background-color: #f8f8f8;
 		display: flex;
 		flex-direction: column;
@@ -492,6 +487,8 @@
 
 	.comment-scroll {
 		flex: 1;
+		height: 0;
+		width: 100%;
 	}
 
 	.comment-header-row {
@@ -586,13 +583,11 @@
 		background: #fff;
 		padding: 20rpx 24rpx;
 		padding-bottom: calc(20rpx + env(safe-area-inset-bottom));
-		box-shadow: 0 -2rpx 10rpx rgba(0, 0, 0, 0.05);
+		box-shadow: 0 -4rpx 16rpx rgba(0, 0, 0, 0.08);
 		border-top: 1rpx solid #f0f0f0;
-		z-index: 999;
+		z-index: 1001;
+		/* 确保在最上层 */
 		box-sizing: border-box;
-		display: flex;
-		flex-direction: column;
-		gap: 10rpx;
 	}
 
 	.input-container {
@@ -800,7 +795,7 @@
 	}
 
 	.is-highlight {
-		animation: highlight-flash 2s ease-out forwards;
+		animation: highlight-flash 3s ease-out forwards;
 	}
 
 	@keyframes highlight-flash {
@@ -808,7 +803,7 @@
 			background-color: #fff3e0;
 		}
 
-		60% {
+		80% {
 			background-color: #fff3e0;
 		}
 

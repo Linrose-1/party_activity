@@ -1128,3 +1128,20 @@
 		/* 确保长按时显示系统菜单 */
 		-webkit-touch-callout: auto;
 }
+.is-highlight.data-v-8303b14f {
+		animation: highlight-flash-8303b14f 3s ease-out forwards;
+}
+@keyframes highlight-flash-8303b14f {
+0% {
+			background-color: #fff3e0;
+			/* 浅橙色 */
+			transform: scale(1.02);
+}
+70% {
+			background-color: #fff3e0;
+			transform: scale(1);
+}
+100% {
+			background-color: transparent;
+}
+}

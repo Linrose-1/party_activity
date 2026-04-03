@@ -23,9 +23,9 @@ const _sfc_main = {
     const replyToId = common_vendor.ref(0);
     const replyToName = common_vendor.ref("");
     const keyboardHeight = common_vendor.ref(0);
-    common_vendor.ref("");
+    const scrollToCommentId = common_vendor.ref("");
     const highlightId = common_vendor.ref(null);
-    const scrollTop = common_vendor.ref(0);
+    common_vendor.ref(0);
     common_vendor.ref(0);
     const imageUrls = common_vendor.ref([]);
     const placeholderText = common_vendor.computed(
@@ -43,12 +43,18 @@ const _sfc_main = {
       });
       fetchComments().then(() => {
         if (options.commentId) {
-          const id = Number(options.commentId);
-          highlightId.value = id;
+          const id = options.commentId;
+          highlightId.value = Number(id);
           setTimeout(() => {
             highlightId.value = null;
-          }, 2e3);
-          scrollToComment(id);
+          }, 2500);
+          scrollToCommentId.value = "";
+          common_vendor.nextTick$1(() => {
+            setTimeout(() => {
+              scrollToCommentId.value = "comment-" + id;
+              common_vendor.index.__f__("log", "at packages/comment-page/comment-page.vue:191", "✅ 已强制触发滚动定位:", scrollToCommentId.value);
+            }, 400);
+          });
         }
       });
       common_vendor.index.onKeyboardHeightChange((res) => {
@@ -58,24 +64,6 @@ const _sfc_main = {
     common_vendor.onUnmounted(() => {
       common_vendor.index.offKeyboardHeightChange();
     });
-    const scrollToComment = (commentId) => {
-      common_vendor.nextTick$1(() => {
-        setTimeout(() => {
-          const query = common_vendor.index.createSelectorQuery();
-          query.select(".comment-scroll").boundingClientRect();
-          query.select(`#comment-${commentId}`).boundingClientRect();
-          query.exec((res) => {
-            if (res[0] && res[1]) {
-              const containerTop = res[0].top;
-              const itemTop = res[1].top;
-              const currentScrollTop = scrollTop.value;
-              const offset = itemTop - containerTop;
-              scrollTop.value = currentScrollTop + offset - 20;
-            }
-          });
-        }, 300);
-      });
-    };
     const fetchComments = async () => {
       const {
         data
@@ -106,7 +94,7 @@ const _sfc_main = {
               const parsed = JSON.parse(imageUrls2[0]);
               imageUrls2 = Array.isArray(parsed) ? parsed : imageUrls2;
             } catch (e) {
-              common_vendor.index.__f__("error", "at packages/comment-page/comment-page.vue:260", "解析imageUrls失败:", e);
+              common_vendor.index.__f__("error", "at packages/comment-page/comment-page.vue:254", "解析imageUrls失败:", e);
             }
           }
         }
@@ -256,7 +244,7 @@ const _sfc_main = {
             if (result.data)
               successfulUrls.push(result.data);
             else
-              common_vendor.index.__f__("error", "at packages/comment-page/comment-page.vue:449", "上传失败:", result.error);
+              common_vendor.index.__f__("error", "at packages/comment-page/comment-page.vue:443", "上传失败:", result.error);
           });
           imageUrls.value = successfulUrls;
           if (successfulUrls.length < validFiles.length) {
@@ -316,7 +304,7 @@ const _sfc_main = {
             p: common_vendor.o(($event) => deleteComment(comment.id), comment.id)
           } : {}, {
             q: comment.id,
-            r: `comment-${comment.id}`,
+            r: "comment-" + comment.id,
             s: comment.parentId !== 0 ? 1 : "",
             t: highlightId.value === comment.id ? 1 : ""
           });
@@ -333,38 +321,39 @@ const _sfc_main = {
           color: "#e0e0e0"
         })
       }, {
-        e: common_vendor.o((...args) => _ctx.onReachBottom && _ctx.onReachBottom(...args)),
-        f: scrollTop.value,
-        g: common_vendor.p({
+        e: keyboardHeight.value + 120 + "px",
+        f: common_vendor.o((...args) => _ctx.onReachBottom && _ctx.onReachBottom(...args)),
+        g: scrollToCommentId.value,
+        h: common_vendor.p({
           type: isAnonymous.value ? "eye-slash-filled" : "eye-filled",
           size: "18",
           color: isAnonymous.value ? "#FF6A00" : "#999"
         }),
-        h: common_vendor.t(isAnonymous.value ? "匿名" : "显名"),
-        i: isAnonymous.value ? 1 : "",
-        j: common_vendor.o(($event) => isAnonymous.value = !isAnonymous.value),
-        k: placeholderText.value,
-        l: newCommentText.value,
-        m: common_vendor.o(($event) => newCommentText.value = $event.detail.value),
-        n: !imageUrls.value || imageUrls.value.length === 0
+        i: common_vendor.t(isAnonymous.value ? "匿名" : "显名"),
+        j: isAnonymous.value ? 1 : "",
+        k: common_vendor.o(($event) => isAnonymous.value = !isAnonymous.value),
+        l: placeholderText.value,
+        m: newCommentText.value,
+        n: common_vendor.o(($event) => newCommentText.value = $event.detail.value),
+        o: !imageUrls.value || imageUrls.value.length === 0
       }, !imageUrls.value || imageUrls.value.length === 0 ? {
-        o: common_vendor.p({
+        p: common_vendor.p({
           type: "image",
           size: "24",
           color: "#999"
         }),
-        p: common_vendor.o(handleChooseImage)
+        q: common_vendor.o(handleChooseImage)
       } : {}, {
-        q: common_vendor.p({
+        r: common_vendor.p({
           type: "paperplane-filled",
           size: "22",
           color: "#ffff7f"
         }),
-        r: newCommentText.value.trim().length > 0 || imageUrls.value && imageUrls.value.length > 0 ? 1 : "",
-        s: common_vendor.o(handleSend),
-        t: imageUrls.value && imageUrls.value.length > 0
+        s: newCommentText.value.trim().length > 0 || imageUrls.value && imageUrls.value.length > 0 ? 1 : "",
+        t: common_vendor.o(handleSend),
+        v: imageUrls.value && imageUrls.value.length > 0
       }, imageUrls.value && imageUrls.value.length > 0 ? {
-        v: common_vendor.f(imageUrls.value, (img, index, i0) => {
+        w: common_vendor.f(imageUrls.value, (img, index, i0) => {
           return {
             a: img,
             b: common_vendor.o(($event) => previewImage(imageUrls.value, index), index),
@@ -373,11 +362,11 @@ const _sfc_main = {
           };
         })
       } : {}, {
-        w: keyboardHeight.value + "px",
-        x: copyMenu.show
+        x: keyboardHeight.value + "px",
+        y: copyMenu.show
       }, copyMenu.show ? {
-        y: common_vendor.o(executeCopy),
-        z: common_vendor.o(($event) => copyMenu.show = false)
+        z: common_vendor.o(executeCopy),
+        A: common_vendor.o(($event) => copyMenu.show = false)
       } : {});
     };
   }

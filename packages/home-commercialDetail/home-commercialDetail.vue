@@ -216,7 +216,9 @@
 					</view>
 					<view class="comment-list">
 						<view class="comment" v-for="comment in comments" :key="comment.id"
-							:class="{ 'is-reply': comment.parentId !== 0 }" :data-comment-id="comment.id">
+							:id="'comment-' + comment.id"
+							:class="{ 'is-reply': comment.parentId !== 0, 'is-highlight': highlightId === comment.id }"
+							:data-comment-id="comment.id">
 							<image :src="comment.avatar" mode="" class="comment-avatar"
 								@click="!comment.anonymous && navigateToBusinessCard({ id: comment.userId, name: comment.user, avatar: comment.avatar })">
 							</image>
@@ -384,6 +386,8 @@
 	const showFollowButton = ref(false);
 	const isActionInProgress = ref(false);
 	const defaultAvatarUrl = '/static/icon/default-avatar.png';
+
+	const highlightId = ref(null);
 
 	// 感兴趣弹窗显示状态
 	const showInterestSuccessModal = ref(false);
@@ -958,9 +962,7 @@
 			if (result && !result.error && Array.isArray(result.data)) {
 				comments.value = flattenComments(result.data);
 				if (targetCommentId.value) {
-					nextTick(() => {
-						scrollToTargetComment(targetCommentId.value);
-					});
+					scrollToTargetComment(targetCommentId.value);
 				}
 			} else {
 				comments.value = [];
@@ -1501,44 +1503,43 @@
 	};
 
 	/**
-	 * 精准定位到目标评论
+	 * 精准定位到目标评论并高亮
 	 */
 	const scrollToTargetComment = (commentId) => {
 		if (!commentId) return;
 
-		// 增加延迟，确保 v-for 已经完成了 DOM 的渲染
-		// 500ms 是一个比较稳妥的数值
+		// 1. 设置高亮 ID
+		highlightId.value = Number(commentId);
+
+		// 2. 2.5秒后取消高亮
 		setTimeout(() => {
-			const query = uni.createSelectorQuery();
+			highlightId.value = null;
+		}, 2500);
 
-			// 核心修复：确保 ID 转换为字符串，并使用更稳固的选择器
-			const idSelector = `[data-comment-id="${commentId}"]`;
+		// 3. 执行滚动
+		nextTick(() => {
+			// 增加延迟，确保数据已渲染成 DOM
+			setTimeout(() => {
+				const query = uni.createSelectorQuery();
+				const idSelector = `#comment-${commentId}`;
 
-			query.select(idSelector).boundingClientRect();
-			query.selectViewport().scrollOffset();
+				query.select(idSelector).boundingClientRect();
+				query.selectViewport().scrollOffset();
 
-			query.exec(res => {
-				// res[0] 是元素位置，res[1] 是当前滚动位置
-				if (res && res[0]) {
-					console.log('✅ 找到目标评论元素，准备滚动', res[0].top);
-					uni.pageScrollTo({
-						// 目标位置 = 当前滚动位 + 元素相对顶部的距离 - 预留的偏移量(100rpx)
-						scrollTop: res[1].scrollTop + res[0].top - 100,
-						duration: 300
-					});
-
-					// 可选：给定位的评论加一个高亮动画或提示
-					uni.showToast({
-						title: '已定位到该评论',
-						icon: 'none'
-					});
-				} else {
-					// 如果 res[0] 为空，说明还是没找到 DOM 节点
-					console.warn('❌ 未找到评论元素，执行兜底：跳转到评论区顶部');
-					scrollToCommentsSection();
-				}
-			});
-		}, 600); // 稍微调高延迟，确保渲染完成
+				query.exec(res => {
+					if (res && res[0]) {
+						console.log('✅ 找到评论位置，执行滚动');
+						uni.pageScrollTo({
+							// 计算目标位置：当前滚动高度 + 元素相对视口顶部的距离 - 预留偏移量(150rpx)
+							scrollTop: res[1].scrollTop + res[0].top - 80,
+							duration: 300
+						});
+					} else {
+						console.warn('❌ 未能找到评论节点，请检查 ID 绑定');
+					}
+				});
+			}, 500); // 详情页较长，给 500ms 渲染时间
+		});
 	};
 </script>
 
@@ -2803,5 +2804,26 @@
 
 		/* 确保长按时显示系统菜单 */
 		-webkit-touch-callout: auto;
+	}
+
+	.is-highlight {
+		animation: highlight-flash 3s ease-out forwards;
+	}
+
+	@keyframes highlight-flash {
+		0% {
+			background-color: #fff3e0;
+			/* 浅橙色 */
+			transform: scale(1.02);
+		}
+
+		70% {
+			background-color: #fff3e0;
+			transform: scale(1);
+		}
+
+		100% {
+			background-color: transparent;
+		}
 	}
 </style>
